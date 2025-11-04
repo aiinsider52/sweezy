@@ -24,6 +24,6 @@ ENV PORT=8000
 EXPOSE 8000
 
 # Run Alembic migrations then start the app. Use Render's PORT if provided.
-CMD ["/bin/sh", "-lc", "alembic -c backend/alembic.ini upgrade head && uvicorn backend.app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+CMD ["sh", "-c", "if [ -d alembic ]; then alembic upgrade head; fi && uvicorn backend.app.main:app --host 0.0.0.0 --port $PORT"]
 
 

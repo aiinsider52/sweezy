@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 import contextlib
 from typing import List
 import subprocess
+from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -60,7 +61,9 @@ app.add_middleware(
 def _run_migrations() -> None:
     # Run Alembic migrations; ignore failure to keep app booting in readonly cases
     try:
-        subprocess.run(["alembic", "-c", "backend/alembic.ini", "upgrade", "head"], check=False)
+        backend_dir = Path(__file__).resolve().parents[1]
+        # Run from backend root so alembic.ini and script_location resolve correctly
+        subprocess.run(["alembic", "-c", "alembic.ini", "upgrade", "head"], cwd=str(backend_dir), check=False)
     except Exception:
         pass
 

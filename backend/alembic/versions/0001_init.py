@@ -71,12 +71,6 @@ def upgrade() -> None:
     )
 
     # appointments
-    status_enum = postgresql.ENUM(
-        "scheduled", "completed", "canceled", name="appointment_status", create_type=False
-    )
-    # Ensure enum exists (idempotent)
-    status_enum.create(op.get_bind(), checkfirst=True)
-
     op.create_table(
         "appointments",
         sa.Column("id", sa.String(length=36), primary_key=True, nullable=False),
@@ -84,7 +78,7 @@ def upgrade() -> None:
         sa.Column("description", sa.Text(), nullable=True),
         sa.Column("scheduled_at", sa.DateTime(timezone=True), nullable=False),
         sa.Column("duration_minutes", sa.Integer(), nullable=False, server_default=sa.text("30")),
-        sa.Column("status", status_enum, nullable=False, server_default="scheduled"),
+        sa.Column("status", sa.String(length=32), nullable=False, server_default="scheduled"),
         sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
         sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
     )
@@ -92,17 +86,9 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     op.drop_table("appointments")
-    try:
-        postgresql.ENUM(name="appointment_status").drop(op.get_bind(), checkfirst=True)
-    except Exception:
-        pass
     op.drop_table("templates")
     op.drop_table("checklists")
     op.drop_table("guides")
     op.drop_table("users")
-    try:
-        sa.Enum(name="appointment_status").drop(op.get_bind(), checkfirst=True)
-    except Exception:
-        pass
 
 

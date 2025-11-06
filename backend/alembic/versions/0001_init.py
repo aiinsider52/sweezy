@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from alembic import op
 import sqlalchemy as sa
+from sqlalchemy.dialects import postgresql
 
 
 # revision identifiers, used by Alembic.
@@ -70,8 +71,10 @@ def upgrade() -> None:
     )
 
     # appointments
-    status_enum = sa.Enum("scheduled", "completed", "canceled", name="appointment_status")
-    # Create enum type once (idempotent)
+    status_enum = postgresql.ENUM(
+        "scheduled", "completed", "canceled", name="appointment_status", create_type=False
+    )
+    # Ensure enum exists (idempotent)
     status_enum.create(op.get_bind(), checkfirst=True)
 
     op.create_table(
@@ -81,18 +84,7 @@ def upgrade() -> None:
         sa.Column("description", sa.Text(), nullable=True),
         sa.Column("scheduled_at", sa.DateTime(timezone=True), nullable=False),
         sa.Column("duration_minutes", sa.Integer(), nullable=False, server_default=sa.text("30")),
-        sa.Column(
-            "status",
-            sa.Enum(
-                "scheduled",
-                "completed",
-                "canceled",
-                name="appointment_status",
-                create_type=False,  # enum already created above; avoid duplicate CREATE TYPE
-            ),
-            nullable=False,
-            server_default="scheduled",
-        ),
+        sa.Column("status", status_enum, nullable=False, server_default="scheduled"),
         sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
         sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
     )
@@ -101,7 +93,7 @@ def upgrade() -> None:
 def downgrade() -> None:
     op.drop_table("appointments")
     try:
-        sa.Enum(name="appointment_status").drop(op.get_bind(), checkfirst=True)
+        postgresql.ENUM(name="appointment_status").drop(op.get_bind(), checkfirst=True)
     except Exception:
         pass
     op.drop_table("templates")

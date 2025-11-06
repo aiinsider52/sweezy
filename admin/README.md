@@ -17,7 +17,7 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:5000/login
+Open http://localhost:9876/login
 
 - Login posts to FastAPI → sets HttpOnly `access_token` cookie via Next route `/api/auth/login`.
 - Middleware protects `/admin/*` routes.

@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "next dev -p 5000",
+    "dev": "next dev -p 9876",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"

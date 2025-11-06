@@ -2,11 +2,12 @@ import Sidebar from '@/components/Sidebar'
 import Header from '@/components/Header'
 import Card from '@/components/Card'
 import { cookies } from 'next/headers'
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer } from 'recharts'
+import dynamic from 'next/dynamic'
+const Chart = dynamic(() => import('@/components/Chart'), { ssr: false })
 
 export default async function DashboardPage() {
   // simple KPI calls (using readiness and remote-config as examples)
-  const base = process.env.NEXT_PUBLIC_API_URL!
+  const base = process.env.NEXT_PUBLIC_API_URL || 'https://sweezy.onrender.com/api/v1'
   const ready = await fetch(`${base}/ready`, { cache: 'no-store' }).then(r=>r.ok)
   const rc = await fetch(`${base}/remote-config/`, { cache: 'no-store' }).then(r=>r.json()).catch(()=>({}))
   const token = cookies().get('access_token')?.value
@@ -25,15 +26,7 @@ export default async function DashboardPage() {
           <Card title="Status">{ready ? 'Backend ready' : 'Backend not ready'}</Card>
           <Card title="Version">{rc?.app_version ?? 'n/a'}</Card>
           <Card title="Overview">
-            <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={data}>
-                  <XAxis dataKey="name" stroke="#999" />
-                  <YAxis stroke="#999" />
-                  <Bar dataKey="value" fill="#60a5fa" radius={[8,8,0,0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+            <Chart data={data}/>
           </Card>
         </main>
       </div>

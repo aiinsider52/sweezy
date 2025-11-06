@@ -15,7 +15,7 @@ export async function logout() {
   cookies().delete('access_token')
 }
 
-export function getToken() {
+export async function getToken() {
   return cookies().get('access_token')?.value || ''
 }
 

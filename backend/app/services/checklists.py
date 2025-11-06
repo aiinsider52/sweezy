@@ -11,8 +11,8 @@ from ..schemas import ChecklistCreate, ChecklistUpdate
 
 class ChecklistService:
     @staticmethod
-    def list(db: Session, *, skip: int = 0, limit: int = 100) -> List[Checklist]:
-        stmt = select(Checklist).offset(skip).limit(limit)
+    def list(db: Session, *, offset: int = 0, limit: int = 100) -> List[Checklist]:
+        stmt = select(Checklist).offset(offset).limit(limit)
         return list(db.execute(stmt).scalars().all())
 
     @staticmethod

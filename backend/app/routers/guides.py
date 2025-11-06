@@ -13,8 +13,8 @@ router = APIRouter()
 
 
 @router.get("/", response_model=List[GuideOut])
-def list_guides(db: DBSession, skip: int = Query(0, ge=0), limit: int = Query(100, ge=1, le=1000)) -> list[GuideOut]:
-    return GuideService.list(db, skip=skip, limit=limit)
+def list_guides(db: DBSession, offset: int = Query(0, ge=0), limit: int = Query(100, ge=1, le=1000)) -> list[GuideOut]:
+    return GuideService.list(db, offset=offset, limit=limit)
 
 
 @router.get("/{guide_id}", response_model=GuideOut)

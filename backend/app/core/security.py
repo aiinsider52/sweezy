@@ -39,3 +39,11 @@ def decode_token(token: str) -> Dict[str, Any]:
         raise ValueError("Invalid token") from exc
 
 
+def create_refresh_token(subject: str, *, expires_delta: Optional[timedelta] = None) -> str:
+    settings = get_settings()
+    if expires_delta is None:
+        expires_delta = timedelta(days=7)
+    expire = datetime.now(timezone.utc) + expires_delta
+    payload: Dict[str, Any] = {"sub": subject, "type": "refresh", "exp": expire}
+    return jwt.encode(payload, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
+

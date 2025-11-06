@@ -13,8 +13,8 @@ router = APIRouter()
 
 
 @router.get("/", response_model=List[ChecklistOut])
-def list_checklists(db: DBSession, skip: int = Query(0, ge=0), limit: int = Query(100, ge=1, le=1000)) -> list[ChecklistOut]:
-    return ChecklistService.list(db, skip=skip, limit=limit)
+def list_checklists(db: DBSession, offset: int = Query(0, ge=0), limit: int = Query(100, ge=1, le=1000)) -> list[ChecklistOut]:
+    return ChecklistService.list(db, offset=offset, limit=limit)
 
 
 @router.get("/{checklist_id}", response_model=ChecklistOut)

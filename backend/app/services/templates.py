@@ -11,8 +11,8 @@ from ..schemas import TemplateCreate, TemplateUpdate
 
 class TemplateService:
     @staticmethod
-    def list(db: Session, *, skip: int = 0, limit: int = 100) -> List[Template]:
-        stmt = select(Template).offset(skip).limit(limit)
+    def list(db: Session, *, offset: int = 0, limit: int = 100) -> List[Template]:
+        stmt = select(Template).offset(offset).limit(limit)
         return list(db.execute(stmt).scalars().all())
 
     @staticmethod

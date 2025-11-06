@@ -13,8 +13,8 @@ router = APIRouter()
 
 
 @router.get("/", response_model=List[AppointmentOut])
-def list_appointments(db: DBSession, skip: int = Query(0, ge=0), limit: int = Query(100, ge=1, le=1000)) -> list[AppointmentOut]:
-    return AppointmentService.list(db, skip=skip, limit=limit)
+def list_appointments(db: DBSession, offset: int = Query(0, ge=0), limit: int = Query(100, ge=1, le=1000)) -> list[AppointmentOut]:
+    return AppointmentService.list(db, offset=offset, limit=limit)
 
 
 @router.get("/{appointment_id}", response_model=AppointmentOut)

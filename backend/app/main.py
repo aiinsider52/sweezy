@@ -7,7 +7,10 @@ from typing import List
 import subprocess
 from pathlib import Path
 
-from fastapi import FastAPI
+import time
+import uuid
+from fastapi import FastAPI, HTTPException, Request
+from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi.middleware.cors import CORSMiddleware
 
 from .core.config import get_settings
@@ -21,6 +24,11 @@ from .routers.remote_config import router as remote_config_router
 
 
 settings = get_settings()
+try:
+    settings.assert_valid()
+except Exception as exc:
+    # Fail fast on invalid configuration
+    raise
 
 
 async def _background_tick() -> None:
@@ -48,14 +56,32 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS
+# CORS (lock in production)
+allowed_origins = list(getattr(settings, "parsed_cors_origins", lambda: settings.CORS_ORIGINS)())
+if settings.APP_ENV.lower() == "production" and (not allowed_origins or "*" in allowed_origins):
+    allowed_origins = []  # locked — must be provided explicitly by env
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS,
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+class RequestIDMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        request_id = str(uuid.uuid4())
+        start = time.perf_counter()
+        response = await call_next(request)
+        duration_ms = int((time.perf_counter() - start) * 1000)
+        response.headers["X-Request-ID"] = request_id
+        response.headers["X-Response-Time"] = str(duration_ms)
+        return response
+
+
+app.add_middleware(RequestIDMiddleware)
 
 
 def _run_migrations() -> None:
@@ -71,19 +97,44 @@ def _run_migrations() -> None:
 async def startup_event() -> None:
     # Run in a background thread so startup isn't blocked
     await asyncio.to_thread(_run_migrations)
+    # Seed default admin (idempotent)
+    from .core.database import SessionLocal
+    from .services.users import seed_admin_user
+    try:
+        with SessionLocal() as db:
+            seed_admin_user(db)
+    except Exception:
+        # don't block startup if seeding fails
+        pass
 
 
 @app.get("/health")
 def health() -> dict:
+    # Liveness
     return {"status": "ok"}
 
 
-# Routers
-app.include_router(auth_router, prefix="/auth", tags=["auth"])
-app.include_router(guides_router, prefix="/guides", tags=["guides"])
-app.include_router(checklists_router, prefix="/checklists", tags=["checklists"])
-app.include_router(templates_router, prefix="/templates", tags=["templates"])
-app.include_router(appointments_router, prefix="/appointments", tags=["appointments"])
-app.include_router(remote_config_router, prefix="/remote-config", tags=["remote-config"])
+@app.get("/ready")
+def ready() -> dict:
+    # Readiness (DB connectivity)
+    from sqlalchemy import text
+    from .core.database import SessionLocal
+
+    try:
+        with SessionLocal() as db:
+            db.execute(text("SELECT 1"))
+        return {"status": "ready"}
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail="not ready") from exc
+
+
+# Routers (versioned)
+API_PREFIX = "/api/v1"
+app.include_router(auth_router, prefix=f"{API_PREFIX}/auth", tags=["auth"])
+app.include_router(guides_router, prefix=f"{API_PREFIX}/guides", tags=["guides"])
+app.include_router(checklists_router, prefix=f"{API_PREFIX}/checklists", tags=["checklists"])
+app.include_router(templates_router, prefix=f"{API_PREFIX}/templates", tags=["templates"])
+app.include_router(appointments_router, prefix=f"{API_PREFIX}/appointments", tags=["appointments"])
+app.include_router(remote_config_router, prefix=f"{API_PREFIX}/remote-config", tags=["remote-config"])
 
 

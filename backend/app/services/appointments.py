@@ -11,8 +11,8 @@ from ..schemas import AppointmentCreate, AppointmentUpdate
 
 class AppointmentService:
     @staticmethod
-    def list(db: Session, *, skip: int = 0, limit: int = 100) -> List[Appointment]:
-        stmt = select(Appointment).offset(skip).limit(limit)
+    def list(db: Session, *, offset: int = 0, limit: int = 100) -> List[Appointment]:
+        stmt = select(Appointment).offset(offset).limit(limit)
         return list(db.execute(stmt).scalars().all())
 
     @staticmethod

@@ -11,8 +11,8 @@ from ..schemas import GuideCreate, GuideUpdate
 
 class GuideService:
     @staticmethod
-    def list(db: Session, *, skip: int = 0, limit: int = 100) -> List[Guide]:
-        stmt = select(Guide).offset(skip).limit(limit)
+    def list(db: Session, *, offset: int = 0, limit: int = 100) -> List[Guide]:
+        stmt = select(Guide).offset(offset).limit(limit)
         return list(db.execute(stmt).scalars().all())
 
     @staticmethod

@@ -13,8 +13,8 @@ router = APIRouter()
 
 
 @router.get("/", response_model=List[TemplateOut])
-def list_templates(db: DBSession, skip: int = Query(0, ge=0), limit: int = Query(100, ge=1, le=1000)) -> list[TemplateOut]:
-    return TemplateService.list(db, skip=skip, limit=limit)
+def list_templates(db: DBSession, offset: int = Query(0, ge=0), limit: int = Query(100, ge=1, le=1000)) -> list[TemplateOut]:
+    return TemplateService.list(db, offset=offset, limit=limit)
 
 
 @router.get("/{template_id}", response_model=TemplateOut)

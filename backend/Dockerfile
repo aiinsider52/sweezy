@@ -27,8 +27,6 @@ RUN apt-get update \
 
 COPY --from=builder /install /usr/local
 COPY . /app/backend
-# Optional: copy .env at build time if present
-COPY --chown=root:root .env /app/.env 2>/dev/null || true
 
 ENV MODULE_NAME=backend.app.main:app
 ENV HOST=0.0.0.0

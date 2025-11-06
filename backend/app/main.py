@@ -21,6 +21,7 @@ from .routers.checklists import router as checklists_router
 from .routers.templates import router as templates_router
 from .routers.appointments import router as appointments_router
 from .routers.remote_config import router as remote_config_router
+from .routers.admin import router as admin_router
 
 
 settings = get_settings()
@@ -136,5 +137,6 @@ app.include_router(checklists_router, prefix=f"{API_PREFIX}/checklists", tags=["
 app.include_router(templates_router, prefix=f"{API_PREFIX}/templates", tags=["templates"])
 app.include_router(appointments_router, prefix=f"{API_PREFIX}/appointments", tags=["appointments"])
 app.include_router(remote_config_router, prefix=f"{API_PREFIX}/remote-config", tags=["remote-config"])
+app.include_router(admin_router, prefix=f"{API_PREFIX}/admin", tags=["admin"])
 
 

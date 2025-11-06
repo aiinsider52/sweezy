@@ -1,15 +1,16 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from ..schemas import Token, TokenPair
 from ..schemas.user import UserCreate, UserLogin, UserOut
 from ..services import AuthService
-from ..services.users import UserService
+from ..services.users import UserService, seed_admin_user
 from ..core.security import create_access_token, create_refresh_token
 from ..core.database import get_db
+from ..core.config import get_settings
 from datetime import timedelta
 
 
@@ -43,4 +44,14 @@ def login_user(payload: UserLogin, db: Session = Depends(get_db)) -> TokenPair:
 
     return TokenPair(access_token=access, refresh_token=refresh, expires_in=15 * 60)
 
+
+@router.post("/seed-admin")
+def seed_admin(request: Request, db: Session = Depends(get_db)) -> dict:
+    settings = get_settings()
+    secret = request.headers.get("x-setup-secret")
+    allowed = [s for s in [settings.SETUP_SECRET, settings.SECRET_KEY, settings.JWT_SECRET_KEY] if s]
+    if not allowed or secret not in allowed:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
+    seed_admin_user(db)
+    return {"status": "ok"}
 

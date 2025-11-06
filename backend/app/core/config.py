@@ -36,6 +36,11 @@ class Settings(BaseSettings):
     ADMIN_EMAIL: str = Field(default="admin@sweeezy.app")
     ADMIN_PASSWORD: str = Field(default="admin123")
 
+    # One-time setup secret to allow forced admin seeding via HTTP
+    SETUP_SECRET: Optional[str] = None
+    # Fallback for setups that already use SECRET_KEY
+    SECRET_KEY: Optional[str] = None
+
     # Sentry
     SENTRY_DSN: Optional[str] = None
     SENTRY_TRACES_SAMPLE_RATE: float = 0.1

@@ -5,7 +5,8 @@ import { cn } from '@/lib/utils'
 
 const items = [
   { href: '/admin/dashboard', label: 'Dashboard' },
-  { href: '/admin/users', label: 'Users' }
+  { href: '/admin/users', label: 'Users' },
+  { href: '/admin/monitoring', label: 'Monitoring' }
 ]
 
 export default function Sidebar() {

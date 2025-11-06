@@ -40,7 +40,20 @@ def seed_admin_user(db: Session) -> None:
     admin_password = settings.ADMIN_PASSWORD
     if not admin_email or not admin_password:
         return
-    if UserService.get_by_email(db, admin_email) is None:
+    user = UserService.get_by_email(db, admin_email)
+    if user is None:
         UserService.create(db, email=admin_email, password=admin_password, is_superuser=True)
+        return
+    # Ensure superuser flag and sync password from env if it has changed
+    updated = False
+    if not user.is_superuser:
+        user.is_superuser = True
+        updated = True
+    if not verify_password(admin_password, user.hashed_password):
+        user.hashed_password = get_password_hash(admin_password)
+        updated = True
+    if updated:
+        db.add(user)
+        db.commit()
 
 

@@ -2,24 +2,18 @@ import Sidebar from '@/components/Sidebar'
 import Header from '@/components/Header'
 import DataTable from '@/components/DataTable'
 import Card from '@/components/Card'
-import { getUsers } from '@/lib/api'
+import { serverFetch } from '@/lib/server'
 
 export default async function UsersPage() {
-  const users = await getUsers()
+  const users = await serverFetch('/admin/users').then(r=>r.json()).catch(()=>[])
   return (
-    <div className="min-h-screen grid grid-cols-[240px_1fr]">
-      <Sidebar/>
-      <div className="flex flex-col">
-        <Header/>
-        <main className="container-grid space-y-4">
-          <div className="flex items-center justify-between">
-            <h1 className="text-xl font-semibold">Users</h1>
-            <CreateUserForm/>
-          </div>
-          <DataTable data={users}/>
-        </main>
+    <section className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h1 className="text-xl font-semibold">Users</h1>
+        <CreateUserForm/>
       </div>
-    </div>
+      <DataTable data={users}/>
+    </section>
   )
 }
 

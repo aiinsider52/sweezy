@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import Any, Dict, List
+import re
 
 from fastapi import APIRouter
 from sqlalchemy import func, select
@@ -98,16 +99,43 @@ def import_guides(payload: Dict[str, Any], db: DBSession, _: CurrentAdmin) -> Di
     created = 0
     for raw in items:
         try:
-            data = GuideCreate(**raw)
+            try:
+                # Try backend shape first
+                data = GuideCreate(**raw)
+                title = data.title
+                slug = data.slug
+                description = data.description
+                content = data.content
+                category = data.category
+                image_url = getattr(data, "image_url", None)
+                is_published = data.is_published
+                version = data.version
+            except Exception:
+                # Fallback to iOS seed shape
+                def slugify(s: str) -> str:
+                    s = s.lower()
+                    s = re.sub(r"[^a-z0-9\s-]", "", s)
+                    s = re.sub(r"[\s-]+", "-", s).strip("-")
+                    return s or "guide"
+
+                title = raw.get("title") or raw.get("name") or "Untitled"
+                slug = raw.get("slug") or slugify(title)
+                description = raw.get("subtitle") or raw.get("description")
+                content = raw.get("bodyMarkdown") or raw.get("content")
+                category = (raw.get("category") or "documents")
+                image_url = raw.get("heroImage") or raw.get("image_url")
+                is_published = bool(raw.get("is_published", True))
+                version = int(raw.get("version", 1))
+
             obj = Guide(
-                title=data.title,
-                slug=data.slug,
-                description=data.description,
-                content=data.content,
-                category=data.category,
-                image_url=getattr(data, "image_url", None),
-                is_published=data.is_published,
-                version=data.version,
+                title=title,
+                slug=slug,
+                description=description,
+                content=content,
+                category=category,
+                image_url=image_url,
+                is_published=is_published,
+                version=version,
             )
             db.add(obj)
             created += 1
@@ -123,8 +151,16 @@ def import_templates(payload: Dict[str, Any], db: DBSession, _: CurrentAdmin) ->
     created = 0
     for raw in items:
         try:
-            data = TemplateCreate(**raw)
-            obj = Template(**data.model_dump())
+            try:
+                data = TemplateCreate(**raw)
+                name = data.name
+                category = data.category
+                content = data.content
+            except Exception:
+                name = raw.get("name") or raw.get("title") or "Untitled"
+                category = raw.get("category") or "general"
+                content = raw.get("content") or ""
+            obj = Template(name=name, category=category, content=content)
             db.add(obj)
             created += 1
         except Exception:
@@ -139,8 +175,22 @@ def import_checklists(payload: Dict[str, Any], db: DBSession, _: CurrentAdmin) -
     created = 0
     for raw in items:
         try:
-            data = ChecklistCreate(**raw)
-            obj = Checklist(**data.model_dump())
+            try:
+                data = ChecklistCreate(**raw)
+                title = data.title
+                description = data.description
+                items_list = data.items
+                is_published = data.is_published
+            except Exception:
+                title = raw.get("title") or "Checklist"
+                description = raw.get("description") or ""
+                # iOS shape: steps: [{ title: ... }]
+                if isinstance(raw.get("steps"), list):
+                    items_list = [str(step.get("title") or step.get("description") or "Step") for step in raw.get("steps", [])]
+                else:
+                    items_list = raw.get("items") or []
+                is_published = bool(raw.get("is_published", True))
+            obj = Checklist(title=title, description=description, items=items_list, is_published=is_published)
             db.add(obj)
             created += 1
         except Exception:

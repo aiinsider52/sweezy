@@ -4,6 +4,7 @@ const ChartContainer = dynamic(() => import('@/components/ChartContainer'), { ss
 import { serverFetch } from '@/lib/server'
 import { redirect } from 'next/navigation'
 import KPI from '@/components/KPI'
+import TemplatesList from '@/components/admin/TemplatesList'
 
 export default async function TemplatesPage() {
   const statsRes = await serverFetch('/admin/stats').catch(()=>null)
@@ -26,6 +27,9 @@ export default async function TemplatesPage() {
       </div>
       <Card title="Content Overview">
         <ChartContainer data={data} />
+      </Card>
+      <Card title="Templates">
+        <TemplatesList/>
       </Card>
     </section>
   )

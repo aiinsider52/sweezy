@@ -26,4 +26,16 @@ body {
   background-repeat: no-repeat;
 }
 
+.md-preview { @apply leading-relaxed; }
+.md-preview h1 { @apply text-2xl font-semibold mt-2 mb-3; }
+.md-preview h2 { @apply text-xl font-semibold mt-2 mb-2; }
+.md-preview h3 { @apply text-lg font-semibold mt-2 mb-2; }
+.md-preview p { @apply my-2 opacity-90; }
+.md-preview strong { @apply font-semibold; }
+.md-preview em { @apply italic; }
+.md-preview code { @apply bg-white/10 px-1.5 py-0.5 rounded text-sm; }
+.md-preview a { @apply underline decoration-white/30 hover:text-white; }
+.md-preview ul { @apply list-disc pl-5 space-y-1; }
+.md-preview blockquote { @apply border-l-4 border-white/20 bg-white/5 px-3 py-2 my-3 rounded; }
+
 

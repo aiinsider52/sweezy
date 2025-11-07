@@ -99,7 +99,7 @@ export default function MarkdownEditor({ value, onChange, placeholder }: Props) 
           }}
         />
         {showPreview && (
-          <div className="glass w-full px-4 py-3 min-h-[220px] prose prose-invert max-w-none"
+          <div className="glass w-full px-4 py-3 min-h-[220px] md-preview"
                dangerouslySetInnerHTML={{ __html: renderMarkdown(value) }} />
         )}
       </div>

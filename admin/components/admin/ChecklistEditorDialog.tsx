@@ -12,6 +12,7 @@ export default function ChecklistEditorDialog({ item, onSaved }: { item?: Checkl
   const [form, setForm] = useState<Checklist>({ title: '', description: '', items: [], is_published: true })
   const [steps, setSteps] = useState<Step[]>([])
   const [saving, setSaving] = useState(false)
+  const [dragIndex, setDragIndex] = useState<number | null>(null)
   useEffect(() => {
     if (item) {
       setForm(item)
@@ -49,10 +50,42 @@ export default function ChecklistEditorDialog({ item, onSaved }: { item?: Checkl
             </div>
             <div className="space-y-2 max-h-[50vh] overflow-auto pr-1">
               {steps.map((s, idx) => (
-                <div key={s.id} className="glass p-3 rounded-lg flex items-center gap-2">
+                <div
+                  key={s.id}
+                  className="glass p-3 rounded-lg flex items-center gap-2"
+                  draggable
+                  onDragStart={() => setDragIndex(idx)}
+                  onDragOver={e => e.preventDefault()}
+                  onDrop={() => {
+                    if (dragIndex === null || dragIndex === idx) return
+                    setSteps(prev => {
+                      const next = [...prev]
+                      const [moved] = next.splice(dragIndex, 1)
+                      next.splice(idx, 0, moved)
+                      return next
+                    })
+                    setDragIndex(null)
+                  }}
+                >
                   <div className="text-xs opacity-60 w-6">{idx+1}.</div>
                   <UIInput className="flex-1" placeholder="Step title" value={s.title} onChange={e=>setSteps(prev=>prev.map(x=>x.id===s.id?{...x, title:e.target.value}:x))} />
-                  <UIButton size="sm" variant="destructive" onClick={()=>setSteps(prev=>prev.filter(x=>x.id!==s.id))}>Delete</UIButton>
+                  <div className="flex items-center gap-2">
+                    <UIButton size="sm" variant="ghost" onClick={()=>{
+                      setSteps(prev => {
+                        const next = [...prev]
+                        if (idx>0) { const [m]=next.splice(idx,1); next.splice(idx-1,0,m) }
+                        return next
+                      })
+                    }}>↑</UIButton>
+                    <UIButton size="sm" variant="ghost" onClick={()=>{
+                      setSteps(prev => {
+                        const next = [...prev]
+                        if (idx<next.length-1) { const [m]=next.splice(idx,1); next.splice(idx+1,0,m) }
+                        return next
+                      })
+                    }}>↓</UIButton>
+                    <UIButton size="sm" variant="destructive" onClick={()=>setSteps(prev=>prev.filter(x=>x.id!==s.id))}>Delete</UIButton>
+                  </div>
                 </div>
               ))}
             </div>

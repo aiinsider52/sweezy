@@ -16,7 +16,7 @@ export function Dialog({ open, onClose, children, size = 'lg', contentClassName 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      <div className={`relative glass w-full ${sizes[size]} overflow-hidden p-0 ${contentClassName ?? ''}`}>
+      <div className={`relative glass w-full ${sizes[size]} max-h-[85vh] overflow-auto p-0 ${contentClassName ?? ''}`}>
         <button onClick={onClose} className="absolute top-2 right-2 glass px-2 py-1 rounded-md text-sm">Close</button>
         <div className="p-6 md:p-8">
           {children}

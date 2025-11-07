@@ -90,6 +90,13 @@ export default function MarkdownEditor({ value, onChange, placeholder }: Props) 
           value={value}
           onChange={e=>onChange(e.target.value)}
           onDrop={onDrop}
+          onKeyDown={(e)=>{
+            if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'b') { e.preventDefault(); insert('**','**') }
+            if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'i') { e.preventDefault(); insert('*','*') }
+            if ((e.metaKey || e.ctrlKey) && e.key === '1') { e.preventDefault(); insert('# ', '') }
+            if ((e.metaKey || e.ctrlKey) && e.key === '2') { e.preventDefault(); insert('## ', '') }
+            if ((e.metaKey || e.ctrlKey) && e.key === '3') { e.preventDefault(); insert('### ', '') }
+          }}
         />
         {showPreview && (
           <div className="glass w-full px-4 py-3 min-h-[220px] prose prose-invert max-w-none"

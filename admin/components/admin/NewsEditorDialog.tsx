@@ -3,9 +3,11 @@ import { useEffect, useState } from 'react'
 import { Dialog } from '@/components/ui/dialog'
 import Button from '@/components/ui/button'
 import UIInput from '@/components/ui/input'
+import UISelect from '@/components/ui/select'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-hot-toast'
 import { News } from '@/lib/types'
+import { API_URL } from '@/lib/api'
 
 export default function NewsEditorDialog({ news, trigger }: { news?: News; trigger?: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false)
@@ -18,6 +20,7 @@ export default function NewsEditorDialog({ news, trigger }: { news?: News; trigg
   const [imageUrl, setImageUrl] = useState(news?.image_url ?? '')
   const [loading, setLoading] = useState(false)
   const qc = useQueryClient()
+  const API_ORIGIN = (()=>{ try { return new URL(API_URL).origin } catch { return '' } })()
 
   useEffect(() => {
     if (isOpen) {
@@ -93,15 +96,15 @@ export default function NewsEditorDialog({ news, trigger }: { news?: News; trigg
               </div>
               <div className="space-y-1">
                 <div className="text-sm opacity-70">Language</div>
-                <select
-                  className="glass w-full px-3 py-2"
+                <UISelect
                   value={language}
-                  onChange={e=>setLanguage(e.target.value)}
-                >
-                  <option value="uk">uk</option>
-                  <option value="en">en</option>
-                  <option value="ru">ru</option>
-                </select>
+                  onChange={setLanguage}
+                  options={[
+                    { value: 'uk', label: 'uk' },
+                    { value: 'en', label: 'en' },
+                    { value: 'ru', label: 'ru' },
+                  ]}
+                />
               </div>
               <div className="space-y-1">
                 <div className="text-sm opacity-70">Published at</div>
@@ -117,6 +120,37 @@ export default function NewsEditorDialog({ news, trigger }: { news?: News; trigg
               <div className="text-sm opacity-70">Image URL</div>
               <UIInput placeholder="https://.../image.jpg" value={imageUrl} onChange={e=>setImageUrl(e.target.value)} />
               <div className="text-xs opacity-60">Опционально. Если указать, превью будет с картинкой.</div>
+            </div>
+            <div
+              className="mt-2 rounded-lg border border-dashed border-white/20 p-4 text-sm opacity-80 text-center"
+              onDragOver={(e)=>e.preventDefault()}
+              onDrop={async (e)=>{
+                e.preventDefault()
+                const file = e.dataTransfer.files?.[0]
+                if (!file) return
+                const fd = new FormData()
+                fd.append('file', file)
+                const res = await fetch('/api/media/upload', { method: 'POST', body: fd })
+                const j = await res.json().catch(()=>null)
+                if (j?.url) setImageUrl(j.url.startsWith('/media') && API_ORIGIN ? `${API_ORIGIN}${j.url}` : j.url)
+              }}
+            >
+              Перетащи сюда изображение или
+              <label className="ml-1 underline cursor-pointer">
+                выбери файл
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={async e=>{
+                    const f = e.target.files?.[0]; if (!f) return
+                    const fd = new FormData(); fd.append('file', f)
+                    const res = await fetch('/api/media/upload', { method: 'POST', body: fd })
+                    const j = await res.json().catch(()=>null)
+                    if (j?.url) setImageUrl(j.url.startsWith('/media') && API_ORIGIN ? `${API_ORIGIN}${j.url}` : j.url)
+                  }}
+                />
+              </label>
             </div>
             <div className="text-right">
               <Button onClick={submit} disabled={loading || !title || !url}>{loading ? 'Saving…' : 'Save'}</Button>

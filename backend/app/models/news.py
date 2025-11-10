@@ -6,7 +6,7 @@ from typing import Optional
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import String, DateTime, Text
 
-from .base import Base
+from ..core.database import Base
 
 
 class News(Base):

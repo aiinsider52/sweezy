@@ -2,19 +2,21 @@ from __future__ import annotations
 
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel, HttpUrl, Field
+from pydantic import BaseModel, Field
 
 
 class NewsBase(BaseModel):
     title: str = Field(..., max_length=300)
     summary: str = ""
     content: Optional[str] = None
-    url: HttpUrl
+    # Allow non-ASCII paths and relative URLs to pass through (validated client-side)
+    url: str
     source: str = "Sweezy"
     language: str = "uk"
     status: str = Field(default="published", description="draft|published")
     published_at: datetime
-    image_url: Optional[HttpUrl] = None
+    # Can be absolute (http...) or relative (/media/...)
+    image_url: Optional[str] = None
 
 
 class NewsCreate(NewsBase):

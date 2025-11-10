@@ -59,7 +59,7 @@ export default async function RSSFeedsPage() {
 function DeleteButton({ id }: { id: string }) {
   async function action() {
     "use server"
-    await fetch(`/api/admin/rss-feeds/${id}`, { method: 'DELETE' })
+    await serverFetch(`/admin/rss-feeds/${id}`, { method: 'DELETE' })
     revalidatePath('/admin/rss-feeds')
   }
   return <form action={action}><Button className="px-2 py-1 text-red-400">Delete</Button></form>
@@ -68,7 +68,7 @@ function DeleteButton({ id }: { id: string }) {
 function RunNowButton({ id }: { id: string }) {
   async function action() {
     "use server"
-    await fetch(`/api/admin/rss-feeds/${id}/import`, { method: 'POST' })
+    await serverFetch(`/admin/rss-feeds/${id}/import`, { method: 'POST' })
     revalidatePath('/admin/rss-feeds')
   }
   return <form action={action}><Button className="px-2 py-1">Run now</Button></form>
@@ -77,7 +77,7 @@ function RunNowButton({ id }: { id: string }) {
 function ToggleButton({ id, enabled }: { id: string, enabled: boolean }) {
   async function action() {
     "use server"
-    await fetch(`/api/admin/rss-feeds/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ enabled: !enabled }) })
+    await serverFetch(`/admin/rss-feeds/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ enabled: !enabled }) })
     revalidatePath('/admin/rss-feeds')
   }
   return <form action={action}><Button className="px-2 py-1">{enabled ? 'Disable' : 'Enable'}</Button></form>
@@ -93,7 +93,7 @@ function CreateFeedForm() {
       max_items: Number(formData.get('max_items') || 20),
       download_images: Boolean(formData.get('download_images') || false),
     }
-    await fetch('/api/admin/rss-feeds', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+    await serverFetch('/admin/rss-feeds', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
     revalidatePath('/admin/rss-feeds')
   }
   return (

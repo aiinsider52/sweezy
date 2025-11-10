@@ -20,18 +20,18 @@ def get_news(news_id: str, db: Session = Depends(get_db)):
   return news
 
 @router.post("/", response_model=NewsOut)
-def create_news(payload: NewsCreate, db: Session = Depends(get_db), _: CurrentAdmin = Depends()):
+def create_news(payload: NewsCreate, _: CurrentAdmin, db: Session = Depends(get_db)):
   return NewsService.create(db, **payload.model_dump())
 
 @router.put("/{news_id}", response_model=NewsOut)
-def update_news(news_id: str, payload: NewsUpdate, db: Session = Depends(get_db), _: CurrentAdmin = Depends()):
+def update_news(news_id: str, payload: NewsUpdate, _: CurrentAdmin, db: Session = Depends(get_db)):
   news = NewsService.get(db, news_id)
   if not news:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="News not found")
   return NewsService.update(db, news, **payload.model_dump(exclude_unset=True))
 
 @router.delete("/{news_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_news(news_id: str, db: Session = Depends(get_db), _: CurrentAdmin = Depends()):
+def delete_news(news_id: str, _: CurrentAdmin, db: Session = Depends(get_db)):
   news = NewsService.get(db, news_id)
   if not news:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="News not found")

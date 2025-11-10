@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { serverFetch } from '@/lib/server'
 
 export async function GET() {
-  const res = await serverFetch('/news?limit=100')
+  const res = await serverFetch('/news/?limit=100')
   const text = await res.text()
   try {
     return new NextResponse(text, { status: res.status })
@@ -13,7 +13,7 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   const body = await req.json()
-  const res = await serverFetch('/news', {
+  const res = await serverFetch('/news/', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),

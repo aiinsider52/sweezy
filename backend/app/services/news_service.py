@@ -4,9 +4,9 @@ from datetime import datetime
 from typing import List, Optional
 
 from sqlalchemy.orm import Session
+from uuid import uuid4
 
 from ..models.news import News
-from ..utils.ids import generate_uuid
 
 
 class NewsService:
@@ -24,7 +24,7 @@ class NewsService:
   @staticmethod
   def create(db: Session, **data) -> News:
     news = News(
-      id=generate_uuid(),
+      id=str(uuid4()),
       title=data["title"],
       summary=data.get("summary", ""),
       url=str(data["url"]),

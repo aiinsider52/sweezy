@@ -1,22 +1,16 @@
 from __future__ import annotations
-
 from typing import List, Optional
-
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-
 from ..schemas.news import NewsOut, NewsCreate, NewsUpdate
 from ..services.news import NewsService
 from ..dependencies import get_db, CurrentAdmin
 
-
 router = APIRouter()
-
 
 @router.get("/", response_model=List[NewsOut])
 def list_news(language: Optional[str] = None, limit: int = 50, db: Session = Depends(get_db)):
   return NewsService.list_news(db, language=language, limit=limit)
-
 
 @router.get("/{news_id}", response_model=NewsOut)
 def get_news(news_id: str, db: Session = Depends(get_db)):
@@ -25,11 +19,9 @@ def get_news(news_id: str, db: Session = Depends(get_db)):
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="News not found")
   return news
 
-
 @router.post("/", response_model=NewsOut)
 def create_news(payload: NewsCreate, db: Session = Depends(get_db), _: CurrentAdmin = Depends()):
   return NewsService.create(db, **payload.model_dump())
-
 
 @router.put("/{news_id}", response_model=NewsOut)
 def update_news(news_id: str, payload: NewsUpdate, db: Session = Depends(get_db), _: CurrentAdmin = Depends()):
@@ -38,7 +30,6 @@ def update_news(news_id: str, payload: NewsUpdate, db: Session = Depends(get_db)
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="News not found")
   return NewsService.update(db, news, **payload.model_dump(exclude_unset=True))
 
-
 @router.delete("/{news_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_news(news_id: str, db: Session = Depends(get_db), _: CurrentAdmin = Depends()):
   news = NewsService.get(db, news_id)
@@ -46,6 +37,3 @@ def delete_news(news_id: str, db: Session = Depends(get_db), _: CurrentAdmin = D
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="News not found")
   NewsService.delete(db, news)
   return None
-from __future__ import annotations
-\nfrom fastapi import APIRouter, Depends, HTTPException, status\nfrom typing import List, Optional\n\nfrom ..schemas.news import NewsOut, NewsCreate, NewsUpdate\nfrom ..services.news import NewsService\nfrom ..dependencies import get_db, CurrentAdmin\nfrom sqlalchemy.orm import Session\n\nrouter = APIRouter()\n\n\n@router.get(\"/\", response_model=List[NewsOut])\ndef list_news(language: Optional[str] = None, limit: int = 50, db: Session = Depends(get_db)):\n    return NewsService.list_news(db, language=language, limit=limit)\n\n\n@router.get(\"/{news_id}\", response_model=NewsOut)\ndef get_news(news_id: str, db: Session = Depends(get_db)):\n    news = NewsService.get(db, news_id)\n    if not news:\n        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=\"News not found\")\n    return news\n\n\n@router.post(\"/\", response_model=NewsOut)\ndef create_news(payload: NewsCreate, db: Session = Depends(get_db), _: CurrentAdmin = Depends()):\n    return NewsService.create(db, **payload.model_dump())\n\n\n@router.put(\"/{news_id}\", response_model=NewsOut)\ndef update_news(news_id: str, payload: NewsUpdate, db: Session = Depends(get_db), _: CurrentAdmin = Depends()):\n    news = NewsService.get(db, news_id)\n    if not news:\n        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=\"News not found\")\n    return NewsService.update(db, news, **payload.model_dump())\n\n\n@router.delete(\"/{news_id}\", status_code=status.HTTP_204_NO_CONTENT)\ndef delete_news(news_id: str, db: Session = Depends(get_db), _: CurrentAdmin = Depends()):\n    news = NewsService.get(db, news_id)\n    if not news:\n        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=\"News not found\")\n    NewsService.delete(db, news)\n    return None\n*** End Patch```  %}
-

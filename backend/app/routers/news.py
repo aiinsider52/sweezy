@@ -3,7 +3,7 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from ..schemas.news import NewsOut, NewsCreate, NewsUpdate
-from ..services.news import NewsService
+from ..services.news_service import NewsService
 from ..dependencies import get_db, CurrentAdmin
 
 router = APIRouter()

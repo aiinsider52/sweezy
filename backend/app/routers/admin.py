@@ -4,7 +4,7 @@ from typing import Any, Dict, List
 import re
 import time
 from datetime import datetime
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urljoin
 
 from fastapi import APIRouter
 from sqlalchemy import func, select
@@ -172,12 +172,97 @@ def import_news_rss(payload: Dict[str, Any], db: DBSession, _: CurrentAdmin) -> 
     max_items = int(payload.get("max_items", 50))
     download_images = bool(payload.get("download_images", True))
 
-    parsed = feedparser.parse(feed_url)
+    # Fetch feed with proper headers (some hosts block default user agents)
+    client = httpx.Client(timeout=10, follow_redirects=True, headers={
+        "User-Agent": "SweezyRSS/1.0 (+https://sweezy.onrender.com)"
+    })
+    try:
+        resp = client.get(feed_url)
+        text = resp.text if resp.status_code < 400 else ""
+    except Exception:
+        text = ""
+    parsed = feedparser.parse(text or feed_url)
+    # If no entries, try to discover <link rel="alternate" type="application/rss+xml|atom+xml">
+    if not getattr(parsed, "entries", None):
+        try:
+            html = text or ""
+            if not html:
+                html = client.get(feed_url).text
+            import re as _re
+            m = _re.search(r'<link[^>]+type="application/(?:rss|atom)\+xml"[^>]+href="([^"]+)"', html, flags=_re.I)
+            if m:
+                feed_href = m.group(1)
+                feed_abs = urljoin(feed_url, feed_href)
+                text2 = client.get(feed_abs).text
+                parsed = feedparser.parse(text2)
+        except Exception:
+            pass
     created = updated = skipped = 0
     src = parsed.feed.get("title") or (urlparse(feed_url).hostname or "RSS")
 
-    client = httpx.Client(timeout=10)
-    for entry in parsed.entries[:max_items]:
+    # If still no entries — treat the URL as single article page and import via OpenGraph
+    if not getattr(parsed, "entries", None):
+        try:
+            html = text or client.get(feed_url).text
+            import re as _re
+            def meta(prop=None, name=None):
+                if prop:
+                    m = _re.search(rf'<meta[^>]+property=["\']{_re.escape(prop)}["\'][^>]*content=["\']([^"\']+)["\']', html, flags=_re.I)
+                    if m: return m.group(1)
+                if name:
+                    m = _re.search(rf'<meta[^>]+name=["\']{_re.escape(name)}["\'][^>]*content=["\']([^"\']+)["\']', html, flags=_re.I)
+                    if m: return m.group(1)
+                return None
+            title = meta(prop="og:title") or meta(name="title")
+            if not title:
+                mtitle = _re.search(r'<title[^>]*>(.*?)</title>', html, flags=_re.I|_re.S)
+                title = (mtitle.group(1).strip() if mtitle else "Untitled")
+            desc = meta(prop="og:description") or meta(name="description") or ""
+            img = meta(prop="og:image") or meta(name="image")
+            pub = meta(prop="article:published_time") or meta(name="article:published_time")
+            pub_dt = datetime.utcnow()
+            try:
+                # try ISO-8601 (trim timezone if necessary)
+                p = pub.replace("Z","").split("+")[0] if pub else ""
+                if p:
+                    pub_dt = datetime.fromisoformat(p)
+            except Exception:
+                pass
+            image_url = None
+            if img:
+                image_url = img
+                if download_images:
+                    try:
+                        r = client.get(urljoin(feed_url, img))
+                        if r.status_code == 200:
+                            name = f"{__import__('uuid').uuid4()}.jpg"
+                            (UPLOAD_DIR / name).write_bytes(r.content)
+                            image_url = f"/media/{name}"
+                    except Exception:
+                        pass
+            data = {
+                "title": title.strip(),
+                "summary": desc.strip(),
+                "content": None,
+                "url": feed_url,
+                "source": src,
+                "language": language,
+                "status": status,
+                "published_at": pub_dt,
+                "image_url": image_url,
+            }
+            existing = db.query(News).filter(News.url == feed_url).first()
+            from ..services.news_service import NewsService as _NS
+            if existing:
+                _NS.update(db, existing, **data); updated += 1
+            else:
+                _NS.create(db, **data); created += 1
+        except Exception:
+            skipped += 1
+            client.close()
+            return {"created": created, "updated": updated, "skipped": skipped}
+
+    for entry in getattr(parsed, "entries", [])[:max_items]:
         try:
             url = entry.get("link")
             if not url:

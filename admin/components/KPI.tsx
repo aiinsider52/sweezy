@@ -1,4 +1,4 @@
-\"use client\"
+"use client"
 import Card from './Card'
 import UIBadge from '@/components/ui/badge'
 import Sparkline from './Sparkline'

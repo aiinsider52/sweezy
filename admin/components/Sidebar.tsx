@@ -2,18 +2,17 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
-import { LayoutDashboard, Users, BookOpenText, FileText, Activity, CheckSquare, Calendar, SlidersHorizontal, Newspaper } from 'lucide-react'
 
 const items = [
-  { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/admin/users', label: 'Users', icon: Users },
-  { href: '/admin/guides', label: 'Guides', icon: BookOpenText },
-  { href: '/admin/templates', label: 'Templates', icon: FileText },
-  { href: '/admin/checklists', label: 'Checklists', icon: CheckSquare },
-  { href: '/admin/news', label: 'News', icon: Newspaper },
-  { href: '/admin/appointments', label: 'Appointments', icon: Calendar },
-  { href: '/admin/config', label: 'Config', icon: SlidersHorizontal },
-  { href: '/admin/monitoring', label: 'Monitoring', icon: Activity }
+  { href: '/admin/dashboard', label: 'Dashboard' },
+  { href: '/admin/users', label: 'Users' },
+  { href: '/admin/guides', label: 'Guides' },
+  { href: '/admin/templates', label: 'Templates' },
+  { href: '/admin/checklists', label: 'Checklists' },
+  { href: '/admin/news', label: 'News' },
+  { href: '/admin/appointments', label: 'Appointments' },
+  { href: '/admin/config', label: 'Config' },
+  { href: '/admin/monitoring', label: 'Monitoring' }
 ]
 
 export default function Sidebar() {
@@ -31,7 +30,7 @@ export default function Sidebar() {
             href={it.href}
             className={cn('flex items-center gap-2 rounded-lg px-3 py-2 hover:bg-white/10 transition', pathname?.startsWith(it.href) && 'bg-white/15')}
           >
-            <it.icon size={16} /> {it.label}
+            <span className="w-4 h-4 rounded-sm bg-white/20 mr-1.5" aria-hidden="true" /> {it.label}
           </Link>
         ))}
       </nav>

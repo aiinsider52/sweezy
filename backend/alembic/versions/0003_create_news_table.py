@@ -1,7 +1,7 @@
 """create news table
 
 Revision ID: 0003_create_news
-Revises: 0002_add_image_url_to_guides
+Revises: 0002_add_image
 Create Date: 2025-11-10 10:00:00.000000
 """
 from __future__ import annotations
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = "0003_create_news"
-down_revision = "0002_add_image_url_to_guides"
+down_revision = "0002_add_image"
 branch_labels = None
 depends_on = None
 

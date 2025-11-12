@@ -83,10 +83,13 @@ async def search_jobs(q: str | None, canton: str | None, page: int, per_page: in
             headers = {
                 "x-rapidapi-key": rapid_key,
                 "x-rapidapi-host": host,
+                "X-RapidAPI-Key": rapid_key,   # some packages require capitalized headers
+                "X-RapidAPI-Host": host,
+                "Accept": "application/json",
             }
             # Try a few common endpoint/param variants used by different Indeed RapidAPI packs
             location_text = f"{canton or ''}, Switzerland".strip(", ")
-            query = (q or "").strip()
+            query = (q or "").strip() or "a"  # fallback to broad match to fetch any listings
             variants = []
             if query:
                 variants.extend([

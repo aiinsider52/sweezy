@@ -55,6 +55,43 @@ def _parse_rav(item: dict) -> JobItem | None:
         return None
 
 
+def _parse_jsearch(item: dict, canton: str | None) -> JobItem | None:
+    try:
+        job_id = str(item.get("job_id") or item.get("id") or "")
+        if not job_id:
+            return None
+        # Posted at (timestamp or ISO)
+        posted_at = None
+        ts = item.get("job_posted_at_timestamp")
+        if isinstance(ts, (int, float)):
+            try:
+                posted_at = datetime.utcfromtimestamp(int(ts))
+            except Exception:
+                posted_at = None
+        if not posted_at:
+            posted_at = _parse_date(item.get("job_posted_at_datetime_utc"))
+        # Build display location
+        city = item.get("job_city")
+        state = item.get("job_state")
+        country = item.get("job_country")
+        location = ", ".join([x for x in [city, state, country] if x])
+        return JobItem(
+            id=f"jsearch:{job_id}",
+            source="jsearch",
+            title=item.get("job_title") or "",
+            company=item.get("employer_name"),
+            location=location or country or "Switzerland",
+            canton=canton,
+            url=item.get("job_apply_link") or item.get("job_apply_url") or item.get("job_apply_link"),
+            posted_at=posted_at,
+            employment_type=item.get("job_employment_type"),
+            salary=item.get("job_salary") or item.get("job_min_salary"),
+            snippet=(item.get("job_description") or "")[:280] if isinstance(item.get("job_description"), str) else None,
+        )
+    except Exception:
+        return None
+
+
 def _parse_date(value) -> datetime | None:
     if not value:
         return None
@@ -85,6 +122,60 @@ async def search_jobs(q: str | None, canton: str | None, page: int, per_page: in
             # Fallback to the stable package if a custom host is set
             if primary_host != "indeed-api.p.rapidapi.com":
                 alt_hosts.append("indeed-api.p.rapidapi.com")
+            # JSearch (jsearch.p.rapidapi.com) - special handling
+            if "jsearch" in primary_host:
+                try:
+                    # JSearch wants location inside query string + country code separately
+                    canton_map = {
+                        "ZH": "Zurich", "BE": "Bern", "LU": "Lucerne", "UR": "Uri", "SZ": "Schwyz",
+                        "OW": "Obwalden", "NW": "Nidwalden", "GL": "Glarus", "ZG": "Zug", "FR": "Fribourg",
+                        "SO": "Solothurn", "BS": "Basel", "BL": "Basel-Landschaft", "SH": "Schaffhausen",
+                        "AR": "Appenzell Ausserrhoden", "AI": "Appenzell Innerrhoden", "SG": "St. Gallen",
+                        "GR": "Grisons", "AG": "Aargau", "TG": "Thurgau", "TI": "Ticino", "VD": "Vaud",
+                        "VS": "Valais", "NE": "Neuchâtel", "GE": "Geneva", "JU": "Jura",
+                    }
+                    city = canton_map.get((canton or "").upper())
+                    base_query = (q or "jobs").strip()
+                    if city:
+                        query = f"{base_query} in {city}"
+                    else:
+                        query = f"{base_query} in Switzerland"
+                    params = {
+                        "query": query,
+                        "page": str(max(page, 1)),
+                        "num_pages": "1",
+                        "country": "ch",
+                        "date_posted": "all",
+                    }
+                    headers = {
+                        "x-rapidapi-key": rapid_key,
+                        "x-rapidapi-host": primary_host,
+                        "Accept": "application/json",
+                    }
+                    url = f"https://{primary_host}/search"
+                    resp = await client.get(url, params=params, headers=headers)
+                    if debug:
+                        try:
+                            snippet = "" if resp.status_code == 200 else resp.text[:220]
+                            debug_info["indeed"].append({"host": primary_host, "url": url, "params": params, "status": resp.status_code, "body": snippet})
+                        except Exception:
+                            pass
+                    if resp.status_code == 200:
+                        data = resp.json()
+                        raw = data.get("data") or []
+                        parsed = [_parse_jsearch(it, canton) for it in raw]
+                        j_items = [p for p in parsed if p]
+                        if j_items:
+                            items.extend(j_items)
+                            source_counts["jsearch"] = len(j_items)
+                            # we consider success and skip other hosts
+                            alt_hosts = []
+                        else:
+                            source_counts["jsearch"] = 0
+                except Exception:
+                    # swallow and continue to generic hosts
+                    pass
+
             # Try a few common endpoint/param variants used by different Indeed RapidAPI packs
             canton_map = {
                 "ZH": "Zurich",

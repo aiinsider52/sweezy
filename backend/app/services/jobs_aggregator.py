@@ -79,29 +79,38 @@ async def search_jobs(q: str, canton: str | None, page: int, per_page: int) -> T
         # Indeed (RapidAPI)
         rapid_key = os.getenv("RAPIDAPI_KEY") or os.getenv("RAPID_API_KEY") or os.getenv("INDEED_RAPIDAPI_KEY")
         if rapid_key:
-            try:
-                host = os.getenv("RAPIDAPI_HOST") or "indeed-api.p.rapidapi.com"
-                params = {
-                    "query": q,
-                    "location": f"{canton or ''}, Switzerland".strip(", "),
-                    "country": "CH",
-                    "page_id": str(max(page, 1)),
-                }
-                headers = {
-                    "x-rapidapi-key": rapid_key,
-                    "x-rapidapi-host": host,
-                }
-                indeed_url = f"https://{host}/jobs/search"
-                resp = await client.get(indeed_url, params=params, headers=headers)
-                if resp.status_code == 200:
+            host = os.getenv("RAPIDAPI_HOST") or "indeed-api.p.rapidapi.com"
+            headers = {
+                "x-rapidapi-key": rapid_key,
+                "x-rapidapi-host": host,
+            }
+            # Try a few common endpoint/param variants used by different Indeed RapidAPI packs
+            variants = [
+                (f"https://{host}/jobs/search", {"query": q, "location": f"{canton or ''}, Switzerland".strip(", "), "country": "CH", "page_id": str(max(page, 1))}),
+                (f"https://{host}/jobs/search", {"q": q, "location": f"{canton or ''}, Switzerland".strip(", "), "country": "CH", "page": str(max(page, 1))}),
+                (f"https://{host}/search", {"query": q, "location": f"{canton or ''}, Switzerland".strip(", "), "country": "CH", "page": str(max(page, 1))}),
+                (f"https://{host}/search", {"q": q, "l": f"{canton or ''}, Switzerland".strip(", "), "page": str(max(page, 1))}),
+            ]
+            success = False
+            for url, params in variants:
+                try:
+                    resp = await client.get(url, params=params, headers=headers)
+                    if resp.status_code != 200:
+                        continue
                     data = resp.json()
-                    raw_list = data.get("data") or data.get("jobs") or data.get("results") or []
+                    raw_list = data.get("data") or data.get("jobs") or data.get("results") or data.get("items") or []
                     parsed = [_parse_indeed(it, canton) for it in raw_list]
                     indeed_items = [p for p in parsed if p]
-                    items.extend(indeed_items)
-                    source_counts["indeed"] = len(indeed_items)
-            except Exception:
-                pass
+                    if indeed_items:
+                        items.extend(indeed_items)
+                        source_counts["indeed"] = len(indeed_items)
+                        success = True
+                        break
+                except Exception:
+                    continue
+            if not success:
+                # mark as attempted so clients don't assume "not configured"
+                source_counts["indeed"] = -1
 
         # RAV Job-Room (optional)
         rav_base = os.getenv("RAV_API_URL")

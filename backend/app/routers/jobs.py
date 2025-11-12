@@ -19,7 +19,7 @@ async def search(q: str = Query(..., min_length=2), canton: str | None = None, p
 
 
 @router.post("/analytics/events", status_code=status.HTTP_204_NO_CONTENT)
-def log_event(keyword: str, canton: str | None = None, db: DBSession):
+def log_event(db: DBSession, keyword: str, canton: str | None = None):
     try:
         db.add(JobSearchEvent(keyword=keyword.strip().lower(), canton=canton))
         db.commit()
@@ -29,7 +29,7 @@ def log_event(keyword: str, canton: str | None = None, db: DBSession):
 
 
 @router.get("/analytics/top", response_model=List[JobSearchEventOut])
-def top_keywords(limit: int = 10, db: DBSession):
+def top_keywords(db: DBSession, limit: int = 10):
     from sqlalchemy import func
     rows = (
         db.query(JobSearchEvent.keyword, JobSearchEvent.canton, func.count().label("count"))

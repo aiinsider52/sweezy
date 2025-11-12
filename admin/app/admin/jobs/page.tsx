@@ -75,9 +75,16 @@ const dict: Record<string, Record<string, string>> = {
 }
 
 function useI18n() {
-  const code = useMemo(() => {
-    if (typeof window === 'undefined') return 'en'
-    return (localStorage.getItem('lang') || navigator.language.split('-')[0] || 'en').toLowerCase().slice(0,2)
+  // Avoid hydration mismatch: render EN on server and first client paint,
+  // then switch to user language after mount.
+  const [code, setCode] = useState<'en' | 'de' | 'ru' | 'uk'>('en')
+  useEffect(() => {
+    try {
+      const stored = typeof window !== 'undefined' ? localStorage.getItem('lang') : null
+      const nav = typeof navigator !== 'undefined' ? navigator.language.split('-')[0] : 'en'
+      const detected = ((stored || nav || 'en').toLowerCase().slice(0,2)) as 'en' | 'de' | 'ru' | 'uk'
+      if (dict[detected]) setCode(detected)
+    } catch {}
   }, [])
   return (key: string) => (dict[code]?.[key] ?? dict.en[key] ?? key)
 }

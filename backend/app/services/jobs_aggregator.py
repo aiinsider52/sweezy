@@ -80,6 +80,7 @@ async def search_jobs(q: str, canton: str | None, page: int, per_page: int) -> T
         rapid_key = os.getenv("RAPIDAPI_KEY") or os.getenv("RAPID_API_KEY") or os.getenv("INDEED_RAPIDAPI_KEY")
         if rapid_key:
             try:
+                host = os.getenv("RAPIDAPI_HOST") or "indeed-api.p.rapidapi.com"
                 params = {
                     "query": q,
                     "location": f"{canton or ''}, Switzerland".strip(", "),
@@ -88,9 +89,10 @@ async def search_jobs(q: str, canton: str | None, page: int, per_page: int) -> T
                 }
                 headers = {
                     "x-rapidapi-key": rapid_key,
-                    "x-rapidapi-host": "indeed-api.p.rapidapi.com",
+                    "x-rapidapi-host": host,
                 }
-                resp = await client.get("https://indeed-api.p.rapidapi.com/jobs/search", params=params, headers=headers)
+                indeed_url = f"https://{host}/jobs/search"
+                resp = await client.get(indeed_url, params=params, headers=headers)
                 if resp.status_code == 200:
                     data = resp.json()
                     raw_list = data.get("data") or data.get("jobs") or data.get("results") or []
@@ -113,7 +115,12 @@ async def search_jobs(q: str, canton: str | None, page: int, per_page: int) -> T
                     "size": str(per_page),
                 }
                 headers = {"Authorization": f"Bearer {rav_token}"} if rav_token else {}
-                resp = await client.get(f"{rav_base.rstrip('/')}/jobAdvertisements", params=params, headers=headers)
+                base = rav_base.rstrip("/")
+                if base.lower().endswith("jobadvertisements"):
+                    rav_url = base
+                else:
+                    rav_url = f"{base}/jobAdvertisements"
+                resp = await client.get(rav_url, params=params, headers=headers)
                 if resp.status_code == 200:
                     data = resp.json()
                     raw_list = data.get("content") if isinstance(data, dict) else data

@@ -129,8 +129,8 @@ export default function JobsPage() {
         const topData = await topRes.json()
         if (Array.isArray(topData)) setTop(topData)
       } catch {}
-      // fire analytics event (best-effort)
-      fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://sweezy.onrender.com/api/v1'}/jobs/analytics/events?keyword=${encodeURIComponent(q)}&canton=${encodeURIComponent(canton)}`, { method: 'POST' }).catch(() => {})
+      // fire analytics event (best-effort, via local API to avoid CORS)
+      fetch(`/api/jobs/analytics/events?keyword=${encodeURIComponent(q)}&canton=${encodeURIComponent(canton)}`, { method: 'POST' }).catch(() => {})
       // track last seen ids for notifications
       if (typeof window !== 'undefined') {
         const key = `job_seen_${q}_${canton}`

@@ -89,7 +89,35 @@ async def search_jobs(q: str | None, canton: str | None, page: int, per_page: in
                 "Accept": "application/json",
             }
             # Try a few common endpoint/param variants used by different Indeed RapidAPI packs
-            location_text = f"{canton or ''}, Switzerland".strip(", ")
+            canton_map = {
+                "ZH": "Zurich",
+                "BE": "Bern",
+                "LU": "Lucerne",
+                "UR": "Uri",
+                "SZ": "Schwyz",
+                "OW": "Obwalden",
+                "NW": "Nidwalden",
+                "GL": "Glarus",
+                "ZG": "Zug",
+                "FR": "Fribourg",
+                "SO": "Solothurn",
+                "BS": "Basel",
+                "BL": "Basel-Landschaft",
+                "SH": "Schaffhausen",
+                "AR": "Appenzell Ausserrhoden",
+                "AI": "Appenzell Innerrhoden",
+                "SG": "St. Gallen",
+                "GR": "Grisons",
+                "AG": "Aargau",
+                "TG": "Thurgau",
+                "TI": "Ticino",
+                "VD": "Vaud",
+                "VS": "Valais",
+                "NE": "Neuchâtel",
+                "GE": "Geneva",
+                "JU": "Jura",
+            }
+            location_text = f"{canton_map.get((canton or '').upper(), (canton or '').upper() or 'Switzerland')}, Switzerland".strip(", ")
             query = (q or "").strip() or "a"  # fallback to broad match to fetch any listings
             variants = []
             if query:
@@ -98,6 +126,11 @@ async def search_jobs(q: str | None, canton: str | None, page: int, per_page: in
                     (f"https://{host}/jobs/search", {"q": query, "location": location_text, "country": "CH", "page": str(max(page, 1))}),
                     (f"https://{host}/search", {"query": query, "location": location_text, "country": "CH", "page": str(max(page, 1))}),
                     (f"https://{host}/search", {"q": query, "l": location_text, "page": str(max(page, 1))}),
+                    # without explicit country
+                    (f"https://{host}/jobs/search", {"query": query, "location": location_text, "page": str(max(page, 1))}),
+                    (f"https://{host}/search", {"q": query, "l": location_text, "page": str(max(page, 1))}),
+                    # some packages use 'co' for country and 'start' for paging
+                    (f"https://{host}/search", {"q": query, "l": location_text, "co": "ch", "start": str((max(page, 1)-1)*per_page), "limit": str(per_page)}),
                 ])
             else:
                 # No query: try endpoints without query to get general listings
@@ -106,6 +139,7 @@ async def search_jobs(q: str | None, canton: str | None, page: int, per_page: in
                     (f"https://{host}/jobs/search", {"location": location_text, "country": "CH", "page": str(max(page, 1))}),
                     (f"https://{host}/search", {"location": location_text, "country": "CH", "page": str(max(page, 1))}),
                     (f"https://{host}/search", {"l": location_text, "page": str(max(page, 1))}),
+                    (f"https://{host}/search", {"l": location_text, "co": "ch", "start": str((max(page, 1)-1)*per_page), "limit": str(per_page)}),
                 ])
             success = False
             for url, params in variants:
@@ -113,7 +147,13 @@ async def search_jobs(q: str | None, canton: str | None, page: int, per_page: in
                     resp = await client.get(url, params=params, headers=headers)
                     if debug:
                         try:
-                            debug_info["indeed"].append({"url": url, "params": params, "status": resp.status_code})
+                            snippet = ""
+                            if resp.status_code != 200:
+                                try:
+                                    snippet = resp.text[:220]
+                                except Exception:
+                                    snippet = ""
+                            debug_info["indeed"].append({"url": url, "params": params, "status": resp.status_code, "body": snippet})
                         except Exception:
                             pass
                     if resp.status_code != 200:

@@ -19,7 +19,14 @@ def _init():
     stripe.api_key = api_key
 
 
-def create_checkout_session(db: Session, user: User, plan: str, success_url: str, cancel_url: str) -> str:
+def create_checkout_session(
+    db: Session,
+    user: User,
+    plan: str,
+    success_url: str,
+    cancel_url: str,
+    promotion_code: Optional[str] = None,
+) -> str:
     """
     plan: 'monthly' or 'yearly'
     Returns URL to redirect user to Stripe Checkout.
@@ -38,6 +45,15 @@ def create_checkout_session(db: Session, user: User, plan: str, success_url: str
         db.add(user)
         db.commit()
 
+    discounts = None
+    if promotion_code:
+        try:
+            pcs = stripe.PromotionCode.list(code=promotion_code, active=True, limit=1)
+            if pcs["data"]:
+                discounts = [{"promotion_code": pcs["data"][0]["id"]}]
+        except Exception:
+            discounts = None
+
     session = stripe.checkout.Session.create(
         mode="subscription",
         success_url=success_url,
@@ -45,6 +61,7 @@ def create_checkout_session(db: Session, user: User, plan: str, success_url: str
         customer=customer_id,
         line_items=[{"price": price_id, "quantity": 1}],
         allow_promotion_codes=True,
+        discounts=discounts,
         client_reference_id=user.id,
     )
     return session["url"]
@@ -98,4 +115,28 @@ def apply_free(db: Session, user: User) -> None:
     db.add(user)
     db.commit()
 
+
+def create_referral_promotion_code(user: User, prefix: Optional[str] = None) -> str:
+    """
+    Creates a one-time promotion code from a preconfigured Stripe coupon for referrals.
+    Requires STRIPE_REFERRAL_COUPON_ID in env.
+    """
+    _init()
+    coupon_id = os.getenv("STRIPE_REFERRAL_COUPON_ID")
+    if not coupon_id:
+        raise RuntimeError("STRIPE_REFERRAL_COUPON_ID not configured")
+    code = None
+    try:
+        kwargs = {
+            "coupon": coupon_id,
+            "max_redemptions": 1,
+            "metadata": {"referrer_user_id": user.id, "referrer_email": user.email},
+        }
+        if prefix:
+            kwargs["code"] = f"{prefix}{user.id[:6]}".upper()
+        pc = stripe.PromotionCode.create(**kwargs)
+        code = pc["code"]
+    except Exception as exc:
+        raise RuntimeError(f"Failed to create referral code: {exc}") from exc
+    return code or ""
 

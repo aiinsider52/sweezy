@@ -20,6 +20,7 @@ from ..routers.media import UPLOAD_DIR
 from ..models.rss_feed import RSSFeed
 from ..services.rss_importer import RSSImporter
 from ..models.subscription import Subscription, SubscriptionEvent
+from ..models.analytics import PaywallEvent
 from ..services import stripe_service
 from datetime import datetime, timedelta, timezone
 from sqlalchemy import func
@@ -304,6 +305,31 @@ def subscriptions_analytics(_: CurrentAdmin, db: DBSession, months: int = 6) -> 
         },
         "by_month": series,
     }
+
+@router.get("/paywall/funnel")
+def paywall_funnel(_: CurrentAdmin, db: DBSession, days: int = 30) -> Dict[str, Any]:
+    """
+    Returns counts for paywall events over the last N days.
+    """
+    from datetime import datetime, timedelta, timezone
+    since = datetime.now(timezone.utc) - timedelta(days=max(1, min(365, days)))
+    rows = (
+        db.query(PaywallEvent.event_type, func.count().label("cnt"))
+        .filter(PaywallEvent.created_at >= since)
+        .group_by(PaywallEvent.event_type)
+        .all()
+    )
+    by_type = {r[0]: int(r[1]) for r in rows}
+    contexts = (
+        db.query(PaywallEvent.context, func.count().label("cnt"))
+        .filter(PaywallEvent.created_at >= since)
+        .group_by(PaywallEvent.context)
+        .order_by(func.count().desc())
+        .limit(10)
+        .all()
+    )
+    top_contexts = [{"context": r[0] or "none", "count": int(r[1])} for r in contexts]
+    return {"by_type": by_type, "top_contexts": top_contexts, "since": since.isoformat()}
 
 @router.post("/import/news/rss")
 def import_news_rss(payload: Dict[str, Any], db: DBSession, _: CurrentAdmin) -> Dict[str, Any]:

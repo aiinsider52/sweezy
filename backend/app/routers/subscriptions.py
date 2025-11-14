@@ -66,6 +66,7 @@ class CheckoutIn(BaseModel):
     plan: str  # 'monthly'|'yearly'
     success_url: str
     cancel_url: str
+    promotion_code: Optional[str] = None
 
 
 class CheckoutOut(BaseModel):
@@ -78,7 +79,12 @@ def create_checkout(payload: CheckoutIn, db: DBSession, user: CurrentUser) -> Ch
         raise HTTPException(status_code=400, detail="Invalid plan")
     try:
         url = stripe_service.create_checkout_session(
-            db, user, payload.plan, success_url=payload.success_url, cancel_url=payload.cancel_url
+            db,
+            user,
+            payload.plan,
+            success_url=payload.success_url,
+            cancel_url=payload.cancel_url,
+            promotion_code=payload.promotion_code,
         )
         return CheckoutOut(url=url)
     except Exception as exc:
@@ -93,6 +99,17 @@ def start_trial(db: DBSession, user: CurrentUser) -> CurrentOut:
     user = stripe_service.apply_trial(db, user, days=7)
     return CurrentOut(status=user.subscription_status, expire_at=user.subscription_expire_at)
 
+class ReferralOut(BaseModel):
+    code: str
+
+@router.post("/referral/create", response_model=ReferralOut)
+def create_referral_code(user: CurrentUser) -> ReferralOut:
+    try:
+        code = stripe_service.create_referral_promotion_code(user, prefix="SWZ")
+        return ReferralOut(code=code)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+
 
 @router.post("/stripe/webhook", status_code=200)
 async def stripe_webhook(request: Request, db: DBSession):
@@ -102,6 +119,8 @@ async def stripe_webhook(request: Request, db: DBSession):
     if not secret:
         raise HTTPException(status_code=500, detail="Webhook not configured")
     import stripe  # type: ignore
+    import urllib.request
+    import json as _json
 
     try:
         event = stripe.Webhook.construct_event(payload=payload, sig_header=sig, secret=secret)  # type: ignore
@@ -124,6 +143,20 @@ async def stripe_webhook(request: Request, db: DBSession):
 
     stripe_service.log_event(db, user.id if user else None, event_type, json.loads(payload.decode("utf-8")))
 
+    # Optional Telegram notification (only for key events)
+    def _notify_telegram(text: str) -> None:
+        token = os.getenv("TELEGRAM_BOT_TOKEN")
+        chat_id = os.getenv("TELEGRAM_CHAT_ID")
+        if not token or not chat_id:
+            return
+        try:
+            url = f"https://api.telegram.org/bot{token}/sendMessage"
+            data = _json.dumps({"chat_id": chat_id, "text": text}).encode("utf-8")
+            req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
+            urllib.request.urlopen(req, timeout=3)  # nosec B310
+        except Exception:
+            pass
+
     # Handle events
     if event_type == "checkout.session.completed":
         # nothing to do; wait for invoice.payment_succeeded
@@ -145,11 +178,13 @@ async def stripe_webhook(request: Request, db: DBSession):
         except Exception:
             period_end = None
         stripe_service.apply_premium(db, user, subscription_id=str(subscription_id), current_period_end=period_end)
+        _notify_telegram(f"✅ Subscription active for {user.email} (until {period_end.isoformat() if period_end else 'n/a'})")
         return {"ok": True}
 
     if event_type in {"customer.subscription.deleted"}:
         if user:
             stripe_service.apply_free(db, user)
+            _notify_telegram(f"⚠️ Subscription canceled for {user.email}")
         return {"ok": True}
 
     return {"ok": True}

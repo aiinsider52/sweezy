@@ -21,6 +21,7 @@ from .routers.auth import router as auth_router
 from .routers.guides import router as guides_router
 from .routers.checklists import router as checklists_router
 from .routers.templates import router as templates_router
+from .routers.analytics import router as analytics_router
 from .routers.appointments import router as appointments_router
 from .routers.remote_config import router as remote_config_router
 from .routers.media import router as media_router
@@ -174,6 +175,7 @@ app.include_router(jobs_router, prefix=f"{API_PREFIX}/jobs", tags=["jobs"])
 app.include_router(live_router, prefix=f"{API_PREFIX}/live", tags=["live"])
 app.include_router(translations_router, prefix=f"{API_PREFIX}/translations", tags=["translations"])
 app.include_router(subscriptions_router, prefix=f"{API_PREFIX}/subscriptions", tags=["subscriptions"])
+app.include_router(analytics_router, prefix=f"{API_PREFIX}/analytics", tags=["analytics"])
 
 # Serve uploaded media
 try:

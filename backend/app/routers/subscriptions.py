@@ -26,6 +26,41 @@ class CurrentOut(BaseModel):
 def current(user: CurrentUser) -> CurrentOut:
     return CurrentOut(status=user.subscription_status, expire_at=user.subscription_expire_at)
 
+class EntitlementsOut(BaseModel):
+    status: str
+    expire_at: Optional[datetime] = None
+    is_premium: bool
+    ai_access: bool
+    favorites_limit: int | None  # None means unlimited
+    guides_full_access: bool
+    pdf_download: bool
+
+def _compute_is_premium(status: str, expire_at: Optional[datetime]) -> bool:
+    if status in {"trial", "premium"}:
+        if expire_at is None:
+            return True
+        try:
+            return expire_at > datetime.now(timezone.utc)
+        except Exception:
+            return True
+    return False
+
+@router.get("/entitlements", response_model=EntitlementsOut)
+def entitlements(user: CurrentUser) -> EntitlementsOut:
+    status = user.subscription_status or "free"
+    expire_at = user.subscription_expire_at
+    is_premium = _compute_is_premium(status, expire_at)
+    favorites_limit = None if is_premium else 3
+    return EntitlementsOut(
+        status=status,
+        expire_at=expire_at,
+        is_premium=is_premium,
+        ai_access=is_premium,
+        favorites_limit=favorites_limit,
+        guides_full_access=is_premium,
+        pdf_download=is_premium,
+    )
+
 
 class CheckoutIn(BaseModel):
     plan: str  # 'monthly'|'yearly'

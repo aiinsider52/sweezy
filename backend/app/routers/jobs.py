@@ -1,15 +1,29 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, Query, HTTPException, status
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, Query, HTTPException, status
 from typing import List
+from datetime import datetime, timezone
 
-from ..dependencies import get_db, CurrentUser, DBSession, require_premium
+from ..dependencies import CurrentUser, DBSession
 from ..schemas.job import JobItem, JobSearchResponse, JobFavoriteIn, JobFavoriteOut, JobSearchEventOut
 from ..services.jobs_aggregator import search_jobs
 from ..models.job import JobFavorite, JobSearchEvent
 
 router = APIRouter()
+
+FREE_FAVORITES_LIMIT = 3
+
+def _is_premium(user) -> bool:
+    status = getattr(user, "subscription_status", "free") or "free"
+    expire_at = getattr(user, "subscription_expire_at", None)
+    if status in {"trial", "premium"}:
+        if expire_at is None:
+            return True
+        try:
+            return expire_at > datetime.now(timezone.utc)
+        except Exception:
+            return True
+    return False
 
 
 @router.get("/search", response_model=JobSearchResponse)
@@ -41,7 +55,7 @@ def top_keywords(db: DBSession, limit: int = 10):
     return [JobSearchEventOut(keyword=r[0], canton=r[1], count=r[2]) for r in rows]
 
 
-@router.get("/favorites", response_model=List[JobFavoriteOut], dependencies=[require_premium()])
+@router.get("/favorites", response_model=List[JobFavoriteOut])
 def list_favorites(user: CurrentUser, db: DBSession):
     rows = (
         db.query(JobFavorite)
@@ -65,8 +79,19 @@ def list_favorites(user: CurrentUser, db: DBSession):
     ]
 
 
-@router.post("/favorites", response_model=JobFavoriteOut, status_code=status.HTTP_201_CREATED, dependencies=[require_premium()])
+@router.post("/favorites", response_model=JobFavoriteOut, status_code=status.HTTP_201_CREATED)
 def add_favorite(payload: JobFavoriteIn, user: CurrentUser, db: DBSession):
+    # Enforce limit for Free plan
+    if not _is_premium(user):
+        try:
+            cnt = db.query(JobFavorite).filter(JobFavorite.user_id == user.id).count()
+        except Exception:
+            cnt = FREE_FAVORITES_LIMIT  # fail safe
+        if cnt >= FREE_FAVORITES_LIMIT:
+            raise HTTPException(
+                status_code=status.HTTP_402_PAYMENT_REQUIRED,
+                detail="Favorites limit reached for Free plan. Upgrade to save unlimited jobs.",
+            )
     fav = JobFavorite(
         user_id=user.id,
         job_id=payload.job_id,
@@ -93,7 +118,7 @@ def add_favorite(payload: JobFavoriteIn, user: CurrentUser, db: DBSession):
     )
 
 
-@router.delete("/favorites/{favorite_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[require_premium()])
+@router.delete("/favorites/{favorite_id}", status_code=status.HTTP_204_NO_CONTENT)
 def remove_favorite(favorite_id: str, user: CurrentUser, db: DBSession):
     fav = db.query(JobFavorite).filter(JobFavorite.id == favorite_id, JobFavorite.user_id == user.id).first()
     if not fav:

@@ -1,0 +1,43 @@
+default_platform(:ios)
+
+platform :ios do
+  desc "Build for testing"
+  lane :build do
+    gym(
+      scheme: "sweezy",
+      project: "sweezy/sweezy.xcodeproj",
+      configuration: "Debug",
+      destination: "generic/platform=iOS"
+    )
+  end
+
+  desc "Run tests"
+  lane :tests do
+    scan(
+      scheme: "sweezy",
+      project: "sweezy/sweezy.xcodeproj",
+      devices: ["iPhone 15"]
+    )
+  end
+
+  desc "Prepare metadata for App Store Connect"
+  lane :metadata do
+    deliver(
+      submit_for_review: false,
+      skip_metadata: false,
+      skip_screenshots: false,
+      skip_binary_upload: true
+    )
+  end
+
+  desc "Upload build + metadata to TestFlight"
+  lane :upload do
+    build_app(
+      scheme: "sweezy",
+      project: "sweezy/sweezy.xcodeproj"
+    )
+    upload_to_testflight
+  end
+end
+
+

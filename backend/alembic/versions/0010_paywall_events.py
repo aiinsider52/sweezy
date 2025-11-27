@@ -6,6 +6,7 @@ Create Date: 2025-11-14
 """
 from alembic import op
 import sqlalchemy as sa
+from sqlalchemy import text
 
 
 # revision identifiers, used by Alembic.
@@ -16,21 +17,26 @@ depends_on = None
 
 
 def upgrade() -> None:
-    op.create_table(
-        "paywall_events",
-        sa.Column("id", sa.String(length=36), primary_key=True),
-        sa.Column("user_id", sa.String(length=36), nullable=True, index=True),
-        sa.Column("event_type", sa.String(length=64), nullable=False),
-        sa.Column("context", sa.String(length=255), nullable=True),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
+    op.execute(
+        text(
+            """
+            CREATE TABLE IF NOT EXISTS paywall_events (
+                id VARCHAR(36) PRIMARY KEY,
+                user_id VARCHAR(36),
+                event_type VARCHAR(64) NOT NULL,
+                context VARCHAR(255),
+                created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+            )
+            """
+        )
     )
-    op.create_index("ix_paywall_events_user_id", "paywall_events", ["user_id"])
-    op.create_index("ix_paywall_events_created_at", "paywall_events", ["created_at"])
+    op.execute(text("CREATE INDEX IF NOT EXISTS ix_paywall_events_user_id ON paywall_events (user_id)"))
+    op.execute(text("CREATE INDEX IF NOT EXISTS ix_paywall_events_created_at ON paywall_events (created_at)"))
 
 
 def downgrade() -> None:
-    op.drop_index("ix_paywall_events_created_at", table_name="paywall_events")
-    op.drop_index("ix_paywall_events_user_id", table_name="paywall_events")
-    op.drop_table("paywall_events")
+    op.execute(text("DROP INDEX IF EXISTS ix_paywall_events_created_at"))
+    op.execute(text("DROP INDEX IF EXISTS ix_paywall_events_user_id"))
+    op.execute(text("DROP TABLE IF EXISTS paywall_events"))
 
 

@@ -1,0 +1,29 @@
+name: iOS CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: macos-13
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select Xcode
+        run: sudo xcode-select -s "/Applications/Xcode_15.0.1.app"
+      - name: List projects
+        run: |
+          set -e
+          find . -name "*.xcodeproj" -o -name "*.xcworkspace"
+      - name: Build
+        run: |
+          set -e
+          xcodebuild -scheme sweezy -project sweezy/sweezy.xcodeproj -configuration Debug -sdk iphonesimulator -destination "platform=iOS Simulator,name=iPhone 15" build | xcpretty
+      - name: Run tests
+        run: |
+          set -e
+          xcodebuild -scheme sweezy -project sweezy/sweezy.xcodeproj -configuration Debug -sdk iphonesimulator -destination "platform=iOS Simulator,name=iPhone 15" test | xcpretty
+
+

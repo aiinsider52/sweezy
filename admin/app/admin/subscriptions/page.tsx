@@ -22,6 +22,7 @@ export default function SubscriptionsPage() {
   const [events, setEvents] = useState<EventRow[]>([])
   const [analytics, setAnalytics] = useState<{ totals: { monthly: number, yearly: number, premium_users: number, trial_users: number, free_users: number }, by_month: { month: string, monthly: number, yearly: number }[] } | null>(null)
   const [months, setMonths] = useState<number>(6)
+  const [funnel, setFunnel] = useState<{ by_type?: Record<string, number>, top_contexts?: { context: string, count: number }[] } | null>(null)
   const [loading, setLoading] = useState(false)
 
   async function load() {
@@ -30,15 +31,19 @@ export default function SubscriptionsPage() {
       const listRes = await fetch(`/api/admin/subscriptions`, { cache: "no-store" })
       const evsRes = await fetch(`/api/admin/subscriptions/events`, { cache: "no-store" })
       const anRes = await fetch(`/api/admin/subscriptions/analytics?months=${months}`, { cache: "no-store" })
+      const funnelRes = await fetch(`/api/admin/paywall/funnel?days=30`, { cache: "no-store" })
       let list: any = []
       let evs: any = []
       let an: any = null
+      let fun: any = null
       try { list = listRes.ok ? await listRes.json() : [] } catch { list = [] }
       try { evs = evsRes.ok ? await evsRes.json() : [] } catch { evs = [] }
       try { an = anRes.ok ? await anRes.json() : null } catch { an = null }
+      try { fun = funnelRes.ok ? await funnelRes.json() : null } catch { fun = null }
       setRows(Array.isArray(list) ? list : [])
       setEvents(Array.isArray(evs) ? evs : [])
       setAnalytics(an && typeof an === 'object' && 'totals' in an ? an : null)
+      setFunnel(fun && typeof fun === 'object' ? fun : null)
     } finally {
       setLoading(false)
     }
@@ -87,6 +92,27 @@ export default function SubscriptionsPage() {
             <MiniBars data={analytics.by_month} />
             <div className="mt-4">
               <MiniStack totals={analytics.totals} />
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {funnel && (
+        <div className="glass p-4">
+          <div className="text-sm font-medium mb-3">Paywall Funnel (30d)</div>
+          <div className="flex gap-6 flex-wrap">
+            <Stat label="Views" value={funnel.by_type?.view || 0} />
+            <Stat label="CTA Click" value={funnel.by_type?.cta_click || 0} />
+            <Stat label="Checkout" value={funnel.by_type?.purchase_start || 0} />
+            <Stat label="Dismiss" value={funnel.by_type?.dismiss || 0} />
+          </div>
+          <div className="mt-3 text-xs opacity-70">
+            Top contexts:
+            <div className="flex gap-2 mt-2 flex-wrap">
+              {(funnel.top_contexts || []).map((c) => (
+                <span key={c.context} className="glass px-2 py-1 rounded-md">{c.context}: {c.count}</span>
+              ))}
+              {(funnel.top_contexts || []).length === 0 && <span>—</span>}
             </div>
           </div>
         </div>

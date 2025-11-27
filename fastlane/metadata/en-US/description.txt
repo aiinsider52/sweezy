@@ -1,0 +1,12 @@
+Sweezy helps you integrate in Switzerland faster: read localized guides, complete checklists, generate CVs and letters, track your roadmap and deadlines. 
+
+Highlights:
+- Personalized integration roadmap
+- Localized guides and checklists
+- AI CV and letter generator (RAV/Gemeinde)
+- Notifications for deadlines and trial reminders
+- Gamified progress (XP, levels, achievements)
+
+Privacy: Data stays on your device. No sensitive documents leave your phone.
+
+

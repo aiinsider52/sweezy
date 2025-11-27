@@ -1,0 +1,7 @@
+• Gamified roadmap and level system
+• New animated background and cards
+• StoreKit 2 purchases with free trial
+• Local notifications for reminders
+• Performance and accessibility improvements
+
+

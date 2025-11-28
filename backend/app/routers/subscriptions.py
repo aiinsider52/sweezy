@@ -6,6 +6,8 @@ from datetime import datetime, timezone
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi.responses import StreamingResponse
+import asyncio
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -61,6 +63,43 @@ def entitlements(user: CurrentUser) -> EntitlementsOut:
         pdf_download=is_premium,
     )
 
+
+@router.get("/stream")
+async def stream(user: CurrentUser, db: DBSession):
+    """
+    Server-Sent Events stream for live subscription updates.
+    Emits 'update' when user.subscription_status or expire_at changes.
+    Sends keepalive pings periodically.
+    """
+    async def event_generator():
+        # initial snapshot
+        last_status = user.subscription_status or "free"
+        last_expire = user.subscription_expire_at.isoformat() if user.subscription_expire_at else None
+        ping_counter = 0
+        while True:
+            await asyncio.sleep(10)
+            # keepalive ping every 25s
+            ping_counter += 10
+            if ping_counter >= 25:
+                yield "event: ping\ndata: keepalive\n\n"
+                ping_counter = 0
+            # reload user from DB
+            try:
+                refreshed = db.query(User).filter(User.id == user.id).first()
+                if not refreshed:
+                    continue
+                cur_status = refreshed.subscription_status or "free"
+                cur_expire = refreshed.subscription_expire_at.isoformat() if refreshed.subscription_expire_at else None
+                if cur_status != last_status or cur_expire != last_expire:
+                    last_status = cur_status
+                    last_expire = cur_expire
+                    payload = {"status": cur_status, "expire_at": cur_expire}
+                    yield f"event: update\ndata: {json.dumps(payload)}\n\n"
+            except Exception:
+                # soft fail and continue
+                continue
+
+    return StreamingResponse(event_generator(), media_type="text/event-stream")
 
 class CheckoutIn(BaseModel):
     plan: str  # 'monthly'|'yearly'

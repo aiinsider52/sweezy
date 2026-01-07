@@ -21,7 +21,7 @@ def _log_file_path(dt: Optional[datetime] = None) -> Path:
 
 
 @router.post("/batch")
-async def ingest_batch(payload: Dict[str, Any]) -> Dict[str, Any]:
+def ingest_batch(payload: Dict[str, Any]) -> Dict[str, Any]:
     """
     Ingest a batch of telemetry events.
     Body: { events: [{ id, ts, level, source, type, message?, meta? }] }
@@ -29,7 +29,8 @@ async def ingest_batch(payload: Dict[str, Any]) -> Dict[str, Any]:
     events = payload.get("events") or []
     if not isinstance(events, list):
         raise HTTPException(status_code=400, detail="events must be a list")
-    # Append to JSONL file (one line per event)
+    # Append to JSONL file (one line per event). This is intentionally sync
+    # and FastAPI will run it in a threadpool because the handler is not async.
     p = _log_file_path()
     accepted = 0
     with p.open("a", encoding="utf-8") as f:

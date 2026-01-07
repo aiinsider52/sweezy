@@ -11,7 +11,8 @@ import asyncio
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from ..dependencies import DBSession, CurrentUser
+from ..dependencies import CurrentUser
+from ..core.database import db_session
 from ..models.user import User
 from ..models.subscription import Subscription, SubscriptionEvent
 from ..services import stripe_service
@@ -65,7 +66,7 @@ def entitlements(user: CurrentUser) -> EntitlementsOut:
 
 
 @router.get("/stream")
-async def stream(user: CurrentUser, db: DBSession):
+async def stream(user: CurrentUser):
     """
     Server-Sent Events stream for live subscription updates.
     Emits 'update' when user.subscription_status or expire_at changes.
@@ -83,13 +84,27 @@ async def stream(user: CurrentUser, db: DBSession):
             if ping_counter >= 25:
                 yield "event: ping\ndata: keepalive\n\n"
                 ping_counter = 0
-            # reload user from DB
+            # reload user from DB in a background thread to avoid blocking event loop
             try:
-                refreshed = db.query(User).filter(User.id == user.id).first()
-                if not refreshed:
+                from asyncio import to_thread
+
+                def _load_snapshot(user_id: str):
+                    with db_session() as db:
+                        refreshed = db.query(User).filter(User.id == user_id).first()
+                        if not refreshed:
+                            return None
+                        cur_status = refreshed.subscription_status or "free"
+                        cur_expire = (
+                            refreshed.subscription_expire_at.isoformat()
+                            if refreshed.subscription_expire_at
+                            else None
+                        )
+                        return cur_status, cur_expire
+
+                snapshot = await to_thread(_load_snapshot, user.id)
+                if not snapshot:
                     continue
-                cur_status = refreshed.subscription_status or "free"
-                cur_expire = refreshed.subscription_expire_at.isoformat() if refreshed.subscription_expire_at else None
+                cur_status, cur_expire = snapshot
                 if cur_status != last_status or cur_expire != last_expire:
                     last_status = cur_status
                     last_expire = cur_expire
@@ -151,7 +166,9 @@ def create_referral_code(user: CurrentUser) -> ReferralOut:
 
 
 @router.post("/stripe/webhook", status_code=200)
-async def stripe_webhook(request: Request, db: DBSession):
+async def stripe_webhook(request: Request):
+    from asyncio import to_thread
+
     payload = await request.body()
     sig = request.headers.get("stripe-signature")
     secret = os.getenv("STRIPE_WEBHOOK_SECRET")
@@ -169,63 +186,73 @@ async def stripe_webhook(request: Request, db: DBSession):
     data = event["data"]["object"]
     event_type = event["type"]
 
-    # Try to locate user via client_reference_id or customer id
-    user: Optional[User] = None
-    client_ref = data.get("client_reference_id") or data.get("client_reference_id".replace("_", ""))
-    customer_id = data.get("customer") or data.get("customer_id")
-    subscription_id = data.get("subscription") or data.get("id")
+    # Process event in a background thread so DB work and HTTP calls don't block the event loop
 
-    if client_ref:
-        user = db.query(User).filter(User.id == str(client_ref)).one_or_none()
-    if not user and customer_id:
-        user = db.query(User).filter(User.stripe_customer_id == str(customer_id)).one_or_none()
+    def _handle_event() -> dict:
+        from ..core.database import db_session
 
-    stripe_service.log_event(db, user.id if user else None, event_type, json.loads(payload.decode("utf-8")))
+        # Try to locate user via client_reference_id or customer id
+        user: Optional[User] = None
+        client_ref = data.get("client_reference_id") or data.get("client_reference_id".replace("_", ""))
+        customer_id = data.get("customer") or data.get("customer_id")
+        subscription_id = data.get("subscription") or data.get("id")
 
-    # Optional Telegram notification (only for key events)
-    def _notify_telegram(text: str) -> None:
-        token = os.getenv("TELEGRAM_BOT_TOKEN")
-        chat_id = os.getenv("TELEGRAM_CHAT_ID")
-        if not token or not chat_id:
-            return
-        try:
-            url = f"https://api.telegram.org/bot{token}/sendMessage"
-            data = _json.dumps({"chat_id": chat_id, "text": text}).encode("utf-8")
-            req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
-            urllib.request.urlopen(req, timeout=3)  # nosec B310
-        except Exception:
-            pass
+        with db_session() as db:
+            if client_ref:
+                user = db.query(User).filter(User.id == str(client_ref)).one_or_none()
+            if not user and customer_id:
+                user = db.query(User).filter(User.stripe_customer_id == str(customer_id)).one_or_none()
 
-    # Handle events
-    if event_type == "checkout.session.completed":
-        # nothing to do; wait for invoice.payment_succeeded
-        return {"ok": True}
+            stripe_service.log_event(db, user.id if user else None, event_type, json.loads(payload.decode("utf-8")))
 
-    if event_type in {"invoice.payment_succeeded", "customer.subscription.updated"}:
-        # subscription active/renewed
-        if not user:
+            # Optional Telegram notification (only for key events)
+            def _notify_telegram(text: str) -> None:
+                token = os.getenv("TELEGRAM_BOT_TOKEN")
+                chat_id = os.getenv("TELEGRAM_CHAT_ID")
+                if not token or not chat_id:
+                    return
+                try:
+                    url = f"https://api.telegram.org/bot{token}/sendMessage"
+                    data_body = _json.dumps({"chat_id": chat_id, "text": text}).encode("utf-8")
+                    req = urllib.request.Request(url, data=data_body, headers={"Content-Type": "application/json"})
+                    urllib.request.urlopen(req, timeout=3)  # nosec B310
+                except Exception:
+                    pass
+
+            # Handle events
+            if event_type == "checkout.session.completed":
+                # nothing to do; wait for invoice.payment_succeeded
+                return {"ok": True}
+
+            if event_type in {"invoice.payment_succeeded", "customer.subscription.updated"}:
+                # subscription active/renewed
+                if not user:
+                    return {"ok": True}
+                # extract current period end
+                period_end = None
+                try:
+                    if "current_period_end" in data:
+                        ts = int(data["current_period_end"])
+                        period_end = datetime.fromtimestamp(ts, tz=timezone.utc)
+                    elif "lines" in data and "data" in data["lines"] and data["lines"]["data"]:
+                        ts = int(data["lines"]["data"][0]["period"]["end"])
+                        period_end = datetime.fromtimestamp(ts, tz=timezone.utc)
+                except Exception:
+                    period_end = None
+                stripe_service.apply_premium(db, user, subscription_id=str(subscription_id), current_period_end=period_end)
+                _notify_telegram(
+                    f"✅ Subscription active for {user.email} (until {period_end.isoformat() if period_end else 'n/a'})"
+                )
+                return {"ok": True}
+
+            if event_type in {"customer.subscription.deleted"}:
+                if user:
+                    stripe_service.apply_free(db, user)
+                    _notify_telegram(f"⚠️ Subscription canceled for {user.email}")
+                return {"ok": True}
+
             return {"ok": True}
-        # extract current period end
-        period_end = None
-        try:
-            if "current_period_end" in data:
-                ts = int(data["current_period_end"])
-                period_end = datetime.fromtimestamp(ts, tz=timezone.utc)
-            elif "lines" in data and "data" in data["lines"] and data["lines"]["data"]:
-                ts = int(data["lines"]["data"][0]["period"]["end"])
-                period_end = datetime.fromtimestamp(ts, tz=timezone.utc)
-        except Exception:
-            period_end = None
-        stripe_service.apply_premium(db, user, subscription_id=str(subscription_id), current_period_end=period_end)
-        _notify_telegram(f"✅ Subscription active for {user.email} (until {period_end.isoformat() if period_end else 'n/a'})")
-        return {"ok": True}
 
-    if event_type in {"customer.subscription.deleted"}:
-        if user:
-            stripe_service.apply_free(db, user)
-            _notify_telegram(f"⚠️ Subscription canceled for {user.email}")
-        return {"ok": True}
-
-    return {"ok": True}
+    return await to_thread(_handle_event)
 
 

@@ -196,3 +196,4 @@ Sweezy is a SwiftUI mobile app backed by a FastAPI service that replaces local J
 - 🚀 Next: ship auth + async + observability, lock down security, finish API integration in app, add tests and CI/CD; then iterate on performance and a11y.
 
 
+в таком то ключе получаеться этотв опрос и эта проблема уже совершенно др инная 

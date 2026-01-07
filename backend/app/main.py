@@ -16,6 +16,8 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi.middleware.cors import CORSMiddleware
 
 from .core.config import get_settings
+from .core.rate_limit import limiter
+from .core.logging import configure_logging, get_logger
 from .core.sentry import init_sentry
 from .routers.auth import router as auth_router
 from .routers.guides import router as guides_router
@@ -35,7 +37,14 @@ from .routers.translations import router as translations_router
 from .routers.subscriptions import router as subscriptions_router
 from .routers.telemetry import router as telemetry_router
 
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
 
+from prometheus_fastapi_instrumentator import Instrumentator
+
+
+configure_logging()
 settings = get_settings()
 try:
     settings.assert_valid()
@@ -88,6 +97,18 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+# Attach global limiter to app state so slowapi decorators can access it
+app.state.limiter = limiter
+
+log = get_logger(module="main")
+
+# Prometheus metrics instrumentator
+instrumentator = Instrumentator(
+    should_group_status_codes=True,
+    should_ignore_untemplated=True,
+    excluded_handlers={"/health", "/ready", "/metrics"},
+)
+
 # CORS (lock in production)
 allowed_origins = list(getattr(settings, "parsed_cors_origins", lambda: settings.CORS_ORIGINS)())
 if settings.APP_ENV.lower() == "production" and (not allowed_origins or "*" in allowed_origins):
@@ -106,14 +127,49 @@ class RequestIDMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         request_id = str(uuid.uuid4())
         start = time.perf_counter()
-        response = await call_next(request)
-        duration_ms = int((time.perf_counter() - start) * 1000)
-        response.headers["X-Request-ID"] = request_id
-        response.headers["X-Response-Time"] = str(duration_ms)
+        # Attach request identifier to structlog context
+        import structlog
+
+        structlog.contextvars.bind_contextvars(
+            request_id=request_id,
+            path=request.url.path,
+            method=request.method,
+        )
+        try:
+            response = await call_next(request)
+        finally:
+            duration_ms = int((time.perf_counter() - start) * 1000)
+            status_code = getattr(response, "status_code", 500)
+            client_host = request.client.host if request.client else None
+
+            # Enrich response with headers so clients can correlate logs
+            if hasattr(response, "headers"):
+                response.headers["X-Request-ID"] = request_id
+                response.headers["X-Response-Time"] = str(duration_ms)
+
+            # Structured access log
+            log.info(
+                "http_request",
+                request_id=request_id,
+                method=request.method,
+                path=str(request.url.path),
+                query=str(request.url.query),
+                status_code=status_code,
+                duration_ms=duration_ms,
+                client_ip=client_host,
+            )
+
+            # Clear contextvars for this request
+            structlog.contextvars.clear_contextvars()
+
         return response
 
 
 app.add_middleware(RequestIDMiddleware)
+
+# Rate limiting middleware & handler (slowapi)
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.add_middleware(SlowAPIMiddleware)
 
 
 def _run_migrations() -> None:
@@ -138,6 +194,14 @@ async def startup_event() -> None:
     except Exception:
         # don't block startup if seeding fails
         pass
+
+    # Expose Prometheus metrics once app and middleware are ready
+    try:
+        instrumentator.instrument(app).expose(app, endpoint="/metrics", include_in_schema=False)
+        log.info("metrics_enabled", endpoint="/metrics")
+    except Exception as exc:
+        # Metrics are helpful but non‑critical; log and continue
+        log.warning("metrics_init_failed", error=str(exc))
 
 
 @app.get("/health")

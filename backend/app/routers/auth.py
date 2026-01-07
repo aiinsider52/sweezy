@@ -10,8 +10,10 @@ from ..services import AuthService
 from ..services.users import UserService, seed_admin_user
 from ..services.email import send_password_reset_email
 from ..core.security import create_access_token, create_refresh_token, decode_token, get_password_hash
+from ..core.password_policy import validate_password_strength
 from ..core.database import get_db
 from ..core.config import get_settings
+from ..core.rate_limit import limiter
 from pydantic import BaseModel, EmailStr, Field
 from datetime import timedelta
 
@@ -26,6 +28,14 @@ class PasswordResetRequest(BaseModel):
 class PasswordResetConfirm(BaseModel):
     token: str = Field(..., min_length=10)
     password: str = Field(..., min_length=8)
+
+    @field_validator("password")
+    @classmethod
+    def validate_password(cls, v: str) -> str:
+        ok, message = validate_password_strength(v)
+        if not ok:
+            raise ValueError(message or "Weak password")
+        return v
 
 
 @router.post("/token", response_model=Token)
@@ -45,7 +55,12 @@ def register(user_in: UserCreate, db: Session = Depends(get_db)) -> UserOut:
 
 
 @router.post("/login", response_model=TokenPair)
-def login_user(payload: UserLogin, db: Session = Depends(get_db)) -> TokenPair:
+@limiter.limit("10/minute")
+def login_user(
+    request: Request,
+    payload: UserLogin,
+    db: Session = Depends(get_db),
+) -> TokenPair:
     user = UserService.authenticate(db, email=payload.email, password=payload.password)
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
@@ -57,7 +72,9 @@ def login_user(payload: UserLogin, db: Session = Depends(get_db)) -> TokenPair:
 
 
 @router.post("/password/forgot")
+@limiter.limit("5/minute")
 def forgot_password(
+    request: Request,
     payload: PasswordResetRequest,
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),

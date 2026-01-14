@@ -105,14 +105,6 @@ async def lifespan(app: FastAPI):
         # Seeding is helpful but not critical for serving requests; log and continue.
         log.warning("seed_admin_failed", error=str(exc))
 
-    # Expose Prometheus metrics once app and middleware are ready
-    try:
-        instrumentator.instrument(app).expose(app, endpoint="/metrics", include_in_schema=False)
-        log.info("metrics_enabled", endpoint="/metrics")
-    except Exception as exc:
-        # Metrics are helpful but non‑critical; log and continue
-        log.warning("metrics_init_failed", error=str(exc))
-
     task = asyncio.create_task(_background_tick())
     try:
         yield
@@ -202,6 +194,14 @@ app.add_middleware(RequestIDMiddleware)
 # Rate limiting middleware & handler (slowapi)
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.add_middleware(SlowAPIMiddleware)
+
+# Prometheus metrics must be registered BEFORE startup (instrumentator adds middleware).
+try:
+    instrumentator.instrument(app).expose(app, endpoint="/metrics", include_in_schema=False)
+    log.info("metrics_enabled", endpoint="/metrics")
+except Exception as exc:
+    # Metrics are helpful but non‑critical; log and continue
+    log.warning("metrics_init_failed", error=str(exc))
 
 
 def _run_migrations() -> bool:

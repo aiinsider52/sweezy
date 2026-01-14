@@ -1,7 +1,7 @@
 import Card from '@/components/Card'
 
 export default async function MonitoringPage() {
-  const base = process.env.NEXT_PUBLIC_API_URL || 'https://sweezy.onrender.com/api/v1'
+  const base = process.env.NEXT_PUBLIC_API_URL || 'https://sweezy-9xyk.onrender.com/api/v1'
   const start1 = Date.now();
   const c1 = new AbortController(); const t1 = setTimeout(()=>c1.abort(), 8000)
   const healthRes = await fetch(`${base}/health`, { cache: 'no-store', signal: c1.signal }).catch(()=>null)

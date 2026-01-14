@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 
-const api = process.env.NEXT_PUBLIC_API_URL || 'https://sweezy.onrender.com/api/v1'
+const api = process.env.NEXT_PUBLIC_API_URL || 'https://sweezy-9xyk.onrender.com/api/v1'
 
 export async function GET() {
   const token = cookies().get('access_token')?.value

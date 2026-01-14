@@ -353,7 +353,7 @@ def import_news_rss(payload: Dict[str, Any], db: DBSession, _: CurrentAdmin) -> 
 
     # Fetch feed with proper headers (some hosts block default user agents)
     client = httpx.Client(timeout=10, follow_redirects=True, headers={
-        "User-Agent": "SweezyRSS/1.0 (+https://sweezy.onrender.com)"
+        "User-Agent": "SweezyRSS/1.0 (+https://sweezy-9xyk.onrender.com)"
     })
     try:
         resp = client.get(feed_url)

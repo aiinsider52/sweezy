@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, Request, status, BackgroundTasks, Response
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
@@ -14,6 +14,8 @@ from ..core.password_policy import validate_password_strength
 from ..core.database import get_db
 from ..core.config import get_settings
 from ..core.rate_limit import limiter
+from ..dependencies import get_current_user
+from ..models.user import User
 from pydantic import BaseModel, EmailStr, Field, field_validator
 from datetime import timedelta
 
@@ -130,4 +132,16 @@ def seed_admin(request: Request, db: Session = Depends(get_db)) -> dict:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
     seed_admin_user(db)
     return {"status": "ok"}
+
+
+@router.delete("/me", status_code=status.HTTP_204_NO_CONTENT)
+def delete_my_account(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> Response:
+    """
+    Permanently delete the current user's account (App Store account deletion compliance).
+    """
+    UserService.delete_account(db, user=current_user)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 

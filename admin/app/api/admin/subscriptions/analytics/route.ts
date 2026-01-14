@@ -4,7 +4,7 @@ import { cookies } from "next/headers"
 
 export async function GET(req: NextRequest) {
   const token = cookies().get("access_token")?.value || ""
-  const base = process.env.NEXT_PUBLIC_API_URL || "https://sweezy.onrender.com/api/v1"
+  const base = process.env.NEXT_PUBLIC_API_URL || "https://sweezy-9xyk.onrender.com/api/v1"
   const months = req.nextUrl.searchParams.get("months") || "6"
   const res = await fetch(`${base}/admin/subscriptions/analytics?months=${encodeURIComponent(months)}`, {
     headers: { Authorization: `Bearer ${token}` },

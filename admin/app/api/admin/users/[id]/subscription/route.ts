@@ -4,7 +4,7 @@ import { cookies } from "next/headers"
 
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   const token = cookies().get("access_token")?.value || ""
-  const base = process.env.NEXT_PUBLIC_API_URL || "https://sweezy.onrender.com/api/v1"
+  const base = process.env.NEXT_PUBLIC_API_URL || "https://sweezy-9xyk.onrender.com/api/v1"
   const body = await req.text()
   const res = await fetch(`${base}/admin/users/${params.id}/subscription`, {
     method: "POST",

@@ -3,7 +3,7 @@ import { cookies } from 'next/headers'
 
 export async function POST(req: NextRequest) {
   const { email, password } = await req.json()
-  const api = process.env.NEXT_PUBLIC_API_URL || 'https://sweezy.onrender.com/api/v1'
+  const api = process.env.NEXT_PUBLIC_API_URL || 'https://sweezy-9xyk.onrender.com/api/v1'
   const res = await fetch(`${api}/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

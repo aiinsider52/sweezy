@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 
 export async function GET(req: NextRequest) {
-  const base = process.env.NEXT_PUBLIC_API_BASE || process.env.API_BASE || "https://sweezy.onrender.com"
+  const base = process.env.NEXT_PUBLIC_API_BASE || process.env.API_BASE || "https://sweezy-9xyk.onrender.com"
   const url = new URL(`${base}/api/v1/admin/paywall/funnel`)
   const days = req.nextUrl.searchParams.get("days") || "30"
   url.searchParams.set("days", days)

@@ -37,6 +37,7 @@ from .routers.live import router as live_router
 from .routers.translations import router as translations_router
 from .routers.subscriptions import router as subscriptions_router
 from .routers.telemetry import router as telemetry_router
+from .routers.legal import router as legal_router
 
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
@@ -273,6 +274,9 @@ app.include_router(translations_router, prefix=f"{API_PREFIX}/translations", tag
 app.include_router(subscriptions_router, prefix=f"{API_PREFIX}/subscriptions", tags=["subscriptions"])
 app.include_router(analytics_router, prefix=f"{API_PREFIX}/analytics", tags=["analytics"])
 app.include_router(telemetry_router, prefix=f"{API_PREFIX}/telemetry", tags=["telemetry"])
+
+# Public pages (App Store / legal)
+app.include_router(legal_router, tags=["legal"])
 
 # Serve uploaded media
 try:

@@ -6,8 +6,8 @@ Added locales:
 - de-DE
 
 Global links:
-- privacy_url.txt → https://sweezy.onrender.com/legal/privacy
-- support_url.txt → https://sweezy.onrender.com/support
+- privacy_url.txt → https://sweezy-9xyk.onrender.com/legal/privacy
+- support_url.txt → https://sweezy-9xyk.onrender.com/support
 
 Screenshots
 -----------

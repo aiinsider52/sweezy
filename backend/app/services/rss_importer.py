@@ -29,7 +29,7 @@ class RSSImporter:
   @staticmethod
   def import_from_url(db: Session, feed_url: str, *, language: str = "uk", status: str = "draft", max_items: int = 50, download_images: bool = True) -> Dict[str, int]:
     client = httpx.Client(timeout=10, follow_redirects=True, headers={
-      "User-Agent": "SweezyRSS/1.0 (+https://sweezy.onrender.com)"
+      "User-Agent": "SweezyRSS/1.0 (+https://sweezy-9xyk.onrender.com)"
     })
     text = RSSImporter._fetch_text(client, feed_url)
     parsed = feedparser.parse(text or feed_url)

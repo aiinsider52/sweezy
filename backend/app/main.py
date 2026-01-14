@@ -83,6 +83,36 @@ async def _background_tick() -> None:
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     init_sentry()
+
+    # NOTE: When `lifespan` is provided, FastAPI does not run `@app.on_event("startup")`
+    # handlers. Therefore, all production-critical startup work must happen here.
+    migrations_ok = await asyncio.to_thread(_run_migrations)
+    if not migrations_ok:
+        # Fail fast: running with an unmigrated DB will cause random 500s in production.
+        raise RuntimeError("Database migrations failed (see logs for details)")
+
+    # Seed default admin (idempotent)
+    from .core.database import SessionLocal
+    from .services.users import seed_admin_user
+
+    def _seed_admin() -> None:
+        with SessionLocal() as db:
+            seed_admin_user(db)
+
+    try:
+        await asyncio.to_thread(_seed_admin)
+    except Exception as exc:
+        # Seeding is helpful but not critical for serving requests; log and continue.
+        log.warning("seed_admin_failed", error=str(exc))
+
+    # Expose Prometheus metrics once app and middleware are ready
+    try:
+        instrumentator.instrument(app).expose(app, endpoint="/metrics", include_in_schema=False)
+        log.info("metrics_enabled", endpoint="/metrics")
+    except Exception as exc:
+        # Metrics are helpful but non‑critical; log and continue
+        log.warning("metrics_init_failed", error=str(exc))
+
     task = asyncio.create_task(_background_tick())
     try:
         yield
@@ -174,7 +204,7 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.add_middleware(SlowAPIMiddleware)
 
 
-def _run_migrations() -> None:
+def _run_migrations() -> bool:
     """
     Apply Alembic migrations.
 
@@ -184,18 +214,16 @@ def _run_migrations() -> None:
     """
     if not Path("backend/alembic").exists():
         log.warning("alembic_missing", path="backend/alembic")
-        if settings.APP_ENV.lower() == "production":
-            raise RuntimeError("Alembic migration folder is missing")
-        return
+        return False
 
     cmd = [sys.executable, "-m", "alembic", "-c", "backend/alembic.ini", "upgrade", "head"]
     try:
         subprocess.run(cmd, check=True, capture_output=True, text=True, timeout=120)
         log.info("alembic_ok")
+        return True
     except subprocess.TimeoutExpired:
         log.error("alembic_timeout", timeout_sec=120)
-        if settings.APP_ENV.lower() == "production":
-            raise
+        return False
     except subprocess.CalledProcessError as exc:
         log.error(
             "alembic_failed",
@@ -203,33 +231,7 @@ def _run_migrations() -> None:
             stdout=(exc.stdout or "")[-4000:],
             stderr=(exc.stderr or "")[-4000:],
         )
-        if settings.APP_ENV.lower() == "production":
-            raise
-
-
-@app.on_event("startup")
-async def startup_event() -> None:
-    # Run in a background thread so startup isn't blocked
-    await asyncio.to_thread(_run_migrations)
-
-    # Seed default admin (idempotent)
-    from .core.database import SessionLocal
-    from .services.users import seed_admin_user
-
-    try:
-        with SessionLocal() as db:
-            seed_admin_user(db)
-    except Exception:
-        # don't block startup if seeding fails
-        pass
-
-    # Expose Prometheus metrics once app and middleware are ready
-    try:
-        instrumentator.instrument(app).expose(app, endpoint="/metrics", include_in_schema=False)
-        log.info("metrics_enabled", endpoint="/metrics")
-    except Exception as exc:
-        # Metrics are helpful but non‑critical; log and continue
-        log.warning("metrics_init_failed", error=str(exc))
+        return False
 
 
 @app.api_route("/health", methods=["GET", "HEAD"])

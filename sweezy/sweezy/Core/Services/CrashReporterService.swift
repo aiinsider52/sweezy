@@ -21,7 +21,7 @@ final class CrashReporterService: CrashReporterServiceProtocol {
     private let dsn: String?
     
     init(dsn: String? = Bundle.main.object(forInfoDictionaryKey: "SENTRY_DSN") as? String) {
-        self.dsn = dsn
+        self.dsn = Self.normalizedBuildSettingValue(dsn)
     }
     
     func start() {
@@ -71,6 +71,16 @@ final class CrashReporterService: CrashReporterServiceProtocol {
             scope.setLevel(level == "error" ? .error : .info)
         }
         #endif
+    }
+
+    private static func normalizedBuildSettingValue(_ raw: String?) -> String? {
+        guard let raw else { return nil }
+        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return nil }
+        // When Info.plist uses $(SENTRY_DSN) and the build setting is not defined,
+        // Xcode may leave the placeholder in place. Treat that as "not configured".
+        if trimmed.hasPrefix("$(") && trimmed.hasSuffix(")") { return nil }
+        return trimmed
     }
 }
 

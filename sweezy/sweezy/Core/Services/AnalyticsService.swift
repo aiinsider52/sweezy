@@ -27,7 +27,7 @@ final class AnalyticsService: AnalyticsServiceProtocol {
     }
     
     init(apiKey: String? = Bundle.main.object(forInfoDictionaryKey: "AMPLITUDE_API_KEY") as? String) {
-        self.apiKey = apiKey
+        self.apiKey = Self.normalizedBuildSettingValue(apiKey)
     }
     
     func setEnabled(_ enabled: Bool) {
@@ -35,10 +35,10 @@ final class AnalyticsService: AnalyticsServiceProtocol {
     }
     
     func identify(userId: String?, properties: [String: Any]? = nil) {
-        guard isEnabled else { return }
+        guard isEnabled, let apiKey, !apiKey.isEmpty else { return }
         // Amplitude Identify via HTTP API v2
         let payload: [String: Any] = [
-            "api_key": apiKey ?? "",
+            "api_key": apiKey,
             "identification": [
                 [
                     "user_id": userId ?? "anon",
@@ -50,9 +50,9 @@ final class AnalyticsService: AnalyticsServiceProtocol {
     }
     
     func track(_ event: String, properties: [String: Any]? = nil) {
-        guard isEnabled else { return }
+        guard isEnabled, let apiKey, !apiKey.isEmpty else { return }
         let payload: [String: Any] = [
-            "api_key": apiKey ?? "",
+            "api_key": apiKey,
             "events": [
                 [
                     "event_type": event,
@@ -74,6 +74,16 @@ final class AnalyticsService: AnalyticsServiceProtocol {
         // Fire-and-forget
         let task = session.dataTask(with: req)
         task.resume()
+    }
+
+    private static func normalizedBuildSettingValue(_ raw: String?) -> String? {
+        guard let raw else { return nil }
+        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return nil }
+        // When Info.plist uses $(AMPLITUDE_API_KEY) and the build setting is not defined,
+        // Xcode may leave the placeholder in place. Treat that as "not configured".
+        if trimmed.hasPrefix("$(") && trimmed.hasSuffix(")") { return nil }
+        return trimmed
     }
 }
 

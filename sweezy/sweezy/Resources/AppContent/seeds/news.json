@@ -1,0 +1,113 @@
+[
+  {
+    "id": "990e8400-e29b-41d4-a716-446655440001",
+    "title": "Зміни у правилах медичного страхування для біженців",
+    "summary": "Деякі кантони оновили інформацію щодо субсидій на медичне страхування для статусу S.",
+    "url": "https://www.bag.admin.ch/bag/ukr-health-update",
+    "source": "BAG",
+    "language": "uk",
+    "publishedAt": "2023-10-10T10:00:00Z",
+    "tags": ["health", "insurance"],
+    "imageURL": null
+  },
+  {
+    "id": "990e8400-e29b-41d4-a716-446655440002",
+    "title": "Neuer Integrationskurs in Zürich",
+    "summary": "Kostenlose Deutschkurse für Neuankömmlinge mit Fokus auf Arbeitsmarktintegration.",
+    "url": "https://integration.zh.ch/de/news/kurs",
+    "source": "Kanton Zürich",
+    "language": "de",
+    "publishedAt": "2023-10-12T08:30:00Z",
+    "tags": ["integration", "language"],
+    "imageURL": null
+  },
+  {
+    "id": "990e8400-e29b-41d4-a716-446655440003",
+    "title": "Geneva opens new legal aid center",
+    "summary": "The canton of Geneva launched a free legal aid center for refugees and migrants.",
+    "url": "https://www.ge.ch/legal-aid-center",
+    "source": "Canton Geneva",
+    "language": "en",
+    "publishedAt": "2023-10-13T12:15:00Z",
+    "tags": ["legal", "support"],
+    "imageURL": null
+  },
+  {
+    "id": "990e8400-e29b-41d4-a716-446655440004",
+    "title": "Updated work permit guidelines for S permit holders",
+    "summary": "The State Secretariat for Migration published updated employment guidelines for protection status S holders across all cantons.",
+    "url": "https://www.sem.admin.ch/sem/en/home/publiservice/aktuell/news.html",
+    "source": "SEM",
+    "language": "en",
+    "publishedAt": "2023-10-14T14:30:00Z",
+    "tags": ["employment", "permits"],
+    "imageURL": null
+  },
+  {
+    "id": "990e8400-e29b-41d4-a716-446655440005",
+    "title": "Житлові програми для біженців у Цюриху",
+    "summary": "Місто Цюрих запускає нову програму доступного житла для власників статусу S з пріоритетним доступом до муніципальної оренди.",
+    "url": "https://www.stadt-zuerich.ch/prd/de/index/wohnen.html",
+    "source": "Stadt Zürich",
+    "language": "uk",
+    "publishedAt": "2023-10-13T09:00:00Z",
+    "tags": ["housing", "Zurich"],
+    "imageURL": null
+  },
+  {
+    "id": "990e8400-e29b-41d4-a716-446655440006",
+    "title": "Kostenlose Rechtsberatung für Geflüchtete",
+    "summary": "Neue Initiative bietet kostenlose Rechtsberatung in den Bereichen Arbeitsrecht, Mietrecht und Familienrecht für Geflüchtete in der Deutschschweiz.",
+    "url": "https://www.caritas.ch/de/aktuell/news.html",
+    "source": "Caritas Schweiz",
+    "language": "de",
+    "publishedAt": "2023-10-12T11:20:00Z",
+    "tags": ["legal", "support"],
+    "imageURL": null
+  },
+  {
+    "id": "990e8400-e29b-41d4-a716-446655440007",
+    "title": "Extension of S permit status confirmed through 2024",
+    "summary": "Federal Council confirms automatic extension of protection status S for Ukrainian refugees through March 2024.",
+    "url": "https://www.admin.ch/gov/en/start/documentation/media-releases.html",
+    "source": "Swiss Federal Council",
+    "language": "en",
+    "publishedAt": "2023-10-11T15:45:00Z",
+    "tags": ["permits", "status-s"],
+    "imageURL": null
+  },
+  {
+    "id": "990e8400-e29b-41d4-a716-446655440008",
+    "title": "Безкоштовні мовні курси в Берні",
+    "summary": "Кантон Берн розширює програму безкоштовних мовних курсів німецької мови для біженців із акцентом на професійну інтеграцію.",
+    "url": "https://www.be.ch/portal/de/index/mediencenter/medienmitteilungen.html",
+    "source": "Kanton Bern",
+    "language": "uk",
+    "publishedAt": "2023-10-10T08:15:00Z",
+    "tags": ["language", "integration", "Bern"],
+    "imageURL": null
+  },
+  {
+    "id": "990e8400-e29b-41d4-a716-446655440009",
+    "title": "New mental health services for refugees",
+    "summary": "Swiss Red Cross launches specialized mental health support program for Ukrainian refugees dealing with trauma and integration challenges.",
+    "url": "https://www.redcross.ch/en/news",
+    "source": "Swiss Red Cross",
+    "language": "en",
+    "publishedAt": "2023-10-09T13:00:00Z",
+    "tags": ["healthcare", "mental-health"],
+    "imageURL": null
+  },
+  {
+    "id": "990e8400-e29b-41d4-a716-446655440010",
+    "title": "Schuleinschreibung für ukrainische Kinder vereinfacht",
+    "summary": "Bildungsdirektionen in mehreren Kantonen vereinfachen das Anmeldeverfahren für Schulkinder aus der Ukraine mit mehrsprachiger Unterstützung.",
+    "url": "https://www.edk.ch/de/aktuell/news",
+    "source": "EDK",
+    "language": "de",
+    "publishedAt": "2023-10-08T10:30:00Z",
+    "tags": ["education", "children"],
+    "imageURL": null
+  }
+]
+

@@ -81,6 +81,8 @@ class Settings(BaseSettings):
                 raise RuntimeError("DATABASE_URL must be set in production")
             if self.CORS_ORIGINS == "*" or self.parsed_cors_origins() == ["*"]:
                 raise RuntimeError("CORS_ORIGINS cannot be '*' in production")
+            if self.ADMIN_PASSWORD == "admin123":
+                raise RuntimeError("ADMIN_PASSWORD must be changed in production")
 
 
 

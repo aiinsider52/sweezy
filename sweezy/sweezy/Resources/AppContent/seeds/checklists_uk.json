@@ -1,0 +1,82 @@
+[
+  {
+    "id": "bbbbbbbb-cccc-dddd-eeee-000000000203",
+    "title": "Реєстрація у Швейцарії: перші кроки",
+    "description": "Що потрібно зробити в перші 2 тижні після прибуття",
+    "category": "arrival",
+    "estimatedTotalTime": 180,
+    "estimatedDuration": "1–2 тижні",
+    "difficulty": "easy",
+    "steps": [
+      {
+        "id": "step_uk_1",
+        "title": "Зареєструватися в Gemeinde (місцева адміністрація)",
+        "description": "Протягом 14 днів після прибуття. Візьміть паспорт/ID, договір оренди або підтвердження проживання, фото, та (за наявності) договір страхування.",
+        "isOptional": false,
+        "estimatedDuration": 30,
+        "requiredDocuments": ["Паспорт/ID", "Договір оренди", "Фото 3x4", "Дозвіл на проживання"],
+        "tips": ["Перевірте години прийому та чи потрібен термін", "Запитайте про субсидію на медстрахування", "Візьміть з собою друга‑перекладача, якщо не знаєте мови"],
+        "links": [
+          {"id":"uk1","title":"CH.CH — Реєстрація при прибутті","url":"https://www.ch.ch/en/registration-arrival","type":"website"}
+        ],
+        "order": 1
+      },
+      {
+        "id": "step_uk_2",
+        "title": "Відкрити банківський рахунок",
+        "description": "Для отримання зарплати або допомог. Оберіть банк (PostFinance, UBS, Raiffeisen), підготуйте паспорт, підтвердження адреси та, за необхідності, довідку про статус.",
+        "isOptional": false,
+        "estimatedDuration": 60,
+        "requiredDocuments": ["Паспорт", "Anmeldebestätigung (підтвердження реєстрації)", "Дозвіл на проживання"],
+        "tips": ["Запитайте про рахунки без комісії для біженців", "Зробіть мобільний e‑банкінг одразу", "Для PostFinance можна відкрити в будь‑якому поштовому відділенні"],
+        "links": [
+          {"id":"uk2","title":"PostFinance","url":"https://www.postfinance.ch/","type":"website"}
+        ],
+        "order": 2
+      },
+      {
+        "id": "step_uk_3",
+        "title": "Оформити медичне страхування",
+        "description": "Обов'язково протягом 3 місяців. Оберіть модель (HMO/Telmed/Standard), підходящу франшизу та перевірте субсидії (Prämienverbilligung).",
+        "isOptional": false,
+        "estimatedDuration": 45,
+        "requiredDocuments": ["Паспорт", "Anmeldebestätigung", "Довідка про доходи (для субсидії)"],
+        "tips": ["Порівняйте ціни на comparis.ch", "Франшиза 300 CHF — найдешевший місячний внесок, але дорожчі візити", "HMO на 10–20% дешевше стандартної моделі"],
+        "links": [
+          {"id":"uk3","title":"Comparis — Krankenkassen","url":"https://www.comparis.ch/krankenkassen/","type":"website"}
+        ],
+        "order": 3
+      },
+      {
+        "id": "step_uk_4",
+        "title": "Подати заявку на субсидію медстрахування",
+        "description": "Якщо ваш дохід нижчий за поріг, ви маєте право на Prämienverbilligung (знижку на премії). Подайте заявку через портал вашого кантону або Sozialamt.",
+        "isOptional": true,
+        "estimatedDuration": 30,
+        "requiredDocuments": ["Довідка про доходи", "Копія полісу медстрахування", "Дозвіл на проживання"],
+        "tips": ["Терміни різні для кожного кантону — перевірте заздалегідь", "Субсидія не діє ретроактивно", "У Цюріху подавайте через svazurich.ch"],
+        "links": [
+          {"id":"uk4","title":"Інфо про субсидії","url":"https://www.ch.ch/en/health-insurance-premium-reduction","type":"website"}
+        ],
+        "order": 4
+      },
+      {
+        "id": "step_uk_5",
+        "title": "Записати дітей до школи/садка",
+        "description": "Якщо у вас є діти, зареєструйте їх у Schulamt (шкільне управління) вашої Gemeinde. Освіта обов'язкова з 4–6 років і безкоштовна.",
+        "isOptional": true,
+        "estimatedDuration": 45,
+        "requiredDocuments": ["Свідоцтво про народження", "Паспорт дитини", "Anmeldebestätigung", "Щеплення (рекомендовано)"],
+        "tips": ["Зверніться до Schulamt протягом перших тижнів", "Багато міст пропонують безкоштовні мовні курси для дітей", "Дитсадки (Kita) платні, але можливі субсидії"],
+        "order": 5
+      }
+    ],
+    "tags": ["registration", "gemeinde", "banking", "insurance", "school", "lang:uk"],
+    "cantonCodes": [],
+    "priority": 10,
+    "isNew": true,
+    "createdAt": "2025-01-15T10:00:00Z",
+    "lastUpdated": "2025-10-15T10:00:00Z"
+  }
+]
+

@@ -1,0 +1,27 @@
+{
+  "privacy": {
+    "tracking": {
+      "purposes": []
+    },
+    "collection": [
+      {
+        "type": "COARSE_LOCATION",
+        "purpose": ["APP_FUNCTIONALITY"],
+        "optional": true
+      },
+      {
+        "type": "CRASH_DATA",
+        "purpose": ["APP_FUNCTIONALITY", "ANALYTICS"],
+        "optional": true
+      },
+      {
+        "type": "DEVICE_ID",
+        "purpose": ["ANALYTICS"],
+        "optional": true
+      }
+    ],
+    "usesNonExemptEncryption": false
+  }
+}
+
+

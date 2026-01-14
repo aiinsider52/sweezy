@@ -1,6 +1,16 @@
 node_modules
 .next
 dist
+.DS_Store
+**/.DS_Store
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.venv/
+DerivedData/
+**/xcuserdata/
+**/*.xcuserstate
+**/*.xcbkptlist
 admin/test-results/
 admin/test-results/
 admin/test-results/

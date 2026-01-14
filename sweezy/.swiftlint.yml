@@ -1,0 +1,80 @@
+########################################
+# SwiftLint configuration for Sweezy
+# - Friendly defaults for a production app
+# - Avoids over‑strict rules that будут мешать разработке
+########################################
+
+# Paths
+included:
+  - sweezy
+
+excluded:
+  - sweezy/Generated
+  - sweezy/Build
+  - sweezy/Tests/Snapshots
+  - sweezyUITests
+  - Pods
+
+########################################
+# Base rules
+########################################
+
+disabled_rules:
+  - trailing_whitespace       # допускаем немного
+  - file_length               # большие feature‑файлы допустимы
+  - type_body_length
+  - function_body_length
+  - todo                      # TODO‑комментарии иногда полезны
+  - nesting                   # SwiftUI часто создаёт глубокие вложения
+
+opt_in_rules:
+  - empty_count
+  - implicitly_unwrapped_optional
+  - closure_spacing
+  - operator_usage_whitespace
+  - unused_import
+  - redundant_optional_initialization
+  - redundant_type_annotation
+  - redundant_nil_coalescing
+  - vertical_parameter_alignment_on_call
+  - unneeded_parentheses_in_closure_argument
+  - prefer_self_type_over_type_of_self
+  - weak_delegate
+
+########################################
+# Rule configuration
+########################################
+
+line_length:
+  warning: 130
+  error: 160
+  ignores_comments: true
+  ignores_urls: true
+
+identifier_name:
+  min_length:
+    warning: 2
+  excluded:
+    - id
+    - x
+    - y
+    - i
+    - j
+    - db
+
+type_name:
+  max_length:
+    warning: 50
+    error: 60
+
+cyclomatic_complexity:
+  warning: 15
+  error: 25
+
+function_parameter_count:
+  warning: 6
+  error: 8
+
+reporter: "xcode"
+
+

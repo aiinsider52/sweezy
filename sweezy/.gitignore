@@ -1,0 +1,5 @@
+
+# Playwright outputs
+admin/test-results/
+admin/playwright-report/
+admin/blob-report/

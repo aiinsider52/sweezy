@@ -1,0 +1,53 @@
+[
+  {
+    "id": "bbbbbbbb-cccc-dddd-eeee-000000000202",
+    "title": "Registration in Switzerland: First Steps",
+    "description": "What to do in your first 2 weeks after arrival",
+    "category": "arrival",
+    "estimatedTotalTime": 135,
+    "estimatedDuration": "1–2 weeks",
+    "difficulty": "easy",
+    "steps": [
+      {
+        "id": "step_reg_en_1",
+        "title": "Register at the Gemeinde (local administration)",
+        "description": "Within 14 days of arrival. Take your passport/ID, tenancy contract or housing confirmation, photo, and (if available) insurance documents.",
+        "isOptional": false,
+        "estimatedDuration": 30,
+        "requiredDocuments": ["Passport/ID", "Tenancy agreement", "Photo"],
+        "tips": ["Check opening hours and whether you need an appointment", "Ask about premium reduction (Prämienverbilligung)"],
+        "links": [
+          {"id":"e1","title":"CH.CH — Registration on arrival","url":"https://www.ch.ch/en/registration-arrival","type":"website"}
+        ],
+        "order": 1
+      },
+      {
+        "id": "step_reg_en_2",
+        "title": "Open a bank account",
+        "description": "For receiving salary or benefits. Choose a bank (PostFinance, UBS, Raiffeisen), prepare your ID, address confirmation and status letter if needed.",
+        "isOptional": false,
+        "estimatedDuration": 60,
+        "tips": ["Ask for fee‑free refugee accounts", "Enable mobile e‑banking right away"],
+        "order": 2
+      },
+      {
+        "id": "step_reg_en_3",
+        "title": "Enroll in health insurance",
+        "description": "Mandatory within 3 months. Choose a model (HMO/Telmed/Standard), a suitable deductible, and check for premium reductions.",
+        "isOptional": false,
+        "estimatedDuration": 45,
+        "links": [
+          {"id":"e2","title":"Comparis — Krankenkassen","url":"https://www.comparis.ch/krankenkassen/","type":"website"}
+        ],
+        "order": 3
+      }
+    ],
+    "tags": ["registration", "gemeinde", "banking", "insurance", "lang:en"],
+    "cantonCodes": [],
+    "priority": 10,
+    "isNew": true,
+    "createdAt": "2025-01-15T10:00:00Z",
+    "lastUpdated": "2025-10-15T10:00:00Z"
+  }
+]
+

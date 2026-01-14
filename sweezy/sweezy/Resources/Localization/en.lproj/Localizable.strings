@@ -1,0 +1,387 @@
+/* 
+  Localizable.strings (English)
+  sweezy
+  
+  Created by Vladyslav Katash on 14.10.2025.
+*/
+
+// MARK: - Common
+"common.ok" = "OK";
+"common.cancel" = "Cancel";
+"common.save" = "Save";
+"common.delete" = "Delete";
+"common.edit" = "Edit";
+"common.done" = "Done";
+"common.next" = "Next";
+"common.back" = "Back";
+"common.close" = "Close";
+"common.search" = "Search";
+"common.filter" = "Filter";
+"common.all" = "All";
+"common.loading" = "Loading...";
+"common.error" = "Error";
+"common.retry" = "Retry";
+"common.share" = "Share";
+"common.copy" = "Copy";
+"common.settings" = "Settings";
+"common.open" = "Open";
+
+// MARK: - Onboarding
+"onboarding.welcome" = "Welcome to Sweezy";
+"onboarding.title1" = "Your Guide to Switzerland";
+"onboarding.subtitle1" = "All essential information for life in Switzerland in one app";
+"onboarding.title2" = "Personalized Advice";
+"onboarding.subtitle2" = "Get recommendations tailored to your canton and status";
+"onboarding.title3" = "Always Available";
+"onboarding.subtitle3" = "Works offline and updates regularly";
+"onboarding.select_language" = "Select Language";
+"onboarding.get_started" = "Get Started";
+"onboarding.page1.title" = "Welcome!";
+"onboarding.page1.subtitle" = "Your assistant for life in Switzerland";
+"onboarding.page2.title" = "Guides, Checklists, Templates";
+"onboarding.page2.subtitle" = "Everything you need in one app";
+"onboarding.page3.title" = "Quick Setup";
+"onboarding.page3.subtitle" = "Make Sweezy yours";
+"onboarding.choose_style.title" = "Choose your style";
+"onboarding.choose_style.subtitle" = "You can change it later in Settings";
+"onboarding.skip" = "Skip";
+
+// MARK: - Home
+"home.welcome" = "Welcome to Sweezy";
+"home.welcome_back" = "Welcome back, %@";
+"home.quick_actions" = "Quick Actions";
+"home.stats" = "Your statistics";
+"home.popular_guides" = "Popular guides";
+"qa.guides" = "Guides";
+"qa.checklists" = "Checklists";
+"qa.calculator" = "Calculator";
+"qa.map" = "Map";
+"home.recent_updates" = "Recent Updates";
+"home.documents" = "Documents";
+"home.housing" = "Housing";
+"home.insurance" = "Insurance";
+"home.work" = "Work";
+"home.finance" = "Finance";
+"home.education" = "Education";
+"home.healthcare" = "Healthcare";
+"home.legal" = "Legal Aid";
+"home.emergency" = "Emergency";
+"home.metrics.guides" = "Guides";
+"home.metrics.lists" = "Lists";
+"home.metrics.templates" = "Templates";
+"home.emergency_contacts" = "Emergency Contacts";
+"home.emergency.police" = "Police";
+"home.emergency.ambulance" = "Ambulance";
+"home.emergency.fire" = "Fire";
+"home.greeting.morning" = "Good morning";
+"home.greeting.afternoon" = "Good afternoon";
+"home.greeting.evening" = "Good evening";
+"home.greeting.night" = "Good night";
+"home.greeting.subtitle" = "Glad to help you today";
+"home.telegram_join" = "Join our Telegram";
+"home.telegram_subtitle" = "Updates and tips in real time";
+
+// MARK: - Guides
+"guides.title" = "Guides";
+"guides.search_placeholder" = "Search information...";
+"guides.no_results" = "No results found";
+"guides.no_results_subtitle" = "Try adjusting your search or filters";
+"guides.clear_filters" = "Clear Filters";
+"guides.hero_title" = "Guide to Switzerland";
+"guides.articles_available" = "articles available";
+"guides.reading_time" = "%d min read";
+"guides.updated" = "Updated %@";
+"guides.new" = "New";
+"guides.bookmark" = "Bookmark";
+"guides.share" = "Share";
+"guides.open_link" = "Open Link";
+"guides.useful_links" = "Useful Links";
+"common.tags" = "Tags";
+
+// MARK: - Checklists
+"checklists.title" = "Checklists";
+"checklists.hero_title" = "Step-by-step guides";
+"checklists.lists_available" = "lists available";
+"checklists.progress" = "Progress: %d%%";
+"checklists.completed" = "Completed";
+"checklists.remaining" = "Remaining: %d";
+"checklists.estimated_time" = "Estimated time: %@";
+"checklists.difficulty" = "Difficulty: %@";
+"checklists.mark_complete" = "Mark as Complete";
+"checklists.add_note" = "Add Note";
+"checklists.view_details" = "View Details";
+"checklists.overall_progress" = "Overall Progress";
+"checklists.steps" = "Steps";
+"checklists.congratulations" = "Congratulations!";
+"checklists.checklist_completed" = "Checklist completed";
+
+// MARK: - Calculator
+"calculator.title" = "Benefits Calculator";
+"calculator.income" = "Income (CHF per month)";
+"calculator.family_size" = "Family Size";
+"calculator.has_children" = "Has Children";
+"calculator.canton" = "Canton";
+"calculator.permit_type" = "Permit Type";
+"calculator.calculate" = "Calculate";
+"calculator.results" = "Results";
+"calculator.eligible" = "You are eligible for assistance";
+"calculator.not_eligible" = "Currently not eligible";
+"calculator.estimated_amount" = "Estimated amount: %@";
+"calculator.disclaimer" = "This is an estimate. For accurate information, consult official sources.";
+"calculator.apply_now" = "Apply Now";
+
+// MARK: - Map
+"map.title" = "Service Map";
+"map.type.government" = "Government Offices";
+"map.type.healthcare" = "Healthcare";
+"map.type.education" = "Education";
+"map.type.legal" = "Legal Services";
+"map.type.social" = "Social Services";
+"map.type.employment" = "Employment";
+"map.type.housing" = "Housing";
+"map.type.transport" = "Transport";
+"map.type.banking" = "Banking";
+"map.type.shopping" = "Shopping";
+"map.type.emergency" = "Emergency";
+"map.type.community" = "Community & Integration";
+"map.nearby_services" = "Nearby Services";
+"map.distance" = "%@ from you";
+"map.opening_hours" = "Opening Hours";
+"map.contact" = "Contact";
+"map.directions" = "Directions";
+"map.call" = "Call";
+"map.website" = "Website";
+"map.closed" = "Closed";
+"map.open" = "Open";
+"map.location_permission" = "Location Permission";
+"map.enable_location" = "Enable Location";
+
+// MARK: - Appointments
+"appointments.title" = "Appointments";
+"appointments.add" = "Add Appointment";
+"appointments.edit" = "Edit Appointment";
+"appointments.delete" = "Delete Appointment";
+"appointments.appointment_title" = "Appointment Title";
+"appointments.date" = "Date";
+"appointments.time" = "Time";
+"appointments.location" = "Location";
+"appointments.notes" = "Notes";
+"appointments.reminders" = "Reminders";
+"appointments.upcoming" = "Upcoming";
+"appointments.past" = "Past";
+"appointments.today" = "Today";
+"appointments.no_appointments" = "No appointments scheduled";
+
+// MARK: - Templates
+"templates.title" = "Document Templates";
+"templates.select" = "Select Template";
+"templates.fill_form" = "Fill Form";
+"templates.preview" = "Preview";
+"templates.generate" = "Generate Document";
+"templates.export" = "Export";
+"templates.required_field" = "Required Field";
+"templates.optional_field" = "Optional Field";
+"templates.saved_documents" = "Saved Documents";
+"templates.document_title" = "Document Title";
+
+// MARK: - Settings
+"settings.title" = "Settings";
+"settings.profile" = "Profile";
+"settings.language" = "Language";
+"settings.notifications" = "Notifications";
+"settings.privacy" = "Privacy";
+"settings.about" = "About";
+"settings.version" = "Version %@";
+"settings.full_name" = "Full Name";
+"settings.email" = "Email";
+"settings.phone" = "Phone";
+"settings.address" = "Address";
+"settings.export_data" = "Export Data";
+"settings.import_data" = "Import Data";
+"settings.delete_all_data" = "Delete All Data";
+"settings.delete_account" = "Delete Account";
+"settings.delete_account.confirm_message" = "This will permanently delete your Sweezy account and server-side data. This cannot be undone.";
+"settings.default_user_name" = "User";
+"settings.privacy.placeholder" = "Privacy settings will be here";
+"settings.data_management" = "Data Management";
+
+// MARK: - Privacy Policy
+"privacy.title" = "Privacy Policy";
+"privacy.last_updated" = "Last updated: %@";
+"privacy.intro.title" = "Introduction";
+"privacy.intro.content" = "Sweezy respects your privacy. This document explains what data we collect and how we use it.";
+"privacy.data_collection.title" = "Data Collection";
+"privacy.data_collection.content" = "We only collect data necessary for the app to function:";
+"privacy.data.profile" = "Name and contact information (stored locally)";
+"privacy.data.preferences" = "Language and other preferences";
+"privacy.data.appointments" = "Your appointments and reminders";
+"privacy.data.location" = "Location (only to find nearby services)";
+"privacy.data_usage.title" = "Data Usage";
+"privacy.data_usage.content" = "Your data is used exclusively for app functionality. We do not sell or share your data with third parties.";
+"privacy.data_storage.title" = "Data Storage";
+"privacy.data_storage.content" = "Most of your personal data is stored locally on your device. Account and subscription information is stored securely on Sweezy servers to provide sync and purchases.";
+"privacy.data_storage.local" = "We only send data to our own backend and trusted providers (such as crash reporting and analytics) to improve the app.";
+"privacy.third_parties.title" = "Third Parties";
+"privacy.third_parties.content" = "Sweezy uses privacy-friendly crash reporting and usage analytics (for example Sentry and Amplitude) to improve stability and features. We do not use this data for advertising or to track you across other apps or websites.";
+"privacy.rights.title" = "Your Rights";
+"privacy.rights.access" = "Access your data at any time";
+"privacy.rights.delete" = "Delete all data via Settings";
+"privacy.rights.export" = "Export your data";
+"privacy.contact.title" = "Contact";
+"privacy.contact.content" = "If you have questions about privacy, contact us:";
+
+// MARK: - What's New
+"whats_new.title" = "What's New";
+"whats_new.version" = "Version %@";
+"whats_new.subtitle" = "Thank you for using Sweezy! Here's what's new:";
+"whats_new.feature1.title" = "First Release!";
+"whats_new.feature1.description" = "Sweezy is now available! 50+ guides, checklists and templates for life in Switzerland.";
+"whats_new.feature2.title" = "Interactive Map";
+"whats_new.feature2.description" = "200+ places: government offices, medical centers, Ukrainian hubs and more.";
+"whats_new.feature3.title" = "Document Templates";
+"whats_new.feature3.description" = "Ready-made forms with PDF export for all official procedures.";
+"whats_new.feature4.title" = "4 Languages";
+"whats_new.feature4.description" = "Ukrainian, Russian, English and German with instant switching.";
+"whats_new.feature5.title" = "Privacy";
+"whats_new.feature5.description" = "No ads or marketing trackers, minimal analytics and crash reports only to improve Sweezy, full accessibility support.";
+"settings.default_user_name" = "User";
+"settings.privacy.placeholder" = "Privacy settings will be here";
+
+// MARK: - Settings - Theme
+"settings.theme.title" = "Appearance";
+"settings.theme.light" = "Light";
+"settings.theme.dark" = "Dark";
+"settings.theme.system" = "System";
+"settings.account" = "Account";
+"settings.register_prompt" = "Register to unlock full access";
+"settings.password" = "Password";
+"settings.register" = "Register";
+"settings.logout" = "Logout";
+"settings.welcome" = "Welcome, %@";
+"errors.title" = "Error";
+"settings.data_management" = "Data Management";
+
+// MARK: - Privacy Policy
+"privacy.title" = "Privacy Policy";
+"privacy.last_updated" = "Last updated: %@";
+"privacy.intro.title" = "Introduction";
+"privacy.intro.content" = "Sweezy respects your privacy. This document explains what data we collect and how we use it.";
+"errors.content_load_failed" = "Failed to load content";
+"errors.decoding_failed" = "Data processing error";
+"errors.invalid_data" = "Invalid data";
+"errors.cache_write_failed" = "Failed to save to cache";
+"errors.recovery.reinstall" = "Try reinstalling the app";
+"errors.recovery.check_connection" = "Check your internet connection";
+"errors.recovery.update_app" = "Update the app to the latest version";
+"errors.recovery.free_space" = "Free up space on your device";
+"privacy.data_collection.title" = "Data Collection";
+"privacy.data_collection.content" = "We only collect data necessary for the app to function:";
+"privacy.data.profile" = "Name and contact information (stored locally)";
+"privacy.data.preferences" = "Language and other preferences";
+"privacy.data.appointments" = "Your appointments and reminders";
+"privacy.data.location" = "Location (only to find nearby services)";
+"privacy.data_usage.title" = "Data Usage";
+"privacy.data_usage.content" = "Your data is used exclusively for app functionality. We do not sell or share your data with third parties.";
+"privacy.data_storage.title" = "Data Storage";
+"privacy.data_storage.content" = "Most of your personal data is stored locally on your device. Account and subscription information is stored securely on Sweezy servers to provide sync and purchases.";
+"privacy.data_storage.local" = "We only send data to our own backend and trusted providers (such as crash reporting and analytics) to improve the app.";
+"privacy.third_parties.title" = "Third Parties";
+"privacy.third_parties.content" = "Sweezy uses privacy-friendly crash reporting and usage analytics (for example Sentry and Amplitude) to improve stability and features. We do not use this data for advertising or to track you across other apps or websites.";
+"privacy.rights.title" = "Your Rights";
+"privacy.rights.access" = "Access your data at any time";
+"privacy.rights.delete" = "Delete all data via Settings";
+"privacy.rights.export" = "Export your data";
+"privacy.contact.title" = "Contact";
+"privacy.contact.content" = "If you have questions about privacy, contact us:";
+
+// MARK: - What's New
+"whats_new.title" = "What's New";
+"whats_new.version" = "Version %@";
+"whats_new.subtitle" = "Thank you for using Sweezy! Here's what's new:";
+"whats_new.feature1.title" = "First Release!";
+"whats_new.feature1.description" = "Sweezy is now available! 50+ guides, checklists and templates for life in Switzerland.";
+"whats_new.feature2.title" = "Interactive Map";
+"whats_new.feature2.description" = "200+ places: government offices, medical centers, Ukrainian hubs and more.";
+"whats_new.feature3.title" = "Document Templates";
+"whats_new.feature3.description" = "Ready-made forms with PDF export for all official procedures.";
+"whats_new.feature4.title" = "4 Languages";
+"whats_new.feature4.description" = "Ukrainian, Russian, English and German with instant switching.";
+"whats_new.feature5.title" = "Privacy";
+"whats_new.feature5.description" = "No ads or marketing trackers, minimal analytics and crash reports only to improve Sweezy, full accessibility support.";
+
+// MARK: - Errors
+
+// MARK: - Settings - Theme
+"settings.theme.title" = "Appearance";
+"settings.theme.dark" = "Dark";
+"settings.theme.system" = "System";
+"errors.title" = "Error";
+"errors.generic" = "An error occurred. Please try again later.";
+"errors.network" = "Network problem. Check your connection.";
+"errors.location" = "Could not get location";
+"errors.permission_denied" = "Permission denied";
+"errors.data_corrupted" = "Data corrupted";
+"errors.file_not_found" = "File not found";
+"errors.invalid_input" = "Invalid input";
+"errors.content_load_failed" = "Failed to load content";
+"errors.decoding_failed" = "Data processing error";
+"errors.invalid_data" = "Invalid data";
+"errors.cache_write_failed" = "Failed to save to cache";
+"errors.recovery.reinstall" = "Try reinstalling the app";
+"errors.recovery.check_connection" = "Check your internet connection";
+"errors.recovery.update_app" = "Update the app to the latest version";
+"errors.recovery.free_space" = "Free up space on your device";
+
+// MARK: - Categories
+"category.documents" = "Documents";
+"category.housing" = "Housing";
+"category.insurance" = "Insurance";
+"category.work" = "Work";
+"category.finance" = "Finance";
+"category.education" = "Education";
+"category.healthcare" = "Healthcare";
+"category.legal" = "Legal Aid";
+"category.emergency" = "Emergency";
+"category.integration" = "Integration";
+"category.transport" = "Transport";
+"category.banking" = "Banking";
+
+// MARK: - Guide Categories (display names)
+"guide.category.documents" = "Documents";
+"guide.category.housing" = "Housing";
+"guide.category.insurance" = "Insurance";
+"guide.category.work" = "Work";
+"guide.category.finance" = "Finance";
+"guide.category.education" = "Education";
+"guide.category.healthcare" = "Healthcare";
+"guide.category.legal" = "Legal";
+"guide.category.emergency" = "Emergency";
+"guide.category.integration" = "Integration";
+"guide.category.transport" = "Transport";
+"guide.category.banking" = "Banking";
+
+// MARK: - Difficulty Levels
+"difficulty.easy" = "Easy";
+"difficulty.medium" = "Medium";
+"difficulty.hard" = "Hard";
+
+// MARK: - Permit Types
+"permit.s" = "S - Protection Status";
+"permit.b" = "B - Residence Permit";
+"permit.c" = "C - Settlement Permit";
+"permit.f" = "F - Provisional Admission";
+"permit.n" = "N - Asylum Seeker";
+"permit.l" = "L - Short-term Residence";
+
+"difficulty.easy" = "Easy";
+"difficulty.medium" = "Medium";
+"difficulty.hard" = "Hard";
+
+// MARK: - Permit Types
+"permit.s" = "S - Protection Status";
+"permit.b" = "B - Residence Permit";
+"permit.c" = "C - Settlement Permit";
+"permit.f" = "F - Provisional Admission";
+"permit.n" = "N - Asylum Seeker";
+"permit.l" = "L - Short-term Residence";
+"validation.email_invalid" = "Invalid email address";

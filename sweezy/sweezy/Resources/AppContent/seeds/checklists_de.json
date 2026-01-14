@@ -1,0 +1,82 @@
+[
+  {
+    "id": "bbbbbbbb-cccc-dddd-eeee-000000000204",
+    "title": "Anmeldung in der Schweiz: Erste Schritte",
+    "description": "Was Sie in den ersten 2 Wochen nach Ankunft erledigen müssen",
+    "category": "arrival",
+    "estimatedTotalTime": 180,
+    "estimatedDuration": "1–2 Wochen",
+    "difficulty": "easy",
+    "steps": [
+      {
+        "id": "step_de_1",
+        "title": "Bei der Gemeinde anmelden",
+        "description": "Innerhalb von 14 Tagen nach Ankunft. Benötigt: Pass/ID, Mietvertrag oder Wohnbestätigung, Foto, und (falls vorhanden) Versicherungsnachweis.",
+        "isOptional": false,
+        "estimatedDuration": 30,
+        "requiredDocuments": ["Pass/ID", "Mietvertrag", "Passfoto", "Aufenthaltsbewilligung"],
+        "tips": ["Öffnungszeiten und Terminpflicht vorher prüfen", "Nach Prämienverbilligung fragen", "Bei Sprachproblemen Freund als Übersetzer mitnehmen"],
+        "links": [
+          {"id":"de1","title":"CH.CH — Anmeldung bei Ankunft","url":"https://www.ch.ch/de/anmeldung-ankunft","type":"website"}
+        ],
+        "order": 1
+      },
+      {
+        "id": "step_de_2",
+        "title": "Bankkonto eröffnen",
+        "description": "Für Lohn oder Sozialleistungen. Bank wählen (PostFinance, UBS, Raiffeisen), Pass, Wohnsitzbestätigung und ggf. Statusnachweis bereithalten.",
+        "isOptional": false,
+        "estimatedDuration": 60,
+        "requiredDocuments": ["Pass", "Anmeldebestätigung", "Aufenthaltsbewilligung"],
+        "tips": ["Nach gebührenfreien Konten für Geflüchtete fragen", "E-Banking sofort aktivieren", "PostFinance: Eröffnung an jedem Postschalter möglich"],
+        "links": [
+          {"id":"de2","title":"PostFinance","url":"https://www.postfinance.ch/","type":"website"}
+        ],
+        "order": 2
+      },
+      {
+        "id": "step_de_3",
+        "title": "Krankenversicherung abschliessen",
+        "description": "Pflicht innerhalb 3 Monaten. Modell wählen (HMO/Telmed/Standard), passende Franchise und Prämienverbilligung prüfen.",
+        "isOptional": false,
+        "estimatedDuration": 45,
+        "requiredDocuments": ["Pass", "Anmeldebestätigung", "Einkommensnachweis (für Prämienverbilligung)"],
+        "tips": ["Prämien auf comparis.ch vergleichen", "Franchise 300 CHF = niedrigste Prämie, aber höhere Arztkosten", "HMO 10–20% günstiger als Standardmodell"],
+        "links": [
+          {"id":"de3","title":"Comparis — Krankenkassen","url":"https://www.comparis.ch/krankenkassen/","type":"website"}
+        ],
+        "order": 3
+      },
+      {
+        "id": "step_de_4",
+        "title": "Prämienverbilligung beantragen",
+        "description": "Bei niedrigem Einkommen Anspruch auf Prämienverbilligung. Antrag über Kantonsportal oder Sozialamt einreichen.",
+        "isOptional": true,
+        "estimatedDuration": 30,
+        "requiredDocuments": ["Einkommensnachweis", "Versicherungspolice", "Aufenthaltsbewilligung"],
+        "tips": ["Fristen pro Kanton unterschiedlich", "Keine rückwirkende Verbilligung", "Zürich: Antrag via svazurich.ch"],
+        "links": [
+          {"id":"de4","title":"Info zu Prämienverbilligung","url":"https://www.ch.ch/de/krankenkassen-praemienverbilligung","type":"website"}
+        ],
+        "order": 4
+      },
+      {
+        "id": "step_de_5",
+        "title": "Kinder für Schule/Kita anmelden",
+        "description": "Falls Kinder vorhanden, beim Schulamt der Gemeinde anmelden. Schulpflicht ab 4–6 Jahren, kostenlos.",
+        "isOptional": true,
+        "estimatedDuration": 45,
+        "requiredDocuments": ["Geburtsurkunde", "Kinderpass", "Anmeldebestätigung", "Impfausweis (empfohlen)"],
+        "tips": ["In den ersten Wochen beim Schulamt melden", "Viele Städte bieten kostenlose Sprachkurse für Kinder", "Kita kostenpflichtig, aber Subventionen möglich"],
+        "order": 5
+      }
+    ],
+    "tags": ["registration", "gemeinde", "banking", "insurance", "school", "lang:de"],
+    "cantonCodes": [],
+    "priority": 10,
+    "isNew": true,
+    "createdAt": "2025-01-15T10:00:00Z",
+    "lastUpdated": "2025-10-15T10:00:00Z"
+  }
+]
+

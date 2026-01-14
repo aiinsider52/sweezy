@@ -1,0 +1,413 @@
+/*
+  Localizable.strings (Ukrainian)
+  sweezy
+  
+  Created by Vladyslav Katash on 14.10.2025.
+*/
+
+// MARK: - Common
+"common.ok" = "Гаразд";
+"common.cancel" = "Скасувати";
+"common.save" = "Зберегти";
+"common.delete" = "Видалити";
+"common.edit" = "Редагувати";
+"common.done" = "Готово";
+"common.next" = "Далі";
+"common.back" = "Назад";
+"common.close" = "Закрити";
+"common.search" = "Пошук";
+"common.filter" = "Фільтр";
+"common.all" = "Всі";
+"common.loading" = "Завантаження...";
+"common.error" = "Помилка";
+"common.retry" = "Спробувати знову";
+"common.share" = "Поділитися";
+"common.copy" = "Копіювати";
+"common.settings" = "Налаштування";
+"common.new" = "Нове";
+"common.open" = "Відкрити";
+
+// MARK: - Onboarding
+"onboarding.welcome" = "Ласкаво просимо до Sweezy";
+"onboarding.title1" = "Ваш путівник по Швейцарії";
+"onboarding.subtitle1" = "Вся необхідна інформація для життя в Швейцарії в одному додатку";
+"onboarding.title2" = "Персоналізовані поради";
+"onboarding.subtitle2" = "Отримуйте рекомендації відповідно до вашого кантону та статусу";
+"onboarding.title3" = "Завжди поруч";
+"onboarding.subtitle3" = "Працює офлайн та регулярно оновлюється";
+"onboarding.select_language" = "Оберіть мову";
+"onboarding.get_started" = "Почати";
+"onboarding.page1.title" = "Ласкаво просимо!";
+"onboarding.page1.subtitle" = "Ваш помічник у житті в Швейцарії";
+"onboarding.page2.title" = "Гіди, чеклисти, шаблони";
+"onboarding.page2.subtitle" = "Усе необхідне в одному додатку";
+"onboarding.page3.title" = "Швидкий старт";
+"onboarding.page3.subtitle" = "Налаштуйте додаток під себе";
+"onboarding.choose_style.title" = "Оберіть стиль";
+"onboarding.choose_style.subtitle" = "Це можна змінити в Налаштуваннях";
+"onboarding.skip" = "Пропустити";
+
+// MARK: - Home
+"home.welcome" = "Вітаємо в Sweezy";
+"home.welcome_back" = "З поверненням, %@";
+"home.quick_actions" = "Швидкі дії";
+"home.stats" = "Ваша статистика";
+"home.popular_guides" = "Популярні довідники";
+"home.recent_updates" = "Останні оновлення";
+"home.documents" = "Документи";
+"home.housing" = "Житло";
+"home.insurance" = "Страхування";
+"home.work" = "Робота";
+"home.finance" = "Фінанси";
+"home.education" = "Освіта";
+"home.healthcare" = "Охорона здоров'я";
+"home.legal" = "Юридична допомога";
+"home.emergency" = "Екстрені служби";
+"home.latest_news" = "Останні новини";
+"home.see_all" = "Показати все";
+"home.metrics.guides" = "Довідники";
+"home.metrics.lists" = "Списки";
+"home.metrics.templates" = "Шаблони";
+"home.emergency_contacts" = "Екстрені контакти";
+"home.emergency.police" = "Поліція";
+"home.emergency.ambulance" = "Швидка";
+"home.emergency.fire" = "Пожежна";
+"home.greeting.morning" = "Доброго ранку";
+"home.greeting.afternoon" = "Доброго дня";
+"home.greeting.evening" = "Доброго вечора";
+"home.greeting.night" = "Доброї ночі";
+"home.greeting.subtitle" = "Раді допомогти вам сьогодні";
+"home.telegram_join" = "Приєднуйтесь до Telegram";
+"home.telegram_subtitle" = "Оновлення та поради у реальному часі";
+
+// Quick Actions
+"qa.guides" = "Довідник";
+"qa.checklists" = "Чеклисти";
+"qa.calculator" = "Калькулятор";
+"qa.map" = "Карта";
+"qa.calculator.title" = "Калькулятор";
+"qa.calculator.subtitle" = "Розрахуйте свої пільги";
+"qa.appointments.title" = "Зустрічі";
+"qa.appointments.subtitle" = "Керуйте розкладом";
+"qa.templates.title" = "Шаблони";
+"qa.templates.subtitle" = "Заповнюйте та експортуйте документи";
+"qa.documents.title" = "Документи";
+"qa.documents.subtitle" = "Офіційні інструкції";
+"qa.housing.title" = "Житло";
+"qa.housing.subtitle" = "Оренда та реєстрація";
+"qa.insurance.title" = "Страхування";
+"qa.insurance.subtitle" = "Здоров'я та покриття";
+"qa.work.title" = "Робота";
+"qa.work.subtitle" = "Робота та дозволи";
+"qa.emergency.title" = "Екстрені служби";
+"qa.emergency.subtitle" = "Важливі контакти";
+
+// MARK: - Guides
+"guides.title" = "Довідник";
+"guides.search_placeholder" = "Пошук інформації...";
+"guides.no_results" = "Нічого не знайдено";
+"guides.no_results_subtitle" = "Спробуйте змінити параметри пошуку або фільтри";
+"guides.clear_filters" = "Очистити фільтри";
+"guides.hero_title" = "Путівник по Швейцарії";
+"guides.articles_available" = "статей доступно";
+"guides.reading_time" = "%d хв читання";
+"guides.updated" = "Оновлено %@";
+"guides.new" = "Нове";
+"guides.bookmark" = "Додати в закладки";
+"guides.share" = "Поділитися";
+"guides.open_link" = "Відкрити посилання";
+"guides.useful_links" = "Корисні посилання";
+"common.tags" = "Теги";
+
+// MARK: - Checklists
+"checklists.title" = "Чек-листи";
+"checklists.hero_title" = "Покрокові інструкції";
+"checklists.lists_available" = "списків доступно";
+"checklists.progress" = "Прогрес: %d%%";
+"checklists.completed" = "Виконано";
+"checklists.remaining" = "Залишилось: %d";
+"checklists.estimated_time" = "Орієнтовний час: %@";
+"checklists.difficulty" = "Складність: %@";
+"checklists.mark_complete" = "Позначити як виконане";
+"checklists.add_note" = "Додати нотатку";
+"checklists.view_details" = "Деталі";
+"checklists.overall_progress" = "Загальний прогрес";
+"checklists.steps" = "Кроки";
+"checklists.congratulations" = "Вітаємо!";
+"checklists.checklist_completed" = "Чек-ліст виконано";
+
+// MARK: - Calculator
+"calculator.title" = "Калькулятор пільг";
+"calculator.income" = "Дохід (CHF на місяць)";
+"calculator.family_size" = "Розмір сім'ї";
+"calculator.has_children" = "Є діти";
+"calculator.canton" = "Кантон";
+"calculator.permit_type" = "Тип дозволу";
+"calculator.calculate" = "Розрахувати";
+"calculator.results" = "Результати";
+"calculator.eligible" = "Ви маєте право на допомогу";
+"calculator.not_eligible" = "Наразі не маєте права";
+"calculator.estimated_amount" = "Орієнтовна сума: %@";
+"calculator.disclaimer" = "Це орієнтовний розрахунок. Для точної інформації зверніться до офіційних джерел.";
+"calculator.apply_now" = "Подати заявку";
+
+// MARK: - Map
+"map.title" = "Карта сервісів";
+"map.nearby_services" = "Поруч з вами";
+"map.type.government" = "Державні установи";
+"map.type.healthcare" = "Медицина";
+"map.type.education" = "Освіта";
+"map.type.legal" = "Юридичні послуги";
+"map.type.social" = "Соціальні служби";
+"map.type.employment" = "Робота";
+"map.type.housing" = "Житло";
+"map.type.transport" = "Транспорт";
+"map.type.banking" = "Банківські послуги";
+"map.type.shopping" = "Покупки";
+"map.type.emergency" = "Надзвичайні";
+"map.type.community" = "Спільнота та інтеграція";
+"map.distance" = "%@ від вас";
+"map.opening_hours" = "Години роботи";
+"map.contact" = "Контакти";
+"map.directions" = "Маршрут";
+"map.call" = "Зателефонувати";
+"map.website" = "Веб-сайт";
+"map.closed" = "Зачинено";
+"map.open" = "Відчинено";
+"map.location_permission" = "Дозвіл на геолокацію";
+"map.enable_location" = "Увімкнути геолокацію";
+
+// MARK: - Appointments
+"appointments.title" = "Зустрічі";
+"appointments.add" = "Додати зустріч";
+"appointments.edit" = "Редагувати зустріч";
+"appointments.delete" = "Видалити зустріч";
+"appointments.appointment_title" = "Назва зустрічі";
+"appointments.date" = "Дата";
+"appointments.time" = "Час";
+"appointments.location" = "Місце";
+"appointments.notes" = "Нотатки";
+"appointments.reminders" = "Нагадування";
+"appointments.upcoming" = "Найближчі";
+"appointments.past" = "Минулі";
+"appointments.today" = "Сьогодні";
+"appointments.no_appointments" = "Немає запланованих зустрічей";
+
+// MARK: - Templates
+"templates.title" = "Шаблони документів";
+"templates.select" = "Оберіть шаблон";
+"templates.fill_form" = "Заповніть форму";
+"templates.preview" = "Попередній перегляд";
+"templates.generate" = "Створити документ";
+"templates.export" = "Експортувати";
+"templates.required_field" = "Обов'язкове поле";
+"templates.optional_field" = "Необов'язкове поле";
+"templates.saved_documents" = "Збережені документи";
+"templates.document_title" = "Назва документа";
+
+// MARK: - Settings
+"settings.title" = "Налаштування";
+"settings.profile" = "Профіль";
+"settings.language" = "Мова";
+"settings.notifications" = "Сповіщення";
+"settings.privacy" = "Приватність";
+"settings.about" = "Про додаток";
+"settings.version" = "Версія %@";
+"settings.full_name" = "Повне ім'я";
+"settings.email" = "Електронна пошта";
+"settings.phone" = "Телефон";
+"settings.address" = "Адреса";
+"settings.export_data" = "Експортувати дані";
+"settings.import_data" = "Імпортувати дані";
+"settings.delete_all_data" = "Видалити всі дані";
+"settings.delete_account" = "Видалити акаунт";
+"settings.delete_account.confirm_message" = "Це остаточно видалить ваш акаунт Sweezy та дані на сервері. Дію неможливо скасувати.";
+"settings.default_user_name" = "Користувач";
+"settings.privacy.placeholder" = "Налаштування приватності будуть тут";
+"settings.data_management" = "Управління даними";
+
+// MARK: - Privacy Policy
+"privacy.title" = "Політика конфіденційності";
+"privacy.last_updated" = "Оновлено: %@";
+"privacy.intro.title" = "Вступ";
+"privacy.intro.content" = "Sweezy поважає вашу конфіденційність. Цей документ пояснює, які дані ми збираємо та як їх використовуємо.";
+"privacy.data_collection.title" = "Збір даних";
+"privacy.data_collection.content" = "Ми збираємо лише дані, необхідні для роботи додатку:";
+"privacy.data.profile" = "Ім'я та контактна інформація (зберігається локально)";
+"privacy.data.preferences" = "Мовні та інші налаштування";
+"privacy.data.appointments" = "Ваші зустрічі та нагадування";
+"privacy.data.location" = "Геолокація (лише для пошуку сервісів поруч)";
+"privacy.data_usage.title" = "Використання даних";
+"privacy.data_usage.content" = "Ваші дані використовуються виключно для функціонування додатку. Ми не продаємо та не передаємо ваші дані третім сторонам.";
+"privacy.data_storage.title" = "Зберігання даних";
+"privacy.data_storage.content" = "Більшість ваших особистих даних зберігається локально на пристрої. Дані облікового запису та підписки зберігаються захищено на серверах Sweezy для синхронізації та оплат.";
+"privacy.data_storage.local" = "Ми передаємо дані лише на наш бекенд та надійним постачальникам (наприклад, для crash‑репортів та аналітики) для покращення додатку.";
+"privacy.third_parties.title" = "Треті сторони";
+"privacy.third_parties.content" = "Sweezy використовує дружні до приватності crash‑репорти та аналітику використання (наприклад Sentry та Amplitude), щоб покращувати стабільність і функції. Ми не використовуємо ці дані для реклами та не відстежуємо вас у інших додатках або на сайтах.";
+"privacy.rights.title" = "Ваші права";
+"privacy.rights.access" = "Доступ до ваших даних у будь-який час";
+"privacy.rights.delete" = "Видалення всіх даних через Налаштування";
+"privacy.rights.export" = "Експорт ваших даних";
+"privacy.contact.title" = "Контакти";
+"privacy.contact.content" = "Якщо у вас є питання про конфіденційність, зв'яжіться з нами:";
+"settings.default_user_name" = "Користувач";
+"settings.privacy.placeholder" = "Налаштування приватності будуть тут";
+"settings.data_management" = "Управління даними";
+
+// MARK: - Privacy Policy
+// MARK: - What's New
+"whats_new.title" = "Що нового";
+"whats_new.version" = "Версія %@";
+"whats_new.subtitle" = "Дякуємо, що використовуєте Sweezy! Ось що нового:";
+"whats_new.feature1.title" = "Перший реліз!";
+"whats_new.feature1.description" = "Sweezy тепер доступний! 50+ гайдів, чек-листи та шаблони для життя у Швейцарії.";
+"whats_new.feature2.title" = "Інтерактивна карта";
+"whats_new.feature2.description" = "200+ місць: державні установи, медичні центри, українські хаби та більше.";
+"whats_new.feature3.title" = "Шаблони документів";
+"whats_new.feature3.description" = "Готові форми з експортом у PDF для всіх офіційних процедур.";
+"whats_new.feature4.title" = "4 мови";
+"whats_new.feature4.description" = "Українська, російська, англійська та німецька з миттєвим перемиканням.";
+"whats_new.feature5.title" = "Приватність";
+"whats_new.feature5.description" = "Без реклами та маркетингових трекерів, мінімальна аналітика й crash‑репорти лише для покращення Sweezy, повна підтримка accessibility.";
+
+"privacy.title" = "Політика конфіденційності";
+
+// MARK: - Settings - Theme
+"settings.theme.title" = "Тема";
+"settings.theme.light" = "Світла";
+"settings.theme.dark" = "Темна";
+"settings.theme.system" = "Системна";
+"settings.account" = "Обліковий запис";
+"settings.register_prompt" = "Зареєструйтесь, щоб отримати повний доступ";
+"settings.password" = "Пароль";
+"settings.register" = "Зареєструватись";
+"settings.logout" = "Вийти";
+"settings.welcome" = "Вітаємо, %@";
+"errors.title" = "Помилка";
+"privacy.last_updated" = "Оновлено: %@";
+"privacy.intro.title" = "Вступ";
+"privacy.intro.content" = "Sweezy поважає вашу конфіденційність. Цей документ пояснює, які дані ми збираємо та як їх використовуємо.";
+"privacy.data_collection.title" = "Збір даних";
+"privacy.data_collection.content" = "Ми збираємо лише дані, необхідні для роботи додатку:";
+"privacy.data.profile" = "Ім'я та контактна інформація (зберігається локально)";
+"privacy.data.preferences" = "Мовні та інші налаштування";
+"errors.content_load_failed" = "Не вдалося завантажити контент";
+"errors.decoding_failed" = "Помилка обробки даних";
+"errors.invalid_data" = "Некоректні дані";
+"errors.cache_write_failed" = "Не вдалося зберегти в кеш";
+"errors.recovery.reinstall" = "Спробуйте перевстановити додаток";
+"errors.recovery.check_connection" = "Перевірте з'єднання з інтернетом";
+"errors.recovery.update_app" = "Оновіть додаток до останньої версії";
+"errors.recovery.free_space" = "Звільніть місце на пристрої";
+"privacy.data.appointments" = "Ваші зустрічі та нагадування";
+"privacy.data.location" = "Геолокація (лише для пошуку сервісів поруч)";
+"privacy.data_usage.title" = "Використання даних";
+"privacy.data_usage.content" = "Ваші дані використовуються виключно для функціонування додатку. Ми не продаємо та не передаємо ваші дані третім сторонам.";
+"privacy.data_storage.title" = "Зберігання даних";
+"privacy.data_storage.content" = "Більшість ваших особистих даних зберігається локально на пристрої. Дані облікового запису та підписки зберігаються захищено на серверах Sweezy для синхронізації та оплат.";
+"privacy.data_storage.local" = "Ми передаємо дані лише на наш бекенд та надійним постачальникам (наприклад, для crash‑репортів та аналітики) для покращення додатку.";
+"privacy.third_parties.title" = "Треті сторони";
+"privacy.third_parties.content" = "Sweezy використовує дружні до приватності crash‑репорти та аналітику використання (наприклад Sentry та Amplitude), щоб покращувати стабільність і функції. Ми не використовуємо ці дані для реклами та не відстежуємо вас у інших додатках або на сайтах.";
+"privacy.rights.title" = "Ваші права";
+"privacy.rights.access" = "Доступ до ваших даних у будь-який час";
+"privacy.rights.delete" = "Видалення всіх даних через Налаштування";
+"privacy.rights.export" = "Експорт ваших даних";
+"privacy.contact.title" = "Контакти";
+"privacy.contact.content" = "Якщо у вас є питання про конфіденційність, зв'яжіться з нами:";
+
+// MARK: - News
+"news.title" = "Новини";
+"news.latest" = "Останні новини";
+
+// MARK: - What's New
+"whats_new.title" = "Що нового";
+"whats_new.version" = "Версія %@";
+"whats_new.subtitle" = "Дякуємо, що використовуєте Sweezy! Ось що нового:";
+"whats_new.feature1.title" = "Перший реліз!";
+"whats_new.feature1.description" = "Sweezy тепер доступний! 50+ гайдів, чек-листи та шаблони для життя у Швейцарії.";
+"whats_new.feature2.title" = "Інтерактивна карта";
+"whats_new.feature2.description" = "200+ місць: державні установи, медичні центри, українські хаби та більше.";
+"whats_new.feature3.title" = "Шаблони документів";
+"whats_new.feature3.description" = "Готові форми з експортом у PDF для всіх офіційних процедур.";
+"whats_new.feature4.title" = "4 мови";
+"whats_new.feature4.description" = "Українська, російська, англійська та німецька з миттєвим перемиканням.";
+"whats_new.feature5.title" = "Приватність";
+"whats_new.feature5.description" = "Без реклами та маркетингових трекерів, мінімальна аналітика й crash‑репорти лише для покращення Sweezy, повна підтримка accessibility.";
+
+// MARK: - Errors
+
+// MARK: - Settings - Theme
+"settings.theme.title" = "Тема";
+"settings.theme.dark" = "Темна";
+"settings.theme.system" = "Системна";
+"errors.title" = "Помилка";
+"errors.generic" = "Сталася помилка. Спробуйте пізніше.";
+"errors.network" = "Проблема з мережею. Перевірте з'єднання.";
+"errors.location" = "Не вдалося отримати геолокацію";
+"errors.permission_denied" = "Доступ заборонено";
+"errors.data_corrupted" = "Дані пошкоджені";
+"errors.file_not_found" = "Файл не знайдено";
+"errors.invalid_input" = "Неправильні дані";
+"errors.content_load_failed" = "Не вдалося завантажити контент";
+"errors.decoding_failed" = "Помилка обробки даних";
+"errors.invalid_data" = "Некоректні дані";
+"errors.cache_write_failed" = "Не вдалося зберегти в кеш";
+"errors.recovery.reinstall" = "Спробуйте перевстановити додаток";
+"errors.recovery.check_connection" = "Перевірте з'єднання з інтернетом";
+"errors.recovery.update_app" = "Оновіть додаток до останньої версії";
+"errors.recovery.free_space" = "Звільніть місце на пристрої";
+
+// MARK: - Categories
+"category.documents" = "Документи";
+"category.housing" = "Житло";
+"category.insurance" = "Страхування";
+"category.work" = "Робота";
+"category.finance" = "Фінанси";
+"category.education" = "Освіта";
+"category.healthcare" = "Охорона здоров'я";
+"category.legal" = "Юридична допомога";
+"category.emergency" = "Екстрені служби";
+"category.integration" = "Інтеграція";
+"category.transport" = "Транспорт";
+"category.banking" = "Банківські послуги";
+
+// MARK: - Guide Categories (display names)
+"guide.category.documents" = "Документи";
+"guide.category.housing" = "Житло";
+"guide.category.insurance" = "Страхування";
+"guide.category.work" = "Робота";
+"guide.category.finance" = "Фінанси";
+"guide.category.education" = "Освіта";
+"guide.category.healthcare" = "Охорона здоров'я";
+"guide.category.legal" = "Юридична допомога";
+"guide.category.emergency" = "Екстрені";
+"guide.category.integration" = "Інтеграція";
+"guide.category.transport" = "Транспорт";
+"guide.category.banking" = "Банківські послуги";
+
+// MARK: - Difficulty Levels
+"difficulty.easy" = "Легко";
+"difficulty.medium" = "Середньо";
+"difficulty.hard" = "Складно";
+
+// MARK: - Permit Types
+"permit.s" = "S - Статус захисту";
+"permit.b" = "B - Дозвіл на проживання";
+"permit.c" = "C - Дозвіл на поселення";
+"permit.f" = "F - Тимчасове допущення";
+"permit.n" = "N - Шукач притулку";
+"permit.l" = "L - Короткострокове проживання";
+
+"difficulty.easy" = "Легко";
+"difficulty.medium" = "Середньо";
+"difficulty.hard" = "Складно";
+
+// MARK: - Permit Types
+"permit.s" = "S - Статус захисту";
+"permit.b" = "B - Дозвіл на проживання";
+"permit.c" = "C - Дозвіл на поселення";
+"permit.f" = "F - Тимчасове допущення";
+"permit.n" = "N - Шукач притулку";
+"permit.l" = "L - Короткострокове проживання";
+
+"validation.email_invalid" = "Некоректна електронна пошта";

@@ -1,0 +1,69 @@
+[
+  {
+    "id": "eeeeeeee-ffff-1111-2222-000000000501",
+    "name": "Vaud Health Insurance Premium Reduction",
+    "description": "Canton Vaud provides subsidies for health insurance premiums (Réduction de primes) based on income and family size. Official source: https://www.vd.ch/assurance-maladie",
+    "category": "health_insurance",
+    "canton": "VD",
+    "permitTypes": ["S", "B", "C", "F", "N"],
+    "conditions": [
+      {
+        "id": "11111111-2222-3333-4444-000000000511",
+        "type": "income",
+        "operator": "less_than_or_equal",
+        "value": 60000,
+        "description": "Annual income ≤ CHF 60,000"
+      }
+    ],
+    "calculationFormula": {
+      "type": "income_based_sliding",
+      "baseAmount": 3600,
+      "percentage": null,
+      "perPersonAmount": null,
+      "childBonus": null,
+      "parameters": {"max_income": 60000}
+    },
+    "maxAmount": 3600,
+    "minAmount": 0,
+    "currency": "CHF",
+    "validFrom": "2025-01-01T00:00:00Z",
+    "validUntil": null,
+    "isActive": true,
+    "officialSource": "https://www.vd.ch/assurance-maladie",
+    "lastUpdated": "2025-01-15T10:00:00Z"
+  },
+  {
+    "id": "eeeeeeee-ffff-1111-2222-000000000502",
+    "name": "Ticino Health Insurance Premium Reduction",
+    "description": "Canton Ticino offers premium reductions (Riduzione dei premi) for low-income families. Official source: https://www4.ti.ch/dss/dasi/upcd/temi/riduzione-dei-premi/",
+    "category": "health_insurance",
+    "canton": "TI",
+    "permitTypes": ["S", "B", "C", "F", "N"],
+    "conditions": [
+      {
+        "id": "11111111-2222-3333-4444-000000000521",
+        "type": "income",
+        "operator": "less_than_or_equal",
+        "value": 55000,
+        "description": "Annual income ≤ CHF 55,000"
+      }
+    ],
+    "calculationFormula": {
+      "type": "income_based_sliding",
+      "baseAmount": 3200,
+      "percentage": null,
+      "perPersonAmount": null,
+      "childBonus": null,
+      "parameters": {"max_income": 55000}
+    },
+    "maxAmount": 3200,
+    "minAmount": 0,
+    "currency": "CHF",
+    "validFrom": "2025-01-01T00:00:00Z",
+    "validUntil": null,
+    "isActive": true,
+    "officialSource": "https://www4.ti.ch/dss/dasi/upcd/temi/riduzione-dei-premi/",
+    "lastUpdated": "2025-01-15T10:00:00Z"
+  }
+]
+

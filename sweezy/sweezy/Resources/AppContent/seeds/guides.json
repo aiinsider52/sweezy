@@ -1,0 +1,658 @@
+[
+  {
+    "id": "11111111-1111-1111-1111-111111111001",
+    "title": "Як зареєструватися у Gemeinde",
+    "subtitle": "Реєстрація прибуття протягом 14 днів",
+    "bodyMarkdown": "# Реєстрація у громаді (Gemeinde)\n\nПісля прибуття до Швейцарії необхідно зареєструватися у місцевій громаді (Gemeinde) протягом 14 днів. Це важливо для отримання дозволів, медстрахування та доступу до соціальних послуг.\n\n## Що взяти з собою\n- Паспорт або ID\n- Підтвердження адреси (договір оренди/гостинність)\n- Дозвіл або підтвердження статусу S\n- Фото 3×4 (деякі кантональні вимоги)\n\n## Порада\nЗаздалегідь уточніть години прийому та чи потрібен запис. Багато Gemeinde мають онлайн‑запис і форми.",
+    "tags": ["housing", "registration", "gemeinde", "lang:uk"],
+    "category": "documents",
+    "cantonCodes": [],
+    "links": [
+      {"id": "1111-1","title": "Портал CH.CH","url": "https://www.ch.ch/uk/","type": "website","description": "Офіційний інформаційний портал"}
+    ],
+    "priority": 9,
+    "isNew": false,
+    "estimatedReadingTime": 6,
+    "lastUpdated": "2023-10-14T10:00:00Z",
+    "createdAt": "2023-10-14T10:00:00Z"
+  },
+  {
+    "id": "11111111-1111-1111-1111-111111111002",
+    "title": "Тимчасове житло: Gemeinde, Caritas, притулки",
+    "subtitle": "Де зупинитися перші тижні",
+    "bodyMarkdown": "# Тимчасове житло\n\nПерші дні можна проживати у центрах прийому, тимчасових гуртожитках або у приймаючих сімей. Gemeinde часто надає список доступних варіантів.\n\n## Де шукати\n- Caritas, Swiss Red Cross, HEKS\n- Інтеграційні центри при кантоні\n- Соцслужба (Sozialdienst) вашої громади\n\n## Документи\nМайте при собі паспорт, підтвердження статусу, а також контактну інформацію.",
+    "tags": ["housing", "temporary", "caritas", "lang:uk"],
+    "category": "housing",
+    "cantonCodes": [],
+    "links": [
+      {"id":"1111-2","title":"Caritas","url":"https://www.caritas.ch/","type":"website","description":"Підтримка й інформація"}
+    ],
+    "priority": 7,
+    "isNew": false,
+    "estimatedReadingTime": 5,
+    "lastUpdated": "2023-10-14T10:00:00Z",
+    "createdAt": "2023-10-14T10:00:00Z"
+  },
+  {
+    "id": "11111111-1111-1111-1111-111111111003",
+    "title": "Пошук квартири: платформи та поради",
+    "subtitle": "Homegate, ImmoScout24 та інші",
+    "bodyMarkdown": "# Пошук житла\n\nОрендний ринок конкурентний: готуйте повний пакет документів та реагуйте швидко.\n\n## Платформи\n- homegate.ch\n- immoscout24.ch\n- tutti.ch (оголошення)\n\n## Поради\n- Підготуйте CV орендаря, довідку про відсутність боргів, рекомендації\n- Вказуйте чесну інформацію та мотивований супровідний лист",
+    "tags": ["housing", "rental", "application", "lang:uk"],
+    "category": "housing",
+    "cantonCodes": [],
+    "links": [
+      {"id":"1111-3","title":"Homegate","url":"https://www.homegate.ch/","type":"website"},
+      {"id":"1111-4","title":"ImmoScout24","url":"https://www.immoscout24.ch/","type":"website"}
+    ],
+    "priority": 8,
+    "isNew": false,
+    "estimatedReadingTime": 6,
+    "lastUpdated": "2023-10-14T10:00:00Z",
+    "createdAt": "2023-10-14T10:00:00Z"
+  },
+  {
+    "id": "11111111-1111-1111-1111-111111111004",
+    "title": "Mietkaution та договір оренди",
+    "subtitle": "Депозит, умови, перевірка договору",
+    "bodyMarkdown": "# Mietkaution (депозит)\n\nЗазвичай 2–3 місячні орендні платежі блокуються на спеціальному рахунку.\n\n## Договір\n- Перевірте терміни попередження (Kündigungsfrist)\n- Огляд квартири (Übergabeprotokoll)\n- Заборона суборенди без дозволу\n\n## Порада\nЗберігайте всі акти передачі та листування з орендодавцем.",
+    "tags": ["housing", "rent", "mietkaution", "lang:uk"],
+    "category": "housing",
+    "cantonCodes": [],
+    "links": [
+      {"id":"1111-5","title":"Міграційна асоціація орендарів","url":"https://www.mieterverband.ch/","type":"website"}
+    ],
+    "priority": 6,
+    "isNew": false,
+    "estimatedReadingTime": 5,
+    "lastUpdated": "2023-10-14T10:00:00Z",
+    "createdAt": "2023-10-14T10:00:00Z"
+  },
+  {
+    "id": "22222222-2222-2222-2222-222222222001",
+    "title": "Статус S: отримання та продовження",
+    "subtitle": "Ausweis S та його дія",
+    "bodyMarkdown": "# Статус S\n\nСтатус тимчасового захисту дозволяє жити та працювати у Швейцарії. Документ Ausweis S видається кантональною владою.\n\n## Продовження\nТермін дії продовжується автоматично за рішенням Федерації. Перевіряйте новини кантону та листи від міграційної служби.",
+    "tags": ["documents", "permit", "status-s", "lang:uk"],
+    "category": "documents",
+    "cantonCodes": [],
+    "links": [
+      {"id":"2222-1","title":"SEM (Міграційний секретаріат)","url":"https://www.sem.admin.ch/","type":"website"}
+    ],
+    "priority": 9,
+    "isNew": false,
+    "estimatedReadingTime": 5,
+    "lastUpdated": "2023-10-14T10:00:00Z",
+    "createdAt": "2023-10-14T10:00:00Z"
+  },
+  {
+    "id": "22222222-2222-2222-2222-222222222002",
+    "title": "Migration Office у вашому кантоні",
+    "subtitle": "Як знайти та звернутися",
+    "bodyMarkdown": "# Міграційна служба (Migrationsamt)\n\nУ кожному кантоні діє свій Migrationsamt. На сайті кантону ви знайдете години прийому та форми.\n\n## Коли звертатися\n- Реєстрація/зміна адреси\n- Запит щодо дозволів та продовжень\n- Довідки та виписки",
+    "tags": ["documents", "migration", "addresses", "lang:uk"],
+    "category": "documents",
+    "cantonCodes": [],
+    "links": [
+      {"id":"2222-2","title":"Пошук кантональних служб","url":"https://www.ch.ch/en/cantonal-authorities/","type":"website"}
+    ],
+    "priority": 7,
+    "isNew": false,
+    "estimatedReadingTime": 4,
+    "lastUpdated": "2023-10-14T10:00:00Z",
+    "createdAt": "2023-10-14T10:00:00Z"
+  },
+  {
+    "id": "22222222-2222-2222-2222-222222222003",
+    "title": "Зміна адреси та Sozialdienst",
+    "subtitle": "Куди повідомляти та як отримати допомогу",
+    "bodyMarkdown": "# Зміна адреси\n\nПро зміну адреси слід повідомити Gemeinde та страховій.\n\n## Sozialdienst\nЯкщо виникли фінансові труднощі — зверніться до соцслужби громади. Вони підкажуть процедуру підтримки (Sozialhilfe).",
+    "tags": ["documents", "address", "sozialdienst", "lang:uk"],
+    "category": "documents",
+    "cantonCodes": [],
+    "links": [
+      {"id":"2222-3","title":"Соцслужби кантонів","url":"https://www.ch.ch/en/social-assistance/","type":"website"}
+    ],
+    "priority": 6,
+    "isNew": false,
+    "estimatedReadingTime": 4,
+    "lastUpdated": "2023-10-14T10:00:00Z",
+    "createdAt": "2023-10-14T10:00:00Z"
+  },
+  {
+    "id": "33333333-3333-3333-3333-333333333001",
+    "title": "Базове медстрахування (Grundversicherung)",
+    "subtitle": "Що покриває та як обрати",
+    "bodyMarkdown": "# Grundversicherung\n\nБазове обов'язкове страхування покриває лікування у межах базового пакета. Обирайте франшизу (Franchise) та модель (HMO/Family Doctor/Telemed).\n\n## Провайдери\nCSS, Helsana, SWICA, Sanitas та інші. Порівнюйте ціни в офіційних калькуляторах.",
+    "tags": ["health", "insurance", "grundversicherung", "lang:uk"],
+    "category": "healthcare",
+    "cantonCodes": [],
+    "links": [
+      {"id":"3333-1","title":"Priminfo (офіційний калькулятор)","url":"https://www.priminfo.admin.ch/","type":"website"}
+    ],
+    "priority": 9,
+    "isNew": false,
+    "estimatedReadingTime": 5,
+    "lastUpdated": "2023-10-14T10:00:00Z",
+    "createdAt": "2023-10-14T10:00:00Z"
+  },
+  {
+    "id": "33333333-3333-3333-3333-333333333002",
+    "title": "Субсидія на медстрахування",
+    "subtitle": "Krankenkassenverbilligung",
+    "bodyMarkdown": "# Субсидія на премії\n\nЗа низького доходу доступна знижка на страхові премії. Подавайте заявку в кантоні.\n\n## Кроки\n- Перевірте вимоги кантону\n- Зберіть довідки про доходи\n- Подайте онлайн або поштою",
+    "tags": ["health", "subsidy", "kanton", "lang:uk"],
+    "category": "healthcare",
+    "cantonCodes": [],
+    "links": [
+      {"id":"3333-2","title":"ZH: Prämienverbilligung","url":"https://www.zh.ch/de/gesundheit/gesundheitsversorgung/praemienverbilligung.html","type":"website"}
+    ],
+    "priority": 8,
+    "isNew": false,
+    "estimatedReadingTime": 4,
+    "lastUpdated": "2023-10-14T10:00:00Z",
+    "createdAt": "2023-10-14T10:00:00Z"
+  },
+  {
+    "id": "33333333-3333-3333-3333-333333333003",
+    "title": "Як записатися до лікаря",
+    "subtitle": "Телефонний/електронний запис, приклад листа",
+    "bodyMarkdown": "# Запис до лікаря\n\nЗазвичай потрібно телефонувати в кабінет або заповнити онлайн‑форму. Майте при собі номер поліса та список симптомів.\n\n## Порада\nВикористайте шаблон звернення в розділі \"Шаблони документів\" для першого запиту.",
+    "tags": ["health", "doctor", "appointment", "lang:uk"],
+    "category": "healthcare",
+    "cantonCodes": [],
+    "links": [
+      {"id":"3333-3","title":"Пошук лікаря FMH","url":"https://www.doctorfmh.ch/","type":"website"}
+    ],
+    "priority": 6,
+    "isNew": false,
+    "estimatedReadingTime": 4,
+    "lastUpdated": "2023-10-14T10:00:00Z",
+    "createdAt": "2023-10-14T10:00:00Z"
+  },
+  {
+    "id": "44444444-4444-4444-4444-444444444001",
+    "title": "Запис дитини до школи",
+    "subtitle": "Schulverwaltung у Gemeinde",
+    "bodyMarkdown": "# Школа\n\nУ Швейцарії обов'язкова освіта. Зверніться до Schulverwaltung у вашій громаді для розподілу до школи.\n\n## Документи\n- Паспорт дитини\n- Адреса проживання\n- Вакцинації/медична картка",
+    "tags": ["education", "school", "children", "lang:uk"],
+    "category": "education",
+    "cantonCodes": [],
+    "links": [
+      {"id":"4444-1","title":"Освіта в CH","url":"https://www.ch.ch/en/compulsory-schooling/","type":"website"}
+    ],
+    "priority": 8,
+    "isNew": false,
+    "estimatedReadingTime": 4,
+    "lastUpdated": "2023-10-14T10:00:00Z",
+    "createdAt": "2023-10-14T10:00:00Z"
+  },
+  {
+    "id": "44444444-4444-4444-4444-444444444002",
+    "title": "Мовні курси: німецька/англійська",
+    "subtitle": "Integration Kurse, Caritas, Klubschule",
+    "bodyMarkdown": "# Мовні курси\n\nБагато кантонів субсидують мовні курси для інтеграції. Оберіть рівень A1–B2 та формат.\n\n## Де шукати\n- Кантональні портали інтеграції\n- Caritas, Klubschule, Migros Klubschule",
+    "tags": ["education", "language", "integration", "lang:uk"],
+    "category": "education",
+    "cantonCodes": [],
+    "links": [
+      {"id":"4444-2","title":"Klubschule Migros","url":"https://www.klubschule.ch/","type":"website"}
+    ],
+    "priority": 6,
+    "isNew": false,
+    "estimatedReadingTime": 3,
+    "lastUpdated": "2023-10-14T10:00:00Z",
+    "createdAt": "2023-10-14T10:00:00Z"
+  },
+  {
+    "id": "44444444-4444-4444-4444-444444444003",
+    "title": "Сімейні пільги",
+    "subtitle": "Kinderzulagen та підтримка сімей",
+    "bodyMarkdown": "# Сімейні виплати\n\nУ різних кантонах доступні Kinderzulagen та інші програми підтримки. Зверніться до кантональної каси.\n\n## Документи\n- Довідка про зайнятість\n- Свідоцтво про народження дитини",
+    "tags": ["education", "family", "benefits", "lang:uk"],
+    "category": "education",
+    "cantonCodes": [],
+    "links": [],
+    "priority": 5,
+    "isNew": false,
+    "estimatedReadingTime": 3,
+    "lastUpdated": "2023-10-14T10:00:00Z",
+    "createdAt": "2023-10-14T10:00:00Z"
+  },
+  {
+    "id": "55555555-5555-5555-5555-555555555001",
+    "title": "Sozialhilfe: як подати запит",
+    "subtitle": "Соціальна допомога у громаді",
+    "bodyMarkdown": "# Sozialhilfe\n\nУ разі фінансової скрути подайте запит у Sozialdienst вашої громади. Поясніть ситуацію, надайте документи.\n\n## Врахуйте\nПідтримка надається індивідуально та може впливати на подальші дозволи.",
+    "tags": ["finance", "sozialhilfe", "support", "lang:uk"],
+    "category": "finance",
+    "cantonCodes": [],
+    "links": [
+      {"id":"5555-1","title":"Sozialhilfe в Швейцарії","url":"https://www.ch.ch/en/social-assistance/","type":"website"}
+    ],
+    "priority": 8,
+    "isNew": false,
+    "estimatedReadingTime": 4,
+    "lastUpdated": "2023-10-14T10:00:00Z",
+    "createdAt": "2023-10-14T10:00:00Z"
+  },
+  {
+    "id": "55555555-5555-5555-5555-555555555002",
+    "title": "Відкриття банківського рахунку",
+    "subtitle": "UBS, PostFinance, Raiffeisen",
+    "bodyMarkdown": "# Банківський рахунок\n\nДля повсякденних платежів відкрийте Privatkonto.\n\n## Документи\n- Паспорт\n- Дозвіл (S/інший)\n- Адреса проживання",
+    "tags": ["finance", "banking", "konto", "lang:uk"],
+    "category": "finance",
+    "cantonCodes": [],
+    "links": [
+      {"id":"5555-2","title":"UBS","url":"https://www.ubs.com/","type":"website"},
+      {"id":"5555-3","title":"PostFinance","url":"https://www.postfinance.ch/","type":"website"}
+    ],
+    "priority": 6,
+    "isNew": false,
+    "estimatedReadingTime": 3,
+    "lastUpdated": "2023-10-14T10:00:00Z",
+    "createdAt": "2023-10-14T10:00:00Z"
+  },
+  {
+    "id": "55555555-5555-5555-5555-555555555003",
+    "title": "Перекази в Україну",
+    "subtitle": "Wise, Revolut: як обрати",
+    "bodyMarkdown": "# Міжнародні перекази\n\nОнлайн‑сервіси дозволяють швидко і недорого відправляти кошти в Україну.\n\n## Поради\n- Перевіряйте комісії та курси\n- Верифікуйте акаунти заздалегідь",
+    "tags": ["finance", "transfers", "wise", "revolut", "lang:uk"],
+    "category": "finance",
+    "cantonCodes": [],
+    "links": [
+      {"id":"5555-4","title":"Wise","url":"https://wise.com/","type":"website"},
+      {"id":"5555-5","title":"Revolut","url":"https://www.revolut.com/","type":"website"}
+    ],
+    "priority": 5,
+    "isNew": false,
+    "estimatedReadingTime": 3,
+    "lastUpdated": "2023-10-14T10:00:00Z",
+    "createdAt": "2023-10-14T10:00:00Z"
+  },
+  {
+    "id": "66666666-6666-6666-6666-666666666001",
+    "title": "Де шукати роботу",
+    "subtitle": "jobup.ch, indeed.ch, arbeit.swiss",
+    "bodyMarkdown": "# Пошук роботи\n\nВикористовуйте локальні платформи та мережі. Підготуйте CV швейцарського формату.\n\n## Портали\n- jobup.ch\n- indeed.ch\n- arbeit.swiss",
+    "tags": ["work", "jobs", "cv", "lang:uk"],
+    "category": "work",
+    "cantonCodes": [],
+    "links": [
+      {"id":"6666-1","title":"arbeit.swiss","url":"https://www.arbeit.swiss/","type":"website"}
+    ],
+    "priority": 8,
+    "isNew": false,
+    "estimatedReadingTime": 4,
+    "lastUpdated": "2023-10-14T10:00:00Z",
+    "createdAt": "2023-10-14T10:00:00Z"
+  },
+  {
+    "id": "66666666-6666-6666-6666-666666666002",
+    "title": "CV швейцарського формату",
+    "subtitle": "Що важливо в резюме",
+    "bodyMarkdown": "# CV\n\nРезюме має бути стислим (1–2 стор.), з досягненнями, мовами, сертифікатами. Додайте професійне фото (за традицією).\n\n## Порада\nСтруктуруйте досвід у зворотному хронологічному порядку.",
+    "tags": ["work", "cv", "resume", "lang:uk"],
+    "category": "work",
+    "cantonCodes": [],
+    "links": [],
+    "priority": 6,
+    "isNew": false,
+    "estimatedReadingTime": 3,
+    "lastUpdated": "2023-10-14T10:00:00Z",
+    "createdAt": "2023-10-14T10:00:00Z"
+  },
+  {
+    "id": "66666666-6666-6666-6666-666666666003",
+    "title": "Дозволи на роботу зі статусом S",
+    "subtitle": "Що можна та що потрібно врахувати",
+    "bodyMarkdown": "# Працевлаштування зі статусом S\n\nСтатус S дозволяє працювати без окремого дозволу, але роботодавець може подати повідомлення до кантональних органів.\n\n## Порада\nПеревіряйте колективні договори (GAV) і мінімальні ставки.",
+    "tags": ["work", "permit", "status-s", "lang:uk"],
+    "category": "work",
+    "cantonCodes": [],
+    "links": [],
+    "priority": 5,
+    "isNew": false,
+    "estimatedReadingTime": 3,
+    "lastUpdated": "2023-10-14T10:00:00Z",
+    "createdAt": "2023-10-14T10:00:00Z"
+  },
+  {
+    "id": "77777777-7777-7777-7777-777777777001",
+    "title": "Swiss Travel Pass, HalbTax, GA",
+    "subtitle": "Як заощаджувати на транспорті",
+    "bodyMarkdown": "# Транспортні абонементи\n\nHalbtax дає -50% на більшість поїздок. Swiss Travel Pass — безліміт на кілька днів. GA — річний/місячний безліміт.\n\n## Де купити\n- SBB Mobile\n- Каси на вокзалах",
+    "tags": ["transport", "sbb", "halbtax", "ga", "lang:uk"],
+    "category": "transport",
+    "cantonCodes": [],
+    "links": [
+      {"id":"7777-1","title":"SBB","url":"https://www.sbb.ch/","type":"website"}
+    ],
+    "priority": 7,
+    "isNew": false,
+    "estimatedReadingTime": 4,
+    "lastUpdated": "2023-10-14T10:00:00Z",
+    "createdAt": "2023-10-14T10:00:00Z"
+  },
+  {
+    "id": "77777777-7777-7777-7777-777777777002",
+    "title": "Обмін українських прав",
+    "subtitle": "Як конвертувати водійське посвідчення",
+    "bodyMarkdown": "# Обмін прав\n\nУкраїнські права можна обміняти на швейцарські протягом 12 місяців. Зверніться до Strassenverkehrsamt кантону.\n\n## Документи\n- Паспорт\n- Українські права\n- Фото/медична довідка (за вимогою)",
+    "tags": ["transport", "license", "umtausch", "lang:uk"],
+    "category": "transport",
+    "cantonCodes": [],
+    "links": [],
+    "priority": 6,
+    "isNew": false,
+    "estimatedReadingTime": 3,
+    "lastUpdated": "2023-10-14T10:00:00Z",
+    "createdAt": "2023-10-14T10:00:00Z"
+  },
+  {
+    "id": "77777777-7777-7777-7777-777777777003",
+    "title": "SBB Mobile App: як користуватися",
+    "subtitle": "Квитки, абонементи та розклади",
+    "bodyMarkdown": "# SBB Mobile\n\nОфіційний застосунок для квитків і планування поїздок. Збережіть спосіб оплати, активуйте абонементи.\n\n## Порада\nУвімкніть \"EasyRide\" для автоматичного визначення маршруту.",
+    "tags": ["transport", "sbb", "app", "lang:uk"],
+    "category": "transport",
+    "cantonCodes": [],
+    "links": [],
+    "priority": 5,
+    "isNew": false,
+    "estimatedReadingTime": 3,
+    "lastUpdated": "2023-10-14T10:00:00Z",
+    "createdAt": "2023-10-14T10:00:00Z"
+  },
+  {
+    "id": "88888888-8888-8888-8888-888888888001",
+    "title": "Екстрені телефони та права",
+    "subtitle": "112, 117, 118, 145",
+    "bodyMarkdown": "# Екстрені телефони\n\n- 112 — загальна допомога\n- 117 — поліція\n- 118 — пожежна\n- 144 — швидка\n- 145 — токсикологія\n\nНадавайте чітку адресу та опишіть ситуацію.",
+    "tags": ["rights", "emergency", "numbers", "lang:uk"],
+    "category": "legal",
+    "cantonCodes": [],
+    "links": [],
+    "priority": 10,
+    "isNew": false,
+    "estimatedReadingTime": 2,
+    "lastUpdated": "2023-10-14T10:00:00Z",
+    "createdAt": "2023-10-14T10:00:00Z"
+  },
+  {
+    "id": "88888888-8888-8888-8888-888888888002",
+    "title": "Юридична допомога",
+    "subtitle": "Де отримати безкоштовну консультацію",
+    "bodyMarkdown": "# Юридична допомога\n\nУ багатьох кантонах діють центри безкоштовної правової підтримки для біженців.\n\n## Як підготуватись\nОпишіть проблему, зберіть документи, підготуйте питання.",
+    "tags": ["rights", "legal", "aid", "lang:uk"],
+    "category": "legal",
+    "cantonCodes": [],
+    "links": [],
+    "priority": 7,
+    "isNew": false,
+    "estimatedReadingTime": 3,
+    "lastUpdated": "2023-10-14T10:00:00Z",
+    "createdAt": "2023-10-14T10:00:00Z"
+  },
+  {
+    "id": "88888888-8888-8888-8888-888888888003",
+    "title": "Посольство України у Берні",
+    "subtitle": "Адреса та контакти",
+    "bodyMarkdown": "# Посольство України\n\nНадання консульських дій: паспорт, довіреності, нотаріальні дії.\n\nАдреса: Fellerstrasse 25, 3027 Bern. Телефон на сайті посольства.",
+    "tags": ["rights", "embassy", "documents", "lang:uk"],
+    "category": "legal",
+    "cantonCodes": [],
+    "links": [
+      {"id":"8888-1","title":"Посольство України","url":"https://switzerland.mfa.gov.ua/","type":"website"}
+    ],
+    "priority": 6,
+    "isNew": false,
+    "estimatedReadingTime": 3,
+    "lastUpdated": "2023-10-14T10:00:00Z",
+    "createdAt": "2023-10-14T10:00:00Z"
+  },
+  {
+    "id": "99999999-9999-9999-9999-999999999001",
+    "title": "Caritas, SRC, HEKS, Refugee Aid",
+    "subtitle": "Організації підтримки",
+    "bodyMarkdown": "# Корисні організації\n\nCaritas, Swiss Red Cross (SRC), HEKS, Refugee Aid забезпечують соціальну, юридичну та гуманітарну підтримку.\n\nЗверніться на локальні сторінки вашого кантону.",
+    "tags": ["organizations", "caritas", "redcross", "heks", "lang:uk"],
+    "category": "integration",
+    "cantonCodes": [],
+    "links": [
+      {"id":"9999-1","title":"Swiss Red Cross","url":"https://www.redcross.ch/","type":"website"}
+    ],
+    "priority": 7,
+    "isNew": false,
+    "estimatedReadingTime": 3,
+    "lastUpdated": "2023-10-14T10:00:00Z",
+    "createdAt": "2023-10-14T10:00:00Z"
+  },
+  {
+    "id": "99999999-9999-9999-9999-999999999002",
+    "title": "Інфоцентри при Gemeinde та спільноти",
+    "subtitle": "Де отримати локальні поради",
+    "bodyMarkdown": "# Інфоцентри\n\nБагато громад мають пункти інформації для новоприбулих.\n\n## Спільноти\nПеревірені Telegram‑групи та Volunteering hubs — запитайте у Gemeinde або Caritas.",
+    "tags": ["organizations", "community", "volunteers", "lang:uk"],
+    "category": "integration",
+    "cantonCodes": [],
+    "links": [],
+    "priority": 5,
+    "isNew": false,
+    "estimatedReadingTime": 3,
+    "lastUpdated": "2023-10-14T10:00:00Z",
+    "createdAt": "2023-10-14T10:00:00Z"
+  },
+  {
+    "id": "aaaaaaa1-aaaa-aaaa-aaaa-aaaaaaaaa001",
+    "title": "Language Helper: базові фрази",
+    "subtitle": "DE/EN для повсякденних ситуацій",
+    "bodyMarkdown": "# Базові фрази\n\nПривітання, звернення у лікарні, пошті, супермаркеті.\n\n## Приклади (DE)\n- Guten Tag!\n- Ich habe einen Termin.\n- Wo ist die Kasse?",
+    "tags": ["tools", "language", "helper", "lang:uk"],
+    "category": "integration",
+    "cantonCodes": [],
+    "links": [],
+    "priority": 6,
+    "isNew": false,
+    "estimatedReadingTime": 3,
+    "lastUpdated": "2023-10-14T10:00:00Z",
+    "createdAt": "2023-10-14T10:00:00Z"
+  },
+  {
+    "id": "aaaaaaa2-aaaa-aaaa-aaaa-aaaaaaaaa002",
+    "title": "Salary Calculator: нетто‑оцінка",
+    "subtitle": "Орієнтовний розрахунок після податків",
+    "bodyMarkdown": "# Зарплата після податків\n\nПодатки відрізняються за кантонами. Для орієнтовного розрахунку використайте онлайн‑калькулятори.\n\n## Порада\nЗвертайте увагу на відрахування на страхування та пенсійний фонд.",
+    "tags": ["tools", "salary", "calculator", "lang:uk"],
+    "category": "integration",
+    "cantonCodes": [],
+    "links": [],
+    "priority": 5,
+    "isNew": false,
+    "estimatedReadingTime": 3,
+    "lastUpdated": "2023-10-14T10:00:00Z",
+    "createdAt": "2023-10-14T10:00:00Z"
+  },
+  {
+    "id": "aaaaaaa3-aaaa-aaaa-aaaa-aaaaaaaaa003",
+    "title": "Integration Score: що оформити далі",
+    "subtitle": "Короткий чек‑ап",
+    "bodyMarkdown": "# Integration Score\n\nПройдіть короткий тест і отримайте пріоритети: реєстрація, страхування, мова, робота.\n\n## Результат\nСписок конкретних кроків із посиланнями на розділи.",
+    "tags": ["tools", "integration", "score", "lang:uk"],
+    "category": "integration",
+    "cantonCodes": [],
+    "links": [],
+    "priority": 4,
+    "isNew": false,
+    "estimatedReadingTime": 2,
+    "lastUpdated": "2023-10-14T10:00:00Z",
+    "createdAt": "2023-10-14T10:00:00Z"
+  },
+  {
+    "id": "aaaaaaa4-aaaa-aaaa-aaaa-aaaaaaaaa004",
+    "title": "Emergency Mode: SOS‑поради",
+    "subtitle": "Що робити у критичній ситуації",
+    "bodyMarkdown": "# SOS\n\nЗнайдіть найближчу лікарню/поліцію на мапі, зателефонуйте на 112/117/118/144.\n\n## Порада\nТримайте під рукою список ліків та алергій.",
+    "tags": ["tools", "emergency", "sos", "lang:uk"],
+    "category": "integration",
+    "cantonCodes": [],
+    "links": [],
+    "priority": 8,
+    "isNew": false,
+    "estimatedReadingTime": 2,
+    "lastUpdated": "2023-10-14T10:00:00Z",
+    "createdAt": "2023-10-14T10:00:00Z"
+  },
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440001",
+    "title": "First Steps in Switzerland",
+    "subtitle": "Essential tasks for your first week",
+    "bodyMarkdown": "# Welcome to Switzerland\n\nCongratulations on arriving in Switzerland! This guide will help you navigate your first important steps.\n\n## Immediate Priorities\n\n### 1. Register with Local Authorities\nYou must register with your local municipality (Gemeinde) within 14 days of arrival.\n\n**Required documents:**\n- Valid passport\n- S permit or temporary protection status\n- Proof of accommodation\n\n### 2. Health Insurance\nHealth insurance is mandatory in Switzerland. You have 3 months to choose a provider.\n\n**Tips:**\n- Compare different insurance companies\n- Consider your budget and needs\n- Ask about premium reductions if you have low income\n\n### 3. Open a Bank Account\nA Swiss bank account will make daily life much easier.\n\n**What you need:**\n- Valid ID\n- Proof of address\n- Employment contract (if available)\n\n### 4. Learn the Local Language\nStart learning German, French, or Italian depending on your region.\n\n**Free resources:**\n- Local integration courses\n- Online language apps\n- Community language exchanges\n\n## Getting Help\n\nDon't hesitate to ask for help. Switzerland has many support services for newcomers.",
+    "tags": ["arrival", "registration", "health-insurance", "banking"],
+    "category": "integration",
+    "cantonCodes": [],
+    "links": [
+      {
+        "id": "550e8400-e29b-41d4-a716-446655440101",
+        "title": "Swiss Government Integration Portal",
+        "url": "https://www.ch.ch/en/",
+        "type": "website",
+        "description": "Official information portal"
+      },
+      {
+        "id": "550e8400-e29b-41d4-a716-446655440102",
+        "title": "Health Insurance Comparison",
+        "url": "https://www.comparis.ch/krankenkassen",
+        "type": "website",
+        "description": "Compare health insurance providers"
+      }
+    ],
+    "priority": 10,
+    "isNew": true,
+    "estimatedReadingTime": 8,
+    "lastUpdated": "2023-10-14T10:00:00Z",
+    "createdAt": "2023-10-14T10:00:00Z"
+  },
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440002",
+    "title": "Understanding Swiss Health Insurance",
+    "subtitle": "Everything you need to know about mandatory health coverage",
+    "bodyMarkdown": "# Swiss Health Insurance System\n\nHealth insurance (Krankenversicherung) is mandatory for everyone living in Switzerland.\n\n## Key Points\n\n### Mandatory Coverage\n- Everyone must have basic health insurance\n- Coverage starts from your first day in Switzerland\n- You have 3 months to choose a provider\n\n### How It Works\n- Monthly premiums vary by canton and age\n- Annual deductible (Franchise): CHF 300-2500\n- Co-payment: 10% of costs above deductible\n- Maximum out-of-pocket: CHF 700-2500 per year\n\n### Choosing a Provider\n\n**Factors to consider:**\n- Monthly premium\n- Deductible amount\n- Network of doctors and hospitals\n- Additional services\n\n**Popular insurers:**\n- CSS\n- Helsana\n- Swica\n- KPT\n- Sanitas\n\n### Premium Reductions\n\nIf your income is low, you may qualify for premium reductions (Prämienverbilligung).\n\n**Eligibility varies by canton but generally:**\n- Singles earning less than CHF 35,000-45,000\n- Families with proportionally higher limits\n- Students and apprentices\n\n### How to Apply\n1. Contact your canton's health insurance office\n2. Submit income documentation\n3. Receive decision within 4-6 weeks\n4. Reductions are paid directly to your insurer\n\n## Emergency Coverage\n\nIf you haven't chosen an insurer after 3 months, your canton will assign one automatically.",
+    "tags": ["health-insurance", "premiums", "deductible", "subsidies"],
+    "category": "healthcare",
+    "cantonCodes": [],
+    "links": [
+      {
+        "id": "550e8400-e29b-41d4-a716-446655440201",
+        "title": "Federal Office of Public Health",
+        "url": "https://www.bag.admin.ch/bag/en/home.html",
+        "type": "website",
+        "description": "Official health insurance information"
+      },
+      {
+        "id": "550e8400-e29b-41d4-a716-446655440202",
+        "title": "Premium Calculator",
+        "url": "https://www.priminfo.admin.ch/",
+        "type": "website",
+        "description": "Compare insurance premiums"
+      }
+    ],
+    "priority": 9,
+    "isNew": false,
+    "estimatedReadingTime": 12,
+    "lastUpdated": "2023-10-10T14:30:00Z",
+    "createdAt": "2023-09-15T09:00:00Z"
+  },
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440003",
+    "title": "Finding Housing in Switzerland",
+    "subtitle": "Tips and resources for securing accommodation",
+    "bodyMarkdown": "# Housing in Switzerland\n\nFinding housing in Switzerland can be challenging, especially in popular cities. Here's what you need to know.\n\n## Types of Housing\n\n### Rental Apartments\n- Most common option for newcomers\n- Typically unfurnished\n- Require 2-3 months deposit\n- Notice period: 3 months\n\n### Shared Housing (WG)\n- More affordable option\n- Great for meeting people\n- Shorter commitment possible\n- Shared kitchen and living areas\n\n### Temporary Housing\n- Hotels and hostels for short stays\n- Furnished apartments\n- Corporate housing\n- Higher cost but flexible\n\n## Search Strategies\n\n### Online Platforms\n- **homegate.ch** - Largest platform\n- **immoscout24.ch** - Popular alternative\n- **tutti.ch** - Classified ads\n- **wgzimmer.ch** - Shared housing\n\n### Offline Methods\n- Local newspapers\n- Notice boards in supermarkets\n- Real estate agencies\n- Word of mouth\n\n## Application Process\n\n### Required Documents\n- Completed application form\n- Copy of ID/passport\n- Employment contract or income proof\n- Bank statements (last 3 months)\n- Previous landlord reference\n- Debt collection certificate (Betreibungsregisterauszug)\n\n### Tips for Success\n- Apply quickly - good apartments go fast\n- Prepare all documents in advance\n- Write a personal cover letter\n- Be flexible with viewing times\n- Consider less popular areas\n\n## Rental Costs\n\n### What to Expect\n- **Zurich**: CHF 1,200-2,500 for 2-3 rooms\n- **Geneva**: CHF 1,100-2,200 for 2-3 rooms\n- **Basel**: CHF 900-1,800 for 2-3 rooms\n- **Bern**: CHF 800-1,600 for 2-3 rooms\n\n### Additional Costs\n- Utilities (Nebenkosten): CHF 150-300\n- Internet: CHF 50-80\n- TV/Radio tax: CHF 365/year\n- Household insurance: CHF 150-300/year\n\n## Legal Protections\n\n- Rent increases are regulated\n- Deposit must be held in blocked account\n- Right to challenge excessive rent\n- Protection against discrimination",
+    "tags": ["housing", "rental", "apartment", "WG", "deposit"],
+    "category": "housing",
+    "cantonCodes": [],
+    "links": [
+      {
+        "id": "550e8400-e29b-41d4-a716-446655440301",
+        "title": "Homegate",
+        "url": "https://www.homegate.ch/",
+        "type": "website",
+        "description": "Largest housing platform"
+      },
+      {
+        "id": "550e8400-e29b-41d4-a716-446655440302",
+        "title": "Tenant Rights Guide",
+        "url": "https://www.mieterverband.ch/",
+        "type": "website",
+        "description": "Swiss Tenants' Association"
+      }
+    ],
+    "priority": 8,
+    "isNew": false,
+    "estimatedReadingTime": 15,
+    "lastUpdated": "2023-10-05T16:45:00Z",
+    "createdAt": "2023-09-20T11:30:00Z"
+  },
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440004",
+    "title": "Working in Switzerland",
+    "subtitle": "Employment rights, job search, and workplace culture",
+    "bodyMarkdown": "# Working in Switzerland\n\nSwitzerland has a strong job market with excellent working conditions. Here's your guide to employment.\n\n## Work Authorization\n\n### With S Permit\n- Right to work in any canton\n- No work permit required\n- Same rights as other workers\n- Can change jobs freely\n\n### Employment Rights\n- Equal pay for equal work\n- Protection against discrimination\n- Right to join unions\n- Workplace safety protections\n\n## Job Search\n\n### Online Job Portals\n- **jobs.ch** - Largest job platform\n- **jobup.ch** - Popular alternative\n- **xing.com** - Professional networking\n- **linkedin.com** - International platform\n\n### Government Services\n- Regional Employment Centers (RAV)\n- Free job counseling\n- Skills assessment\n- Language courses\n\n### Networking\n- Professional associations\n- Industry events\n- Expat communities\n- Alumni networks\n\n## Application Process\n\n### CV Requirements\n- Photo (professional headshot)\n- Personal details\n- Education and qualifications\n- Work experience\n- Languages and skills\n- References\n\n### Cover Letter\n- Address specific job requirements\n- Show knowledge of company\n- Explain your motivation\n- Keep to one page\n\n### Interviews\n- Punctuality is crucial\n- Dress professionally\n- Prepare questions about the role\n- Follow up with thank you email\n\n## Workplace Culture\n\n### Key Values\n- Punctuality and reliability\n- Quality over quantity\n- Direct communication\n- Work-life balance\n- Consensus building\n\n### Working Hours\n- Standard: 40-42 hours per week\n- Flexible hours common\n- Lunch breaks: 30-60 minutes\n- Overtime compensation required\n\n### Vacation and Benefits\n- Minimum 4 weeks paid vacation\n- 13th month salary common\n- Sick leave protection\n- Maternity/paternity leave\n- Pension contributions\n\n## Salary Expectations\n\n### Average Salaries (Gross/Year)\n- **Administrative**: CHF 55,000-75,000\n- **IT/Tech**: CHF 80,000-120,000\n- **Healthcare**: CHF 70,000-100,000\n- **Education**: CHF 60,000-90,000\n- **Hospitality**: CHF 45,000-65,000\n\n### Salary Negotiation\n- Research market rates\n- Consider total compensation\n- Negotiate during job offer\n- Annual reviews common\n\n## Recognition of Qualifications\n\nForeign qualifications may need recognition:\n- Contact SERI (State Secretariat for Education)\n- Professional associations\n- Canton education departments\n- May require additional training",
+    "tags": ["employment", "job-search", "CV", "salary", "workplace"],
+    "category": "work",
+    "cantonCodes": [],
+    "links": [
+      {
+        "id": "550e8400-e29b-41d4-a716-446655440401",
+        "title": "Jobs.ch",
+        "url": "https://www.jobs.ch/",
+        "type": "website",
+        "description": "Leading job portal"
+      },
+      {
+        "id": "550e8400-e29b-41d4-a716-446655440402",
+        "title": "RAV Employment Centers",
+        "url": "https://www.treffpunkt-arbeit.ch/",
+        "type": "website",
+        "description": "Government employment services"
+      }
+    ],
+    "priority": 7,
+    "isNew": false,
+    "estimatedReadingTime": 18,
+    "lastUpdated": "2023-09-28T13:20:00Z",
+    "createdAt": "2023-09-10T08:15:00Z"
+  },
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440005",
+    "title": "Swiss Banking and Finance",
+    "subtitle": "Opening accounts, understanding the financial system",
+    "bodyMarkdown": "# Banking in Switzerland\n\nThe Swiss banking system is renowned for its stability and security. Here's how to navigate it as a newcomer.\n\n## Opening a Bank Account\n\n### Required Documents\n- Valid passport or ID\n- Residence permit (S permit accepted)\n- Proof of address (rental contract, utility bill)\n- Employment contract or income proof\n- Initial deposit (varies by bank)\n\n### Types of Accounts\n\n#### Private Account (Privatkonto)\n- For personal banking\n- Debit card included\n- Online banking access\n- Monthly fees: CHF 5-15\n\n#### Savings Account (Sparkonto)\n- Higher interest rates\n- Limited transactions\n- Good for emergency funds\n- Lower or no monthly fees\n\n#### Youth Account (under 25)\n- Reduced or no fees\n- Special benefits\n- Student discounts\n- Proof of student status required\n\n### Major Banks\n\n#### Big Banks\n- **UBS** - Largest Swiss bank\n- **Credit Suisse** - International presence\n- Higher fees but extensive services\n\n#### Cantonal Banks\n- **Zürcher Kantonalbank (ZKB)**\n- **Berner Kantonalbank (BEKB)**\n- Regional focus, competitive rates\n\n#### Online Banks\n- **Neon** - Mobile-first, low fees\n- **Zak** - Digital banking solution\n- Lower costs, fewer physical branches\n\n## Payment Methods\n\n### Debit Cards\n- Most common payment method\n- Accepted everywhere\n- PIN required for transactions\n- Daily withdrawal limits\n\n### Credit Cards\n- Less common than other countries\n- Higher annual fees\n- Strict approval process\n- Useful for online shopping and travel\n\n### Cash\n- Still widely used\n- ATMs everywhere\n- Coins up to CHF 5\n- Notes: CHF 10, 20, 50, 100, 200, 1000\n\n### Digital Payments\n- **TWINT** - Swiss mobile payment app\n- **Apple Pay/Google Pay** - Increasingly accepted\n- **PayPal** - For online purchases\n\n## Understanding Swiss Finances\n\n### Cost of Living\n- High salaries offset high costs\n- Budget 25-30% of income for housing\n- Transportation: CHF 80-150/month\n- Food: CHF 400-600/month per person\n\n### Taxes\n- Federal, cantonal, and municipal taxes\n- Tax rates vary by canton\n- Annual tax return required\n- Withholding tax for some employees\n\n### Insurance Requirements\n- Health insurance (mandatory)\n- Household insurance (recommended)\n- Personal liability insurance (recommended)\n- Car insurance (if you drive)\n\n### Building Credit\n- Pay bills on time\n- Maintain stable employment\n- Keep bank account in good standing\n- Avoid debt collection procedures\n\n## Money Transfer\n\n### International Transfers\n- Bank wire transfers (expensive)\n- **Wise** (formerly TransferWise)\n- **Remitly** for specific countries\n- **Western Union** for cash pickup\n\n### Within Switzerland\n- Bank transfers (usually free)\n- TWINT for small amounts\n- PostFinance services\n\n## Financial Planning\n\n### Emergency Fund\n- Save 3-6 months of expenses\n- Keep in easily accessible account\n- Swiss franc deposits recommended\n\n### Retirement Planning\n- 3-pillar system in Switzerland\n- Pillar 1: State pension (AHV)\n- Pillar 2: Occupational pension\n- Pillar 3: Private savings (tax benefits)\n\n### Investment Options\n- Bank investment products\n- Stock trading platforms\n- Real estate investment\n- Pension fund contributions",
+    "tags": ["banking", "finance", "account", "payments", "taxes"],
+    "category": "finance",
+    "cantonCodes": [],
+    "links": [
+      {
+        "id": "550e8400-e29b-41d4-a716-446655440501",
+        "title": "Swiss Banking Comparison",
+        "url": "https://www.moneyland.ch/en/bank-comparison",
+        "type": "website",
+        "description": "Compare Swiss banks and accounts"
+      },
+      {
+        "id": "550e8400-e29b-41d4-a716-446655440502",
+        "title": "TWINT Mobile Payment",
+        "url": "https://www.twint.ch/en/",
+        "type": "website",
+        "description": "Swiss mobile payment solution"
+      }
+    ],
+    "priority": 6,
+    "isNew": false,
+    "estimatedReadingTime": 20,
+    "lastUpdated": "2023-09-25T09:45:00Z",
+    "createdAt": "2023-09-05T14:20:00Z"
+  }
+]

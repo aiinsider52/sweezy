@@ -1,0 +1,76 @@
+[
+  {
+    "id": "c1-0001-0001-0001-000000000001",
+    "title": "Реєстрація прибуття (ZH)",
+    "description": "Кроки після прибуття у кантоні Цюрих протягом перших 14 днів",
+    "category": "arrival",
+    "estimatedDuration": "3-5 днів",
+    "difficulty": "easy",
+    "steps": [
+      {"id":"c1s-01","title":"Запишіться до Gemeinde","description":"Знайдіть адміністрацію вашої громади та запишіться.","estimatedTime":"30 хв","isOptional":false,"links":[],"requiredDocuments":["Паспорт","Підтвердження адреси"],"tips":["Візьміть фото 3×4"],"order":0},
+      {"id":"c1s-02","title":"Реєстрація в Migrationsamt","description":"Подайте документи на посвідку.","estimatedTime":"1 год","isOptional":false,"links":[],"requiredDocuments":["Паспорт","Документи S/B"],"tips":[],"order":1},
+      {"id":"c1s-03","title":"Оберіть Krankenkasse","description":"Маєте 3 місяці на вибір страховки.","estimatedTime":"1-2 год","isOptional":false,"links":[],"requiredDocuments":[],"tips":["Порівняйте премії"],"order":2}
+    ],
+    "tags": ["ZH","registration"],
+    "cantonCodes": ["ZH"],
+    "priority": 9,
+    "isNew": true,
+    "createdAt": "2025-10-14T10:00:00Z",
+    "lastUpdated": "2025-10-14T10:00:00Z"
+  },
+  {
+    "id": "c1-0001-0001-0001-000000000002",
+    "title": "Продовження дозволу S/B",
+    "description": "Як вчасно продовжити посвідку та які документи потрібні",
+    "category": "documents",
+    "estimatedDuration": "1-2 тижні",
+    "difficulty": "medium",
+    "steps": [
+      {"id":"c2s-01","title":"Перевірте термін","description":"Перевірте дату завершення у вашій посвідці.","estimatedTime":"5 хв","isOptional":false,"links":[],"requiredDocuments":[],"tips":[],"order":0},
+      {"id":"c2s-02","title":"Підготуйте документи","description":"Паспорт, фото, договір оренди, довідка про доходи.","estimatedTime":"2-3 год","isOptional":false,"links":[],"requiredDocuments":["Паспорт","Фото","Договір оренди"],"tips":[],"order":1},
+      {"id":"c2s-03","title":"Запис до Migrationsamt","description":"Подайте заявку онлайн або у вікні.","estimatedTime":"30 хв","isOptional":false,"links":[],"requiredDocuments":[],"tips":[],"order":2}
+    ],
+    "tags": ["permit","renewal"],
+    "cantonCodes": [],
+    "priority": 8,
+    "isNew": true,
+    "createdAt": "2025-10-14T10:00:00Z",
+    "lastUpdated": "2025-10-14T10:00:00Z"
+  },
+  {
+    "id": "c1-0001-0001-0001-000000000003",
+    "title": "Дитячий садок/школа: перші кроки",
+    "description": "Як оформити садок або школу та які довідки потрібні",
+    "category": "education",
+    "estimatedDuration": "1-2 тижні",
+    "difficulty": "easy",
+    "steps": [
+      {"id":"c3s-01","title":"Зв'яжіться з Schulamt","description":"Дізнайтеся місце для вашої дитини.","estimatedTime":"20 хв","isOptional":false,"links":[],"requiredDocuments":["Паспорт","Вакцинації"],"tips":[],"order":0},
+      {"id":"c3s-02","title":"Медичні щеплення","description":"Перевірте картку щеплень, зробіть пропущені.","estimatedTime":"Залежить","isOptional":false,"links":[],"requiredDocuments":[],"tips":[],"order":1}
+    ],
+    "tags": ["kids","school"],
+    "cantonCodes": [],
+    "priority": 7,
+    "isNew": true,
+    "createdAt": "2025-10-14T10:00:00Z",
+    "lastUpdated": "2025-10-14T10:00:00Z"
+  },
+  {
+    "id": "c1-0001-0001-0001-000000000004",
+    "title": "Щорічні податки та пільги",
+    "description": "Як підготуватися до податкової декларації та де шукати допомогу",
+    "category": "finance",
+    "estimatedDuration": "1-2 тижні",
+    "difficulty": "medium",
+    "steps": [
+      {"id":"c4s-01","title":"Зберіть документи","description":"Довідки про доходи, оренду, страхові внески.","estimatedTime":"3-4 год","isOptional":false,"links":[],"requiredDocuments":[],"tips":[],"order":0},
+      {"id":"c4s-02","title":"Подайте декларацію","description":"Через програму кантону або письмово.","estimatedTime":"2-3 год","isOptional":false,"links":[],"requiredDocuments":[],"tips":[],"order":1}
+    ],
+    "tags": ["tax","benefits"],
+    "cantonCodes": [],
+    "priority": 6,
+    "isNew": true,
+    "createdAt": "2025-10-14T10:00:00Z",
+    "lastUpdated": "2025-10-14T10:00:00Z"
+  }
+]

@@ -1,0 +1,159 @@
+/*
+ Localizable.strings (German)
+ sweezy
+*/
+
+"common.ok" = "OK";
+"common.cancel" = "Abbrechen";
+"common.save" = "Speichern";
+"common.delete" = "Löschen";
+"common.edit" = "Bearbeiten";
+"common.done" = "Fertig";
+"common.next" = "Weiter";
+"common.back" = "Zurück";
+"common.close" = "Schließen";
+"common.search" = "Suchen";
+"common.filter" = "Filter";
+"common.all" = "Alle";
+"common.loading" = "Laden...";
+"common.error" = "Fehler";
+"common.retry" = "Erneut versuchen";
+"common.share" = "Teilen";
+"common.copy" = "Kopieren";
+"common.settings" = "Einstellungen";
+"common.tags" = "Tags";
+"common.new" = "Neu";
+"common.open" = "Öffnen";
+
+"home.welcome" = "Willkommen bei Sweezy";
+"home.welcome_back" = "Willkommen zurück, %@";
+"home.quick_actions" = "Schnellaktionen";
+"home.recent_updates" = "Aktuelle Updates";
+"home.latest_news" = "Neueste Nachrichten";
+"home.see_all" = "Alle anzeigen";
+"home.metrics.guides" = "Leitfäden";
+"home.metrics.lists" = "Listen";
+"home.metrics.templates" = "Vorlagen";
+"home.emergency_contacts" = "Notfallkontakte";
+"home.emergency.police" = "Polizei";
+"home.emergency.ambulance" = "Rettung";
+"home.emergency.fire" = "Feuerwehr";
+"home.greeting.morning" = "Guten Morgen";
+"home.greeting.afternoon" = "Guten Tag";
+"home.greeting.evening" = "Guten Abend";
+"home.greeting.night" = "Gute Nacht";
+"home.greeting.subtitle" = "Schön, dass Sie da sind";
+"home.telegram_join" = "Unserem Telegram beitreten";
+"home.telegram_subtitle" = "Updates und Tipps in Echtzeit";
+
+// Quick Actions
+"qa.calculator.title" = "Rechner";
+"qa.calculator.subtitle" = "Leistungen berechnen";
+"qa.appointments.title" = "Termine";
+"qa.appointments.subtitle" = "Zeitplan verwalten";
+"qa.templates.title" = "Vorlagen";
+"qa.templates.subtitle" = "Dokumente ausfüllen und exportieren";
+"qa.documents.title" = "Dokumente";
+"qa.documents.subtitle" = "Offizielle Anleitungen";
+"qa.housing.title" = "Wohnen";
+"qa.housing.subtitle" = "Miete & Anmeldung";
+"qa.insurance.title" = "Versicherung";
+"qa.insurance.subtitle" = "Gesundheit & Deckung";
+"qa.work.title" = "Arbeit";
+"qa.work.subtitle" = "Jobs & Bewilligungen";
+"qa.emergency.title" = "Notfälle";
+"qa.emergency.subtitle" = "Wichtige Kontakte";
+
+"guides.title" = "Leitfäden";
+"guides.search_placeholder" = "Informationen suchen...";
+"guides.no_results" = "Keine Ergebnisse";
+"guides.reading_time" = "%d Min. Lesezeit";
+"guides.updated" = "Aktualisiert %@";
+"guides.new" = "Neu";
+"guides.hero_title" = "Leitfaden für die Schweiz";
+"guides.articles_available" = "Artikel verfügbar";
+"guides.no_results_subtitle" = "Versuchen Sie, Ihre Suche oder Filter anzupassen";
+"guides.clear_filters" = "Filter löschen";
+"guides.useful_links" = "Nützliche Links";
+
+"checklists.title" = "Checklisten";
+"checklists.progress" = "Fortschritt: %d%%";
+"checklists.estimated_time" = "Geschätzte Zeit: %@";
+"checklists.hero_title" = "Schritt-für-Schritt-Anleitungen";
+"checklists.lists_available" = "Listen verfügbar";
+"checklists.overall_progress" = "Gesamtfortschritt";
+"checklists.steps" = "Schritte";
+"checklists.congratulations" = "Herzlichen Glückwunsch!";
+"checklists.checklist_completed" = "Checkliste abgeschlossen";
+
+"calculator.title" = "Leistungsrechner";
+"calculator.calculate" = "Berechnen";
+"calculator.results" = "Ergebnisse";
+"calculator.eligible" = "Anspruch besteht";
+"calculator.not_eligible" = "Derzeit kein Anspruch";
+"calculator.estimated_amount" = "Geschätzter Betrag: %@";
+"calculator.disclaimer" = "Dies ist eine Schätzung. Prüfen Sie offizielle Quellen.";
+
+"map.title" = "Servicekarte";
+"map.type.government" = "Behörden";
+"map.type.healthcare" = "Gesundheit";
+"map.type.education" = "Bildung";
+"map.type.legal" = "Rechtsberatung";
+"map.type.social" = "Sozialdienste";
+"map.type.employment" = "Arbeit";
+"map.type.housing" = "Wohnen";
+"map.type.transport" = "Transport";
+"map.type.banking" = "Banking";
+"map.type.shopping" = "Einkaufen";
+"map.type.emergency" = "Notfall";
+"map.type.community" = "Community & Integration";
+"map.nearby_services" = "In der Nähe";
+"map.directions" = "Route";
+
+"appointments.title" = "Termine";
+"appointments.add" = "Termin hinzufügen";
+"appointments.today" = "Heute";
+
+"templates.title" = "Dokumentvorlagen";
+"templates.fill_form" = "Formular ausfüllen";
+"templates.preview" = "Vorschau";
+"templates.generate" = "Dokument erstellen";
+
+"news.title" = "Nachrichten";
+"news.latest" = "Neueste Nachrichten";
+"validation.email_invalid" = "Ungültige E-Mail-Adresse";
+
+// MARK: - Settings
+"settings.title" = "Einstellungen";
+"settings.profile" = "Profil";
+"settings.language" = "Sprache";
+"settings.notifications" = "Benachrichtigungen";
+"settings.privacy" = "Datenschutz";
+"settings.about" = "Über";
+"settings.version" = "Version %@";
+"settings.full_name" = "Vollständiger Name";
+"settings.email" = "E-Mail";
+"settings.phone" = "Telefon";
+"settings.address" = "Adresse";
+"settings.export_data" = "Daten exportieren";
+"settings.import_data" = "Daten importieren";
+"settings.delete_all_data" = "Alle Daten löschen";
+"settings.delete_account" = "Konto löschen";
+"settings.delete_account.confirm_message" = "Dadurch wird dein Sweezy-Konto und die serverseitigen Daten dauerhaft gelöscht. Dies kann nicht rückgängig gemacht werden.";
+"settings.default_user_name" = "Benutzer";
+"settings.privacy.placeholder" = "Datenschutzeinstellungen werden hier erscheinen";
+"settings.data_management" = "Datenverwaltung";
+
+// MARK: - Settings - Theme
+"settings.theme.title" = "Erscheinungsbild";
+"settings.theme.light" = "Hell";
+"settings.theme.dark" = "Dunkel";
+"settings.theme.system" = "System";
+
+// MARK: - Settings - Account
+"settings.account" = "Konto";
+"settings.register_prompt" = "Registriere dich, um vollen Zugriff zu erhalten";
+"settings.password" = "Passwort";
+"settings.register" = "Registrieren";
+"settings.logout" = "Abmelden";
+"settings.welcome" = "Willkommen, %@";

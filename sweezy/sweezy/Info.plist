@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>API_BASE_URL</key>
+	<string>$(API_BASE_URL)</string>
+	<key>AMPLITUDE_API_KEY</key>
+	<string>$(AMPLITUDE_API_KEY)</string>
+	<key>SENTRY_DSN</key>
+	<string>$(SENTRY_DSN)</string>
+	<key>SUPPORT_EMAIL</key>
+	<string>$(SUPPORT_EMAIL)</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Використовуємо Face ID для розблокування додатку та підтвердження дій.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Локація потрібна для відображення найближчих сервісів та релевантних гідів.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Камера може знадобитися для сканування документів або QR‑кодів.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Доступ до Фото потрібен для збереження або вибору зображень документів.</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+</dict>
+</plist>

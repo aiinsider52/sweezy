@@ -1,0 +1,131 @@
+[
+  {
+    "id": "t-extra-001",
+    "title": "Повідомлення орендодавцю про зміну адреси",
+    "description": "Шаблон листа про зміну місця проживання",
+    "category": "housing",
+    "templateType": "letter",
+    "content": "{{date}}\n\n{{landlord_name}}\n{{landlord_address}}\n\nТема: Повідомлення про зміну адреси\n\nШановні,\n\nПовідомляю, що з {{moveDate}} моя нова адреса: {{new_address}}, {{postalCode}} {{city}}.\nБудь ласка, оновіть контактні дані та адресу для листування.\n\nЗ повагою,\n{{fullName}}\n{{phoneNumber}}\n{{email}}",
+    "placeholders": [
+      {"id":"date","label":"Дата","description":"Поточна дата","type":"date","isRequired":true,"order":1},
+      {"id":"landlord_name","label":"Орендодавець","description":"Ім'я/назва","type":"text","isRequired":true,"order":2},
+      {"id":"landlord_address","label":"Адреса","description":"Адреса","type":"multilineText","isRequired":true,"order":3},
+      {"id":"moveDate","label":"Дата переїзду","description":"Дата","type":"date","isRequired":true,"order":4},
+      {"id":"new_address","label":"Нова адреса","description":"Вулиця, будинок","type":"text","isRequired":true,"order":5},
+      {"id":"postalCode","label":"Поштовий індекс","description":"Індекс","type":"text","isRequired":true,"order":6},
+      {"id":"city","label":"Місто","description":"Місто","type":"text","isRequired":true,"order":7},
+      {"id":"fullName","label":"Ім'я","description":"Повне ім'я","type":"text","isRequired":true,"order":8},
+      {"id":"phoneNumber","label":"Телефон","description":"Номер","type":"phone","isRequired":false,"order":9},
+      {"id":"email","label":"Email","description":"Пошта","type":"email","isRequired":false,"order":10}
+    ],
+    "requiredFields": ["date","landlord_name","landlord_address","moveDate","new_address","postalCode","city","fullName"],
+    "tags": ["housing","address","lang:uk"],
+    "cantonCodes": [],
+    "language": "uk",
+    "isOfficial": false,
+    "lastUpdated": "2025-10-14T10:00:00Z",
+    "createdAt": "2025-10-14T10:00:00Z"
+  },
+  {
+    "id": "t-extra-002",
+    "title": "Запит до Schulamt про зарахування дитини",
+    "description": "Шаблон звернення до Schulverwaltung (Gemeinde)",
+    "category": "education",
+    "templateType": "email",
+    "content": "Тема: Зарахування дитини до школи\n\nШановні пані/панове,\n\nПрошу надати інформацію щодо зарахування моєї дитини {{childName}} ({{birthDate}}) до школи за адресою {{address}}.\nПосвідка: {{permitType}}. Бажана мова комунікації: {{language}}.\n\nДякую!\n{{fullName}}\n{{phoneNumber}}\n{{email}}",
+    "placeholders": [
+      {"id":"childName","label":"Ім'я дитини","type":"text","isRequired":true,"order":1},
+      {"id":"birthDate","label":"Дата народження","type":"date","isRequired":true,"order":2},
+      {"id":"address","label":"Адреса","type":"text","isRequired":true,"order":3},
+      {"id":"permitType","label":"Посвідка","type":"text","defaultValue":"S","isRequired":true,"order":4},
+      {"id":"language","label":"Мова","type":"text","defaultValue":"DE","isRequired":true,"order":5},
+      {"id":"fullName","label":"Ім'я","type":"text","isRequired":true,"order":6},
+      {"id":"phoneNumber","label":"Телефон","type":"phone","isRequired":false,"order":7},
+      {"id":"email","label":"Email","type":"email","isRequired":false,"order":8}
+    ],
+    "requiredFields": ["childName","birthDate","address","permitType","language","fullName"],
+    "tags": ["school","gemeinde","lang:uk"],
+    "cantonCodes": [],
+    "language": "uk",
+    "isOfficial": false,
+    "lastUpdated": "2025-10-14T10:00:00Z",
+    "createdAt": "2025-10-14T10:00:00Z"
+  },
+  {
+    "id": "t-extra-003",
+    "title": "Запит у Krankenkasse про субсидію",
+    "description": "Лист/емейл до страхової щодо Prämienverbilligung",
+    "category": "insurance",
+    "templateType": "email",
+    "content": "Тема: Prämienverbilligung (запит)\n\nШановні,\n\nПрошу надати інформацію щодо знижки на премію (Krankenkassenverbilligung) для моєї сім'ї {{familySize}} ос., кантон {{canton}}.\nПосвідка: {{permitType}}, дохід: {{income}} CHF/місяць.\n\nЗ повагою,\n{{fullName}}\n{{policyNumber}}\n{{email}}",
+    "placeholders": [
+      {"id":"familySize","label":"Розмір сім'ї","type":"number","isRequired":true,"order":1},
+      {"id":"canton","label":"Кантон","type":"text","isRequired":true,"order":2},
+      {"id":"permitType","label":"Посвідка","type":"text","defaultValue":"S","isRequired":true,"order":3},
+      {"id":"income","label":"Дохід CHF/міс","type":"number","isRequired":false,"order":4},
+      {"id":"fullName","label":"Ім'я","type":"text","isRequired":true,"order":5},
+      {"id":"policyNumber","label":"Номер полісу","type":"text","isRequired":false,"order":6},
+      {"id":"email","label":"Email","type":"email","isRequired":false,"order":7}
+    ],
+    "requiredFields": ["familySize","canton","permitType","fullName"],
+    "tags": ["insurance","subsidy","group:premium_subsidy_letter","lang:uk"],
+    "cantonCodes": [],
+    "language": "uk",
+    "isOfficial": false,
+    "lastUpdated": "2025-10-14T10:00:00Z",
+    "createdAt": "2025-10-14T10:00:00Z"
+  },
+  {
+    "id": "t-extra-004",
+    "title": "Запит у Sozialdienst (первинна консультація)",
+    "description": "Лист до соціальної служби про первинну консультацію",
+    "category": "government",
+    "templateType": "letter",
+    "content": "{{date}}\n\nSozialdienst {{gemeinde}}\n{{address}}\n\nШановні,\n\nПрошу призначити консультацію щодо можливої соціальної допомоги для мене/сім'ї. Посвідка: {{permitType}}, склад сім'ї: {{family}}, дохід: {{income}} CHF/міс.\n\nЗ повагою,\n{{fullName}}\n{{phoneNumber}}\n{{email}}",
+    "placeholders": [
+      {"id":"date","label":"Дата","type":"date","isRequired":true,"order":1},
+      {"id":"gemeinde","label":"Gemeinde","type":"text","isRequired":true,"order":2},
+      {"id":"address","label":"Адреса","type":"multilineText","isRequired":true,"order":3},
+      {"id":"permitType","label":"Посвідка","type":"text","defaultValue":"S","isRequired":true,"order":4},
+      {"id":"family","label":"Склад сім'ї","type":"text","isRequired":true,"order":5},
+      {"id":"income","label":"Дохід","type":"number","isRequired":false,"order":6},
+      {"id":"fullName","label":"Ім'я","type":"text","isRequired":true,"order":7},
+      {"id":"phoneNumber","label":"Телефон","type":"phone","isRequired":false,"order":8},
+      {"id":"email","label":"Email","type":"email","isRequired":false,"order":9}
+    ],
+    "requiredFields": ["date","gemeinde","address","permitType","family","fullName"],
+    "tags": ["sozialdienst","consultation","lang:uk"],
+    "cantonCodes": [],
+    "language": "uk",
+    "isOfficial": false,
+    "lastUpdated": "2025-10-14T10:00:00Z",
+    "createdAt": "2025-10-14T10:00:00Z"
+  },
+  {
+    "id": "t-extra-005",
+    "title": "Скарга орендодавцю (дефекти житла)",
+    "description": "Офіційний лист про дефекти/ремонт",
+    "category": "housing",
+    "templateType": "letter",
+    "content": "{{date}}\n\n{{landlord_name}}\n{{landlord_address}}\n\nТема: Повідомлення про дефекти житла\n\nШановні,\n\nПрошу усунути наступні недоліки у квартирі: {{defects}}. Прошу вжити заходів до {{deadline}}.\n\nЗ повагою,\n{{fullName}}\n{{address}}\n{{email}}",
+    "placeholders": [
+      {"id":"date","label":"Дата","type":"date","isRequired":true,"order":1},
+      {"id":"defects","label":"Недоліки","type":"multilineText","isRequired":true,"order":2},
+      {"id":"deadline","label":"Термін","type":"date","isRequired":true,"order":3},
+      {"id":"fullName","label":"Ім'я","type":"text","isRequired":true,"order":4},
+      {"id":"address","label":"Адреса","type":"text","isRequired":true,"order":5},
+      {"id":"email","label":"Email","type":"email","isRequired":false,"order":6}
+    ],
+    "requiredFields": ["date","defects","deadline","fullName","address"],
+    "tags": ["housing","complaint","lang:uk"],
+    "cantonCodes": [],
+    "language": "uk",
+    "isOfficial": false,
+    "lastUpdated": "2025-10-14T10:00:00Z",
+    "createdAt": "2025-10-14T10:00:00Z"
+  }
+]
+
+
+
+

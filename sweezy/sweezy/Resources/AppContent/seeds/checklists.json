@@ -1,0 +1,837 @@
+[
+  {
+    "id": "660e8400-e29b-41d4-a716-446655440001",
+    "title": "First 7 Days in Switzerland",
+    "description": "Essential tasks to complete during your first week in Switzerland",
+    "category": "arrival",
+    "estimatedDuration": "1 week",
+    "difficulty": "medium",
+    "steps": [
+      {
+        "id": "660e8400-e29b-41d4-a716-446655440101",
+        "title": "Find temporary accommodation",
+        "description": "Secure a place to stay for your first few weeks while you search for permanent housing",
+        "estimatedTime": "1-2 days",
+        "isOptional": false,
+        "links": [
+          {
+            "id": "660e8400-e29b-41d4-a716-446655440111",
+            "title": "Booking.com",
+            "url": "https://www.booking.com/",
+            "type": "website",
+            "description": "Find hotels and short-term rentals"
+          }
+        ],
+        "requiredDocuments": ["Passport", "Credit card or cash"],
+        "tips": ["Book in advance", "Consider hostels for budget options", "Look for extended stay hotels"],
+        "order": 1
+      },
+      {
+        "id": "660e8400-e29b-41d4-a716-446655440102",
+        "title": "Register with local authorities",
+        "description": "Register your arrival with the municipality (Gemeinde) within 14 days",
+        "estimatedTime": "2-3 hours",
+        "isOptional": false,
+        "links": [
+          {
+            "id": "660e8400-e29b-41d4-a716-446655440112",
+            "title": "Find your Gemeinde",
+            "url": "https://www.ch.ch/en/",
+            "type": "website",
+            "description": "Official Swiss government portal"
+          }
+        ],
+        "requiredDocuments": ["Passport", "S permit", "Proof of accommodation"],
+        "tips": ["Make an appointment in advance", "Bring all original documents", "Ask for information in your language"],
+        "order": 2
+      },
+      {
+        "id": "660e8400-e29b-41d4-a716-446655440103",
+        "title": "Get a Swiss phone number",
+        "description": "Obtain a local phone number for communication and services",
+        "estimatedTime": "1 hour",
+        "isOptional": false,
+        "links": [
+          {
+            "id": "660e8400-e29b-41d4-a716-446655440113",
+            "title": "Swisscom",
+            "url": "https://www.swisscom.ch/",
+            "type": "website",
+            "description": "Largest Swiss telecom provider"
+          }
+        ],
+        "requiredDocuments": ["Passport", "Proof of address"],
+        "tips": ["Compare prepaid vs. contract plans", "Consider data needs", "Ask about international calling"],
+        "order": 3
+      },
+      {
+        "id": "660e8400-e29b-41d4-a716-446655440104",
+        "title": "Open a bank account",
+        "description": "Open a Swiss bank account for daily financial transactions",
+        "estimatedTime": "1-2 hours",
+        "isOptional": false,
+        "links": [
+          {
+            "id": "660e8400-e29b-41d4-a716-446655440114",
+            "title": "Bank comparison",
+            "url": "https://www.moneyland.ch/en/",
+            "type": "website",
+            "description": "Compare Swiss banks and fees"
+          }
+        ],
+        "requiredDocuments": ["Passport", "S permit", "Proof of address", "Initial deposit"],
+        "tips": ["Research different banks", "Ask about fees", "Consider online banks for lower costs"],
+        "order": 4
+      },
+      {
+        "id": "660e8400-e29b-41d4-a716-446655440105",
+        "title": "Research health insurance options",
+        "description": "Start researching health insurance providers (you have 3 months to decide)",
+        "estimatedTime": "2-3 hours",
+        "isOptional": false,
+        "links": [
+          {
+            "id": "660e8400-e29b-41d4-a716-446655440115",
+            "title": "Comparis Health Insurance",
+            "url": "https://www.comparis.ch/krankenkassen",
+            "type": "website",
+            "description": "Compare health insurance providers"
+          }
+        ],
+        "requiredDocuments": [],
+        "tips": ["Compare premiums and deductibles", "Check if you qualify for subsidies", "Consider your health needs"],
+        "order": 5
+      },
+      {
+        "id": "660e8400-e29b-41d4-a716-446655440106",
+        "title": "Learn basic German/French/Italian phrases",
+        "description": "Start learning essential phrases in the local language",
+        "estimatedTime": "30 minutes daily",
+        "isOptional": true,
+        "links": [
+          {
+            "id": "660e8400-e29b-41d4-a716-446655440116",
+            "title": "Duolingo",
+            "url": "https://www.duolingo.com/",
+            "type": "website",
+            "description": "Free language learning app"
+          }
+        ],
+        "requiredDocuments": [],
+        "tips": ["Focus on practical phrases first", "Practice with locals", "Use language learning apps"],
+        "order": 6
+      },
+      {
+        "id": "660e8400-e29b-41d4-a716-446655440107",
+        "title": "Explore your neighborhood",
+        "description": "Get familiar with your local area and essential services",
+        "estimatedTime": "2-3 hours",
+        "isOptional": true,
+        "links": [],
+        "requiredDocuments": [],
+        "tips": ["Find the nearest supermarket", "Locate public transport stops", "Identify important services"],
+        "order": 7
+      }
+    ],
+    "tags": ["arrival", "registration", "essentials"],
+    "cantonCodes": [],
+    "priority": 10,
+    "isNew": true,
+    "createdAt": "2023-10-14T10:00:00Z",
+    "lastUpdated": "2023-10-14T10:00:00Z"
+  },
+  {
+    "id": "660e8400-e29b-41d4-a716-446655440002",
+    "title": "Health Insurance Setup",
+    "description": "Complete guide to choosing and setting up mandatory health insurance",
+    "category": "insurance",
+    "estimatedDuration": "2-3 weeks",
+    "difficulty": "medium",
+    "steps": [
+      {
+        "id": "660e8400-e29b-41d4-a716-446655440201",
+        "title": "Understand the Swiss health system",
+        "description": "Learn how Swiss health insurance works and what's covered",
+        "estimatedTime": "1 hour",
+        "isOptional": false,
+        "links": [
+          {
+            "id": "660e8400-e29b-41d4-a716-446655440211",
+            "title": "Federal Office of Public Health",
+            "url": "https://www.bag.admin.ch/bag/en/home.html",
+            "type": "website",
+            "description": "Official health insurance information"
+          }
+        ],
+        "requiredDocuments": [],
+        "tips": ["Understand deductibles and co-payments", "Learn about basic vs. supplementary insurance"],
+        "order": 1
+      },
+      {
+        "id": "660e8400-e29b-41d4-a716-446655440202",
+        "title": "Compare insurance providers",
+        "description": "Research and compare different health insurance companies",
+        "estimatedTime": "2-3 hours",
+        "isOptional": false,
+        "links": [
+          {
+            "id": "660e8400-e29b-41d4-a716-446655440212",
+            "title": "Priminfo",
+            "url": "https://www.priminfo.admin.ch/",
+            "type": "website",
+            "description": "Official premium comparison tool"
+          }
+        ],
+        "requiredDocuments": [],
+        "tips": ["Compare premiums for your age and canton", "Consider deductible options", "Check provider networks"],
+        "order": 2
+      },
+      {
+        "id": "660e8400-e29b-41d4-a716-446655440203",
+        "title": "Check eligibility for premium reductions",
+        "description": "Determine if you qualify for health insurance subsidies",
+        "estimatedTime": "1 hour",
+        "isOptional": true,
+        "links": [
+          {
+            "id": "660e8400-e29b-41d4-a716-446655440213",
+            "title": "Canton subsidy information",
+            "url": "https://www.ch.ch/en/health-insurance-premium-reductions/",
+            "type": "website",
+            "description": "Information about premium reductions by canton"
+          }
+        ],
+        "requiredDocuments": ["Income statements", "Tax documents"],
+        "tips": ["Each canton has different income limits", "Apply as soon as possible", "Subsidies are paid directly to insurers"],
+        "order": 3
+      },
+      {
+        "id": "660e8400-e29b-41d4-a716-446655440204",
+        "title": "Choose your insurance plan",
+        "description": "Select the insurance provider and plan that best fits your needs",
+        "estimatedTime": "30 minutes",
+        "isOptional": false,
+        "links": [],
+        "requiredDocuments": [],
+        "tips": ["Consider your health needs", "Balance premium vs. deductible", "Check if your preferred doctors are covered"],
+        "order": 4
+      },
+      {
+        "id": "660e8400-e29b-41d4-a716-446655440205",
+        "title": "Submit insurance application",
+        "description": "Complete and submit your health insurance application",
+        "estimatedTime": "30 minutes",
+        "isOptional": false,
+        "links": [],
+        "requiredDocuments": ["Passport copy", "Residence permit", "Proof of address"],
+        "tips": ["Apply online for faster processing", "Keep copies of all documents", "Confirm receipt of application"],
+        "order": 5
+      },
+      {
+        "id": "660e8400-e29b-41d4-a716-446655440206",
+        "title": "Receive insurance card and documents",
+        "description": "Wait for and verify your insurance card and policy documents",
+        "estimatedTime": "1-2 weeks",
+        "isOptional": false,
+        "links": [],
+        "requiredDocuments": [],
+        "tips": ["Check all personal details are correct", "Understand your policy number", "Keep insurance card with you always"],
+        "order": 6
+      },
+      {
+        "id": "660e8400-e29b-41d4-a716-446655440207",
+        "title": "Register with a family doctor",
+        "description": "Find and register with a general practitioner (GP)",
+        "estimatedTime": "1-2 hours",
+        "isOptional": true,
+        "links": [
+          {
+            "id": "660e8400-e29b-41d4-a716-446655440214",
+            "title": "Doctor search",
+            "url": "https://www.doctorfmh.ch/",
+            "type": "website",
+            "description": "Find doctors in Switzerland"
+          }
+        ],
+        "requiredDocuments": ["Insurance card", "Previous medical records"],
+        "tips": ["Choose a doctor near your home", "Check if they speak your language", "Some plans require GP referrals"],
+        "order": 7
+      }
+    ],
+    "tags": ["health-insurance", "mandatory", "subsidies"],
+    "cantonCodes": [],
+    "priority": 9,
+    "isNew": false,
+    "createdAt": "2023-09-20T14:30:00Z",
+    "lastUpdated": "2023-10-10T11:15:00Z"
+  },
+  {
+    "id": "660e8400-e29b-41d4-a716-446655440003",
+    "title": "Finding Permanent Housing",
+    "description": "Step-by-step guide to securing long-term accommodation in Switzerland",
+    "category": "housing",
+    "estimatedDuration": "4-8 weeks",
+    "difficulty": "hard",
+    "steps": [
+      {
+        "id": "660e8400-e29b-41d4-a716-446655440301",
+        "title": "Determine your housing budget",
+        "description": "Calculate how much you can afford to spend on rent and utilities",
+        "estimatedTime": "30 minutes",
+        "isOptional": false,
+        "links": [],
+        "requiredDocuments": ["Income statements", "Bank statements"],
+        "tips": ["Budget max 30% of income for rent", "Include utilities and insurance", "Consider transportation costs"],
+        "order": 1
+      },
+      {
+        "id": "660e8400-e29b-41d4-a716-446655440302",
+        "title": "Research neighborhoods",
+        "description": "Explore different areas to find the best fit for your lifestyle and budget",
+        "estimatedTime": "2-3 hours",
+        "isOptional": false,
+        "links": [
+          {
+            "id": "660e8400-e29b-41d4-a716-446655440311",
+            "title": "Homegate neighborhood guide",
+            "url": "https://www.homegate.ch/",
+            "type": "website",
+            "description": "Housing platform with area information"
+          }
+        ],
+        "requiredDocuments": [],
+        "tips": ["Consider commute times", "Check local amenities", "Visit areas at different times"],
+        "order": 2
+      },
+      {
+        "id": "660e8400-e29b-41d4-a716-446655440303",
+        "title": "Gather required documents",
+        "description": "Prepare all necessary paperwork for rental applications",
+        "estimatedTime": "2-3 hours",
+        "isOptional": false,
+        "links": [
+          {
+            "id": "660e8400-e29b-41d4-a716-446655440312",
+            "title": "Debt collection certificate",
+            "url": "https://www.betreibungsregister.ch/",
+            "type": "website",
+            "description": "Order your debt collection certificate online"
+          }
+        ],
+        "requiredDocuments": [
+          "Passport copy",
+          "Residence permit",
+          "Employment contract",
+          "Salary certificates (3 months)",
+          "Bank statements",
+          "Debt collection certificate",
+          "Previous landlord reference"
+        ],
+        "tips": ["Get documents translated if needed", "Make multiple copies", "Keep originals safe"],
+        "order": 3
+      },
+      {
+        "id": "660e8400-e29b-41d4-a716-446655440304",
+        "title": "Start apartment hunting",
+        "description": "Search for available apartments on various platforms",
+        "estimatedTime": "Ongoing",
+        "isOptional": false,
+        "links": [
+          {
+            "id": "660e8400-e29b-41d4-a716-446655440313",
+            "title": "ImmoScout24",
+            "url": "https://www.immoscout24.ch/",
+            "type": "website",
+            "description": "Popular housing search platform"
+          }
+        ],
+        "requiredDocuments": [],
+        "tips": ["Set up search alerts", "Check multiple platforms daily", "Be ready to apply quickly"],
+        "order": 4
+      },
+      {
+        "id": "660e8400-e29b-41d4-a716-446655440305",
+        "title": "Attend apartment viewings",
+        "description": "Schedule and attend viewings for suitable properties",
+        "estimatedTime": "1-2 hours per viewing",
+        "isOptional": false,
+        "links": [],
+        "requiredDocuments": ["All application documents", "Checkbook for deposit"],
+        "tips": ["Arrive on time", "Bring all documents", "Ask about utilities and rules", "Take photos/notes"],
+        "order": 5
+      },
+      {
+        "id": "660e8400-e29b-41d4-a716-446655440306",
+        "title": "Submit rental applications",
+        "description": "Complete and submit applications for apartments you're interested in",
+        "estimatedTime": "30 minutes per application",
+        "isOptional": false,
+        "links": [],
+        "requiredDocuments": ["Complete application dossier"],
+        "tips": ["Write a personal cover letter", "Submit applications immediately", "Follow up politely"],
+        "order": 6
+      },
+      {
+        "id": "660e8400-e29b-41d4-a716-446655440307",
+        "title": "Sign lease agreement",
+        "description": "Review and sign the rental contract once accepted",
+        "estimatedTime": "1 hour",
+        "isOptional": false,
+        "links": [],
+        "requiredDocuments": ["Deposit payment", "Insurance proof"],
+        "tips": ["Read contract carefully", "Understand notice periods", "Document apartment condition"],
+        "order": 7
+      },
+      {
+        "id": "660e8400-e29b-41d4-a716-446655440308",
+        "title": "Set up utilities and services",
+        "description": "Arrange electricity, internet, and other essential services",
+        "estimatedTime": "2-3 hours",
+        "isOptional": false,
+        "links": [],
+        "requiredDocuments": ["Lease agreement", "Passport"],
+        "tips": ["Compare internet providers", "Set up automatic payments", "Keep all service contracts"],
+        "order": 8
+      }
+    ],
+    "tags": ["housing", "rental", "apartment", "lease"],
+    "cantonCodes": [],
+    "priority": 8,
+    "isNew": false,
+    "createdAt": "2023-09-15T16:45:00Z",
+    "lastUpdated": "2023-10-05T09:30:00Z"
+  },
+  {
+    "id": "660e8400-e29b-41d4-a716-446655440004",
+    "title": "Job Search and Employment",
+    "description": "Complete guide to finding employment in Switzerland",
+    "category": "work",
+    "estimatedDuration": "6-12 weeks",
+    "difficulty": "hard",
+    "steps": [
+      {
+        "id": "660e8400-e29b-41d4-a716-446655440401",
+        "title": "Assess your skills and qualifications",
+        "description": "Evaluate your professional background and identify transferable skills",
+        "estimatedTime": "2-3 hours",
+        "isOptional": false,
+        "links": [
+          {
+            "id": "660e8400-e29b-41d4-a716-446655440411",
+            "title": "Skills assessment tool",
+            "url": "https://www.berufsberatung.ch/",
+            "type": "website",
+            "description": "Swiss career guidance portal"
+          }
+        ],
+        "requiredDocuments": ["Educational certificates", "Work experience records"],
+        "tips": ["Consider Swiss market needs", "Identify skill gaps", "Plan additional training if needed"],
+        "order": 1
+      },
+      {
+        "id": "660e8400-e29b-41d4-a716-446655440402",
+        "title": "Get qualifications recognized",
+        "description": "Have your foreign qualifications officially recognized in Switzerland",
+        "estimatedTime": "4-8 weeks",
+        "isOptional": true,
+        "links": [
+          {
+            "id": "660e8400-e29b-41d4-a716-446655440412",
+            "title": "SERI Recognition",
+            "url": "https://www.sbfi.admin.ch/sbfi/en/home.html",
+            "type": "website",
+            "description": "State Secretariat for Education, Research and Innovation"
+          }
+        ],
+        "requiredDocuments": ["Original diplomas", "Transcripts", "Work certificates"],
+        "tips": ["Start process early", "Get documents translated", "Some professions require additional exams"],
+        "order": 2
+      },
+      {
+        "id": "660e8400-e29b-41d4-a716-446655440403",
+        "title": "Create Swiss-style CV",
+        "description": "Adapt your resume to Swiss standards and expectations",
+        "estimatedTime": "3-4 hours",
+        "isOptional": false,
+        "links": [],
+        "requiredDocuments": ["Professional photo", "All certificates"],
+        "tips": ["Include professional photo", "List languages with proficiency levels", "Keep to 2-3 pages maximum"],
+        "order": 3
+      },
+      {
+        "id": "660e8400-e29b-41d4-a716-446655440404",
+        "title": "Improve language skills",
+        "description": "Enhance your German, French, or Italian language abilities",
+        "estimatedTime": "Ongoing",
+        "isOptional": true,
+        "links": [
+          {
+            "id": "660e8400-e29b-41d4-a716-446655440413",
+            "title": "Language courses",
+            "url": "https://www.fide-info.ch/",
+            "type": "website",
+            "description": "Find language courses in Switzerland"
+          }
+        ],
+        "requiredDocuments": [],
+        "tips": ["Focus on business language", "Get certified proficiency levels", "Practice with native speakers"],
+        "order": 4
+      },
+      {
+        "id": "660e8400-e29b-41d4-a716-446655440405",
+        "title": "Network and make connections",
+        "description": "Build professional networks in your field",
+        "estimatedTime": "Ongoing",
+        "isOptional": true,
+        "links": [
+          {
+            "id": "660e8400-e29b-41d4-a716-446655440414",
+            "title": "Xing Switzerland",
+            "url": "https://www.xing.com/",
+            "type": "website",
+            "description": "Professional networking platform"
+          }
+        ],
+        "requiredDocuments": [],
+        "tips": ["Join professional associations", "Attend industry events", "Connect with expat communities"],
+        "order": 5
+      },
+      {
+        "id": "660e8400-e29b-41d4-a716-446655440406",
+        "title": "Search and apply for jobs",
+        "description": "Actively search for job opportunities and submit applications",
+        "estimatedTime": "Ongoing",
+        "isOptional": false,
+        "links": [
+          {
+            "id": "660e8400-e29b-41d4-a716-446655440415",
+            "title": "Jobs.ch",
+            "url": "https://www.jobs.ch/",
+            "type": "website",
+            "description": "Leading Swiss job portal"
+          }
+        ],
+        "requiredDocuments": ["CV", "Cover letters", "Certificates"],
+        "tips": ["Customize each application", "Follow up appropriately", "Apply quickly to new postings"],
+        "order": 6
+      },
+      {
+        "id": "660e8400-e29b-41d4-a716-446655440407",
+        "title": "Prepare for interviews",
+        "description": "Practice interview skills and prepare for Swiss interview culture",
+        "estimatedTime": "2-3 hours per interview",
+        "isOptional": false,
+        "links": [],
+        "requiredDocuments": ["Portfolio", "References", "Questions for employer"],
+        "tips": ["Research the company thoroughly", "Prepare specific examples", "Practice in the local language"],
+        "order": 7
+      },
+      {
+        "id": "660e8400-e29b-41d4-a716-446655440408",
+        "title": "Negotiate job offer",
+        "description": "Review and negotiate employment terms and salary",
+        "estimatedTime": "1-2 hours",
+        "isOptional": true,
+        "links": [],
+        "requiredDocuments": ["Salary research", "Contract draft"],
+        "tips": ["Research market salaries", "Consider total compensation", "Negotiate respectfully"],
+        "order": 8
+      }
+    ],
+    "tags": ["employment", "job-search", "CV", "interview"],
+    "cantonCodes": [],
+    "priority": 7,
+    "isNew": false,
+    "createdAt": "2023-09-10T12:00:00Z",
+    "lastUpdated": "2023-09-28T15:45:00Z"
+  },
+  {
+    "id": "660e8400-e29b-41d4-a716-446655440005",
+    "title": "School Enrollment for Children",
+    "description": "Complete guide to enrolling your child in Swiss schools",
+    "category": "education",
+    "estimatedDuration": "2-4 weeks",
+    "difficulty": "medium",
+    "steps": [
+      {
+        "id": "660e8400-e29b-41d4-a716-446655440501",
+        "title": "Contact school administration",
+        "description": "Reach out to the Schulverwaltung in your municipality",
+        "estimatedTime": "30 minutes",
+        "isOptional": false,
+        "links": [],
+        "requiredDocuments": ["Child's passport", "Proof of address"],
+        "tips": ["Call ahead to make an appointment", "Ask about language support programs"],
+        "order": 1
+      },
+      {
+        "id": "660e8400-e29b-41d4-a716-446655440502",
+        "title": "Gather required documents",
+        "description": "Prepare all necessary paperwork for enrollment",
+        "estimatedTime": "2-3 hours",
+        "isOptional": false,
+        "links": [],
+        "requiredDocuments": ["Birth certificate", "Vaccination records", "Previous school records", "Passport copies"],
+        "tips": ["Get documents translated if needed", "Ask about vaccination requirements"],
+        "order": 2
+      },
+      {
+        "id": "660e8400-e29b-41d4-a716-446655440503",
+        "title": "Complete enrollment forms",
+        "description": "Fill out all required school registration forms",
+        "estimatedTime": "1 hour",
+        "isOptional": false,
+        "links": [],
+        "requiredDocuments": [],
+        "tips": ["Ask for help if German/French is difficult", "Double-check all information"],
+        "order": 3
+      },
+      {
+        "id": "660e8400-e29b-41d4-a716-446655440504",
+        "title": "Attend school meeting",
+        "description": "Meet with teachers and learn about the curriculum",
+        "estimatedTime": "1-2 hours",
+        "isOptional": false,
+        "links": [],
+        "requiredDocuments": [],
+        "tips": ["Bring a translator if needed", "Ask about after-school programs"],
+        "order": 4
+      }
+    ],
+    "tags": ["education", "school", "children"],
+    "cantonCodes": [],
+    "priority": 8,
+    "isNew": true,
+    "createdAt": "2023-10-14T10:00:00Z",
+    "lastUpdated": "2023-10-14T10:00:00Z"
+  },
+  {
+    "id": "660e8400-e29b-41d4-a716-446655440006",
+    "title": "Family Reunification Process",
+    "description": "Steps to bring family members to Switzerland",
+    "category": "family",
+    "estimatedDuration": "3-6 months",
+    "difficulty": "hard",
+    "steps": [
+      {
+        "id": "660e8400-e29b-41d4-a716-446655440601",
+        "title": "Check eligibility requirements",
+        "description": "Verify you meet the criteria for family reunification",
+        "estimatedTime": "1 hour",
+        "isOptional": false,
+        "links": [],
+        "requiredDocuments": ["Valid residence permit", "Proof of income", "Adequate housing proof"],
+        "tips": ["Requirements vary by permit type", "Consult migration office"],
+        "order": 1
+      },
+      {
+        "id": "660e8400-e29b-41d4-a716-446655440602",
+        "title": "Prepare application documents",
+        "description": "Gather all necessary documentation for your application",
+        "estimatedTime": "1-2 weeks",
+        "isOptional": false,
+        "links": [],
+        "requiredDocuments": ["Marriage certificate", "Birth certificates", "Police clearance certificates", "Medical certificates"],
+        "tips": ["Get all documents officially translated", "Apostille may be required"],
+        "order": 2
+      },
+      {
+        "id": "660e8400-e29b-41d4-a716-446655440603",
+        "title": "Submit application to migration office",
+        "description": "File the family reunification application",
+        "estimatedTime": "2-3 hours",
+        "isOptional": false,
+        "links": [],
+        "requiredDocuments": [],
+        "tips": ["Keep copies of everything", "Get a receipt confirmation"],
+        "order": 3
+      },
+      {
+        "id": "660e8400-e29b-41d4-a716-446655440604",
+        "title": "Wait for decision and prepare for arrival",
+        "description": "Processing time and preparation for family's arrival",
+        "estimatedTime": "2-4 months",
+        "isOptional": false,
+        "links": [],
+        "requiredDocuments": [],
+        "tips": ["Prepare accommodation", "Research schools if bringing children"],
+        "order": 4
+      }
+    ],
+    "tags": ["family", "reunification", "migration"],
+    "cantonCodes": [],
+    "priority": 7,
+    "isNew": false,
+    "createdAt": "2023-09-25T10:00:00Z",
+    "lastUpdated": "2023-10-12T10:00:00Z"
+  },
+  {
+    "id": "660e8400-e29b-41d4-a716-446655440007",
+    "title": "Mental Health Support Access",
+    "description": "Finding and accessing mental health services in Switzerland",
+    "category": "healthcare",
+    "estimatedDuration": "1-2 weeks",
+    "difficulty": "medium",
+    "steps": [
+      {
+        "id": "660e8400-e29b-41d4-a716-446655440701",
+        "title": "Identify your needs",
+        "description": "Determine what type of mental health support you need",
+        "estimatedTime": "30 minutes",
+        "isOptional": false,
+        "links": [],
+        "requiredDocuments": [],
+        "tips": ["Consider therapy, counseling, or psychiatric support", "Think about language preferences"],
+        "order": 1
+      },
+      {
+        "id": "660e8400-e29b-41d4-a716-446655440702",
+        "title": "Get referral from GP",
+        "description": "Obtain a referral from your family doctor",
+        "estimatedTime": "1 hour",
+        "isOptional": true,
+        "links": [],
+        "requiredDocuments": ["Insurance card"],
+        "tips": ["Some therapists don't require referrals", "Ask for recommendations"],
+        "order": 2
+      },
+      {
+        "id": "660e8400-e29b-41d4-a716-446655440703",
+        "title": "Find suitable therapist or service",
+        "description": "Search for mental health professionals who speak your language",
+        "estimatedTime": "2-3 hours",
+        "isOptional": false,
+        "links": [],
+        "requiredDocuments": [],
+        "tips": ["Check if covered by insurance", "Look for trauma-specialized therapists if needed"],
+        "order": 3
+      },
+      {
+        "id": "660e8400-e29b-41d4-a716-446655440704",
+        "title": "Make first appointment",
+        "description": "Schedule your initial consultation",
+        "estimatedTime": "1 hour",
+        "isOptional": false,
+        "links": [],
+        "requiredDocuments": ["Insurance card", "Referral (if required)"],
+        "tips": ["Prepare questions about treatment approach", "Don't hesitate to try different therapists"],
+        "order": 4
+      }
+    ],
+    "tags": ["healthcare", "mental-health", "therapy"],
+    "cantonCodes": [],
+    "priority": 6,
+    "isNew": true,
+    "createdAt": "2023-10-14T10:00:00Z",
+    "lastUpdated": "2023-10-14T10:00:00Z"
+  },
+  {
+    "id": "660e8400-e29b-41d4-a716-446655440008",
+    "title": "Legal Rights and Protection",
+    "description": "Understanding your legal rights and accessing legal aid",
+    "category": "legal",
+    "estimatedDuration": "1-2 weeks",
+    "difficulty": "medium",
+    "steps": [
+      {
+        "id": "660e8400-e29b-41d4-a716-446655440801",
+        "title": "Learn your basic rights",
+        "description": "Understand your rights as a resident in Switzerland",
+        "estimatedTime": "1-2 hours",
+        "isOptional": false,
+        "links": [],
+        "requiredDocuments": [],
+        "tips": ["Read official government resources", "Attend information sessions"],
+        "order": 1
+      },
+      {
+        "id": "660e8400-e29b-41d4-a716-446655440802",
+        "title": "Find legal aid organization",
+        "description": "Locate free or low-cost legal assistance",
+        "estimatedTime": "1 hour",
+        "isOptional": false,
+        "links": [],
+        "requiredDocuments": [],
+        "tips": ["Many organizations offer free consultations", "Check cantonal legal aid services"],
+        "order": 2
+      },
+      {
+        "id": "660e8400-e29b-41d4-a716-446655440803",
+        "title": "Document any legal issues",
+        "description": "Keep records of important documents and communications",
+        "estimatedTime": "Ongoing",
+        "isOptional": false,
+        "links": [],
+        "requiredDocuments": [],
+        "tips": ["Save all official letters", "Take notes of verbal communications"],
+        "order": 3
+      }
+    ],
+    "tags": ["legal", "rights", "protection"],
+    "cantonCodes": [],
+    "priority": 6,
+    "isNew": false,
+    "createdAt": "2023-09-20T10:00:00Z",
+    "lastUpdated": "2023-10-08T10:00:00Z"
+  },
+  {
+    "id": "660e8400-e29b-41d4-a716-446655440009",
+    "title": "Tax Return Preparation",
+    "description": "Filing your first Swiss tax return",
+    "category": "finance",
+    "estimatedDuration": "2-4 weeks",
+    "difficulty": "hard",
+    "steps": [
+      {
+        "id": "660e8400-e29b-41d4-a716-446655440901",
+        "title": "Understand Swiss tax system",
+        "description": "Learn about federal, cantonal, and municipal taxes",
+        "estimatedTime": "2-3 hours",
+        "isOptional": false,
+        "links": [],
+        "requiredDocuments": [],
+        "tips": ["Taxes vary significantly by canton", "Deductions can reduce tax burden"],
+        "order": 1
+      },
+      {
+        "id": "660e8400-e29b-41d4-a716-446655440902",
+        "title": "Collect necessary documents",
+        "description": "Gather all financial documents for the tax year",
+        "estimatedTime": "3-4 hours",
+        "isOptional": false,
+        "links": [],
+        "requiredDocuments": ["Salary certificates", "Bank statements", "Insurance premium receipts", "Rental agreement"],
+        "tips": ["Keep organized records throughout the year", "Don't forget deduction receipts"],
+        "order": 2
+      },
+      {
+        "id": "660e8400-e29b-41d4-a716-446655440903",
+        "title": "Complete tax return",
+        "description": "Fill out your cantonal tax declaration",
+        "estimatedTime": "4-6 hours",
+        "isOptional": false,
+        "links": [],
+        "requiredDocuments": [],
+        "tips": ["Use cantonal online tax software", "Consider hiring tax advisor for first year"],
+        "order": 3
+      },
+      {
+        "id": "660e8400-e29b-41d4-a716-446655440904",
+        "title": "Submit and pay taxes",
+        "description": "File your return and arrange payment if needed",
+        "estimatedTime": "1-2 hours",
+        "isOptional": false,
+        "links": [],
+        "requiredDocuments": [],
+        "tips": ["Request payment plan if needed", "Keep confirmation of submission"],
+        "order": 4
+      }
+    ],
+    "tags": ["finance", "tax", "declaration"],
+    "cantonCodes": [],
+    "priority": 5,
+    "isNew": false,
+    "createdAt": "2023-09-15T10:00:00Z",
+    "lastUpdated": "2023-10-01T10:00:00Z"
+  }
+]

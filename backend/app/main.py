@@ -8,6 +8,7 @@ import subprocess
 from pathlib import Path
 import os
 import time as _time
+import sys
 
 import time
 import uuid
@@ -48,7 +49,7 @@ configure_logging()
 settings = get_settings()
 try:
     settings.assert_valid()
-except Exception as exc:
+except Exception:
     # Fail fast on invalid configuration
     raise
 
@@ -57,6 +58,7 @@ async def _background_tick() -> None:
     from .core.database import SessionLocal
     from .models.rss_feed import RSSFeed
     from .services.rss_importer import RSSImporter
+
     interval = int(os.getenv("FEED_IMPORT_INTERVAL_SEC", "900"))
     last_run = 0.0
     while True:
@@ -173,21 +175,47 @@ app.add_middleware(SlowAPIMiddleware)
 
 
 def _run_migrations() -> None:
-    # Run Alembic migrations only if scripts exist; ignore failures
+    """
+    Apply Alembic migrations.
+
+    Important:
+    - We must NOT rely on the `alembic` shell entrypoint being on PATH in hosted envs.
+    - In production, we want to fail fast if migrations cannot be applied.
+    """
+    if not Path("backend/alembic").exists():
+        log.warning("alembic_missing", path="backend/alembic")
+        if settings.APP_ENV.lower() == "production":
+            raise RuntimeError("Alembic migration folder is missing")
+        return
+
+    cmd = [sys.executable, "-m", "alembic", "-c", "backend/alembic.ini", "upgrade", "head"]
     try:
-        if Path("backend/alembic").exists():
-            subprocess.run(["alembic", "-c", "backend/alembic.ini", "upgrade", "head"], check=False)
-    except Exception:
-        pass
+        subprocess.run(cmd, check=True, capture_output=True, text=True, timeout=120)
+        log.info("alembic_ok")
+    except subprocess.TimeoutExpired:
+        log.error("alembic_timeout", timeout_sec=120)
+        if settings.APP_ENV.lower() == "production":
+            raise
+    except subprocess.CalledProcessError as exc:
+        log.error(
+            "alembic_failed",
+            returncode=exc.returncode,
+            stdout=(exc.stdout or "")[-4000:],
+            stderr=(exc.stderr or "")[-4000:],
+        )
+        if settings.APP_ENV.lower() == "production":
+            raise
 
 
 @app.on_event("startup")
 async def startup_event() -> None:
     # Run in a background thread so startup isn't blocked
     await asyncio.to_thread(_run_migrations)
+
     # Seed default admin (idempotent)
     from .core.database import SessionLocal
     from .services.users import seed_admin_user
+
     try:
         with SessionLocal() as db:
             seed_admin_user(db)
@@ -204,21 +232,22 @@ async def startup_event() -> None:
         log.warning("metrics_init_failed", error=str(exc))
 
 
-@app.get("/health")
+@app.api_route("/health", methods=["GET", "HEAD"])
 def health() -> dict:
     # Liveness
     return {"status": "ok"}
 
 
-@app.get("/ready")
+@app.api_route("/ready", methods=["GET", "HEAD"])
 def ready() -> dict:
-    # Readiness (DB connectivity)
+    # Readiness (DB connectivity + schema/migrations)
     from sqlalchemy import text
     from .core.database import SessionLocal
 
     try:
         with SessionLocal() as db:
             db.execute(text("SELECT 1"))
+            db.execute(text("SELECT 1 FROM alembic_version LIMIT 1"))
         return {"status": "ready"}
     except Exception as exc:
         raise HTTPException(status_code=503, detail="not ready") from exc
@@ -250,4 +279,21 @@ except Exception:
     # directory may not exist at build time
     pass
 
+
+@app.get("/debug/openapi")
+def debug_openapi() -> dict:
+    """
+    Helper endpoint to debug OpenAPI generation issues in hosted environments.
+    It attempts to call `app.openapi()` and, if that fails, returns the error
+    and traceback instead of letting FastAPI swallow it into a generic 500.
+    """
+    import traceback
+
+    try:
+        return app.openapi()
+    except Exception as exc:  # pragma: no cover - only used in prod debugging
+        return {
+            "error": str(exc),
+            "traceback": traceback.format_exc(),
+        }
 

@@ -14,7 +14,7 @@ from ..core.password_policy import validate_password_strength
 from ..core.database import get_db
 from ..core.config import get_settings
 from ..core.rate_limit import limiter
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, field_validator
 from datetime import timedelta
 
 

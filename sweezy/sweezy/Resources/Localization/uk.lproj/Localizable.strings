@@ -26,6 +26,7 @@
 "common.settings" = "Налаштування";
 "common.new" = "Нове";
 "common.open" = "Відкрити";
+"common.help" = "Допомога";
 
 // MARK: - Onboarding
 "onboarding.welcome" = "Ласкаво просимо до Sweezy";
@@ -46,6 +47,14 @@
 "onboarding.choose_style.title" = "Оберіть стиль";
 "onboarding.choose_style.subtitle" = "Це можна змінити в Налаштуваннях";
 "onboarding.skip" = "Пропустити";
+
+// MARK: - Довідник (Гайди + Чек‑листи) — підказки
+"dovidnyk.tour.step1.title" = "Гайди та чек‑листи";
+"dovidnyk.tour.step1.message" = "Перемикайте вкладки, щоб швидко знайти потрібне. Порада: можна свайпати між екранами.";
+"dovidnyk.tour.step2.title" = "Фільтруйте гайди";
+"dovidnyk.tour.step2.message" = "Оберіть категорію, щоб звузити результати. Пошук — зверху.";
+"dovidnyk.tour.step3.title" = "Прогрес чек‑листів";
+"dovidnyk.tour.step3.message" = "Тут видно загальний прогрес. Відкрийте чек‑лист і виконуйте кроки.";
 
 // MARK: - Home
 "home.welcome" = "Вітаємо в Sweezy";

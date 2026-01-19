@@ -24,6 +24,18 @@
 "common.tags" = "Tags";
 "common.new" = "Neu";
 "common.open" = "Öffnen";
+"common.help" = "Hilfe";
+
+// MARK: - Onboarding
+"onboarding.skip" = "Überspringen";
+
+// MARK: - Dovidnyk (Leitfäden + Checklisten) Tour
+"dovidnyk.tour.step1.title" = "Leitfäden & Checklisten";
+"dovidnyk.tour.step1.message" = "Wechseln Sie über Tabs zwischen Leitfäden und Checklisten. Tipp: Sie können auch wischen.";
+"dovidnyk.tour.step2.title" = "Leitfäden filtern";
+"dovidnyk.tour.step2.message" = "Wählen Sie eine Kategorie, um die Ergebnisse einzugrenzen. Die Suche ist oben.";
+"dovidnyk.tour.step3.title" = "Checklisten‑Fortschritt";
+"dovidnyk.tour.step3.message" = "Behalten Sie den Gesamtfortschritt im Blick und machen Sie Schritt für Schritt weiter.";
 
 "home.welcome" = "Willkommen bei Sweezy";
 "home.welcome_back" = "Willkommen zurück, %@";

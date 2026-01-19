@@ -25,6 +25,7 @@
 "common.copy" = "Copy";
 "common.settings" = "Settings";
 "common.open" = "Open";
+"common.help" = "Help";
 
 // MARK: - Onboarding
 "onboarding.welcome" = "Welcome to Sweezy";
@@ -45,6 +46,14 @@
 "onboarding.choose_style.title" = "Choose your style";
 "onboarding.choose_style.subtitle" = "You can change it later in Settings";
 "onboarding.skip" = "Skip";
+
+// MARK: - Dovidnyk (Guides + Checklists) Tour
+"dovidnyk.tour.step1.title" = "Guides & Checklists";
+"dovidnyk.tour.step1.message" = "Use tabs to switch between guides and checklists. Tip: you can also swipe between pages.";
+"dovidnyk.tour.step2.title" = "Filter guides";
+"dovidnyk.tour.step2.message" = "Pick a category to narrow down results. Search is available at the top.";
+"dovidnyk.tour.step3.title" = "Checklist progress";
+"dovidnyk.tour.step3.message" = "Track your overall progress and continue checklists step-by-step.";
 
 // MARK: - Home
 "home.welcome" = "Welcome to Sweezy";

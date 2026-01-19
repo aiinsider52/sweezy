@@ -56,6 +56,16 @@
 "dovidnyk.tour.step3.title" = "Прогрес чек‑листів";
 "dovidnyk.tour.step3.message" = "Тут видно загальний прогрес. Відкрийте чек‑лист і виконуйте кроки.";
 
+// MARK: - Налаштування — підказки
+"settings.tour.step1.title" = "Ваш профіль";
+"settings.tour.step1.message" = "Керуйте даними акаунта та переглядайте свій прогрес.";
+"settings.tour.step2.title" = "Мова";
+"settings.tour.step2.message" = "Змінюйте мову додатку будь‑коли.";
+"settings.tour.step3.title" = "Приватність";
+"settings.tour.step3.message" = "Перегляньте політику приватності та дозволи.";
+"settings.tour.step4.title" = "Дані та акаунт";
+"settings.tour.step4.message" = "Експорт/імпорт, очистка локальних даних або видалення акаунта.";
+
 // MARK: - Home
 "home.welcome" = "Вітаємо в Sweezy";
 "home.welcome_back" = "З поверненням, %@";

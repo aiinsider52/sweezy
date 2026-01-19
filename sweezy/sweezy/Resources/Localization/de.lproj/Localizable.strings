@@ -37,6 +37,16 @@
 "dovidnyk.tour.step3.title" = "Checklisten‑Fortschritt";
 "dovidnyk.tour.step3.message" = "Behalten Sie den Gesamtfortschritt im Blick und machen Sie Schritt für Schritt weiter.";
 
+// MARK: - Einstellungen Tour
+"settings.tour.step1.title" = "Ihr Profil";
+"settings.tour.step1.message" = "Kontodaten verwalten und den Fortschritt ansehen.";
+"settings.tour.step2.title" = "Sprache";
+"settings.tour.step2.message" = "App‑Sprache jederzeit ändern.";
+"settings.tour.step3.title" = "Datenschutz";
+"settings.tour.step3.message" = "Datenschutzerklärung und Berechtigungen prüfen.";
+"settings.tour.step4.title" = "Daten & Konto";
+"settings.tour.step4.message" = "Daten exportieren/importieren, Cache löschen oder Konto entfernen.";
+
 "home.welcome" = "Willkommen bei Sweezy";
 "home.welcome_back" = "Willkommen zurück, %@";
 "home.quick_actions" = "Schnellaktionen";

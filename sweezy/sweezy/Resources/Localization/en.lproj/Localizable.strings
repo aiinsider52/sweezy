@@ -55,6 +55,16 @@
 "dovidnyk.tour.step3.title" = "Checklist progress";
 "dovidnyk.tour.step3.message" = "Track your overall progress and continue checklists step-by-step.";
 
+// MARK: - Settings Tour
+"settings.tour.step1.title" = "Your profile";
+"settings.tour.step1.message" = "Manage your account details and see your progress.";
+"settings.tour.step2.title" = "Language";
+"settings.tour.step2.message" = "Change the app language anytime.";
+"settings.tour.step3.title" = "Privacy";
+"settings.tour.step3.message" = "Review the privacy policy and permissions.";
+"settings.tour.step4.title" = "Data & account";
+"settings.tour.step4.message" = "Export/import data, clear cache, or delete your account.";
+
 // MARK: - Home
 "home.welcome" = "Welcome to Sweezy";
 "home.welcome_back" = "Welcome back, %@";

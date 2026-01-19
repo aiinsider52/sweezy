@@ -38,95 +38,127 @@ struct SettingsView: View {
     @State private var liveXP: Int = 0
     @State private var liveLastAward: Int = 0
     @State private var liveTodayXP: Int = 0
+
+    // Page tour (coach marks)
+    @AppStorage("tour.settings.v1") private var didShowTour: Bool = false
+    @State private var showTour: Bool = false
     
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(spacing: Theme.Spacing.xl) {
-                    // Profile card
-                    profileCard
-                    
-                    // Gamification panel
-                    gamificationPanel
-                    
-                    // Premium block
-                    if !shouldHideSubscriptionPromo {
-                        subscriptionBlock
-                    }
-                    
-                    // Language & Privacy - Winter styled
-                    VStack(alignment: .leading, spacing: Theme.Spacing.md) {
-                        WinterSectionHeader(title: "Налаштування")
-                        winterSettingsRow(icon: "globe", title: "settings.language".localized, value: currentLanguageName) {
-                            showingLanguageSelection = true
+            ScrollViewReader { scrollProxy in
+                ScrollView {
+                    VStack(spacing: Theme.Spacing.xl) {
+                        // Profile card
+                        profileCard
+                            .coachMarkTarget("settings.profile")
+                            .id("settings.profile")
+                        
+                        // Gamification panel
+                        gamificationPanel
+                        
+                        // Premium block
+                        if !shouldHideSubscriptionPromo {
+                            subscriptionBlock
                         }
-                        winterSettingsRow(icon: "hand.raised.fill", title: "privacy.title".localized) {
-                            showingPrivacy = true
-                        }
-                        // Biometrics - Winter styled
-                        WinterSettingsCard {
-                            HStack(spacing: Theme.Spacing.md) {
-                                Image(systemName: lockManager.biometryDisplayName == "Face ID" ? "faceid" : "touchid")
-                                    .font(.system(size: 20, weight: .semibold))
-                                    .foregroundColor(.cyan)
-                                    .frame(width: 24)
-                                Toggle("Use \(lockManager.biometryDisplayName)", isOn: Binding(
-                                    get: { lockManager.biometricsEnabled },
-                                    set: { newValue in
-                                        Task { @MainActor in
-                                            if newValue {
-                                                lockManager.biometricsEnabled = true
-                                                lockManager.isLocked = true
-                                                let ok = await lockManager.authenticate(reason: "Enable \(lockManager.biometryDisplayName)")
-                                                if !ok { lockManager.biometricsEnabled = false }
-                                            } else {
-                                                lockManager.biometricsEnabled = false
-                                                lockManager.isLocked = false
+                        
+                        // Language & Privacy - Winter styled
+                        VStack(alignment: .leading, spacing: Theme.Spacing.md) {
+                            WinterSectionHeader(title: "settings.title".localized)
+                            winterSettingsRow(icon: "globe", title: "settings.language".localized, value: currentLanguageName) {
+                                showingLanguageSelection = true
+                            }
+                            .coachMarkTarget("settings.language")
+                            .id("settings.language")
+                            
+                            winterSettingsRow(icon: "hand.raised.fill", title: "privacy.title".localized) {
+                                showingPrivacy = true
+                            }
+                            .coachMarkTarget("settings.privacy")
+                            .id("settings.privacy")
+                            
+                            // Biometrics - Winter styled
+                            WinterSettingsCard {
+                                HStack(spacing: Theme.Spacing.md) {
+                                    Image(systemName: lockManager.biometryDisplayName == "Face ID" ? "faceid" : "touchid")
+                                        .font(.system(size: 20, weight: .semibold))
+                                        .foregroundColor(.cyan)
+                                        .frame(width: 24)
+                                    Toggle("Use \(lockManager.biometryDisplayName)", isOn: Binding(
+                                        get: { lockManager.biometricsEnabled },
+                                        set: { newValue in
+                                            Task { @MainActor in
+                                                if newValue {
+                                                    lockManager.biometricsEnabled = true
+                                                    lockManager.isLocked = true
+                                                    let ok = await lockManager.authenticate(reason: "Enable \(lockManager.biometryDisplayName)")
+                                                    if !ok { lockManager.biometricsEnabled = false }
+                                                } else {
+                                                    lockManager.biometricsEnabled = false
+                                                    lockManager.isLocked = false
+                                                }
                                             }
                                         }
-                                    }
-                                ))
-                                .tint(.cyan)
+                                    ))
+                                    .tint(.cyan)
+                                }
                             }
                         }
+                        
+                        // About - Winter styled
+                        VStack(alignment: .leading, spacing: Theme.Spacing.md) {
+                            WinterSectionHeader(title: "settings.about".localized)
+                            winterSettingsRow(icon: "info.circle", title: "settings.version".localized(with: Bundle.main.appVersion)) {}
+                            winterSettingsRow(icon: "questionmark.circle", title: "settings.about".localized) {
+                                showingAbout = true
+                            }
+                            // Data management entry at the very end of the page
+                            winterSettingsRow(icon: "internaldrive", title: "settings.data_management".localized) {
+                                showingDataManagement = true
+                            }
+                            .coachMarkTarget("settings.data_management")
+                            .id("settings.data_management")
+                        }
                     }
-                    
-                    // About - Winter styled
-                    VStack(alignment: .leading, spacing: Theme.Spacing.md) {
-                        WinterSectionHeader(title: "settings.about".localized)
-                        winterSettingsRow(icon: "info.circle", title: "settings.version".localized(with: Bundle.main.appVersion)) {}
-                        winterSettingsRow(icon: "questionmark.circle", title: "settings.about".localized) {
-                            showingAbout = true
+                    .padding(Theme.Spacing.lg)
+                }
+                .background(
+                    ZStack {
+                        // Winter gradient background (always festive on Settings)
+                        LinearGradient(
+                            colors: [
+                                Color(red: 0.05, green: 0.1, blue: 0.2),
+                                Color(red: 0.08, green: 0.15, blue: 0.28),
+                                Color(red: 0.06, green: 0.12, blue: 0.22)
+                            ],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                        .ignoresSafeArea()
+                        
+                        // Subtle snowfall
+                        WinterSceneLite(intensity: .light)
+                    }
+                )
+                .navigationTitle("settings.title".localized)
+                .navigationBarTitleDisplayMode(.large)
+                .refreshable { await reloadSubscription() }
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
+                            showTour = true
+                        } label: {
+                            Image(systemName: "questionmark.circle")
                         }
-                        // Data management entry at the very end of the page
-                        winterSettingsRow(icon: "internaldrive", title: "settings.data_management".localized) {
-                            showingDataManagement = true
-                        }
+                        .tint(Color.cyan)
+                        .accessibilityLabel(Text("common.help".localized))
                     }
                 }
-                .padding(Theme.Spacing.lg)
+                .coachMarks(
+                    steps: settingsTourSteps(scrollProxy: scrollProxy),
+                    isPresented: $showTour,
+                    onFinish: { didShowTour = true }
+                )
             }
-            .background(
-                ZStack {
-                    // Winter gradient background (always festive on Settings)
-                    LinearGradient(
-                        colors: [
-                            Color(red: 0.05, green: 0.1, blue: 0.2),
-                            Color(red: 0.08, green: 0.15, blue: 0.28),
-                            Color(red: 0.06, green: 0.12, blue: 0.22)
-                        ],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                    .ignoresSafeArea()
-                    
-                    // Subtle snowfall
-                    WinterSceneLite(intensity: .light)
-                }
-            )
-            .navigationTitle("settings.title".localized)
-            .navigationBarTitleDisplayMode(.large)
-            .refreshable { await reloadSubscription() }
         }
         .onAppear {
             print("⚙️ SettingsView onAppear")
@@ -139,6 +171,13 @@ struct SettingsView: View {
             liveXP = appContainer.gamification.totalXP
             liveLastAward = appContainer.gamification.lastAwardedXP
             liveTodayXP = appContainer.gamification.xpGainedToday()
+            
+            // Auto-show page tour once (after layout)
+            if !didShowTour {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                    showTour = true
+                }
+            }
         }
         // Lightweight listeners (two small subjects, update only this card)
         .onReceive(appContainer.gamification.$totalXP) { value in
@@ -316,6 +355,55 @@ struct SettingsView: View {
 // MARK: - Sections
 
 private extension SettingsView {
+    func settingsTourSteps(scrollProxy: ScrollViewProxy) -> [CoachMarkStep] {
+        [
+            CoachMarkStep(
+                id: "profile",
+                title: "settings.tour.step1.title".localized,
+                message: "settings.tour.step1.message".localized,
+                targetId: "settings.profile",
+                onAppear: {
+                    withAnimation(.easeInOut(duration: 0.25)) {
+                        scrollProxy.scrollTo("settings.profile", anchor: .top)
+                    }
+                }
+            ),
+            CoachMarkStep(
+                id: "language",
+                title: "settings.tour.step2.title".localized,
+                message: "settings.tour.step2.message".localized,
+                targetId: "settings.language",
+                onAppear: {
+                    withAnimation(.easeInOut(duration: 0.25)) {
+                        scrollProxy.scrollTo("settings.language", anchor: .top)
+                    }
+                }
+            ),
+            CoachMarkStep(
+                id: "privacy",
+                title: "settings.tour.step3.title".localized,
+                message: "settings.tour.step3.message".localized,
+                targetId: "settings.privacy",
+                onAppear: {
+                    withAnimation(.easeInOut(duration: 0.25)) {
+                        scrollProxy.scrollTo("settings.privacy", anchor: .top)
+                    }
+                }
+            ),
+            CoachMarkStep(
+                id: "data",
+                title: "settings.tour.step4.title".localized,
+                message: "settings.tour.step4.message".localized,
+                targetId: "settings.data_management",
+                onAppear: {
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        scrollProxy.scrollTo("settings.data_management", anchor: .center)
+                    }
+                }
+            ),
+        ]
+    }
+
     var gamificationPanel: some View {
         let baseXP = appContainer.gamification.totalXP
         let currentXPValue = (liveXP == 0 ? baseXP : liveXP)

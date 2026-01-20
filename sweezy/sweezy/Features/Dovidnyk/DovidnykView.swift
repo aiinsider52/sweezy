@@ -15,18 +15,14 @@ struct DovidnykView: View {
     @State private var selectedTab: DovidnykTab = .guides
     @State private var searchText = ""
     
-    // Page tour (coach marks)
-    @AppStorage("tour.dovidnyk.v1") private var didShowTour: Bool = false
-    @State private var showTour: Bool = false
-    
     enum DovidnykTab: String, CaseIterable {
         case guides = "guides"
         case checklists = "checklists"
         
         var title: String {
             switch self {
-            case .guides: return "guides.title".localized
-            case .checklists: return "checklists.title".localized
+            case .guides: return "Гайди"
+            case .checklists: return "Чек-листи"
             }
         }
         
@@ -79,73 +75,14 @@ struct DovidnykView: View {
                     WinterSceneLite(intensity: .light)
                 }
             )
-            .navigationTitle("guides.title".localized)
+            .navigationTitle("Довідник")
             .navigationBarTitleDisplayMode(.large)
-            .searchable(text: $searchText, prompt: "guides.search_placeholder".localized)
+            .searchable(text: $searchText, prompt: "Пошук...")
             .refreshable {
                 await appContainer.contentService.refreshContent()
                 haptic(.light)
             }
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        showTour = true
-                    } label: {
-                        Image(systemName: "questionmark.circle")
-                    }
-                    .tint(Color.cyan)
-                    .accessibilityLabel(Text("common.help".localized))
-                }
-            }
-            .onAppear {
-                guard !didShowTour else { return }
-                // Delay so targets have layout and can be highlighted correctly.
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
-                    showTour = true
-                }
-            }
-            .coachMarks(
-                steps: [
-                    CoachMarkStep(
-                        id: "tabs",
-                        title: "dovidnyk.tour.step1.title".localized,
-                        message: "dovidnyk.tour.step1.message".localized,
-                        targetId: "dovidnyk.tabs"
-                    ),
-                    CoachMarkStep(
-                        id: "guides_categories",
-                        title: "dovidnyk.tour.step2.title".localized,
-                        message: "dovidnyk.tour.step2.message".localized,
-                        targetId: "dovidnyk.guides.categories",
-                        onAppear: {
-                            if selectedTab != .guides {
-                                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                                    selectedTab = .guides
-                                }
-                                haptic(.light)
-                            }
-                        }
-                    ),
-                    CoachMarkStep(
-                        id: "checklists_progress",
-                        title: "dovidnyk.tour.step3.title".localized,
-                        message: "dovidnyk.tour.step3.message".localized,
-                        targetId: "dovidnyk.checklists.progress",
-                        onAppear: {
-                            if selectedTab != .checklists {
-                                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                                    selectedTab = .checklists
-                                }
-                                haptic(.light)
-                            }
-                        }
-                    ),
-                ],
-                isPresented: $showTour,
-                onFinish: {
-                    didShowTour = true
-                }
-            )
+            .featureOnboarding(.dovidnyk)
         }
     }
     
@@ -192,7 +129,6 @@ struct DovidnykView: View {
                 .fill(Color(red: 0.05, green: 0.1, blue: 0.2).opacity(0.95))
                 .shadow(color: Color.cyan.opacity(0.1), radius: 4, x: 0, y: 2)
         )
-        .coachMarkTarget("dovidnyk.tabs")
     }
 }
 
@@ -300,7 +236,6 @@ struct GuidesContentView: View {
                 }
             }
         }
-        .coachMarkTarget("dovidnyk.guides.categories")
     }
     
     private func chipButton(_ category: GuideCategory?, isSelected: Bool) -> some View {
@@ -784,7 +719,6 @@ struct ChecklistsContentView: View {
                 }
             }
         )
-        .coachMarkTarget("dovidnyk.checklists.progress")
     }
     
     private func progressMessage(for percent: Int) -> String {

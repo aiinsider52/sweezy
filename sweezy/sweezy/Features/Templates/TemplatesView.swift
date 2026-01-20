@@ -69,6 +69,7 @@ struct TemplatesView: View {
                     await appContainer.contentService.refreshContent()
                 }
             }
+            .featureOnboarding(.templates)
         }
     }
     

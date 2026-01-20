@@ -26,7 +26,6 @@
 "common.settings" = "Налаштування";
 "common.new" = "Нове";
 "common.open" = "Відкрити";
-"common.help" = "Допомога";
 
 // MARK: - Onboarding
 "onboarding.welcome" = "Ласкаво просимо до Sweezy";
@@ -48,23 +47,37 @@
 "onboarding.choose_style.subtitle" = "Це можна змінити в Налаштуваннях";
 "onboarding.skip" = "Пропустити";
 
-// MARK: - Довідник (Гайди + Чек‑листи) — підказки
-"dovidnyk.tour.step1.title" = "Гайди та чек‑листи";
-"dovidnyk.tour.step1.message" = "Перемикайте вкладки, щоб швидко знайти потрібне. Порада: можна свайпати між екранами.";
-"dovidnyk.tour.step2.title" = "Фільтруйте гайди";
-"dovidnyk.tour.step2.message" = "Оберіть категорію, щоб звузити результати. Пошук — зверху.";
-"dovidnyk.tour.step3.title" = "Прогрес чек‑листів";
-"dovidnyk.tour.step3.message" = "Тут видно загальний прогрес. Відкрийте чек‑лист і виконуйте кроки.";
+// MARK: - Feature Onboarding
+"onboarding.understood" = "Зрозуміло";
+"onboarding.next" = "Далі";
 
-// MARK: - Налаштування — підказки
-"settings.tour.step1.title" = "Ваш профіль";
-"settings.tour.step1.message" = "Керуйте даними акаунта та переглядайте свій прогрес.";
-"settings.tour.step2.title" = "Мова";
-"settings.tour.step2.message" = "Змінюйте мову додатку будь‑коли.";
-"settings.tour.step3.title" = "Приватність";
-"settings.tour.step3.message" = "Перегляньте політику приватності та дозволи.";
-"settings.tour.step4.title" = "Дані та акаунт";
-"settings.tour.step4.message" = "Експорт/імпорт, очистка локальних даних або видалення акаунта.";
+// Dovidnyk
+"onboarding.dovidnyk.title" = "Довідник";
+"onboarding.dovidnyk.description" = "Тут зібрані корисні гайди та чеклисти для життя в Швейцарії. Документи, житло, робота — все в одному місці.";
+"onboarding.dovidnyk.checklists.title" = "Чек-листи";
+"onboarding.dovidnyk.checklists.description" = "Відзначай виконані пункти та слідкуй за прогресом. Ми нагадаємо про важливі дедлайни.";
+
+// Calculator
+"onboarding.calculator.title" = "Калькулятор виплат";
+"onboarding.calculator.description" = "Розрахуй свої потенційні субсидії та виплати в Швейцарії. Введи дані — ми порахуємо.";
+
+// Roadmap
+"onboarding.roadmap.title" = "Твій шлях до вершини";
+"onboarding.roadmap.description" = "Проходь рівні, виконуй завдання та слідкуй за своїм прогресом інтеграції в Швейцарії.";
+"onboarding.roadmap.xp.title" = "Заробляй XP";
+"onboarding.roadmap.xp.description" = "За кожне виконане завдання отримуй очки досвіду. Чим більше — тим вище рівень!";
+
+// Map
+"onboarding.map.title" = "Карта корисних місць";
+"onboarding.map.description" = "Знайди ближчі офіси, школи, магазини та українські ком'юніті поблизу.";
+
+// Jobs
+"onboarding.jobs.title" = "Пошук роботи";
+"onboarding.jobs.description" = "Актуальні вакансії для українців у Швейцарії. Фільтруй за регіоном та галуззю.";
+
+// Templates
+"onboarding.templates.title" = "Шаблони документів";
+"onboarding.templates.description" = "Готові зразки резюме, мотиваційних листів та офіційних звернень німецькою та французькою.";
 
 // MARK: - Home
 "home.welcome" = "Вітаємо в Sweezy";

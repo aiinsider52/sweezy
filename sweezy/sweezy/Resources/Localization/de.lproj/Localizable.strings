@@ -24,28 +24,38 @@
 "common.tags" = "Tags";
 "common.new" = "Neu";
 "common.open" = "Öffnen";
-"common.help" = "Hilfe";
 
-// MARK: - Onboarding
-"onboarding.skip" = "Überspringen";
+// MARK: - Feature Onboarding
+"onboarding.understood" = "Verstanden";
+"onboarding.next" = "Weiter";
 
-// MARK: - Dovidnyk (Leitfäden + Checklisten) Tour
-"dovidnyk.tour.step1.title" = "Leitfäden & Checklisten";
-"dovidnyk.tour.step1.message" = "Wechseln Sie über Tabs zwischen Leitfäden und Checklisten. Tipp: Sie können auch wischen.";
-"dovidnyk.tour.step2.title" = "Leitfäden filtern";
-"dovidnyk.tour.step2.message" = "Wählen Sie eine Kategorie, um die Ergebnisse einzugrenzen. Die Suche ist oben.";
-"dovidnyk.tour.step3.title" = "Checklisten‑Fortschritt";
-"dovidnyk.tour.step3.message" = "Behalten Sie den Gesamtfortschritt im Blick und machen Sie Schritt für Schritt weiter.";
+// Dovidnyk
+"onboarding.dovidnyk.title" = "Ihr Ratgeber";
+"onboarding.dovidnyk.description" = "Hier finden Sie hilfreiche Leitfäden und Checklisten für das Leben in der Schweiz. Dokumente, Wohnen, Arbeit — alles an einem Ort.";
+"onboarding.dovidnyk.checklists.title" = "Checklisten";
+"onboarding.dovidnyk.checklists.description" = "Verfolgen Sie Ihren Fortschritt, indem Sie erledigte Punkte abhaken. Wir erinnern Sie an wichtige Fristen.";
 
-// MARK: - Einstellungen Tour
-"settings.tour.step1.title" = "Ihr Profil";
-"settings.tour.step1.message" = "Kontodaten verwalten und den Fortschritt ansehen.";
-"settings.tour.step2.title" = "Sprache";
-"settings.tour.step2.message" = "App‑Sprache jederzeit ändern.";
-"settings.tour.step3.title" = "Datenschutz";
-"settings.tour.step3.message" = "Datenschutzerklärung und Berechtigungen prüfen.";
-"settings.tour.step4.title" = "Daten & Konto";
-"settings.tour.step4.message" = "Daten exportieren/importieren, Cache löschen oder Konto entfernen.";
+// Calculator
+"onboarding.calculator.title" = "Leistungsrechner";
+"onboarding.calculator.description" = "Berechnen Sie Ihre möglichen Subventionen und Leistungen in der Schweiz. Geben Sie Ihre Daten ein — wir rechnen.";
+
+// Roadmap
+"onboarding.roadmap.title" = "Ihr Weg zum Gipfel";
+"onboarding.roadmap.description" = "Absolvieren Sie Level, erledigen Sie Aufgaben und verfolgen Sie Ihren Integrationsfortschritt in der Schweiz.";
+"onboarding.roadmap.xp.title" = "XP verdienen";
+"onboarding.roadmap.xp.description" = "Erhalten Sie Erfahrungspunkte für jede erledigte Aufgabe. Je mehr Sie sammeln — desto höher Ihr Level!";
+
+// Map
+"onboarding.map.title" = "Karte nützlicher Orte";
+"onboarding.map.description" = "Finden Sie Ämter, Schulen, Geschäfte und ukrainische Gemeinschaften in Ihrer Nähe.";
+
+// Jobs
+"onboarding.jobs.title" = "Jobsuche";
+"onboarding.jobs.description" = "Aktuelle Stellenangebote für Ukrainer in der Schweiz. Filtern nach Region und Branche.";
+
+// Templates
+"onboarding.templates.title" = "Dokumentvorlagen";
+"onboarding.templates.description" = "Fertige Lebensläufe, Motivationsschreiben und offizielle Anträge auf Deutsch und Französisch.";
 
 "home.welcome" = "Willkommen bei Sweezy";
 "home.welcome_back" = "Willkommen zurück, %@";

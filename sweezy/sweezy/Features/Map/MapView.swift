@@ -112,6 +112,7 @@ struct MapView: View {
             .onAppear {
                 requestLocationPermission()
             }
+            .featureOnboarding(.map)
         }
     }
     

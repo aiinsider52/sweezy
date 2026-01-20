@@ -52,6 +52,7 @@ struct BenefitsCalculatorView: View {
                     }
                 }
             }
+            .featureOnboarding(.calculator)
         }
     }
     

@@ -83,6 +83,7 @@ struct MountainRoadmapView: View {
         } message: {
             Text("Ви впевнені? Ви зможете повернутися до цього рівня пізніше.")
         }
+        .featureOnboarding(.roadmap)
     }
     
     // MARK: - Header

@@ -1250,5 +1250,6 @@ private struct CVTextArea: View {
                 }
             }
         }
+            .featureOnboarding(.cvBuilder)
     }
 }

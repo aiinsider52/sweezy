@@ -60,6 +60,7 @@ struct AppointmentsView: View {
                     appointments.append(appointment)
                 }
             }
+            .featureOnboarding(.appointments)
         }
         .onAppear {
             isLoading = true

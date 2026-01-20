@@ -49,6 +49,7 @@ struct NewsDetailView: View, Identifiable {
         .background(Theme.Colors.primaryBackground.ignoresSafeArea())
         .navigationTitle("Новина")
         .navigationBarTitleDisplayMode(.inline)
+        .featureOnboarding(.news)
     }
     
     private func formattedDate(_ date: Date) -> String {

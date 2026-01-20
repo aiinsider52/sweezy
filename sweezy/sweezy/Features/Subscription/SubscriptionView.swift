@@ -103,6 +103,7 @@ struct SubscriptionView: View {
             .sheet(isPresented: $promoCodeSheet) { promoCodeSheetContent }
             .sheet(isPresented: $showPrivacy) { PrivacyPolicyView() }
             .sheet(isPresented: $showTerms) { TermsOfUseView() }
+            .featureOnboarding(.subscription)
         }
         .overlay(ConfettiOverlay(show: $showConfetti, reduceMotion: reduceMotion))
         .task {

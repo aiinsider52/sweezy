@@ -18,6 +18,7 @@ struct QuestsView: View {
             }
             .listStyle(.insetGrouped)
         }
+        .featureOnboarding(.gamification)
     }
 }
 

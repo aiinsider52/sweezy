@@ -127,6 +127,7 @@ struct SettingsView: View {
             .navigationTitle("settings.title".localized)
             .navigationBarTitleDisplayMode(.large)
             .refreshable { await reloadSubscription() }
+            .featureOnboarding(.settings)
         }
         .onAppear {
             print("⚙️ SettingsView onAppear")

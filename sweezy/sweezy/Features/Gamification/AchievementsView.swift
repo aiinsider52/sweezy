@@ -33,6 +33,7 @@ struct AchievementsView: View {
             }
             .padding(.top, Theme.Spacing.lg)
         }
+        .featureOnboarding(.gamification)
     }
     
     private func icon(for id: String) -> String {

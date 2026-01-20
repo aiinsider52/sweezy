@@ -18,6 +18,12 @@ enum OnboardingFeature: String, CaseIterable {
     case map = "feature.map"
     case jobs = "feature.jobs"
     case templates = "feature.templates"
+    case settings = "feature.settings"
+    case appointments = "feature.appointments"
+    case subscription = "feature.subscription"
+    case news = "feature.news"
+    case gamification = "feature.gamification"
+    case cvBuilder = "feature.cv_builder"
     
     /// UserDefaults key for tracking if this onboarding was shown
     var seenKey: String { "onboarding.seen.\(rawValue)" }
@@ -36,6 +42,12 @@ enum OnboardingFeature: String, CaseIterable {
         case .map: return 1
         case .jobs: return 1
         case .templates: return 1
+        case .settings: return 1
+        case .appointments: return 1
+        case .subscription: return 1
+        case .news: return 1
+        case .gamification: return 1
+        case .cvBuilder: return 1
         }
     }
 }
@@ -175,5 +187,53 @@ extension FeatureOnboardingContent {
         iconColor: Theme.Colors.warning,
         title: "onboarding.templates.title".localized,
         description: "onboarding.templates.description".localized
+    )
+
+    static let settings = FeatureOnboardingContent(
+        feature: .settings,
+        icon: "gearshape.fill",
+        iconColor: Theme.Colors.accentTurquoise,
+        title: "onboarding.settings.title".localized,
+        description: "onboarding.settings.description".localized
+    )
+
+    static let appointments = FeatureOnboardingContent(
+        feature: .appointments,
+        icon: "calendar.badge.clock",
+        iconColor: Theme.Colors.info,
+        title: "onboarding.appointments.title".localized,
+        description: "onboarding.appointments.description".localized
+    )
+
+    static let subscription = FeatureOnboardingContent(
+        feature: .subscription,
+        icon: "crown.fill",
+        iconColor: Theme.Colors.accent,
+        title: "onboarding.subscription.title".localized,
+        description: "onboarding.subscription.description".localized
+    )
+
+    static let news = FeatureOnboardingContent(
+        feature: .news,
+        icon: "newspaper.fill",
+        iconColor: Theme.Colors.accentCoral,
+        title: "onboarding.news.title".localized,
+        description: "onboarding.news.description".localized
+    )
+
+    static let gamification = FeatureOnboardingContent(
+        feature: .gamification,
+        icon: "trophy.fill",
+        iconColor: Theme.Colors.success,
+        title: "onboarding.gamification.title".localized,
+        description: "onboarding.gamification.description".localized
+    )
+
+    static let cvBuilder = FeatureOnboardingContent(
+        feature: .cvBuilder,
+        icon: "doc.badge.person.crop",
+        iconColor: Theme.Colors.primary,
+        title: "onboarding.cv.title".localized,
+        description: "onboarding.cv.description".localized
     )
 }

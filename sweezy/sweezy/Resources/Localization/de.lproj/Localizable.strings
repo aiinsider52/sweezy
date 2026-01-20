@@ -57,6 +57,30 @@
 "onboarding.templates.title" = "Dokumentvorlagen";
 "onboarding.templates.description" = "Fertige Lebensläufe, Motivationsschreiben und offizielle Anträge auf Deutsch und Französisch.";
 
+// Settings
+"onboarding.settings.title" = "Einstellungen";
+"onboarding.settings.description" = "Sprache, Datenschutz, Konto und App-Einstellungen — alles an einem Ort.";
+
+// Appointments
+"onboarding.appointments.title" = "Termine";
+"onboarding.appointments.description" = "Speichern Sie wichtige Termine und Fristen, damit Sie nichts verpassen.";
+
+// Subscription
+"onboarding.subscription.title" = "Premium";
+"onboarding.subscription.description" = "Schalten Sie Premium-Funktionen frei und kommen Sie schneller voran.";
+
+// News
+"onboarding.news.title" = "Nachrichten";
+"onboarding.news.description" = "Lesen Sie Updates und nützliche Nachrichten in einer übersichtlichen Ansicht.";
+
+// Gamification
+"onboarding.gamification.title" = "Erfolge";
+"onboarding.gamification.description" = "Verdienen Sie Abzeichen und verfolgen Sie Ihren Fortschritt beim Erledigen von Aufgaben.";
+
+// CV
+"onboarding.cv.title" = "CV-Builder";
+"onboarding.cv.description" = "Erstellen Sie Schritt für Schritt einen Schweizer Lebenslauf mit Tipps und Vorschau.";
+
 "home.welcome" = "Willkommen bei Sweezy";
 "home.welcome_back" = "Willkommen zurück, %@";
 "home.quick_actions" = "Schnellaktionen";

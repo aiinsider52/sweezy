@@ -78,6 +78,30 @@
 "onboarding.templates.title" = "Document Templates";
 "onboarding.templates.description" = "Ready-to-use CV, cover letter, and official request templates in German and French.";
 
+// Settings
+"onboarding.settings.title" = "Settings";
+"onboarding.settings.description" = "Manage language, privacy, account, and app preferences in one place.";
+
+// Appointments
+"onboarding.appointments.title" = "Appointments";
+"onboarding.appointments.description" = "Save important appointments and deadlines so you don't miss anything.";
+
+// Subscription
+"onboarding.subscription.title" = "Premium";
+"onboarding.subscription.description" = "Unlock premium features and keep your progress moving faster.";
+
+// News
+"onboarding.news.title" = "News";
+"onboarding.news.description" = "Read updates and useful news in one place, with a clean reading view.";
+
+// Gamification
+"onboarding.gamification.title" = "Achievements";
+"onboarding.gamification.description" = "Earn achievements and track your progress as you complete tasks.";
+
+// CV
+"onboarding.cv.title" = "CV Builder";
+"onboarding.cv.description" = "Create a Swiss-style CV step by step, with tips and a preview.";
+
 // MARK: - Home
 "home.welcome" = "Welcome to Sweezy";
 "home.welcome_back" = "Welcome back, %@";

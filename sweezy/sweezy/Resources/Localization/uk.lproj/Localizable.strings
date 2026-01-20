@@ -79,6 +79,30 @@
 "onboarding.templates.title" = "Шаблони документів";
 "onboarding.templates.description" = "Готові зразки резюме, мотиваційних листів та офіційних звернень німецькою та французькою.";
 
+// Settings
+"onboarding.settings.title" = "Налаштування";
+"onboarding.settings.description" = "Мова, приватність, акаунт та інші параметри — все зібрано в одному місці.";
+
+// Appointments
+"onboarding.appointments.title" = "Твої записи";
+"onboarding.appointments.description" = "Зберігай важливі зустрічі та дедлайни, щоб нічого не пропустити.";
+
+// Subscription
+"onboarding.subscription.title" = "Преміум";
+"onboarding.subscription.description" = "Розблокуй преміум-функції та рухайся швидше до своїх цілей.";
+
+// News
+"onboarding.news.title" = "Новини";
+"onboarding.news.description" = "Читай оновлення та корисні новини у зручному форматі.";
+
+// Gamification
+"onboarding.gamification.title" = "Досягнення";
+"onboarding.gamification.description" = "Отримуй відзнаки та слідкуй за прогресом, виконуючи завдання.";
+
+// CV
+"onboarding.cv.title" = "Конструктор CV";
+"onboarding.cv.description" = "Створи CV у швейцарському стилі крок за кроком, з підказками та переглядом.";
+
 // MARK: - Home
 "home.welcome" = "Вітаємо в Sweezy";
 "home.welcome_back" = "З поверненням, %@";

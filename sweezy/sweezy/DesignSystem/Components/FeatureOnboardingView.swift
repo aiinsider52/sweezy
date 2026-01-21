@@ -3,7 +3,7 @@
 //  sweezy
 //
 //  Reusable modal onboarding view with single-page or carousel support.
-//  Apple-style "What's New" design.
+//  Winter/New Year themed design matching the app aesthetic.
 //
 
 import SwiftUI
@@ -13,7 +13,7 @@ struct FeatureOnboardingView: View {
     let onDismiss: () -> Void
     
     @State private var currentPage = 0
-    @Environment(\.colorScheme) private var colorScheme
+    @State private var appeared = false
     
     private var isLastPage: Bool {
         currentPage >= content.slides.count - 1
@@ -24,80 +24,156 @@ struct FeatureOnboardingView: View {
     }
     
     var body: some View {
-        VStack(spacing: 0) {
-            // Drag indicator
-            Capsule()
-                .fill(Color.secondary.opacity(0.3))
-                .frame(width: 36, height: 5)
-                .padding(.top, 12)
+        ZStack {
+            // Winter gradient background
+            LinearGradient(
+                colors: [
+                    Color(red: 0.04, green: 0.08, blue: 0.18),
+                    Color(red: 0.06, green: 0.12, blue: 0.24),
+                    Color(red: 0.05, green: 0.10, blue: 0.20)
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .ignoresSafeArea()
             
-            if isMultiPage {
-                // Carousel mode
-                TabView(selection: $currentPage) {
-                    ForEach(Array(content.slides.enumerated()), id: \.element.id) { index, slide in
-                        slideView(slide)
-                            .tag(index)
+            // Subtle ambient glow (static, no animation)
+            Circle()
+                .fill(Color.cyan.opacity(0.08))
+                .frame(width: 250, height: 250)
+                .blur(radius: 80)
+                .offset(x: -80, y: -150)
+            
+            Circle()
+                .fill(Color.blue.opacity(0.06))
+                .frame(width: 200, height: 200)
+                .blur(radius: 60)
+                .offset(x: 100, y: 100)
+            
+            // Very light snowfall (minimal, won't crash)
+            if WinterTheme.isActive {
+                LightSnowfall()
+                    .ignoresSafeArea()
+            }
+            
+            // Main content
+            VStack(spacing: 0) {
+                // Drag indicator with frost effect
+                Capsule()
+                    .fill(Color.white.opacity(0.3))
+                    .frame(width: 40, height: 5)
+                    .padding(.top, 14)
+                
+                if isMultiPage {
+                    // Carousel mode
+                    TabView(selection: $currentPage) {
+                        ForEach(Array(content.slides.enumerated()), id: \.element.id) { index, slide in
+                            slideView(slide)
+                                .tag(index)
+                        }
                     }
+                    .tabViewStyle(.page(indexDisplayMode: .never))
+                } else if let slide = content.slides.first {
+                    // Single page mode
+                    slideView(slide)
                 }
-                .tabViewStyle(.page(indexDisplayMode: .never))
-                .animation(.easeInOut(duration: 0.3), value: currentPage)
-            } else if let slide = content.slides.first {
-                // Single page mode
-                slideView(slide)
+                
+                // Page indicator (only for multi-page)
+                if isMultiPage {
+                    pageIndicator
+                        .padding(.bottom, 20)
+                }
+                
+                // Action button
+                actionButton
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 38)
             }
-            
-            // Page indicator (only for multi-page)
-            if isMultiPage {
-                pageIndicator
-                    .padding(.bottom, 16)
-            }
-            
-            // Action button
-            actionButton
-                .padding(.horizontal, 24)
-                .padding(.bottom, 34)
         }
-        .background(backgroundColor)
-        .presentationDetents([.medium])
+        .presentationDetents([.medium, .large])
         .presentationDragIndicator(.hidden)
+        .presentationCornerRadius(28)
         .interactiveDismissDisabled(!isLastPage && isMultiPage)
+        .onAppear {
+            withAnimation(.easeOut(duration: 0.4)) {
+                appeared = true
+            }
+        }
     }
     
     // MARK: - Slide View
     
     private func slideView(_ slide: OnboardingSlide) -> some View {
-        VStack(spacing: 24) {
+        VStack(spacing: 20) {
             Spacer()
             
-            // Icon with gradient background
+            // Icon with winter glow effect
             ZStack {
+                // Outer glow
                 Circle()
-                    .fill(slide.iconColor.opacity(0.15))
-                    .frame(width: 100, height: 100)
+                    .fill(slide.iconColor.opacity(0.12))
+                    .frame(width: 140, height: 140)
+                    .blur(radius: 20)
                 
+                // Inner frost circle
                 Circle()
-                    .fill(slide.iconColor.opacity(0.08))
-                    .frame(width: 130, height: 130)
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                Color.white.opacity(0.12),
+                                Color.white.opacity(0.04)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .frame(width: 110, height: 110)
+                    .overlay(
+                        Circle()
+                            .stroke(
+                                LinearGradient(
+                                    colors: [
+                                        Color.white.opacity(0.3),
+                                        slide.iconColor.opacity(0.2),
+                                        Color.white.opacity(0.1)
+                                    ],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ),
+                                lineWidth: 1.5
+                            )
+                    )
                 
+                // Icon
                 Image(systemName: slide.icon)
-                    .font(.system(size: 44, weight: .medium))
-                    .foregroundStyle(slide.iconColor)
+                    .font(.system(size: 48, weight: .medium))
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [slide.iconColor, slide.iconColor.opacity(0.7)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .shadow(color: slide.iconColor.opacity(0.5), radius: 10, x: 0, y: 4)
             }
-            .padding(.top, 20)
+            .scaleEffect(appeared ? 1.0 : 0.8)
+            .opacity(appeared ? 1.0 : 0)
+            .padding(.top, 16)
             
             // Title
             Text(slide.title)
-                .font(.system(size: 26, weight: .bold, design: .rounded))
-                .foregroundColor(Theme.Colors.textPrimary)
+                .font(.system(size: 28, weight: .bold, design: .rounded))
+                .foregroundColor(.white)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 24)
+                .shadow(color: Color.black.opacity(0.3), radius: 4, x: 0, y: 2)
             
             // Description
             Text(slide.description)
-                .font(.system(size: 17, weight: .regular))
-                .foregroundColor(Theme.Colors.textSecondary)
+                .font(.system(size: 16, weight: .regular))
+                .foregroundColor(Color.white.opacity(0.75))
                 .multilineTextAlignment(.center)
-                .lineSpacing(4)
+                .lineSpacing(5)
                 .padding(.horizontal, 32)
             
             Spacer()
@@ -107,12 +183,24 @@ struct FeatureOnboardingView: View {
     // MARK: - Page Indicator
     
     private var pageIndicator: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: 10) {
             ForEach(0..<content.slides.count, id: \.self) { index in
                 Capsule()
-                    .fill(index == currentPage ? Theme.Colors.accentTurquoise : Color.secondary.opacity(0.3))
-                    .frame(width: index == currentPage ? 20 : 8, height: 8)
-                    .animation(.spring(response: 0.3), value: currentPage)
+                    .fill(
+                        index == currentPage
+                        ? LinearGradient(
+                            colors: [Color.cyan, Color.cyan.opacity(0.7)],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                        : LinearGradient(
+                            colors: [Color.white.opacity(0.25), Color.white.opacity(0.15)],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .frame(width: index == currentPage ? 24 : 8, height: 8)
+                    .animation(.spring(response: 0.35, dampingFraction: 0.7), value: currentPage)
             }
         }
     }
@@ -125,42 +213,121 @@ struct FeatureOnboardingView: View {
                 FeatureOnboardingManager.shared.markAsSeen(content.feature)
                 onDismiss()
             } else {
-                withAnimation(.spring(response: 0.4)) {
+                withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
                     currentPage += 1
                 }
             }
         } label: {
-            HStack {
+            HStack(spacing: 10) {
                 Text(isLastPage || !isMultiPage ? content.buttonTitle : "onboarding.next".localized)
                     .font(.system(size: 17, weight: .semibold))
                 
                 if !isLastPage && isMultiPage {
                     Image(systemName: "arrow.right")
-                        .font(.system(size: 14, weight: .semibold))
+                        .font(.system(size: 14, weight: .bold))
                 }
             }
             .foregroundColor(.white)
             .frame(maxWidth: .infinity)
-            .frame(height: 54)
+            .frame(height: 56)
             .background(
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .fill(Theme.Colors.accentTurquoise)
+                ZStack {
+                    // Gradient background
+                    LinearGradient(
+                        colors: [
+                            Color(red: 0.2, green: 0.75, blue: 0.9),
+                            Color(red: 0.25, green: 0.65, blue: 0.95)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                    
+                    // Frost shimmer overlay
+                    LinearGradient(
+                        colors: [
+                            Color.white.opacity(0.2),
+                            Color.clear,
+                            Color.white.opacity(0.1)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                }
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .stroke(
+                        LinearGradient(
+                            colors: [
+                                Color.white.opacity(0.4),
+                                Color.cyan.opacity(0.2),
+                                Color.white.opacity(0.1)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 1
+                    )
+            )
+            .shadow(color: Color.cyan.opacity(0.4), radius: 16, x: 0, y: 8)
+        }
+        .buttonStyle(ScaleButtonStyle())
+    }
+}
+
+// MARK: - Scale Button Style (subtle press effect)
+
+private struct ScaleButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.97 : 1.0)
+            .animation(.easeOut(duration: 0.15), value: configuration.isPressed)
+    }
+}
+
+// MARK: - Lightweight Snowfall (optimized for sheets)
+
+private struct LightSnowfall: View {
+    // Static positions - no Timer, no state updates = no crashes
+    private let flakes: [(x: CGFloat, y: CGFloat, size: CGFloat, opacity: Double)] = {
+        (0..<12).map { _ in
+            (
+                x: CGFloat.random(in: 0...1),
+                y: CGFloat.random(in: 0...1),
+                size: CGFloat.random(in: 2...5),
+                opacity: Double.random(in: 0.2...0.5)
             )
         }
-        .buttonStyle(.plain)
-    }
+    }()
     
-    // MARK: - Background
+    @State private var offset: CGFloat = 0
     
-    private var backgroundColor: some View {
-        Group {
-            if colorScheme == .dark {
-                Color(red: 0.11, green: 0.11, blue: 0.12)
-            } else {
-                Color(red: 0.98, green: 0.98, blue: 0.99)
+    var body: some View {
+        GeometryReader { geo in
+            let width = geo.size.width
+            let height = geo.size.height
+            
+            ZStack {
+                ForEach(0..<flakes.count, id: \.self) { i in
+                    let flake = flakes[i]
+                    Circle()
+                        .fill(Color.white.opacity(flake.opacity))
+                        .frame(width: flake.size, height: flake.size)
+                        .position(
+                            x: flake.x * width,
+                            y: (flake.y * height + offset * (0.5 + flake.size / 10)).truncatingRemainder(dividingBy: height + 20)
+                        )
+                }
             }
         }
-        .ignoresSafeArea()
+        .allowsHitTesting(false)
+        .onAppear {
+            // Single slow animation, not a Timer loop
+            withAnimation(.linear(duration: 20).repeatForever(autoreverses: false)) {
+                offset = 800
+            }
+        }
     }
 }
 
@@ -174,7 +341,7 @@ struct FeatureOnboardingModifier: ViewModifier {
         view
             .onAppear {
                 // Delay slightly for smoother UX
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
                     if FeatureOnboardingManager.shared.shouldShowOnboarding(for: content.feature) {
                         showOnboarding = true
                     }

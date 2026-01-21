@@ -14,6 +14,7 @@ struct FeatureOnboardingView: View {
     
     @State private var currentPage = 0
     @State private var appeared = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     
     private var isLastPage: Bool {
         currentPage >= content.slides.count - 1
@@ -58,11 +59,24 @@ struct FeatureOnboardingView: View {
             
             // Main content
             VStack(spacing: 0) {
-                // Drag indicator with frost effect
-                Capsule()
-                    .fill(Color.white.opacity(0.3))
-                    .frame(width: 40, height: 5)
-                    .padding(.top, 14)
+                // Close (disabled until last page for multi-page)
+                HStack {
+                    Spacer()
+                    Button {
+                        FeatureOnboardingManager.shared.markAsSeen(content.feature)
+                        onDismiss()
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.system(size: 28, weight: .semibold))
+                            .foregroundStyle(Color.white.opacity(0.75))
+                            .shadow(color: Color.black.opacity(0.25), radius: 6, x: 0, y: 2)
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(!isLastPage && isMultiPage)
+                    .opacity((!isLastPage && isMultiPage) ? 0.25 : 1.0)
+                }
+                .padding(.horizontal, 18)
+                .padding(.top, 10)
                 
                 if isMultiPage {
                     // Carousel mode
@@ -90,13 +104,14 @@ struct FeatureOnboardingView: View {
                     .padding(.bottom, 38)
             }
         }
-        .presentationDetents([.medium, .large])
-        .presentationDragIndicator(.hidden)
-        .presentationCornerRadius(28)
         .interactiveDismissDisabled(!isLastPage && isMultiPage)
         .onAppear {
-            withAnimation(.easeOut(duration: 0.4)) {
+            if reduceMotion {
                 appeared = true
+            } else {
+                withAnimation(.easeOut(duration: 0.4)) {
+                    appeared = true
+                }
             }
         }
     }
@@ -156,8 +171,8 @@ struct FeatureOnboardingView: View {
                     )
                     .shadow(color: slide.iconColor.opacity(0.5), radius: 10, x: 0, y: 4)
             }
-            .scaleEffect(appeared ? 1.0 : 0.8)
-            .opacity(appeared ? 1.0 : 0)
+            .scaleEffect(reduceMotion ? 1.0 : (appeared ? 1.0 : 0.8))
+            .opacity(reduceMotion ? 1.0 : (appeared ? 1.0 : 0))
             .padding(.top, 16)
             
             // Title
@@ -200,7 +215,7 @@ struct FeatureOnboardingView: View {
                         )
                     )
                     .frame(width: index == currentPage ? 24 : 8, height: 8)
-                    .animation(.spring(response: 0.35, dampingFraction: 0.7), value: currentPage)
+                    .animation(reduceMotion ? nil : .spring(response: 0.35, dampingFraction: 0.7), value: currentPage)
             }
         }
     }
@@ -213,8 +228,12 @@ struct FeatureOnboardingView: View {
                 FeatureOnboardingManager.shared.markAsSeen(content.feature)
                 onDismiss()
             } else {
-                withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                if reduceMotion {
                     currentPage += 1
+                } else {
+                    withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                        currentPage += 1
+                    }
                 }
             }
         } label: {
@@ -272,7 +291,7 @@ struct FeatureOnboardingView: View {
             )
             .shadow(color: Color.cyan.opacity(0.4), radius: 16, x: 0, y: 8)
         }
-        .buttonStyle(ScaleButtonStyle())
+        .buttonStyle(ScaleButtonStyle(scaleAmount: reduceMotion ? 1.0 : 0.97))
     }
 }
 
@@ -337,7 +356,7 @@ struct FeatureOnboardingModifier: ViewModifier {
                     }
                 }
             }
-            .sheet(isPresented: $showOnboarding) {
+            .fullScreenCover(isPresented: $showOnboarding) {
                 FeatureOnboardingView(content: content) {
                     showOnboarding = false
                 }

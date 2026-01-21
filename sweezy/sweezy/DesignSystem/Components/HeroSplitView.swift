@@ -118,6 +118,8 @@ struct FullBleedAuroraHero: View {
     let level: Int
     let streak: Int
     let integrationPercent: Int
+    /// Top safe-area inset (status bar / dynamic island). Used to keep content below the notch while allowing full-bleed background.
+    let topInset: CGFloat
     let onAvatarTap: () -> Void
     let onProgressTap: () -> Void
     
@@ -145,7 +147,7 @@ struct FullBleedAuroraHero: View {
                     Spacer()
                 }
                 .padding(.horizontal, 20)
-                .padding(.top, 8)
+                .padding(.top, 8 + topInset)
                 
                 // Main greeting
                 VStack(alignment: .leading, spacing: 12) {
@@ -249,7 +251,7 @@ struct FullBleedAuroraHero: View {
                 .padding(.bottom, 24)
             }
         }
-        .frame(height: 340)
+        .frame(height: 340 + topInset)
         .clipShape(
             RoundedCornerShape(corners: [.bottomLeft, .bottomRight], radius: 32)
         )

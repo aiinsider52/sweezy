@@ -42,50 +42,54 @@ struct HomeViewRedesigned: View {
     
     var body: some View {
         NavigationStack {
-            ScrollView(.vertical, showsIndicators: false) {
-                VStack(spacing: 0) {
-                    // Full hero with progress
-                    heroWithProgress
-                    
-                    VStack(spacing: Theme.Spacing.xxl) {
-                        // personalModulesSection + stats removed per design — мінімізуємо візуальний шум
-                        journeyRoadmapSection
-                        quickActionsSection
-                        recommendationsSection
-                        proCardSection
-                        newsSection
-                        telegramSection
+            GeometryReader { geo in
+                ScrollView(.vertical, showsIndicators: false) {
+                    VStack(spacing: 0) {
+                        // Full hero with progress (full-bleed to the very top)
+                        heroWithProgress(topInset: geo.safeAreaInsets.top)
+                        
+                        VStack(spacing: Theme.Spacing.xxl) {
+                            // personalModulesSection + stats removed per design — мінімізуємо візуальний шум
+                            journeyRoadmapSection
+                            quickActionsSection
+                            recommendationsSection
+                            proCardSection
+                            newsSection
+                            telegramSection
+                        }
+                        .padding(.top, Theme.Spacing.xl)
+                        .padding(.bottom, Theme.Spacing.xxxl)
                     }
-                    .padding(.top, Theme.Spacing.xl)
-                    .padding(.bottom, Theme.Spacing.xxxl)
                 }
-            }
-            .background(
-                ZStack {
-                    // Winter gradient background (always festive)
-                    LinearGradient(
-                        colors: [
-                            Color(red: 0.05, green: 0.1, blue: 0.2),
-                            Color(red: 0.08, green: 0.15, blue: 0.28),
-                            Color(red: 0.06, green: 0.12, blue: 0.22)
-                        ],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                    .ignoresSafeArea()
-                    
-                    // Subtle snowfall
-                    WinterSceneLite(intensity: .light)
+                // Allow hero background to extend behind the status bar
+                .ignoresSafeArea(edges: .top)
+                .background(
+                    ZStack {
+                        // Winter gradient background (always festive)
+                        LinearGradient(
+                            colors: [
+                                Color(red: 0.05, green: 0.1, blue: 0.2),
+                                Color(red: 0.08, green: 0.15, blue: 0.28),
+                                Color(red: 0.06, green: 0.12, blue: 0.22)
+                            ],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                        .ignoresSafeArea()
+                        
+                        // Subtle snowfall
+                        WinterSceneLite(intensity: .light)
+                    }
+                )
+                .navigationBarHidden(true)
+                .navigationDestination(item: $selectedGuide) { guide in
+                    GuideDetailView(guide: guide)
                 }
-            )
-            .navigationBarHidden(true)
-            .navigationDestination(item: $selectedGuide) { guide in
-                GuideDetailView(guide: guide)
+                .navigationDestination(item: $selectedNews) { news in
+                    NewsDetailView(news: news)
+                }
+                .navigationDestination(isPresented: .constant(false)) { EmptyView() }
             }
-            .navigationDestination(item: $selectedNews) { news in
-                NewsDetailView(news: news)
-            }
-            .navigationDestination(isPresented: .constant(false)) { EmptyView() }
         }
         .sheet(isPresented: $showWhatsNewSheet) {
             WhatsNewView()
@@ -237,7 +241,7 @@ struct HomeViewRedesigned: View {
     }
     
     // MARK: - Hero with embedded progress (Full Bleed Aurora)
-    private var heroWithProgress: some View {
+    private func heroWithProgress(topInset: CGFloat) -> some View {
         let tasks = appContainer.firstWeekService.tasks.sorted(by: { $0.dueDate < $1.dueDate })
         let total = max(1, tasks.count)
         let done = tasks.filter { $0.isDone }.count
@@ -253,6 +257,7 @@ struct HomeViewRedesigned: View {
             level: statLevel,
             streak: min(streak, 999),
             integrationPercent: percent,
+            topInset: topInset,
             onAvatarTap: {
                 showSettings = true
             },
@@ -260,7 +265,6 @@ struct HomeViewRedesigned: View {
                 NotificationCenter.default.post(name: .switchTab, object: 1)
             }
         )
-        .ignoresSafeArea(edges: .top)
     }
     
     // MARK: - Personal Focus (Week Strip)

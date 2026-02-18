@@ -1301,116 +1301,70 @@ private struct BentoLevelCard: View {
     let progress: CGFloat
     let pulseScale: CGFloat
     
+    private var levelAccent: Color {
+        switch level {
+        case 1: return Color.cyan
+        case 2: return Color(red: 0.4, green: 0.85, blue: 0.65)
+        case 3: return Color(red: 0.55, green: 0.5, blue: 1.0)
+        case 4: return Color(red: 1.0, green: 0.65, blue: 0.3)
+        case 5: return Color(red: 1.0, green: 0.4, blue: 0.5)
+        default: return Color(red: 1.0, green: 0.85, blue: 0.3)
+        }
+    }
+    
     var body: some View {
         ZStack {
-            // Subtle gradient background
+            // Background
             RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .fill(
-                    LinearGradient(
-                        colors: [
-                            Color.white.opacity(0.06),
-                            Color.white.opacity(0.02)
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
+                .fill(Theme.Colors.adaptiveCard)
             
-            // Ambient glow
-            Circle()
-                .fill(
-                    RadialGradient(
-                        colors: [Theme.Colors.accentTurquoise.opacity(0.25), Color.clear],
-                        center: .center,
-                        startRadius: 10,
-                        endRadius: 80
-                    )
-                )
-                .frame(width: 120, height: 120)
-                .blur(radius: 30)
-                .offset(x: -40, y: -30)
-            
-            HStack(spacing: 16) {
+            HStack(spacing: 14) {
                 // Level ring
                 ZStack {
-                    // Outer pulse ring
                     Circle()
-                        .stroke(
-                            AngularGradient(
-                                colors: [
-                                    Theme.Colors.accentTurquoise,
-                                    Theme.Colors.accent,
-                                    Theme.Colors.accentCoral,
-                                    Theme.Colors.accentTurquoise
-                                ],
-                                center: .center
-                            ),
-                            lineWidth: 4
-                        )
-                        .frame(width: 72, height: 72)
-                        .scaleEffect(pulseScale)
-                        .opacity(0.6)
+                        .stroke(levelAccent.opacity(0.15), lineWidth: 4)
+                        .frame(width: 60, height: 60)
                     
-                    // Progress ring
                     Circle()
                         .trim(from: 0, to: progress)
                         .stroke(
-                            LinearGradient(
-                                colors: [Theme.Colors.accentTurquoise, Theme.Colors.accent],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
+                            AngularGradient(
+                                colors: [levelAccent, levelAccent.opacity(0.6), levelAccent],
+                                center: .center
                             ),
-                            style: StrokeStyle(lineWidth: 6, lineCap: .round)
+                            style: StrokeStyle(lineWidth: 4, lineCap: .round)
                         )
                         .frame(width: 60, height: 60)
                         .rotationEffect(.degrees(-90))
                     
-                    // Inner circle
                     Circle()
-                        .fill(
-                            LinearGradient(
-                                colors: [
-                                    Color(red: 0.12, green: 0.16, blue: 0.22),
-                                    Color(red: 0.08, green: 0.10, blue: 0.16)
-                                ],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-                        .frame(width: 50, height: 50)
-                        .shadow(color: Theme.Colors.accentTurquoise.opacity(0.4), radius: 10, x: 0, y: 0)
+                        .fill(levelAccent.opacity(0.1))
+                        .frame(width: 48, height: 48)
                     
-                    // Level number
                     Text("\(level)")
-                        .font(.system(size: 22, weight: .bold, design: .rounded))
-                        .foregroundStyle(
-                            LinearGradient(
-                                colors: [Theme.Colors.accentTurquoise, Theme.Colors.accent],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
+                        .font(.system(size: 20, weight: .bold, design: .rounded))
+                        .foregroundColor(Theme.Colors.textPrimary)
                 }
                 
-                VStack(alignment: .leading, spacing: 6) {
+                VStack(alignment: .leading, spacing: 5) {
                     Text(levelTitle)
-                        .font(.system(size: 20, weight: .bold, design: .rounded))
-                        .foregroundColor(.white)
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundColor(Theme.Colors.textPrimary)
                     
                     Text("\(xp) / \(xpNext) XP")
-                        .font(Theme.Typography.caption)
-                        .foregroundColor(Theme.Colors.secondaryText)
+                        .font(.system(size: 12))
+                        .foregroundColor(Theme.Colors.textSecondary)
                     
                     // Mini XP bar
                     GeometryReader { geo in
                         ZStack(alignment: .leading) {
-                            RoundedRectangle(cornerRadius: 4)
+                            Capsule()
                                 .fill(Theme.Colors.adaptiveSurface)
                             
-                            RoundedRectangle(cornerRadius: 4)
+                            Capsule()
                                 .fill(
                                     LinearGradient(
-                                        colors: [Theme.Colors.accentTurquoise, Theme.Colors.accent],
+                                        colors: [levelAccent, levelAccent.opacity(0.6)],
                                         startPoint: .leading,
                                         endPoint: .trailing
                                     )
@@ -1418,22 +1372,29 @@ private struct BentoLevelCard: View {
                                 .frame(width: geo.size.width * progress)
                         }
                     }
-                    .frame(height: 6)
-                    .frame(maxWidth: 120)
+                    .frame(height: 5)
+                    .frame(maxWidth: 110)
                     
                     Text("До рівня \(level + 1)")
-                        .font(Theme.Typography.caption2)
+                        .font(.system(size: 10))
                         .foregroundColor(Theme.Colors.textTertiary)
                 }
                 
                 Spacer()
             }
-            .padding(20)
+            .padding(16)
         }
         .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .stroke(Theme.Colors.adaptiveCard, lineWidth: 1)
+                .stroke(
+                    LinearGradient(
+                        colors: [levelAccent.opacity(0.35), Theme.Colors.adaptiveBorder.opacity(0.2)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    lineWidth: 1
+                )
         )
     }
 }
@@ -1448,7 +1409,7 @@ private struct BentoMiniCard: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .fill(Color.white.opacity(0.04))
+                .fill(Theme.Colors.adaptiveCard)
             
             VStack(spacing: 4) {
                 Image(systemName: icon)
@@ -1505,7 +1466,7 @@ private struct BentoMediumCard: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(value)
                         .font(.system(size: 26, weight: .bold, design: .rounded))
-                        .foregroundColor(.white)
+                        .foregroundColor(Theme.Colors.textPrimary)
                     
                     Text(label)
                         .font(Theme.Typography.caption2)
@@ -1519,7 +1480,7 @@ private struct BentoMediumCard: View {
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .stroke(color.opacity(0.12), lineWidth: 1)
+                .stroke(color.opacity(0.2), lineWidth: 1)
         )
     }
 }
@@ -3535,7 +3496,6 @@ struct GamificationLevelCard: View {
     
     @State private var animatedProgress: CGFloat = 0
     @State private var showXPGain: Bool = false
-    @State private var pulseScale: CGFloat = 1.0
     
     private var progress: CGFloat {
         let previousLevelXP: Int = {
@@ -3555,260 +3515,191 @@ struct GamificationLevelCard: View {
         return CGFloat(xpInCurrentLevel) / CGFloat(max(1, xpNeededForLevel))
     }
     
+    // Accent color based on level
+    private var levelAccent: Color {
+        switch level {
+        case 1: return Color.cyan
+        case 2: return Color(red: 0.4, green: 0.85, blue: 0.65) // emerald
+        case 3: return Color(red: 0.55, green: 0.5, blue: 1.0)  // violet
+        case 4: return Color(red: 1.0, green: 0.65, blue: 0.3)  // amber
+        case 5: return Color(red: 1.0, green: 0.4, blue: 0.5)   // rose
+        default: return Color(red: 1.0, green: 0.85, blue: 0.3) // gold
+        }
+    }
+    
     var body: some View {
         VStack(spacing: 0) {
-            // Header with level
-            HStack(alignment: .center, spacing: Theme.Spacing.md) {
-                // Level badge
+            // ── Top section: Level badge + Info + XP earned ──
+            HStack(alignment: .center, spacing: 16) {
+                // Level ring
                 ZStack {
-                    // Outer glow ring - winter or regular
+                    // Progress ring (background track)
                     Circle()
+                        .stroke(levelAccent.opacity(0.15), lineWidth: 4)
+                        .frame(width: 64, height: 64)
+                    
+                    // Progress ring (filled arc)
+                    Circle()
+                        .trim(from: 0, to: animatedProgress)
                         .stroke(
                             AngularGradient(
-                                colors: WinterTheme.isActive 
-                                    ? [Color.cyan, Color.white.opacity(0.8), Color(red: 0.6, green: 0.85, blue: 1.0), Color.cyan]
-                                    : [Theme.Colors.accentTurquoise, Theme.Colors.accent, Theme.Colors.accentCoral, Theme.Colors.accentTurquoise],
+                                colors: [levelAccent, levelAccent.opacity(0.6), levelAccent],
                                 center: .center
                             ),
-                            lineWidth: 3
+                            style: StrokeStyle(lineWidth: 4, lineCap: .round)
                         )
-                        .frame(width: 70, height: 70)
-                        .scaleEffect(pulseScale)
+                        .frame(width: 64, height: 64)
+                        .rotationEffect(.degrees(-90))
                     
                     // Inner circle
                     Circle()
                         .fill(
                             LinearGradient(
                                 colors: [
-                                    Color(red: 0.1, green: 0.15, blue: 0.25),
-                                    Color(red: 0.05, green: 0.08, blue: 0.15)
+                                    levelAccent.opacity(0.15),
+                                    levelAccent.opacity(0.05)
                                 ],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             )
                         )
-                        .frame(width: 60, height: 60)
-                        .overlay(
-                            Circle()
-                                .stroke(
-                                    WinterTheme.isActive 
-                                        ? Color.cyan.opacity(0.4) 
-                                        : Color.white.opacity(0.2), 
-                                    lineWidth: 1
-                                )
-                        )
-                        .shadow(
-                            color: WinterTheme.isActive 
-                                ? Color.cyan.opacity(0.6) 
-                                : Theme.Colors.accentTurquoise.opacity(0.5), 
-                            radius: 12, 
-                            x: 0, 
-                            y: 0
-                        )
+                        .frame(width: 52, height: 52)
                     
                     // Level number
                     Text("\(level)")
-                        .font(.system(size: 28, weight: .bold, design: .rounded))
-                        .foregroundStyle(
-                            LinearGradient(
-                                colors: WinterTheme.isActive 
-                                    ? [Color.cyan, Color.white]
-                                    : [Theme.Colors.accentTurquoise, Theme.Colors.accent],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
+                        .font(.system(size: 24, weight: .bold, design: .rounded))
+                        .foregroundColor(Theme.Colors.textPrimary)
                 }
                 
+                // Title + XP text
                 VStack(alignment: .leading, spacing: 4) {
                     Text(levelTitle)
-                        .font(Theme.Typography.title2)
-                        .fontWeight(.bold)
+                        .font(.system(size: 20, weight: .bold))
                         .foregroundColor(Theme.Colors.textPrimary)
                     
                     Text("\(currentXP) / \(xpForNextLevel) XP")
-                        .font(Theme.Typography.caption)
-                        .foregroundColor(Theme.Colors.secondaryText)
+                        .font(.system(size: 13))
+                        .foregroundColor(Theme.Colors.textSecondary)
                 }
                 
                 Spacer()
                 
-                // XP indicator (last award)
+                // XP earned badge
                 VStack(alignment: .trailing, spacing: 2) {
                     Text("+\(lastAward)")
-                        .font(Theme.Typography.headline)
-                        .fontWeight(.bold)
-                        .foregroundColor(Theme.Colors.accentTurquoise)
-                        .opacity(showXPGain ? 1 : 0.7)
-                        .scaleEffect(showXPGain ? 1.1 : 1.0)
+                        .font(.system(size: 22, weight: .bold, design: .rounded))
+                        .foregroundColor(levelAccent)
+                        .scaleEffect(showXPGain ? 1.15 : 1.0)
                     
                     Text("XP зароблено")
-                        .font(Theme.Typography.caption2)
+                        .font(.system(size: 10, weight: .medium))
                         .foregroundColor(Theme.Colors.textTertiary)
                 }
             }
-            .padding(Theme.Spacing.lg)
+            .padding(.horizontal, 20)
+            .padding(.top, 20)
+            .padding(.bottom, 16)
             
-            // XP Progress bar
-            VStack(alignment: .leading, spacing: 8) {
-                GeometryReader { geo in
-                    ZStack(alignment: .leading) {
-                        // Background track
-                        RoundedRectangle(cornerRadius: 6)
-                            .fill(
-                                WinterTheme.isActive 
-                                    ? Color.cyan.opacity(0.15) 
-                                    : Theme.Colors.adaptiveSurface
+            // ── Progress bar ──
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    // Track
+                    Capsule()
+                        .fill(Theme.Colors.adaptiveSurface)
+                    
+                    // Fill
+                    Capsule()
+                        .fill(
+                            LinearGradient(
+                                colors: [levelAccent, levelAccent.opacity(0.6)],
+                                startPoint: .leading,
+                                endPoint: .trailing
                             )
-                            .frame(height: 12)
-                        
-                        // Progress fill - winter or regular
-                        RoundedRectangle(cornerRadius: 6)
-                            .fill(
-                                LinearGradient(
-                                    colors: WinterTheme.isActive 
-                                        ? [Color.cyan, Color(red: 0.6, green: 0.85, blue: 1.0), Color.white.opacity(0.8)]
-                                        : [Theme.Colors.accentTurquoise, Theme.Colors.accent],
-                                    startPoint: .leading,
-                                    endPoint: .trailing
-                                )
-                            )
-                            .frame(width: geo.size.width * animatedProgress, height: 12)
-                            .shadow(
-                                color: WinterTheme.isActive 
-                                    ? Color.cyan.opacity(0.7) 
-                                    : Theme.Colors.accentTurquoise.opacity(0.6), 
-                                radius: 8, 
-                                x: 0, 
-                                y: 0
-                            )
-                        
-                        // Shine effect
-                        RoundedRectangle(cornerRadius: 6)
-                            .fill(
-                                LinearGradient(
-                                    colors: [
-                                        Color.white.opacity(0.4),
-                                        Color.white.opacity(0.0)
-                                    ],
-                                    startPoint: .top,
-                                    endPoint: .bottom
-                                )
-                            )
-                            .frame(width: geo.size.width * animatedProgress, height: 6)
-                            .offset(y: -1)
-                        
-                        // Winter snowflake indicator at progress end
-                        if WinterTheme.isActive && animatedProgress > 0.05 {
-                            Text("❄️")
-                                .font(.system(size: 14))
-                                .offset(x: geo.size.width * animatedProgress - 10)
-                        }
-                    }
+                        )
+                        .frame(width: max(0, geo.size.width * animatedProgress))
+                        .shadow(color: levelAccent.opacity(0.5), radius: 6, y: 0)
                 }
-                .frame(height: 12)
+            }
+            .frame(height: 8)
+            .padding(.horizontal, 20)
+            .padding(.bottom, 14)
+            
+            // ── Stats row ──
+            HStack(spacing: 0) {
+                LevelStatItem(icon: "bolt.fill", value: "+\(todayXP)", label: "XP сьогодні", color: levelAccent)
+                    .frame(maxWidth: .infinity)
                 
-                // Stats row (equal flexible columns to avoid wrapping/clipping)
-                HStack(spacing: 10) {
-                    StatPill(icon: "bolt.fill", value: "+\(todayXP)", label: "XP сьогодні")
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    StatPill(icon: "clock.fill", value: "\(hoursSaved)", label: "год збережено")
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    StatPill(icon: "book.fill", value: "\(guidesRead)", label: "гідів")
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
-                // Next level hint (separate row to reduce horizontal pressure)
-                HStack {
-                    Spacer()
-                    Text("До рівня \(level + 1)")
-                        .font(Theme.Typography.caption2)
-                        .foregroundColor(Theme.Colors.textTertiary)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.8)
-                }
+                Rectangle()
+                    .fill(Theme.Colors.adaptiveBorder.opacity(0.3))
+                    .frame(width: 1, height: 28)
+                
+                LevelStatItem(icon: "clock.fill", value: "\(hoursSaved)", label: "год збережено", color: .orange)
+                    .frame(maxWidth: .infinity)
+                
+                Rectangle()
+                    .fill(Theme.Colors.adaptiveBorder.opacity(0.3))
+                    .frame(width: 1, height: 28)
+                
+                LevelStatItem(icon: "book.fill", value: "\(guidesRead)", label: "гідів", color: Theme.Colors.primary)
+                    .frame(maxWidth: .infinity)
             }
-            .padding(.horizontal, Theme.Spacing.lg)
-            .padding(.bottom, Theme.Spacing.md)
+            .padding(.horizontal, 12)
+            .padding(.bottom, 12)
             
-            // Badges section
+            // Next level hint
+            HStack {
+                Spacer()
+                Text("До рівня \(level + 1)")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundColor(Theme.Colors.textTertiary)
+            }
+            .padding(.horizontal, 20)
+            .padding(.bottom, 14)
+            
+            // ── Badges section ──
             if !badges.isEmpty {
-                Divider()
-                    .background(WinterTheme.isActive ? Color.cyan.opacity(0.2) : Theme.Colors.adaptiveSurface)
+                Rectangle()
+                    .fill(Theme.Colors.adaptiveBorder.opacity(0.25))
+                    .frame(height: 1)
+                    .padding(.horizontal, 16)
                 
-                VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
-                    HStack(spacing: 6) {
-                        if WinterTheme.isActive {
-                            Text("🏆")
-                                .font(.system(size: 14))
-                        }
-                        Text("Досягнення")
-                            .font(Theme.Typography.caption)
-                            .fontWeight(.semibold)
-                            .foregroundColor(Theme.Colors.secondaryText)
-                    }
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Досягнення")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(Theme.Colors.textSecondary)
                     
                     ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: Theme.Spacing.sm) {
+                        HStack(spacing: 8) {
                             ForEach(badges) { badge in
                                 BadgeChip(badge: badge)
                             }
                         }
                     }
                 }
-                .padding(Theme.Spacing.lg)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 14)
             }
         }
         .background(
-            RoundedRectangle(cornerRadius: Theme.CornerRadius.xxl, style: .continuous)
-                .fill(Theme.Colors.secondaryBackground)
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .fill(Theme.Colors.adaptiveCard)
                 .overlay(
-                    RoundedRectangle(cornerRadius: Theme.CornerRadius.xxl, style: .continuous)
+                    RoundedRectangle(cornerRadius: 24, style: .continuous)
                         .stroke(
                             LinearGradient(
-                                colors: WinterTheme.isActive 
-                                    ? [Color.cyan.opacity(0.5), Color.white.opacity(0.2)]
-                                    : [Theme.Colors.accentTurquoise.opacity(0.3), Theme.Colors.adaptiveSurface],
+                                colors: [levelAccent.opacity(0.4), Theme.Colors.adaptiveBorder.opacity(0.3)],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             ),
-                            lineWidth: WinterTheme.isActive ? 1.5 : 1
+                            lineWidth: 1
                         )
                 )
         )
-        .shadow(
-            color: WinterTheme.isActive 
-                ? Color.cyan.opacity(0.2) 
-                : Theme.Colors.accentTurquoise.opacity(0.15), 
-            radius: 20, 
-            x: 0, 
-            y: 10
-        )
-        .overlay(
-            Group {
-                if WinterTheme.isActive {
-                    // Corner snowflakes
-                    Text("❄️")
-                        .font(.system(size: 18))
-                        .opacity(0.8)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
-                        .offset(x: -16, y: 16)
-                    
-                    Text("✨")
-                        .font(.system(size: 14))
-                        .opacity(0.7)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-                        .offset(x: 16, y: 16)
-                }
-            }
-        )
+        .shadow(color: levelAccent.opacity(0.12), radius: 20, y: 8)
         .onAppear {
             withAnimation(.spring(response: 1.0, dampingFraction: 0.8).delay(0.3)) {
                 animatedProgress = progress
             }
-            withAnimation(.easeInOut(duration: 2).repeatForever(autoreverses: true)) {
-                pulseScale = 1.05
-            }
-            // initial pulse for award if any
             if lastAward > 0 {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                     withAnimation(.spring(response: 0.4, dampingFraction: 0.6)) { showXPGain = true }
@@ -3824,6 +3715,34 @@ struct GamificationLevelCard: View {
             DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
                 withAnimation(.easeInOut(duration: 0.25)) { showXPGain = false }
             }
+        }
+    }
+}
+
+// MARK: - Level Card Sub-components
+
+private struct LevelStatItem: View {
+    let icon: String
+    let value: String
+    let label: String
+    let color: Color
+    
+    var body: some View {
+        VStack(spacing: 3) {
+            HStack(spacing: 4) {
+                Image(systemName: icon)
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundColor(color)
+                Text(value)
+                    .font(.system(size: 14, weight: .bold, design: .rounded))
+                    .foregroundColor(Theme.Colors.textPrimary)
+                    .monospacedDigit()
+            }
+            Text(label)
+                .font(.system(size: 10))
+                .foregroundColor(Theme.Colors.textTertiary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
         }
     }
 }
@@ -3855,7 +3774,6 @@ struct StatPill: View {
                 .minimumScaleFactor(0.85)
                 .allowsTightening(true)
         }
-        // No fixedSize: allow flexible shrink within column
     }
 }
 

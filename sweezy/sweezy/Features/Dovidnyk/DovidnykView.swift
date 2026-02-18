@@ -21,8 +21,8 @@ struct DovidnykView: View {
         
         var title: String {
             switch self {
-            case .guides: return "Гайди"
-            case .checklists: return "Чек-листи"
+            case .guides: return "dovidnyk.tab.guides".localized
+            case .checklists: return "dovidnyk.tab.checklists".localized
             }
         }
         
@@ -58,9 +58,9 @@ struct DovidnykView: View {
                 .animation(.easeInOut(duration: 0.25), value: selectedTab)
             }
             .background(AdaptivePageBackground())
-            .navigationTitle("Довідник")
+            .navigationTitle("guides.title".localized)
             .navigationBarTitleDisplayMode(.large)
-            .searchable(text: $searchText, prompt: "Пошук...")
+            .searchable(text: $searchText, prompt: "guides.search_placeholder".localized)
             .refreshable {
                 await appContainer.contentService.refreshContent()
                 haptic(.light)

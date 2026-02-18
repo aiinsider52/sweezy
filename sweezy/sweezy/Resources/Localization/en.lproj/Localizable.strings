@@ -56,6 +56,8 @@
 "onboarding.dovidnyk.title" = "Your Guide";
 "onboarding.dovidnyk.description" = "Find helpful guides and checklists for life in Switzerland. Documents, housing, work — all in one place.";
 "onboarding.dovidnyk.checklists.title" = "Checklists";
+"dovidnyk.tab.guides" = "Guides";
+"dovidnyk.tab.checklists" = "Checklists";
 "onboarding.dovidnyk.checklists.description" = "Track your progress by checking off completed items. We'll remind you about important deadlines.";
 
 // Calculator
@@ -145,8 +147,14 @@
 "home.greeting.evening" = "Good evening";
 "home.greeting.night" = "Good night";
 "home.greeting.subtitle" = "Glad to help you today";
+"home.friend" = "friend";
+"home.hero.subtitle.registered" = "Welcome, %@! Keep going";
+"home.hero.subtitle.guest" = "Your complete guide for life in Switzerland";
 "home.telegram_join" = "Join our Telegram";
 "home.telegram_subtitle" = "Updates and tips in real time";
+
+// MARK: - News
+"news.empty" = "No news yet";
 
 // MARK: - Guides
 "guides.title" = "Guides";
@@ -219,6 +227,10 @@
 "map.no_places" = "No places found";
 "map.center_on_me.label" = "My location";
 "map.center_on_me.hint" = "Centers the map on your position";
+"map.closed_today" = "Closed today";
+"map.hours_unknown" = "Hours not specified";
+"map.description" = "Description";
+"map.services_label" = "Services";
 "map.distance" = "%@ from you";
 "map.opening_hours" = "Opening Hours";
 "map.contact" = "Contact";
@@ -235,6 +247,7 @@
 "gamification.xp_today" = "XP today";
 "gamification.hours_saved" = "hours saved";
 "gamification.guides" = "guides";
+"gamification.guides_count_format" = "%d guides";
 "gamification.to_level_format" = "To level %d";
 "gamification.to_level_xp_format" = "To level %d: %d XP";
 "gamification.level.1" = "Beginner";
@@ -245,6 +258,11 @@
 "gamification.level.6" = "Guru";
 "gamification.level.7" = "Legend";
 "gamification.level.default" = "Champion";
+"gamification.badge.reader" = "Reader";
+"gamification.badge.bookworm" = "Bookworm";
+"gamification.badge.organizer" = "Organizer";
+"gamification.badge.time_saver" = "Time saver";
+"gamification.badge.superstar" = "Superstar";
 
 // MARK: - Quick Actions (Bento)
 "qa.jobs.title" = "Job search";

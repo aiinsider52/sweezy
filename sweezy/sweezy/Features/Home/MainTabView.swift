@@ -514,7 +514,7 @@ struct OptimizedMapView: View {
             
             VStack(spacing: 12) {
                 ProgressView()
-                Text("Завантаження...")
+                Text("common.loading".localized)
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
@@ -740,10 +740,10 @@ struct PlaceDetailSheet: View {
     private var todayHours: String {
         let weekday = Calendar.current.component(.weekday, from: Date())
         if let hours = place.openingHours.first(where: { $0.weekday == weekday }) {
-            if hours.isClosed { return "Закрито сьогодні" }
+            if hours.isClosed { return "map.closed_today".localized }
             return "\(hours.openTime.formatted) – \(hours.closeTime.formatted)"
         }
-        return "Години не вказані"
+        return "map.hours_unknown".localized
     }
     
     private var languageFlags: String {
@@ -852,7 +852,7 @@ struct PlaceDetailSheet: View {
                     .fill(place.isOpen() ? Color.green : Color.red)
                     .frame(width: 10, height: 10)
                     .shadow(color: place.isOpen() ? .green.opacity(0.5) : .red.opacity(0.5), radius: 4)
-                Text(place.isOpen() ? "Відкрито" : "Закрито")
+                Text(place.isOpen() ? "map.open".localized : "map.closed".localized)
                     .font(.caption.bold())
                     .foregroundColor(place.isOpen() ? .green : .red)
             }
@@ -910,7 +910,7 @@ struct PlaceDetailSheet: View {
     // MARK: - Description
     private func descriptionSection(_ text: String) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            Label("Опис", systemImage: "text.alignleft")
+            Label("map.description".localized, systemImage: "text.alignleft")
                 .font(.caption.bold())
                 .foregroundColor(.cyan)
             
@@ -934,7 +934,7 @@ struct PlaceDetailSheet: View {
     // MARK: - Services
     private var servicesSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Label("Послуги", systemImage: "checkmark.seal.fill")
+            Label("map.services_label".localized, systemImage: "checkmark.seal.fill")
                 .font(.caption.bold())
                 .foregroundColor(.cyan)
             
@@ -973,7 +973,7 @@ struct PlaceDetailSheet: View {
             } label: {
                 HStack {
                     Image(systemName: "arrow.triangle.turn.up.right.diamond.fill")
-                    Text("Прокласти маршрут")
+                    Text("map.directions".localized)
                         .fontWeight(.semibold)
                 }
                 .frame(maxWidth: .infinity)
@@ -1000,7 +1000,7 @@ struct PlaceDetailSheet: View {
                     } label: {
                         HStack {
                             Image(systemName: "phone.fill")
-                            Text("Дзвінок")
+                            Text("map.call".localized)
                         }
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
@@ -1022,7 +1022,7 @@ struct PlaceDetailSheet: View {
                     } label: {
                         HStack {
                             Image(systemName: "safari.fill")
-                            Text("Сайт")
+                            Text("map.website".localized)
                         }
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
@@ -1869,11 +1869,11 @@ struct SettingsLiteView: View {
                         .frame(height: 8)
                         
                         HStack {
-                            Label("\(guidesRead) гідів", systemImage: "book.fill")
+                            Label("gamification.guides_count_format".localized(with: guidesRead), systemImage: "book.fill")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                             Spacer()
-                            Text("До рівня \(level + 1): \(nextLevelXP - totalXP) XP")
+                            Text("gamification.to_level_xp_format".localized(with: level + 1, nextLevelXP - totalXP))
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }

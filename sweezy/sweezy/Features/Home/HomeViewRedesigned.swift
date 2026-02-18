@@ -204,8 +204,8 @@ struct HomeViewRedesigned: View {
                 .foregroundColor(.primary)
             
             Text(lockManager.isRegistered
-                ? "Вітаємо, \(lockManager.userName)! Продовжуйте ваш шлях"
-                : "Ваш повний гід для успішного життя в Швейцарії")
+                ? "home.hero.subtitle.registered".localized(with: lockManager.userName)
+                : "home.hero.subtitle.guest".localized)
                 .font(.subheadline)
                 .foregroundColor(.secondary)
         }
@@ -235,7 +235,7 @@ struct HomeViewRedesigned: View {
         
         return FullBleedAuroraHero(
             greeting: dynamicGreeting,
-            userName: lockManager.isRegistered ? lockManager.userName : "Друже",
+            userName: lockManager.isRegistered ? lockManager.userName : "home.friend".localized,
             xp: statXP,
             level: statLevel,
             streak: min(streak, 999),
@@ -701,19 +701,19 @@ struct HomeViewRedesigned: View {
         var badges: [GamificationBadge] = []
         
         if appContainer.userStats.guidesReadCount >= 1 {
-            badges.append(GamificationBadge(icon: "book.fill", title: "Читач", color: Theme.Colors.info))
+            badges.append(GamificationBadge(icon: "book.fill", title: "gamification.badge.reader".localized, color: Theme.Colors.info))
         }
         if appContainer.userStats.guidesReadCount >= 5 {
-            badges.append(GamificationBadge(icon: "books.vertical.fill", title: "Книголюб", color: Theme.Colors.accentTurquoise))
+            badges.append(GamificationBadge(icon: "books.vertical.fill", title: "gamification.badge.bookworm".localized, color: Theme.Colors.accentTurquoise))
         }
         if appContainer.userStats.activeChecklistsCount >= 1 {
-            badges.append(GamificationBadge(icon: "checklist", title: "Організатор", color: Theme.Colors.success))
+            badges.append(GamificationBadge(icon: "checklist", title: "gamification.badge.organizer".localized, color: Theme.Colors.success))
         }
         if estimatedHoursSaved >= 5 {
-            badges.append(GamificationBadge(icon: "clock.fill", title: "Економ часу", color: Theme.Colors.accent))
+            badges.append(GamificationBadge(icon: "clock.fill", title: "gamification.badge.time_saver".localized, color: Theme.Colors.accent))
         }
         if estimatedHoursSaved >= 20 {
-            badges.append(GamificationBadge(icon: "star.fill", title: "Суперзірка", color: Theme.Colors.accentCoral))
+            badges.append(GamificationBadge(icon: "star.fill", title: "gamification.badge.superstar".localized, color: Theme.Colors.accentCoral))
         }
         
         return badges
@@ -785,7 +785,7 @@ struct HomeViewRedesigned: View {
 			}()
 			
 			if items.isEmpty {
-				Text("Новини поки що відсутні")
+				Text("news.empty".localized)
 					.font(Theme.Typography.caption)
 					.foregroundColor(Theme.Colors.textTertiary)
 					.padding(.horizontal, Theme.Spacing.lg)
@@ -843,10 +843,10 @@ struct HomeViewRedesigned: View {
     private var dynamicGreeting: String {
         let hour = Calendar.current.component(.hour, from: Date())
         switch hour {
-        case 5..<12: return "Доброго ранку"
-        case 12..<17: return "Доброго дня"
-        case 17..<22: return "Доброго вечора"
-        default: return "Доброї ночі"
+        case 5..<12: return "home.greeting.morning".localized
+        case 12..<17: return "home.greeting.afternoon".localized
+        case 17..<22: return "home.greeting.evening".localized
+        default: return "home.greeting.night".localized
         }
     }
     

@@ -67,8 +67,8 @@ struct GuidesViewRedesigned: View {
     private var headerSection: some View {
         VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
             SectionHeader(
-                "Довідники",
-                subtitle: "\(filteredGuides.count) статей доступно"
+                "home.metrics.guides".localized,
+                subtitle: "guides.articles_available_format".localized(with: filteredGuides.count)
             )
         }
         .padding(.horizontal, Theme.Spacing.lg)
@@ -85,7 +85,7 @@ struct GuidesViewRedesigned: View {
                     .font(.system(size: 20, weight: .medium))
                     .foregroundStyle(Theme.Colors.gradientPrimaryAdaptive)
                 
-                TextField("Шукати довідники...", text: $searchText)
+                TextField("guides.search_placeholder".localized, text: $searchText)
                     .font(Theme.Typography.body)
                     .foregroundColor(Theme.Colors.textPrimary)
                     .autocorrectionDisabled()

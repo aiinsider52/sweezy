@@ -34,6 +34,8 @@
 "onboarding.dovidnyk.title" = "Ihr Ratgeber";
 "onboarding.dovidnyk.description" = "Hier finden Sie hilfreiche Leitfäden und Checklisten für das Leben in der Schweiz. Dokumente, Wohnen, Arbeit — alles an einem Ort.";
 "onboarding.dovidnyk.checklists.title" = "Checklisten";
+"dovidnyk.tab.guides" = "Leitfäden";
+"dovidnyk.tab.checklists" = "Checklisten";
 "onboarding.dovidnyk.checklists.description" = "Verfolgen Sie Ihren Fortschritt, indem Sie erledigte Punkte abhaken. Wir erinnern Sie an wichtige Fristen.";
 
 // Calculator
@@ -109,10 +111,20 @@
 "home.greeting.evening" = "Guten Abend";
 "home.greeting.night" = "Gute Nacht";
 "home.greeting.subtitle" = "Schön, dass Sie da sind";
+"home.friend" = "Freund";
+"home.hero.subtitle.registered" = "Willkommen, %@! Mach weiter so";
+"home.hero.subtitle.guest" = "Dein kompletter Guide fürs Leben in der Schweiz";
 "home.telegram_join" = "Unserem Telegram beitreten";
 "home.telegram_subtitle" = "Updates und Tipps in Echtzeit";
 
+// MARK: - News
+"news.empty" = "Noch keine Nachrichten";
+
 // Quick Actions
+"qa.guides" = "Leitfäden";
+"qa.checklists" = "Checklisten";
+"qa.calculator" = "Rechner";
+"qa.map" = "Karte";
 "qa.calculator.title" = "Rechner";
 "qa.calculator.subtitle" = "Leistungen berechnen";
 "qa.appointments.title" = "Termine";
@@ -181,6 +193,10 @@
 "map.no_places" = "Keine Orte gefunden";
 "map.center_on_me.label" = "Mein Standort";
 "map.center_on_me.hint" = "Zentriert die Karte auf deine Position";
+"map.closed_today" = "Heute geschlossen";
+"map.hours_unknown" = "Öffnungszeiten nicht angegeben";
+"map.description" = "Beschreibung";
+"map.services_label" = "Leistungen";
 "map.directions" = "Route";
 
 // MARK: - Gamification
@@ -188,6 +204,7 @@
 "gamification.xp_today" = "XP heute";
 "gamification.hours_saved" = "Std. gespart";
 "gamification.guides" = "Guides";
+"gamification.guides_count_format" = "%d Guides";
 "gamification.to_level_format" = "Bis Level %d";
 "gamification.to_level_xp_format" = "Bis Level %d: %d XP";
 "gamification.level.1" = "Anfänger";
@@ -198,6 +215,11 @@
 "gamification.level.6" = "Guru";
 "gamification.level.7" = "Legende";
 "gamification.level.default" = "Champion";
+"gamification.badge.reader" = "Leser";
+"gamification.badge.bookworm" = "Bücherwurm";
+"gamification.badge.organizer" = "Organisator";
+"gamification.badge.time_saver" = "Zeitsparer";
+"gamification.badge.superstar" = "Superstar";
 
 // MARK: - Quick Actions (Bento)
 "qa.jobs.title" = "Jobsuche";

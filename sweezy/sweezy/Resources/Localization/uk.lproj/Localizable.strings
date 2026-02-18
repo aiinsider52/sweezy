@@ -56,6 +56,8 @@
 "onboarding.dovidnyk.title" = "Довідник";
 "onboarding.dovidnyk.description" = "Тут зібрані корисні гайди та чеклисти для життя в Швейцарії. Документи, житло, робота — все в одному місці.";
 "onboarding.dovidnyk.checklists.title" = "Чек-листи";
+"dovidnyk.tab.guides" = "Гайди";
+"dovidnyk.tab.checklists" = "Чек-листи";
 "onboarding.dovidnyk.checklists.description" = "Відзначай виконані пункти та слідкуй за прогресом. Ми нагадаємо про важливі дедлайни.";
 
 // Calculator
@@ -134,8 +136,14 @@
 "home.greeting.evening" = "Доброго вечора";
 "home.greeting.night" = "Доброї ночі";
 "home.greeting.subtitle" = "Раді допомогти вам сьогодні";
+"home.friend" = "Друже";
+"home.hero.subtitle.registered" = "Вітаємо, %@! Продовжуйте ваш шлях";
+"home.hero.subtitle.guest" = "Ваш повний гід для успішного життя в Швейцарії";
 "home.telegram_join" = "Приєднуйтесь до Telegram";
 "home.telegram_subtitle" = "Оновлення та поради у реальному часі";
+
+// MARK: - News
+"news.empty" = "Новини поки що відсутні";
 "home.recommendations" = "Рекомендації для вас";
 "home.focus" = "Ваш фокус";
 "home.insider" = "Sweezy Insider";
@@ -227,6 +235,10 @@
 "map.no_places" = "Немає місць";
 "map.center_on_me.label" = "Моє місцезнаходження";
 "map.center_on_me.hint" = "Центрує карту на вашій позиції";
+"map.closed_today" = "Закрито сьогодні";
+"map.hours_unknown" = "Години не вказані";
+"map.description" = "Опис";
+"map.services_label" = "Послуги";
 "map.type.government" = "Державні установи";
 "map.type.healthcare" = "Медицина";
 "map.type.education" = "Освіта";
@@ -253,6 +265,7 @@
 "gamification.xp_today" = "XP сьогодні";
 "gamification.hours_saved" = "год збережено";
 "gamification.guides" = "гідів";
+"gamification.guides_count_format" = "%d гідів";
 "gamification.to_level_format" = "До рівня %d";
 "gamification.to_level_xp_format" = "До рівня %d: %d XP";
 "gamification.level.1" = "Новачок";
@@ -263,6 +276,11 @@
 "gamification.level.6" = "Гуру";
 "gamification.level.7" = "Легенда";
 "gamification.level.default" = "Чемпіон";
+"gamification.badge.reader" = "Читач";
+"gamification.badge.bookworm" = "Книголюб";
+"gamification.badge.organizer" = "Організатор";
+"gamification.badge.time_saver" = "Економ часу";
+"gamification.badge.superstar" = "Суперзірка";
 
 // MARK: - Quick Actions (Bento)
 "qa.jobs.title" = "Пошук роботи";

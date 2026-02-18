@@ -469,7 +469,7 @@ struct BentoQuickActionsExtended: View {
         Theme.Colors.primaryBackground.ignoresSafeArea()
         
         VStack(spacing: 24) {
-            Text("Швидкі дії")
+            Text("home.quick_actions")
                 .font(.title2.bold())
                 .frame(maxWidth: .infinity, alignment: .leading)
             
@@ -484,12 +484,12 @@ struct BentoQuickActionsExtended: View {
                 items: [
                     BentoQuickActionItem(
                         icon: "book.fill",
-                        title: "Довідники",
+                        title: "qa.guides",
                         accentColor: .blue
                     ) {},
                     BentoQuickActionItem(
                         icon: "checkmark.circle.fill",
-                        title: "Чек-листи",
+                        title: "qa.checklists",
                         accentColor: .green
                     ) {}
                 ]
@@ -504,7 +504,7 @@ struct BentoQuickActionsExtended: View {
         Theme.Colors.primaryBackground.ignoresSafeArea()
         
         VStack(spacing: 24) {
-            Text("Швидкі дії")
+            Text("home.quick_actions")
                 .font(.title2.bold())
                 .frame(maxWidth: .infinity, alignment: .leading)
             
@@ -517,8 +517,8 @@ struct BentoQuickActionsExtended: View {
                     badgeText: "New"
                 ) {},
                 primaryItems: [
-                    BentoQuickActionItem(icon: "book.fill", title: "Довідники", accentColor: .blue) {},
-                    BentoQuickActionItem(icon: "checkmark.circle.fill", title: "Чек-листи", accentColor: .green) {}
+                    BentoQuickActionItem(icon: "book.fill", title: "qa.guides", accentColor: .blue) {},
+                    BentoQuickActionItem(icon: "checkmark.circle.fill", title: "qa.checklists", accentColor: .green) {}
                 ],
                 secondaryItems: [
                     BentoQuickActionItem(icon: "function", title: "Калькулятор", accentColor: .orange) {},

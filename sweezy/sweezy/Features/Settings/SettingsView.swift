@@ -815,23 +815,23 @@ private extension SettingsView {
     }
     func levelName(for level: Int) -> String {
         switch level {
-        case 1: return "Новачок"
-        case 2: return "Дослідник"
-        case 3: return "Інтегратор"
-        case 4: return "Експерт"
-        case 5: return "Майстер"
-        case 6: return "Гуру"
-        case 7: return "Легенда"
-        default: return "Чемпіон"
+        case 1: return "gamification.level.1".localized
+        case 2: return "gamification.level.2".localized
+        case 3: return "gamification.level.3".localized
+        case 4: return "gamification.level.4".localized
+        case 5: return "gamification.level.5".localized
+        case 6: return "gamification.level.6".localized
+        case 7: return "gamification.level.7".localized
+        default: return "gamification.level.default".localized
         }
     }
     func computeBadges(guidesRead: Int, hoursSaved: Int) -> [GamificationBadge] {
         var badges: [GamificationBadge] = []
         if guidesRead >= 1 {
-            badges.append(GamificationBadge(icon: "book.fill", title: "Читач", color: Theme.Colors.info))
+            badges.append(GamificationBadge(icon: "book.fill", title: "gamification.badge.reader".localized, color: Theme.Colors.info))
         }
         if hoursSaved >= 5 {
-            badges.append(GamificationBadge(icon: "clock.fill", title: "Економ часу", color: Theme.Colors.accent))
+            badges.append(GamificationBadge(icon: "clock.fill", title: "gamification.badge.time_saver".localized, color: Theme.Colors.accent))
         }
         return badges
     }

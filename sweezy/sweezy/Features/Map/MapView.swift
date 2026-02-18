@@ -107,7 +107,7 @@ struct MapView: View {
     private var filtersSection: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
-                MapFilterChip(
+                MapPillFilterChip(
                     title: "common.all".localized,
                     icon: "square.grid.2x2.fill",
                     isSelected: selectedPlaceType == nil
@@ -119,7 +119,7 @@ struct MapView: View {
                 }
                 
                 ForEach(PlaceType.allCases, id: \.self) { type in
-                    MapFilterChip(
+                    MapPillFilterChip(
                         title: type.localizedName,
                         icon: type.iconName,
                         isSelected: selectedPlaceType == type,
@@ -670,7 +670,7 @@ struct PlaceShimmerRow: View {
 
 // MARK: - Map Filter Chip (new, replaces WinterFilterChip for map page)
 
-struct MapFilterChip: View {
+struct MapPillFilterChip: View {
     let title: String
     let icon: String
     let isSelected: Bool
@@ -802,7 +802,7 @@ struct WinterFilterChip: View {
     let action: () -> Void
     
     var body: some View {
-        MapFilterChip(title: title, icon: icon, isSelected: isSelected, action: action)
+        MapPillFilterChip(title: title, icon: icon, isSelected: isSelected, action: action)
     }
 }
 

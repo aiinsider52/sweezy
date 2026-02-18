@@ -43,6 +43,12 @@ class Settings(BaseSettings):
     ADMIN_EMAIL: str = Field(default="admin@sweeezy.app")
     ADMIN_PASSWORD: str = Field(default="admin123")
 
+    # App Review / Demo user (optional). If set, backend will ensure this user exists on startup.
+    # Do NOT hardcode credentials in the repo; set these via environment variables.
+    DEMO_USER_ENABLED: bool = Field(default=False)
+    DEMO_USER_EMAIL: str | None = Field(default=None)
+    DEMO_USER_PASSWORD: str | None = Field(default=None)
+
     # One-time setup secret to allow forced admin seeding via HTTP
     SETUP_SECRET: Optional[str] = None
     # Fallback for setups that already use SECRET_KEY

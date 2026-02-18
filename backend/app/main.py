@@ -92,9 +92,9 @@ async def lifespan(app: FastAPI):
         # Fail fast: running with an unmigrated DB will cause random 500s in production.
         raise RuntimeError("Database migrations failed (see logs for details)")
 
-    # Seed default admin (idempotent)
+    # Seed default admin + optional demo user (idempotent)
     from .core.database import SessionLocal
-    from .services.users import seed_admin_user
+    from .services.users import seed_admin_user, seed_demo_user
 
     def _seed_admin() -> None:
         with SessionLocal() as db:
@@ -105,6 +105,16 @@ async def lifespan(app: FastAPI):
     except Exception as exc:
         # Seeding is helpful but not critical for serving requests; log and continue.
         log.warning("seed_admin_failed", error=str(exc))
+
+    def _seed_demo() -> None:
+        with SessionLocal() as db:
+            seed_demo_user(db)
+
+    try:
+        await asyncio.to_thread(_seed_demo)
+    except Exception as exc:
+        # Demo seeding is optional; log and continue.
+        log.warning("seed_demo_failed", error=str(exc))
 
     task = asyncio.create_task(_background_tick())
     try:

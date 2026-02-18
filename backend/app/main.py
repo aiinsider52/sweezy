@@ -94,7 +94,12 @@ async def lifespan(app: FastAPI):
 
     # Seed default admin + optional demo user (idempotent)
     from .core.database import SessionLocal
-    from .services.users import seed_admin_user, seed_demo_user
+    from .services.users import seed_admin_user
+    try:
+        # Optional: may not exist in older builds; never crash startup because of demo seeding.
+        from .services.users import seed_demo_user  # type: ignore
+    except ImportError:
+        seed_demo_user = None  # type: ignore
 
     def _seed_admin() -> None:
         with SessionLocal() as db:
@@ -108,7 +113,8 @@ async def lifespan(app: FastAPI):
 
     def _seed_demo() -> None:
         with SessionLocal() as db:
-            seed_demo_user(db)
+            if seed_demo_user is not None:
+                seed_demo_user(db)
 
     try:
         await asyncio.to_thread(_seed_demo)

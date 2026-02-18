@@ -51,38 +51,42 @@ struct MapView: View {
                 }
                 .frame(height: 0)
                 
-                VStack(spacing: Theme.Spacing.md) {
-                    // Winter-styled header (always festive on Map page)
-                    WinterMapHeader(title: "map.title".localized)
-                    
-                    // Filters
+                VStack(spacing: 0) {
+                    // Filters (compact horizontal scroll)
                     filtersSection
+                        .padding(.top, Theme.Spacing.sm)
                     
                     // Map or placeholder (collapsible)
                     Group {
                         if networkMonitor.isOnline || !offlineCache.hasSnapshot() {
                             mapSection
                         } else if let img = offlineCache.loadSnapshot() {
-                            // Offline fallback snapshot
                             Image(uiImage: img)
                                 .resizable()
                                 .scaledToFill()
                                 .frame(height: mapCurrentHeight)
-                                .clipShape(RoundedRectangle(cornerRadius: Theme.CornerRadius.lg, style: .continuous))
+                                .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
                                 .overlay(
-                                    RoundedRectangle(cornerRadius: Theme.CornerRadius.lg)
-                                        .stroke(Theme.Colors.chipBorder, lineWidth: 1)
+                                    RoundedRectangle(cornerRadius: 20)
+                                        .stroke(
+                                            LinearGradient(colors: [Color.cyan.opacity(0.5), Color.white.opacity(0.15)],
+                                                           startPoint: .topLeading, endPoint: .bottomTrailing),
+                                            lineWidth: 1.5
+                                        )
                                 )
                                 .padding(.horizontal, Theme.Spacing.md)
                         } else {
                             mapSection
                         }
                     }
-                        .animation(Theme.Animation.smooth, value: mapCurrentHeight)
+                    .animation(Theme.Animation.smooth, value: mapCurrentHeight)
+                    .padding(.top, Theme.Spacing.sm)
                     
                     // Places list
                     placesListSection
+                        .padding(.top, Theme.Spacing.md)
                 }
+                .padding(.bottom, Theme.Spacing.xxxl)
             }
             .coordinateSpace(name: "mapScroll")
             .onPreferenceChange(ScrollOffsetPreferenceKey.self) { minY in
@@ -90,7 +94,8 @@ struct MapView: View {
                 scrollOffset = min(offset, mapExpandedHeight - mapCollapsedHeight)
             }
             .navigationTitle("map.title".localized)
-            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarTitleDisplayMode(.large)
+            .toolbarBackground(.hidden, for: .navigationBar)
             .background(AdaptivePageBackground())
             .onAppear {
                 requestLocationPermission()
@@ -101,29 +106,35 @@ struct MapView: View {
     
     private var filtersSection: some View {
         ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: Theme.Spacing.sm) {
-                WinterFilterChip(
+            HStack(spacing: 8) {
+                MapFilterChip(
                     title: "common.all".localized,
-                    icon: "square.grid.2x2",
+                    icon: "square.grid.2x2.fill",
                     isSelected: selectedPlaceType == nil
                 ) {
-                    selectedPlaceType = nil
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
+                        selectedPlaceType = nil
+                    }
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
                 }
                 
                 ForEach(PlaceType.allCases, id: \.self) { type in
-                    WinterFilterChip(
+                    MapFilterChip(
                         title: type.localizedName,
                         icon: type.iconName,
-                        isSelected: selectedPlaceType == type
+                        isSelected: selectedPlaceType == type,
+                        accentColor: type.swiftUIColor
                     ) {
-                        selectedPlaceType = selectedPlaceType == type ? nil : type
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
+                            selectedPlaceType = selectedPlaceType == type ? nil : type
+                        }
+                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
                     }
                 }
             }
-            .padding(.horizontal, Theme.Spacing.md)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 4)
         }
-        .padding(.vertical, Theme.Spacing.sm)
-        .background(Color.clear) // Transparent to show winter background
     }
     
     private var mapSection: some View {
@@ -141,23 +152,23 @@ struct MapView: View {
                 }
             }
             .frame(height: mapCurrentHeight)
-            .clipShape(RoundedRectangle(cornerRadius: Theme.CornerRadius.lg, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
             .overlay(
-                // Winter frost border (always active on Map page)
-                RoundedRectangle(cornerRadius: Theme.CornerRadius.lg)
+                // Elegant frost border
+                RoundedRectangle(cornerRadius: 20)
                     .stroke(
                         LinearGradient(
-                            colors: [Color.cyan.opacity(0.6), Color.white.opacity(0.3), Color.cyan.opacity(0.4)],
+                            colors: [Color.cyan.opacity(0.55), Color.white.opacity(0.2), Color.cyan.opacity(0.3)],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         ),
-                        lineWidth: 2
+                        lineWidth: 1.5
                     )
             )
-            .shadow(color: Color.cyan.opacity(0.3), radius: 10, y: 4)
+            .shadow(color: Color.cyan.opacity(0.25), radius: 16, y: 6)
             .sheet(item: $selectedPlace) { place in
                 WinterPlaceBottomSheet(place: place)
-                    .presentationDetents([.height(320), .medium])
+                    .presentationDetents([.height(340), .medium])
                     .presentationDragIndicator(.visible)
             }
             
@@ -201,56 +212,85 @@ struct MapView: View {
     }
     
     private var placesListSection: some View {
-        VStack(alignment: .leading, spacing: Theme.Spacing.md) {
-            HStack {
-                HStack(spacing: 8) {
-                    Image(systemName: "snowflake")
-                        .font(.caption)
-                        .foregroundColor(.cyan.opacity(0.7))
+        VStack(alignment: .leading, spacing: 12) {
+            // Section header — count badge + title
+            HStack(alignment: .center, spacing: 10) {
+                VStack(alignment: .leading, spacing: 2) {
                     Text("map.nearby_services".localized)
-                        .font(Theme.Typography.headline)
+                        .font(.system(size: 20, weight: .bold))
                         .foregroundColor(.white)
                 }
                 
                 Spacer()
                 
-                Text("\(filteredPlaces.count) places")
-                    .font(Theme.Typography.caption)
-                    .foregroundColor(.white.opacity(0.6))
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 4)
+                // Count badge
+                if !filteredPlaces.isEmpty {
+                    HStack(spacing: 4) {
+                        Image(systemName: "mappin.circle.fill")
+                            .font(.system(size: 12))
+                            .foregroundColor(.cyan)
+                        Text("\(filteredPlaces.count)")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundColor(.white)
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
                     .background(
                         Capsule()
-                            .fill(Color.cyan.opacity(0.15))
+                            .fill(Color.cyan.opacity(0.18))
+                            .overlay(Capsule().stroke(Color.cyan.opacity(0.3), lineWidth: 1))
                     )
-            }
-            .padding(.horizontal, Theme.Spacing.md)
-            
-            Group {
-                if appContainer.contentService.isLoading {
-                    VStack(spacing: Theme.Spacing.sm) {
-                        ForEach(0..<4, id: \.self) { _ in
-                            WinterPlaceShimmer()
-                                .padding(.horizontal, Theme.Spacing.md)
-                        }
-                    }
-                } else if filteredPlaces.isEmpty {
-                    WinterEmptyState(
-                        icon: "mappin.slash",
-                        title: "map.nearby_services".localized,
-                        subtitle: "guides.no_results_subtitle".localized
-                    )
-                } else {
-                    LazyVStack(spacing: Theme.Spacing.sm) {
-                        ForEach(filteredPlaces) { place in
-                            WinterPlaceCard(place: place)
-                        }
-                    }
-                    .padding(.horizontal, Theme.Spacing.md)
                 }
             }
+            .padding(.horizontal, 16)
+            
+            // Content
+            if appContainer.contentService.isLoading {
+                VStack(spacing: 8) {
+                    ForEach(0..<5, id: \.self) { _ in
+                        WinterPlaceShimmer()
+                            .padding(.horizontal, 16)
+                    }
+                }
+            } else if filteredPlaces.isEmpty {
+                WinterEmptyState(
+                    icon: "mappin.slash",
+                    title: "map.nearby_services".localized,
+                    subtitle: "guides.no_results_subtitle".localized
+                )
+            } else {
+                // Beautiful rounded card container
+                LazyVStack(spacing: 0) {
+                    ForEach(Array(filteredPlaces.enumerated()), id: \.element.id) { index, place in
+                        WinterPlaceRow(place: place)
+                        
+                        if index < filteredPlaces.count - 1 {
+                            Rectangle()
+                                .fill(Color.white.opacity(0.06))
+                                .frame(height: 1)
+                                .padding(.leading, 78)
+                        }
+                    }
+                }
+                .background(
+                    RoundedRectangle(cornerRadius: 20, style: .continuous)
+                        .fill(Color.white.opacity(0.07))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                                .stroke(
+                                    LinearGradient(
+                                        colors: [Color.cyan.opacity(0.35), Color.white.opacity(0.08)],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    ),
+                                    lineWidth: 1
+                                )
+                        )
+                )
+                .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                .padding(.horizontal, 16)
+            }
         }
-        .background(Color.clear) // Transparent to show winter background
     }
     
     private func requestLocationPermission() {
@@ -628,59 +668,133 @@ struct PlaceShimmerRow: View {
     }
 }
 
-// MARK: - Winter Themed Components
+// MARK: - Map Filter Chip (new, replaces WinterFilterChip for map page)
 
-struct WinterMapHeader: View {
+struct MapFilterChip: View {
     let title: String
+    let icon: String
+    let isSelected: Bool
+    var accentColor: Color = .cyan
+    let action: () -> Void
     
     var body: some View {
-        HStack(spacing: 12) {
-            // Decorative snowflake
-            ZStack {
-                Circle()
-                    .fill(Color.cyan.opacity(0.15))
-                    .frame(width: 44, height: 44)
-                Circle()
-                    .stroke(
-                        LinearGradient(
-                            colors: [Color.cyan.opacity(0.5), Color.white.opacity(0.2)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ),
-                        lineWidth: 1
-                    )
-                    .frame(width: 44, height: 44)
-                Image(systemName: "map.fill")
-                    .font(.system(size: 18, weight: .medium))
-                    .foregroundColor(.cyan)
-            }
-            
-            VStack(alignment: .leading, spacing: 2) {
+        Button(action: action) {
+            HStack(spacing: 5) {
+                Image(systemName: icon)
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundColor(isSelected ? .white : accentColor.opacity(0.8))
                 Text(title)
-                    .font(.title2.weight(.bold))
-                    .foregroundColor(.white)
-                Text("Знайди потрібне місце")
-                    .font(.caption)
-                    .foregroundColor(.white.opacity(0.5))
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundColor(isSelected ? .white : .white.opacity(0.75))
             }
-            
-            Spacer()
-            
-            // Winter decoration
-            HStack(spacing: 4) {
-                Image(systemName: "snowflake")
-                    .font(.caption)
-                    .foregroundColor(.cyan.opacity(0.6))
-                Image(systemName: "snowflake")
-                    .font(.caption2)
-                    .foregroundColor(.white.opacity(0.4))
-            }
+            .padding(.horizontal, 13)
+            .padding(.vertical, 8)
+            .background(
+                Capsule()
+                    .fill(isSelected
+                        ? LinearGradient(
+                            colors: [accentColor.opacity(0.55), accentColor.opacity(0.35)],
+                            startPoint: .topLeading, endPoint: .bottomTrailing)
+                        : LinearGradient(
+                            colors: [Color.white.opacity(0.09), Color.white.opacity(0.06)],
+                            startPoint: .topLeading, endPoint: .bottomTrailing)
+                    )
+            )
+            .overlay(
+                Capsule()
+                    .stroke(isSelected ? accentColor.opacity(0.5) : Color.white.opacity(0.12), lineWidth: 1)
+            )
+            .shadow(color: isSelected ? accentColor.opacity(0.35) : .clear, radius: 8, y: 3)
         }
-        .padding(.horizontal, Theme.Spacing.md)
-        .padding(.vertical, Theme.Spacing.sm)
+        .buttonStyle(.plain)
+        .scaleEffect(isSelected ? 1.02 : 1.0)
+        .animation(.spring(response: 0.25, dampingFraction: 0.7), value: isSelected)
     }
 }
 
+// MARK: - Compact Place Row (beautiful iOS-style row inside grouped card)
+
+struct WinterPlaceRow: View {
+    let place: Place
+    @State private var showDetail = false
+    
+    private var isOpen: Bool { place.isOpen() }
+    
+    var body: some View {
+        Button { showDetail = true } label: {
+            HStack(spacing: 14) {
+                // Colored icon square
+                ZStack {
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .fill(
+                            LinearGradient(
+                                colors: [
+                                    place.type.swiftUIColor.opacity(0.35),
+                                    place.type.swiftUIColor.opacity(0.18)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .frame(width: 46, height: 46)
+                    
+                    Image(systemName: place.type.iconName)
+                        .font(.system(size: 18, weight: .medium))
+                        .foregroundColor(place.type.swiftUIColor)
+                }
+                
+                // Info
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(place.name)
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(Theme.Colors.textPrimary)
+                        .lineLimit(1)
+                    
+                    Text(place.type.localizedName)
+                        .font(.system(size: 12))
+                        .foregroundColor(Theme.Colors.textSecondary)
+                    
+                    // Status dot + text
+                    HStack(spacing: 5) {
+                        Circle()
+                            .fill(isOpen ? Color.green : Color(red: 1.0, green: 0.35, blue: 0.35))
+                            .frame(width: 6, height: 6)
+                        Text(isOpen ? "map.open".localized : "map.closed".localized)
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(isOpen ? Color.green : Color(red: 1.0, green: 0.42, blue: 0.42))
+                    }
+                }
+                
+                Spacer()
+                
+                // Chevron
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(Theme.Colors.textSecondary.opacity(0.5))
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
+        }
+        .buttonStyle(PlaceRowPressStyle())
+        .sheet(isPresented: $showDetail) {
+            WinterPlaceBottomSheet(place: place)
+                .presentationDetents([.height(340), .medium])
+                .presentationDragIndicator(.visible)
+        }
+    }
+}
+
+private struct PlaceRowPressStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .background(configuration.isPressed
+                ? Color.white.opacity(0.06)
+                : Color.clear)
+            .animation(.easeOut(duration: 0.1), value: configuration.isPressed)
+    }
+}
+
+// MARK: - Legacy WinterFilterChip (kept for compatibility)
 struct WinterFilterChip: View {
     let title: String
     let icon: String
@@ -688,32 +802,7 @@ struct WinterFilterChip: View {
     let action: () -> Void
     
     var body: some View {
-        Button(action: action) {
-            HStack(spacing: 6) {
-                Image(systemName: icon)
-                    .font(.system(size: 12, weight: .medium))
-                Text(title)
-                    .font(.system(size: 13, weight: .medium))
-            }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 10)
-            .background(
-                isSelected
-                    ? AnyShapeStyle(LinearGradient(
-                        colors: [Color.cyan.opacity(0.4), Color.blue.opacity(0.3)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                      ))
-                    : AnyShapeStyle(Theme.Colors.adaptiveCard)
-            )
-            .clipShape(Capsule())
-            .overlay(
-                Capsule()
-                    .stroke(isSelected ? Color.cyan.opacity(0.6) : Color.white.opacity(0.15), lineWidth: 1)
-            )
-            .shadow(color: isSelected ? Color.cyan.opacity(0.3) : Color.clear, radius: 6, y: 2)
-        }
-        .foregroundColor(isSelected ? .white : .white.opacity(0.7))
+        MapFilterChip(title: title, icon: icon, isSelected: isSelected, action: action)
     }
 }
 
@@ -1026,21 +1115,21 @@ struct WinterEmptyState: View {
                     .fill(Color.cyan.opacity(0.1))
                     .frame(width: 80, height: 80)
                 Circle()
-                    .stroke(Color.cyan.opacity(0.2), lineWidth: 1)
+                    .stroke(Color.cyan.opacity(0.25), lineWidth: 1)
                     .frame(width: 80, height: 80)
                 
                 Image(systemName: icon)
                     .font(.system(size: 32))
-                    .foregroundColor(.cyan.opacity(0.6))
+                    .foregroundColor(.cyan.opacity(0.7))
             }
             
             Text(title)
                 .font(Theme.Typography.headline)
-                .foregroundColor(.white.opacity(0.8))
+                .foregroundColor(Theme.Colors.textPrimary)
             
             Text(subtitle)
                 .font(Theme.Typography.caption)
-                .foregroundColor(.white.opacity(0.5))
+                .foregroundColor(Theme.Colors.textSecondary)
                 .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity)
@@ -1078,97 +1167,102 @@ struct WinterPlaceBottomSheet: View {
     
     var body: some View {
         ZStack {
-            // Winter background (always active on Map page)
-            LinearGradient(
-                colors: [
-                    Color(red: 0.05, green: 0.1, blue: 0.2),
-                    Color(red: 0.08, green: 0.15, blue: 0.25)
-                ],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .ignoresSafeArea()
+            // Adaptive background (dark/light aware)
+            AdaptivePageBackground()
+                .ignoresSafeArea()
             
-            VStack(alignment: .leading, spacing: Theme.Spacing.md) {
+            VStack(alignment: .leading, spacing: 0) {
+                // Drag handle area
+                Capsule()
+                    .fill(Color.white.opacity(0.18))
+                    .frame(width: 36, height: 4)
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 12)
+                    .padding(.bottom, 20)
+                
                 // Header
-                HStack(spacing: 12) {
+                HStack(spacing: 14) {
                     ZStack {
-                        Circle()
-                            .fill(LinearGradient(
-                                colors: [place.type.swiftUIColor.opacity(0.3), place.type.swiftUIColor.opacity(0.15)],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            ))
-                            .frame(width: 56, height: 56)
-                        Circle()
-                            .stroke(Color.cyan.opacity(0.3), lineWidth: 1)
-                            .frame(width: 56, height: 56)
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            .fill(
+                                LinearGradient(
+                                    colors: [place.type.swiftUIColor.opacity(0.4), place.type.swiftUIColor.opacity(0.2)],
+                                    startPoint: .topLeading, endPoint: .bottomTrailing
+                                )
+                            )
+                            .frame(width: 58, height: 58)
                         
                         Image(systemName: place.type.iconName)
-                            .font(.title2)
-                            .foregroundColor(.white)
+                            .font(.system(size: 22, weight: .semibold))
+                            .foregroundColor(place.type.swiftUIColor)
                     }
                     
                     VStack(alignment: .leading, spacing: 4) {
                         Text(place.name)
-                            .font(Theme.Typography.headline)
-                            .foregroundColor(.white)
+                            .font(.system(size: 18, weight: .bold))
+                            .foregroundColor(Theme.Colors.textPrimary)
+                            .lineLimit(2)
                         Text(place.type.localizedName)
-                            .font(Theme.Typography.caption)
-                            .foregroundColor(.white.opacity(0.6))
+                            .font(.system(size: 13))
+                            .foregroundColor(Theme.Colors.textSecondary)
                     }
                     Spacer()
                 }
-                .padding(.top, Theme.Spacing.md)
+                .padding(.bottom, 20)
                 
-                // Hours
+                // Status row
                 HStack(spacing: 8) {
                     Circle().fill(openNowLine.color).frame(width: 8, height: 8)
                     Text(openNowLine.text)
-                        .font(Theme.Typography.caption)
+                        .font(.system(size: 13, weight: .semibold))
                         .foregroundColor(openNowLine.color)
                     Text("·")
-                        .foregroundColor(.white.opacity(0.3))
+                        .foregroundColor(Theme.Colors.textSecondary)
                     Text(todayHoursLine)
-                        .font(Theme.Typography.caption)
-                        .foregroundColor(.white.opacity(0.6))
+                        .font(.system(size: 13))
+                        .foregroundColor(Theme.Colors.textSecondary)
                     
                     if let liveWait {
                         Text("·")
-                            .foregroundColor(.white.opacity(0.3))
+                            .foregroundColor(Theme.Colors.textSecondary)
                         HStack(spacing: 4) {
                             Image(systemName: "clock")
                             Text("\(liveWait) min")
                         }
-                        .font(Theme.Typography.caption)
-                        .foregroundColor(.cyan.opacity(0.8))
+                        .font(.system(size: 12))
+                        .foregroundColor(.cyan)
                     }
                 }
+                .padding(.bottom, 16)
                 
-                // Address
-                HStack(alignment: .top, spacing: 8) {
+                // Address card
+                HStack(alignment: .top, spacing: 10) {
                     Image(systemName: "mappin.circle.fill")
-                        .foregroundColor(.cyan.opacity(0.7))
+                        .font(.system(size: 18))
+                        .foregroundColor(.cyan)
                     VStack(alignment: .leading, spacing: 2) {
                         Text("\(place.address.street) \(place.address.houseNumber)")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(Theme.Colors.textPrimary)
                         Text("\(place.address.postalCode) \(place.address.city)")
+                            .font(.system(size: 13))
+                            .foregroundColor(Theme.Colors.textSecondary)
                     }
-                    .font(Theme.Typography.caption)
-                    .foregroundColor(.white.opacity(0.7))
+                    Spacer()
                 }
-                .padding(12)
-                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(14)
                 .background(
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.white.opacity(0.05))
+                    RoundedRectangle(cornerRadius: 14)
+                        .fill(Theme.Colors.adaptiveCard)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 14)
+                                .stroke(Theme.Colors.adaptiveBorder.opacity(0.5), lineWidth: 1)
+                        )
                 )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.cyan.opacity(0.2), lineWidth: 1)
-                )
+                .padding(.bottom, 20)
                 
-                // Contact buttons
-                HStack(spacing: Theme.Spacing.sm) {
+                // Action buttons
+                HStack(spacing: 10) {
                     if let phone = place.phoneNumber {
                         WinterSheetButton(icon: "phone.fill", title: "map.call".localized) {
                             if let url = URL(string: "tel:\(phone)") {
@@ -1197,7 +1291,7 @@ struct WinterPlaceBottomSheet: View {
                 
                 Spacer()
             }
-            .padding(.horizontal, Theme.Spacing.md)
+            .padding(.horizontal, 20)
         }
         .onAppear {
             Task { await computeETA() }
@@ -1250,33 +1344,37 @@ struct WinterSheetButton: View {
                 if isLoading {
                     ProgressView()
                         .scaleEffect(0.7)
-                        .tint(.white)
+                        .tint(isPrimary ? .white : .cyan)
                 } else {
                     Image(systemName: icon)
-                        .font(.system(size: 14, weight: .medium))
+                        .font(.system(size: 14, weight: .semibold))
                 }
                 Text(title)
-                    .font(Theme.Typography.caption)
-                    .fontWeight(.medium)
+                    .font(.system(size: 13, weight: .semibold))
             }
-            .foregroundColor(isPrimary ? .white : .cyan)
+            .foregroundColor(isPrimary ? .white : Theme.Colors.textPrimary)
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 12)
+            .padding(.vertical, 13)
             .background(
                 isPrimary
                     ? AnyShapeStyle(LinearGradient(
-                        colors: [Color.cyan.opacity(0.8), Color.blue.opacity(0.6)],
+                        colors: [Color.cyan, Color.blue.opacity(0.8)],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                       ))
                     : AnyShapeStyle(Theme.Colors.adaptiveCard)
             )
-            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
             .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(isPrimary ? Color.cyan.opacity(0.5) : Color.cyan.opacity(0.2), lineWidth: 1)
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .stroke(
+                        isPrimary ? Color.cyan.opacity(0.4) : Theme.Colors.adaptiveBorder.opacity(0.6),
+                        lineWidth: 1
+                    )
             )
+            .shadow(color: isPrimary ? Color.cyan.opacity(0.3) : .clear, radius: 8, y: 3)
         }
+        .buttonStyle(.plain)
     }
 }
 

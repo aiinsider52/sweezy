@@ -17,7 +17,7 @@ struct MainTabView: View {
             HomeViewRedesigned()
                 .tabItem {
                     Label {
-                        Text("Home")
+                        Text("tab.home".localized)
                     } icon: {
                         NewYearTabIcon(baseSystemName: "house.fill", isSelected: selectedTab == 0)
                     }
@@ -28,7 +28,7 @@ struct MainTabView: View {
             LazyDovidnykWrapper()
                 .tabItem {
                     Label {
-                        Text("Довідник")
+                        Text("guides.title".localized)
                     } icon: {
                         NewYearTabIcon(baseSystemName: "book.fill", isSelected: selectedTab == 1)
                     }
@@ -449,7 +449,7 @@ struct OptimizedMapView: View {
             HStack(spacing: 8) {
                 // Диапазон: рядом или вся Швейцария
                 MapFilterChip(
-                    title: "Поруч (10 км)",
+                    title: "map.range.nearby_10km".localized,
                     isSelected: rangeMode == .nearby,
                     color: .cyan
                 ) {
@@ -460,7 +460,7 @@ struct OptimizedMapView: View {
                 }
                 
                 MapFilterChip(
-                    title: "Вся Швейцарія",
+                    title: "map.range.all_switzerland".localized,
                     isSelected: rangeMode == .all,
                     color: .purple
                 ) {
@@ -472,7 +472,7 @@ struct OptimizedMapView: View {
                 
                 // Разделитель по смыслу: ниже — фильтр по типу сервиса
                 MapFilterChip(
-                    title: "Всі",
+                    title: "common.all".localized,
                     isSelected: selectedType == nil,
                     color: .blue
                 ) {
@@ -574,8 +574,8 @@ struct OptimizedMapView: View {
                     .clipShape(Circle())
                     .shadow(color: .black.opacity(0.2), radius: 4, y: 2)
             }
-            .accessibilityLabel("Моє місцезнаходження")
-            .accessibilityHint("Центрує карту на вашій позиції")
+            .accessibilityLabel("map.center_on_me.label".localized)
+            .accessibilityHint("map.center_on_me.hint".localized)
             .padding(12)
         }
         .padding(.horizontal)
@@ -591,7 +591,7 @@ struct OptimizedMapView: View {
     private var placesListSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text(rangeMode == .nearby ? "Сервіси поруч" : "Сервіси")
+                Text(rangeMode == .nearby ? "map.nearby_services".localized : "map.services".localized)
                     .font(.system(size: 20, weight: .bold))
                     .foregroundColor(Theme.Colors.textPrimary)
                 Spacer()
@@ -621,7 +621,7 @@ struct OptimizedMapView: View {
                     Image(systemName: "mappin.slash")
                         .font(.title)
                         .foregroundColor(.secondary)
-                    Text("Немає місць")
+                    Text("map.no_places".localized)
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                 }

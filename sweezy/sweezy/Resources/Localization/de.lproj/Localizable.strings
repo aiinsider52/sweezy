@@ -24,6 +24,7 @@
 "common.tags" = "Tags";
 "common.new" = "Neu";
 "common.open" = "Öffnen";
+"common.soon" = "Bald";
 
 // MARK: - Feature Onboarding
 "onboarding.understood" = "Verstanden";
@@ -87,6 +88,15 @@
 "home.recent_updates" = "Aktuelle Updates";
 "home.latest_news" = "Neueste Nachrichten";
 "home.see_all" = "Alle anzeigen";
+"home.recommendations" = "Empfehlungen für dich";
+"home.focus" = "Dein Fokus";
+"home.insider" = "Sweezy Insider";
+"home.roadmap" = "Integrations-Roadmap";
+"home.local_feed" = "Lokaler Feed";
+"home.notifications" = "Benachrichtigungen";
+
+// MARK: - Tabs
+"tab.home" = "Home";
 "home.metrics.guides" = "Leitfäden";
 "home.metrics.lists" = "Listen";
 "home.metrics.templates" = "Vorlagen";
@@ -128,6 +138,7 @@
 "guides.new" = "Neu";
 "guides.hero_title" = "Leitfaden für die Schweiz";
 "guides.articles_available" = "Artikel verfügbar";
+"guides.articles_available_format" = "%d Artikel verfügbar";
 "guides.no_results_subtitle" = "Versuchen Sie, Ihre Suche oder Filter anzupassen";
 "guides.clear_filters" = "Filter löschen";
 "guides.useful_links" = "Nützliche Links";
@@ -164,7 +175,37 @@
 "map.type.emergency" = "Notfall";
 "map.type.community" = "Community & Integration";
 "map.nearby_services" = "In der Nähe";
+"map.services" = "Services";
+"map.range.nearby_10km" = "In der Nähe (10 km)";
+"map.range.all_switzerland" = "Ganze Schweiz";
+"map.no_places" = "Keine Orte gefunden";
+"map.center_on_me.label" = "Mein Standort";
+"map.center_on_me.hint" = "Zentriert die Karte auf deine Position";
 "map.directions" = "Route";
+
+// MARK: - Gamification
+"gamification.xp_earned" = "XP verdient";
+"gamification.xp_today" = "XP heute";
+"gamification.hours_saved" = "Std. gespart";
+"gamification.guides" = "Guides";
+"gamification.to_level_format" = "Bis Level %d";
+"gamification.to_level_xp_format" = "Bis Level %d: %d XP";
+"gamification.level.1" = "Anfänger";
+"gamification.level.2" = "Entdecker";
+"gamification.level.3" = "Integrator";
+"gamification.level.4" = "Experte";
+"gamification.level.5" = "Meister";
+"gamification.level.6" = "Guru";
+"gamification.level.7" = "Legende";
+"gamification.level.default" = "Champion";
+
+// MARK: - Quick Actions (Bento)
+"qa.jobs.title" = "Jobsuche";
+"qa.jobs.subtitle" = "RAV + Indeed • Filter";
+"qa.guides.subtitle" = "Guides + Checklisten";
+"qa.map.subtitle" = "Services in der Nähe";
+"qa.templates_short" = "Vorlagen";
+"qa.cv_builder" = "CV-Builder";
 
 "appointments.title" = "Termine";
 "appointments.add" = "Termin hinzufügen";

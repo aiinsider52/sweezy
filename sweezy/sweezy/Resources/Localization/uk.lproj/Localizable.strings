@@ -26,6 +26,7 @@
 "common.settings" = "Налаштування";
 "common.new" = "Нове";
 "common.open" = "Відкрити";
+"common.soon" = "Скоро";
 
 // MARK: - Onboarding
 "onboarding.welcome" = "Ласкаво просимо до Sweezy";
@@ -135,6 +136,15 @@
 "home.greeting.subtitle" = "Раді допомогти вам сьогодні";
 "home.telegram_join" = "Приєднуйтесь до Telegram";
 "home.telegram_subtitle" = "Оновлення та поради у реальному часі";
+"home.recommendations" = "Рекомендації для вас";
+"home.focus" = "Ваш фокус";
+"home.insider" = "Sweezy Insider";
+"home.roadmap" = "Roadmap інтеграції";
+"home.local_feed" = "Локальна стрічка";
+"home.notifications" = "Сповіщення";
+
+// MARK: - Tabs
+"tab.home" = "Головна";
 
 // Quick Actions
 "qa.guides" = "Довідник";
@@ -166,6 +176,7 @@
 "guides.clear_filters" = "Очистити фільтри";
 "guides.hero_title" = "Путівник по Швейцарії";
 "guides.articles_available" = "статей доступно";
+"guides.articles_available_format" = "%d статей доступно";
 "guides.reading_time" = "%d хв читання";
 "guides.updated" = "Оновлено %@";
 "guides.new" = "Нове";
@@ -210,6 +221,12 @@
 // MARK: - Map
 "map.title" = "Карта сервісів";
 "map.nearby_services" = "Поруч з вами";
+"map.services" = "Сервіси";
+"map.range.nearby_10km" = "Поруч (10 км)";
+"map.range.all_switzerland" = "Вся Швейцарія";
+"map.no_places" = "Немає місць";
+"map.center_on_me.label" = "Моє місцезнаходження";
+"map.center_on_me.hint" = "Центрує карту на вашій позиції";
 "map.type.government" = "Державні установи";
 "map.type.healthcare" = "Медицина";
 "map.type.education" = "Освіта";
@@ -230,6 +247,30 @@
 "map.website" = "Веб-сайт";
 "map.closed" = "Зачинено";
 "map.open" = "Відчинено";
+
+// MARK: - Gamification
+"gamification.xp_earned" = "XP зароблено";
+"gamification.xp_today" = "XP сьогодні";
+"gamification.hours_saved" = "год збережено";
+"gamification.guides" = "гідів";
+"gamification.to_level_format" = "До рівня %d";
+"gamification.to_level_xp_format" = "До рівня %d: %d XP";
+"gamification.level.1" = "Новачок";
+"gamification.level.2" = "Дослідник";
+"gamification.level.3" = "Інтегратор";
+"gamification.level.4" = "Експерт";
+"gamification.level.5" = "Майстер";
+"gamification.level.6" = "Гуру";
+"gamification.level.7" = "Легенда";
+"gamification.level.default" = "Чемпіон";
+
+// MARK: - Quick Actions (Bento)
+"qa.jobs.title" = "Пошук роботи";
+"qa.jobs.subtitle" = "RAV + Indeed • Фільтри";
+"qa.guides.subtitle" = "Гайди + чек-листи";
+"qa.map.subtitle" = "Сервіси поруч";
+"qa.templates_short" = "Шаблони";
+"qa.cv_builder" = "CV Builder";
 "map.location_permission" = "Дозвіл на геолокацію";
 "map.enable_location" = "Увімкнути геолокацію";
 

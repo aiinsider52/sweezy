@@ -253,7 +253,7 @@ struct HomeViewRedesigned: View {
     // MARK: - Personal Focus (Week Strip)
     private var personalModulesSection: some View {
         VStack(alignment: .leading, spacing: Theme.Spacing.md) {
-            SectionHeader("Ваш фокус")
+            SectionHeader("home.focus".localized)
             
             WeekStripFocusView(
                 todayTasks: todayFocus,
@@ -268,7 +268,7 @@ struct HomeViewRedesigned: View {
     
     private var insiderSection: some View {
         VStack(spacing: Theme.Spacing.md) {
-            SectionHeader("Sweezy Insider")
+            SectionHeader("home.insider".localized)
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: Theme.Spacing.md) {
                     ForEach(insiderMoments) { insight in
@@ -282,7 +282,7 @@ struct HomeViewRedesigned: View {
     
     private var journeyRoadmapSection: some View {
         VStack(alignment: .leading, spacing: Theme.Spacing.md) {
-            SectionHeader("Roadmap інтеграції")
+            SectionHeader("home.roadmap".localized)
             
             // New Mountain Roadmap Preview Card
             NavigationLink {
@@ -302,8 +302,7 @@ struct HomeViewRedesigned: View {
     
     private var quickActionsSection: some View {
         VStack(spacing: Theme.Spacing.lg) {
-            // Используем явный текст, чтобы не зависеть от String.localized в этом файле
-            SectionHeader("Швидкі дії")
+            SectionHeader("home.quick_actions".localized)
             
             BentoQuickActionsExtended(
                 featuredItem: bentoFeaturedQuickAction,
@@ -317,10 +316,10 @@ struct HomeViewRedesigned: View {
     private var bentoFeaturedQuickAction: BentoQuickActionItem {
         BentoQuickActionItem(
             icon: "briefcase.fill",
-            title: LocalizedStringKey("Пошук роботи"),
-            subtitle: LocalizedStringKey("RAV + Indeed • Фільтри"),
+            title: "qa.jobs.title",
+            subtitle: "qa.jobs.subtitle",
             accentColor: Color.cyan,
-            badgeText: "Скоро",
+            badgeText: "common.soon".localized,
             isLocked: true
         ) {
             showJobs = true
@@ -332,16 +331,16 @@ struct HomeViewRedesigned: View {
         [
             BentoQuickActionItem(
                 icon: "book.fill",
-                title: LocalizedStringKey("Довідник"),
-                subtitle: LocalizedStringKey("Гайди + чек-листи"),
+                title: "qa.guides",
+                subtitle: "qa.guides.subtitle",
                 accentColor: Color.blue
             ) {
                 NotificationCenter.default.post(name: .switchTab, object: 1)
             },
             BentoQuickActionItem(
                 icon: "map.fill",
-                title: LocalizedStringKey("Карта"),
-                subtitle: LocalizedStringKey("Сервіси поруч"),
+                title: "qa.map",
+                subtitle: "qa.map.subtitle",
                 accentColor: Color.orange
             ) {
                 NotificationCenter.default.post(name: .switchTab, object: 2)
@@ -353,7 +352,7 @@ struct HomeViewRedesigned: View {
         [
             BentoQuickActionItem(
                 icon: "function",
-                title: LocalizedStringKey("Калькулятор"),
+                title: "qa.calculator",
                 subtitle: nil,
                 accentColor: Color.cyan
             ) {
@@ -361,7 +360,7 @@ struct HomeViewRedesigned: View {
             },
             BentoQuickActionItem(
                 icon: "doc.richtext",
-                title: LocalizedStringKey("CV Builder"),
+                title: "qa.cv_builder",
                 subtitle: nil,
                 accentColor: Color.purple
             ) {
@@ -369,7 +368,7 @@ struct HomeViewRedesigned: View {
             },
             BentoQuickActionItem(
                 icon: "doc.text",
-                title: LocalizedStringKey("Шаблони"),
+                title: "qa.templates_short",
                 subtitle: nil,
                 accentColor: Color.pink
             ) {
@@ -377,7 +376,7 @@ struct HomeViewRedesigned: View {
             },
             BentoQuickActionItem(
                 icon: "gearshape.fill",
-                title: LocalizedStringKey("Налаштування"),
+                title: "settings.title",
                 subtitle: nil,
                 accentColor: Color.gray
             ) {
@@ -391,9 +390,9 @@ struct HomeViewRedesigned: View {
         VStack(spacing: 0) {
             InteractiveCard(
                 icon: "briefcase.fill",
-                title: "Пошук роботи",
-                subtitle: "Офіційний RAV + Indeed. Фільтр за кантонами.",
-                badge: "Нове",
+                title: "qa.jobs.title".localized,
+                subtitle: "qa.jobs.subtitle".localized,
+                badge: "common.new".localized,
                 badgeColor: Theme.Colors.accent
             ) { showJobs = true }
             .buttonStyle(CardPressStyle())
@@ -405,7 +404,7 @@ struct HomeViewRedesigned: View {
     
     private var statsSection: some View {
         VStack(spacing: Theme.Spacing.lg) {
-            SectionHeader("Ваша статистика")
+            SectionHeader("home.stats".localized)
             BentoStatsGrid(
                 level: statLevel,
                 xp: statXP,
@@ -422,7 +421,7 @@ struct HomeViewRedesigned: View {
     // MARK: - Recommendations Section
     private var recommendationsSection: some View {
         VStack(spacing: Theme.Spacing.md) {
-            SectionHeader("Рекомендації для вас")
+            SectionHeader("home.recommendations".localized)
             let cards = recommendedGuides.prefix(4).map {
                 RecommendationDisplay(
                     guide: $0,
@@ -687,14 +686,14 @@ struct HomeViewRedesigned: View {
     
     private var levelTitle: String {
         switch userLevel {
-        case 1: return "Новачок"
-        case 2: return "Дослідник"
-        case 3: return "Інтегратор"
-        case 4: return "Експерт"
-        case 5: return "Майстер"
-        case 6: return "Гуру"
-        case 7: return "Легенда"
-        default: return "Чемпіон"
+        case 1: return "gamification.level.1".localized
+        case 2: return "gamification.level.2".localized
+        case 3: return "gamification.level.3".localized
+        case 4: return "gamification.level.4".localized
+        case 5: return "gamification.level.5".localized
+        case 6: return "gamification.level.6".localized
+        case 7: return "gamification.level.7".localized
+        default: return "gamification.level.default".localized
         }
     }
     
@@ -723,7 +722,7 @@ struct HomeViewRedesigned: View {
     // MARK: - Local Feed Chips
     private var localFeedChips: some View {
         VStack(spacing: Theme.Spacing.md) {
-            SectionHeader("Локальна стрічка")
+            SectionHeader("home.local_feed".localized)
             FlowLayout(spacing: 8) {
                 ForEach(upcomingChips.prefix(8), id: \.id) { chip in
                     InfoChip(text: chip.text, color: chip.color, countdown: chip.countdown)
@@ -738,7 +737,7 @@ struct HomeViewRedesigned: View {
         Group {
             if !ambientAlerts.isEmpty {
                 VStack(spacing: Theme.Spacing.md) {
-                    SectionHeader("Сповіщення")
+                    SectionHeader("home.notifications".localized)
                     VStack(spacing: Theme.Spacing.md) {
                         ForEach(ambientAlerts) { alert in
                             AmbientNotificationCard(alert: alert)
@@ -754,7 +753,7 @@ struct HomeViewRedesigned: View {
     
     private var featuredGuidesSection: some View {
         VStack(spacing: Theme.Spacing.lg) {
-            SectionHeader("Популярні гіди")
+            SectionHeader("home.popular_guides".localized)
             KnowledgeMindMapView(
                 guides: cachedFeaturedGuides.isEmpty ? featuredGuides : cachedFeaturedGuides,
                 onSelect: { guide in selectedGuide = guide }
@@ -775,7 +774,7 @@ struct HomeViewRedesigned: View {
     
     private var newsSection: some View {
         VStack(spacing: Theme.Spacing.lg) {
-            SectionHeader("Що нового")
+            SectionHeader("whats_new.title".localized)
             
 			let items: [NewsItem] = {
 				let lang = appContainer.currentLocale.identifier
@@ -1212,12 +1211,14 @@ private struct BentoStatsGrid: View {
     
     private var levelTitle: String {
         switch level {
-        case 1: return "Новачок"
-        case 2: return "Дослідник"
-        case 3: return "Інтегратор"
-        case 4: return "Експерт"
-        case 5: return "Майстер"
-        default: return "Легенда"
+        case 1: return "gamification.level.1".localized
+        case 2: return "gamification.level.2".localized
+        case 3: return "gamification.level.3".localized
+        case 4: return "gamification.level.4".localized
+        case 5: return "gamification.level.5".localized
+        case 6: return "gamification.level.6".localized
+        case 7: return "gamification.level.7".localized
+        default: return "gamification.level.default".localized
         }
     }
     
@@ -1375,7 +1376,7 @@ private struct BentoLevelCard: View {
                     .frame(height: 5)
                     .frame(maxWidth: 110)
                     
-                    Text("До рівня \(level + 1)")
+                    Text("gamification.to_level_format".localized(with: level + 1))
                         .font(.system(size: 10))
                         .foregroundColor(Theme.Colors.textTertiary)
                 }
@@ -3591,7 +3592,7 @@ struct GamificationLevelCard: View {
                         .foregroundColor(levelAccent)
                         .scaleEffect(showXPGain ? 1.15 : 1.0)
                     
-                    Text("XP зароблено")
+                    Text("gamification.xp_earned".localized)
                         .font(.system(size: 10, weight: .medium))
                         .foregroundColor(Theme.Colors.textTertiary)
                 }
@@ -3626,21 +3627,21 @@ struct GamificationLevelCard: View {
             
             // ── Stats row ──
             HStack(spacing: 0) {
-                LevelStatItem(icon: "bolt.fill", value: "+\(todayXP)", label: "XP сьогодні", color: levelAccent)
+                LevelStatItem(icon: "bolt.fill", value: "+\(todayXP)", label: "gamification.xp_today".localized, color: levelAccent)
                     .frame(maxWidth: .infinity)
                 
                 Rectangle()
                     .fill(Theme.Colors.adaptiveBorder.opacity(0.3))
                     .frame(width: 1, height: 28)
                 
-                LevelStatItem(icon: "clock.fill", value: "\(hoursSaved)", label: "год збережено", color: .orange)
+                LevelStatItem(icon: "clock.fill", value: "\(hoursSaved)", label: "gamification.hours_saved".localized, color: .orange)
                     .frame(maxWidth: .infinity)
                 
                 Rectangle()
                     .fill(Theme.Colors.adaptiveBorder.opacity(0.3))
                     .frame(width: 1, height: 28)
                 
-                LevelStatItem(icon: "book.fill", value: "\(guidesRead)", label: "гідів", color: Theme.Colors.primary)
+                LevelStatItem(icon: "book.fill", value: "\(guidesRead)", label: "gamification.guides".localized, color: Theme.Colors.primary)
                     .frame(maxWidth: .infinity)
             }
             .padding(.horizontal, 12)
@@ -3649,7 +3650,7 @@ struct GamificationLevelCard: View {
             // Next level hint
             HStack {
                 Spacer()
-                Text("До рівня \(level + 1)")
+                Text("gamification.to_level_format".localized(with: level + 1))
                     .font(.system(size: 11, weight: .medium))
                     .foregroundColor(Theme.Colors.textTertiary)
             }

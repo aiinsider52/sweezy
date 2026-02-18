@@ -18,6 +18,8 @@
 "common.search" = "Search";
 "common.filter" = "Filter";
 "common.all" = "All";
+"common.new" = "New";
+"common.soon" = "Soon";
 "common.loading" = "Loading...";
 "common.error" = "Error";
 "common.retry" = "Retry";
@@ -108,6 +110,15 @@
 "home.quick_actions" = "Quick Actions";
 "home.stats" = "Your statistics";
 "home.popular_guides" = "Popular guides";
+"home.recommendations" = "Recommended for you";
+"home.focus" = "Your focus";
+"home.insider" = "Sweezy Insider";
+"home.roadmap" = "Integration Roadmap";
+"home.local_feed" = "Local feed";
+"home.notifications" = "Notifications";
+
+// MARK: - Tabs
+"tab.home" = "Home";
 "qa.guides" = "Guides";
 "qa.checklists" = "Checklists";
 "qa.calculator" = "Calculator";
@@ -145,6 +156,7 @@
 "guides.clear_filters" = "Clear Filters";
 "guides.hero_title" = "Guide to Switzerland";
 "guides.articles_available" = "articles available";
+"guides.articles_available_format" = "%d articles available";
 "guides.reading_time" = "%d min read";
 "guides.updated" = "Updated %@";
 "guides.new" = "New";
@@ -201,6 +213,12 @@
 "map.type.emergency" = "Emergency";
 "map.type.community" = "Community & Integration";
 "map.nearby_services" = "Nearby Services";
+"map.services" = "Services";
+"map.range.nearby_10km" = "Nearby (10 km)";
+"map.range.all_switzerland" = "All Switzerland";
+"map.no_places" = "No places found";
+"map.center_on_me.label" = "My location";
+"map.center_on_me.hint" = "Centers the map on your position";
 "map.distance" = "%@ from you";
 "map.opening_hours" = "Opening Hours";
 "map.contact" = "Contact";
@@ -211,6 +229,30 @@
 "map.open" = "Open";
 "map.location_permission" = "Location Permission";
 "map.enable_location" = "Enable Location";
+
+// MARK: - Gamification
+"gamification.xp_earned" = "XP earned";
+"gamification.xp_today" = "XP today";
+"gamification.hours_saved" = "hours saved";
+"gamification.guides" = "guides";
+"gamification.to_level_format" = "To level %d";
+"gamification.to_level_xp_format" = "To level %d: %d XP";
+"gamification.level.1" = "Beginner";
+"gamification.level.2" = "Explorer";
+"gamification.level.3" = "Integrator";
+"gamification.level.4" = "Expert";
+"gamification.level.5" = "Master";
+"gamification.level.6" = "Guru";
+"gamification.level.7" = "Legend";
+"gamification.level.default" = "Champion";
+
+// MARK: - Quick Actions (Bento)
+"qa.jobs.title" = "Job search";
+"qa.jobs.subtitle" = "RAV + Indeed • Filters";
+"qa.guides.subtitle" = "Guides + checklists";
+"qa.map.subtitle" = "Nearby services";
+"qa.templates_short" = "Templates";
+"qa.cv_builder" = "CV Builder";
 
 // MARK: - Appointments
 "appointments.title" = "Appointments";

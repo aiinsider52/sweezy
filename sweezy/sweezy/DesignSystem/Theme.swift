@@ -76,6 +76,34 @@ struct Theme {
         static let darkCard = Color.white.opacity(0.08)
         static let darkElevated = Color.white.opacity(0.12)
         
+        // MARK: Adaptive Card/Row backgrounds (safe in both light & dark)
+        /// Use this instead of Color.white.opacity(0.08) for row/card backgrounds
+        static var adaptiveCard: Color {
+            Color(UIColor { tc in
+                tc.userInterfaceStyle == .dark
+                    ? UIColor(white: 1.0, alpha: 0.08)
+                    : UIColor(red: 0.97, green: 0.97, blue: 0.99, alpha: 1.0)
+            })
+        }
+        
+        /// Subtle elevated surface (settings rows, list cells)
+        static var adaptiveSurface: Color {
+            Color(UIColor { tc in
+                tc.userInterfaceStyle == .dark
+                    ? UIColor(white: 1.0, alpha: 0.10)
+                    : UIColor(red: 1.0, green: 1.0, blue: 1.0, alpha: 0.95)
+            })
+        }
+        
+        /// Separator / card border (visible in both modes)
+        static var adaptiveBorder: Color {
+            Color(UIColor { tc in
+                tc.userInterfaceStyle == .dark
+                    ? UIColor(white: 1.0, alpha: 0.18)
+                    : UIColor(red: 0.0, green: 0.0, blue: 0.0, alpha: 0.10)
+            })
+        }
+        
         // MARK: Adaptive Backgrounds
         static var primaryBackground: Color {
             Color(UIColor { traitCollection in

@@ -417,25 +417,7 @@ struct OptimizedMapView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                // Winter background (lightweight, reused across app)
-                if WinterTheme.isActive {
-                    LinearGradient(
-                        colors: [
-                            Color(red: 0.05, green: 0.1, blue: 0.2),
-                            Color(red: 0.08, green: 0.15, blue: 0.28),
-                            Color(red: 0.06, green: 0.12, blue: 0.22)
-                        ],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                    .ignoresSafeArea()
-                    
-                    WinterSceneLite(intensity: .light)
-                        .ignoresSafeArea()
-                } else {
-                    Theme.Colors.primaryBackground
-                        .ignoresSafeArea()
-                }
+                AdaptivePageBackground()
                 
                 VStack(spacing: 0) {
                     // Filters - lightweight horizontal scroll
@@ -908,7 +890,7 @@ struct PlaceDetailSheet: View {
                 .fill(Color.white.opacity(0.05))
                 .overlay(
                     RoundedRectangle(cornerRadius: 14)
-                        .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                        .stroke(Theme.Colors.adaptiveSurface, lineWidth: 1)
                 )
         )
     }
@@ -941,7 +923,7 @@ struct PlaceDetailSheet: View {
                 .fill(Color.white.opacity(0.05))
                 .overlay(
                     RoundedRectangle(cornerRadius: 14)
-                        .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                        .stroke(Theme.Colors.adaptiveSurface, lineWidth: 1)
                 )
         )
     }
@@ -986,7 +968,7 @@ struct PlaceDetailSheet: View {
                         }
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
-                        .background(Color.white.opacity(0.1))
+                        .background(Theme.Colors.adaptiveSurface)
                         .foregroundColor(.white)
                         .cornerRadius(12)
                         .overlay(
@@ -1008,7 +990,7 @@ struct PlaceDetailSheet: View {
                         }
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
-                        .background(Color.white.opacity(0.1))
+                        .background(Theme.Colors.adaptiveSurface)
                         .foregroundColor(.white)
                         .cornerRadius(12)
                         .overlay(
@@ -1172,22 +1154,7 @@ struct HomeSimplifiedView: View {
                 }
                 .padding()
             }
-            .background(
-                ZStack {
-                    LinearGradient(
-                        colors: [
-                            Color(red: 0.05, green: 0.1, blue: 0.2),
-                            Color(red: 0.08, green: 0.15, blue: 0.28),
-                            Color(red: 0.06, green: 0.12, blue: 0.22)
-                        ],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                    .ignoresSafeArea()
-                    
-                    WinterSceneLite(intensity: .light)
-                }
-            )
+            .background(AdaptivePageBackground())
             .navigationTitle("Sweezy")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {

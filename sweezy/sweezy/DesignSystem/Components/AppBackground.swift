@@ -1,5 +1,43 @@
 import SwiftUI
 
+// MARK: - Adaptive Page Background (replaces hardcoded dark gradients)
+
+/// Use this instead of the hardcoded dark blue gradient in every page.
+/// Dark mode → deep navy winter. Light mode → crisp sky-white winter.
+struct AdaptivePageBackground: View {
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        ZStack {
+            if colorScheme == .dark {
+                LinearGradient(
+                    colors: [
+                        Color(red: 0.05, green: 0.10, blue: 0.20),
+                        Color(red: 0.07, green: 0.14, blue: 0.26),
+                        Color(red: 0.05, green: 0.11, blue: 0.21)
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .ignoresSafeArea()
+            } else {
+                LinearGradient(
+                    colors: [
+                        Color(red: 0.94, green: 0.97, blue: 1.00),
+                        Color(red: 0.96, green: 0.99, blue: 1.00),
+                        Color(red: 0.92, green: 0.96, blue: 0.99)
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .ignoresSafeArea()
+            }
+            // Subtle snow on both — ultra-light
+            WinterSceneLite(intensity: .light)
+        }
+    }
+}
+
 /// Global animated background with neon depth for dark mode and pastel calm for light mode.
 struct AppBackground: View {
     @Environment(\.colorScheme) private var colorScheme

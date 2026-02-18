@@ -272,14 +272,14 @@ private struct BentoFeaturedCard: View {
                     }
                 }
                 
-                // Border
+                // Border — adaptive for light & dark mode
                 RoundedRectangle(cornerRadius: 24, style: .continuous)
                     .stroke(
                         LinearGradient(
                             colors: [
-                                Color.white.opacity(item.isLocked ? 0.2 : 0.4),
-                                (item.isLocked ? Color.gray : item.accentColor).opacity(0.2),
-                                Color.white.opacity(0.1)
+                                Theme.Colors.adaptiveBorder,
+                                (item.isLocked ? Color.gray : item.accentColor).opacity(0.25),
+                                Theme.Colors.adaptiveBorder.opacity(0.5)
                             ],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
@@ -352,13 +352,13 @@ private struct BentoCompactCard: View {
                 .padding(.horizontal, 12)
                 .padding(.vertical, 10)
                 
-                // Border
+                // Border — adaptive for light & dark mode
                 RoundedRectangle(cornerRadius: 20, style: .continuous)
                     .stroke(
                         LinearGradient(
                             colors: [
-                                Color.white.opacity(0.35),
-                                item.accentColor.opacity(0.15)
+                                Theme.Colors.adaptiveBorder,
+                                item.accentColor.opacity(0.2)
                             ],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing

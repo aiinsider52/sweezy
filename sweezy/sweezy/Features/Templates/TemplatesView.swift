@@ -27,20 +27,7 @@ struct TemplatesView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                // Winter gradient background (always festive)
-                LinearGradient(
-                    colors: [
-                        Color(red: 0.05, green: 0.1, blue: 0.2),
-                        Color(red: 0.08, green: 0.15, blue: 0.28),
-                        Color(red: 0.06, green: 0.12, blue: 0.22)
-                    ],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-                .ignoresSafeArea()
-                
-                // Subtle snowfall
-                WinterSceneLite(intensity: .light)
+                AdaptivePageBackground()
                 
                 VStack(spacing: 0) {
                     // Header with winter decoration
@@ -126,7 +113,7 @@ struct TemplatesView: View {
             .padding(12)
             .background(
                 RoundedRectangle(cornerRadius: 12)
-                    .fill(WinterTheme.isActive ? Color.white.opacity(0.1) : Theme.Colors.tertiaryBackground)
+                    .fill(WinterTheme.isActive ? Theme.Colors.adaptiveSurface : Theme.Colors.tertiaryBackground)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
@@ -302,7 +289,7 @@ struct WinterCategoryChip: View {
                         }
                     } else {
                         if WinterTheme.isActive {
-                            Color.white.opacity(0.1)
+                            Theme.Colors.adaptiveSurface
                         } else {
                             Theme.Colors.tertiaryBackground
                         }
@@ -406,12 +393,12 @@ struct WinterTemplateCard: View {
             Group {
                 if WinterTheme.isActive {
                     RoundedRectangle(cornerRadius: 16)
-                        .fill(Color.white.opacity(0.08))
+                        .fill(Theme.Colors.adaptiveCard)
                         .overlay(
                             RoundedRectangle(cornerRadius: 16)
                                 .stroke(
                                     LinearGradient(
-                                        colors: [Color.cyan.opacity(0.3), Color.white.opacity(0.1)],
+                                        colors: [Color.cyan.opacity(0.3), Theme.Colors.adaptiveSurface],
                                         startPoint: .topLeading,
                                         endPoint: .bottomTrailing
                                     ),
@@ -564,7 +551,7 @@ struct TemplateDetailView: View {
             Group {
                 if WinterTheme.isActive {
                     RoundedRectangle(cornerRadius: 16)
-                        .fill(Color.white.opacity(0.08))
+                        .fill(Theme.Colors.adaptiveCard)
                         .overlay(
                             RoundedRectangle(cornerRadius: 16)
                                 .stroke(Color.cyan.opacity(0.2), lineWidth: 1)
@@ -798,7 +785,7 @@ struct WinterTemplateFieldView: View {
         .padding(12)
         .background(
             RoundedRectangle(cornerRadius: 10)
-                .fill(WinterTheme.isActive ? Color.white.opacity(0.08) : Color.white)
+                .fill(WinterTheme.isActive ? Theme.Colors.adaptiveCard : Color.white)
         )
         .overlay(
             RoundedRectangle(cornerRadius: 10)
@@ -818,7 +805,7 @@ struct WinterTemplateFieldView: View {
         .padding(8)
         .background(
             RoundedRectangle(cornerRadius: 10)
-                .fill(WinterTheme.isActive ? Color.white.opacity(0.08) : Color.white)
+                .fill(WinterTheme.isActive ? Theme.Colors.adaptiveCard : Color.white)
         )
         .overlay(
             RoundedRectangle(cornerRadius: 10)
@@ -847,7 +834,7 @@ struct WinterTemplateFieldView: View {
             .padding(12)
             .background(
                 RoundedRectangle(cornerRadius: 10)
-                    .fill(WinterTheme.isActive ? Color.white.opacity(0.08) : Color.white)
+                    .fill(WinterTheme.isActive ? Theme.Colors.adaptiveCard : Color.white)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 10)
@@ -932,7 +919,7 @@ struct DocumentPreviewView: View {
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .background(
                                 RoundedRectangle(cornerRadius: 12)
-                                    .fill(WinterTheme.isActive ? Color.white.opacity(0.08) : Color.white)
+                                    .fill(WinterTheme.isActive ? Theme.Colors.adaptiveCard : Color.white)
                             )
                             .overlay(
                                 RoundedRectangle(cornerRadius: 12)

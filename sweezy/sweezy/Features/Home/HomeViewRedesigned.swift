@@ -63,24 +63,7 @@ struct HomeViewRedesigned: View {
                 }
                 // Allow hero background to extend behind the status bar
                 .ignoresSafeArea(edges: .top)
-                .background(
-                    ZStack {
-                        // Winter gradient background (always festive)
-                        LinearGradient(
-                            colors: [
-                                Color(red: 0.05, green: 0.1, blue: 0.2),
-                                Color(red: 0.08, green: 0.15, blue: 0.28),
-                                Color(red: 0.06, green: 0.12, blue: 0.22)
-                            ],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
-                        .ignoresSafeArea()
-                        
-                        // Subtle snowfall
-                        WinterSceneLite(intensity: .light)
-                    }
-                )
+                .background(AdaptivePageBackground())
                 .navigationBarHidden(true)
                 .navigationDestination(item: $selectedGuide) { guide in
                     GuideDetailView(guide: guide)
@@ -1127,7 +1110,7 @@ private struct TelegramCommunityCard: View {
                         LinearGradient(
                             colors: [
                                 telegramBlue.opacity(0.4),
-                                Color.white.opacity(0.1),
+                                Theme.Colors.adaptiveSurface,
                                 telegramBlue.opacity(0.2)
                             ],
                             startPoint: .topLeading,
@@ -1422,7 +1405,7 @@ private struct BentoLevelCard: View {
                     GeometryReader { geo in
                         ZStack(alignment: .leading) {
                             RoundedRectangle(cornerRadius: 4)
-                                .fill(Color.white.opacity(0.1))
+                                .fill(Theme.Colors.adaptiveSurface)
                             
                             RoundedRectangle(cornerRadius: 4)
                                 .fill(
@@ -1450,7 +1433,7 @@ private struct BentoLevelCard: View {
         .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .stroke(Color.white.opacity(0.08), lineWidth: 1)
+                .stroke(Theme.Colors.adaptiveCard, lineWidth: 1)
         )
     }
 }
@@ -2068,7 +2051,7 @@ private struct QuickTaskPreview: View {
                 .overlay(
                     RoundedRectangle(cornerRadius: 16, style: .continuous)
                         .stroke(
-                            isUrgent ? Color.orange.opacity(0.3) : Color.white.opacity(0.1),
+                            isUrgent ? Color.orange.opacity(0.3) : Theme.Colors.adaptiveSurface,
                             lineWidth: 1
                         )
                 )
@@ -2140,7 +2123,7 @@ private struct ExpandableDayTasks: View {
                 )
                 .overlay(
                     RoundedRectangle(cornerRadius: 18, style: .continuous)
-                        .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                        .stroke(Theme.Colors.adaptiveSurface, lineWidth: 1)
                 )
         )
     }
@@ -2868,7 +2851,7 @@ private struct JourneyRoadmapView: View {
                                         Circle()
                                             .stroke(
                                                 LinearGradient(
-                                                    colors: [Color.white.opacity(0.6), Color.white.opacity(0.1)],
+                                                    colors: [Color.white.opacity(0.6), Theme.Colors.adaptiveSurface],
                                                     startPoint: .topLeading,
                                                     endPoint: .bottomTrailing
                                                 ),
@@ -3170,7 +3153,7 @@ private struct ProBenefitRow: View {
                 Circle()
                     .fill(highlight
                           ? LinearGradient(colors: [Theme.Colors.accentTurquoise.opacity(0.3), Theme.Colors.accent.opacity(0.2)], startPoint: .topLeading, endPoint: .bottomTrailing)
-                          : LinearGradient(colors: [Color.white.opacity(0.1), Color.white.opacity(0.05)], startPoint: .topLeading, endPoint: .bottomTrailing)
+                          : LinearGradient(colors: [Theme.Colors.adaptiveSurface, Color.white.opacity(0.05)], startPoint: .topLeading, endPoint: .bottomTrailing)
                     )
                     .frame(width: 32, height: 32)
                 
@@ -3212,7 +3195,7 @@ private struct ProPlanSelector: View {
                                   ? LinearGradient(
                                         colors: plan == .yearly
                                             ? [Theme.Colors.accentTurquoise.opacity(0.3), Theme.Colors.accent.opacity(0.2)]
-                                            : [Color.white.opacity(0.15), Color.white.opacity(0.08)],
+                                            : [Color.white.opacity(0.15), Theme.Colors.adaptiveCard],
                                         startPoint: .topLeading,
                                         endPoint: .bottomTrailing
                                     )
@@ -3235,7 +3218,7 @@ private struct ProPlanSelector: View {
                                 .matchedGeometryEffect(id: "planRing", in: planAnimation)
                         } else {
                             RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                                .stroke(Theme.Colors.adaptiveSurface, lineWidth: 1)
                         }
                         
                         // Content
@@ -3474,7 +3457,7 @@ private struct InsiderCard: View {
                             LinearGradient(
                                 colors: [
                                     Color.white.opacity(0.4),
-                                    Color.white.opacity(0.1),
+                                    Theme.Colors.adaptiveSurface,
                                     Color.clear
                                 ],
                                 startPoint: .topLeading,
@@ -3675,7 +3658,7 @@ struct GamificationLevelCard: View {
                             .fill(
                                 WinterTheme.isActive 
                                     ? Color.cyan.opacity(0.15) 
-                                    : Color.white.opacity(0.1)
+                                    : Theme.Colors.adaptiveSurface
                             )
                             .frame(height: 12)
                         
@@ -3750,7 +3733,7 @@ struct GamificationLevelCard: View {
             // Badges section
             if !badges.isEmpty {
                 Divider()
-                    .background(WinterTheme.isActive ? Color.cyan.opacity(0.2) : Color.white.opacity(0.1))
+                    .background(WinterTheme.isActive ? Color.cyan.opacity(0.2) : Theme.Colors.adaptiveSurface)
                 
                 VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
                     HStack(spacing: 6) {
@@ -3784,7 +3767,7 @@ struct GamificationLevelCard: View {
                             LinearGradient(
                                 colors: WinterTheme.isActive 
                                     ? [Color.cyan.opacity(0.5), Color.white.opacity(0.2)]
-                                    : [Theme.Colors.accentTurquoise.opacity(0.3), Color.white.opacity(0.1)],
+                                    : [Theme.Colors.accentTurquoise.opacity(0.3), Theme.Colors.adaptiveSurface],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             ),
@@ -3900,7 +3883,7 @@ struct BadgeChip: View {
         .padding(.vertical, 6)
         .background(
             Capsule()
-                .fill(Color.white.opacity(0.08))
+                .fill(Theme.Colors.adaptiveCard)
                 .overlay(
                     Capsule()
                         .stroke(badge.color.opacity(0.3), lineWidth: 1)
@@ -4087,7 +4070,7 @@ private struct KnowledgeMindMapView: View {
                                     Circle()
                                         .stroke(
                                             LinearGradient(
-                                                colors: [Color.white.opacity(0.5), Color.white.opacity(0.1)],
+                                                colors: [Color.white.opacity(0.5), Theme.Colors.adaptiveSurface],
                                                 startPoint: .topLeading,
                                                 endPoint: .bottomTrailing
                                             ),

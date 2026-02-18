@@ -106,24 +106,7 @@ struct SettingsView: View {
                 }
                 .padding(Theme.Spacing.lg)
             }
-            .background(
-                ZStack {
-                    // Winter gradient background (always festive on Settings)
-                    LinearGradient(
-                        colors: [
-                            Color(red: 0.05, green: 0.1, blue: 0.2),
-                            Color(red: 0.08, green: 0.15, blue: 0.28),
-                            Color(red: 0.06, green: 0.12, blue: 0.22)
-                        ],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                    .ignoresSafeArea()
-                    
-                    // Subtle snowfall
-                    WinterSceneLite(intensity: .light)
-                }
-            )
+            .background(AdaptivePageBackground())
             .navigationTitle("settings.title".localized)
             .navigationBarTitleDisplayMode(.large)
             .refreshable { await reloadSubscription() }
@@ -347,7 +330,7 @@ private extension SettingsView {
                 .offset(x: 12, y: -20)
                 .blur(radius: 18)
             Circle()
-                .fill(Color.white.opacity(0.06))
+                .fill(Theme.Colors.adaptiveCard.opacity(0.7))
                 .frame(width: 160, height: 160)
                 .offset(x: 190, y: 40)
                 .blur(radius: 22)
@@ -356,7 +339,7 @@ private extension SettingsView {
                 HStack(alignment: .center, spacing: 12) {
                     ZStack {
                         Circle()
-                            .fill(Color.white.opacity(0.1))
+                            .fill(Theme.Colors.adaptiveSurface)
                             .frame(width: 44, height: 44)
                         Text("🎄")
                             .font(.system(size: 22))
@@ -395,13 +378,13 @@ private extension SettingsView {
                 .offset(x: -8, y: 8)
         }
         .padding(16)
-        .background(Color.white.opacity(0.08))
+        .background(Theme.Colors.adaptiveCard)
         .cornerRadius(20)
         .overlay(
             RoundedRectangle(cornerRadius: 20)
                 .stroke(
                     LinearGradient(
-                        colors: [Color.cyan.opacity(0.3), Color.white.opacity(0.1)],
+                        colors: [Color.cyan.opacity(0.3), Theme.Colors.adaptiveSurface],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     ),
@@ -519,7 +502,7 @@ private extension SettingsView {
                 // Arrow with circle - winter styled
                 ZStack {
                     Circle()
-                        .fill(Color.white.opacity(0.1))
+                        .fill(Theme.Colors.adaptiveSurface)
                         .frame(width: 36, height: 36)
                     Circle()
                         .stroke(Color.cyan.opacity(0.3), lineWidth: 1)
@@ -530,13 +513,13 @@ private extension SettingsView {
                 }
             }
             .padding(16)
-            .background(Color.white.opacity(0.08))
+            .background(Theme.Colors.adaptiveCard)
             .cornerRadius(20)
             .overlay(
                 RoundedRectangle(cornerRadius: 20, style: .continuous)
                     .stroke(
                         LinearGradient(
-                            colors: [Color.cyan.opacity(0.4), Color.white.opacity(0.1)],
+                            colors: [Color.cyan.opacity(0.4), Theme.Colors.adaptiveSurface],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         ),
@@ -598,15 +581,15 @@ private extension SettingsView {
                         .frame(width: 24)
                     Text(title)
                         .font(Theme.Typography.body)
-                        .foregroundColor(tinted == .red ? .red : .white)
+                        .foregroundColor(tinted == .red ? .red : Theme.Colors.textPrimary)
                     Spacer()
                     if let value = value {
                         Text(value)
                             .font(Theme.Typography.subheadline)
-                            .foregroundColor(.white.opacity(0.6))
+                            .foregroundColor(Theme.Colors.textSecondary)
                     }
                     Image(systemName: "chevron.right")
-                        .foregroundColor(.white.opacity(0.4))
+                        .foregroundColor(Theme.Colors.textTertiary)
                 }
             }
         }
@@ -1314,7 +1297,7 @@ struct ProfileEditView: View {
                         Image(systemName: "chevron.right").foregroundColor(.white.opacity(0.4))
                     }
                     .padding(14)
-                    .background(Color.white.opacity(0.08))
+                    .background(Theme.Colors.adaptiveCard)
                     .cornerRadius(12)
                     .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.cyan.opacity(0.2), lineWidth: 1))
                 }.buttonStyle(.plain)
@@ -1335,7 +1318,7 @@ struct ProfileEditView: View {
                         Image(systemName: "chevron.right").foregroundColor(.white.opacity(0.4))
                     }
                     .padding(14)
-                    .background(Color.white.opacity(0.08))
+                    .background(Theme.Colors.adaptiveCard)
                     .cornerRadius(12)
                     .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.cyan.opacity(0.2), lineWidth: 1))
                 }.buttonStyle(.plain)
@@ -1429,7 +1412,7 @@ struct ProfileEditView: View {
                         }
                     }
                     .foregroundColor(.white)
-                    .background(Color.white.opacity(0.1))
+                    .background(Theme.Colors.adaptiveSurface)
                     .cornerRadius(10)
                 }
                 
@@ -1444,7 +1427,7 @@ struct ProfileEditView: View {
                     Toggle("", isOn: $hasChildren).labelsHidden().tint(.pink)
                 }
                 .padding(14)
-                .background(Color.white.opacity(0.08))
+                .background(Theme.Colors.adaptiveCard)
                 .cornerRadius(12)
                 .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.cyan.opacity(0.2), lineWidth: 1))
             }
@@ -1494,12 +1477,12 @@ struct ProfileEditView: View {
                             startPoint: .leading,
                             endPoint: .trailing
                           ))
-                        : AnyShapeStyle(Color.white.opacity(0.1))
+                        : AnyShapeStyle(Theme.Colors.adaptiveSurface)
                 )
                 .cornerRadius(16)
                 .overlay(
                     RoundedRectangle(cornerRadius: 16)
-                        .stroke(hasChanges ? Color.cyan.opacity(0.5) : Color.white.opacity(0.1), lineWidth: 1)
+                        .stroke(hasChanges ? Color.cyan.opacity(0.5) : Theme.Colors.adaptiveSurface, lineWidth: 1)
                 )
                 .shadow(color: hasChanges ? Color.cyan.opacity(0.3) : Color.clear, radius: 10, y: 4)
         }
@@ -1804,7 +1787,7 @@ private struct WinterQuickStat: View {
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 4)
-        .background(Color.white.opacity(0.1))
+        .background(Theme.Colors.adaptiveSurface)
         .cornerRadius(8)
         .overlay(
             RoundedRectangle(cornerRadius: 8)
@@ -1991,13 +1974,13 @@ private struct WinterSectionCard<Content: View>: View {
             content
         }
         .padding(16)
-        .background(Color.white.opacity(0.08))
+        .background(Theme.Colors.adaptiveCard)
         .cornerRadius(20)
         .overlay(
             RoundedRectangle(cornerRadius: 20)
                 .stroke(
                     LinearGradient(
-                        colors: [Color.cyan.opacity(0.3), Color.white.opacity(0.1)],
+                        colors: [Color.cyan.opacity(0.3), Theme.Colors.adaptiveSurface],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     ),
@@ -2038,7 +2021,7 @@ private struct WinterTextField: View {
                 }
             }
             .padding(14)
-            .background(Color.white.opacity(0.08))
+            .background(Theme.Colors.adaptiveCard)
             .cornerRadius(12)
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
@@ -2116,7 +2099,7 @@ private struct WinterGoalChip: View {
             .padding(.vertical, 10)
             .background(
                 RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .fill(isSelected ? goalColor.opacity(0.25) : Color.white.opacity(0.08))
+                    .fill(isSelected ? goalColor.opacity(0.25) : Theme.Colors.adaptiveCard)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 14, style: .continuous)
@@ -2246,7 +2229,7 @@ struct AboutView: View {
                     .padding(16)
                     .background(
                         RoundedRectangle(cornerRadius: 20)
-                            .fill(Color.white.opacity(0.06))
+                            .fill(Theme.Colors.adaptiveCard.opacity(0.7))
                             .overlay(
                                 RoundedRectangle(cornerRadius: 20)
                                     .stroke(
@@ -2275,7 +2258,7 @@ struct AboutView: View {
                         .padding(16)
                         .background(
                             RoundedRectangle(cornerRadius: 20)
-                                .fill(Color.white.opacity(0.04))
+                                .fill(Theme.Colors.adaptiveCard.opacity(0.5))
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 20)
                                         .stroke(Color.white.opacity(0.12), lineWidth: 1)
@@ -2377,7 +2360,7 @@ private struct WinterPillButton: View {
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                           ))
-                        : AnyShapeStyle(Color.white.opacity(0.08))
+                        : AnyShapeStyle(Theme.Colors.adaptiveCard)
                 )
                 .cornerRadius(18)
                 .overlay(
@@ -2489,13 +2472,13 @@ private struct WinterSettingsCard<Content: View>: View {
     var body: some View {
         content
             .padding(16)
-            .background(Color.white.opacity(0.08))
+            .background(Theme.Colors.adaptiveCard)
             .cornerRadius(16)
             .overlay(
                 RoundedRectangle(cornerRadius: 16)
                     .stroke(
                         LinearGradient(
-                            colors: [Color.cyan.opacity(0.3), Color.white.opacity(0.1)],
+                            colors: [Color.cyan.opacity(0.3), Theme.Colors.adaptiveSurface],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         ),
@@ -2513,7 +2496,7 @@ private struct WinterSectionHeader: View {
         HStack(spacing: 8) {
             Text(title)
                 .font(.system(size: 20, weight: .bold))
-                .foregroundColor(.white)
+                .foregroundColor(Theme.Colors.textPrimary)
             
             Spacer()
             

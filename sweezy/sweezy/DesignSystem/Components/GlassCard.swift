@@ -37,18 +37,9 @@ struct GlassCard<Content: View>: View {
                     .fill(Theme.Colors.glassMaterial.opacity(Theme.Colors.glassOpacity))
             )
             .overlay(
-                // Gradient stroke
+                // Gradient stroke — adaptive for light & dark mode
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .stroke(
-                        LinearGradient(
-                            colors: enableGradientStroke
-                                ? [Color.white.opacity(0.4), Color.white.opacity(0.1)]
-                                : [Color.white.opacity(0.15)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ),
-                        lineWidth: 1
-                    )
+                    .stroke(Theme.Colors.adaptiveBorder, lineWidth: 1)
                     .allowsHitTesting(false)
             )
             .overlay(

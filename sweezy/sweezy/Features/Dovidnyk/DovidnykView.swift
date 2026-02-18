@@ -57,24 +57,7 @@ struct DovidnykView: View {
                 .tabViewStyle(.page(indexDisplayMode: .never))
                 .animation(.easeInOut(duration: 0.25), value: selectedTab)
             }
-            .background(
-                ZStack {
-                    // Winter gradient background (always festive)
-                    LinearGradient(
-                        colors: [
-                            Color(red: 0.05, green: 0.1, blue: 0.2),
-                            Color(red: 0.08, green: 0.15, blue: 0.28),
-                            Color(red: 0.06, green: 0.12, blue: 0.22)
-                        ],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                    .ignoresSafeArea()
-                    
-                    // Subtle snowfall
-                    WinterSceneLite(intensity: .light)
-                }
-            )
+            .background(AdaptivePageBackground())
             .navigationTitle("Довідник")
             .navigationBarTitleDisplayMode(.large)
             .searchable(text: $searchText, prompt: "Пошук...")
@@ -109,7 +92,7 @@ struct DovidnykView: View {
                                     .font(.system(size: 10))
                             }
                         }
-                        .foregroundColor(selectedTab == tab ? Color.cyan : .white.opacity(0.5))
+                        .foregroundColor(selectedTab == tab ? Color.cyan : Theme.Colors.textTertiary)
                         .padding(.vertical, 10)
                         .frame(maxWidth: .infinity)
                         
@@ -124,10 +107,8 @@ struct DovidnykView: View {
             }
         }
         .padding(.horizontal, Theme.Spacing.md)
-        .background(
-            Rectangle()
-                .fill(Color(red: 0.05, green: 0.1, blue: 0.2).opacity(0.95))
-                .shadow(color: Color.cyan.opacity(0.1), radius: 4, x: 0, y: 2)
+        .background(Theme.Colors.adaptiveSurface
+            .shadow(.drop(color: Color.cyan.opacity(0.08), radius: 4, x: 0, y: 2))
         )
     }
 }

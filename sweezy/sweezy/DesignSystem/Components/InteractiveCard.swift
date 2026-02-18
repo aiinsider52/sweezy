@@ -100,14 +100,7 @@ struct InteractiveCard: View {
             )
             .overlay(
                 RoundedRectangle(cornerRadius: Theme.CornerRadius.lg, style: .continuous)
-                    .stroke(
-                        LinearGradient(
-                            colors: [Color.white.opacity(0.3), Color.white.opacity(0.1)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ),
-                        lineWidth: 1
-                    )
+                    .stroke(Theme.Colors.adaptiveBorder, lineWidth: 1)
                     .allowsHitTesting(false)
             )
             .themeShadow(Theme.Shadows.level2)

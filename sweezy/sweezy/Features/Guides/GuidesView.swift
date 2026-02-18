@@ -69,20 +69,7 @@ struct GuidesView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                // Winter gradient background (always festive)
-                LinearGradient(
-                    colors: [
-                        Color(red: 0.05, green: 0.1, blue: 0.2),
-                        Color(red: 0.08, green: 0.15, blue: 0.28),
-                        Color(red: 0.06, green: 0.12, blue: 0.22)
-                    ],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-                .ignoresSafeArea()
-                
-                // Subtle snowfall
-                WinterSceneLite(intensity: .light)
+                AdaptivePageBackground()
                 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: Theme.Spacing.xl) {
@@ -769,7 +756,7 @@ struct GuideDetailView: View {
             if WinterTheme.isActive {
                 LinearGradient(
                     colors: [
-                        Color.white.opacity(0.1),
+                        Theme.Colors.adaptiveSurface,
                         Color.clear,
                         Color.cyan.opacity(0.05)
                     ],

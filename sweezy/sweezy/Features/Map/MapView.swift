@@ -91,24 +91,7 @@ struct MapView: View {
             }
             .navigationTitle("map.title".localized)
             .navigationBarTitleDisplayMode(.inline)
-            .background(
-                ZStack {
-                    // Deep winter gradient background (always festive on Map page)
-                    LinearGradient(
-                        colors: [
-                            Color(red: 0.05, green: 0.1, blue: 0.2),
-                            Color(red: 0.08, green: 0.15, blue: 0.28),
-                            Color(red: 0.06, green: 0.12, blue: 0.22)
-                        ],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                    .ignoresSafeArea()
-                    
-                    // Subtle snowfall (lightweight, won't affect performance)
-                    WinterSceneLite(intensity: .light)
-                }
-            )
+            .background(AdaptivePageBackground())
             .onAppear {
                 requestLocationPermission()
             }
@@ -721,7 +704,7 @@ struct WinterFilterChip: View {
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                       ))
-                    : AnyShapeStyle(Color.white.opacity(0.08))
+                    : AnyShapeStyle(Theme.Colors.adaptiveCard)
             )
             .clipShape(Capsule())
             .overlay(
@@ -930,13 +913,13 @@ struct WinterPlaceCard: View {
         .padding(Theme.Spacing.md)
         .background(
             RoundedRectangle(cornerRadius: Theme.CornerRadius.lg)
-                .fill(Color.white.opacity(0.08))
+                .fill(Theme.Colors.adaptiveCard)
         )
         .overlay(
             RoundedRectangle(cornerRadius: Theme.CornerRadius.lg)
                 .stroke(
                     LinearGradient(
-                        colors: [Color.cyan.opacity(0.3), Color.white.opacity(0.1)],
+                        colors: [Color.cyan.opacity(0.3), Theme.Colors.adaptiveSurface],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     ),
@@ -1286,7 +1269,7 @@ struct WinterSheetButton: View {
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                       ))
-                    : AnyShapeStyle(Color.white.opacity(0.08))
+                    : AnyShapeStyle(Theme.Colors.adaptiveCard)
             )
             .clipShape(RoundedRectangle(cornerRadius: 12))
             .overlay(

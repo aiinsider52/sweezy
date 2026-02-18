@@ -32,20 +32,7 @@ struct SubscriptionView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                // Winter gradient background
-                LinearGradient(
-                    colors: [
-                        Color(red: 0.05, green: 0.1, blue: 0.2),
-                        Color(red: 0.08, green: 0.15, blue: 0.28),
-                        Color(red: 0.06, green: 0.12, blue: 0.22)
-                    ],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-                .ignoresSafeArea()
-                
-                // Subtle snowfall
-                WinterSceneLite(intensity: .light)
+                AdaptivePageBackground()
                 
                 // Ambient glows - winter cyan tint
                 Circle()

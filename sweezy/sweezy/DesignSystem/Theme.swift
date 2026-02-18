@@ -32,28 +32,25 @@ struct Theme {
         static let backgroundIvory = Color(red: 0.980, green: 0.976, blue: 0.965) // #FAF9F6
         static let backgroundStone = Color(red: 0.961, green: 0.961, blue: 0.953) // #F5F5F3
 
-        // MARK: Text Colors (Dynamic)
+        // MARK: Text Colors
+        // App always uses dark/winter aesthetic (dark backgrounds in both modes),
+        // so text is always white. The adaptive block is kept for native UI elements.
         static var textPrimary: Color {
             Color(UIColor { traitCollection in
-                traitCollection.userInterfaceStyle == .dark
-                    ? UIColor(white: 1.0, alpha: 0.92)
-                    : UIColor(red: 0.129, green: 0.129, blue: 0.129, alpha: 1.0) // #212121 graphite
+                // Both modes: bright white on dark winter background
+                UIColor(white: 1.0, alpha: 0.92)
             })
         }
         
         static var textSecondary: Color {
             Color(UIColor { traitCollection in
-                traitCollection.userInterfaceStyle == .dark
-                    ? UIColor(white: 1.0, alpha: 0.6)
-                    : UIColor(red: 0.047, green: 0.047, blue: 0.082, alpha: 0.6)
+                UIColor(white: 1.0, alpha: 0.60)
             })
         }
         
         static var textTertiary: Color {
             Color(UIColor { traitCollection in
-                traitCollection.userInterfaceStyle == .dark
-                    ? UIColor(white: 1.0, alpha: 0.4)
-                    : UIColor(red: 0.047, green: 0.047, blue: 0.082, alpha: 0.4)
+                UIColor(white: 1.0, alpha: 0.40)
             })
         }
         
@@ -76,33 +73,16 @@ struct Theme {
         static let darkCard = Color.white.opacity(0.08)
         static let darkElevated = Color.white.opacity(0.12)
         
-        // MARK: Adaptive Card/Row backgrounds (safe in both light & dark)
-        /// Use this instead of Color.white.opacity(0.08) for row/card backgrounds
-        static var adaptiveCard: Color {
-            Color(UIColor { tc in
-                tc.userInterfaceStyle == .dark
-                    ? UIColor(white: 1.0, alpha: 0.08)
-                    : UIColor(red: 0.97, green: 0.97, blue: 0.99, alpha: 1.0)
-            })
-        }
+        // MARK: Frosted Glass Card/Row backgrounds
+        // App always has dark winter background → frosted glass in both modes.
+        /// Card / section background — frosted glass on dark winter background.
+        static let adaptiveCard = Color.white.opacity(0.09)
         
-        /// Subtle elevated surface (settings rows, list cells)
-        static var adaptiveSurface: Color {
-            Color(UIColor { tc in
-                tc.userInterfaceStyle == .dark
-                    ? UIColor(white: 1.0, alpha: 0.10)
-                    : UIColor(red: 1.0, green: 1.0, blue: 1.0, alpha: 0.95)
-            })
-        }
+        /// Slightly more elevated surface (settings toggle rows, list cells).
+        static let adaptiveSurface = Color.white.opacity(0.11)
         
-        /// Separator / card border (visible in both modes)
-        static var adaptiveBorder: Color {
-            Color(UIColor { tc in
-                tc.userInterfaceStyle == .dark
-                    ? UIColor(white: 1.0, alpha: 0.18)
-                    : UIColor(red: 0.0, green: 0.0, blue: 0.0, alpha: 0.10)
-            })
-        }
+        /// Separator / card border — visible on dark background in both modes.
+        static let adaptiveBorder = Color.white.opacity(0.18)
         
         // MARK: Adaptive Backgrounds
         static var primaryBackground: Color {
@@ -201,15 +181,9 @@ struct Theme {
         
         static var glassOpacity: Double { 0.75 }
 
-        // MARK: Inputs & Chips
-        static let chipBorder = Color(red: 0.878, green: 0.878, blue: 0.878) // #E0E0E0
-        static var chipBackground: Color {
-            Color(UIColor { traitCollection in
-                traitCollection.userInterfaceStyle == .dark
-                    ? UIColor(white: 1.0, alpha: 0.08)
-                    : UIColor(red: 0.96, green: 0.96, blue: 0.96, alpha: 1.0)
-            })
-        }
+        // MARK: Inputs & Chips (always dark/frosted since background is always dark)
+        static let chipBorder = Color.white.opacity(0.18)
+        static let chipBackground = Color.white.opacity(0.09)
         static let inputBorder = Color(red: 0.878, green: 0.878, blue: 0.878) // #E0E0E0
         static let focusGlow = accentTurquoise.opacity(0.35)
     }

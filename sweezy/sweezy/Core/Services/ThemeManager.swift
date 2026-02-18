@@ -24,7 +24,7 @@ enum AppTheme: String, CaseIterable, Identifiable {
 }
 
 final class ThemeManager: ObservableObject {
-    @AppStorage("selectedTheme") var selectedTheme: AppTheme = .system {
+    @AppStorage("selectedTheme") var selectedTheme: AppTheme = .dark {
         didSet { objectWillChange.send() }
     }
     

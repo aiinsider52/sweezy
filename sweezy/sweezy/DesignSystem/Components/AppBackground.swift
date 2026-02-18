@@ -3,13 +3,14 @@ import SwiftUI
 // MARK: - Adaptive Page Background (replaces hardcoded dark gradients)
 
 /// Use this instead of the hardcoded dark blue gradient in every page.
-/// Dark mode → deep navy winter. Light mode → crisp sky-white winter.
+/// Dark mode → deep navy winter aurora. Light mode → beautiful winter dawn sky.
 struct AdaptivePageBackground: View {
     @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         ZStack {
             if colorScheme == .dark {
+                // Deep midnight navy — classic winter night
                 LinearGradient(
                     colors: [
                         Color(red: 0.05, green: 0.10, blue: 0.20),
@@ -21,14 +22,24 @@ struct AdaptivePageBackground: View {
                 )
                 .ignoresSafeArea()
             } else {
+                // Beautiful winter dawn sky — deep indigo/teal gradient, NOT plain white
                 LinearGradient(
                     colors: [
-                        Color(red: 0.94, green: 0.97, blue: 1.00),
-                        Color(red: 0.96, green: 0.99, blue: 1.00),
-                        Color(red: 0.92, green: 0.96, blue: 0.99)
+                        Color(red: 0.08, green: 0.16, blue: 0.32),   // deep twilight blue
+                        Color(red: 0.10, green: 0.22, blue: 0.42),   // midnight blue
+                        Color(red: 0.07, green: 0.18, blue: 0.36)    // ocean depth
                     ],
                     startPoint: .top,
                     endPoint: .bottom
+                )
+                .ignoresSafeArea()
+                
+                // Subtle aurora glow in light "winter dawn" mode
+                RadialGradient(
+                    colors: [Color.cyan.opacity(0.15), Color.clear],
+                    center: .init(x: 0.3, y: 0.2),
+                    startRadius: 20,
+                    endRadius: 280
                 )
                 .ignoresSafeArea()
             }

@@ -434,8 +434,9 @@ struct OptimizedMapView: View {
                     placesListSection
                 }
             }
-            .navigationTitle("Карта")
-            .navigationBarTitleDisplayMode(.inline)
+            .navigationTitle("map.title".localized)
+            .navigationBarTitleDisplayMode(.large)
+            .toolbarBackground(.hidden, for: .navigationBar)
         }
         .onAppear {
             loadPlacesOnce()
@@ -452,7 +453,8 @@ struct OptimizedMapView: View {
                     isSelected: rangeMode == .nearby,
                     color: .cyan
                 ) {
-                    withAnimation(.easeInOut(duration: 0.2)) {
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
                         rangeMode = .nearby
                     }
                 }
@@ -462,7 +464,8 @@ struct OptimizedMapView: View {
                     isSelected: rangeMode == .all,
                     color: .purple
                 ) {
-                    withAnimation(.easeInOut(duration: 0.2)) {
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
                         rangeMode = .all
                     }
                 }
@@ -473,7 +476,8 @@ struct OptimizedMapView: View {
                     isSelected: selectedType == nil,
                     color: .blue
                 ) {
-                    withAnimation(.easeInOut(duration: 0.2)) {
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
                         selectedType = nil
                     }
                 }
@@ -484,20 +488,16 @@ struct OptimizedMapView: View {
                         isSelected: selectedType == type,
                         color: type.swiftUIColor
                     ) {
-                        withAnimation(.easeInOut(duration: 0.2)) {
+                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
                             selectedType = selectedType == type ? nil : type
                         }
                     }
                 }
             }
-            .padding(.horizontal)
+            .padding(.horizontal, 16)
         }
-        .padding(.vertical, 10)
-        .background(
-            WinterTheme.isActive
-                ? Color.black.opacity(0.25)    // subtle glass bar over winter background
-                : Color(.systemBackground)
-        )
+        .padding(.vertical, 8)
     }
     
     // MARK: - Map Loading Placeholder
@@ -542,7 +542,19 @@ struct OptimizedMapView: View {
             }
             .mapStyle(.standard(elevation: .flat)) // Flat style is faster
             .frame(height: 220)
-            .cornerRadius(16)
+            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .stroke(
+                        LinearGradient(
+                            colors: [Color.cyan.opacity(0.45), Color.white.opacity(0.12)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 1.5
+                    )
+            )
+            .shadow(color: Color.cyan.opacity(0.18), radius: 14, y: 6)
             
             // Location button
             Button {
@@ -552,7 +564,13 @@ struct OptimizedMapView: View {
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundColor(.white)
                     .frame(width: 36, height: 36)
-                    .background(Color.blue)
+                    .background(
+                        LinearGradient(
+                            colors: [Color.cyan, Color.blue.opacity(0.85)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
                     .clipShape(Circle())
                     .shadow(color: .black.opacity(0.2), radius: 4, y: 2)
             }
@@ -574,13 +592,28 @@ struct OptimizedMapView: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Text(rangeMode == .nearby ? "Сервіси поруч" : "Сервіси")
-                    .font(.headline)
+                    .font(.system(size: 20, weight: .bold))
+                    .foregroundColor(Theme.Colors.textPrimary)
                 Spacer()
-                Text("\(filteredPlaces.count)")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
+                if !filteredPlaces.isEmpty {
+                    HStack(spacing: 4) {
+                        Image(systemName: "mappin.circle.fill")
+                            .font(.system(size: 12))
+                            .foregroundColor(.cyan)
+                        Text("\(filteredPlaces.count)")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundColor(Theme.Colors.textPrimary)
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(
+                        Capsule()
+                            .fill(Color.cyan.opacity(0.16))
+                            .overlay(Capsule().stroke(Color.cyan.opacity(0.25), lineWidth: 1))
+                    )
+                }
             }
-            .padding(.horizontal)
+            .padding(.horizontal, 16)
             .padding(.top, 12)
             
             if filteredPlaces.isEmpty {
@@ -598,6 +631,9 @@ struct OptimizedMapView: View {
                 List {
                     ForEach(filteredPlaces.prefix(30)) { place in
                         PlaceLiteRow(place: place)
+                            .listRowSeparator(.hidden)
+                            .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+                            .listRowBackground(Color.clear)
                             .onTapGesture {
                                 selectedPlace = place
                             }
@@ -1053,12 +1089,31 @@ struct MapFilterChip: View {
     var body: some View {
         Button(action: action) {
             Text(title)
-                .font(.subheadline.weight(.medium))
-                .padding(.horizontal, 14)
-                .padding(.vertical, 8)
-                .background(isSelected ? color : Color(.systemGray5))
-                .foregroundColor(isSelected ? .white : .primary)
-                .cornerRadius(20)
+                .font(.system(size: 13, weight: .semibold))
+                .padding(.horizontal, 13)
+                .padding(.vertical, 9)
+                .background(
+                    Capsule()
+                        .fill(
+                            isSelected
+                                ? LinearGradient(
+                                    colors: [color.opacity(0.55), color.opacity(0.35)],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                                : LinearGradient(
+                                    colors: [Theme.Colors.adaptiveCard, Theme.Colors.adaptiveCard.opacity(0.8)],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                        )
+                )
+                .overlay(
+                    Capsule()
+                        .stroke(isSelected ? color.opacity(0.45) : Theme.Colors.adaptiveBorder.opacity(0.5), lineWidth: 1)
+                )
+                .foregroundColor(isSelected ? .white : Theme.Colors.textPrimary)
+                .shadow(color: isSelected ? color.opacity(0.25) : .clear, radius: 8, y: 3)
         }
         .buttonStyle(.plain)
     }
@@ -1069,31 +1124,41 @@ struct PlaceLiteRow: View {
     let place: Place
     
     var body: some View {
-        HStack(spacing: 12) {
-            // Icon
-            Image(systemName: place.type.iconName)
-                .font(.title2)
-                .foregroundColor(place.type.swiftUIColor)
-                .frame(width: 44, height: 44)
-                .background(place.type.swiftUIColor.opacity(0.1))
-                .cornerRadius(10)
+        HStack(spacing: 14) {
+            // Icon (compact gradient tile)
+            ZStack {
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .fill(
+                        LinearGradient(
+                            colors: [place.type.swiftUIColor.opacity(0.35), place.type.swiftUIColor.opacity(0.18)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .frame(width: 46, height: 46)
+                
+                Image(systemName: place.type.iconName)
+                    .font(.system(size: 18, weight: .medium))
+                    .foregroundColor(place.type.swiftUIColor)
+            }
             
             // Info
             VStack(alignment: .leading, spacing: 4) {
                 Text(place.name)
-                    .font(.subheadline.bold())
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundColor(Theme.Colors.textPrimary)
                     .lineLimit(1)
                 
                 Text(place.type.localizedName)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                    .font(.system(size: 12))
+                    .foregroundColor(Theme.Colors.textSecondary)
                 
                 HStack(spacing: 4) {
                     Circle()
                         .fill(place.isOpen() ? Color.green : Color.red)
                         .frame(width: 6, height: 6)
-                    Text(place.isOpen() ? "Відкрито" : "Закрито")
-                        .font(.caption2)
+                    Text(place.isOpen() ? "map.open".localized : "map.closed".localized)
+                        .font(.system(size: 12, weight: .medium))
                         .foregroundColor(place.isOpen() ? .green : .red)
                 }
             }
@@ -1105,12 +1170,21 @@ struct PlaceLiteRow: View {
                 openInMaps()
             } label: {
                 Image(systemName: "arrow.triangle.turn.up.right.diamond.fill")
-                    .font(.title3)
-                    .foregroundColor(.blue)
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundColor(.cyan)
             }
             .buttonStyle(.plain)
         }
-        .padding(.vertical, 4)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 14)
+        .background(
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .fill(Theme.Colors.adaptiveCard)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        .stroke(Theme.Colors.adaptiveBorder.opacity(0.45), lineWidth: 1)
+                )
+        )
     }
     
     private func openInMaps() {

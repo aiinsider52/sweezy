@@ -526,3 +526,46 @@
 "permit.l" = "L - Короткострокове проживання";
 
 "validation.email_invalid" = "Некоректна електронна пошта";
+
+// MARK: - Auth (Login + Password Reset)
+"common.or" = "або";
+
+"auth.login.title" = "Вхід";
+"auth.login.subtitle" = "Увійдіть, щоб продовжити";
+"auth.login.email" = "Електронна пошта";
+"auth.login.password" = "Пароль";
+"auth.login.forgot_password" = "Забули пароль?";
+"auth.login.button" = "Увійти";
+"auth.secure_connection" = "Безпечне з'єднання";
+
+"auth.reset.step.email" = "Email";
+"auth.reset.step.code" = "Код";
+"auth.reset.step.password" = "Пароль";
+"auth.reset.step.done" = "Готово";
+
+"auth.reset.title" = "Відновлення паролю";
+"auth.reset.subtitle" = "Введіть email, на який зареєстрований ваш акаунт";
+"auth.reset.email_sent" = "Лист надіслано! Перевірте пошту";
+"auth.reset.continue" = "Продовжити";
+"auth.reset.send_code" = "Надіслати код";
+
+"auth.reset.enter_code.title" = "Введіть код";
+"auth.reset.enter_code.subtitle_format" = "Вставте код з листа, який ми надіслали на\n%@";
+"auth.reset.enter_code.placeholder" = "Вставте код сюди";
+"auth.reset.enter_code.hint" = "Код має вигляд довгого рядка букв і цифр";
+"auth.reset.resend_code" = "Надіслати код повторно";
+
+"auth.reset.new_password.title" = "Новий пароль";
+"auth.reset.new_password.subtitle" = "Придумайте надійний пароль для вашого акаунту";
+"auth.reset.new_password.field" = "Новий пароль";
+"auth.reset.confirm_password.field" = "Підтвердіть пароль";
+"auth.reset.passwords_match" = "Паролі співпадають";
+"auth.reset.passwords_not_match" = "Паролі не співпадають";
+"auth.reset.change_password" = "Змінити пароль";
+
+"auth.reset.success.title" = "Пароль змінено!";
+"auth.reset.success.subtitle" = "Тепер ви можете увійти з новим паролем";
+"auth.reset.success.login" = "Увійти в акаунт";
+
+"auth.reset.error.send_email_failed" = "Не вдалося надіслати лист. Спробуйте пізніше.";
+"auth.reset.error.reset_failed" = "Не вдалося змінити пароль. Перевірте код.";

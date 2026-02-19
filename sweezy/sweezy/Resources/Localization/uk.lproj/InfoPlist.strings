@@ -1,0 +1,7 @@
+/* InfoPlist.strings (Ukrainian) */
+
+"NSCameraUsageDescription" = "Камера може знадобитися для сканування документів або QR‑кодів.";
+"NSFaceIDUsageDescription" = "Використовуємо Face ID для розблокування додатку та підтвердження дій.";
+"NSLocationWhenInUseUsageDescription" = "Локація потрібна для відображення найближчих сервісів та релевантних гідів.";
+"NSPhotoLibraryUsageDescription" = "Доступ до Фото потрібен для збереження або вибору зображень документів.";
+

@@ -501,3 +501,46 @@
 "permit.n" = "N - Asylum Seeker";
 "permit.l" = "L - Short-term Residence";
 "validation.email_invalid" = "Invalid email address";
+
+// MARK: - Auth (Login + Password Reset)
+"common.or" = "or";
+
+"auth.login.title" = "Sign In";
+"auth.login.subtitle" = "Sign in to continue";
+"auth.login.email" = "Email";
+"auth.login.password" = "Password";
+"auth.login.forgot_password" = "Forgot password?";
+"auth.login.button" = "Sign In";
+"auth.secure_connection" = "Secure connection";
+
+"auth.reset.step.email" = "Email";
+"auth.reset.step.code" = "Code";
+"auth.reset.step.password" = "Password";
+"auth.reset.step.done" = "Done";
+
+"auth.reset.title" = "Password reset";
+"auth.reset.subtitle" = "Enter the email you used to sign up";
+"auth.reset.email_sent" = "Email sent! Check your inbox";
+"auth.reset.continue" = "Continue";
+"auth.reset.send_code" = "Send code";
+
+"auth.reset.enter_code.title" = "Enter code";
+"auth.reset.enter_code.subtitle_format" = "Paste the code from the email we sent to\n%@";
+"auth.reset.enter_code.placeholder" = "Paste code here";
+"auth.reset.enter_code.hint" = "The code looks like a long string of letters and numbers";
+"auth.reset.resend_code" = "Resend code";
+
+"auth.reset.new_password.title" = "New password";
+"auth.reset.new_password.subtitle" = "Create a strong password for your account";
+"auth.reset.new_password.field" = "New password";
+"auth.reset.confirm_password.field" = "Confirm password";
+"auth.reset.passwords_match" = "Passwords match";
+"auth.reset.passwords_not_match" = "Passwords don't match";
+"auth.reset.change_password" = "Change password";
+
+"auth.reset.success.title" = "Password changed!";
+"auth.reset.success.subtitle" = "You can now sign in with your new password";
+"auth.reset.success.login" = "Sign in to your account";
+
+"auth.reset.error.send_email_failed" = "Couldn't send the email. Please try again later.";
+"auth.reset.error.reset_failed" = "Couldn't change the password. Check the code.";

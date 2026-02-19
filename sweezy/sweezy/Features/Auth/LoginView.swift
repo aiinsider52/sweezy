@@ -140,11 +140,11 @@ struct LoginView: View {
             }
             
             VStack(spacing: 8) {
-                Text("Вхід")
+                Text("auth.login.title")
                     .font(.system(size: 32, weight: .bold))
                     .foregroundColor(.white)
                 
-                Text("Увійдіть, щоб продовжити")
+                Text("auth.login.subtitle")
                     .font(.subheadline)
                     .foregroundColor(.white.opacity(0.7))
             }
@@ -158,7 +158,7 @@ struct LoginView: View {
         VStack(spacing: 20) {
             // Email field
             modernTextField(
-                placeholder: "Електронна пошта",
+                placeholder: "auth.login.email",
                 text: $email,
                 icon: "envelope.fill",
                 keyboardType: .emailAddress
@@ -166,7 +166,7 @@ struct LoginView: View {
             
             // Password field
             modernSecureField(
-                placeholder: "Пароль",
+                placeholder: "auth.login.password",
                 text: $password,
                 icon: "lock.fill"
             )
@@ -177,7 +177,7 @@ struct LoginView: View {
                 Button {
                     showReset = true
                 } label: {
-                    Text("Забули пароль?")
+                    Text("auth.login.forgot_password")
                         .font(.subheadline.weight(.medium))
                         .foregroundColor(.cyan)
                 }
@@ -212,7 +212,7 @@ struct LoginView: View {
                     } else {
                         Image(systemName: "arrow.right.circle.fill")
                             .font(.title3)
-                        Text("Увійти")
+                        Text("auth.login.button")
                             .fontWeight(.semibold)
                     }
                 }
@@ -269,7 +269,7 @@ struct LoginView: View {
                 Rectangle()
                     .fill(.white.opacity(0.2))
                     .frame(height: 1)
-                Text("або")
+                Text("common.or")
                     .font(.caption)
                     .foregroundColor(.white.opacity(0.5))
                 Rectangle()
@@ -281,7 +281,7 @@ struct LoginView: View {
             HStack(spacing: 8) {
                 Image(systemName: "lock.shield.fill")
                     .foregroundColor(.cyan.opacity(0.7))
-                Text("Безпечне з'єднання")
+                Text("auth.secure_connection")
                     .font(.caption)
                     .foregroundColor(.white.opacity(0.5))
             }
@@ -301,7 +301,7 @@ struct LoginView: View {
                 .foregroundColor(.cyan.opacity(0.8))
                 .frame(width: 24)
             
-            TextField("", text: text, prompt: Text(placeholder).foregroundColor(.white.opacity(0.4)))
+            TextField("", text: text, prompt: Text(LocalizedStringKey(placeholder)).foregroundColor(.white.opacity(0.4)))
                 .font(.body)
                 .foregroundColor(.white)
                 .keyboardType(keyboardType)
@@ -340,9 +340,9 @@ struct LoginView: View {
             
             Group {
                 if showPassword {
-                    TextField("", text: text, prompt: Text(placeholder).foregroundColor(.white.opacity(0.4)))
+                    TextField("", text: text, prompt: Text(LocalizedStringKey(placeholder)).foregroundColor(.white.opacity(0.4)))
                 } else {
-                    SecureField("", text: text, prompt: Text(placeholder).foregroundColor(.white.opacity(0.4)))
+                    SecureField("", text: text, prompt: Text(LocalizedStringKey(placeholder)).foregroundColor(.white.opacity(0.4)))
                 }
             }
             .font(.body)
@@ -489,10 +489,10 @@ struct PasswordResetSheet: View {
         
         var title: String {
             switch self {
-            case .email: return "Email"
-            case .code: return "Код"
-            case .newPassword: return "Пароль"
-            case .success: return "Готово"
+            case .email: return "auth.reset.step.email".localized
+            case .code: return "auth.reset.step.code".localized
+            case .newPassword: return "auth.reset.step.password".localized
+            case .success: return "auth.reset.step.done".localized
             }
         }
         
@@ -583,7 +583,7 @@ struct PasswordResetSheet: View {
                         } label: {
                             HStack(spacing: 4) {
                                 Image(systemName: "chevron.left")
-                                Text("Назад")
+                                Text("common.back".localized)
                             }
                             .foregroundColor(.cyan)
                         }
@@ -687,11 +687,11 @@ struct PasswordResetSheet: View {
             .padding(.top, 10)
             
             VStack(spacing: 8) {
-                Text("Відновлення паролю")
+                Text("auth.reset.title")
                     .font(.title2.bold())
                     .foregroundColor(.white)
                 
-                Text("Введіть email, на який зареєстрований ваш акаунт")
+                Text("auth.reset.subtitle")
                     .font(.subheadline)
                     .foregroundColor(.white.opacity(0.7))
                     .multilineTextAlignment(.center)
@@ -700,7 +700,7 @@ struct PasswordResetSheet: View {
             // Email input card
             VStack(spacing: 16) {
                 AccentTextField(
-                    LocalizedStringKey("Email"),
+                    "auth.login.email",
                     text: $email,
                     icon: "envelope.fill",
                     keyboardType: .emailAddress
@@ -723,7 +723,7 @@ struct PasswordResetSheet: View {
                     HStack(spacing: 6) {
                         Image(systemName: "checkmark.circle.fill")
                             .foregroundColor(.green)
-                        Text("Лист надіслано! Перевірте пошту")
+                        Text("auth.reset.email_sent")
                             .font(.caption)
                             .foregroundColor(.green)
                     }
@@ -753,7 +753,7 @@ struct PasswordResetSheet: View {
                             .progressViewStyle(CircularProgressViewStyle(tint: .white))
                     } else {
                         Image(systemName: emailSent ? "arrow.right" : "paperplane.fill")
-                        Text(emailSent ? "Продовжити" : "Надіслати код")
+                        Text(emailSent ? "auth.reset.continue".localized : "auth.reset.send_code".localized)
                             .fontWeight(.semibold)
                     }
                 }
@@ -789,11 +789,11 @@ struct PasswordResetSheet: View {
             .padding(.top, 10)
             
             VStack(spacing: 8) {
-                Text("Введіть код")
+                Text("auth.reset.enter_code.title")
                     .font(.title2.bold())
                     .foregroundColor(.white)
                 
-                Text("Вставте код з листа, який ми надіслали на\n\(email)")
+                Text("auth.reset.enter_code.subtitle_format".localized(with: email))
                     .font(.subheadline)
                     .foregroundColor(.white.opacity(0.7))
                     .multilineTextAlignment(.center)
@@ -805,7 +805,7 @@ struct PasswordResetSheet: View {
                     Image(systemName: "key.fill")
                         .foregroundColor(.cyan)
                     
-                    TextField("Вставте код сюди", text: $token)
+                    TextField("auth.reset.enter_code.placeholder".localized, text: $token)
                         .font(.system(.body, design: .monospaced))
                         .foregroundColor(.white)
                         .autocapitalization(.none)
@@ -856,7 +856,7 @@ struct PasswordResetSheet: View {
                 HStack(spacing: 6) {
                     Image(systemName: "lightbulb.fill")
                         .foregroundColor(.yellow.opacity(0.8))
-                    Text("Код має вигляд довгого рядка букв і цифр")
+                    Text("auth.reset.enter_code.hint")
                         .font(.caption)
                         .foregroundColor(.white.opacity(0.6))
                 }
@@ -883,7 +883,7 @@ struct PasswordResetSheet: View {
             } label: {
                 HStack(spacing: 10) {
                     Image(systemName: "arrow.right")
-                    Text("Далі")
+                    Text("common.next".localized)
                         .fontWeight(.semibold)
                 }
                 .frame(maxWidth: .infinity)
@@ -902,7 +902,7 @@ struct PasswordResetSheet: View {
             Button {
                 Task { await sendResetEmail() }
             } label: {
-                Text("Надіслати код повторно")
+                Text("auth.reset.resend_code")
                     .font(.subheadline)
                     .foregroundColor(.cyan)
             }
@@ -928,11 +928,11 @@ struct PasswordResetSheet: View {
             .padding(.top, 10)
             
             VStack(spacing: 8) {
-                Text("Новий пароль")
+                Text("auth.reset.new_password.title")
                     .font(.title2.bold())
                     .foregroundColor(.white)
                 
-                Text("Придумайте надійний пароль для вашого акаунту")
+                Text("auth.reset.new_password.subtitle")
                     .font(.subheadline)
                     .foregroundColor(.white.opacity(0.7))
                     .multilineTextAlignment(.center)
@@ -941,13 +941,13 @@ struct PasswordResetSheet: View {
             // Password inputs
             VStack(spacing: 16) {
                 AccentSecureField(
-                    LocalizedStringKey("Новий пароль"),
+                    "auth.reset.new_password.field",
                     text: $newPassword,
                     icon: "lock.fill"
                 )
                 
                 AccentSecureField(
-                    LocalizedStringKey("Підтвердіть пароль"),
+                    "auth.reset.confirm_password.field",
                     text: $confirmPassword,
                     icon: "lock.rotation"
                 )
@@ -960,7 +960,7 @@ struct PasswordResetSheet: View {
                     HStack(spacing: 6) {
                         Image(systemName: passwordsMatch ? "checkmark.circle.fill" : "xmark.circle.fill")
                             .foregroundColor(passwordsMatch ? .green : .red)
-                        Text(passwordsMatch ? "Паролі співпадають" : "Паролі не співпадають")
+                        Text(passwordsMatch ? "auth.reset.passwords_match".localized : "auth.reset.passwords_not_match".localized)
                             .font(.caption)
                             .foregroundColor(passwordsMatch ? .green : .red)
                     }
@@ -999,7 +999,7 @@ struct PasswordResetSheet: View {
                             .progressViewStyle(CircularProgressViewStyle(tint: .white))
                     } else {
                         Image(systemName: "checkmark.shield.fill")
-                        Text("Змінити пароль")
+                        Text("auth.reset.change_password")
                             .fontWeight(.semibold)
                     }
                 }
@@ -1059,11 +1059,11 @@ struct PasswordResetSheet: View {
             }
             
             VStack(spacing: 12) {
-                Text("Пароль змінено!")
+                Text("auth.reset.success.title")
                     .font(.title.bold())
                     .foregroundColor(.white)
                 
-                Text("Тепер ви можете увійти з новим паролем")
+                Text("auth.reset.success.subtitle")
                     .font(.subheadline)
                     .foregroundColor(.white.opacity(0.7))
                     .multilineTextAlignment(.center)
@@ -1080,7 +1080,7 @@ struct PasswordResetSheet: View {
             } label: {
                 HStack(spacing: 10) {
                     Image(systemName: "arrow.right.circle.fill")
-                    Text("Увійти в акаунт")
+                    Text("auth.reset.success.login")
                         .fontWeight(.semibold)
                 }
                 .frame(maxWidth: .infinity)
@@ -1116,7 +1116,7 @@ struct PasswordResetSheet: View {
                     }
                 }
             } else {
-                errorMessage = "Не вдалося надіслати лист. Спробуйте пізніше."
+                errorMessage = "auth.reset.error.send_email_failed".localized
             }
         }
     }
@@ -1134,7 +1134,7 @@ struct PasswordResetSheet: View {
                     currentStep = .success
                 }
             } else {
-                errorMessage = "Не вдалося змінити пароль. Перевірте код."
+                errorMessage = "auth.reset.error.reset_failed".localized
             }
         }
     }

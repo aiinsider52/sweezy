@@ -107,3 +107,36 @@ def seed_admin_user(db: Session) -> None:
         db.commit()
 
 
+def seed_demo_user(db: Session) -> None:
+    """
+    Ensure a stable demo account exists (for App Store review / QA).
+
+    Controlled by env:
+    - DEMO_USER_ENABLED=true
+    - DEMO_USER_EMAIL=...
+    - DEMO_USER_PASSWORD=...
+    """
+    settings = get_settings()
+    if not getattr(settings, "DEMO_USER_ENABLED", False):
+        return
+    demo_email = getattr(settings, "DEMO_USER_EMAIL", None)
+    demo_password = getattr(settings, "DEMO_USER_PASSWORD", None)
+    if not demo_email or not demo_password:
+        return
+
+    user = UserService.get_by_email(db, demo_email)
+    if user is None:
+        UserService.create(db, email=demo_email, password=demo_password, is_superuser=False, role="viewer")
+        return
+
+    updated = False
+    if not user.is_active:
+        user.is_active = True
+        updated = True
+    if not verify_password(demo_password, user.hashed_password):
+        user.hashed_password = get_password_hash(demo_password)
+        updated = True
+    if updated:
+        db.add(user)
+        db.commit()
+

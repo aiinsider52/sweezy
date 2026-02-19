@@ -276,3 +276,46 @@
 "settings.register" = "Registrieren";
 "settings.logout" = "Abmelden";
 "settings.welcome" = "Willkommen, %@";
+
+// MARK: - Auth (Login + Password Reset)
+"common.or" = "oder";
+
+"auth.login.title" = "Anmelden";
+"auth.login.subtitle" = "Melden Sie sich an, um fortzufahren";
+"auth.login.email" = "E-Mail";
+"auth.login.password" = "Passwort";
+"auth.login.forgot_password" = "Passwort vergessen?";
+"auth.login.button" = "Anmelden";
+"auth.secure_connection" = "Sichere Verbindung";
+
+"auth.reset.step.email" = "E-Mail";
+"auth.reset.step.code" = "Code";
+"auth.reset.step.password" = "Passwort";
+"auth.reset.step.done" = "Fertig";
+
+"auth.reset.title" = "Passwort zurücksetzen";
+"auth.reset.subtitle" = "Geben Sie die E-Mail-Adresse ein, mit der Sie sich registriert haben";
+"auth.reset.email_sent" = "E-Mail gesendet! Bitte Posteingang prüfen";
+"auth.reset.continue" = "Weiter";
+"auth.reset.send_code" = "Code senden";
+
+"auth.reset.enter_code.title" = "Code eingeben";
+"auth.reset.enter_code.subtitle_format" = "Fügen Sie den Code aus der E-Mail ein, die wir an\n%@ gesendet haben";
+"auth.reset.enter_code.placeholder" = "Code hier einfügen";
+"auth.reset.enter_code.hint" = "Der Code ist eine lange Zeichenfolge aus Buchstaben und Zahlen";
+"auth.reset.resend_code" = "Code erneut senden";
+
+"auth.reset.new_password.title" = "Neues Passwort";
+"auth.reset.new_password.subtitle" = "Erstellen Sie ein starkes Passwort für Ihr Konto";
+"auth.reset.new_password.field" = "Neues Passwort";
+"auth.reset.confirm_password.field" = "Passwort bestätigen";
+"auth.reset.passwords_match" = "Passwörter stimmen überein";
+"auth.reset.passwords_not_match" = "Passwörter stimmen nicht überein";
+"auth.reset.change_password" = "Passwort ändern";
+
+"auth.reset.success.title" = "Passwort geändert!";
+"auth.reset.success.subtitle" = "Sie können sich jetzt mit Ihrem neuen Passwort anmelden";
+"auth.reset.success.login" = "Im Konto anmelden";
+
+"auth.reset.error.send_email_failed" = "E-Mail konnte nicht gesendet werden. Bitte später erneut versuchen.";
+"auth.reset.error.reset_failed" = "Passwort konnte nicht geändert werden. Prüfen Sie den Code.";

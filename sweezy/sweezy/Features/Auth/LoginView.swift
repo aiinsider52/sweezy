@@ -3,6 +3,7 @@ import SwiftUI
 struct LoginView: View {
     @EnvironmentObject private var appContainer: AppContainer
     @EnvironmentObject private var lockManager: AppLockManager
+    @EnvironmentObject private var sessionManager: SessionManager
     @Environment(\.dismiss) private var dismiss
 
     @State private var email: String = ""
@@ -277,6 +278,33 @@ struct LoginView: View {
                     .frame(height: 1)
             }
             
+            // Guest mode (App Store 5.1.1 compliance):
+            // Allow users to use the app for non-account features without creating an account.
+            Button {
+                sessionManager.continueAsGuest()
+                dismiss()
+            } label: {
+                HStack(spacing: 10) {
+                    Image(systemName: "person.fill.questionmark")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(.white.opacity(0.9))
+                    Text("auth.login.continue_as_guest")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundColor(.white)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 14)
+                .background(
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .fill(Color.white.opacity(0.08))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                .stroke(Color.white.opacity(0.16), lineWidth: 1)
+                        )
+                )
+            }
+            .buttonStyle(.plain)
+
             // Security note
             HStack(spacing: 8) {
                 Image(systemName: "lock.shield.fill")

@@ -10,6 +10,7 @@ import StoreKit
 struct SubscriptionView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var appContainer: AppContainer
+    @EnvironmentObject private var sessionManager: SessionManager
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @StateObject private var subManager = SubscriptionManager.shared
     @State private var current: APIClient.SubscriptionCurrent?
@@ -24,12 +25,108 @@ struct SubscriptionView: View {
     @State private var promoCodeSheet: Bool = false
     @State private var promoCodeInput: String = ""
     @State private var remoteBenefits: [String] = []
+    @State private var showLogin: Bool = false
+    @State private var didAutoPromptLogin: Bool = false
     
     private let monthlyPrice: Double = 4.90
     private let yearlyPrice: Double = 44.0
     private var yearlySavings: Double { monthlyPrice * 12 - yearlyPrice }
     
     var body: some View {
+        Group {
+            if sessionManager.isAuthenticated {
+                paywallContent
+            } else {
+                guestGateContent
+            }
+        }
+        .sheet(isPresented: $showLogin, onDismiss: {
+            // If auth was dismissed and user is still a guest, close the paywall
+            // to ensure guests can't reach purchase flows (IAP is account-only).
+            if !sessionManager.isAuthenticated {
+                dismiss()
+            }
+        }) {
+            LoginView()
+        }
+        .onAppear {
+            // Auto-redirect guests to Login when they open an account-only screen.
+            if !sessionManager.isAuthenticated && !didAutoPromptLogin {
+                didAutoPromptLogin = true
+                showLogin = true
+            }
+        }
+    }
+
+    // MARK: - Guest Gate (no IAP access)
+    private var guestGateContent: some View {
+        NavigationStack {
+            ZStack {
+                AdaptivePageBackground()
+
+                VStack(spacing: 12) {
+                    Image(systemName: "lock.fill")
+                        .font(.system(size: 34, weight: .semibold))
+                        .foregroundColor(.white.opacity(0.85))
+
+                    Text("auth.login.title")
+                        .font(.system(size: 20, weight: .bold))
+                        .foregroundColor(.white)
+
+                    Text("auth.login.subtitle")
+                        .font(.subheadline)
+                        .foregroundColor(.white.opacity(0.7))
+                        .multilineTextAlignment(.center)
+
+                    Button {
+                        showLogin = true
+                    } label: {
+                        Text("auth.login.button")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 14)
+                            .background(
+                                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                    .fill(LinearGradient(colors: [.cyan, .blue], startPoint: .leading, endPoint: .trailing))
+                            )
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.top, 6)
+
+                    Button { dismiss() } label: {
+                        Text("common.close")
+                            .font(.subheadline.weight(.medium))
+                            .foregroundColor(.white.opacity(0.75))
+                    }
+                    .buttonStyle(.plain)
+                }
+                .padding(24)
+                .background(
+                    RoundedRectangle(cornerRadius: 20, style: .continuous)
+                        .fill(Theme.Colors.adaptiveCard)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                                .stroke(Color.white.opacity(0.14), lineWidth: 1)
+                        )
+                )
+                .padding(.horizontal, 20)
+            }
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button { dismiss() } label: {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(.white.opacity(0.7))
+                    }
+                }
+            }
+        }
+    }
+
+    // MARK: - Paywall (authenticated only)
+    private var paywallContent: some View {
         NavigationStack {
             ZStack {
                 AdaptivePageBackground()
@@ -628,6 +725,13 @@ private struct ConfettiOverlay: View {
 }
 
 #Preview {
-    SubscriptionView()
+    let lockManager = AppLockManager()
+    lockManager.userEmail = "preview@sweezy.app"
+    lockManager.userName = "Preview"
+    lockManager.isRegistered = true
+    
+    return SubscriptionView()
         .environmentObject(AppContainer())
+        .environmentObject(lockManager)
+        .environmentObject(SessionManager(lockManager: lockManager))
 }

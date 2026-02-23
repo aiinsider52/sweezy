@@ -536,6 +536,7 @@
 "auth.login.password" = "Пароль";
 "auth.login.forgot_password" = "Забули пароль?";
 "auth.login.button" = "Увійти";
+"auth.login.continue_as_guest" = "Продовжити як гість";
 "auth.secure_connection" = "Безпечне з'єднання";
 
 "auth.reset.step.email" = "Email";

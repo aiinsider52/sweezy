@@ -159,14 +159,8 @@ struct TemplatesView: View {
             } else if filteredTemplates.isEmpty {
                 emptyStateView
             } else {
-                if lockManager.isRegistered {
-                    templatesListSection
-                } else {
-                    ZStack {
-                        templatesListSection.blur(radius: 4)
-                        winterLockOverlay
-                    }
-                }
+                // Public (non-account-based) content must be accessible without login (App Store 5.1.1).
+                templatesListSection
             }
         }
     }

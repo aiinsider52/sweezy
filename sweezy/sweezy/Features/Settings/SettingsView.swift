@@ -11,6 +11,7 @@ struct SettingsView: View {
     @EnvironmentObject private var appContainer: AppContainer
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var lockManager: AppLockManager
+    @EnvironmentObject private var sessionManager: SessionManager
     @Environment(\.scenePhase) private var scenePhase
     
     @State private var showingLanguageSelection = false
@@ -614,12 +615,8 @@ private extension SettingsView {
                         Spacer()
                         PrimaryButton("settings.logout".localized, style: .outline) {
                             withAnimation(Theme.Animation.smooth) {
-                                lockManager.isRegistered = false
-                                lockManager.userName = ""
-                                lockManager.userEmail = ""
+                                sessionManager.signOut()
                             }
-                            KeychainStore.delete("access_token")
-                            KeychainStore.delete("refresh_token")
                         }
                         .frame(maxWidth: 120)
                     }
@@ -937,12 +934,8 @@ private extension SettingsView {
         // Clear profile and auth
         appContainer.userProfile = nil
         withAnimation(Theme.Animation.smooth) {
-            lockManager.isRegistered = false
-            lockManager.userName = ""
-            lockManager.userEmail = ""
+            sessionManager.signOut()
         }
-        KeychainStore.delete("access_token")
-        KeychainStore.delete("refresh_token")
     }
 
     func deleteAccount() async {
@@ -1029,6 +1022,7 @@ struct LanguageSelectionSheet: View {
 
 struct ProfileEditView: View {
     @EnvironmentObject private var appContainer: AppContainer
+    @EnvironmentObject private var sessionManager: SessionManager
     @Environment(\.dismiss) private var dismiss
     
     // Form state
@@ -1047,6 +1041,8 @@ struct ProfileEditView: View {
     @State private var hasChanges = false
     @State private var showCantonPicker = false
     @State private var showPermitPicker = false
+    @State private var showLogin: Bool = false
+    @State private var didAutoPromptLogin: Bool = false
     
     // Validation
     private var isEmailValid: Bool {
@@ -1078,69 +1074,157 @@ struct ProfileEditView: View {
     }
     
     var body: some View {
+        Group {
+            if sessionManager.isAuthenticated {
+                NavigationStack {
+                    ZStack {
+                        // Winter gradient background (always festive on Profile Edit)
+                        LinearGradient(
+                            colors: [
+                                Color(red: 0.05, green: 0.1, blue: 0.2),
+                                Color(red: 0.08, green: 0.15, blue: 0.28),
+                                Color(red: 0.06, green: 0.12, blue: 0.22)
+                            ],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                        .ignoresSafeArea()
+                        
+                        // Subtle snowfall
+                        WinterSceneLite(intensity: .light)
+                        
+                        ScrollView(showsIndicators: false) {
+                            VStack(spacing: 20) {
+                                // Hero
+                                winterHeroSection
+                                // Personal
+                                winterProfilePersonalCard
+                                // Location & Permit
+                                winterProfileLocationCard
+                                // Timeline
+                                winterProfileTimelineCard
+                                // Family
+                                winterProfileFamilyCard
+                                // Goals
+                                winterProfileGoalsCard
+                                Spacer(minLength: 100)
+                            }
+                            .padding(.horizontal, 16)
+                            .padding(.top, 16)
+                        }
+                    }
+                    .navigationTitle("Редагувати профіль")
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .navigationBarLeading) {
+                            Button { dismiss() } label: { Text("Скасувати").foregroundColor(.white.opacity(0.7)) }
+                        }
+                        ToolbarItem(placement: .navigationBarTrailing) {
+                            Button { saveProfile() } label: { Text("Зберегти").fontWeight(.semibold).foregroundColor(.cyan) }
+                                .disabled(!hasChanges)
+                        }
+                    }
+                    .safeAreaInset(edge: .bottom) { winterSaveButton }
+                }
+                .onAppear { loadCurrentProfile() }
+                .onChange(of: fullName) { _, _ in hasChanges = true }
+                .onChange(of: email) { _, _ in hasChanges = true }
+                .onChange(of: phoneNumber) { _, _ in hasChanges = true }
+                .onChange(of: selectedCanton) { _, _ in hasChanges = true }
+                .onChange(of: selectedPermitType) { _, _ in hasChanges = true }
+                .onChange(of: arrivalDate) { _, _ in hasChanges = true }
+                .onChange(of: permitExpiry) { _, _ in hasChanges = true }
+                .onChange(of: selectedGoals) { _, _ in hasChanges = true }
+                .onChange(of: familySize) { _, _ in hasChanges = true }
+                .onChange(of: hasChildren) { _, _ in hasChanges = true }
+                .sheet(isPresented: $showCantonPicker) { cantonPickerSheet }
+                .sheet(isPresented: $showPermitPicker) { permitPickerSheet }
+            } else {
+                // Profile personalization is account-based; guests must sign in first.
+                guestGateContent
+            }
+        }
+        .sheet(isPresented: $showLogin, onDismiss: {
+            // If auth was dismissed and user is still a guest, close Profile Edit.
+            if !sessionManager.isAuthenticated {
+                dismiss()
+            }
+        }) {
+            LoginView()
+        }
+        .onAppear {
+            // Auto-redirect guests to Login when they reach a protected screen.
+            if !sessionManager.isAuthenticated && !didAutoPromptLogin {
+                didAutoPromptLogin = true
+                showLogin = true
+            }
+        }
+    }
+
+    private var guestGateContent: some View {
         NavigationStack {
             ZStack {
-                // Winter gradient background (always festive on Profile Edit)
-                LinearGradient(
-                    colors: [
-                        Color(red: 0.05, green: 0.1, blue: 0.2),
-                        Color(red: 0.08, green: 0.15, blue: 0.28),
-                        Color(red: 0.06, green: 0.12, blue: 0.22)
-                    ],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-                .ignoresSafeArea()
+                AdaptivePageBackground()
                 
-                // Subtle snowfall
-                WinterSceneLite(intensity: .light)
-                
-                ScrollView(showsIndicators: false) {
-                    VStack(spacing: 20) {
-                        // Hero
-                        winterHeroSection
-                        // Personal
-                        winterProfilePersonalCard
-                        // Location & Permit
-                        winterProfileLocationCard
-                        // Timeline
-                        winterProfileTimelineCard
-                        // Family
-                        winterProfileFamilyCard
-                        // Goals
-                        winterProfileGoalsCard
-                        Spacer(minLength: 100)
+                VStack(spacing: 12) {
+                    Image(systemName: "lock.fill")
+                        .font(.system(size: 34, weight: .semibold))
+                        .foregroundColor(.white.opacity(0.85))
+                    
+                    Text("auth.login.title")
+                        .font(.system(size: 20, weight: .bold))
+                        .foregroundColor(.white)
+                    
+                    Text("auth.login.subtitle")
+                        .font(.subheadline)
+                        .foregroundColor(.white.opacity(0.7))
+                        .multilineTextAlignment(.center)
+                    
+                    Button {
+                        showLogin = true
+                    } label: {
+                        Text("auth.login.button")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 14)
+                            .background(
+                                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                    .fill(LinearGradient(colors: [.cyan, .blue], startPoint: .leading, endPoint: .trailing))
+                            )
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.top, 16)
+                    .buttonStyle(.plain)
+                    .padding(.top, 6)
+                    
+                    Button { dismiss() } label: {
+                        Text("common.close")
+                            .font(.subheadline.weight(.medium))
+                            .foregroundColor(.white.opacity(0.75))
+                    }
+                    .buttonStyle(.plain)
                 }
+                .padding(24)
+                .background(
+                    RoundedRectangle(cornerRadius: 20, style: .continuous)
+                        .fill(Theme.Colors.adaptiveCard)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                                .stroke(Color.white.opacity(0.14), lineWidth: 1)
+                        )
+                )
+                .padding(.horizontal, 20)
             }
-            .navigationTitle("Редагувати профіль")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button { dismiss() } label: { Text("Скасувати").foregroundColor(.white.opacity(0.7)) }
-                }
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button { saveProfile() } label: { Text("Зберегти").fontWeight(.semibold).foregroundColor(.cyan) }
-                        .disabled(!hasChanges)
+                ToolbarItem(placement: .topBarLeading) {
+                    Button { dismiss() } label: {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(.white.opacity(0.7))
+                    }
                 }
             }
-            .safeAreaInset(edge: .bottom) { winterSaveButton }
         }
-        .onAppear { loadCurrentProfile() }
-        .onChange(of: fullName) { _, _ in hasChanges = true }
-        .onChange(of: email) { _, _ in hasChanges = true }
-        .onChange(of: phoneNumber) { _, _ in hasChanges = true }
-        .onChange(of: selectedCanton) { _, _ in hasChanges = true }
-        .onChange(of: selectedPermitType) { _, _ in hasChanges = true }
-        .onChange(of: arrivalDate) { _, _ in hasChanges = true }
-        .onChange(of: permitExpiry) { _, _ in hasChanges = true }
-        .onChange(of: selectedGoals) { _, _ in hasChanges = true }
-        .onChange(of: familySize) { _, _ in hasChanges = true }
-        .onChange(of: hasChildren) { _, _ in hasChanges = true }
-        .sheet(isPresented: $showCantonPicker) { cantonPickerSheet }
-        .sheet(isPresented: $showPermitPicker) { permitPickerSheet }
     }
     
     // MARK: - Hero (Original)

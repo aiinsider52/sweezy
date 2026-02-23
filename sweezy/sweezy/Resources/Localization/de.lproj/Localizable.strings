@@ -286,6 +286,7 @@
 "auth.login.password" = "Passwort";
 "auth.login.forgot_password" = "Passwort vergessen?";
 "auth.login.button" = "Anmelden";
+"auth.login.continue_as_guest" = "Als Gast fortfahren";
 "auth.secure_connection" = "Sichere Verbindung";
 
 "auth.reset.step.email" = "E-Mail";

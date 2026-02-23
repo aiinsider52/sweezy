@@ -2054,8 +2054,14 @@ extension Notification.Name {
 }
 
 #Preview {
-    MainTabView()
+    let lockManager = AppLockManager()
+    lockManager.userEmail = "preview@sweezy.app"
+    lockManager.userName = "Preview"
+    lockManager.isRegistered = true
+    
+    return MainTabView()
         .environmentObject(AppContainer())
-        .environmentObject(AppLockManager())
+        .environmentObject(lockManager)
         .environmentObject(ThemeManager())
+        .environmentObject(SessionManager(lockManager: lockManager))
 }

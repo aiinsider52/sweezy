@@ -41,12 +41,8 @@ struct GuidesViewRedesigned: View {
                     // Category filter chips
                     categoryFilterSection
                     
-                    // Guides list
-                    if lockManager.isRegistered {
-                        guidesListSection
-                    } else {
-                        lockedContentSection
-                    }
+                    // Public (non-account-based) content must be accessible without login (App Store 5.1.1).
+                    guidesListSection
                 }
                 .padding(.bottom, Theme.Spacing.xxxl)
             }

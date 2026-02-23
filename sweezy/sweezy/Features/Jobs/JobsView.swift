@@ -10,6 +10,7 @@ import CoreHaptics
 
 struct JobsView: View {
     @EnvironmentObject private var appContainer: AppContainer
+    @EnvironmentObject private var sessionManager: SessionManager
     @Environment(\.dismiss) private var dismiss
     
     // MARK: - State
@@ -32,6 +33,7 @@ struct JobsView: View {
     @State private var showDraftSheet: Bool = false
     @State private var draftedText: String?
     @State private var isDrafting: Bool = false
+    @State private var showLogin: Bool = false
     
     // AI Match
     @State private var showAIMatchProfile: Bool = false
@@ -184,6 +186,11 @@ struct JobsView: View {
         }
         .sheet(isPresented: $showPaywall) {
             SubscriptionView().environmentObject(appContainer)
+        }
+        .sheet(isPresented: $showLogin) {
+            // Login is presented only when a protected action is triggered (favorites / premium).
+            LoginView()
+                .environmentObject(appContainer)
         }
         .sheet(isPresented: $showAIMatchProfile) {
             AIMatchProfileSheet(
@@ -699,6 +706,12 @@ struct JobsView: View {
     }
     
     private func toggleFavorite(_ job: APIClient.JobItem) {
+        // Saving favorites is account-based. Guests must sign in first.
+        guard sessionManager.isAuthenticated else {
+            showLogin = true
+            return
+        }
+
         haptic(.medium)
         
         if favoriteIds.contains(job.id) {
@@ -738,6 +751,12 @@ struct JobsView: View {
     }
     
     private func draftApply(_ job: APIClient.JobItem) async {
+        // Premium + personalization action: require sign-in for guests.
+        guard sessionManager.isAuthenticated else {
+            await MainActor.run { showLogin = true }
+            return
+        }
+
         if !isPremium {
             showPaywall = true
             return
@@ -1714,6 +1733,13 @@ private struct DraftSheet: View {
 }
 
 #Preview {
-    JobsView()
+    let lockManager = AppLockManager()
+    lockManager.userEmail = "preview@sweezy.app"
+    lockManager.userName = "Preview"
+    lockManager.isRegistered = true
+    
+    return JobsView()
         .environmentObject(AppContainer())
+        .environmentObject(lockManager)
+        .environmentObject(SessionManager(lockManager: lockManager))
 }

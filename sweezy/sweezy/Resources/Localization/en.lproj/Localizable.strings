@@ -511,6 +511,7 @@
 "auth.login.password" = "Password";
 "auth.login.forgot_password" = "Forgot password?";
 "auth.login.button" = "Sign In";
+"auth.login.continue_as_guest" = "Continue as Guest";
 "auth.secure_connection" = "Secure connection";
 
 "auth.reset.step.email" = "Email";

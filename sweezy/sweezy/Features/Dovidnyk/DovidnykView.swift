@@ -121,13 +121,8 @@ struct GuidesContentView: View {
     
     @State private var guides: [Guide] = []
     @State private var selectedCategory: GuideCategory?
-    @StateObject private var subManager = SubscriptionManager.shared
-    @State private var entitlements: APIClient.Entitlements?
-    
-    private var isPremium: Bool {
-        if let entitlements { return entitlements.is_premium }
-        return subManager.isPremium
-    }
+    // TEMPORARY (App Store review): IAP removed, all content is unlocked.
+    private let hasPremiumAccess: Bool = true
     
     private func haptic(_ style: UIImpactFeedbackGenerator.FeedbackStyle) {
         UIImpactFeedbackGenerator(style: style).impactOccurred()
@@ -183,7 +178,7 @@ struct GuidesContentView: View {
                     NavigationLink {
                         GuideDetailView(guide: guide)
                     } label: {
-                        GuideCardCompact(guide: guide, isPremium: isPremium)
+                        GuideCardCompact(guide: guide)
                     }
                     .buttonStyle(.plain)
                 }
@@ -196,7 +191,6 @@ struct GuidesContentView: View {
             .padding(.vertical, Theme.Spacing.lg)
             .padding(.bottom, 80)
         }
-        .task { await reloadSubscription() }
         .onAppear {
             loadGuidesIfNeeded()
         }
@@ -374,10 +368,6 @@ struct GuidesContentView: View {
         .padding(.vertical, 60)
     }
     
-    private func reloadSubscription() async {
-        entitlements = try? await APIClient.fetchEntitlements()
-    }
-    
     private func loadGuidesIfNeeded() {
         // If already loaded, don't reload
         if !guides.isEmpty { return }
@@ -413,7 +403,6 @@ struct GuidesContentView: View {
 // MARK: - Compact Guide Card
 struct GuideCardCompact: View {
     let guide: Guide
-    let isPremium: Bool
     
     @EnvironmentObject private var appContainer: AppContainer
     
@@ -500,12 +489,7 @@ struct GuideCardCompact: View {
                             .foregroundColor(Theme.Colors.success)
                     }
                     
-                    // Premium lock
-                    if guide.isPremium && !isPremium {
-                        Image(systemName: "lock.fill")
-                            .font(.caption)
-                            .foregroundColor(.orange)
-                    }
+                    // TEMPORARY (App Store review): no subscription locks in this build.
                 }
             }
             

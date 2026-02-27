@@ -11,7 +11,6 @@ struct ChecklistsView: View {
     @EnvironmentObject private var lockManager: AppLockManager
     @State private var selectedCategory: ChecklistCategory?
     @State private var viewMode: ViewMode = .list
-    @State private var showPaywall = false
     @Namespace private var animation
     
     enum ViewMode: String, CaseIterable {
@@ -128,9 +127,6 @@ struct ChecklistsView: View {
             .refreshable {
                 await appContainer.contentService.refreshContent()
                 haptic(.light)
-            }
-            .sheet(isPresented: $showPaywall) {
-                SubscriptionView().environmentObject(appContainer)
             }
         }
     }

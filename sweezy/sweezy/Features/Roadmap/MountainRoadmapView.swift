@@ -15,9 +15,8 @@ struct MountainRoadmapView: View {
     @State private var showSkipConfirmation = false
     @State private var levelToSkip: RoadmapLevel?
     
-    private var isPremium: Bool {
-        appContainer.subscriptionManager.isPremium
-    }
+    // TEMPORARY (App Store review): IAP removed — roadmap is fully unlocked.
+    private var isPremium: Bool { true }
     
     var body: some View {
         ZStack {
@@ -152,15 +151,7 @@ struct MountainRoadmapView: View {
                 
                 Spacer()
                 
-                if isPremium {
-                    HStack(spacing: 4) {
-                        Image(systemName: "crown.fill")
-                            .foregroundColor(.yellow)
-                        Text("Premium")
-                            .font(.caption.bold())
-                            .foregroundColor(.yellow)
-                    }
-                }
+                // TEMPORARY: no subscription badges.
             }
             .padding(.horizontal, 24)
         }
@@ -256,15 +247,7 @@ struct LevelNode: View {
                             .background(Circle().fill(status.color))
                             .offset(x: 25, y: -25)
                         
-                        // Premium badge
-                        if level.isPremiumOnly {
-                            Image(systemName: "crown.fill")
-                                .font(.caption2)
-                                .foregroundColor(.yellow)
-                                .padding(4)
-                                .background(Circle().fill(Color.black.opacity(0.5)))
-                                .offset(x: -25, y: -25)
-                        }
+                        // TEMPORARY (App Store review): no subscription badges.
                     }
                     .scaleEffect(isActive && isAnimating ? 1.05 : 1.0)
                     .shadow(color: isActive ? MountainTheme.glowColor.opacity(0.5) : .clear, radius: 10)
@@ -321,7 +304,7 @@ struct LevelNode: View {
                 )
             }
             .buttonStyle(.plain)
-            .disabled(isLocked && !isPremium)
+            .disabled(isLocked)
         }
         .onAppear {
             if isActive {
@@ -511,32 +494,11 @@ struct LevelDetailSheet: View {
                 TaskCard(
                     task: task,
                     isCompleted: isTaskCompleted(task),
-                    isLocked: task.isPremiumOnly && !isPremium,
+                    isLocked: false,
                     onTap: {
                         handleTaskTap(task)
                     }
                 )
-            }
-            
-            // Premium tasks teaser
-            if !isPremium {
-                let premiumTasks = level.tasks.filter { $0.isPremiumOnly }
-                if !premiumTasks.isEmpty {
-                    HStack(spacing: 8) {
-                        Image(systemName: "crown.fill")
-                            .foregroundColor(.yellow)
-                        Text("\(premiumTasks.count) додаткових завдань для Premium")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        Spacer()
-                        Text("+\(premiumTasks.reduce(0) { $0 + $1.effectiveXPReward }) XP")
-                            .font(.caption.bold())
-                            .foregroundColor(.yellow)
-                    }
-                    .padding()
-                    .background(Color.yellow.opacity(0.1))
-                    .cornerRadius(12)
-                }
             }
         }
         .padding()
@@ -545,11 +507,8 @@ struct LevelDetailSheet: View {
     }
     
     private var availableTasks: [LevelTask] {
-        if isPremium {
-            return level.tasks
-        } else {
-            return level.tasks.filter { !$0.isPremiumOnly }
-        }
+        // TEMPORARY: no subscription-based filtering.
+        level.tasks
     }
     
     private var completedTasksCount: Int {
@@ -645,15 +604,7 @@ struct LevelDetailSheet: View {
                         .font(.caption)
                         .foregroundColor(.secondary)
                     
-                    if level.isPremiumOnly {
-                        Label("Premium", systemImage: "crown.fill")
-                            .font(.caption2)
-                            .foregroundColor(.yellow)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(Color.yellow.opacity(0.2))
-                            .cornerRadius(4)
-                    }
+                    // TEMPORARY: no subscription labels.
                 }
                 
                 Text(level.subtitle)
@@ -751,36 +702,15 @@ struct LevelDetailSheet: View {
                 }
             }
             
-            // Premium tips
-            if isPremium && !level.premiumTips.isEmpty {
-                Divider()
-                
-                HStack {
-                    Image(systemName: "crown.fill")
+            // TEMPORARY: show all tips without subscription labeling.
+            ForEach(level.premiumTips, id: \.self) { tip in
+                HStack(alignment: .top, spacing: 12) {
+                    Image(systemName: "star.fill")
                         .foregroundColor(.yellow)
-                    Text("Premium поради")
-                        .font(.subheadline.bold())
-                        .foregroundColor(.yellow)
-                }
-                
-                ForEach(level.premiumTips, id: \.self) { tip in
-                    HStack(alignment: .top, spacing: 12) {
-                        Image(systemName: "star.fill")
-                            .foregroundColor(.yellow)
-                            .font(.caption)
-                        Text(tip)
-                            .font(.subheadline)
-                    }
-                }
-            } else if !isPremium && !level.premiumTips.isEmpty {
-                HStack {
-                    Image(systemName: "lock.fill")
-                        .foregroundColor(.secondary)
-                    Text("\(level.premiumTips.count) додаткових порад для Premium")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                    Text(tip)
+                        .font(.subheadline)
                 }
-                .padding(.top, 8)
             }
         }
         .padding()
@@ -792,29 +722,16 @@ struct LevelDetailSheet: View {
     private var actionsSection: some View {
         VStack(spacing: 12) {
             if status == .locked {
-                if isPremium {
-                    Button {
-                        onSkip()
-                        dismiss()
-                    } label: {
-                        Label("Пропустити рівень", systemImage: "forward.fill")
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.orange)
-                            .foregroundColor(.white)
-                            .cornerRadius(12)
-                    }
-                } else {
-                    VStack(spacing: 8) {
-                        Image(systemName: "lock.fill")
-                            .font(.title)
-                            .foregroundColor(.secondary)
-                        Text("Завершіть попередній рівень на 80%")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                            .multilineTextAlignment(.center)
-                    }
-                    .padding()
+                Button {
+                    onSkip()
+                    dismiss()
+                } label: {
+                    Label("Пропустити рівень", systemImage: "forward.fill")
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.orange)
+                        .foregroundColor(.white)
+                        .cornerRadius(12)
                 }
             } else if status == .inProgress {
                 Button {
@@ -875,11 +792,7 @@ struct TaskCard: View {
                             .strikethrough(isCompleted, color: .green)
                             .lineLimit(2)
                         
-                        if task.isPremiumOnly {
-                            Image(systemName: "crown.fill")
-                                .foregroundColor(.yellow)
-                                .font(.caption2)
-                        }
+                        // TEMPORARY: no subscription markers.
                     }
                     
                     Text(task.description)

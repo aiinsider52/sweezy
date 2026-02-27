@@ -16,9 +16,6 @@ struct SettingsView: View {
     
     @State private var showingLanguageSelection = false
     @State private var showingProfileEdit = false
-    @State private var showSubscription = false
-    @State private var subscription: APIClient.SubscriptionCurrent?
-    @State private var entitlements: APIClient.Entitlements?
     
     @State private var regName: String = ""
     @State private var regEmail: String = ""
@@ -49,11 +46,6 @@ struct SettingsView: View {
                     
                     // Gamification panel
                     gamificationPanel
-                    
-                    // Premium block
-                    if !shouldHideSubscriptionPromo {
-                        subscriptionBlock
-                    }
                     
                     // Language & Privacy - Winter styled
                     VStack(alignment: .leading, spacing: Theme.Spacing.md) {
@@ -110,16 +102,10 @@ struct SettingsView: View {
             .background(AdaptivePageBackground())
             .navigationTitle("settings.title".localized)
             .navigationBarTitleDisplayMode(.large)
-            .refreshable { await reloadSubscription() }
             .featureOnboarding(.settings)
         }
         .onAppear {
             print("⚙️ SettingsView onAppear")
-            // Delay subscription reload to not block UI
-            Task {
-                try? await Task.sleep(nanoseconds: 500_000_000) // 0.5s delay
-                await reloadSubscription()
-            }
             // Seed live gamification state
             liveXP = appContainer.gamification.totalXP
             liveLastAward = appContainer.gamification.lastAwardedXP
@@ -138,31 +124,12 @@ struct SettingsView: View {
             if newPhase == .active {
                 Task {
                     try? await Task.sleep(nanoseconds: 300_000_000)
-                    await reloadSubscription()
                 }
             }
         }
         // Removed heavy .id(refreshKey) and .onReceive that caused constant redraws
-        .onReceive(NotificationCenter.default.publisher(for: .subscriptionLiveUpdated)) { _ in
-            Task {
-                try? await Task.sleep(nanoseconds: 300_000_000)
-                await reloadSubscription()
-            }
-        }
-        .onChange(of: showSubscription) { _, isPresented in
-            if !isPresented {
-                Task {
-                    try? await Task.sleep(nanoseconds: 300_000_000)
-                    await reloadSubscription()
-                }
-            }
-        }
         .sheet(isPresented: $showingPrivacy) {
             PrivacyPolicyView()
-        }
-        .sheet(isPresented: $showSubscription) {
-            SubscriptionView()
-                .environmentObject(appContainer)
         }
         // Export JSON file
         .fileExporter(isPresented: $showingExporter, document: exportDocument, contentType: .json, defaultFilename: defaultBackupFilename) { _ in }
@@ -322,77 +289,7 @@ private extension SettingsView {
             badges: badges
         )
     }
-    var subscriptionBlock: some View {
-        ZStack(alignment: .topLeading) {
-            // Soft blobs for wow-effect - winter tint
-            Circle()
-                .fill(Color.cyan.opacity(0.08))
-                .frame(width: 120, height: 120)
-                .offset(x: 12, y: -20)
-                .blur(radius: 18)
-            Circle()
-                .fill(Theme.Colors.adaptiveCard.opacity(0.7))
-                .frame(width: 160, height: 160)
-                .offset(x: 190, y: 40)
-                .blur(radius: 22)
-            
-            VStack(alignment: .leading, spacing: 12) {
-                HStack(alignment: .center, spacing: 12) {
-                    ZStack {
-                        Circle()
-                            .fill(Theme.Colors.adaptiveSurface)
-                            .frame(width: 44, height: 44)
-                        Text("🎄")
-                            .font(.system(size: 22))
-                    }
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("🎁 Premium план")
-                            .font(Theme.Typography.subheadline)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.white)
-                        Text(subscriptionText)
-                            .font(Theme.Typography.caption)
-                            .foregroundColor(.white.opacity(0.6))
-                    }
-                    Spacer(minLength: 8)
-                    if showTrialBadge {
-                        BadgePill(text: "🎅 7 днів безкоштовно")
-                    }
-                }
-                VStack(alignment: .leading, spacing: 8) {
-                    winterBenefitRow("sparkles", "AI‑інструменти для резюме та відгуків")
-                    winterBenefitRow("doc.richtext", "Повний доступ до гідів та PDF")
-                    winterBenefitRow("heart", "Необмежені збереження та избранное")
-                }
-                HStack(spacing: 12) {
-                    WinterPillButton(title: "Керувати", style: .outline) { showSubscription = true }
-                    WinterPillButton(title: "🎁 Спробувати", style: .filled) { showSubscription = true }
-                }
-                .padding(.top, 2)
-            }
-            
-            // Winter corner decoration
-            Text("❄️")
-                .font(.system(size: 16))
-                .opacity(0.8)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
-                .offset(x: -8, y: 8)
-        }
-        .padding(16)
-        .background(Theme.Colors.adaptiveCard)
-        .cornerRadius(20)
-        .overlay(
-            RoundedRectangle(cornerRadius: 20)
-                .stroke(
-                    LinearGradient(
-                        colors: [Color.cyan.opacity(0.3), Theme.Colors.adaptiveSurface],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ),
-                    lineWidth: 1
-                )
-        )
-    }
+    // TEMPORARY (App Store review): subscription/paywall UI removed.
     
     func winterBenefitRow(_ icon: String, _ text: String) -> some View {
         HStack(spacing: 8) {
@@ -646,28 +543,7 @@ private extension SettingsView {
 // MARK: - Computed
 
 private extension SettingsView {
-    var shouldHideSubscriptionPromo: Bool {
-        let status = effectiveStatus
-        switch status {
-        case "premium", "trial": return true
-        default: return true // hide until we know for sure; will be shown by explicit blocks if needed
-        }
-    }
-    var showTrialBadge: Bool {
-        let status = effectiveStatus
-        return !(status == "premium" || status == "trial")
-    }
-    var subscriptionText: String {
-        let status = effectiveStatus
-        switch status {
-        case "premium":
-            return localizedPlanText("premium")
-        case "trial":
-            return "\(localizedPlanText("trial")) до: \(formattedExpireAt ?? (effectiveExpire ?? ""))"
-        default:
-            return "AI, необмежені збереження, повний доступ"
-        }
-    }
+    // TEMPORARY (App Store review): IAP/subscription removed — treat plan as fully unlocked.
     var profileName: String {
         if let name = appContainer.userProfile?.fullName, !name.isEmpty { return name }
         return "settings.default_user_name".localized
@@ -683,105 +559,18 @@ private extension SettingsView {
     }
     
     var profileSubtitle: String {
-        let status = effectiveStatus
-        switch status {
-        case "trial":
-            return "\(localizedPlanText("trial")) до \(formattedExpireAt ?? (effectiveExpire ?? ""))"
-        case "premium":
-            return "\(localizedPlanText("premium")) активна"
-        default:
-            return "settings.profile".localized
-        }
-    }
-    
-    private var formattedExpireAt: String? {
-        guard let raw = effectiveExpire, !raw.isEmpty else { return nil }
-        let iso = ISO8601DateFormatter()
-        if let date = iso.date(from: raw) {
-            let fmt = DateFormatter()
-            fmt.dateFormat = "dd.MM.yyyy"
-            return fmt.string(from: date)
-        }
-        return effectiveExpire
-    }
-    
-    private var trialExpireDate: Date? {
-        guard let raw = effectiveExpire, !raw.isEmpty else { return nil }
-        let iso = ISO8601DateFormatter()
-        return iso.date(from: raw)
-    }
-    
-    private var effectiveStatus: String {
-        if let entitlements { return entitlements.status }
-        if let s = subscription?.status { return s }
-        return "free"
-    }
-    private var effectiveExpire: String? {
-        if let entitlements { return entitlements.expire_at }
-        return subscription?.expire_at
+        "settings.profile".localized
     }
     
     @ViewBuilder
     var profileStatusChip: some View {
-        let status = effectiveStatus
-        switch status {
-        case "trial":
-            if let d = trialExpireDate {
-                TrialCountdownChip(expireAt: d, locale: appContainer.currentLocale)
-            } else {
-                PlanChip(icon: "clock.fill", text: localizedPlanText("trial"), color: .yellow)
-            }
-        case "premium":
-            PlanChip(icon: "crown.fill", text: localizedPlanText("premium"), color: Theme.Colors.accentTurquoise)
-        default:
-            PlanChip(icon: "lock.open.fill", text: localizedPlanText("free"), color: Color.white.opacity(0.35))
-        }
-    }
-    
-    private func localizedPlanText(_ status: String) -> String {
-        let code = appContainer.currentLocale.identifier
-        switch status {
-        case "premium":
-            if code.hasPrefix("uk") { return "Преміум" }
-            if code.hasPrefix("de") { return "Premium" }
-            return "Premium"
-        case "trial":
-            if code.hasPrefix("uk") { return "Пробний" }
-            if code.hasPrefix("de") { return "Test" }
-            return "Free trial"
-        default:
-            if code.hasPrefix("uk") { return "Безкоштовно" }
-            if code.hasPrefix("de") { return "Kostenlos" }
-            return "Free"
-        }
+        PlanChip(icon: "checkmark.seal.fill", text: "Unlocked", color: Color.cyan.opacity(0.35))
     }
     
     var currentLanguageName: String {
         let languages = appContainer.localizationService.availableLanguages
         let currentCode = appContainer.currentLocale.identifier
         return languages.first { $0.code == currentCode }?.nativeName ?? "English"
-    }
-    
-    func reloadSubscription() async {
-        async let s = APIClient.subscriptionCurrent()
-        async let e = APIClient.fetchEntitlements()
-        let sub = await s
-        let ent = await e
-        
-        // Debug logging to understand why plan might still show as free
-        print("🔐 [Settings] subscriptionCurrent.status =", sub?.status ?? "nil",
-              "expire_at =", sub?.expire_at ?? "nil")
-        if let ent {
-            print("🔐 [Settings] entitlements.status =", ent.status,
-                  "is_premium =", ent.is_premium,
-                  "ai_access =", ent.ai_access,
-                  "expire_at =", ent.expire_at ?? "nil")
-        } else {
-            print("🔐 [Settings] entitlements = nil")
-        }
-        
-        subscription = sub
-        entitlements = ent
     }
 }
 

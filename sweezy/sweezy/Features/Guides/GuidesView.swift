@@ -11,15 +11,9 @@ import UIKit
 struct GuidesView: View {
     @EnvironmentObject private var appContainer: AppContainer
     @EnvironmentObject private var lockManager: AppLockManager
-    @StateObject private var subManager = SubscriptionManager.shared
     @State private var searchText = ""
     @State private var selectedCategory: GuideCategory?
     @Namespace private var animation
-    
-    // Backend subscription status
-    @State private var entitlements: APIClient.Entitlements?
-    @State private var subscription: APIClient.SubscriptionCurrent?
-    private let freeGuidesLimit: Int = 5
     
     // Optional initial category for deep-linking
     private let initialCategory: GuideCategory?
@@ -29,11 +23,11 @@ struct GuidesView: View {
         _selectedCategory = State(initialValue: initialCategory)
     }
     
-    private var isPremium: Bool {
-        if let entitlements { return entitlements.is_premium }
-        if let subscription { return subscription.status == "premium" || subscription.status == "trial" }
-        return subManager.isPremium
-    }
+    // TEMPORARY (App Store review): IAP removed, all features/content are unlocked.
+    private var isPremium: Bool { true }
+    
+    // Keep quota-related code paths harmless for now (always unlocked).
+    private let freeGuidesLimit: Int = .max
     
     private var allGuides: [Guide] {
         appContainer.contentService.searchGuides(query: "", category: nil, canton: appContainer.userProfile?.canton)
@@ -104,11 +98,9 @@ struct GuidesView: View {
             .navigationBarTitleDisplayMode(.large)
             .refreshable {
                 await appContainer.contentService.refreshContent()
-                await reloadSubscription()
                 haptic(.light)
             }
         }
-        .task { await reloadSubscription() }
     }
     
     // MARK: - Search Bar
@@ -473,13 +465,6 @@ struct GuidesView: View {
             .background(Capsule().fill(color))
     }
     
-    private func reloadSubscription() async {
-        async let sub = APIClient.subscriptionCurrent()
-        async let ent = APIClient.fetchEntitlements()
-        subscription = await sub
-        entitlements = await ent
-    }
-    
     private func haptic(_ style: UIImpactFeedbackGenerator.FeedbackStyle) {
         UIImpactFeedbackGenerator(style: style).impactOccurred()
     }
@@ -519,11 +504,7 @@ struct GuideDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var appContainer: AppContainer
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @StateObject private var subManager = SubscriptionManager.shared
-    @State private var entitlements: APIClient.Entitlements?
-    @State private var subscription: APIClient.SubscriptionCurrent?
     @State private var scrollOffset: CGFloat = 0
-    @State private var showPaywall = false
     @State private var showShareSheet = false
     @State private var showXPToast = false
     @State private var didAwardXP = false
@@ -537,11 +518,8 @@ struct GuideDetailView: View {
     // повернути логіку через guide.isPremium.
     private let freeGuidesLimit: Int = .max
     
-    private var isPremium: Bool {
-        if let entitlements { return entitlements.is_premium }
-        if let subscription { return subscription.status == "premium" || subscription.status == "trial" }
-        return subManager.isPremium
-    }
+    // TEMPORARY (App Store review): fully unlocked.
+    private var isPremium: Bool { true }
     
     private var isLocked: Bool {
         // Наразі **жоден** гайд не блокується для безкоштовних користувачів.
@@ -680,9 +658,6 @@ struct GuideDetailView: View {
         .sheet(isPresented: $showShareSheet) {
             GuidesShareSheet(items: [guide.title, guide.bodyMarkdown])
         }
-        .sheet(isPresented: $showPaywall) {
-            SubscriptionView().environmentObject(appContainer)
-        }
         .overlay(alignment: .top) {
             if showXPToast {
                 xpToast
@@ -723,12 +698,6 @@ struct GuideDetailView: View {
                     }
                 }
             }
-        }
-        .task {
-            async let sub = APIClient.subscriptionCurrent()
-            async let ent = APIClient.fetchEntitlements()
-            subscription = await sub
-            entitlements = await ent
         }
     }
     
@@ -892,59 +861,8 @@ struct GuideDetailView: View {
     // MARK: - Content Section
     @ViewBuilder
     private var contentSection: some View {
-        if isLocked {
-            ZStack {
-                // Blurred preview
-                MarkdownContentView(content: String(guide.bodyMarkdown.prefix(500)))
-                    .blur(radius: 6)
-                
-                // Lock overlay
-                VStack(spacing: 16) {
-                    Image(systemName: "lock.fill")
-                        .font(.system(size: 40))
-                        .foregroundColor(Theme.Colors.accent)
-                    
-                    let quotaLocked = (!isPremium && !appContainer.userStats.isGuideRead(id: guide.id) && appContainer.userStats.guidesReadCount >= freeGuidesLimit)
-                    Text(quotaLocked ? "Ліміт безкоштовних гідів вичерпано" : "Повний доступ з Premium")
-                        .font(Theme.Typography.headline)
-                        .foregroundColor(Theme.Colors.textPrimary)
-                    
-                    Text(quotaLocked ? "Доступно до 5 гідів на безкоштовному плані. Оформіть Premium, щоб читати без обмежень." : "Розблокуйте всі гіди, AI-інструменти та необмежені збереження")
-                        .font(Theme.Typography.subheadline)
-                        .foregroundColor(Theme.Colors.textSecondary)
-                        .multilineTextAlignment(.center)
-                    
-                    Button {
-                        showPaywall = true
-                        haptic(.medium)
-                    } label: {
-                        HStack(spacing: 8) {
-                            Image(systemName: "crown.fill")
-                            Text("Спробувати 7 днів безкоштовно")
-                        }
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 24)
-                        .padding(.vertical, 14)
-                        .background(
-                            LinearGradient(
-                                colors: [Theme.Colors.accentTurquoise, Theme.Colors.accent],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
-                        )
-                        .cornerRadius(16)
-                        .shadow(color: Theme.Colors.accent.opacity(0.4), radius: 12, x: 0, y: 6)
-                    }
-                }
-                .padding(32)
-                .background(.ultraThinMaterial)
-                .cornerRadius(24)
-                .padding(.horizontal, 20)
-            }
-        } else {
-            MarkdownContentView(content: guide.bodyMarkdown)
-        }
+        // TEMPORARY (App Store review): fully unlocked — no paywall/locked preview.
+        MarkdownContentView(content: guide.bodyMarkdown)
     }
     
     // MARK: - Template Steps Section

@@ -3,7 +3,7 @@
 //  sweezy
 //
 //  Professional CV Builder following Swiss standards.
-//  Features: step-by-step wizard, DE translation, AI enhancement (Premium).
+//  Features: step-by-step wizard, DE translation, AI enhancement.
 //
 
 import SwiftUI
@@ -28,16 +28,13 @@ struct CVBuilderView: View {
     
     // AI Enhancement
     @State private var isAIProcessing = false
-    @State private var showPremiumPrompt = false
     @State private var aiError: String?
     
     // UI State
     @State private var showTips = false
     @State private var copiedFeedback = false
     
-    // Backend subscription status (for premium / AI access)
-    @State private var entitlements: APIClient.Entitlements?
-    @State private var subscription: APIClient.SubscriptionCurrent?
+    // TEMPORARY (App Store review): IAP removed — everything is unlocked.
     
     enum PreviewLanguage: String, CaseIterable {
         case ukrainian = "uk"
@@ -89,16 +86,8 @@ struct CVBuilderView: View {
         }
     }
     
-    private var isPremium: Bool {
-        if let entitlements { return entitlements.is_premium }
-        if let subscription { return subscription.status == "premium" || subscription.status == "trial" }
-        return appContainer.subscriptionManager.isPremium
-    }
-    
-    private var hasAIAccess: Bool {
-        if let entitlements { return entitlements.ai_access }
-        return isPremium
-    }
+    private let hasPremiumAccess: Bool = true
+    private let hasAIAccess: Bool = true
     
     var body: some View {
         NavigationStack {
@@ -154,12 +143,9 @@ struct CVBuilderView: View {
             .sheet(isPresented: $showTips) {
                 swissCVTipsSheet
             }
-            .sheet(isPresented: $showPremiumPrompt) {
-                premiumPromptSheet
-            }
             .onAppear {
                 loadSavedCV()
-                Task { await reloadSubscription() }
+                // TEMPORARY: no subscription/entitlement refresh in this build.
             }
         }
     }
@@ -673,11 +659,7 @@ struct CVBuilderView: View {
     // MARK: - AI Enhancement Button
     private func aiEnhanceButton(for section: String, action: @escaping () async -> Void) -> some View {
         Button {
-            if hasAIAccess {
-                Task { await action() }
-            } else {
-                showPremiumPrompt = true
-            }
+            Task { await action() }
         } label: {
             HStack(spacing: 8) {
                 if isAIProcessing {
@@ -686,123 +668,31 @@ struct CVBuilderView: View {
                         .scaleEffect(0.8)
                 } else {
                     Image(systemName: "sparkles")
-                        .foregroundColor(hasAIAccess ? .purple : .gray)
+                        .foregroundColor(.purple)
                 }
                 
                 Text("Покращити з AI")
                     .font(.caption.bold())
-                    .foregroundColor(hasAIAccess ? .purple : .gray)
-                
-                if !hasAIAccess {
-                    Image(systemName: "lock.fill")
-                        .font(.caption2)
-                        .foregroundColor(.yellow)
-                    
-                    Text("PRO")
-                        .font(.caption2.bold())
-                        .foregroundColor(.black)
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
-                        .background(Color.yellow)
-                        .cornerRadius(4)
-                }
+                    .foregroundColor(.purple)
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 10)
             .frame(maxWidth: .infinity)
             .background(
                 RoundedRectangle(cornerRadius: 12)
-                    .fill(hasAIAccess ? Color.purple.opacity(0.15) : Color.white.opacity(0.05))
+                    .fill(Color.purple.opacity(0.15))
                     .overlay(
                         RoundedRectangle(cornerRadius: 12)
-                            .stroke(hasAIAccess ? Color.purple.opacity(0.4) : Color.white.opacity(0.1), lineWidth: 1)
+                            .stroke(Color.purple.opacity(0.4), lineWidth: 1)
                     )
             )
         }
         .disabled(isAIProcessing)
     }
     
-    // MARK: - Premium Prompt Sheet
-    private var premiumPromptSheet: some View {
-        NavigationStack {
-            VStack(spacing: 24) {
-                Spacer()
-                
-                // Icon
-                ZStack {
-                    Circle()
-                        .fill(
-                            LinearGradient(
-                                colors: [Color.purple.opacity(0.4), Color.cyan.opacity(0.3)],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-                        .frame(width: 100, height: 100)
-                        .shadow(color: .purple.opacity(0.5), radius: 20)
-                    
-                    Image(systemName: "sparkles")
-                        .font(.system(size: 44))
-                        .foregroundColor(.white)
-                }
-                
-                Text("AI-покращення резюме")
-                    .font(.title2.bold())
-                    .foregroundColor(.white)
-                
-                Text("З Premium підпискою ви отримуєте:\n\n✨ AI-покращення тексту резюме\n🇩🇪 Автоматичний переклад на німецьку\n📝 Генерація професійного профілю\n💼 Поради по швейцарських стандартах")
-                    .font(.subheadline)
-                    .foregroundColor(.white.opacity(0.8))
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 20)
-                
-                Spacer()
-                
-                Button {
-                    showPremiumPrompt = false
-                    // Navigate to subscription
-                    NotificationCenter.default.post(name: .switchTab, object: 3)
-                } label: {
-                    Text("Отримати Premium")
-                        .font(.headline)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
-                        .background(
-                            LinearGradient(
-                                colors: [Color.purple, Color.cyan],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
-                        )
-                        .cornerRadius(16)
-                        .shadow(color: .purple.opacity(0.4), radius: 10, y: 4)
-                }
-                .padding(.horizontal, 24)
-                
-                Button {
-                    showPremiumPrompt = false
-                } label: {
-                    Text("Пізніше")
-                        .font(.subheadline)
-                        .foregroundColor(.white.opacity(0.6))
-                }
-                .padding(.bottom, 20)
-            }
-            .background(
-                LinearGradient(
-                    colors: [
-                        Color(red: 0.08, green: 0.06, blue: 0.18),
-                        Color(red: 0.12, green: 0.08, blue: 0.22)
-                    ],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-                .ignoresSafeArea()
-            )
-        }
-        .presentationDetents([.medium])
-    }
+    // MARK: - Premium Prompt Sheet (removed)
+    // TEMPORARY (App Store review): IAP removed, so there is no premium upsell UI.
+    private var premiumPromptSheet: some View { EmptyView() }
     
     // MARK: - Navigation Buttons
     private var navigationButtons: some View {
@@ -1064,26 +954,7 @@ struct CVBuilderView: View {
         }
     }
     
-    private func reloadSubscription() async {
-        async let sub = APIClient.subscriptionCurrent()
-        async let ent = APIClient.fetchEntitlements()
-        let s = await sub
-        let e = await ent
-        
-        print("🔐 [CVBuilder] subscriptionCurrent.status =", s?.status ?? "nil",
-              "expire_at =", s?.expire_at ?? "nil")
-        if let e {
-            print("🔐 [CVBuilder] entitlements.status =", e.status,
-                  "is_premium =", e.is_premium,
-                  "ai_access =", e.ai_access,
-                  "expire_at =", e.expire_at ?? "nil")
-        } else {
-            print("🔐 [CVBuilder] entitlements = nil")
-        }
-        
-        subscription = s
-        entitlements = e
-    }
+    // TEMPORARY: subscription/entitlement code removed.
     
     // MARK: - CV Text Generation
     private func generateCVText(from resume: CVResume) -> String {

@@ -18,7 +18,6 @@ class AppContainer: ObservableObject {
     let localizationService: any LocalizationServiceProtocol
     let gamification: GamificationService
     let analytics: AnalyticsService
-    let subscriptionManager: SubscriptionManager
     lazy var roadmapSync: RoadmapSyncService = RoadmapSyncService(app: self)
     let telemetry: TelemetryService
     lazy var performanceMonitor: PerformanceMonitorService = PerformanceMonitorService(telemetry: telemetry)
@@ -92,14 +91,6 @@ class AppContainer: ObservableObject {
         return _crashReporter!
     }
     
-    private var _subscriptionLive: SubscriptionLiveService?
-    var subscriptionLive: SubscriptionLiveService {
-        if _subscriptionLive == nil {
-            _subscriptionLive = SubscriptionLiveService(subscriptionManager: subscriptionManager)
-        }
-        return _subscriptionLive!
-    }
-    
     // MARK: - State
     @Published var isOnboardingCompleted: Bool
     @Published var currentLocale: Locale
@@ -114,7 +105,6 @@ class AppContainer: ObservableObject {
         self.localizationService = LocalizationService()
         self.gamification = GamificationService()
         self.analytics = AnalyticsService()
-        self.subscriptionManager = SubscriptionManager()
         self.telemetry = TelemetryService()
         
         // Configure a modest URLCache to improve offline behavior

@@ -14,7 +14,6 @@ struct AppRootView: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var showGlobalReset: Bool = false
     @State private var resetToken: String? = nil
-    @State private var refreshTimer = Timer.publish(every: 60, on: .main, in: .common).autoconnect()
     
     var body: some View {
         mainContent
@@ -25,12 +24,6 @@ struct AppRootView: View {
             }
             .handleDeepLinks { link in
                 handleDeepLink(link)
-            }
-            .onReceive(refreshTimer) { _ in
-                guard scenePhase == .active else { return }
-                Task { @MainActor in
-                    await appContainer.subscriptionManager.load()
-                }
             }
             .sheet(isPresented: $showGlobalReset) {
                 PasswordResetSheet(initialEmail: lockManager.userEmail, initialToken: resetToken)
@@ -61,13 +54,8 @@ struct AppRootView: View {
         switch phase {
         case .background, .inactive:
             lockManager.appDidEnterBackground()
-            appContainer.subscriptionLive.stop()
         case .active:
             lockManager.appDidBecomeActive()
-            appContainer.subscriptionLive.start()
-            Task { @MainActor in
-                await appContainer.subscriptionManager.load()
-            }
         @unknown default:
             break
         }

@@ -31,10 +31,6 @@ struct HomeViewRedesigned: View {
     @State private var statChecklists: Int = 0
     @State private var statTemplates: Int = 0
     @State private var statHoursSaved: Int = 0
-    @State private var entitlements: APIClient.Entitlements?
-    @State private var favoritesCount: Int = 0
-    @State private var showSubscription = false
-    @State private var selectedPlan: PaywallPlan = .yearly
     @State private var dismissedNewsIDs: Set<UUID> = []
     @State private var selectedJourneyStage: JourneyStage?
     // Forces lightweight refresh on day change / foreground to keep "today focus" accurate
@@ -53,7 +49,6 @@ struct HomeViewRedesigned: View {
                             journeyRoadmapSection
                             quickActionsSection
                             recommendationsSection
-                            proCardSection
                             newsSection
                             telegramSection
                         }
@@ -108,22 +103,8 @@ struct HomeViewRedesigned: View {
             try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 sec
             
             EventBus.shared.emit(GamEvent(type: .appDailyOpen))
-            appContainer.analytics.track("daily_open", properties: ["entitlement": appContainer.subscriptionManager.isPremium ? "premium" : "free"])
-            
-            // Re-engage notification for free users (once), driven by RemoteConfig
-            if appContainer.subscriptionManager.entitlement == .free {
-                let key = "reengage_scheduled_v2"
-                if !UserDefaults.standard.bool(forKey: key) {
-                    let cfg = await appContainer.remoteConfigService.getRemoteConfig()
-                    let days = cfg?.reengageDays ?? [7, 14, 30]
-                    var scheduledAny = false
-                    for d in days {
-                        let ok = await appContainer.notificationService.scheduleReengageReminder(afterDays: d)
-                        scheduledAny = scheduledAny || ok
-                    }
-                    if scheduledAny { UserDefaults.standard.set(true, forKey: key) }
-                }
-            }
+            // TEMPORARY (App Store review): IAP removed, app is fully unlocked.
+            appContainer.analytics.track("daily_open", properties: ["entitlement": "unlocked"])
             
             // Seed stats mirrors once UI is visible
             await MainActor.run {
@@ -180,11 +161,7 @@ struct HomeViewRedesigned: View {
         .task {
             // Delay API calls
             try? await Task.sleep(nanoseconds: 1_000_000_000) // 1 sec
-            async let entitlementsTask = APIClient.fetchEntitlements()
-            async let favoritesTask = APIClient.listJobFavorites()
-            entitlements = await entitlementsTask
-            let favorites = await favoritesTask
-            favoritesCount = favorites.count       
+            // TEMPORARY: subscription / favorites sync disabled (no gating in this build).
         }
         .fullScreenCover(isPresented: $showOnboarding) {
             OnboardingView()
@@ -452,189 +429,10 @@ struct HomeViewRedesigned: View {
         }
     }
     
-    // MARK: - Pro Card (Premium Design)
+    // MARK: - Pro Card (removed)
     private var proCardSection: some View {
-        Group {
-            if shouldShowProCard {
-                ZStack {
-                    // Background with gradient and glow
-                    RoundedRectangle(cornerRadius: 28, style: .continuous)
-                        .fill(
-                            LinearGradient(
-                                colors: [
-                                    Color(red: 0.08, green: 0.12, blue: 0.18),
-                                    Color(red: 0.05, green: 0.08, blue: 0.14)
-                                ],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-                    
-                    // Ambient glow blobs
-                    Circle()
-                        .fill(
-                            RadialGradient(
-                                colors: [Theme.Colors.accentTurquoise.opacity(0.25), Color.clear],
-                                center: .center,
-                                startRadius: 10,
-                                endRadius: 120
-                            )
-                        )
-                        .frame(width: 200, height: 200)
-                        .blur(radius: 40)
-                        .offset(x: -80, y: -60)
-                    
-                    Circle()
-                        .fill(
-                            RadialGradient(
-                                colors: [Theme.Colors.accent.opacity(0.2), Color.clear],
-                                center: .center,
-                                startRadius: 10,
-                                endRadius: 100
-                            )
-                        )
-                        .frame(width: 160, height: 160)
-                        .blur(radius: 35)
-                        .offset(x: 100, y: 80)
-                    
-                    // Content
-                    VStack(alignment: .leading, spacing: Theme.Spacing.lg) {
-                        // Header with crown and badge
-                        HStack(spacing: Theme.Spacing.sm) {
-                            // Animated crown icon
-                            ZStack {
-                                Circle()
-                                    .fill(
-                                        LinearGradient(
-                                            colors: [
-                                                Color(red: 0.95, green: 0.80, blue: 0.30),
-                                                Color(red: 0.85, green: 0.65, blue: 0.20)
-                                            ],
-                                            startPoint: .topLeading,
-                                            endPoint: .bottomTrailing
-                                        )
-                                    )
-                                    .frame(width: 44, height: 44)
-                                    .shadow(color: Color(red: 0.95, green: 0.80, blue: 0.30).opacity(0.5), radius: 12, x: 0, y: 4)
-                                
-                                Image(systemName: "crown.fill")
-                                    .font(.system(size: 20, weight: .semibold))
-                                    .foregroundColor(.white)
-                            }
-                            
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text("Sweezy Pro")
-                                    .font(.system(size: 22, weight: .bold, design: .rounded))
-                                    .foregroundColor(.white)
-                                
-                                Text("Повний доступ до всіх можливостей")
-                                    .font(Theme.Typography.caption)
-                                    .foregroundColor(.white.opacity(0.7))
-                            }
-                            
-                            Spacer()
-                            
-                            // Pro badge with glow
-                            Text("PRO")
-                                .font(.system(size: 11, weight: .heavy, design: .rounded))
-                                .foregroundColor(.white)
-                                .padding(.horizontal, 10)
-                                .padding(.vertical, 5)
-                                .background(
-                                    Capsule()
-                                        .fill(
-                                            LinearGradient(
-                                                colors: [Theme.Colors.accentTurquoise, Theme.Colors.accent],
-                                                startPoint: .leading,
-                                                endPoint: .trailing
-                                            )
-                                        )
-                                )
-                                .shadow(color: Theme.Colors.accentTurquoise.opacity(0.5), radius: 8, x: 0, y: 2)
-                        }
-                        
-                        // Benefits with icons
-                        VStack(alignment: .leading, spacing: 10) {
-                            ProBenefitRow(icon: "wand.and.stars", text: "AI-генерація CV та листів", highlight: true)
-                            ProBenefitRow(icon: "doc.richtext", text: "Преміум шаблони + офлайн PDF", highlight: false)
-                            ProBenefitRow(icon: "bell.badge", text: "Безлімітні push-сповіщення", highlight: false)
-                            ProBenefitRow(icon: "infinity", text: "Необмежені збереження", highlight: false)
-                        }
-                        
-                        // Plan selector (redesigned)
-                        ProPlanSelector(selectedPlan: $selectedPlan)
-                        
-                        // CTA Button with savings info
-                        VStack(spacing: 10) {
-                            Button {
-                                UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                                showSubscription = true
-                            } label: {
-                                HStack(spacing: 8) {
-                                    Text(selectedPlan.ctaTitle)
-                                        .font(.system(size: 17, weight: .bold, design: .rounded))
-                                    Image(systemName: "arrow.right")
-                                        .font(.system(size: 14, weight: .bold))
-                                }
-                                .foregroundColor(.white)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 16)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                        .fill(
-                                            LinearGradient(
-                                                colors: [Theme.Colors.accentTurquoise, Theme.Colors.accent],
-                                                startPoint: .leading,
-                                                endPoint: .trailing
-                                            )
-                                        )
-                                )
-                                .shadow(color: Theme.Colors.accentTurquoise.opacity(0.4), radius: 16, x: 0, y: 8)
-                            }
-                            .accessibilityLabel("Оформити \(selectedPlan.displayTitle)")
-                            
-                            // Savings info
-                            HStack(spacing: 6) {
-                                Image(systemName: "tag.fill")
-                                    .font(.system(size: 12))
-                                    .foregroundColor(Theme.Colors.accentYellowSoft)
-                                Text(selectedPlan.savingsLine)
-                                    .font(Theme.Typography.caption)
-                                    .foregroundColor(.white.opacity(0.8))
-                                Text("•")
-                                    .foregroundColor(.white.opacity(0.4))
-                                Text(selectedPlan.detailLine(limitReached: isFavoritesLimitReached))
-                                    .font(Theme.Typography.caption2)
-                                    .foregroundColor(.white.opacity(0.6))
-                            }
-                        }
-                    }
-                    .padding(Theme.Spacing.xl)
-                }
-                .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 28, style: .continuous)
-                        .stroke(
-                            LinearGradient(
-                                colors: [
-                                    Color.white.opacity(0.25),
-                                    Color.white.opacity(0.05),
-                                    Theme.Colors.accentTurquoise.opacity(0.3)
-                                ],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            ),
-                            lineWidth: 1
-                        )
-                )
-                .shadow(color: Color.black.opacity(0.3), radius: 20, x: 0, y: 10)
-                .padding(.horizontal, Theme.Spacing.lg)
-                .sheet(isPresented: $showSubscription) {
-                    SubscriptionView()
-                        .environmentObject(appContainer)
-                }
-            }
-        }
+        // TEMPORARY (App Store review): paywall UI removed.
+        EmptyView()
     }
     
     // MARK: - Analytics Pinboard (Gamification)
@@ -914,17 +712,7 @@ struct HomeViewRedesigned: View {
         Calendar.current.dateComponents([.day], from: date, to: Date()).day ?? 0
     }
     
-    private var shouldShowProCard: Bool {
-        if appContainer.subscriptionManager.isPremium { return false }
-        guard let ents = entitlements else { return false }
-        if ents.is_premium { return false }
-        return true
-    }
-    
-    private var isFavoritesLimitReached: Bool {
-        guard let limit = entitlements?.favorites_limit else { return false }
-        return favoritesCount >= limit
-    }
+    // TEMPORARY (App Store review): no subscription-based gating in this build.
     
     private var estimatedHoursSaved: Int {
         max(1, appContainer.userStats.guidesReadCount * 2 + appContainer.userStats.activeChecklistsCount)
@@ -3093,179 +2881,7 @@ private func bulletRow(_ text: String) -> some View {
     }
 }
 
-// Legacy PlanToggle (kept for compatibility)
-private struct PlanToggle: View {
-    @Binding var selectedPlan: PaywallPlan
-    
-    var body: some View {
-        ProPlanSelector(selectedPlan: $selectedPlan)
-    }
-}
-
-// MARK: - Pro Card Components
-
-private struct ProBenefitRow: View {
-    let icon: String
-    let text: String
-    let highlight: Bool
-    
-    var body: some View {
-        HStack(spacing: 12) {
-            ZStack {
-                Circle()
-                    .fill(highlight
-                          ? LinearGradient(colors: [Theme.Colors.accentTurquoise.opacity(0.3), Theme.Colors.accent.opacity(0.2)], startPoint: .topLeading, endPoint: .bottomTrailing)
-                          : LinearGradient(colors: [Theme.Colors.adaptiveSurface, Color.white.opacity(0.05)], startPoint: .topLeading, endPoint: .bottomTrailing)
-                    )
-                    .frame(width: 32, height: 32)
-                
-                Image(systemName: icon)
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(highlight ? Theme.Colors.accentTurquoise : .white.opacity(0.8))
-            }
-            
-            Text(text)
-                .font(Theme.Typography.subheadline)
-                .foregroundColor(.white.opacity(0.9))
-            
-            Spacer()
-            
-            Image(systemName: "checkmark")
-                .font(.system(size: 12, weight: .bold))
-                .foregroundColor(Theme.Colors.accentTurquoise)
-        }
-    }
-}
-
-private struct ProPlanSelector: View {
-    @Binding var selectedPlan: PaywallPlan
-    @Namespace private var planAnimation
-    
-    var body: some View {
-        HStack(spacing: 12) {
-            ForEach(PaywallPlan.allCases, id: \.self) { plan in
-                Button {
-                    withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
-                        selectedPlan = plan
-                    }
-                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                } label: {
-                    ZStack {
-                        // Background
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .fill(selectedPlan == plan
-                                  ? LinearGradient(
-                                        colors: plan == .yearly
-                                            ? [Theme.Colors.accentTurquoise.opacity(0.3), Theme.Colors.accent.opacity(0.2)]
-                                            : [Color.white.opacity(0.15), Theme.Colors.adaptiveCard],
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    )
-                                  : LinearGradient(colors: [Color.white.opacity(0.05), Color.white.opacity(0.02)], startPoint: .topLeading, endPoint: .bottomTrailing)
-                            )
-                        
-                        // Selection ring
-                        if selectedPlan == plan {
-                            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                .stroke(
-                                    LinearGradient(
-                                        colors: plan == .yearly
-                                            ? [Theme.Colors.accentTurquoise, Theme.Colors.accent]
-                                            : [Color.white.opacity(0.4), Color.white.opacity(0.2)],
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    ),
-                                    lineWidth: 2
-                                )
-                                .matchedGeometryEffect(id: "planRing", in: planAnimation)
-                        } else {
-                            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                .stroke(Theme.Colors.adaptiveSurface, lineWidth: 1)
-                        }
-                        
-                        // Content
-                        VStack(spacing: 6) {
-                            // Badge for yearly
-                            if plan == .yearly {
-                                Text("НАЙКРАЩА ЦІНА")
-                                    .font(.system(size: 9, weight: .heavy, design: .rounded))
-                                    .foregroundColor(.white)
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 3)
-                                    .background(
-                                        Capsule()
-                                            .fill(
-                                                LinearGradient(
-                                                    colors: [Theme.Colors.accentTurquoise, Theme.Colors.accent],
-                                                    startPoint: .leading,
-                                                    endPoint: .trailing
-                                                )
-                                            )
-                                    )
-                            }
-                            
-                            Text(plan.displayTitle)
-                                .font(.system(size: 15, weight: .semibold, design: .rounded))
-                                .foregroundColor(selectedPlan == plan ? .white : .white.opacity(0.7))
-                            
-                            Text(plan.priceLine)
-                                .font(.system(size: 13, weight: .medium, design: .rounded))
-                                .foregroundColor(selectedPlan == plan
-                                                 ? (plan == .yearly ? Theme.Colors.accentTurquoise : .white.opacity(0.9))
-                                                 : .white.opacity(0.5))
-                        }
-                        .padding(.vertical, 16)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .frame(height: plan == .yearly ? 100 : 85)
-                }
-                .buttonStyle(PlainButtonStyle())
-            }
-        }
-    }
-}
-
-private enum PaywallPlan: CaseIterable {
-    case monthly, yearly
-    
-    var displayTitle: String {
-        switch self {
-        case .monthly: return "Щомісяця"
-        case .yearly: return "Рік"
-        }
-    }
-    
-    var priceLine: String {
-        switch self {
-        case .monthly: return "14 CHF"
-        case .yearly: return "11 CHF / міс"
-        }
-    }
-    
-    var ctaTitle: String {
-        switch self {
-        case .monthly: return "Активувати Monthly"
-        case .yearly: return "Активувати Yearly"
-        }
-    }
-    
-    var savingsLine: String {
-        switch self {
-        case .monthly: return "Гнучка оплата щомісяця"
-        case .yearly: return "Заощаджує 36 CHF/рік"
-        }
-    }
-    
-    func detailLine(limitReached: Bool) -> String {
-        if limitReached {
-            return "Досягнуто ліміту збережень • активуйте, щоб не зупинятись"
-        }
-        switch self {
-        case .monthly: return "Можна скасувати будь-коли"
-        case .yearly: return "Вигода −3 CHF/міс + бонусні шаблони"
-        }
-    }
-}
+// TEMPORARY (App Store review): paywall plan UI removed.
 
 private struct JourneyStage: Identifiable {
     let id = UUID()

@@ -11,9 +11,8 @@ struct MountainRoadmapPreviewCard: View {
     @EnvironmentObject private var appContainer: AppContainer
     @StateObject private var roadmapService = RoadmapService()
     
-    private var isPremium: Bool {
-        appContainer.subscriptionManager.isPremium
-    }
+    // TEMPORARY (App Store review): IAP removed — roadmap is fully unlocked.
+    private var isPremium: Bool { true }
     
     var body: some View {
         ZStack {

@@ -1205,8 +1205,6 @@ struct HomeSimplifiedView: View {
     @State private var guidesCount = 0
     @State private var totalXP = 0
     @State private var level = 1
-    @State private var isPremium = false
-    @State private var showSubscription = false
     
     var body: some View {
         NavigationStack {
@@ -1217,11 +1215,6 @@ struct HomeSimplifiedView: View {
                     
                     // Stats Row
                     statsRow
-                    
-                    // Premium Card
-                    if !isPremium {
-                        premiumCard
-                    }
                     
                     // Quick Actions
                     quickActionsGrid
@@ -1241,10 +1234,6 @@ struct HomeSimplifiedView: View {
                     }
                 }
             }
-            .sheet(isPresented: $showSubscription) {
-                SubscriptionView()
-                    .environmentObject(appContainer)
-            }
         }
         .onAppear { loadData() }
     }
@@ -1254,7 +1243,6 @@ struct HomeSimplifiedView: View {
         guidesCount = appContainer.userStats.guidesReadCount
         totalXP = appContainer.gamification.totalXP
         level = appContainer.gamification.level()
-        isPremium = appContainer.subscriptionManager.isPremium
     }
     
     // MARK: - Welcome Card
@@ -1284,35 +1272,6 @@ struct HomeSimplifiedView: View {
             StatCard(title: "Гіди", value: "\(guidesCount)", icon: "book.fill", color: .blue)
             StatCard(title: "XP", value: "\(totalXP)", icon: "star.fill", color: .orange)
             StatCard(title: "Рівень", value: "\(level)", icon: "trophy.fill", color: .purple)
-        }
-    }
-    
-    // MARK: - Premium Card
-    private var premiumCard: some View {
-        Button {
-            showSubscription = true
-        } label: {
-            HStack(spacing: 12) {
-                Image(systemName: "crown.fill")
-                    .font(.title2)
-                    .foregroundColor(.yellow)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Отримайте Premium")
-                        .font(.headline)
-                        .foregroundColor(.primary)
-                    Text("Доступ до всіх функцій")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-                Spacer()
-                Image(systemName: "chevron.right")
-                    .foregroundColor(.secondary)
-            }
-            .padding()
-            .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(Color.yellow.opacity(0.15))
-            )
         }
     }
     
@@ -1536,11 +1495,7 @@ struct GuideRow: View {
                             .cornerRadius(4)
                     }
                     
-                    if guide.isPremium {
-                        Image(systemName: "crown.fill")
-                            .font(.caption2)
-                            .foregroundColor(.yellow)
-                    }
+                    // TEMPORARY: IAP removed; do not show subscription-related badges.
                 }
             }
             
@@ -1777,8 +1732,6 @@ struct SettingsLiteView: View {
     
     @State private var userName = ""
     @State private var userEmail = ""
-    @State private var isPremium = false
-    @State private var showSubscription = false
     @State private var totalXP = 0
     @State private var level = 1
     @State private var guidesRead = 0
@@ -1811,19 +1764,17 @@ struct SettingsLiteView: View {
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                             
-                            // Status chip
-                            HStack(spacing: 4) {
-                                if isPremium {
-                                    Image(systemName: "crown.fill")
-                                        .font(.caption2)
-                                }
-                                Text(isPremium ? "Premium" : "Free")
+                            // TEMPORARY: IAP removed, app is fully unlocked.
+                            HStack(spacing: 6) {
+                                Image(systemName: "checkmark.seal.fill")
+                                    .font(.caption2)
+                                Text("Unlocked")
                                     .font(.caption2.bold())
                             }
                             .padding(.horizontal, 8)
                             .padding(.vertical, 4)
-                            .background(isPremium ? Color.yellow : Color.gray.opacity(0.2))
-                            .foregroundColor(isPremium ? .black : .secondary)
+                            .background(Color.cyan.opacity(0.15))
+                            .foregroundColor(.white.opacity(0.85))
                             .cornerRadius(8)
                         }
                     }
@@ -1879,30 +1830,6 @@ struct SettingsLiteView: View {
                         }
                     }
                     .padding(.vertical, 4)
-                }
-                
-                // Premium Section
-                if !isPremium {
-                    Section {
-                        Button {
-                            showSubscription = true
-                        } label: {
-                            HStack {
-                                Image(systemName: "crown.fill")
-                                    .foregroundColor(.yellow)
-                                VStack(alignment: .leading) {
-                                    Text("Отримати Premium")
-                                        .foregroundColor(.primary)
-                                    Text("Доступ до всіх функцій")
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                }
-                                Spacer()
-                                Image(systemName: "chevron.right")
-                                    .foregroundColor(.secondary)
-                            }
-                        }
-                    }
                 }
                 
                 // App Settings
@@ -1969,10 +1896,6 @@ struct SettingsLiteView: View {
                 }
             }
             .navigationTitle("Налаштування")
-            .sheet(isPresented: $showSubscription) {
-                SubscriptionView()
-                    .environmentObject(appContainer)
-            }
             .refreshable {
                 loadData()
             }
@@ -1986,7 +1909,6 @@ struct SettingsLiteView: View {
     private func loadData() {
         userName = lockManager.userName.isEmpty ? "User" : lockManager.userName
         userEmail = lockManager.userEmail
-        isPremium = appContainer.subscriptionManager.isPremium
         totalXP = appContainer.gamification.totalXP
         level = appContainer.gamification.level()
         guidesRead = appContainer.userStats.guidesReadCount

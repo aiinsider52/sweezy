@@ -10,7 +10,6 @@ import CoreHaptics
 
 struct JobsView: View {
     @EnvironmentObject private var appContainer: AppContainer
-    @EnvironmentObject private var sessionManager: SessionManager
     @Environment(\.dismiss) private var dismiss
     
     // MARK: - State
@@ -22,9 +21,6 @@ struct JobsView: View {
     @State private var favoriteIds: Set<String> = Set(UserDefaults.standard.stringArray(forKey: "job_favorite_ids") ?? [])
     @State private var didSearchOnce: Bool = false
     @State private var selectedJob: APIClient.JobItem?
-    @State private var showPaywall: Bool = false
-    @State private var subscription: APIClient.SubscriptionCurrent?
-    @State private var entitlements: APIClient.Entitlements?
     @State private var favoritesCount: Int = 0
     @State private var page: Int = 1
     @State private var canLoadMore: Bool = false
@@ -33,7 +29,6 @@ struct JobsView: View {
     @State private var showDraftSheet: Bool = false
     @State private var draftedText: String?
     @State private var isDrafting: Bool = false
-    @State private var showLogin: Bool = false
     
     // AI Match
     @State private var showAIMatchProfile: Bool = false
@@ -114,11 +109,8 @@ struct JobsView: View {
         return counts.sorted { $0.value > $1.value }.prefix(6).map { $0.key }
     }
     
-    private var isPremium: Bool {
-        if let ent = entitlements { return ent.is_premium }
-        if let sub = subscription { return sub.status == "premium" || sub.status == "trial" }
-        return false
-    }
+    // TEMPORARY (App Store review): IAP removed, all features are fully unlocked.
+    private let hasPremiumAccess: Bool = true
     
     // MARK: - Body
     var body: some View {
@@ -178,19 +170,11 @@ struct JobsView: View {
             appContainer.telemetry.info("view_open", source: "jobs", message: "JobsView opened")
         }
         .sheet(item: $selectedJob) { job in
-            JobDetailSheet(job: job, isPremium: isPremium, onDraft: { await draftApply(job) })
+            JobDetailSheet(job: job, onDraft: { await draftApply(job) })
                 .environmentObject(appContainer)
         }
         .sheet(isPresented: $showDraftSheet) {
             DraftSheet(text: draftedText, isDrafting: isDrafting)
-        }
-        .sheet(isPresented: $showPaywall) {
-            SubscriptionView().environmentObject(appContainer)
-        }
-        .sheet(isPresented: $showLogin) {
-            // Login is presented only when a protected action is triggered (favorites / premium).
-            LoginView()
-                .environmentObject(appContainer)
         }
         .sheet(isPresented: $showAIMatchProfile) {
             AIMatchProfileSheet(
@@ -229,8 +213,6 @@ struct JobsView: View {
                 selectedEmployment = EmploymentFilter(rawValue: lastEmploymentRaw) ?? .all
                 appliedCount = appliedJobIdsRaw.split(separator: ",").count
                 await performSearch()
-                subscription = await APIClient.subscriptionCurrent()
-                entitlements = await APIClient.fetchEntitlements()
                 await refreshFavoritesCount()
                 if !didSeeJobsOnboarding {
                     // Показуємо легкий onboarding лише при першому вході
@@ -701,42 +683,20 @@ struct JobsView: View {
     }
     
     private func refreshFavoritesCount() async {
-        let list = await APIClient.listJobFavorites()
-        await MainActor.run { favoritesCount = list.count }
+        // Favorites are fully available in this build.
+        // For guests (no backend token), we rely on local persistence.
+        await MainActor.run { favoritesCount = favoriteIds.count }
     }
     
     private func toggleFavorite(_ job: APIClient.JobItem) {
-        // Saving favorites is account-based. Guests must sign in first.
-        guard sessionManager.isAuthenticated else {
-            showLogin = true
-            return
-        }
-
         haptic(.medium)
         
         if favoriteIds.contains(job.id) {
             favoriteIds.remove(job.id)
-            Task { _ = await APIClient.removeJobFavorite(jobId: job.id, source: job.source) }
             favoritesCount = max(0, favoritesCount - 1)
         } else {
-            // Check limit
-            if let limit = entitlements?.favorites_limit, favoriteIds.count >= limit {
-                showPaywall = true
-                return
-            }
-            
             favoriteIds.insert(job.id)
             favoritesCount += 1
-            Task {
-                let outcome = await APIClient.addJobFavorite(job: job)
-                if case .upgradeRequired = outcome {
-                    await MainActor.run {
-                        favoriteIds.remove(job.id)
-                        favoritesCount -= 1
-                        showPaywall = true
-                    }
-                }
-            }
         }
         UserDefaults.standard.set(Array(favoriteIds), forKey: "job_favorite_ids")
     }
@@ -751,16 +711,7 @@ struct JobsView: View {
     }
     
     private func draftApply(_ job: APIClient.JobItem) async {
-        // Premium + personalization action: require sign-in for guests.
-        guard sessionManager.isAuthenticated else {
-            await MainActor.run { showLogin = true }
-            return
-        }
-
-        if !isPremium {
-            showPaywall = true
-            return
-        }
+        guard hasPremiumAccess else { return }
         
         isDrafting = true
         draftedText = ""
@@ -1613,7 +1564,6 @@ private struct JobsEmptyState: View {
 // MARK: - Job Detail Sheet
 private struct JobDetailSheet: View {
     let job: APIClient.JobItem
-    let isPremium: Bool
     let onDraft: () async -> Void
     
     @Environment(\.dismiss) private var dismiss
@@ -1666,14 +1616,10 @@ private struct JobDetailSheet: View {
                             HStack {
                                 Image(systemName: "sparkles")
                                 Text("AI Відповідь")
-                                if !isPremium {
-                                    Image(systemName: "lock.fill")
-                                        .font(.caption)
-                                }
                             }
                             .frame(maxWidth: .infinity)
                             .padding()
-                            .background(isPremium ? Color.purple : Color.gray)
+                            .background(Color.purple)
                             .foregroundColor(.white)
                             .cornerRadius(12)
                         }

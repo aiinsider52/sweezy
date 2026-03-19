@@ -27,4 +27,54 @@ struct LockOverlayView: View {
     }
 }
 
+struct LockScreenOverlay: View {
+    @EnvironmentObject private var lockManager: AppLockManager
+    
+    var body: some View {
+        ZStack {
+            Theme.Colors.primaryBackground
+                .ignoresSafeArea()
+                .overlay {
+                    Rectangle()
+                        .fill(.black.opacity(0.28))
+                        .ignoresSafeArea()
+                }
+            
+            VStack(spacing: Theme.Spacing.lg) {
+                Spacer()
+                
+                Image(systemName: biometricIcon)
+                    .font(.system(size: 64, weight: .regular))
+                    .foregroundStyle(Theme.Colors.gradientPrimaryAdaptive)
+                
+                Text("Unlock with \(lockManager.biometryDisplayName)")
+                    .font(Theme.Typography.headline)
+                    .foregroundColor(Theme.Colors.textPrimary)
+                
+                if let error = lockManager.lastAuthErrorDescription {
+                    Text(error)
+                        .font(Theme.Typography.caption)
+                        .foregroundColor(.red)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, Theme.Spacing.md)
+                }
+                
+                PrimaryButton("Unlock") {
+                    Task { _ = await lockManager.authenticate(reason: "Unlock Sweezy") }
+                }
+                .frame(maxWidth: 220)
+                
+                Spacer()
+            }
+            .padding()
+        }
+        .transition(.opacity)
+        .zIndex(1)
+    }
+    
+    private var biometricIcon: String {
+        lockManager.biometryDisplayName == "Face ID" ? "faceid" : "touchid"
+    }
+}
+
 

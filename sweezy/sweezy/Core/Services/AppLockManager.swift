@@ -18,6 +18,8 @@ final class AppLockManager: ObservableObject {
     @AppStorage("biometricsEnabled") var biometricsEnabled: Bool = false
     @Published var isLocked: Bool = false
     @Published var lastAuthErrorDescription: String?
+    @Published private(set) var isBiometryAvailable: Bool = false
+    @Published private(set) var biometryUnavailableReason: String?
     
     // Cached biometry type to avoid repeated LAContext calls during body evaluation
     private var _cachedBiometryType: LABiometryType?
@@ -41,28 +43,63 @@ final class AppLockManager: ObservableObject {
     
     /// Call this once after app launch (e.g., in onAppear or task) to cache biometry type safely
     func loadBiometryType() {
-        // Already cached
-        guard _cachedBiometryType == nil else { return }
+        let context = LAContext()
+        var error: NSError?
+        let available = context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error)
+        let type = context.biometryType
         
-        // Evaluate on the main actor; this call is lightweight and avoids Swift 6 isolation issues
-        Task { @MainActor in
-            let context = LAContext()
-            var error: NSError?
-            _ = context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error)
-            let type = context.biometryType
-            _cachedBiometryType = type
-            objectWillChange.send()
+        _cachedBiometryType = type
+        isBiometryAvailable = available && type != .none
+        biometryUnavailableReason = isBiometryAvailable ? nil : availabilityMessage(for: error)
+        
+        // Avoid persisting a lock mode that cannot be fulfilled on this device.
+        if biometricsEnabled && !isBiometryAvailable {
+            biometricsEnabled = false
+            isLocked = false
         }
     }
     
     func appDidEnterBackground() {
-        guard biometricsEnabled else { return }
+        guard biometricsEnabled, isBiometryAvailable else { return }
         isLocked = true
     }
     
     func appDidBecomeActive() {
-        guard biometricsEnabled, isLocked else { return }
+        guard biometricsEnabled else { return }
+        guard isBiometryAvailable else {
+            biometricsEnabled = false
+            isLocked = false
+            return
+        }
+        guard isLocked else { return }
         Task { _ = await authenticate(reason: "Unlock Sweezy") }
+    }
+    
+    func setBiometricsEnabled(_ enabled: Bool) async -> Bool {
+        loadBiometryType()
+        
+        guard enabled else {
+            biometricsEnabled = false
+            isLocked = false
+            lastAuthErrorDescription = nil
+            return true
+        }
+        
+        guard isBiometryAvailable else {
+            biometricsEnabled = false
+            isLocked = false
+            lastAuthErrorDescription = biometryUnavailableReason
+            return false
+        }
+        
+        biometricsEnabled = true
+        isLocked = true
+        
+        let ok = await authenticate(reason: "Enable \(biometryDisplayName)")
+        if !ok {
+            biometricsEnabled = false
+        }
+        return ok
     }
     
     func authenticate(reason: String) async -> Bool {
@@ -100,5 +137,26 @@ final class AppLockManager: ObservableObject {
         let canEvaluate = context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &authError)
         if let authError { throw authError }
         return canEvaluate
+    }
+    
+    private func availabilityMessage(for error: NSError?) -> String {
+        guard let error else {
+            return "Biometric authentication is not available on this device."
+        }
+        
+        if let laError = LAError.Code(rawValue: error.code) {
+            switch laError {
+            case .biometryNotAvailable:
+                return "Biometric authentication is not available on this device."
+            case .biometryNotEnrolled:
+                return "Set up Face ID or Touch ID in device settings to use app lock."
+            case .passcodeNotSet:
+                return "Set a device passcode before enabling biometric lock."
+            default:
+                break
+            }
+        }
+        
+        return error.localizedDescription
     }
 }

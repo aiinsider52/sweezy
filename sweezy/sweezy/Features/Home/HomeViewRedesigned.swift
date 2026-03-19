@@ -11,6 +11,7 @@ struct HomeViewRedesigned: View {
     @EnvironmentObject private var appContainer: AppContainer
     @EnvironmentObject private var lockManager: AppLockManager
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var sessionManager: SessionManager
     @Environment(\.scenePhase) private var scenePhase
     
     @AppStorage("lastSeenVersion") private var lastSeenVersion = ""
@@ -18,8 +19,6 @@ struct HomeViewRedesigned: View {
     @State private var showSettings = false
     @State private var showCVBuilder = false
     @State private var showTemplates = false
-    @State private var showJobs = false
-    @State private var showOnboarding = false
     @State private var selectedGuide: Guide?
     @State private var selectedNews: NewsItem?
     @State private var cachedFeaturedGuides: [Guide] = []
@@ -40,24 +39,30 @@ struct HomeViewRedesigned: View {
         NavigationStack {
             GeometryReader { geo in
                 ScrollView(.vertical, showsIndicators: false) {
-                    VStack(spacing: 0) {
-                        // Full hero with progress (full-bleed to the very top)
-                        heroWithProgress(topInset: geo.safeAreaInsets.top)
-                        
+                    VStack(spacing: Theme.Spacing.xl) {
+                        greetingSection(topInset: geo.safeAreaInsets.top)
+
                         VStack(spacing: Theme.Spacing.xxl) {
-                            // personalModulesSection + stats removed per design — мінімізуємо візуальний шум
-                            journeyRoadmapSection
+                            if shouldShowProgressSection {
+                                compactProgressSection
+                            }
+
+                            if shouldShowPriorityTasksSection {
+                                priorityTasksSection
+                            }
+
                             quickActionsSection
-                            recommendationsSection
-                            newsSection
+
+                            if shouldShowCuratedContentSection {
+                                curatedContentSection
+                            }
+
                             telegramSection
                         }
-                        .padding(.top, Theme.Spacing.xl)
+                        .padding(.top, Theme.Spacing.md)
                         .padding(.bottom, Theme.Spacing.xxxl)
                     }
                 }
-                // Allow hero background to extend behind the status bar
-                .ignoresSafeArea(edges: .top)
                 .background(AdaptivePageBackground())
                 .navigationBarHidden(true)
                 .navigationDestination(item: $selectedGuide) { guide in
@@ -66,7 +71,6 @@ struct HomeViewRedesigned: View {
                 .navigationDestination(item: $selectedNews) { news in
                     NewsDetailView(news: news)
                 }
-                .navigationDestination(isPresented: .constant(false)) { EmptyView() }
             }
         }
         .sheet(isPresented: $showWhatsNewSheet) {
@@ -77,6 +81,9 @@ struct HomeViewRedesigned: View {
                 .environmentObject(appContainer)
                 .environmentObject(lockManager)
                 .environmentObject(themeManager)
+                // Explicitly pass SessionManager so the sheet remains safe
+                // even if HomeViewRedesigned is ever mounted in a different context.
+                .environmentObject(sessionManager)
         }
         .sheet(isPresented: $showCVBuilder) {
             CVBuilderView()
@@ -86,6 +93,7 @@ struct HomeViewRedesigned: View {
         .sheet(isPresented: $showTemplates) {
             TemplatesView()
                 .environmentObject(appContainer)
+                .environmentObject(appContainer.accountManager)
                 .environmentObject(lockManager)
         }
         .onAppear {
@@ -93,9 +101,6 @@ struct HomeViewRedesigned: View {
             // Defer heavy operations to not block UI
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                 checkForWhatsNew()
-                if !appContainer.isOnboardingCompleted {
-                    showOnboarding = true
-                }
             }
         }
         .task {
@@ -163,14 +168,80 @@ struct HomeViewRedesigned: View {
             try? await Task.sleep(nanoseconds: 1_000_000_000) // 1 sec
             // TEMPORARY: subscription / favorites sync disabled (no gating in this build).
         }
-        .fullScreenCover(isPresented: $showOnboarding) {
-            OnboardingView()
-                .environmentObject(appContainer)
+    }
+    
+    private func greetingSection(topInset: CGFloat) -> some View {
+        VStack(alignment: .leading, spacing: Theme.Spacing.md) {
+            HStack(alignment: .top, spacing: Theme.Spacing.md) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(greetingTitle)
+                        .font(.system(size: 32, weight: .bold, design: .rounded))
+                        .foregroundColor(.white)
+                    Text(formattedGreetingDate)
+                        .font(Theme.Typography.subheadline)
+                        .foregroundColor(.white.opacity(0.78))
+                }
+                
+                Spacer()
+                
+                Button {
+                    showSettings = true
+                } label: {
+                    ZStack {
+                        Circle()
+                            .fill(Color.white.opacity(0.14))
+                            .frame(width: 48, height: 48)
+                        Circle()
+                            .stroke(Color.white.opacity(0.18), lineWidth: 1)
+                            .frame(width: 48, height: 48)
+                        Text(profileBadgeText)
+                            .font(.system(size: 18, weight: .bold, design: .rounded))
+                            .foregroundColor(.white)
+                    }
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("home.openSettingsButton")
+            }
+            
+            if lockManager.isRegistered, !lockManager.userName.isEmpty {
+                Text("home.hero.subtitle.registered".localized(with: lockManager.userName))
+                    .font(Theme.Typography.caption)
+                    .foregroundColor(.white.opacity(0.68))
+            } else {
+                Text("home.hero.subtitle.guest".localized)
+                    .font(Theme.Typography.caption)
+                    .foregroundColor(.white.opacity(0.68))
+            }
         }
-        .fullScreenCover(isPresented: $showJobs) {
-            JobsView()
-                .environmentObject(appContainer)
+        .padding(.top, topInset + Theme.Spacing.md)
+        .padding(.horizontal, Theme.Spacing.lg)
+        .padding(.bottom, Theme.Spacing.lg)
+        .background(
+            ZStack {
+                Theme.Colors.gradientHero
+                
+                HStack {
+                    Spacer()
+                    Image(systemName: "leaf.fill")
+                        .font(.system(size: 64))
+                        .foregroundColor(.white.opacity(0.06))
+                        .rotationEffect(.degrees(-25))
+                        .offset(x: 20, y: -10)
+                }
+            }
+        )
+        .overlay(alignment: .bottomLeading) {
+            Rectangle()
+                .fill(Theme.Colors.accent.opacity(0.12))
+                .frame(width: 180, height: 120)
+                .blur(radius: 50)
+                .offset(x: -20, y: 20)
         }
+        .clipShape(
+            RoundedRectangle(cornerRadius: 32, style: .continuous)
+        )
+        .padding(.horizontal, Theme.Spacing.md)
+        .padding(.top, 4)
     }
     
     // MARK: - Simplified Hero (for debugging)
@@ -190,11 +261,7 @@ struct HomeViewRedesigned: View {
         .padding(20)
         .background(
             RoundedRectangle(cornerRadius: 20)
-                .fill(LinearGradient(
-                    colors: [Color.blue.opacity(0.15), Color.purple.opacity(0.1)],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                ))
+                .fill(Theme.Colors.gradientSoft)
         )
         .padding(.horizontal, 16)
         .padding(.top, 8)
@@ -257,51 +324,52 @@ struct HomeViewRedesigned: View {
         }
     }
     
-    private var journeyRoadmapSection: some View {
-        VStack(alignment: .leading, spacing: Theme.Spacing.md) {
-            SectionHeader("home.roadmap".localized)
-            
-            // New Mountain Roadmap Preview Card
-            NavigationLink {
-                MountainRoadmapView()
-                    .environmentObject(appContainer)
-            } label: {
-                MountainRoadmapPreviewCard()
-                    .environmentObject(appContainer)
-            }
-            .buttonStyle(.plain)
-        }
-        .padding(.horizontal, Theme.Spacing.lg)
-    }
+    // PHASE 4: Re-enable when Roadmap flow is production-ready.
+//    private var journeyRoadmapSection: some View {
+//        VStack(alignment: .leading, spacing: Theme.Spacing.md) {
+//            SectionHeader("home.roadmap".localized)
+//
+//            NavigationLink {
+//                MountainRoadmapView()
+//                    .environmentObject(appContainer)
+//            } label: {
+//                MountainRoadmapPreviewCard()
+//                    .environmentObject(appContainer)
+//            }
+//            .buttonStyle(.plain)
+//        }
+//        .padding(.horizontal, Theme.Spacing.lg)
+//    }
     
     // helper funcs removed (moved into IntegrationProgressCard)
     // MARK: - Quick Actions Section
     
     private var quickActionsSection: some View {
-        VStack(spacing: Theme.Spacing.lg) {
+        VStack(spacing: Theme.Spacing.md) {
             SectionHeader("home.quick_actions".localized)
             
-            BentoQuickActionsExtended(
-                featuredItem: bentoFeaturedQuickAction,
-                primaryItems: bentoPrimaryQuickActions,
-                secondaryItems: bentoSecondaryQuickActions
-            )
+            LazyVGrid(columns: quickActionColumns, spacing: 12) {
+                ForEach(quickActionItems) { item in
+                    HomeQuickActionTile(item: item)
+                }
+            }
+            .padding(.horizontal, Theme.Spacing.lg)
         }
-        .padding(.horizontal, Theme.Spacing.lg)
     }
     
-    private var bentoFeaturedQuickAction: BentoQuickActionItem {
-        BentoQuickActionItem(
-            icon: "briefcase.fill",
-            title: "qa.jobs.title",
-            subtitle: "qa.jobs.subtitle",
-            accentColor: Color.cyan,
-            badgeText: "common.soon".localized,
-            isLocked: true
-        ) {
-            showJobs = true
-        }
-    }
+    // PHASE 4: Re-enable when Jobs flow is production-ready.
+//    private var bentoFeaturedQuickAction: BentoQuickActionItem {
+//        BentoQuickActionItem(
+//            icon: "briefcase.fill",
+//            title: "qa.jobs.title",
+//            subtitle: "qa.jobs.subtitle",
+//            accentColor: Theme.Colors.accentTurquoise,
+//            badgeText: "common.soon".localized,
+//            isLocked: true
+//        ) {
+//            showJobs = true
+//        }
+//    }
     
     private var bentoPrimaryQuickActions: [BentoQuickActionItem] {
         // Завжди 2 елементи справа для правильного layout
@@ -310,7 +378,7 @@ struct HomeViewRedesigned: View {
                 icon: "book.fill",
                 title: "qa.guides",
                 subtitle: "qa.guides.subtitle",
-                accentColor: Color.blue
+                accentColor: Theme.Colors.primary
             ) {
                 NotificationCenter.default.post(name: .switchTab, object: 1)
             },
@@ -327,19 +395,12 @@ struct HomeViewRedesigned: View {
     
     private var bentoSecondaryQuickActions: [BentoQuickActionItem] {
         [
-            BentoQuickActionItem(
-                icon: "function",
-                title: "qa.calculator",
-                subtitle: nil,
-                accentColor: Color.cyan
-            ) {
-                DeepLinkService.shared.navigate(to: .calculator)
-            },
+            // TODO: unhide when calculator is production-ready.
             BentoQuickActionItem(
                 icon: "doc.richtext",
                 title: "qa.cv_builder",
                 subtitle: nil,
-                accentColor: Color.purple
+                accentColor: Theme.Colors.accent
             ) {
                 showCVBuilder = true
             },
@@ -363,19 +424,20 @@ struct HomeViewRedesigned: View {
     }
     
     // MARK: - Jobs Promo Section
-    private var jobsPromoSection: some View {
-        VStack(spacing: 0) {
-            InteractiveCard(
-                icon: "briefcase.fill",
-                title: "qa.jobs.title".localized,
-                subtitle: "qa.jobs.subtitle".localized,
-                badge: "common.new".localized,
-                badgeColor: Theme.Colors.accent
-            ) { showJobs = true }
-            .buttonStyle(CardPressStyle())
-            .padding(.horizontal, Theme.Spacing.lg)
-        }
-    }
+    // PHASE 4: Re-enable when Jobs flow is production-ready.
+//    private var jobsPromoSection: some View {
+//        VStack(spacing: 0) {
+//            InteractiveCard(
+//                icon: "briefcase.fill",
+//                title: "qa.jobs.title".localized,
+//                subtitle: "qa.jobs.subtitle".localized,
+//                badge: "common.new".localized,
+//                badgeColor: Theme.Colors.accent
+//            ) { showJobs = true }
+//            .buttonStyle(CardPressStyle())
+//            .padding(.horizontal, Theme.Spacing.lg)
+//        }
+//    }
     
     // MARK: - Stats Section (Bento Grid)
     
@@ -570,34 +632,32 @@ struct HomeViewRedesigned: View {
     
     // MARK: - News Section
     
-    private var newsSection: some View {
-        VStack(spacing: Theme.Spacing.lg) {
-            SectionHeader("whats_new.title".localized)
-            
-			let items: [NewsItem] = {
-				let lang = appContainer.currentLocale.identifier
-				let primary = appContainer.contentService.latestNews(limit: 8, language: lang)
-				return primary.isEmpty
-				? appContainer.contentService.latestNews(limit: 8, language: nil)
-				: primary
-			}()
-			
-			if items.isEmpty {
-				Text("news.empty".localized)
-					.font(Theme.Typography.caption)
-					.foregroundColor(Theme.Colors.textTertiary)
-					.padding(.horizontal, Theme.Spacing.lg)
-			} else {
-				NewsCarousel(items: items) { item in
-					if let content = item.content, !content.isEmpty {
-						selectedNews = item
-					} else if let url = URL(string: item.url) {
-						UIApplication.shared.open(url)
-					}
-				}
-			}
-        }
-    }
+    // PHASE 4: Re-enable when News carousel flow is production-ready.
+//    private var newsSection: some View {
+//        VStack(spacing: Theme.Spacing.lg) {
+//            SectionHeader("whats_new.title".localized)
+//
+//			let items: [NewsItem] = {
+//				let lang = appContainer.currentLocale.identifier
+//				let primary = appContainer.contentService.latestNews(limit: 8, language: lang)
+//				let rawItems = primary.isEmpty
+//				? appContainer.contentService.latestNews(limit: 8, language: nil)
+//				: primary
+//                return validatedHomeNewsItems(from: rawItems)
+//			}()
+//
+//			if items.isEmpty {
+//				Text("news.empty".localized)
+//					.font(Theme.Typography.caption)
+//					.foregroundColor(Theme.Colors.textTertiary)
+//					.padding(.horizontal, Theme.Spacing.lg)
+//			} else {
+//				NewsCarousel(items: items) { item in
+//                    handleNewsCardTap(item)
+//				}
+//			}
+//        }
+//    }
     
     // MARK: - Telegram Section
     
@@ -607,6 +667,216 @@ struct HomeViewRedesigned: View {
     }
     
     // MARK: - Helpers (must stay inside HomeViewRedesigned for @EnvironmentObject access)
+    
+    private var shouldShowPriorityTasksSection: Bool {
+        !priorityTasks.isEmpty
+    }
+    
+    private var priorityTasks: [FirstWeekChecklistService.TaskItem] {
+        checklistTasks
+            .filter { !$0.isDone }
+            .sorted { $0.dueDate < $1.dueDate }
+            .prefix(3)
+            .map { $0 }
+    }
+    
+    private var compactProgressSection: some View {
+        GlassCard(innerGlow: false) {
+            HStack(spacing: Theme.Spacing.md) {
+                CompactProgressPill(
+                    icon: "bolt.fill",
+                    value: "\(statXP)",
+                    label: "XP",
+                    color: Theme.Colors.accentTurquoise
+                )
+                
+                CompactProgressPill(
+                    icon: "star.fill",
+                    value: "\(statLevel)",
+                    label: "Level",
+                    color: Theme.Colors.accent
+                )
+                
+                CompactProgressPill(
+                    icon: "flame.fill",
+                    value: "\(appContainer.gamification.currentStreak())",
+                    label: "Streak",
+                    color: Theme.Colors.accentCoral
+                )
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .padding(.horizontal, Theme.Spacing.lg)
+    }
+    
+    private var priorityTasksSection: some View {
+        VStack(alignment: .leading, spacing: Theme.Spacing.md) {
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Першочергові задачі")
+                        .font(.title3.weight(.bold))
+                        .foregroundColor(Theme.Colors.textPrimary)
+                    Text(priorityTasksSubtitle)
+                        .font(Theme.Typography.caption)
+                        .foregroundColor(Theme.Colors.textSecondary)
+                }
+                
+                Spacer()
+                
+                Button("Показать все") {
+                    NotificationCenter.default.post(
+                        name: .switchTab,
+                        object: SwitchTabPayload(tab: 1, section: .checklists)
+                    )
+                }
+                .font(Theme.Typography.caption)
+                .fontWeight(.semibold)
+                .foregroundColor(Theme.Colors.accentTurquoise)
+                .accessibilityIdentifier("home.showAllTasksButton")
+            }
+            
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    Capsule()
+                        .fill(Theme.Colors.adaptiveSurface)
+                    Capsule()
+                        .fill(
+                            LinearGradient(
+                                colors: [Theme.Colors.accentTurquoise, Theme.Colors.primary],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .frame(width: geo.size.width * firstWeekProgress)
+                }
+            }
+            .frame(height: 8)
+            
+            VStack(spacing: 10) {
+                ForEach(priorityTasks) { task in
+                    PriorityTaskRow(
+                        task: task,
+                        countdownText: countdownString(to: task.dueDate),
+                        onToggle: {
+                            appContainer.firstWeekService.toggle(task.id)
+                        }
+                    )
+                }
+            }
+        }
+        .padding(Theme.Spacing.lg)
+        .background(
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .fill(Theme.Colors.adaptiveCard)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .stroke(Theme.Colors.accentTurquoise.opacity(0.25), lineWidth: 1.5)
+        )
+        .shadow(color: Theme.Colors.accentTurquoise.opacity(0.12), radius: 18, x: 0, y: 8)
+        .padding(.horizontal, Theme.Spacing.lg)
+        .accessibilityIdentifier("home.priorityTasksSection")
+    }
+    
+    private var shouldShowProgressSection: Bool {
+        statXP > 0 || appContainer.gamification.currentStreak() > 0 || statGuides > 0 || statChecklists > 0
+    }
+    
+    private var quickActionColumns: [GridItem] {
+        [
+            GridItem(.flexible(), spacing: 12),
+            GridItem(.flexible(), spacing: 12)
+        ]
+    }
+    
+    private var quickActionItems: [HomeQuickActionItem] {
+        [
+            HomeQuickActionItem(icon: "doc.richtext", title: "qa.cv_builder".localized, accentColor: .purple, accessibilityIdentifier: "home.quickAction.cvBuilder") {
+                showCVBuilder = true
+            },
+            HomeQuickActionItem(icon: "doc.text", title: "qa.templates_short".localized, accentColor: .pink, accessibilityIdentifier: "home.quickAction.templates") {
+                showTemplates = true
+            },
+            HomeQuickActionItem(icon: "map.fill", title: "qa.map".localized, accentColor: .orange, accessibilityIdentifier: "home.quickAction.map") {
+                NotificationCenter.default.post(name: .switchTab, object: 2)
+            },
+            HomeQuickActionItem(icon: "book.fill", title: "qa.guides".localized, accentColor: .blue, accessibilityIdentifier: "home.quickAction.guides") {
+                NotificationCenter.default.post(
+                    name: .switchTab,
+                    object: SwitchTabPayload(tab: 1, section: .guides)
+                )
+            }
+        ]
+    }
+    
+    private var shouldShowCuratedContentSection: Bool {
+        !topRecommendedCards.isEmpty || featuredNewsItem != nil
+    }
+    
+    private var curatedContentSection: some View {
+        VStack(spacing: Theme.Spacing.md) {
+            SectionHeader("Рекомендований контент")
+            
+            if !topRecommendedCards.isEmpty {
+                StackedRecommendationList(
+                    cards: topRecommendedCards,
+                    onSelect: { guide in selectedGuide = guide }
+                )
+                .padding(.horizontal, Theme.Spacing.lg)
+            }
+            
+            if let featuredNewsItem {
+                FeaturedNewsInlineCard(item: featuredNewsItem) {
+                    handleNewsCardTap(featuredNewsItem)
+                }
+                .padding(.horizontal, Theme.Spacing.lg)
+            }
+        }
+    }
+    
+    private var topRecommendedCards: [RecommendationDisplay] {
+        recommendedGuides.prefix(2).map {
+            RecommendationDisplay(
+                guide: $0,
+                badgeText: badgeFor(guide: $0),
+                badgeColor: badgeColorFor(guide: $0),
+                tagline: taglineForGuide($0)
+            )
+        }
+    }
+    
+    private var featuredNewsItem: NewsItem? {
+        let lang = appContainer.currentLocale.identifier
+        let localized = appContainer.contentService.latestNews(limit: 3, language: lang)
+        let rawItems = localized.isEmpty
+            ? appContainer.contentService.latestNews(limit: 3, language: nil)
+            : localized
+        return validatedHomeNewsItems(from: rawItems).first
+    }
+    
+    private func validatedHomeNewsItems(from items: [NewsItem]) -> [NewsItem] {
+        items.filter(isValidHomeNewsItem)
+    }
+    
+    private func isValidHomeNewsItem(_ item: NewsItem) -> Bool {
+        let hasContent = !(item.content?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
+        let urlString = item.url.trimmingCharacters(in: .whitespacesAndNewlines)
+        let hasValidURL = URL(string: urlString) != nil
+        return hasContent || hasValidURL
+    }
+    
+    private func handleNewsCardTap(_ news: NewsItem) {
+        let trimmedContent = news.content?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        if !trimmedContent.isEmpty {
+            selectedNews = news
+            return
+        }
+        
+        let trimmedURL = news.url.trimmingCharacters(in: .whitespacesAndNewlines)
+        if let url = URL(string: trimmedURL), UIApplication.shared.canOpenURL(url) {
+            UIApplication.shared.open(url)
+        }
+    }
     
     private var checklistTasks: [FirstWeekChecklistService.TaskItem] {
         appContainer.firstWeekService.tasks
@@ -648,6 +918,38 @@ struct HomeViewRedesigned: View {
         }
     }
     
+    private var greetingTitle: String {
+        if lockManager.isRegistered, !lockManager.userName.isEmpty {
+            return "Привіт, \(lockManager.userName)!"
+        }
+        return "Привіт!"
+    }
+    
+    private var formattedGreetingDate: String {
+        let formatter = DateFormatter()
+        formatter.locale = appContainer.currentLocale
+        formatter.dateFormat = "EEEE, d MMMM"
+        return formatter.string(from: dayToken).capitalized
+    }
+    
+    private var profileBadgeText: String {
+        if lockManager.isRegistered, let first = lockManager.userName.first {
+            return String(first).uppercased()
+        }
+        return "⚙︎"
+    }
+    
+    private var firstWeekProgress: CGFloat {
+        CGFloat(appContainer.firstWeekService.progress)
+    }
+    
+    private var priorityTasksSubtitle: String {
+        let completed = checklistTasks.filter(\.isDone).count
+        let total = checklistTasks.count
+        guard total > 0 else { return "" }
+        return "\(completed) из \(total) выполнено"
+    }
+    
     private func checkForWhatsNew() {
         let currentVersion = Bundle.main.appVersion
         if lastSeenVersion != currentVersion && !lastSeenVersion.isEmpty {
@@ -671,8 +973,8 @@ struct HomeViewRedesigned: View {
     private var insiderMoments: [InsiderMoment] {
         let cantonName = appContainer.userProfile?.canton.localizedName ?? "Швейцарії"
         return [
-            InsiderMoment(title: "Пільги \(cantonName)", summary: "Короткий список виплат та гарантій.", icon: "bolt.fill", tag: "Benefits", accent: Color(red: 0.22, green: 0.88, blue: 0.72), gradient: [Color(red: 0.15, green: 0.75, blue: 0.65), Color(red: 0.08, green: 0.45, blue: 0.55)], isNew: true, count: 5),
-            InsiderMoment(title: "Career Pulse", summary: "3 вакансії тижня.", icon: "chart.line.uptrend.xyaxis", tag: "Jobs", accent: Color(red: 0.98, green: 0.55, blue: 0.45), gradient: [Color(red: 0.95, green: 0.45, blue: 0.35), Color(red: 0.75, green: 0.30, blue: 0.50)], isNew: false, count: 3)
+            InsiderMoment(title: "Пільги \(cantonName)", summary: "Короткий список виплат та гарантій.", icon: "bolt.fill", tag: "Benefits", accent: Theme.Colors.accentTurquoise, gradient: [Theme.Colors.primary, Theme.Colors.accentTurquoise], isNew: true, count: 5),
+            InsiderMoment(title: "Career Pulse", summary: "3 вакансії тижня.", icon: "chart.line.uptrend.xyaxis", tag: "Jobs", accent: Theme.Colors.accentCoral, gradient: [Theme.Colors.accentCoral, Theme.Colors.accent], isNew: false, count: 3)
         ]
     }
     
@@ -799,7 +1101,7 @@ private struct TelegramCommunityCard: View {
                     .offset(x: -80, y: -30)
                 
                 Circle()
-                    .fill(Color.cyan.opacity(0.15))
+                    .fill(Theme.Colors.accentTurquoise.opacity(0.15))
                     .frame(width: 100, height: 100)
                     .blur(radius: 50)
                     .offset(x: 100, y: 40)
@@ -812,7 +1114,7 @@ private struct TelegramCommunityCard: View {
                         Circle()
                             .stroke(
                                 LinearGradient(
-                                    colors: [telegramBlue, Color.cyan],
+                                    colors: [telegramBlue, Theme.Colors.accentTurquoise],
                                     startPoint: .topLeading,
                                     endPoint: .bottomTrailing
                                 ),
@@ -931,6 +1233,219 @@ private struct TelegramCardPressStyle: ButtonStyle {
         configuration.label
             .scaleEffect(configuration.isPressed ? 0.97 : 1)
             .animation(.spring(response: 0.3, dampingFraction: 0.7), value: configuration.isPressed)
+    }
+}
+
+private struct CompactProgressPill: View {
+    let icon: String
+    let value: String
+    let label: String
+    let color: Color
+    
+    var body: some View {
+        HStack(spacing: 10) {
+            ZStack {
+                Circle()
+                    .fill(color.opacity(0.18))
+                    .frame(width: 34, height: 34)
+                Image(systemName: icon)
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(color)
+            }
+            
+            VStack(alignment: .leading, spacing: 2) {
+                Text(value)
+                    .font(.system(size: 17, weight: .bold, design: .rounded))
+                    .foregroundColor(Theme.Colors.textPrimary)
+                    .monospacedDigit()
+                Text(label)
+                    .font(Theme.Typography.caption2)
+                    .foregroundColor(Theme.Colors.textTertiary)
+            }
+            
+            Spacer(minLength: 0)
+        }
+        .padding(.vertical, 4)
+    }
+}
+
+private struct HomeQuickActionItem: Identifiable {
+    let id = UUID()
+    let icon: String
+    let title: String
+    let accentColor: Color
+    let accessibilityIdentifier: String
+    let action: () -> Void
+}
+
+private struct HomeQuickActionTile: View {
+    let item: HomeQuickActionItem
+    
+    var body: some View {
+        Button(action: item.action) {
+            HStack(spacing: 12) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .fill(item.accentColor.opacity(0.16))
+                        .frame(width: 44, height: 44)
+                    Image(systemName: item.icon)
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundColor(item.accentColor)
+                }
+                
+                Text(item.title)
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundColor(Theme.Colors.textPrimary)
+                    .lineLimit(2)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                
+                Image(systemName: "arrow.right")
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundColor(Theme.Colors.textTertiary)
+            }
+            .padding(16)
+            .frame(maxWidth: .infinity, minHeight: 84)
+            .background(
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .fill(Theme.Colors.adaptiveCard)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .stroke(item.accentColor.opacity(0.18), lineWidth: 1)
+            )
+        }
+        .buttonStyle(ScaleButtonStyle(scaleAmount: 0.98))
+        .accessibilityIdentifier(item.accessibilityIdentifier)
+    }
+}
+
+private struct PriorityTaskRow: View {
+    let task: FirstWeekChecklistService.TaskItem
+    let countdownText: String?
+    let onToggle: () -> Void
+    
+    var body: some View {
+        Button(action: onToggle) {
+            HStack(spacing: 12) {
+                ZStack {
+                    Circle()
+                        .stroke(Theme.Colors.accentTurquoise.opacity(0.55), lineWidth: 2)
+                        .frame(width: 24, height: 24)
+                    if task.isDone {
+                        Circle()
+                            .fill(Theme.Colors.accentTurquoise)
+                            .frame(width: 24, height: 24)
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundColor(.white)
+                    }
+                }
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(task.title)
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(Theme.Colors.textPrimary)
+                        .multilineTextAlignment(.leading)
+                    if let details = task.details, !details.isEmpty {
+                        Text(details)
+                            .font(Theme.Typography.caption)
+                            .foregroundColor(Theme.Colors.textSecondary)
+                            .multilineTextAlignment(.leading)
+                            .lineLimit(2)
+                    }
+                }
+                
+                Spacer()
+                
+                if let countdownText {
+                    Text(countdownText)
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundColor(Theme.Colors.accentTurquoise)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(
+                            Capsule()
+                                .fill(Theme.Colors.accentTurquoise.opacity(0.12))
+                        )
+                }
+            }
+            .padding(14)
+            .background(
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .fill(Theme.Colors.secondaryBackground.opacity(0.65))
+            )
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+private struct FeaturedNewsInlineCard: View {
+    let item: NewsItem
+    let action: () -> Void
+    
+    private var accentColor: Color {
+        let tag = item.tags.first?.lowercased() ?? item.source.lowercased()
+        switch tag {
+        case "law", "legal", "юридична": return Color(red: 0.6, green: 0.4, blue: 0.9)
+        case "caritas", "help", "допомога": return Color(red: 0.9, green: 0.5, blue: 0.3)
+        case "canton", "кантон": return Color(red: 0.3, green: 0.7, blue: 0.9)
+        case "work", "робота": return Color(red: 0.3, green: 0.8, blue: 0.5)
+        case "finance", "фінанси": return Color(red: 0.95, green: 0.7, blue: 0.2)
+        default: return Color(red: 0.4, green: 0.6, blue: 0.95)
+        }
+    }
+    
+    var body: some View {
+        Button(action: action) {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(spacing: 8) {
+                    NewsTagChip(text: item.source, color: accentColor)
+                    Spacer()
+                    Text(relativeDate(item.publishedAt))
+                        .font(Theme.Typography.caption2)
+                        .foregroundColor(Theme.Colors.textTertiary)
+                }
+                
+                Text(item.title)
+                    .font(.system(size: 18, weight: .bold, design: .rounded))
+                    .foregroundColor(Theme.Colors.textPrimary)
+                    .multilineTextAlignment(.leading)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                
+                Text(item.summary)
+                    .font(Theme.Typography.caption)
+                    .foregroundColor(Theme.Colors.textSecondary)
+                    .multilineTextAlignment(.leading)
+                    .lineLimit(3)
+                
+                HStack {
+                    Text("Читати")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(accentColor)
+                    Spacer()
+                    Image(systemName: "arrow.right")
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundColor(accentColor)
+                }
+            }
+            .padding(18)
+            .background(
+                RoundedRectangle(cornerRadius: 22, style: .continuous)
+                    .fill(Theme.Colors.adaptiveCard)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 22, style: .continuous)
+                    .stroke(accentColor.opacity(0.18), lineWidth: 1)
+            )
+        }
+        .buttonStyle(ScaleButtonStyle(scaleAmount: 0.98))
+    }
+    
+    private func relativeDate(_ date: Date) -> String {
+        let formatter = RelativeDateTimeFormatter()
+        formatter.locale = Locale.current
+        formatter.unitsStyle = .short
+        return formatter.localizedString(for: date, relativeTo: Date())
     }
 }
 
@@ -1092,12 +1607,12 @@ private struct BentoLevelCard: View {
     
     private var levelAccent: Color {
         switch level {
-        case 1: return Color.cyan
-        case 2: return Color(red: 0.4, green: 0.85, blue: 0.65)
-        case 3: return Color(red: 0.55, green: 0.5, blue: 1.0)
-        case 4: return Color(red: 1.0, green: 0.65, blue: 0.3)
-        case 5: return Color(red: 1.0, green: 0.4, blue: 0.5)
-        default: return Color(red: 1.0, green: 0.85, blue: 0.3)
+        case 1: return Theme.Colors.accentTurquoise
+        case 2: return Theme.Colors.primary
+        case 3: return Theme.Colors.accent
+        case 4: return Theme.Colors.accentCoral
+        case 5: return Theme.Colors.accentYellowSoft
+        default: return Theme.Colors.accent
         }
     }
     
@@ -1434,21 +1949,10 @@ private struct RecommendationCard: View {
                             lineWidth: 1
                         )
                     
-                    // Corner snowflakes (winter theme only)
-                    if WinterTheme.isActive {
-                        CornerSnowflakes()
-                            .padding(8)
-                    }
                 }
             )
             .shadow(color: Color.black.opacity(0.06), radius: 12, x: 0, y: 6)
-            .apply {
-                if WinterTheme.isActive {
-                    $0.frostFrame(cornerRadius: 18, lineWidth: 1.5)
-                } else {
-                    $0
-                }
-            }
+            
         }
         .buttonStyle(RecommendationCardPressStyle())
     }
@@ -1668,8 +2172,8 @@ private struct WeekStripFocusView: View {
                 .fill(
                     LinearGradient(
                         colors: [
-                            Color(red: 0.15, green: 0.15, blue: 0.2).opacity(0.5),
-                            Color(red: 0.1, green: 0.1, blue: 0.15).opacity(0.3)
+                            Theme.Colors.primary.opacity(0.15),
+                            Theme.Colors.primary.opacity(0.08)
                         ],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
@@ -1705,7 +2209,7 @@ private struct WeekStripFocusView: View {
                 icon: "calendar",
                 value: "\(weekTasks.count)",
                 label: "тиждень",
-                color: Color.cyan
+                color: Theme.Colors.accentTurquoise
             )
             
             Divider()
@@ -1756,7 +2260,7 @@ private struct QuickTaskPreview: View {
             // Іконка з індикатором
             ZStack {
                 Circle()
-                    .fill(isUrgent ? Color.orange.opacity(0.2) : Color.cyan.opacity(0.2))
+                    .fill(isUrgent ? Color.orange.opacity(0.2) : Theme.Colors.accentTurquoise.opacity(0.2))
                     .frame(width: 40, height: 40)
                 
                 Image(systemName: isUrgent ? "exclamationmark.circle.fill" : "arrow.right.circle.fill")
@@ -1831,7 +2335,7 @@ private struct ExpandableDayTasks: View {
                     .padding(.vertical, 3)
                     .background(
                         Capsule()
-                            .fill(day.isToday ? Color.cyan : Color.gray.opacity(0.5))
+                            .fill(day.isToday ? Theme.Colors.accentTurquoise : Color.gray.opacity(0.5))
                     )
             }
             .padding(.horizontal, 4)
@@ -2010,13 +2514,13 @@ private struct WeekDayCell: View {
                         Circle()
                             .fill(
                                 LinearGradient(
-                                    colors: [Color.cyan, Color.blue],
+                                    colors: [Theme.Colors.accentTurquoise, Theme.Colors.primary],
                                     startPoint: .topLeading,
                                     endPoint: .bottomTrailing
                                 )
                             )
                             .frame(width: 36, height: 36)
-                            .shadow(color: Color.cyan.opacity(0.5), radius: 8, x: 0, y: 4)
+                            .shadow(color: Theme.Colors.accentTurquoise.opacity(0.5), radius: 8, x: 0, y: 4)
                     } else if isSelected {
                         Circle()
                             .fill(Color.white.opacity(0.15))
@@ -2032,7 +2536,7 @@ private struct WeekDayCell: View {
                 HStack(spacing: 3) {
                     ForEach(0..<min(day.tasksCount, 3), id: \.self) { _ in
                         Circle()
-                            .fill(day.isToday ? Color.cyan : Color.gray.opacity(0.5))
+                            .fill(day.isToday ? Theme.Colors.accentTurquoise : Color.gray.opacity(0.5))
                             .frame(width: 4, height: 4)
                     }
                     if day.tasksCount > 3 {
@@ -2479,7 +2983,7 @@ private struct JourneyRoadmapView: View {
                     Circle()
                         .fill(
                             RadialGradient(
-                                colors: [Color.cyan.opacity(0.15), Color.clear],
+                                colors: [Theme.Colors.accentTurquoise.opacity(0.15), Color.clear],
                                 center: .center,
                                 startRadius: 20,
                                 endRadius: 180
@@ -2492,7 +2996,7 @@ private struct JourneyRoadmapView: View {
                     Circle()
                         .fill(
                             RadialGradient(
-                                colors: [Color.purple.opacity(0.12), Color.clear],
+                                colors: [Theme.Colors.accent.opacity(0.12), Color.clear],
                                 center: .center,
                                 startRadius: 20,
                                 endRadius: 200
@@ -2518,8 +3022,8 @@ private struct JourneyRoadmapView: View {
                             ),
                             style: StrokeStyle(lineWidth: 5, lineCap: .round, lineJoin: .round)
                         )
-                        .shadow(color: Color.cyan.opacity(glowOpacity), radius: 12, x: 0, y: 0)
-                        .shadow(color: Color.purple.opacity(glowOpacity * 0.6), radius: 20, x: 0, y: 0)
+                        .shadow(color: Theme.Colors.accentTurquoise.opacity(glowOpacity), radius: 12, x: 0, y: 0)
+                        .shadow(color: Theme.Colors.accent.opacity(glowOpacity * 0.6), radius: 20, x: 0, y: 0)
                     
                     // Dashed overlay for texture
                     routePathShape(positions: positions)
@@ -2665,8 +3169,8 @@ private struct JourneyRoadmapView: View {
                             LinearGradient(
                                 colors: [
                                     Color.white.opacity(0.2),
-                                    Color.cyan.opacity(0.1),
-                                    Color.purple.opacity(0.1),
+                                    Theme.Colors.accentTurquoise.opacity(0.1),
+                                    Theme.Colors.accent.opacity(0.1),
                                     Color.white.opacity(0.15)
                                 ],
                                 startPoint: .topLeading,
@@ -3132,15 +3636,14 @@ struct GamificationLevelCard: View {
         return CGFloat(xpInCurrentLevel) / CGFloat(max(1, xpNeededForLevel))
     }
     
-    // Accent color based on level
     private var levelAccent: Color {
         switch level {
-        case 1: return Color.cyan
-        case 2: return Color(red: 0.4, green: 0.85, blue: 0.65) // emerald
-        case 3: return Color(red: 0.55, green: 0.5, blue: 1.0)  // violet
-        case 4: return Color(red: 1.0, green: 0.65, blue: 0.3)  // amber
-        case 5: return Color(red: 1.0, green: 0.4, blue: 0.5)   // rose
-        default: return Color(red: 1.0, green: 0.85, blue: 0.3) // gold
+        case 1: return Theme.Colors.accentTurquoise
+        case 2: return Theme.Colors.primary
+        case 3: return Theme.Colors.accent
+        case 4: return Theme.Colors.accentCoral
+        case 5: return Theme.Colors.accentYellowSoft
+        default: return Theme.Colors.accent
         }
     }
     

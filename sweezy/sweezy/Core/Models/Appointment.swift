@@ -25,6 +25,7 @@ struct Appointment: Codable, Identifiable, Hashable {
     var updatedAt: Date
     
     init(
+        id: UUID = UUID(),
         title: String,
         description: String? = nil,
         category: AppointmentCategory,
@@ -33,9 +34,13 @@ struct Appointment: Codable, Identifiable, Hashable {
         location: AppointmentLocation? = nil,
         contactInfo: ContactInfo? = nil,
         reminderSettings: ReminderSettings = ReminderSettings(),
-        notes: String = ""
+        status: AppointmentStatus = .scheduled,
+        notes: String = "",
+        attachments: [String] = [],
+        createdAt: Date = Date(),
+        updatedAt: Date = Date()
     ) {
-        self.id = UUID()
+        self.id = id
         self.title = title
         self.description = description
         self.category = category
@@ -44,11 +49,36 @@ struct Appointment: Codable, Identifiable, Hashable {
         self.location = location
         self.contactInfo = contactInfo
         self.reminderSettings = reminderSettings
-        self.status = .scheduled
+        self.status = status
         self.notes = notes
-        self.attachments = []
-        self.createdAt = Date()
-        self.updatedAt = Date()
+        self.attachments = attachments
+        self.createdAt = createdAt
+        self.updatedAt = updatedAt
+    }
+
+    func updating(
+        title: String,
+        description: String?,
+        category: AppointmentCategory,
+        dateTime: Date,
+        location: AppointmentLocation?
+    ) -> Appointment {
+        Appointment(
+            id: id,
+            title: title,
+            description: description,
+            category: category,
+            dateTime: dateTime,
+            duration: duration,
+            location: location,
+            contactInfo: contactInfo,
+            reminderSettings: reminderSettings,
+            status: status,
+            notes: notes,
+            attachments: attachments,
+            createdAt: createdAt,
+            updatedAt: Date()
+        )
     }
     
     /// End time of appointment

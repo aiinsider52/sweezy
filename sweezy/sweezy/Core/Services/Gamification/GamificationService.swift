@@ -232,27 +232,6 @@ final class GamificationService: ObservableObject {
         if totalXP >= 100 { newBadges.append("reader_5") }
         if totalXP >= 150 { newBadges.append("organizer_1") }
         
-        // Winter badges (Dec 15 - Jan 10)
-        if WinterTheme.isActive {
-            // Winter Pioneer - first launch during winter
-            if UserDefaults.standard.bool(forKey: "winter_first_launch_2024") {
-                newBadges.append("winter_pioneer")
-            } else {
-                UserDefaults.standard.set(true, forKey: "winter_first_launch_2024")
-                newBadges.append("winter_pioneer")
-            }
-            
-            // Festive Organizer - 5+ checklists completed in December
-            if totalXP >= 50 && Calendar.current.component(.month, from: Date()) == 12 {
-                newBadges.append("festive_organizer")
-            }
-            
-            // New Year Hero - 10+ guides read during festive period
-            if totalXP >= 100 {
-                newBadges.append("new_year_hero")
-            }
-        }
-        
         badges = newBadges
     }
     

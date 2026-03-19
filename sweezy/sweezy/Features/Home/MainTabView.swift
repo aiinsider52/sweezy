@@ -10,6 +10,8 @@ import MapKit
 
 struct MainTabView: View {
     @State private var selectedTab = 0
+    @State private var requestedDovidnykSection: DovidnykRouteSection? = nil
+    @State private var requestedDovidnykRouteID = UUID()
     
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -25,7 +27,10 @@ struct MainTabView: View {
                 .tag(0)
             
             // Tab 1 - Довідник (Guides + Checklists unified)
-            LazyDovidnykWrapper()
+            LazyDovidnykWrapper(
+                requestedSection: requestedDovidnykSection,
+                routeID: requestedDovidnykRouteID
+            )
                 .tabItem {
                     Label {
                         Text("guides.title".localized)
@@ -61,120 +66,51 @@ struct MainTabView: View {
             print("📱 MainTabView appeared")
         }
         .onReceive(NotificationCenter.default.publisher(for: .switchTab)) { output in
-            if let index = output.object as? Int {
+            if let payload = output.object as? SwitchTabPayload {
+                selectedTab = payload.tab
+                if payload.tab == 1 {
+                    requestedDovidnykSection = payload.section
+                    requestedDovidnykRouteID = payload.routeID
+                }
+            } else if let index = output.object as? Int {
                 selectedTab = index
             }
         }
     }
 }
 
-// MARK: - New Year Tab Icon (Festive themed icons matching sections)
+enum DovidnykRouteSection: String {
+    case guides
+    case checklists
+}
+
+struct SwitchTabPayload {
+    let tab: Int
+    let section: DovidnykRouteSection?
+    let routeID: UUID
+    
+    init(tab: Int, section: DovidnykRouteSection? = nil, routeID: UUID = UUID()) {
+        self.tab = tab
+        self.section = section
+        self.routeID = routeID
+    }
+}
+
+// MARK: - Tab Icon
 private struct NewYearTabIcon: View {
     let baseSystemName: String
     let isSelected: Bool
     
-    /// Returns a festive icon that matches the section's meaning
-    private var festiveIcon: String {
-        // Check if winter theme is active
-        guard WinterTheme.isActive else {
-            return baseSystemName
-        }
-        
-        switch baseSystemName {
-        case "house.fill":
-            return "🏠"  // Will use emoji for home with Christmas tree
-        case "book.fill":
-            return "📚"  // Will use emoji for guides  
-        case "map.fill":
-            return "🗺️"  // Will use emoji for map
-        case "gearshape.fill":
-            return "⚙️"  // Will use emoji for settings
-        default:
-            return baseSystemName
-        }
-    }
-    
-    /// SF Symbol for winter mode
-    private var winterIcon: String {
-        switch baseSystemName {
-        case "house.fill":
-            return "sparkles"                // Magical home vibe
-        case "book.fill":
-            return "text.book.closed.fill"   // Knowledge/guides
-        case "map.fill":
-            return "snowflake"               // Snowy location
-        case "gearshape.fill":
-            return "gift.fill"               // Settings as gift
-        default:
-            return baseSystemName
-        }
-    }
-    
-    /// Main icon color
     private var iconColor: Color {
-        guard WinterTheme.isActive else {
-            return isSelected ? Color.cyan : Color.white.opacity(0.7)
-        }
-        
-        switch baseSystemName {
-        case "house.fill":
-            return isSelected ? Color.cyan : Color.cyan.opacity(0.5)
-        case "book.fill":
-            return isSelected ? Color.white : Color.white.opacity(0.6)
-        case "map.fill":
-            return isSelected ? Color.white : Color.white.opacity(0.5)
-        case "gearshape.fill":
-            return isSelected ? Color.red.opacity(0.9) : Color.red.opacity(0.5)
-        default:
-            return isSelected ? Color.cyan : Color.white.opacity(0.7)
-        }
-    }
-    
-    /// Decoration emoji for each tab
-    private var decorationEmoji: String {
-        guard WinterTheme.isActive else { return "" }
-        
-        switch baseSystemName {
-        case "house.fill":
-            return "🎄"  // Christmas tree for home
-        case "book.fill":
-            return "❄️"  // Snowflake for guides
-        case "map.fill":
-            return "⛄"  // Snowman for map
-        case "gearshape.fill":
-            return "🎁"  // Gift for settings
-        default:
-            return "❄️"
-        }
+        isSelected ? Theme.Colors.primary : Theme.Colors.textTertiary
     }
     
     var body: some View {
-        ZStack {
-            if WinterTheme.isActive {
-                // Winter/New Year themed icon with emoji decoration
-                ZStack {
-                    // Main SF Symbol icon
-                    Image(systemName: winterIcon)
-                        .font(.system(size: 22, weight: .semibold))
-                        .foregroundColor(iconColor)
-                        .shadow(color: isSelected ? iconColor.opacity(0.6) : Color.clear,
-                                radius: 6, x: 0, y: 2)
-                    
-                    // Festive emoji decoration
-                    Text(decorationEmoji)
-                        .font(.system(size: 10))
-                        .offset(x: 10, y: -10)
-                        .opacity(isSelected ? 1 : 0.6)
-                }
-            } else {
-                // Regular icon (non-winter)
-                Image(systemName: baseSystemName)
-                    .font(.system(size: 21, weight: .semibold))
-                    .foregroundColor(iconColor)
-                    .shadow(color: isSelected ? Color.cyan.opacity(0.6) : Color.clear,
-                            radius: 6, x: 0, y: 2)
-            }
-        }
+        Image(systemName: baseSystemName)
+            .font(.system(size: 21, weight: .semibold))
+            .foregroundColor(iconColor)
+            .shadow(color: isSelected ? Theme.Colors.primary.opacity(0.4) : Color.clear,
+                    radius: 6, x: 0, y: 2)
     }
 }
 
@@ -349,8 +285,8 @@ struct MapPlaceholderView: View {
             .background(
                 LinearGradient(
                     colors: [
-                        Color(red: 0.05, green: 0.1, blue: 0.2),
-                        Color(red: 0.08, green: 0.15, blue: 0.28)
+                        Theme.Colors.primaryDark,
+                        Theme.Colors.primary.opacity(0.7)
                     ],
                     startPoint: .top,
                     endPoint: .bottom
@@ -765,8 +701,8 @@ struct PlaceDetailSheet: View {
             // Winter gradient background
             LinearGradient(
                 colors: [
-                    Color(red: 0.06, green: 0.1, blue: 0.18),
-                    Color(red: 0.08, green: 0.14, blue: 0.24)
+                    Theme.Colors.darkBackground,
+                    Theme.Colors.primaryDark.opacity(0.9)
                 ],
                 startPoint: .top,
                 endPoint: .bottom
@@ -1640,7 +1576,7 @@ struct ChecklistRow: View {
                 
                 if progress >= 1.0 {
                     Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(.green)
+                        .foregroundColor(Theme.Colors.primary)
                 }
             }
             
@@ -1648,11 +1584,11 @@ struct ChecklistRow: View {
             GeometryReader { geo in
                 ZStack(alignment: .leading) {
                     RoundedRectangle(cornerRadius: 2)
-                        .fill(Color(.systemGray5))
+                        .fill(Theme.Colors.primaryLight.opacity(0.15))
                         .frame(height: 4)
                     
                     RoundedRectangle(cornerRadius: 2)
-                        .fill(checklist.category.swiftUIColor)
+                        .fill(Theme.Colors.primary)
                         .frame(width: geo.size.width * progress, height: 4)
                 }
             }
@@ -1701,18 +1637,18 @@ struct ChecklistStepRow: View {
             HStack(spacing: 12) {
                 Image(systemName: isCompleted ? "checkmark.circle.fill" : "circle")
                     .font(.title2)
-                    .foregroundColor(isCompleted ? .green : .secondary)
+                    .foregroundColor(isCompleted ? Theme.Colors.primary : Theme.Colors.textTertiary)
                 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(step.title)
                         .font(.subheadline)
-                        .strikethrough(isCompleted)
-                        .foregroundColor(isCompleted ? .secondary : .primary)
+                        .strikethrough(isCompleted, color: Theme.Colors.textTertiary)
+                        .foregroundColor(isCompleted ? Theme.Colors.textTertiary : Theme.Colors.textPrimary)
                     
                     if !step.description.isEmpty {
                         Text(step.description)
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(Theme.Colors.textSecondary)
                             .lineLimit(2)
                     }
                 }
@@ -1764,18 +1700,6 @@ struct SettingsLiteView: View {
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                             
-                            // TEMPORARY: IAP removed, app is fully unlocked.
-                            HStack(spacing: 6) {
-                                Image(systemName: "checkmark.seal.fill")
-                                    .font(.caption2)
-                                Text("Unlocked")
-                                    .font(.caption2.bold())
-                            }
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(Color.cyan.opacity(0.15))
-                            .foregroundColor(.white.opacity(0.85))
-                            .cornerRadius(8)
                         }
                     }
                     .padding(.vertical, 8)

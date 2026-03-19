@@ -527,6 +527,10 @@ struct GuideDetailView: View {
         return false
     }
     
+    private var calculatedReadingMinutes: Int {
+        max(1, guide.bodyMarkdown.split(whereSeparator: { $0.isWhitespace || $0.isNewline }).count / 200)
+    }
+    
     private var readingProgress: Double {
         // Simple scroll-based progress
         let maxScroll: CGFloat = 1000
@@ -580,7 +584,7 @@ struct GuideDetailView: View {
             // Reading progress bar
             GeometryReader { geo in
                 Rectangle()
-                    .fill(guide.category.swiftUIColor)
+                    .fill(Theme.Colors.primary)
                     .frame(width: geo.size.width * readingProgress, height: 3)
             }
             .frame(height: 3)
@@ -645,15 +649,8 @@ struct GuideDetailView: View {
             }
         }
         .background(
-            ZStack {
-                Theme.Colors.primaryBackground
-                    .ignoresSafeArea()
-                
-                // Winter theme overlay
-                if WinterTheme.isActive {
-                    WinterSceneLite(intensity: .light)
-                }
-            }
+            Theme.Colors.primaryBackground
+                .ignoresSafeArea()
         )
         .sheet(isPresented: $showShareSheet) {
             GuidesShareSheet(items: [guide.title, guide.bodyMarkdown])
@@ -721,40 +718,13 @@ struct GuideDetailView: View {
                 LinearGradient(colors: [.clear, .black.opacity(0.4)], startPoint: .top, endPoint: .bottom)
             )
             
-            // Winter frost overlay
-            if WinterTheme.isActive {
-                LinearGradient(
-                    colors: [
-                        Theme.Colors.adaptiveSurface,
-                        Color.clear,
-                        Color.cyan.opacity(0.05)
-                    ],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .frame(height: 260)
-                
-                // Corner snowflakes
-                Text("❄️")
-                    .font(.system(size: 24))
-                    .opacity(0.8)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
-                    .offset(x: -16, y: 16)
-                
-                Text("✨")
-                    .font(.system(size: 16))
-                    .opacity(0.7)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-                    .offset(x: 16, y: 20)
-            }
-            
             // Content
             VStack(alignment: .leading, spacing: 12) {
                 // Badges
                 HStack(spacing: 8) {
                     categoryBadge
                     if guide.isNew {
-                        Text(WinterTheme.isActive ? "🎄 NEW" : "NEW")
+                        Text("NEW")
                             .font(.system(size: 10, weight: .bold))
                             .foregroundColor(.white)
                             .padding(.horizontal, 8)
@@ -798,10 +768,10 @@ struct GuideDetailView: View {
                 
                 // Meta
                 HStack(spacing: 16) {
-                    Label("\(guide.estimatedReadingTime) хв читання", systemImage: "clock")
+                    Label("≈ \(calculatedReadingMinutes) хв читання", systemImage: "clock")
                     Label(formatDate(guide.lastUpdated), systemImage: "calendar")
                 }
-                .font(Theme.Typography.caption)
+                .font(.system(size: 13, weight: .regular))
                 .foregroundColor(.white.opacity(0.8))
             }
             .padding(20)
@@ -1227,69 +1197,28 @@ struct LinkRow: View {
 struct MarkdownContentView: View {
     let content: String
     
+    var estimatedMinutes: Int {
+        max(1, content.split(whereSeparator: { $0.isWhitespace || $0.isNewline }).count / 200)
+    }
+    
     var body: some View {
-        VStack(alignment: .leading, spacing: Theme.Spacing.md) {
-            ForEach(parseMarkdown(content), id: \.id) { element in
-                element.view
+        let blocks = Self.parseBlocks(content)
+        VStack(alignment: .leading, spacing: 0) {
+            ForEach(Array(blocks.enumerated()), id: \.offset) { _, block in
+                blockView(block)
             }
         }
+        .tint(Theme.Colors.primary)
     }
     
-    private func parseMarkdown(_ content: String) -> [MarkdownElement] {
-        let lines = content.components(separatedBy: .newlines)
-        var elements: [MarkdownElement] = []
-        
-        for line in lines {
-            if line.hasPrefix("# ") {
-                elements.append(.heading1(String(line.dropFirst(2))))
-            } else if line.hasPrefix("## ") {
-                elements.append(.heading2(String(line.dropFirst(3))))
-            } else if line.hasPrefix("### ") {
-                elements.append(.heading3(String(line.dropFirst(4))))
-            } else if line.hasPrefix("> ") {
-                elements.append(.callout(String(line.dropFirst(2))))
-            } else if line.trimmingCharacters(in: .whitespaces) == "---" {
-                elements.append(.separator)
-            } else if line.hasPrefix("- [ ] ") {
-                elements.append(.task(text: String(line.dropFirst(6)), done: false))
-            } else if line.hasPrefix("- [x] ") || line.hasPrefix("- [X] ") {
-                elements.append(.task(text: String(line.dropFirst(6)), done: true))
-            } else if line.hasPrefix("- ") {
-                elements.append(.bulletPoint(String(line.dropFirst(2))))
-            } else if !line.isEmpty {
-                elements.append(.paragraph(line))
-            }
-        }
-        
-        return elements
-    }
-}
-
-enum MarkdownElement {
-    case heading1(String)
-    case heading2(String)
-    case heading3(String)
-    case paragraph(String)
-    case bulletPoint(String)
-    case callout(String)
-    case task(text: String, done: Bool)
-    case separator
-    
-    var id: String {
-        switch self {
-        case .heading1(let t), .heading2(let t), .heading3(let t), .paragraph(let t), .bulletPoint(let t), .callout(let t), .task(let t, _):
-            return t + UUID().uuidString
-        case .separator:
-            return UUID().uuidString
-        }
-    }
+    // MARK: - Block Renderer
     
     @ViewBuilder
-    var view: some View {
-        switch self {
+    private func blockView(_ block: MarkdownBlock) -> some View {
+        switch block {
         case .heading1(let text):
             VStack(alignment: .leading, spacing: 6) {
-                Text(text)
+                inlineText(text)
                     .font(.system(size: 24, weight: .bold, design: .rounded))
                     .foregroundColor(Theme.Colors.textPrimary)
                 Rectangle()
@@ -1297,67 +1226,93 @@ enum MarkdownElement {
                     .frame(width: 44, height: 3)
                     .cornerRadius(1.5)
             }
-            .padding(.top, Theme.Spacing.lg)
+            .padding(.top, 28)
+            .padding(.bottom, 4)
             
         case .heading2(let text):
-            VStack(alignment: .leading, spacing: 4) {
-                Text(text)
-                    .font(.system(size: 20, weight: .semibold, design: .rounded))
+            VStack(alignment: .leading, spacing: 6) {
+                inlineText(text)
+                    .font(.system(size: 20, weight: .bold, design: .rounded))
                     .foregroundColor(Theme.Colors.textPrimary)
                 Rectangle()
-                    .fill(Theme.Colors.accent.opacity(0.6))
-                    .frame(width: 32, height: 2)
-                    .cornerRadius(1)
+                    .fill(Theme.Colors.primary.opacity(0.3))
+                    .frame(height: 1)
             }
-            .padding(.top, Theme.Spacing.md)
+            .padding(.top, 24)
+            .padding(.bottom, 4)
             
         case .heading3(let text):
-            Text(text)
+            inlineText(text)
                 .font(.system(size: 17, weight: .semibold))
                 .foregroundColor(Theme.Colors.textPrimary)
-                .padding(.top, Theme.Spacing.sm)
+                .padding(.top, 16)
+                .padding(.bottom, 2)
             
         case .paragraph(let text):
-            Text(text)
+            inlineText(text)
                 .font(Theme.Typography.body)
                 .foregroundColor(Theme.Colors.textPrimary)
                 .lineSpacing(6)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.top, 8)
             
-        case .bulletPoint(let text):
+        case .bullet(let text):
             HStack(alignment: .top, spacing: 12) {
                 Circle()
-                    .fill(Theme.Colors.accentTurquoise)
+                    .fill(Theme.Colors.primary)
                     .frame(width: 6, height: 6)
                     .padding(.top, 8)
-                Text(text)
+                inlineText(text)
                     .font(Theme.Typography.body)
                     .foregroundColor(Theme.Colors.textPrimary)
                     .lineSpacing(6)
+                    .fixedSize(horizontal: false, vertical: true)
             }
+            .padding(.leading, 16)
+            .padding(.top, 4)
             
-        case .callout(let text):
-            HStack(alignment: .top, spacing: 12) {
-                Image(systemName: "info.circle.fill")
-                    .foregroundColor(Theme.Colors.info)
-                    .font(.system(size: 18))
-                Text(text)
+        case .numbered(let number, let text):
+            HStack(alignment: .top, spacing: 10) {
+                Text("\(number).")
+                    .font(.system(size: 17, weight: .semibold, design: .rounded))
+                    .foregroundColor(Theme.Colors.primary)
+                    .frame(width: 24, alignment: .trailing)
+                inlineText(text)
                     .font(Theme.Typography.body)
                     .foregroundColor(Theme.Colors.textPrimary)
+                    .lineSpacing(6)
+                    .fixedSize(horizontal: false, vertical: true)
             }
-            .padding(16)
-            .background(Theme.Colors.info.opacity(0.1))
-            .cornerRadius(14)
-            .overlay(
-                RoundedRectangle(cornerRadius: 14)
-                    .stroke(Theme.Colors.info.opacity(0.2), lineWidth: 1)
-            )
+            .padding(.leading, 16)
+            .padding(.top, 4)
+            
+        case .blockquote(let text):
+            HStack(alignment: .top, spacing: 0) {
+                RoundedRectangle(cornerRadius: 1.5)
+                    .fill(Theme.Colors.primary)
+                    .frame(width: 3)
+                
+                VStack(alignment: .leading) {
+                    inlineText(text)
+                        .font(Theme.Typography.body)
+                        .foregroundColor(Theme.Colors.textSecondary)
+                        .lineSpacing(6)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 12)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Theme.Colors.backgroundStone)
+            .cornerRadius(8)
+            .padding(.top, 8)
             
         case .task(let text, let done):
             HStack(spacing: 12) {
                 Image(systemName: done ? "checkmark.circle.fill" : "circle")
-                    .foregroundColor(done ? .green : Theme.Colors.textTertiary)
+                    .foregroundColor(done ? Theme.Colors.success : Theme.Colors.textTertiary)
                     .font(.system(size: 18))
-                Text(text)
+                inlineText(text)
                     .font(Theme.Typography.body)
                     .strikethrough(done)
                     .foregroundColor(done ? Theme.Colors.textSecondary : Theme.Colors.textPrimary)
@@ -1370,6 +1325,116 @@ enum MarkdownElement {
                 .padding(.vertical, 8)
         }
     }
+    
+    // MARK: - Inline Markdown (bold, italic, links, code)
+    
+    private func inlineText(_ markdown: String) -> Text {
+        guard var attributed = try? AttributedString(
+            markdown: markdown,
+            options: .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)
+        ) else {
+            return Text(markdown)
+        }
+        
+        for run in attributed.runs {
+            let range = run.range
+            if run.link != nil {
+                attributed[range].underlineStyle = .single
+            }
+        }
+        
+        return Text(attributed)
+    }
+    
+    // MARK: - Block-Level Parser
+    
+    static func parseBlocks(_ text: String) -> [MarkdownBlock] {
+        let lines = text.components(separatedBy: "\n")
+        var blocks: [MarkdownBlock] = []
+        var i = 0
+        
+        while i < lines.count {
+            let trimmed = lines[i].trimmingCharacters(in: .whitespaces)
+            
+            if trimmed.isEmpty {
+                i += 1
+                continue
+            }
+            
+            // Headings (order matters: check ### before ##)
+            if trimmed.hasPrefix("### ") {
+                blocks.append(.heading3(String(trimmed.dropFirst(4))))
+            } else if trimmed.hasPrefix("## ") {
+                blocks.append(.heading2(String(trimmed.dropFirst(3))))
+            } else if trimmed.hasPrefix("# ") {
+                blocks.append(.heading1(String(trimmed.dropFirst(2))))
+            }
+            // Blockquote — group consecutive > lines
+            else if trimmed.hasPrefix(">") {
+                var quoteLines: [String] = []
+                while i < lines.count {
+                    let ql = lines[i].trimmingCharacters(in: .whitespaces)
+                    if ql.hasPrefix("> ") {
+                        quoteLines.append(String(ql.dropFirst(2)))
+                        i += 1
+                    } else if ql == ">" {
+                        quoteLines.append("")
+                        i += 1
+                    } else if ql.hasPrefix(">") {
+                        quoteLines.append(String(ql.dropFirst(1)))
+                        i += 1
+                    } else {
+                        break
+                    }
+                }
+                blocks.append(.blockquote(quoteLines.joined(separator: "\n")))
+                continue
+            }
+            // Separator
+            else if trimmed == "---" || trimmed == "***" || trimmed == "___" {
+                blocks.append(.separator)
+            }
+            // Task list
+            else if trimmed.hasPrefix("- [ ] ") {
+                blocks.append(.task(text: String(trimmed.dropFirst(6)), done: false))
+            } else if trimmed.hasPrefix("- [x] ") || trimmed.hasPrefix("- [X] ") {
+                blocks.append(.task(text: String(trimmed.dropFirst(6)), done: true))
+            }
+            // Bullet list
+            else if trimmed.hasPrefix("- ") || trimmed.hasPrefix("* ") {
+                blocks.append(.bullet(String(trimmed.dropFirst(2))))
+            } else if trimmed.hasPrefix("• ") {
+                blocks.append(.bullet(String(trimmed.dropFirst(2))))
+            }
+            // Numbered list
+            else if trimmed.range(of: #"^\d+\.\s"#, options: .regularExpression) != nil {
+                let num = Int(trimmed.prefix(while: { $0.isNumber })) ?? 1
+                let dotSpace = trimmed.range(of: #"^\d+\.\s"#, options: .regularExpression)!
+                let content = String(trimmed[dotSpace.upperBound...])
+                blocks.append(.numbered(number: num, text: content))
+            }
+            // Paragraph
+            else {
+                blocks.append(.paragraph(trimmed))
+            }
+            
+            i += 1
+        }
+        
+        return blocks
+    }
+}
+
+enum MarkdownBlock {
+    case heading1(String)
+    case heading2(String)
+    case heading3(String)
+    case paragraph(String)
+    case bullet(String)
+    case numbered(number: Int, text: String)
+    case blockquote(String)
+    case task(text: String, done: Bool)
+    case separator
 }
 
 // Flow layout for tags

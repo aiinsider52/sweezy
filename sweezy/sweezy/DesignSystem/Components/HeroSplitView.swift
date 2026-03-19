@@ -1,53 +1,48 @@
 import SwiftUI
 
-// MARK: - Lightweight Aurora Background
+// MARK: - Lightweight Aurora Background (Spring/Summer 2025)
 struct AuroraBackground: View {
     @State private var phase: CGFloat = 0
     
     var body: some View {
         GeometryReader { geo in
             ZStack {
-                // Base dark gradient
                 LinearGradient(
                     colors: [
-                        Color(red: 0.02, green: 0.06, blue: 0.1),
-                        Color(red: 0.03, green: 0.1, blue: 0.15),
-                        Color(red: 0.04, green: 0.12, blue: 0.18)
+                        Color(red: 0.06, green: 0.09, blue: 0.05),
+                        Color(red: 0.08, green: 0.12, blue: 0.07),
+                        Color(red: 0.10, green: 0.14, blue: 0.08)
                     ],
                     startPoint: .top,
                     endPoint: .bottom
                 )
                 
-                // Aurora wave 1 - Teal
                 AuroraWave(
-                    color: Color(red: 0.1, green: 0.8, blue: 0.7),
+                    color: Color(red: 0.18, green: 0.49, blue: 0.20),
                     phase: phase,
                     amplitude: 30,
                     yOffset: geo.size.height * 0.3
                 )
                 .opacity(0.4)
                 
-                // Aurora wave 2 - Green
                 AuroraWave(
-                    color: Color(red: 0.2, green: 0.9, blue: 0.5),
+                    color: Color(red: 0.40, green: 0.73, blue: 0.42),
                     phase: phase + 0.5,
                     amplitude: 25,
                     yOffset: geo.size.height * 0.35
                 )
                 .opacity(0.3)
                 
-                // Aurora wave 3 - Purple accent
                 AuroraWave(
-                    color: Color(red: 0.5, green: 0.3, blue: 0.9),
+                    color: Color(red: 0.98, green: 0.66, blue: 0.15),
                     phase: phase + 1.0,
                     amplitude: 20,
                     yOffset: geo.size.height * 0.25
                 )
                 .opacity(0.2)
                 
-                // Subtle stars
                 AuroraStars()
-                    .opacity(0.6)
+                    .opacity(0.5)
             }
         }
         .onAppear {
@@ -126,19 +121,13 @@ struct FullBleedAuroraHero: View {
     @State private var glowPulse = false
     
     private var accentColor: Color {
-        Color(red: 0.2, green: 0.9, blue: 0.7)
+        Color(red: 0.40, green: 0.73, blue: 0.42) // #66BB6A spring green
     }
     
     var body: some View {
         ZStack(alignment: .top) {
             // Winter Night Background (conditional based on season)
-            if WinterTheme.isActive {
-                // Full winter scene with trees, snow, gifts, santa
-                WinterSceneBackground()
-            } else {
-                // Regular Aurora background
-                AuroraBackground()
-            }
+            AuroraBackground()
             
             // Content
             VStack(spacing: 0) {
@@ -195,7 +184,7 @@ struct FullBleedAuroraHero: View {
                                 .trim(from: 0, to: CGFloat(integrationPercent) / 100)
                                 .stroke(
                                     LinearGradient(
-                                        colors: [accentColor, Color(red: 0.3, green: 0.95, blue: 0.6)],
+                                        colors: [accentColor, Color(red: 0.976, green: 0.659, blue: 0.145)],
                                         startPoint: .topLeading,
                                         endPoint: .bottomTrailing
                                     ),

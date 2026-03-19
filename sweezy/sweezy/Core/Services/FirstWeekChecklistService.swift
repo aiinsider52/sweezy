@@ -56,6 +56,10 @@ final class FirstWeekChecklistService: ObservableObject {
             .first
     }
     
+    func generateTasks(for profile: UserProfile) {
+        generateDefaultTasks(for: profile)
+    }
+    
     func generateDefaultTasks(for profile: UserProfile) {
         let start = profile.arrivalDate ?? Date()
         var new: [TaskItem] = []

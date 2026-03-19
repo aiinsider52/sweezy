@@ -108,12 +108,6 @@ private struct BentoFeaturedCard: View {
                         )
                     )
                 
-                // Christmas lights (winter theme only)
-                if WinterTheme.isActive {
-                    ChristmasLights()
-                        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-                }
-                
                 // Soft glow
                 Circle()
                     .fill(item.accentColor.opacity(item.isLocked ? 0.15 : 0.3))

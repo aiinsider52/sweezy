@@ -2,49 +2,44 @@ import SwiftUI
 
 // MARK: - Adaptive Page Background (replaces hardcoded dark gradients)
 
-/// Use this instead of the hardcoded dark blue gradient in every page.
-/// Dark mode → deep navy winter aurora. Light mode → beautiful winter dawn sky.
+/// Adaptive page background — spring/summer 2025 palette.
+/// Dark mode → deep forest night. Light mode → fresh alpine meadow.
 struct AdaptivePageBackground: View {
     @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         ZStack {
             if colorScheme == .dark {
-                // Deep midnight navy — classic winter night
                 LinearGradient(
                     colors: [
-                        Color(red: 0.05, green: 0.10, blue: 0.20),
-                        Color(red: 0.07, green: 0.14, blue: 0.26),
-                        Color(red: 0.05, green: 0.11, blue: 0.21)
+                        Color(red: 0.08, green: 0.11, blue: 0.07),  // #141C12
+                        Color(red: 0.10, green: 0.14, blue: 0.09),  // #1A2417
+                        Color(red: 0.08, green: 0.12, blue: 0.07)   // #141F12
                     ],
                     startPoint: .top,
                     endPoint: .bottom
                 )
                 .ignoresSafeArea()
             } else {
-                // Beautiful winter dawn sky — deep indigo/teal gradient, NOT plain white
                 LinearGradient(
                     colors: [
-                        Color(red: 0.08, green: 0.16, blue: 0.32),   // deep twilight blue
-                        Color(red: 0.10, green: 0.22, blue: 0.42),   // midnight blue
-                        Color(red: 0.07, green: 0.18, blue: 0.36)    // ocean depth
+                        Color(red: 0.98, green: 0.99, blue: 0.97),  // #FAFDF7
+                        Color(red: 0.95, green: 0.97, blue: 0.91),  // #F1F8E9
+                        Color(red: 0.96, green: 0.98, blue: 0.93)   // #F5FAF0
                     ],
                     startPoint: .top,
                     endPoint: .bottom
                 )
                 .ignoresSafeArea()
                 
-                // Subtle aurora glow in light "winter dawn" mode
                 RadialGradient(
-                    colors: [Color.cyan.opacity(0.15), Color.clear],
+                    colors: [Color(red: 0.400, green: 0.733, blue: 0.416).opacity(0.08), Color.clear],
                     center: .init(x: 0.3, y: 0.2),
                     startRadius: 20,
                     endRadius: 280
                 )
                 .ignoresSafeArea()
             }
-            // Subtle snow on both — ultra-light
-            WinterSceneLite(intensity: .light)
         }
     }
 }
@@ -72,39 +67,38 @@ struct AppBackground: View {
         ZStack {
             LinearGradient(
                 colors: [
-                    Color(red: 0.01, green: 0.02, blue: 0.05),
-                    Color(red: 0.05, green: 0.07, blue: 0.11)
+                    Color(red: 0.06, green: 0.08, blue: 0.05),  // deep forest
+                    Color(red: 0.08, green: 0.11, blue: 0.07)
                 ],
                 startPoint: .top,
                 endPoint: .bottom
             )
             .ignoresSafeArea()
             
-            // Mesh gradient and overlays are guarded to avoid Timeline/Canvas on constrained devices
             if !reduceMotion && !ProcessInfo.processInfo.isLowPowerModeEnabled {
                 AnimatedMeshGradient(
                     colors: [
-                        Color(red: 0.12, green: 0.89, blue: 1.00),
-                        Color(red: 0.68, green: 0.32, blue: 1.00),
-                        Color(red: 0.04, green: 1.00, blue: 0.72)
+                        Color(red: 0.40, green: 0.73, blue: 0.42),  // #66BB6A
+                        Color(red: 0.98, green: 0.66, blue: 0.15),  // #F9A825
+                        Color(red: 0.18, green: 0.49, blue: 0.20)   // #2E7D32
                     ],
                     speed: 0.12
                 )
-                .opacity(0.45)
+                .opacity(0.35)
                 .blendMode(.screen)
                 .ignoresSafeArea()
                 
                 ConstellationOverlay()
-                    .opacity(0.35)
+                    .opacity(0.25)
                     .allowsHitTesting(false)
                     .ignoresSafeArea()
                 
-                SubtleParticlesOverlay(count: 24, opacity: 0.08)
+                SubtleParticlesOverlay(count: 24, opacity: 0.06)
                     .ignoresSafeArea()
             }
             
             RadialGradient(
-                colors: [Color.black.opacity(0.0), Color.black.opacity(0.35)],
+                colors: [Color.black.opacity(0.0), Color.black.opacity(0.30)],
                 center: .center,
                 startRadius: 120,
                 endRadius: 900
@@ -118,8 +112,8 @@ struct AppBackground: View {
         ZStack {
             LinearGradient(
                 colors: [
-                    Color(red: 0.96, green: 0.99, blue: 1.00),
-                    Color(red: 0.97, green: 1.00, blue: 0.95)
+                    Color(red: 0.98, green: 0.99, blue: 0.97),  // #FAFDF7
+                    Color(red: 0.95, green: 0.97, blue: 0.91)   // #F1F8E9
                 ],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
@@ -129,22 +123,22 @@ struct AppBackground: View {
             if !reduceMotion && !ProcessInfo.processInfo.isLowPowerModeEnabled {
                 AnimatedMeshGradient(
                     colors: [
-                        Color(red: 0.73, green: 0.89, blue: 1.00),
-                        Color(red: 0.92, green: 0.74, blue: 1.00),
-                        Color(red: 0.82, green: 0.95, blue: 0.86)
+                        Color(red: 0.65, green: 0.84, blue: 0.65),  // #A5D6A7
+                        Color(red: 1.0, green: 0.95, blue: 0.46),   // #FFF176
+                        Color(red: 0.78, green: 0.90, blue: 0.79)   // #C8E6C9
                     ],
                     speed: 0.10
                 )
-                .opacity(0.25)
+                .opacity(0.20)
                 .ignoresSafeArea()
                 
-                NoiseOverlay(intensity: 0.18)
+                NoiseOverlay(intensity: 0.14)
                     .ignoresSafeArea()
                     .allowsHitTesting(false)
             }
             
             LinearGradient(
-                colors: [Color.black.opacity(0.05), Color.clear, Color.black.opacity(0.05)],
+                colors: [Color.black.opacity(0.03), Color.clear, Color.black.opacity(0.03)],
                 startPoint: .top,
                 endPoint: .bottom
             )

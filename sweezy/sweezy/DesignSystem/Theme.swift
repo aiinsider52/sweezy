@@ -13,54 +13,59 @@ struct Theme {
     
     // MARK: - Colors
     struct Colors {
-        // MARK: Brand Colors (Legacy / Ukrainian)
-        static let primary = Color(red: 0.0, green: 0.357, blue: 0.733) // #005BBB Ukrainian Blue
-        static let accent = Color(red: 1.0, green: 0.835, blue: 0.0) // #FFD500 Gold
+        // MARK: Brand Colors — Spring/Summer 2025 (Swiss Alpine Spring)
+        static let primary = Color(red: 0.180, green: 0.490, blue: 0.196) // #2E7D32 Forest Green
+        static let primaryLight = Color(red: 0.400, green: 0.733, blue: 0.416) // #66BB6A Light Green
+        static let primaryDark = Color(red: 0.106, green: 0.369, blue: 0.125) // #1B5E20 Dark Green
+        static let accent = Color(red: 0.976, green: 0.659, blue: 0.145) // #F9A825 Warm Solar Yellow
 
-        // MARK: GoIT-Inspired Accents
-        static let accentTurquoise = Color(red: 0.0, green: 0.784, blue: 0.627) // #00C8A0
-        static let accentYellowSoft = Color(red: 1.0, green: 0.878, blue: 0.4) // #FFE066
-        static let accentWarmGreen = Color(red: 0.643, green: 0.902, blue: 0.765) // #A4E6C3
-        static let accentCoral = Color(red: 1.0, green: 0.439, blue: 0.357) // #FF705B
+        // MARK: Spring Accents
+        static let accentTurquoise = Color(red: 0.400, green: 0.733, blue: 0.416) // #66BB6A Light Green
+        static let accentYellowSoft = Color(red: 1.0, green: 0.945, blue: 0.463) // #FFF176 Pastel Yellow
+        static let accentWarmGreen = Color(red: 0.400, green: 0.733, blue: 0.416) // #66BB6A Light Green
+        static let accentCoral = Color(red: 1.0, green: 0.439, blue: 0.263) // #FF7043 Warm Orange
 
         // MARK: Surface Colors (Light)
-        static let surface = Color(red: 0.957, green: 0.976, blue: 0.965) // light pastel surface
-        static let card = Color(red: 1.0, green: 1.0, blue: 1.0).opacity(0.65)
+        static let surface = Color(red: 0.980, green: 0.992, blue: 0.969) // #FAFDF7 spring white-green
+        static let card = Color(red: 1.0, green: 1.0, blue: 1.0).opacity(0.85)
         static let divider = Color.black.opacity(0.06)
 
-        // MARK: GoIT-Inspired Backgrounds
-        static let backgroundIvory = Color(red: 0.980, green: 0.976, blue: 0.965) // #FAF9F6
-        static let backgroundStone = Color(red: 0.961, green: 0.961, blue: 0.953) // #F5F5F3
+        // MARK: Spring Backgrounds
+        static let backgroundIvory = Color(red: 0.980, green: 0.992, blue: 0.969) // #FAFDF7
+        static let backgroundStone = Color(red: 0.945, green: 0.973, blue: 0.914) // #F1F8E9
 
-        // MARK: Text Colors
-        // App always uses dark/winter aesthetic (dark backgrounds in both modes),
-        // so text is always white. The adaptive block is kept for native UI elements.
+        // MARK: Text Colors (adaptive: dark text on light bg, white on dark bg)
         static var textPrimary: Color {
             Color(UIColor { traitCollection in
-                // Both modes: bright white on dark winter background
-                UIColor(white: 1.0, alpha: 0.92)
+                traitCollection.userInterfaceStyle == .dark
+                    ? UIColor(white: 1.0, alpha: 0.92)
+                    : UIColor(red: 0.110, green: 0.169, blue: 0.102, alpha: 1.0) // #1C2B1A
             })
         }
         
         static var textSecondary: Color {
             Color(UIColor { traitCollection in
-                UIColor(white: 1.0, alpha: 0.60)
+                traitCollection.userInterfaceStyle == .dark
+                    ? UIColor(white: 1.0, alpha: 0.60)
+                    : UIColor(red: 0.290, green: 0.369, blue: 0.282, alpha: 1.0) // #4A5E48
             })
         }
         
         static var textTertiary: Color {
             Color(UIColor { traitCollection in
-                UIColor(white: 1.0, alpha: 0.40)
+                traitCollection.userInterfaceStyle == .dark
+                    ? UIColor(white: 1.0, alpha: 0.40)
+                    : UIColor(red: 0.482, green: 0.580, blue: 0.475, alpha: 1.0) // #7B9479
             })
         }
         
         static let textOnPrimary = Color.white
         
         // MARK: Semantic Colors
-        static let success = Color(red: 0.204, green: 0.78, blue: 0.349) // #34C759
-        static let warning = Color(red: 1.0, green: 0.584, blue: 0.0) // #FF9500
-        static let error = Color(red: 1.0, green: 0.231, blue: 0.188) // #FF3B30
-        static let info = Color(red: 0.0, green: 0.478, blue: 1.0) // #007AFF
+        static let success = Color(red: 0.220, green: 0.557, blue: 0.235) // #388E3C
+        static let warning = Color(red: 0.976, green: 0.659, blue: 0.145) // #F9A825
+        static let error = Color(red: 0.827, green: 0.184, blue: 0.184) // #D32F2F
+        static let info = Color(red: 0.008, green: 0.533, blue: 0.820) // #0288D1
         
         // Backwards-compatibility aliases
         static var primaryText: Color { textPrimary }
@@ -68,28 +73,36 @@ struct Theme {
         static var tertiaryText: Color { textTertiary }
         
         // MARK: Dark Mode Specific
-        static let darkBackground = Color(red: 0.047, green: 0.047, blue: 0.082) // #0C0C15
+        static let darkBackground = Color(red: 0.102, green: 0.137, blue: 0.094) // #1A2318
         static let darkSurface = Color.white.opacity(0.06)
         static let darkCard = Color.white.opacity(0.08)
         static let darkElevated = Color.white.opacity(0.12)
         
-        // MARK: Frosted Glass Card/Row backgrounds
-        // App always has dark winter background → frosted glass in both modes.
-        /// Card / section background — frosted glass on dark winter background.
-        static let adaptiveCard = Color.white.opacity(0.09)
+        // MARK: Adaptive Card / Surface / Border
+        static let adaptiveCard = Color(UIColor { tc in
+            tc.userInterfaceStyle == .dark
+                ? UIColor(white: 1.0, alpha: 0.09)
+                : UIColor(white: 1.0, alpha: 0.85)
+        })
         
-        /// Slightly more elevated surface (settings toggle rows, list cells).
-        static let adaptiveSurface = Color.white.opacity(0.11)
+        static let adaptiveSurface = Color(UIColor { tc in
+            tc.userInterfaceStyle == .dark
+                ? UIColor(white: 1.0, alpha: 0.11)
+                : UIColor(red: 0.945, green: 0.973, blue: 0.914, alpha: 1.0) // #F1F8E9
+        })
         
-        /// Separator / card border — visible on dark background in both modes.
-        static let adaptiveBorder = Color.white.opacity(0.18)
+        static let adaptiveBorder = Color(UIColor { tc in
+            tc.userInterfaceStyle == .dark
+                ? UIColor(white: 1.0, alpha: 0.18)
+                : UIColor(red: 0.0, green: 0.0, blue: 0.0, alpha: 0.08)
+        })
         
         // MARK: Adaptive Backgrounds
         static var primaryBackground: Color {
             Color(UIColor { traitCollection in
                 traitCollection.userInterfaceStyle == .dark
-                    ? UIColor(red: 0.047, green: 0.047, blue: 0.082, alpha: 1.0)
-                    : UIColor(red: 0.980, green: 0.976, blue: 0.965, alpha: 1.0) // Ivory
+                    ? UIColor(red: 0.102, green: 0.137, blue: 0.094, alpha: 1.0) // #1A2318
+                    : UIColor(red: 0.980, green: 0.992, blue: 0.969, alpha: 1.0) // #FAFDF7
             })
         }
         
@@ -104,13 +117,25 @@ struct Theme {
         // MARK: Legacy Compatibility
         static let ukrainianBlue = primary
         static let warmYellow = accent
-        static let swissWhite = Color(red: 0.98, green: 0.98, blue: 0.98)
-        static let swissGray = Color(red: 0.45, green: 0.45, blue: 0.45)
-        static let swissLightGray = Color(red: 0.95, green: 0.95, blue: 0.95)
+        static let swissWhite = Color(red: 0.98, green: 0.99, blue: 0.97)
+        static let swissGray = Color(red: 0.45, green: 0.48, blue: 0.44)
+        static let swissLightGray = Color(red: 0.95, green: 0.97, blue: 0.94)
         
-        // Older glass helpers (kept for compatibility)
-        static var glassBackground: Color { Color.white.opacity(0.1) }
-        static var glassBorder: Color { Color.white.opacity(0.2) }
+        // Glass helpers (adaptive for light/dark)
+        static var glassBackground: Color {
+            Color(UIColor { tc in
+                tc.userInterfaceStyle == .dark
+                    ? UIColor(white: 1.0, alpha: 0.1)
+                    : UIColor(white: 0.0, alpha: 0.04)
+            })
+        }
+        static var glassBorder: Color {
+            Color(UIColor { tc in
+                tc.userInterfaceStyle == .dark
+                    ? UIColor(white: 1.0, alpha: 0.2)
+                    : UIColor(white: 0.0, alpha: 0.08)
+            })
+        }
         
         // MARK: Gradients
         static var gradientPrimary: LinearGradient {
@@ -121,10 +146,9 @@ struct Theme {
             )
         }
 
-        /// GoIT-inspired accent gradient (turquoise -> warm green)
         static var gradientAccent: LinearGradient {
             LinearGradient(
-                colors: [accentTurquoise, accentWarmGreen],
+                colors: [accentTurquoise, primary],
                 startPoint: .leading,
                 endPoint: .trailing
             )
@@ -133,8 +157,8 @@ struct Theme {
         static var gradientSoft: LinearGradient {
             LinearGradient(
                 colors: [
-                    Color(red: 0.878, green: 0.914, blue: 1.0), // #E0E9FF
-                    Color(red: 1.0, green: 0.961, blue: 0.855) // #FFF5DA
+                    Color(red: 0.945, green: 0.973, blue: 0.914), // #F1F8E9
+                    Color(red: 1.0, green: 0.945, blue: 0.463)    // #FFF176
                 ],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
@@ -143,30 +167,40 @@ struct Theme {
         
         static var gradientHero: LinearGradient {
             LinearGradient(
-                stops: [
-                    .init(color: accentTurquoise, location: 0.0),
-                    .init(color: Color(red: 0.0, green: 0.6, blue: 0.6), location: 0.5),
-                    .init(color: accentWarmGreen, location: 1.0)
+                colors: [
+                    Color(red: 0.180, green: 0.490, blue: 0.196), // #2E7D32
+                    Color(red: 0.106, green: 0.369, blue: 0.125)  // #1B5E20
                 ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
+                startPoint: .top,
+                endPoint: .bottom
             )
         }
         
         // Legacy gradient name
         static var primaryGradient: LinearGradient { gradientPrimaryAdaptive }
         
-        // MARK: Adaptive Gradient (Dark Mode)
+        static var gradientSunrise: LinearGradient {
+            LinearGradient(
+                colors: [
+                    Color(red: 1.0, green: 0.945, blue: 0.463),   // #FFF176
+                    Color(red: 0.976, green: 0.659, blue: 0.145)   // #F9A825
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        }
+        
+        // MARK: Adaptive Gradient
         static var gradientPrimaryAdaptive: LinearGradient {
             LinearGradient(
                 colors: [
                     Color(UIColor { $0.userInterfaceStyle == .dark
-                        ? UIColor(red: 0.0, green: 0.6, blue: 0.6, alpha: 1.0)
-                        : UIColor(red: 0.0, green: 0.784, blue: 0.627, alpha: 1.0) // #00C8A0
+                        ? UIColor(red: 0.400, green: 0.733, blue: 0.416, alpha: 1.0) // #66BB6A
+                        : UIColor(red: 0.180, green: 0.490, blue: 0.196, alpha: 1.0) // #2E7D32
                     }),
                     Color(UIColor { $0.userInterfaceStyle == .dark
-                        ? UIColor(red: 0.98, green: 0.75, blue: 0.2, alpha: 1.0)
-                        : UIColor(red: 0.643, green: 0.902, blue: 0.765, alpha: 1.0) // #A4E6C3
+                        ? UIColor(red: 0.976, green: 0.659, blue: 0.145, alpha: 1.0) // #F9A825
+                        : UIColor(red: 0.400, green: 0.733, blue: 0.416, alpha: 1.0) // #66BB6A
                     })
                 ],
                 startPoint: .topLeading,
@@ -181,9 +215,17 @@ struct Theme {
         
         static var glassOpacity: Double { 0.75 }
 
-        // MARK: Inputs & Chips (always dark/frosted since background is always dark)
-        static let chipBorder = Color.white.opacity(0.18)
-        static let chipBackground = Color.white.opacity(0.09)
+        // MARK: Inputs & Chips
+        static let chipBorder = Color(UIColor { tc in
+            tc.userInterfaceStyle == .dark
+                ? UIColor(white: 1.0, alpha: 0.18)
+                : UIColor(red: 0.180, green: 0.490, blue: 0.196, alpha: 0.15)
+        })
+        static let chipBackground = Color(UIColor { tc in
+            tc.userInterfaceStyle == .dark
+                ? UIColor(white: 1.0, alpha: 0.09)
+                : UIColor(red: 0.180, green: 0.490, blue: 0.196, alpha: 0.06)
+        })
         static let inputBorder = Color(red: 0.878, green: 0.878, blue: 0.878) // #E0E0E0
         static let focusGlow = accentTurquoise.opacity(0.35)
     }
@@ -244,8 +286,8 @@ struct Theme {
         // Level 1: Subtle lift
         static let level1 = Shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 2)
         
-        // Level 2: Cards
-        static let level2 = Shadow(color: Color.black.opacity(0.08), radius: 12, x: 0, y: 4)
+        // Level 2: Cards — tinted with primary for cohesive palette
+        static let level2 = Shadow(color: Theme.Colors.primary.opacity(0.08), radius: 12, x: 0, y: 4)
         
         // Level 3: Modals
         static let level3 = Shadow(color: Color.black.opacity(0.12), radius: 24, x: 0, y: 8)

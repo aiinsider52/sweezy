@@ -8,20 +8,20 @@
 import SwiftUI
 
 struct AppointmentsView: View {
+    @EnvironmentObject private var repository: AppointmentRepository
     @Environment(\.dismiss) private var dismiss
-    @State private var appointments: [Appointment] = []
     @State private var showingAddAppointment = false
+    @State private var editingAppointment: Appointment?
     @State private var selectedSegment = 0
-    @State private var isLoading = false
     
     private let segments = ["appointments.upcoming".localized, "appointments.past".localized]
     
     private var upcomingAppointments: [Appointment] {
-        appointments.filter { !$0.isPast }.sorted { $0.dateTime < $1.dateTime }
+        repository.appointments.filter { !$0.isPast }.sorted { $0.dateTime < $1.dateTime }
     }
     
     private var pastAppointments: [Appointment] {
-        appointments.filter { $0.isPast }.sorted { $0.dateTime > $1.dateTime }
+        repository.appointments.filter { $0.isPast }.sorted { $0.dateTime > $1.dateTime }
     }
     
     var body: some View {
@@ -57,30 +57,21 @@ struct AppointmentsView: View {
             }
             .sheet(isPresented: $showingAddAppointment) {
                 AddAppointmentView { appointment in
-                    appointments.append(appointment)
+                    repository.add(appointment)
+                }
+            }
+            .sheet(item: $editingAppointment) { appointment in
+                AddAppointmentView(appointment: appointment) { updatedAppointment in
+                    repository.update(updatedAppointment)
                 }
             }
             .featureOnboarding(.appointments)
-        }
-        .onAppear {
-            isLoading = true
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-                loadAppointments()
-                isLoading = false
-            }
         }
     }
     
     private var appointmentsListSection: some View {
         Group {
-            if isLoading {
-                VStack(spacing: Theme.Spacing.md) {
-                    ForEach(0..<3, id: \.self) { _ in
-                        AppointmentShimmerRow()
-                            .padding(.horizontal, Theme.Spacing.md)
-                    }
-                }
-            } else if currentAppointments.isEmpty {
+            if currentAppointments.isEmpty {
                 EmptyStateView(
                     systemImage: "calendar",
                     title: "appointments.no_appointments".localized,
@@ -130,29 +121,25 @@ struct AppointmentsView: View {
             LazyVStack(spacing: Theme.Spacing.md) {
                 ForEach(currentAppointments) { appointment in
                     AppointmentCard(appointment: appointment)
+                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                            Button {
+                                editingAppointment = appointment
+                            } label: {
+                                Label("appointments.edit".localized, systemImage: "pencil")
+                            }
+                            .tint(.blue)
+
+                            Button(role: .destructive) {
+                                repository.delete(appointment)
+                            } label: {
+                                Label("common.delete".localized, systemImage: "trash")
+                            }
+                        }
                 }
             }
             .padding(.horizontal, Theme.Spacing.md)
             .padding(.vertical, Theme.Spacing.sm)
         }
-    }
-    
-    private func loadAppointments() {
-        // Mock appointments
-        appointments = [
-            Appointment(
-                title: "Municipality Registration",
-                description: "Register arrival with local authorities",
-                category: .government,
-                dateTime: Calendar.current.date(byAdding: .day, value: 2, to: Date()) ?? Date()
-            ),
-            Appointment(
-                title: "Doctor Appointment",
-                description: "General health checkup",
-                category: .healthcare,
-                dateTime: Calendar.current.date(byAdding: .day, value: 7, to: Date()) ?? Date()
-            )
-        ]
     }
 }
 
@@ -263,14 +250,25 @@ struct AppointmentCard: View {
 
 struct AddAppointmentView: View {
     @Environment(\.dismiss) private var dismiss
+    let existingAppointment: Appointment?
     let onSave: (Appointment) -> Void
     
-    @State private var title = ""
-    @State private var description = ""
-    @State private var selectedCategory: AppointmentCategory = .government
-    @State private var selectedDate = Date()
-    @State private var locationName = ""
+    @State private var title: String
+    @State private var description: String
+    @State private var selectedCategory: AppointmentCategory
+    @State private var selectedDate: Date
+    @State private var locationName: String
     @State private var isSaving = false
+
+    init(appointment: Appointment? = nil, onSave: @escaping (Appointment) -> Void) {
+        self.existingAppointment = appointment
+        self.onSave = onSave
+        _title = State(initialValue: appointment?.title ?? "")
+        _description = State(initialValue: appointment?.description ?? "")
+        _selectedCategory = State(initialValue: appointment?.category ?? .government)
+        _selectedDate = State(initialValue: appointment?.dateTime ?? Date())
+        _locationName = State(initialValue: appointment?.location?.name ?? appointment?.location?.address.city ?? "")
+    }
     
     var body: some View {
         NavigationStack {
@@ -301,7 +299,7 @@ struct AddAppointmentView: View {
                     TextField("Location name", text: $locationName)
                 }
             }
-            .navigationTitle("appointments.add".localized)
+            .navigationTitle(existingAppointment == nil ? "appointments.add".localized : "appointments.edit".localized)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -341,14 +339,25 @@ struct AddAppointmentView: View {
                 canton: .zurich
             )
         )
-        
-        let appointment = Appointment(
-            title: title,
-            description: description.isEmpty ? nil : description,
-            category: selectedCategory,
-            dateTime: selectedDate,
-            location: location
-        )
+
+        let appointment: Appointment
+        if let existingAppointment {
+            appointment = existingAppointment.updating(
+                title: title,
+                description: description.isEmpty ? nil : description,
+                category: selectedCategory,
+                dateTime: selectedDate,
+                location: location
+            )
+        } else {
+            appointment = Appointment(
+                title: title,
+                description: description.isEmpty ? nil : description,
+                category: selectedCategory,
+                dateTime: selectedDate,
+                location: location
+            )
+        }
         
         onSave(appointment)
         dismiss()
@@ -357,4 +366,5 @@ struct AddAppointmentView: View {
 
 #Preview {
     AppointmentsView()
+        .environmentObject(AppContainer().appointmentRepository)
 }

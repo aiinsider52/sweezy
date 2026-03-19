@@ -359,10 +359,7 @@ private struct GuideDetailSheet: View {
                         
                         Divider()
                         
-                        Text(guide.bodyMarkdown)
-                            .font(Theme.Typography.body)
-                            .foregroundColor(Theme.Colors.textPrimary)
-                            .lineSpacing(6)
+                        MarkdownContentView(content: guide.bodyMarkdown)
 
                         if !guide.tags.isEmpty {
                             VStack(alignment: .leading, spacing: Theme.Spacing.md) {

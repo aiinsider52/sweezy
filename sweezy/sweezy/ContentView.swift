@@ -33,12 +33,16 @@ struct SweezyApp: App {
         WindowGroup {
             MainAppContent()
                 .environmentObject(appContainer)
+                .environmentObject(appContainer.accountManager)
+                .environmentObject(appContainer.appointmentRepository)
                 .environmentObject(themeManager)
                 .environmentObject(lockManager)
                 .environmentObject(sessionManager)
                 .onAppear {
                     print("🎉 App UI appeared")
-                    UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { _, _ in }
+                    if ProcessInfo.processInfo.environment["UITESTS"] != "1" {
+                        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { _, _ in }
+                    }
                     lockManager.loadBiometryType()
                     
                     // Start crash reporter (no-op if SDK absent)
@@ -64,19 +68,69 @@ struct MainAppContent: View {
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var lockManager: AppLockManager
     @EnvironmentObject private var sessionManager: SessionManager
+    @Environment(\.scenePhase) private var scenePhase
+    
+    @State private var showGlobalReset: Bool = false
+    @State private var resetToken: String? = nil
     
     var body: some View {
-        Group {
-            if appContainer.isOnboardingCompleted {
-                // IMPORTANT (App Store 5.1.1):
-                // Do NOT force account creation on launch.
-                // Guest users can access all public (non-account-based) content from the main app.
-                MainTabView()
-            } else {
-                OnboardingViewRedesigned()
+        ZStack {
+            Group {
+                if appContainer.isOnboardingCompleted {
+                    // IMPORTANT (App Store 5.1.1):
+                    // Do NOT force account creation on launch.
+                    // Guest users can access all public (non-account-based) content from the main app.
+                    MainTabView()
+                } else {
+                    OnboardingViewRedesigned()
+                }
+            }
+            .blur(radius: shouldShowLockOverlay ? 3 : 0)
+            .disabled(shouldShowLockOverlay)
+            
+            if shouldShowLockOverlay {
+                LockScreenOverlay()
+                    .environmentObject(lockManager)
             }
         }
         .preferredColorScheme(themeManager.colorScheme)
         .environment(\.locale, appContainer.currentLocale)
+        .onChange(of: scenePhase) { _, phase in
+            handleScenePhaseChange(phase)
+        }
+        .onOpenURL { url in
+            DeepLinkService.shared.handle(url: url)
+        }
+        .handleDeepLinks { link in
+            handleDeepLink(link)
+        }
+        .sheet(isPresented: $showGlobalReset) {
+            PasswordResetSheet(initialEmail: lockManager.userEmail, initialToken: resetToken)
+        }
+    }
+    
+    private var shouldShowLockOverlay: Bool {
+        lockManager.biometricsEnabled && lockManager.isLocked
+    }
+    
+    private func handleScenePhaseChange(_ phase: ScenePhase) {
+        switch phase {
+        case .background, .inactive:
+            lockManager.appDidEnterBackground()
+        case .active:
+            lockManager.appDidBecomeActive()
+        @unknown default:
+            break
+        }
+    }
+    
+    private func handleDeepLink(_ link: DeepLink) {
+        switch link {
+        case .passwordReset(let token):
+            resetToken = token
+            showGlobalReset = true
+        default:
+            break
+        }
     }
 }

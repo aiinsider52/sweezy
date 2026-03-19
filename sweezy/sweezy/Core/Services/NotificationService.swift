@@ -21,8 +21,10 @@ protocol NotificationServiceProtocol: ObservableObject {
     func scheduleTrialEndReminder(endDate: Date) async -> Bool
     func scheduleReengageReminder(afterDays days: Int) async -> Bool
     func cancelNotification(with identifier: String)
+    func cancelAppointmentNotifications(for appointmentId: UUID)
     func cancelAllNotifications()
     func getPendingNotifications() async -> [UNNotificationRequest]
+    func rescheduleAppointmentNotifications(for appointment: Appointment) async -> Bool
 }
 
 /// Notification service implementation
@@ -63,10 +65,11 @@ class NotificationService: NotificationServiceProtocol {
     }
     
     func scheduleTrialEndReminder(endDate: Date) async -> Bool {
+        // Disabled: no active subscriptions in this build.
         guard isAuthorized else { return false }
         let content = UNMutableNotificationContent()
-        content.title = "Пробний період закінчується"
-        content.body = "Продовжіть доступ до всіх можливостей Sweezy"
+        content.title = "Нагадування від Sweezy"
+        content.body = "Відкрийте застосунок, щоб перевірити останні оновлення"
         content.sound = .default
         content.categoryIdentifier = "TRIAL_REMINDER"
         content.userInfo = ["type": "trial_end"]
@@ -282,7 +285,7 @@ extension NotificationService {
         // Trial reminder category
         let upgradeAction = UNNotificationAction(
             identifier: "OPEN_PAYWALL",
-            title: "See plans",
+            title: "Open Sweezy",
             options: [.foreground]
         )
         let trialCategory = UNNotificationCategory(

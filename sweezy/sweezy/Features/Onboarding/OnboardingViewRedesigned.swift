@@ -14,14 +14,23 @@ struct OnboardingViewRedesigned: View {
     
     @State private var currentPage = 0
     @State private var showLanguageSelection = false
-    @State private var showWinterGreeting = WinterTheme.isActive
+    @State private var selectedCanton: Canton = .zurich
+    @State private var selectedPermitType: PermitType = .s
+    @State private var arrivalMonth: Int = Calendar.current.component(.month, from: Date())
+    @State private var arrivalYear: Int = Calendar.current.component(.year, from: Date())
+    @State private var hasChildren = false
+    @State private var childrenCount = 1
+    @State private var familyStatus: FamilyStatus? = nil
+    @State private var skippedAboutStep = false
+    @State private var skippedFamilyStep = false
+    @State private var didSeedProfileState = false
     
     private let pages: [OnboardingV2Page] = [
         OnboardingV2Page(
             id: 1,
             icon: "hand.wave.fill",
             gradient: LinearGradient(
-                colors: [Color(red: 0.0, green: 0.357, blue: 0.733), Color(red: 0.0, green: 0.478, blue: 1.0)],
+                colors: [Theme.Colors.primary, Theme.Colors.accentTurquoise],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             ),
@@ -32,7 +41,7 @@ struct OnboardingViewRedesigned: View {
             id: 2,
             icon: "book.pages.fill",
             gradient: LinearGradient(
-                colors: [Color(red: 0.0, green: 0.478, blue: 1.0), Color(red: 0.204, green: 0.78, blue: 0.349)],
+                colors: [Theme.Colors.accentTurquoise, Theme.Colors.accent],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             ),
@@ -43,15 +52,6 @@ struct OnboardingViewRedesigned: View {
     
     var body: some View {
         ZStack {
-            // Winter greeting screen (shown first in winter season)
-            if showWinterGreeting {
-                WinterGreetingScreen {
-                    withAnimation(Theme.Animation.smooth) {
-                        showWinterGreeting = false
-                    }
-                }
-                .transition(.opacity)
-            } else {
                 // Full-screen paged content
                 TabView(selection: $currentPage) {
                     ForEach(pages) { page in
@@ -64,9 +64,24 @@ struct OnboardingViewRedesigned: View {
                         appContainer.updateLocale(Locale(identifier: code))
                     }
                     .tag(pages.count)
+                    ProfileDetailsPage(
+                        selectedCanton: $selectedCanton,
+                        selectedPermitType: $selectedPermitType,
+                        arrivalMonth: $arrivalMonth,
+                        arrivalYear: $arrivalYear,
+                        onSkip: skipAboutStep
+                    )
+                    .tag(pages.count + 1)
+                    FamilyDetailsPage(
+                        hasChildren: $hasChildren,
+                        childrenCount: $childrenCount,
+                        familyStatus: $familyStatus,
+                        onSkip: skipFamilyStep
+                    )
+                    .tag(pages.count + 2)
                     // Theme picker page (second to last)
                     ThemePickerPage(selectedTheme: $themeManager.selectedTheme)
-                        .tag(pages.count + 1)
+                        .tag(pages.count + 3)
                     // Success page (last)
                     SuccessPageView()
                         .tag(totalPages - 1)
@@ -102,21 +117,13 @@ struct OnboardingViewRedesigned: View {
             VStack {
                 Spacer()
                 
-                // Page indicator - winter snowflakes or regular dots
+                // Page indicator
                 HStack(spacing: 8) {
                     ForEach(0..<totalPages, id: \.self) { index in
-                        if WinterTheme.isActive {
-                            Text(index == currentPage ? "❄️" : "•")
-                                .font(.system(size: index == currentPage ? 16 : 10))
-                                .foregroundColor(index == currentPage ? Color.cyan : Color.white.opacity(0.4))
-                                .scaleEffect(index == currentPage ? 1.1 : 1.0)
-                                .animation(Theme.Animation.smooth, value: currentPage)
-                        } else {
-                            Capsule()
-                                .fill(index == currentPage ? Color.white : Color.white.opacity(0.3))
-                                .frame(width: index == currentPage ? 32 : 8, height: 8)
-                                .animation(Theme.Animation.smooth, value: currentPage)
-                        }
+                        Capsule()
+                            .fill(index == currentPage ? Color.white : Color.white.opacity(0.3))
+                            .frame(width: index == currentPage ? 32 : 8, height: 8)
+                            .animation(Theme.Animation.smooth, value: currentPage)
                     }
                 }
                 .padding(.bottom, Theme.Spacing.lg)
@@ -174,10 +181,11 @@ struct OnboardingViewRedesigned: View {
                 .padding(.horizontal, Theme.Spacing.lg)
                 .padding(.bottom, Theme.Spacing.xl)
             }
-            } // End of else block for showWinterGreeting
         }
         .animation(Theme.Animation.smooth, value: currentPage)
-        .animation(Theme.Animation.smooth, value: showWinterGreeting)
+        .onAppear {
+            seedProfileStateIfNeeded()
+        }
         .sheet(isPresented: $showLanguageSelection) {
             LanguageSelectionSheetV2(selectedLanguage: $preferredLanguage)
         }
@@ -206,13 +214,24 @@ struct OnboardingViewRedesigned: View {
     }
     
     private func completeOnboarding() {
+        persistOnboardingProfile()
         withAnimation(Theme.Animation.smooth) {
             appContainer.completeOnboarding()
         }
         triggerHapticFeedback(style: .medium)
     }
     
-    private var totalPages: Int { pages.count + 3 }
+    private func skipAboutStep() {
+        skippedAboutStep = true
+        goNext()
+    }
+    
+    private func skipFamilyStep() {
+        skippedFamilyStep = true
+        goNext()
+    }
+    
+    private var totalPages: Int { pages.count + 5 }
     
     private var languageDisplayName: String {
         switch preferredLanguage {
@@ -228,6 +247,72 @@ struct OnboardingViewRedesigned: View {
         let generator = UIImpactFeedbackGenerator(style: style)
         generator.impactOccurred()
     }
+    
+    private func seedProfileStateIfNeeded() {
+        guard !didSeedProfileState else { return }
+        didSeedProfileState = true
+        
+        guard let profile = appContainer.userProfile else { return }
+        selectedCanton = profile.canton
+        selectedPermitType = profile.permitType
+        preferredLanguage = profile.preferredLanguage
+        
+        if let arrivalDate = profile.arrivalDate {
+            arrivalMonth = Calendar.current.component(.month, from: arrivalDate)
+            arrivalYear = Calendar.current.component(.year, from: arrivalDate)
+        }
+        
+        hasChildren = profile.hasChildren
+        familyStatus = profile.familyStatus
+        
+        let adults = adultCount(for: profile.familyStatus)
+        if profile.hasChildren {
+            childrenCount = max(1, profile.familySize - adults)
+        }
+    }
+    
+    private func persistOnboardingProfile() {
+        var profile = appContainer.userProfile ?? UserProfile()
+        
+        profile.preferredLanguage = preferredLanguage
+        
+        if !skippedAboutStep {
+            profile.canton = selectedCanton
+            profile.permitType = selectedPermitType
+            profile.arrivalDate = resolvedArrivalDate
+        }
+        
+        if !skippedFamilyStep {
+            profile.hasChildren = hasChildren
+            profile.familyStatus = familyStatus
+            profile.familySize = resolvedFamilySize
+        }
+        
+        appContainer.userProfile = profile
+        appContainer.firstWeekService.generateTasks(for: profile)
+    }
+    
+    private var resolvedArrivalDate: Date? {
+        var components = DateComponents()
+        components.year = arrivalYear
+        components.month = arrivalMonth
+        components.day = 1
+        return Calendar.current.date(from: components)
+    }
+    
+    private var resolvedFamilySize: Int {
+        let adults = adultCount(for: familyStatus)
+        return hasChildren ? adults + childrenCount : adults
+    }
+    
+    private func adultCount(for status: FamilyStatus?) -> Int {
+        switch status {
+        case .married, .partner:
+            return 2
+        default:
+            return 1
+        }
+    }
 }
 
 // MARK: - Theme Picker Page
@@ -241,56 +326,19 @@ private struct ThemePickerPage: View {
     
     var body: some View {
         ZStack {
-            // Background - winter or theme-based
-            if WinterTheme.isActive {
-                // Winter night background (dark by default for consistency)
-                LinearGradient(
-                    colors: [
-                        Color(red: 0.05, green: 0.1, blue: 0.25),
-                        Color(red: 0.1, green: 0.15, blue: 0.35),
-                        Color(red: 0.08, green: 0.12, blue: 0.3)
-                    ],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-                .ignoresSafeArea()
-                
-                // Northern lights
-                LinearGradient(
-                    colors: [
-                        Color.cyan.opacity(0.1),
-                        Color.green.opacity(0.05),
-                        Color.clear
-                    ],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .blur(radius: 40)
-                .ignoresSafeArea()
-                
-                // Snowfall
-                SnowfallView(particleCount: 12, speed: 0.5)
-                    .ignoresSafeArea()
-            } else {
-                // Background that reflects current theme choice
-                Group {
-                    if selectedTheme == .dark {
-                        LinearGradient(
-                            colors: [Color(red: 0.05, green: 0.05, blue: 0.12), Color(red: 0.0, green: 0.35, blue: 0.35)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    } else {
-                        LinearGradient(
-                            colors: [Color(red: 0.9, green: 0.98, blue: 0.96), Color(red: 0.96, green: 0.99, blue: 1.0)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    }
+            Group {
+                if selectedTheme == .dark {
+                    LinearGradient(
+                        colors: [Theme.Colors.darkBackground, Theme.Colors.darkBackground.opacity(0.9)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                } else {
+                    Theme.Colors.gradientSoft
                 }
-                .ignoresSafeArea()
-                .overlay(FloatingParticlesOverlayV2().opacity(0.15))
             }
+            .ignoresSafeArea()
+            .overlay(FloatingParticlesOverlayV2().opacity(0.15))
             
             VStack(spacing: Theme.Spacing.xl) {
                 Spacer()
@@ -388,13 +436,437 @@ private struct ThemePreviewCard: View {
         .frame(width: 150, height: 120)
         .background(
             RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .fill(isDark ? Color(red: 0.08, green: 0.08, blue: 0.14) : Color.white)
+                .fill(isDark ? Theme.Colors.darkBackground : Color.white)
         )
         .overlay(
             RoundedRectangle(cornerRadius: 20, style: .continuous)
                 .stroke(isSelected ? LinearGradient(colors: [Theme.Colors.primary, Theme.Colors.accent], startPoint: .leading, endPoint: .trailing) : LinearGradient(colors: [Color.black.opacity(0.06)], startPoint: .leading, endPoint: .trailing), lineWidth: isSelected ? 2 : 1)
         )
         .shadow(color: .black.opacity(isDark ? 0.4 : 0.1), radius: 12, x: 0, y: 8)
+    }
+}
+
+private struct ProfileDetailsPage: View {
+    @Binding var selectedCanton: Canton
+    @Binding var selectedPermitType: PermitType
+    @Binding var arrivalMonth: Int
+    @Binding var arrivalYear: Int
+    let onSkip: () -> Void
+    
+    private let permitOptions: [PermitType] = [.b, .c, .s, .n, .other]
+    private let months = Array(1...12)
+    private var years: [Int] {
+        let currentYear = Calendar.current.component(.year, from: Date())
+        return Array((currentYear - 10)...(currentYear + 1)).reversed()
+    }
+    
+    @State private var titleAppeared = false
+    
+    var body: some View {
+        OnboardingDetailsBackground {
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: Theme.Spacing.lg) {
+                    Spacer().frame(height: 20)
+                    
+                    // Hero icon + title
+                    VStack(spacing: Theme.Spacing.md) {
+                        ZStack {
+                            Circle()
+                                .fill(Color.white.opacity(0.1))
+                                .frame(width: 72, height: 72)
+                            Image(systemName: "person.text.rectangle")
+                                .font(.system(size: 32, weight: .medium))
+                                .foregroundColor(.white)
+                                .symbolEffect(.pulse, options: .repeating.speed(0.3))
+                        }
+                        .opacity(titleAppeared ? 1 : 0)
+                        .scaleEffect(titleAppeared ? 1 : 0.5)
+                        
+                        VStack(spacing: 8) {
+                            Text("Расскажи о себе")
+                                .font(.system(size: 28, weight: .bold, design: .rounded))
+                                .foregroundColor(.white)
+                                .multilineTextAlignment(.center)
+                            Text("Выбери кантон, тип разрешения и примерно\nукажи, когда ты приехал в Швейцарию.")
+                                .font(.system(size: 16))
+                                .foregroundColor(.white.opacity(0.78))
+                                .multilineTextAlignment(.center)
+                                .lineSpacing(3)
+                        }
+                        .opacity(titleAppeared ? 1 : 0)
+                        .offset(y: titleAppeared ? 0 : 15)
+                    }
+                    
+                    VStack(spacing: 14) {
+                        OnboardingFieldCard(title: "Кантон проживания", icon: "mappin.and.ellipse", delay: 0.15) {
+                            Menu {
+                                ForEach(Canton.allCases, id: \.self) { canton in
+                                    Button(canton.localizedName) {
+                                        selectedCanton = canton
+                                    }
+                                }
+                            } label: {
+                                HStack {
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text(selectedCanton.localizedName)
+                                            .font(.system(size: 17, weight: .semibold))
+                                            .foregroundColor(.white)
+                                        Text(selectedCanton.rawValue)
+                                            .font(.system(size: 13))
+                                            .foregroundColor(.white.opacity(0.55))
+                                    }
+                                    Spacer()
+                                    Image(systemName: "chevron.down.circle.fill")
+                                        .font(.system(size: 22))
+                                        .foregroundColor(.white.opacity(0.35))
+                                }
+                                .padding(.vertical, 4)
+                            }
+                        }
+                        
+                        OnboardingFieldCard(title: "Тип разрешения", icon: "doc.badge.gearshape", delay: 0.25) {
+                            VStack(spacing: 4) {
+                                ForEach(permitOptions, id: \.self) { permit in
+                                    OnboardingChoiceRow(
+                                        title: permit.localizedName,
+                                        subtitle: permit.description,
+                                        isSelected: selectedPermitType == permit
+                                    ) {
+                                        selectedPermitType = permit
+                                    }
+                                }
+                            }
+                        }
+                        
+                        OnboardingFieldCard(title: "Дата приезда", icon: "calendar", delay: 0.35) {
+                            HStack(spacing: 12) {
+                                Picker("Month", selection: $arrivalMonth) {
+                                    ForEach(months, id: \.self) { month in
+                                        Text(monthName(for: month)).tag(month)
+                                    }
+                                }
+                                .pickerStyle(.menu)
+                                .tint(.white)
+                                
+                                Picker("Year", selection: $arrivalYear) {
+                                    ForEach(years, id: \.self) { year in
+                                        Text(String(year)).tag(year)
+                                    }
+                                }
+                                .pickerStyle(.menu)
+                                .tint(.white)
+                            }
+                        }
+                    }
+                    .padding(.horizontal, Theme.Spacing.lg)
+                    
+                    // Skip styled as pill
+                    Button {
+                        onSkip()
+                    } label: {
+                        Text("Пропустить")
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundColor(.white.opacity(0.75))
+                            .padding(.horizontal, 24)
+                            .padding(.vertical, 10)
+                            .background(
+                                Capsule().stroke(Color.white.opacity(0.25), lineWidth: 1)
+                            )
+                    }
+                    .accessibilityIdentifier("onboarding.profile.skipButton")
+                    
+                    Spacer().frame(height: 12)
+                }
+            }
+        }
+        .onAppear {
+            withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                titleAppeared = true
+            }
+        }
+        .accessibilityIdentifier("onboarding.profileDetailsPage")
+    }
+    
+    private func monthName(for month: Int) -> String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        return formatter.monthSymbols[month - 1]
+    }
+}
+
+private struct FamilyDetailsPage: View {
+    @Binding var hasChildren: Bool
+    @Binding var childrenCount: Int
+    @Binding var familyStatus: FamilyStatus?
+    let onSkip: () -> Void
+    @State private var titleAppeared = false
+    
+    var body: some View {
+        OnboardingDetailsBackground {
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: Theme.Spacing.lg) {
+                    Spacer().frame(height: 40)
+                    
+                    // Hero icon + title
+                    VStack(spacing: Theme.Spacing.md) {
+                        ZStack {
+                            Circle()
+                                .fill(Color.white.opacity(0.1))
+                                .frame(width: 72, height: 72)
+                            Image(systemName: "figure.2.and.child.holdinghands")
+                                .font(.system(size: 30, weight: .medium))
+                                .foregroundColor(.white)
+                                .symbolEffect(.pulse, options: .repeating.speed(0.3))
+                        }
+                        .opacity(titleAppeared ? 1 : 0)
+                        .scaleEffect(titleAppeared ? 1 : 0.5)
+                        
+                        VStack(spacing: 8) {
+                            Text("Твоя семья")
+                                .font(.system(size: 28, weight: .bold, design: .rounded))
+                                .foregroundColor(.white)
+                            Text("Этот шаг необязательный. Он поможет\nлучше подобрать стартовые задачи.")
+                                .font(.system(size: 16))
+                                .foregroundColor(.white.opacity(0.78))
+                                .multilineTextAlignment(.center)
+                                .lineSpacing(3)
+                        }
+                        .opacity(titleAppeared ? 1 : 0)
+                        .offset(y: titleAppeared ? 0 : 15)
+                    }
+                    
+                    VStack(spacing: 14) {
+                        OnboardingFieldCard(title: "Семейное положение", icon: "heart.circle", delay: 0.15) {
+                            VStack(spacing: 4) {
+                                ForEach(FamilyStatus.allCases) { status in
+                                    OnboardingChoiceRow(
+                                        title: status.localizedName,
+                                        subtitle: nil,
+                                        isSelected: familyStatus == status
+                                    ) {
+                                        familyStatus = status
+                                    }
+                                }
+                            }
+                        }
+                        
+                        OnboardingFieldCard(title: "Есть ли дети", icon: "figure.and.child.holdinghands", delay: 0.25) {
+                            Toggle(isOn: $hasChildren) {
+                                Text(hasChildren ? "Да" : "Нет")
+                                    .font(.system(size: 15, weight: .semibold))
+                                    .foregroundColor(.white)
+                            }
+                            .tint(Theme.Colors.accent)
+                        }
+                        
+                        if hasChildren {
+                            OnboardingFieldCard(title: "Количество детей", icon: "number.circle", delay: 0.35) {
+                                Stepper(value: $childrenCount, in: 1...5) {
+                                    Text("\(childrenCount)")
+                                        .font(.system(size: 17, weight: .bold))
+                                        .foregroundColor(.white)
+                                }
+                                .tint(Theme.Colors.accent)
+                            }
+                        }
+                    }
+                    .padding(.horizontal, Theme.Spacing.lg)
+                    .animation(.spring(response: 0.4, dampingFraction: 0.8), value: hasChildren)
+                    
+                    // Skip styled as pill
+                    Button {
+                        onSkip()
+                    } label: {
+                        Text("Пропустить этот шаг")
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundColor(.white.opacity(0.75))
+                            .padding(.horizontal, 24)
+                            .padding(.vertical, 10)
+                            .background(
+                                Capsule().stroke(Color.white.opacity(0.25), lineWidth: 1)
+                            )
+                    }
+                    .accessibilityIdentifier("onboarding.family.skipButton")
+                    
+                    Spacer().frame(height: 12)
+                }
+            }
+        }
+        .onAppear {
+            withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                titleAppeared = true
+            }
+        }
+        .accessibilityIdentifier("onboarding.familyDetailsPage")
+    }
+}
+
+private struct OnboardingDetailsBackground<Content: View>: View {
+    @ViewBuilder let content: Content
+    
+    var body: some View {
+        ZStack {
+            LinearGradient(
+                colors: [
+                    Theme.Colors.primaryDark,
+                    Theme.Colors.primary,
+                    Theme.Colors.accentTurquoise.opacity(0.85)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
+            
+            // Radial glow accent
+            RadialGradient(
+                colors: [Theme.Colors.accent.opacity(0.12), .clear],
+                center: .topTrailing,
+                startRadius: 20,
+                endRadius: 300
+            )
+            .ignoresSafeArea()
+            
+            // Decorative background symbols
+            VStack {
+                HStack {
+                    Spacer()
+                    Image(systemName: "mountain.2.fill")
+                        .font(.system(size: 120, weight: .ultraLight))
+                        .foregroundColor(.white.opacity(0.04))
+                        .rotationEffect(.degrees(-8))
+                        .offset(x: 40, y: -20)
+                }
+                Spacer()
+                HStack {
+                    Image(systemName: "leaf.fill")
+                        .font(.system(size: 80, weight: .ultraLight))
+                        .foregroundColor(.white.opacity(0.03))
+                        .rotationEffect(.degrees(25))
+                        .offset(x: -30, y: 20)
+                    Spacer()
+                }
+            }
+            .ignoresSafeArea()
+            
+            FloatingParticlesOverlayV2().opacity(0.1)
+            
+            content
+        }
+    }
+}
+
+private struct OnboardingFieldCard<Content: View>: View {
+    let title: String
+    let icon: String?
+    let delay: Double
+    @ViewBuilder let content: Content
+    @State private var appeared = false
+    
+    init(title: String, icon: String? = nil, delay: Double = 0, @ViewBuilder content: () -> Content) {
+        self.title = title
+        self.icon = icon
+        self.delay = delay
+        self.content = content()
+    }
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 8) {
+                if let icon {
+                    Image(systemName: icon)
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(.white.opacity(0.55))
+                }
+                Text(title)
+                    .font(.system(size: 13, weight: .semibold, design: .rounded))
+                    .foregroundColor(.white.opacity(0.72))
+                    .textCase(.uppercase)
+                    .tracking(0.5)
+            }
+            content
+        }
+        .padding(Theme.Spacing.md + 2)
+        .background(
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .fill(.ultraThinMaterial.opacity(0.45))
+                .background(
+                    RoundedRectangle(cornerRadius: 20, style: .continuous)
+                        .fill(Color.white.opacity(0.08))
+                )
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .stroke(
+                    LinearGradient(
+                        colors: [Color.white.opacity(0.28), Color.white.opacity(0.08)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    lineWidth: 1
+                )
+        )
+        .shadow(color: Color.black.opacity(0.12), radius: 16, y: 8)
+        .opacity(appeared ? 1 : 0)
+        .offset(y: appeared ? 0 : 20)
+        .onAppear {
+            withAnimation(.spring(response: 0.5, dampingFraction: 0.8).delay(delay)) {
+                appeared = true
+            }
+        }
+    }
+}
+
+private struct OnboardingChoiceRow: View {
+    let title: String
+    let subtitle: String?
+    let isSelected: Bool
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: {
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+            action()
+        }) {
+            HStack(spacing: 12) {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(title)
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(.white)
+                    if let subtitle {
+                        Text(subtitle)
+                            .font(.system(size: 12))
+                            .foregroundColor(.white.opacity(0.6))
+                            .multilineTextAlignment(.leading)
+                    }
+                }
+                Spacer()
+                ZStack {
+                    Circle()
+                        .stroke(isSelected ? Color.clear : Color.white.opacity(0.35), lineWidth: 1.5)
+                        .frame(width: 24, height: 24)
+                    if isSelected {
+                        Circle()
+                            .fill(Theme.Colors.accent)
+                            .frame(width: 24, height: 24)
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundColor(Theme.Colors.primaryDark)
+                    }
+                }
+                .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isSelected)
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 12)
+            .background(
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .fill(isSelected ? Color.white.opacity(0.14) : Color.clear)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .stroke(isSelected ? Theme.Colors.accent.opacity(0.4) : Color.clear, lineWidth: 1)
+            )
+        }
+        .buttonStyle(.plain)
     }
 }
 
@@ -418,100 +890,31 @@ private struct OnboardingV2PageView: View {
     
     var body: some View {
         ZStack {
-            // Full-screen background - winter or regular gradient
-            if WinterTheme.isActive {
-                // Winter night background
-                LinearGradient(
-                    colors: [
-                        Color(red: 0.05, green: 0.1, blue: 0.25),
-                        Color(red: 0.1, green: 0.15, blue: 0.35),
-                        Color(red: 0.08, green: 0.12, blue: 0.3)
-                    ],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
+            page.gradient
                 .ignoresSafeArea()
-                
-                // Northern lights hint
-                LinearGradient(
-                    colors: [
-                        Color.cyan.opacity(0.15),
-                        Color.green.opacity(0.08),
-                        Color.clear
-                    ],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .blur(radius: 40)
-                .ignoresSafeArea()
-                
-                // Snowfall
-                SnowfallView(particleCount: 15, speed: 0.5)
-                    .ignoresSafeArea()
-            } else {
-                page.gradient
-                    .ignoresSafeArea()
-                
-                // Subtle animated particles
-                FloatingParticlesOverlayV2()
-                    .opacity(0.2)
-            }
+            
+            FloatingParticlesOverlayV2()
+                .opacity(0.2)
             
             // Content
             VStack(spacing: Theme.Spacing.xxl) {
                 Spacer()
                 
-                // Large icon with winter decorations
                 ZStack {
                     Circle()
-                        .fill(WinterTheme.isActive ? Color.cyan.opacity(0.15) : Color.white.opacity(0.2))
+                        .fill(Color.white.opacity(0.2))
                         .frame(width: 160, height: 160)
                         .blur(radius: 20)
-                    
-                    // Winter frost ring
-                    if WinterTheme.isActive {
-                        Circle()
-                            .stroke(
-                                LinearGradient(
-                                    colors: [Color.cyan.opacity(0.4), Color.white.opacity(0.2)],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                ),
-                                lineWidth: 2
-                            )
-                            .frame(width: 150, height: 150)
-                    }
                     
                     Image(systemName: page.icon)
                         .font(.system(size: 80, weight: .semibold))
                         .foregroundColor(.white)
                         .scaleEffect(animateIcon ? 1.0 : 0.5)
                         .opacity(animateIcon ? 1.0 : 0.0)
-                    
-                    // Corner snowflakes
-                    if WinterTheme.isActive {
-                        Text("❄️")
-                            .font(.system(size: 20))
-                            .opacity(0.7)
-                            .offset(x: 65, y: -55)
-                        
-                        Text("✨")
-                            .font(.system(size: 16))
-                            .opacity(0.6)
-                            .offset(x: -60, y: 50)
-                    }
                 }
                 
                 // Text content
                 VStack(spacing: Theme.Spacing.md) {
-                    // Winter greeting on first page
-                    if WinterTheme.isActive && page.id == 1 {
-                        Text(WinterTheme.isPostNewYear ? "🎄 З Новим Роком!" : "🎄 Святкова зима разом із Sweezy")
-                            .font(.system(size: 15, weight: .semibold))
-                            .foregroundColor(Color.cyan)
-                            .padding(.bottom, 4)
-                    }
-                    
                     Text(LocalizedStringKey(page.titleKey))
                         .font(Theme.Typography.largeTitle)
                         .fontWeight(.bold)
@@ -624,54 +1027,16 @@ private struct LanguagePickerPage: View {
     
     var body: some View {
         ZStack {
-            // Background - winter or regular
-            if WinterTheme.isActive {
-                LinearGradient(
-                    colors: [
-                        Color(red: 0.05, green: 0.1, blue: 0.25),
-                        Color(red: 0.1, green: 0.15, blue: 0.35),
-                        Color(red: 0.08, green: 0.12, blue: 0.3)
-                    ],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-                .ignoresSafeArea()
-                
-                // Northern lights
-                LinearGradient(
-                    colors: [
-                        Color.cyan.opacity(0.12),
-                        Color.green.opacity(0.06),
-                        Color.clear
-                    ],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .blur(radius: 40)
-                .ignoresSafeArea()
-                
-                // Snowfall
-                SnowfallView(particleCount: 15, speed: 0.5)
-                    .ignoresSafeArea()
-            } else {
-                LinearGradient(
-                    colors: [Color(red: 0.14, green: 0.16, blue: 0.28), Color(red: 0.0, green: 0.6, blue: 0.6)],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .ignoresSafeArea()
-                .overlay(FloatingParticlesOverlayV2().opacity(0.15))
-            }
+            LinearGradient(
+                colors: [Theme.Colors.primary, Theme.Colors.accentTurquoise],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
+            .overlay(FloatingParticlesOverlayV2().opacity(0.15))
             
             VStack(spacing: Theme.Spacing.lg) {
                 Spacer()
-                
-                // Winter emoji
-                if WinterTheme.isActive {
-                    Text("🎄")
-                        .font(.system(size: 36))
-                        .padding(.bottom, 8)
-                }
                 
                 Text(LocalizedStringKey("onboarding.select_language"))
                     .font(Theme.Typography.title1)
@@ -692,29 +1057,19 @@ private struct LanguagePickerPage: View {
                                     .fontWeight(.semibold)
                                 Spacer()
                                 if selectedLanguage == language.code {
-                                    if WinterTheme.isActive {
-                                        Text("❄️").font(.system(size: 20))
-                                    } else {
-                                        Image(systemName: "checkmark.circle.fill").foregroundColor(.white)
-                                    }
+                                    Image(systemName: "checkmark.circle.fill").foregroundColor(.white)
                                 }
                             }
                             .foregroundColor(.white)
                             .padding(Theme.Spacing.md)
                             .background(
                                 RoundedRectangle(cornerRadius: Theme.CornerRadius.lg)
-                                    .fill(
-                                        WinterTheme.isActive && selectedLanguage == language.code
-                                            ? Color.cyan.opacity(0.2)
-                                            : Color.white.opacity(selectedLanguage == language.code ? 0.18 : 0.12)
-                                    )
+                                    .fill(Color.white.opacity(selectedLanguage == language.code ? 0.18 : 0.12))
                             )
                             .overlay(
                                 RoundedRectangle(cornerRadius: Theme.CornerRadius.lg)
                                     .stroke(
-                                        WinterTheme.isActive && selectedLanguage == language.code
-                                            ? Color.cyan.opacity(0.5)
-                                            : Color.white.opacity(selectedLanguage == language.code ? 0.35 : 0.2),
+                                        Color.white.opacity(selectedLanguage == language.code ? 0.35 : 0.2),
                                         lineWidth: selectedLanguage == language.code ? 2 : 1
                                     )
                             )
@@ -735,85 +1090,38 @@ private struct LanguagePickerPage: View {
 // MARK: - Success Page (last)
 
 private struct SuccessPageView: View {
+    @State private var appeared = false
+    
     var body: some View {
         ZStack {
-            // Background - winter or regular
-            if WinterTheme.isActive {
-                // Winter celebration background
-                LinearGradient(
-                    colors: [
-                        Color(red: 0.05, green: 0.1, blue: 0.25),
-                        Color(red: 0.1, green: 0.15, blue: 0.35),
-                        Color(red: 0.08, green: 0.12, blue: 0.3)
-                    ],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
+            Theme.Colors.gradientSunrise
                 .ignoresSafeArea()
-                
-                // Festive northern lights
-                LinearGradient(
-                    colors: [
-                        Color.cyan.opacity(0.15),
-                        Color.green.opacity(0.1),
-                        Color.yellow.opacity(0.05)
-                    ],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .blur(radius: 40)
-                .ignoresSafeArea()
-                
-                // Snowfall
-                SnowfallView(particleCount: 20, speed: 0.5)
-                    .ignoresSafeArea()
-            } else {
-                LinearGradient(
-                    colors: [Color(red: 1.0, green: 0.8, blue: 0.2), Color(red: 1.0, green: 0.58, blue: 0.0)],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .ignoresSafeArea()
-            }
             
             VStack(spacing: Theme.Spacing.lg) {
                 Spacer()
+                
                 ZStack {
                     Circle()
-                        .fill(WinterTheme.isActive ? Color.cyan.opacity(0.2) : Color.white.opacity(0.25))
-                        .frame(width: 160, height: 160)
-                        .blur(radius: 20)
+                        .fill(Color.white.opacity(0.20))
+                        .frame(width: 180, height: 180)
+                        .blur(radius: 25)
                     
-                    // Winter: Christmas tree, Regular: checkmark
-                    if WinterTheme.isActive {
-                        Text("🎄")
-                            .font(.system(size: 80))
-                    } else {
-                        Image(systemName: "checkmark.seal.fill")
-                            .font(.system(size: 80, weight: .semibold))
-                            .foregroundColor(.white)
-                    }
+                    Image(systemName: "sun.max.fill")
+                        .font(.system(size: 44))
+                        .foregroundColor(.white.opacity(0.15))
+                        .offset(x: -40, y: -30)
+                        .rotationEffect(.degrees(appeared ? 15 : 0))
                     
-                    // Corner snowflakes
-                    if WinterTheme.isActive {
-                        Text("❄️")
-                            .font(.system(size: 24))
-                            .opacity(0.7)
-                            .offset(x: 70, y: -60)
-                        
-                        Text("✨")
-                            .font(.system(size: 20))
-                            .opacity(0.6)
-                            .offset(x: -65, y: 55)
-                    }
-                }
-                
-                // Title
-                if WinterTheme.isActive {
-                    Text(WinterTheme.isPostNewYear ? "🎉 З Новим Роком!" : "🎉 Святковий настрій разом із Sweezy")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(Color.cyan)
-                        .padding(.bottom, 4)
+                    Image(systemName: "leaf.fill")
+                        .font(.system(size: 32))
+                        .foregroundColor(.white.opacity(0.12))
+                        .offset(x: 45, y: 25)
+                        .rotationEffect(.degrees(appeared ? -10 : 0))
+                    
+                    Image(systemName: "checkmark.seal.fill")
+                        .font(.system(size: 80, weight: .semibold))
+                        .foregroundColor(.white)
+                        .scaleEffect(appeared ? 1.0 : 0.7)
                 }
                 
                 Text("onboarding.page3.title".localized)
@@ -827,8 +1135,14 @@ private struct SuccessPageView: View {
                     .foregroundColor(.white.opacity(0.9))
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, Theme.Spacing.xl)
+                
                 Spacer()
                 Spacer()
+            }
+        }
+        .onAppear {
+            withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
+                appeared = true
             }
         }
     }

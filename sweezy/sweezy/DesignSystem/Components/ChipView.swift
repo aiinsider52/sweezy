@@ -30,7 +30,7 @@ struct ChipView: View {
             .background(
                 Group {
                     if isSelected {
-                        Capsule().fill(Theme.Colors.gradientAccent)
+                        Capsule().fill(Theme.Colors.primary)
                     } else {
                         Capsule().fill(Theme.Colors.primaryBackground)
                     }

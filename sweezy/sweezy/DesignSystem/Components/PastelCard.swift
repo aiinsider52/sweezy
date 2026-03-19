@@ -6,15 +6,15 @@ struct PastelCard<Content: View>: View {
     let cornerRadius: CGFloat
     @Environment(\.colorScheme) private var colorScheme
     
-    init(background: Color, cornerRadius: CGFloat = 28, @ViewBuilder content: () -> Content) {
+    init(background: Color = Theme.Colors.backgroundStone, cornerRadius: CGFloat = 20, @ViewBuilder content: () -> Content) {
         self.background = background
-        self.cornerRadius = cornerRadius
+        self.cornerRadius = max(cornerRadius, 12)
         self.content = content()
     }
     
     var body: some View {
         let fill = colorScheme == .dark ? Theme.Colors.darkCard : background
-        let stroke = colorScheme == .dark ? Color.white.opacity(0.12) : Color.black.opacity(0.05)
+        let stroke = colorScheme == .dark ? Color.white.opacity(0.12) : Theme.Colors.primary.opacity(0.06)
         content
             .padding(20)
             .background(
@@ -26,7 +26,7 @@ struct PastelCard<Content: View>: View {
                     .stroke(stroke, lineWidth: 1)
                     .allowsHitTesting(false)
             )
-            .themeShadow(colorScheme == .dark ? Theme.Shadows.level1 : Theme.Shadows.level2)
+            .themeShadow(Theme.Shadows.level2)
     }
 }
 

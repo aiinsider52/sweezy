@@ -339,7 +339,7 @@ struct ChecklistsView: View {
                 } label: {
                     Image(systemName: "checkmark.circle.fill")
                         .font(.system(size: 36))
-                        .foregroundColor(Theme.Colors.accentTurquoise)
+                        .foregroundColor(Theme.Colors.primary)
                 }
                 .accessibilityLabel("Позначити крок виконаним")
             }
@@ -523,7 +523,7 @@ private struct ChecklistProgressCard: View {
                     if isCompleted {
                         Image(systemName: "checkmark.circle.fill")
                             .font(.system(size: 28))
-                            .foregroundColor(.green)
+                            .foregroundColor(Theme.Colors.primary)
                     } else {
                         Image(systemName: checklist.category.iconName)
                             .font(.system(size: 26))
@@ -592,10 +592,10 @@ private struct ChecklistProgressCard: View {
                 HStack(spacing: 6) {
                     Image(systemName: isCompleted ? "checkmark.circle.fill" : "chart.bar.fill")
                         .font(.system(size: 12))
-                        .foregroundColor(isCompleted ? .green : checklist.category.swiftUIColor)
+                        .foregroundColor(isCompleted ? Theme.Colors.primary : checklist.category.swiftUIColor)
                     Text(isCompleted ? "Завершено" : "\(Int(completion * 100))%")
                         .font(.system(size: 13, weight: .medium))
-                        .foregroundColor(isCompleted ? .green : Theme.Colors.textSecondary)
+                        .foregroundColor(isCompleted ? Theme.Colors.primary : Theme.Colors.textSecondary)
                 }
                 
                 Spacer()
@@ -702,14 +702,9 @@ private struct TimelineChecklistRow: View {
                         .frame(width: 24, height: 24)
                     
                     if isCompleted {
-                        if WinterTheme.isActive {
-                            Text("❄️")
-                                .font(.system(size: 12))
-                        } else {
-                            Image(systemName: "checkmark")
-                                .font(.system(size: 12, weight: .bold))
-                                .foregroundColor(.white)
-                        }
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundColor(.white)
                     } else if isInProgress {
                         Circle()
                             .fill(.white)
@@ -817,11 +812,6 @@ struct ChecklistDetailView: View {
         ZStack {
             Theme.Colors.primaryBackground.ignoresSafeArea()
             
-            // Winter theme background
-            if WinterTheme.isActive {
-                WinterSceneLite(intensity: .light)
-            }
-            
             ScrollView(showsIndicators: false) {
                 VStack(spacing: Theme.Spacing.lg) {
                     // Hero header
@@ -894,27 +884,6 @@ struct ChecklistDetailView: View {
                     .foregroundColor(.white.opacity(0.15))
                     .offset(x: 80, y: -20)
             )
-            
-            // Winter frost overlay
-            if WinterTheme.isActive {
-                LinearGradient(
-                    colors: [
-                        Theme.Colors.adaptiveSurface,
-                        Color.clear,
-                        Color.cyan.opacity(0.05)
-                    ],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .frame(height: 180)
-                
-                // Corner snowflakes
-                Text("❄️")
-                    .font(.system(size: 20))
-                    .opacity(0.8)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
-                    .offset(x: -12, y: 12)
-            }
             
             VStack(alignment: .leading, spacing: 8) {
                 // Category badge
@@ -1125,14 +1094,9 @@ private struct StepCard: View {
                             .frame(width: 28, height: 28)
                         
                         if isCompleted {
-                            if WinterTheme.isActive {
-                                Text("❄️")
-                                    .font(.system(size: 14))
-                            } else {
-                                Image(systemName: "checkmark")
-                                    .font(.system(size: 14, weight: .bold))
-                                    .foregroundColor(.white)
-                            }
+                            Image(systemName: "checkmark")
+                                .font(.system(size: 14, weight: .bold))
+                                .foregroundColor(.white)
                         }
                     }
                 }

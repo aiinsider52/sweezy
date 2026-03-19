@@ -26,36 +26,28 @@ struct FeatureOnboardingView: View {
     
     var body: some View {
         ZStack {
-            // Winter gradient background
             LinearGradient(
                 colors: [
-                    Color(red: 0.04, green: 0.08, blue: 0.18),
-                    Color(red: 0.06, green: 0.12, blue: 0.24),
-                    Color(red: 0.05, green: 0.10, blue: 0.20)
+                    Color(red: 0.08, green: 0.11, blue: 0.07),
+                    Color(red: 0.10, green: 0.15, blue: 0.08),
+                    Color(red: 0.08, green: 0.12, blue: 0.07)
                 ],
                 startPoint: .top,
                 endPoint: .bottom
             )
             .ignoresSafeArea()
             
-            // Subtle ambient glow (static, no animation)
             Circle()
-                .fill(Color.cyan.opacity(0.08))
+                .fill(Color(red: 0.400, green: 0.733, blue: 0.416).opacity(0.08))
                 .frame(width: 250, height: 250)
                 .blur(radius: 80)
                 .offset(x: -80, y: -150)
             
             Circle()
-                .fill(Color.blue.opacity(0.06))
+                .fill(Color(red: 0.976, green: 0.659, blue: 0.145).opacity(0.06))
                 .frame(width: 200, height: 200)
                 .blur(radius: 60)
                 .offset(x: 100, y: 100)
-            
-            // Very light snowfall (minimal, won't crash)
-            if WinterTheme.isActive {
-                LightSnowfall()
-                    .ignoresSafeArea()
-            }
             
             // Main content
             VStack(spacing: 0) {
@@ -204,7 +196,7 @@ struct FeatureOnboardingView: View {
                     .fill(
                         index == currentPage
                         ? LinearGradient(
-                            colors: [Color.cyan, Color.cyan.opacity(0.7)],
+                            colors: [Theme.Colors.accentTurquoise, Theme.Colors.accentTurquoise.opacity(0.7)],
                             startPoint: .leading,
                             endPoint: .trailing
                         )
@@ -280,7 +272,7 @@ struct FeatureOnboardingView: View {
                         LinearGradient(
                             colors: [
                                 Color.white.opacity(0.4),
-                                Color.cyan.opacity(0.2),
+                                Theme.Colors.accentTurquoise.opacity(0.2),
                                 Color.white.opacity(0.1)
                             ],
                             startPoint: .topLeading,
@@ -289,7 +281,7 @@ struct FeatureOnboardingView: View {
                         lineWidth: 1
                     )
             )
-            .shadow(color: Color.cyan.opacity(0.4), radius: 16, x: 0, y: 8)
+            .shadow(color: Theme.Colors.accentTurquoise.opacity(0.4), radius: 16, x: 0, y: 8)
         }
         .buttonStyle(ScaleButtonStyle(scaleAmount: reduceMotion ? 1.0 : 0.97))
     }

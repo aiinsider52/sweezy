@@ -59,13 +59,13 @@ struct TagChip: View {
     private var backgroundColor: Color {
         switch (style, isSelected) {
         case (.filter, true):
-            return Theme.Colors.ukrainianBlue
+            return Theme.Colors.primary
         case (.filter, false):
             return Theme.Colors.tertiaryBackground
         case (.category, _):
-            return Theme.Colors.warmYellow.opacity(0.2)
+            return Theme.Colors.primaryLight.opacity(0.15)
         case (.status, _):
-            return Theme.Colors.success.opacity(0.2)
+            return Theme.Colors.success.opacity(0.15)
         }
     }
     
@@ -76,7 +76,7 @@ struct TagChip: View {
         case (.filter, false):
             return Theme.Colors.primaryText
         case (.category, _):
-            return Theme.Colors.ukrainianBlue
+            return Theme.Colors.primaryDark
         case (.status, _):
             return Theme.Colors.success
         }
@@ -85,11 +85,11 @@ struct TagChip: View {
     private var borderColor: Color {
         switch (style, isSelected) {
         case (.filter, true):
-            return Theme.Colors.ukrainianBlue
+            return Theme.Colors.primary
         case (.filter, false):
             return Theme.Colors.swissGray.opacity(0.3)
         case (.category, _):
-            return Theme.Colors.warmYellow
+            return Theme.Colors.primaryLight.opacity(0.3)
         case (.status, _):
             return Theme.Colors.success
         }

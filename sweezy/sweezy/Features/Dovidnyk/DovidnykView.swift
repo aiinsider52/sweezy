@@ -12,6 +12,9 @@ struct DovidnykView: View {
     @EnvironmentObject private var appContainer: AppContainer
     @EnvironmentObject private var lockManager: AppLockManager
     
+    let requestedSection: DovidnykRouteSection?
+    let routeID: UUID
+    
     @State private var selectedTab: DovidnykTab = .guides
     @State private var searchText = ""
     
@@ -32,10 +35,24 @@ struct DovidnykView: View {
             case .checklists: return "checklist"
             }
         }
+        
+        init(routeSection: DovidnykRouteSection) {
+            switch routeSection {
+            case .guides:
+                self = .guides
+            case .checklists:
+                self = .checklists
+            }
+        }
     }
     
     private func haptic(_ style: UIImpactFeedbackGenerator.FeedbackStyle) {
         UIImpactFeedbackGenerator(style: style).impactOccurred()
+    }
+    
+    init(requestedSection: DovidnykRouteSection? = nil, routeID: UUID = UUID()) {
+        self.requestedSection = requestedSection
+        self.routeID = routeID
     }
     
     var body: some View {
@@ -67,9 +84,22 @@ struct DovidnykView: View {
             }
             .featureOnboarding(.dovidnyk)
         }
+        .onAppear {
+            applyRequestedSection()
+        }
+        .onChange(of: routeID) { _, _ in
+            applyRequestedSection()
+        }
     }
     
-    // MARK: - Tab Switcher (Winter styled)
+    private func applyRequestedSection() {
+        guard let requestedSection else { return }
+        withAnimation(.easeInOut(duration: 0.2)) {
+            selectedTab = DovidnykTab(routeSection: requestedSection)
+        }
+    }
+    
+    // MARK: - Tab Switcher
     private var tabSwitcher: some View {
         HStack(spacing: 0) {
             ForEach(DovidnykTab.allCases, id: \.self) { tab in
@@ -191,6 +221,7 @@ struct GuidesContentView: View {
             .padding(.vertical, Theme.Spacing.lg)
             .padding(.bottom, 80)
         }
+        .accessibilityIdentifier("dovidnyk.guides.content")
         .onAppear {
             loadGuidesIfNeeded()
         }
@@ -235,14 +266,6 @@ struct GuidesContentView: View {
                     .fill(isSelected ? (category?.swiftUIColor ?? Theme.Colors.accent) : Color(.systemGray6))
             )
             .foregroundColor(isSelected ? .white : Theme.Colors.textPrimary)
-            .overlay(
-                Group {
-                    if WinterTheme.isActive && isSelected {
-                        Capsule()
-                            .stroke(Color.white.opacity(0.4), lineWidth: 1)
-                    }
-                }
-            )
         }
         .buttonStyle(.plain)
     }
@@ -264,29 +287,13 @@ struct GuidesContentView: View {
                     )
                     .frame(height: 180)
                 
-                // Winter frost overlay
-                if WinterTheme.isActive {
-                    RoundedRectangle(cornerRadius: 20, style: .continuous)
-                        .fill(
-                            LinearGradient(
-                                colors: [
-                                    Color.white.opacity(0.1),
-                                    Color.clear,
-                                    Color.cyan.opacity(0.05)
-                                ],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-                        .frame(height: 180)
-                }
                 
                 // Content
                 VStack(alignment: .leading, spacing: 8) {
                     // Badge
                     HStack {
                         if guide.isNew {
-                            Text(WinterTheme.isActive ? "🎄 Рекомендовано" : "Рекомендовано")
+                            Text("Рекомендовано")
                                 .font(.caption.bold())
                                 .padding(.horizontal, 10)
                                 .padding(.vertical, 4)
@@ -322,31 +329,9 @@ struct GuidesContentView: View {
                 }
                 .padding(20)
                 
-                // Winter corner snowflakes
-                if WinterTheme.isActive {
-                    Text("❄️")
-                        .font(.system(size: 20))
-                        .opacity(0.8)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
-                        .offset(x: -12, y: 12)
-                    
-                    Text("✨")
-                        .font(.system(size: 14))
-                        .opacity(0.7)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
-                        .offset(x: -16, y: -16)
-                }
             }
         }
         .buttonStyle(.plain)
-        .overlay(
-            Group {
-                if WinterTheme.isActive {
-                    RoundedRectangle(cornerRadius: 20, style: .continuous)
-                        .stroke(Color.white.opacity(0.3), lineWidth: 1.5)
-                }
-            }
-        )
     }
     
     // MARK: - Empty State
@@ -375,7 +360,7 @@ struct GuidesContentView: View {
         Task {
             let locale = appContainer.currentLocale.identifier
             // Retry a few times while content service finishes loading
-            for attempt in 1...10 {
+            for _ in 1...10 {
                 try? await Task.sleep(nanoseconds: 300_000_000) // 0.3s
                 let localized = await MainActor.run {
                     appContainer.contentService.getGuidesForLocale(locale)
@@ -429,12 +414,6 @@ struct GuideCardCompact: View {
                     .font(.title2)
                     .foregroundColor(guide.category.swiftUIColor)
                 
-                // Winter decoration on icon
-                if WinterTheme.isActive {
-                    Text("❄️")
-                        .font(.system(size: 10))
-                        .offset(x: 20, y: -20)
-                }
             }
             
             // Content
@@ -508,23 +487,9 @@ struct GuideCardCompact: View {
         .overlay(
             RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .stroke(
-                    WinterTheme.isActive 
-                        ? Color.cyan.opacity(0.3) 
-                        : Color.gray.opacity(0.15),
-                    lineWidth: WinterTheme.isActive ? 1.5 : 1
+                    Color.gray.opacity(0.15),
+                    lineWidth: 1
                 )
-        )
-        .overlay(
-            Group {
-                if WinterTheme.isActive {
-                    // Frost corner accent
-                    Text("✨")
-                        .font(.system(size: 12))
-                        .opacity(0.7)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
-                        .offset(x: -8, y: 8)
-                }
-            }
         )
     }
 }
@@ -599,6 +564,7 @@ struct ChecklistsContentView: View {
             .padding(.vertical, Theme.Spacing.lg)
             .padding(.bottom, 80)
         }
+        .accessibilityIdentifier("dovidnyk.checklists.content")
     }
     
     // MARK: - Progress Card
@@ -611,9 +577,7 @@ struct ChecklistsContentView: View {
             ZStack {
                 Circle()
                     .stroke(
-                        WinterTheme.isActive 
-                            ? Color.cyan.opacity(0.15) 
-                            : Color.gray.opacity(0.2),
+                        Color.gray.opacity(0.2),
                         lineWidth: 6
                     )
                     .frame(width: 60, height: 60)
@@ -622,9 +586,7 @@ struct ChecklistsContentView: View {
                     .trim(from: 0, to: progress.percentage)
                     .stroke(
                         LinearGradient(
-                            colors: WinterTheme.isActive 
-                                ? [Color.cyan, Color(red: 0.6, green: 0.85, blue: 1.0)]
-                                : [Theme.Colors.accent, Theme.Colors.accentTurquoise],
+                            colors: [Theme.Colors.accent, Theme.Colors.accentTurquoise],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         ),
@@ -632,7 +594,7 @@ struct ChecklistsContentView: View {
                     )
                     .frame(width: 60, height: 60)
                     .rotationEffect(.degrees(-90))
-                    .shadow(color: WinterTheme.isActive ? Color.cyan.opacity(0.4) : Color.clear, radius: 4)
+                    .shadow(color: Color.clear, radius: 4)
                 
                 Text("\(percent)%")
                     .font(.system(size: 14, weight: .bold, design: .rounded))
@@ -641,10 +603,6 @@ struct ChecklistsContentView: View {
             
             VStack(alignment: .leading, spacing: 4) {
                 HStack(spacing: 4) {
-                    if WinterTheme.isActive {
-                        Text("❄️")
-                            .font(.system(size: 14))
-                    }
                     Text("Ваш прогрес")
                         .font(.headline)
                         .foregroundColor(Theme.Colors.textPrimary)
@@ -656,7 +614,7 @@ struct ChecklistsContentView: View {
                 
                 Text(progressMessage(for: percent))
                     .font(.caption)
-                    .foregroundColor(WinterTheme.isActive ? Color.cyan : Theme.Colors.accent)
+                    .foregroundColor(Theme.Colors.accent)
             }
             
             Spacer()
@@ -669,20 +627,9 @@ struct ChecklistsContentView: View {
         .overlay(
             RoundedRectangle(cornerRadius: 20, style: .continuous)
                 .stroke(
-                    WinterTheme.isActive ? Color.cyan.opacity(0.3) : Color.gray.opacity(0.15),
-                    lineWidth: WinterTheme.isActive ? 1.5 : 1
+                    Color.gray.opacity(0.15),
+                    lineWidth: 1
                 )
-        )
-        .overlay(
-            Group {
-                if WinterTheme.isActive {
-                    Text("✨")
-                        .font(.system(size: 14))
-                        .opacity(0.8)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
-                        .offset(x: -12, y: 12)
-                }
-            }
         )
     }
     
@@ -739,14 +686,6 @@ struct ChecklistsContentView: View {
                     .fill(isSelected ? (category?.swiftUIColor ?? Theme.Colors.accent) : Color(.systemGray6))
             )
             .foregroundColor(isSelected ? .white : Theme.Colors.textPrimary)
-            .overlay(
-                Group {
-                    if WinterTheme.isActive && isSelected {
-                        Capsule()
-                            .stroke(Color.white.opacity(0.4), lineWidth: 1)
-                    }
-                }
-            )
         }
         .buttonStyle(.plain)
     }
@@ -802,21 +741,10 @@ struct ChecklistCardCompact: View {
                         .fill(isCompleted ? Theme.Colors.success.opacity(0.15) : checklist.category.swiftUIColor.opacity(0.15))
                         .frame(width: 56, height: 56)
                     
-                    // Winter snowflake for completed, regular icon otherwise
-                    if isCompleted && WinterTheme.isActive {
-                        SnowflakeCheckmark()
-                    } else {
-                        Image(systemName: isCompleted ? "checkmark.circle.fill" : checklist.category.iconName)
-                            .font(.title2)
-                            .foregroundColor(isCompleted ? Theme.Colors.success : checklist.category.swiftUIColor)
-                    }
+                    Image(systemName: isCompleted ? "checkmark.circle.fill" : checklist.category.iconName)
+                        .font(.title2)
+                        .foregroundColor(isCompleted ? Theme.Colors.success : checklist.category.swiftUIColor)
                     
-                    // Winter decoration
-                    if WinterTheme.isActive && !isCompleted {
-                        Text("❄️")
-                            .font(.system(size: 10))
-                            .offset(x: 20, y: -20)
-                    }
                 }
                 
                 // Content
@@ -828,7 +756,7 @@ struct ChecklistCardCompact: View {
                             .lineLimit(2)
                         
                         if isCompleted {
-                            Text(WinterTheme.isActive ? "🎄 Готово" : "Готово")
+                            Text("Готово")
                                 .font(.caption2.bold())
                                 .padding(.horizontal, 6)
                                 .padding(.vertical, 2)
@@ -885,23 +813,18 @@ struct ChecklistCardCompact: View {
                     .foregroundColor(Theme.Colors.textTertiary)
             }
             
-            // Progress bar - winter or regular
-            if WinterTheme.isActive {
-                WinterProgressBar(progress: progress, height: 4)
-            } else {
-                GeometryReader { geo in
-                    ZStack(alignment: .leading) {
-                        RoundedRectangle(cornerRadius: 2)
-                            .fill(Color.gray.opacity(0.2))
-                            .frame(height: 4)
-                        
-                        RoundedRectangle(cornerRadius: 2)
-                            .fill(isCompleted ? Theme.Colors.success : checklist.category.swiftUIColor)
-                            .frame(width: geo.size.width * progress, height: 4)
-                    }
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    RoundedRectangle(cornerRadius: 2)
+                        .fill(Color.gray.opacity(0.2))
+                        .frame(height: 4)
+                    
+                    RoundedRectangle(cornerRadius: 2)
+                        .fill(isCompleted ? Theme.Colors.success : checklist.category.swiftUIColor)
+                        .frame(width: geo.size.width * progress, height: 4)
                 }
-                .frame(height: 4)
             }
+            .frame(height: 4)
         }
         .padding(14)
         .background(
@@ -913,32 +836,23 @@ struct ChecklistCardCompact: View {
                 .stroke(
                     isCompleted 
                         ? Theme.Colors.success.opacity(0.3) 
-                        : (WinterTheme.isActive ? Color.cyan.opacity(0.3) : Color.gray.opacity(0.15)),
-                    lineWidth: WinterTheme.isActive ? 1.5 : 1
+                        : Color.gray.opacity(0.15),
+                    lineWidth: 1
                 )
-        )
-        .overlay(
-            Group {
-                if WinterTheme.isActive {
-                    Text("✨")
-                        .font(.system(size: 12))
-                        .opacity(0.7)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
-                        .offset(x: -8, y: 8)
-                }
-            }
         )
     }
 }
 
 // MARK: - Lazy Wrapper for DovidnykView
 struct LazyDovidnykWrapper: View {
+    let requestedSection: DovidnykRouteSection?
+    let routeID: UUID
     @State private var showOriginal = false
     
     var body: some View {
         Group {
             if showOriginal {
-                DovidnykView()
+                DovidnykView(requestedSection: requestedSection, routeID: routeID)
                     .onAppear {
                         print("📚 DovidnykView loaded")
                     }
@@ -969,8 +883,8 @@ struct DovidnykLiteView: View {
             .background(
                 LinearGradient(
                     colors: [
-                        Color(red: 0.05, green: 0.1, blue: 0.2),
-                        Color(red: 0.08, green: 0.15, blue: 0.28)
+                        Theme.Colors.primaryDark,
+                        Theme.Colors.primary.opacity(0.7)
                     ],
                     startPoint: .top,
                     endPoint: .bottom

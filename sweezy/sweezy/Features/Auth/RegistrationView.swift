@@ -33,9 +33,6 @@ struct RegistrationView: View {
                 // Aurora background
                 AuthAuroraBackground()
                 
-                // Subtle snowfall
-                WinterSceneLite(intensity: .light)
-                
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 24) {
                         // Top icon
@@ -140,19 +137,6 @@ struct RegistrationView: View {
                     )
                     .scaleEffect(animateIcon ? 1 : 0.5)
                     .opacity(animateIcon ? 1 : 0)
-                
-                // Winter decoration
-                if WinterTheme.isActive {
-                    Text("🎄")
-                        .font(.system(size: 28))
-                        .offset(x: 50, y: -30)
-                        .opacity(animateIcon ? 1 : 0)
-                    
-                    Text("❄️")
-                        .font(.system(size: 16))
-                        .offset(x: -45, y: -35)
-                        .opacity(animateIcon ? 0.7 : 0)
-                }
             }
             
             VStack(spacing: 8) {

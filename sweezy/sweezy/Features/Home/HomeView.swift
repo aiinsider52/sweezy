@@ -48,22 +48,16 @@ struct HomeView: View {
                 scrollOffset = -y
             }
             .background(
-                ZStack {
-                    // Winter gradient background (always festive)
-                    LinearGradient(
-                        colors: [
-                            Color(red: 0.05, green: 0.1, blue: 0.2),
-                            Color(red: 0.08, green: 0.15, blue: 0.28),
-                            Color(red: 0.06, green: 0.12, blue: 0.22)
-                        ],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                    .ignoresSafeArea()
-                    
-                    // Subtle snowfall
-                    WinterSceneLite(intensity: .light)
-                }
+                LinearGradient(
+                    colors: [
+                        Color(red: 0.05, green: 0.1, blue: 0.2),
+                        Color(red: 0.08, green: 0.15, blue: 0.28),
+                        Color(red: 0.06, green: 0.12, blue: 0.22)
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .ignoresSafeArea()
             )
             .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
@@ -179,7 +173,11 @@ struct HomeView: View {
                     title: "templates.title".localized,
                     subtitle: "qa.templates.subtitle".localized,
                     colors: [Color(red: 1.0, green: 0.6, blue: 0.2), Color(red: 1.0, green: 0.8, blue: 0.3)],
-                    destination: AnyView(TemplatesView().environmentObject(appContainer))
+                    destination: AnyView(
+                        TemplatesView()
+                            .environmentObject(appContainer)
+                            .environmentObject(appContainer.accountManager)
+                    )
                 )
             }
             .padding(.horizontal, Theme.Spacing.md)

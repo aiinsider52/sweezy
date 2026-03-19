@@ -13,6 +13,7 @@ import Combine
 @MainActor
 class AppContainer: ObservableObject {
     // MARK: - Services (lightweight - safe to init immediately)
+    let accountManager: AccountManager
     let errorHandler: ErrorHandlingService
     let userStats: UserStatsService
     let localizationService: any LocalizationServiceProtocol
@@ -48,6 +49,14 @@ class AppContainer: ObservableObject {
             _notificationService = service
         }
         return _notificationService!
+    }
+
+    private var _appointmentRepository: AppointmentRepository?
+    var appointmentRepository: AppointmentRepository {
+        if _appointmentRepository == nil {
+            _appointmentRepository = AppointmentRepository(notificationService: notificationService)
+        }
+        return _appointmentRepository!
     }
     
     private var _calculatorService: CalculatorService?
@@ -100,6 +109,7 @@ class AppContainer: ObservableObject {
     
     init() {
         // Initialize only lightweight services synchronously
+        self.accountManager = AccountManager()
         self.errorHandler = ErrorHandlingService()
         self.userStats = UserStatsService()
         self.localizationService = LocalizationService()

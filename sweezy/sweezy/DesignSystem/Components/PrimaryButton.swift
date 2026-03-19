@@ -99,9 +99,9 @@ struct PrimaryButton: View {
     private var backgroundView: some View {
         switch style {
         case .primary:
-            Theme.Colors.gradientAccent
+            isPressed ? Theme.Colors.primaryDark : Theme.Colors.primary
         case .secondary:
-            Theme.Colors.secondaryBackground
+            Color.clear
         case .outline:
             Color.clear
         case .coral:
@@ -130,9 +130,9 @@ struct PrimaryButton: View {
         case .primary:
             return Theme.Colors.textOnPrimary
         case .secondary:
-            return Theme.Colors.textPrimary
+            return Theme.Colors.primary
         case .outline:
-            return Theme.Colors.accentTurquoise
+            return Theme.Colors.primary
         case .coral:
             return .white
         }
@@ -140,28 +140,30 @@ struct PrimaryButton: View {
     
     private var borderColor: Color {
         switch style {
-        case .primary, .secondary, .coral:
+        case .primary, .coral:
             return Color.clear
+        case .secondary:
+            return Theme.Colors.primary
         case .outline:
-            return Theme.Colors.accentTurquoise
+            return Theme.Colors.primary
         }
     }
     
     private var borderWidth: CGFloat {
         switch style {
-        case .primary, .secondary, .coral:
+        case .primary, .coral:
             return 0
-        case .outline:
-            return 2
+        case .secondary, .outline:
+            return 1.5
         }
     }
     
     private var shadowForStyle: Shadow {
         switch style {
         case .primary:
-            return Theme.Shadows.colored(color: Theme.Colors.accentTurquoise)
+            return Shadow(color: Theme.Colors.primary.opacity(0.3), radius: 16, x: 0, y: 4)
         case .secondary, .outline:
-            return Theme.Shadows.level1
+            return Theme.Shadows.level0
         case .coral:
             return Theme.Shadows.colored(color: Theme.Colors.accentCoral)
         }

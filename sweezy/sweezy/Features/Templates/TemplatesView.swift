@@ -30,14 +30,11 @@ struct TemplatesView: View {
                 AdaptivePageBackground()
                 
                 VStack(spacing: 0) {
-                    // Header with winter decoration
                     headerSection
 
-                // Search + Category filters
                     searchSection
-                categoryFiltersSection
+                    categoryFiltersSection
                 
-                    // Content
                     contentSection
                 }
             }
@@ -60,7 +57,7 @@ struct TemplatesView: View {
         }
     }
     
-    // MARK: - Header Section (Winter styled)
+    // MARK: - Header Section
     private var headerSection: some View {
         VStack(spacing: Theme.Spacing.sm) {
             HStack {
@@ -80,13 +77,6 @@ struct TemplatesView: View {
                 }
                 
                 Spacer()
-                
-                // Winter decoration
-                if true {
-                    Text("❄️")
-                        .font(.title)
-                        .opacity(0.8)
-                }
             }
             .padding(.horizontal, Theme.Spacing.md)
             .padding(.top, Theme.Spacing.md)
@@ -98,26 +88,26 @@ struct TemplatesView: View {
         HStack(spacing: 12) {
             HStack(spacing: 10) {
                 Image(systemName: "magnifyingglass")
-                    .foregroundColor(WinterTheme.isActive ? .cyan.opacity(0.7) : Theme.Colors.secondaryText)
+                    .foregroundColor(Theme.Colors.secondaryText)
                 
                 TextField("Пошук шаблонів...", text: $searchText)
-                    .foregroundColor(WinterTheme.isActive ? .white : Theme.Colors.primaryText)
+                    .foregroundColor(Theme.Colors.primaryText)
                 
                 if !searchText.isEmpty {
                     Button(action: { searchText = "" }) {
                         Image(systemName: "xmark.circle.fill")
-                            .foregroundColor(WinterTheme.isActive ? .white.opacity(0.5) : Theme.Colors.tertiaryText)
+                            .foregroundColor(Theme.Colors.tertiaryText)
                     }
                 }
             }
             .padding(12)
             .background(
                 RoundedRectangle(cornerRadius: 12)
-                    .fill(WinterTheme.isActive ? Theme.Colors.adaptiveSurface : Theme.Colors.tertiaryBackground)
+                    .fill(Theme.Colors.tertiaryBackground)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
-                    .stroke(WinterTheme.isActive ? Color.cyan.opacity(0.3) : Color.clear, lineWidth: 1)
+                    .stroke(Color.clear, lineWidth: 1)
             )
         }
         .padding(.horizontal, Theme.Spacing.md)
@@ -128,7 +118,7 @@ struct TemplatesView: View {
     private var categoryFiltersSection: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 10) {
-                WinterCategoryChip(
+                TemplateCategoryChip(
                     title: "Усі",
                     isSelected: selectedCategory == nil,
                     icon: "doc.on.doc"
@@ -137,7 +127,7 @@ struct TemplatesView: View {
                 }
                 
                 ForEach(TemplateCategory.allCases, id: \.self) { category in
-                    WinterCategoryChip(
+                    TemplateCategoryChip(
                         title: category.localizedName,
                         isSelected: selectedCategory == category,
                         icon: category.iconName
@@ -168,7 +158,7 @@ struct TemplatesView: View {
     private var loadingView: some View {
         VStack(spacing: Theme.Spacing.md) {
             ForEach(0..<3, id: \.self) { idx in
-                WinterTemplateShimmer()
+                TemplateShimmerView()
                     .padding(.horizontal, Theme.Spacing.md)
             }
             Spacer()
@@ -178,59 +168,49 @@ struct TemplatesView: View {
     
     private var emptyStateView: some View {
         VStack(spacing: Theme.Spacing.lg) {
-            if WinterTheme.isActive {
-                Text("📄❄️")
-                    .font(.system(size: 60))
-            } else {
             Image(systemName: "doc.text")
                 .font(.system(size: 60))
                 .foregroundColor(Theme.Colors.tertiaryText)
-            }
             
             VStack(spacing: Theme.Spacing.sm) {
                 Text("Шаблони не знайдено")
                     .font(Theme.Typography.headline)
-                    .foregroundColor(WinterTheme.isActive ? .white : Theme.Colors.primaryText)
+                    .foregroundColor(Theme.Colors.primaryText)
                 
                 Text("Спробуйте змінити фільтри")
                     .font(Theme.Typography.subheadline)
-                    .foregroundColor(WinterTheme.isActive ? .white.opacity(0.7) : Theme.Colors.secondaryText)
+                    .foregroundColor(Theme.Colors.secondaryText)
             }
             
             Button(action: { selectedCategory = nil; searchText = "" }) {
                 Text("Скинути фільтри")
                     .font(.subheadline.weight(.medium))
-                    .foregroundColor(WinterTheme.isActive ? .cyan : Theme.Colors.accent)
+                    .foregroundColor(Theme.Colors.accent)
             }
         }
         .padding(Theme.Spacing.xl)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
     
-    private var winterLockOverlay: some View {
+    private var lockOverlay: some View {
         VStack(spacing: Theme.Spacing.md) {
-            if WinterTheme.isActive {
-                Text("🔒❄️")
-                    .font(.system(size: 50))
-            } else {
-                Image(systemName: "lock.fill")
-                    .font(.system(size: 40))
-                    .foregroundColor(Theme.Colors.accent)
-            }
+            Image(systemName: "lock.fill")
+                .font(.system(size: 40))
+                .foregroundColor(Theme.Colors.accent)
             
             Text("Зареєструйтесь для доступу")
                 .font(.headline)
-                .foregroundColor(WinterTheme.isActive ? .white : Theme.Colors.primaryText)
+                .foregroundColor(Theme.Colors.primaryText)
             
             Text("Шаблони доступні для зареєстрованих користувачів")
                 .font(.subheadline)
-                .foregroundColor(WinterTheme.isActive ? .white.opacity(0.7) : Theme.Colors.secondaryText)
+                .foregroundColor(Theme.Colors.secondaryText)
                 .multilineTextAlignment(.center)
         }
         .padding(Theme.Spacing.xl)
         .background(
             RoundedRectangle(cornerRadius: 20)
-                .fill(WinterTheme.isActive ? Color.black.opacity(0.7) : Color.black.opacity(0.5))
+                .fill(Color.black.opacity(0.5))
         )
         .padding(Theme.Spacing.xl)
     }
@@ -240,7 +220,7 @@ struct TemplatesView: View {
             LazyVStack(spacing: Theme.Spacing.md) {
                 ForEach(filteredTemplates) { template in
                     NavigationLink(destination: TemplateDetailView(template: template)) {
-                        WinterTemplateCard(template: template)
+                        TemplateCardView(template: template)
                     }
                     .buttonStyle(PlainButtonStyle())
                 }
@@ -252,8 +232,8 @@ struct TemplatesView: View {
     }
 }
 
-// MARK: - Winter Category Chip
-struct WinterCategoryChip: View {
+// MARK: - Category Chip
+struct TemplateCategoryChip: View {
     let title: String
     let isSelected: Bool
     let icon: String
@@ -272,28 +252,16 @@ struct WinterCategoryChip: View {
             .background(
                 Group {
                     if isSelected {
-                        if WinterTheme.isActive {
-                            LinearGradient(
-                                colors: [Color.cyan.opacity(0.6), Color.teal.opacity(0.4)],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        } else {
-                            Theme.Colors.accent
-                        }
+                        Theme.Colors.accent
                     } else {
-                        if WinterTheme.isActive {
-                            Theme.Colors.adaptiveSurface
-                        } else {
-                            Theme.Colors.tertiaryBackground
-                        }
+                        Theme.Colors.tertiaryBackground
                     }
                 }
             )
             .foregroundColor(
                 isSelected
                     ? .white
-                    : (WinterTheme.isActive ? .white.opacity(0.8) : Theme.Colors.primaryText)
+                    : Theme.Colors.primaryText
             )
             .cornerRadius(20)
             .overlay(
@@ -301,7 +269,7 @@ struct WinterCategoryChip: View {
                     .stroke(
                         isSelected
                             ? Color.clear
-                            : (WinterTheme.isActive ? Color.cyan.opacity(0.2) : Color.clear),
+                            : Color.clear,
                         lineWidth: 1
                     )
             )
@@ -309,50 +277,33 @@ struct WinterCategoryChip: View {
     }
 }
 
-// MARK: - Winter Template Card
-struct WinterTemplateCard: View {
+// MARK: - Template Card View
+struct TemplateCardView: View {
     let template: DocumentTemplate
     
     var body: some View {
             VStack(alignment: .leading, spacing: Theme.Spacing.md) {
             HStack(alignment: .top, spacing: 12) {
-                // Icon with winter styling
                 ZStack {
-                    if WinterTheme.isActive {
-                        Circle()
-                            .fill(
-                                LinearGradient(
-                                    colors: [Color.cyan.opacity(0.3), Color.teal.opacity(0.2)],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            )
-                            .frame(width: 50, height: 50)
-                        
-                        Image(systemName: template.category.iconName)
-                            .font(.title3)
-                            .foregroundColor(.cyan)
-                    } else {
-                        Circle()
-                            .fill(template.category.swiftUIColor.opacity(0.15))
-                            .frame(width: 50, height: 50)
-                        
-                        Image(systemName: template.category.iconName)
-                            .font(.title3)
-                            .foregroundColor(template.category.swiftUIColor)
-                    }
+                    Circle()
+                        .fill(template.category.swiftUIColor.opacity(0.15))
+                        .frame(width: 50, height: 50)
+                    
+                    Image(systemName: template.category.iconName)
+                        .font(.title3)
+                        .foregroundColor(template.category.swiftUIColor)
                 }
                 
                 VStack(alignment: .leading, spacing: 4) {
                         Text(template.title)
                         .font(.subheadline.weight(.semibold))
-                        .foregroundColor(WinterTheme.isActive ? .white : Theme.Colors.primaryText)
+                        .foregroundColor(Theme.Colors.primaryText)
                             .lineLimit(2)
                         .multilineTextAlignment(.leading)
                         
                         Text(template.description)
                         .font(.caption)
-                        .foregroundColor(WinterTheme.isActive ? .white.opacity(0.6) : Theme.Colors.secondaryText)
+                        .foregroundColor(Theme.Colors.secondaryText)
                         .lineLimit(2)
                         .multilineTextAlignment(.leading)
                     }
@@ -361,13 +312,13 @@ struct WinterTemplateCard: View {
                     
                 Image(systemName: "chevron.right")
                     .font(.caption)
-                    .foregroundColor(WinterTheme.isActive ? .cyan.opacity(0.6) : Theme.Colors.tertiaryText)
+                    .foregroundColor(Theme.Colors.tertiaryText)
             }
             
             // Tags row
             HStack(spacing: 8) {
-                WinterTagPill(text: template.category.localizedName, color: template.category.swiftUIColor)
-                WinterTagPill(text: template.templateType.localizedName, color: .purple)
+                TagPill(text: template.category.localizedName, color: template.category.swiftUIColor)
+                TagPill(text: template.templateType.localizedName, color: .purple)
                     
                     Spacer()
                     
@@ -384,33 +335,15 @@ struct WinterTemplateCard: View {
             }
         .padding(Theme.Spacing.md)
         .background(
-            Group {
-                if WinterTheme.isActive {
-                    RoundedRectangle(cornerRadius: 16)
-                        .fill(Theme.Colors.adaptiveCard)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 16)
-                                .stroke(
-                                    LinearGradient(
-                                        colors: [Color.cyan.opacity(0.3), Theme.Colors.adaptiveSurface],
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    ),
-                                    lineWidth: 1
-                                )
-                        )
-                } else {
-                    RoundedRectangle(cornerRadius: 16)
-                        .fill(Theme.Colors.card)
-                        .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 4)
-                }
-            }
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Theme.Colors.card)
+                .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 4)
         )
     }
 }
 
-// MARK: - Winter Tag Pill
-struct WinterTagPill: View {
+// MARK: - Tag Pill
+struct TagPill: View {
     let text: String
     let color: Color
     
@@ -420,11 +353,9 @@ struct WinterTagPill: View {
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
             .background(
-                WinterTheme.isActive
-                    ? color.opacity(0.2)
-                    : color.opacity(0.15)
+                color.opacity(0.15)
             )
-            .foregroundColor(WinterTheme.isActive ? .white.opacity(0.9) : color)
+            .foregroundColor(color)
             .cornerRadius(6)
     }
 }
@@ -439,31 +370,14 @@ struct TemplateDetailView: View {
     
     var body: some View {
         ZStack {
-            // Winter background
-            if WinterTheme.isActive {
-                LinearGradient(
-                    colors: [
-                        Color(red: 0.05, green: 0.1, blue: 0.2),
-                        Color(red: 0.08, green: 0.15, blue: 0.25),
-                        Color(red: 0.05, green: 0.1, blue: 0.18)
-                    ],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-                .ignoresSafeArea()
-            } else {
-                Theme.Colors.primaryBackground.ignoresSafeArea()
-            }
+            Theme.Colors.primaryBackground.ignoresSafeArea()
             
         ScrollView {
             VStack(alignment: .leading, spacing: Theme.Spacing.lg) {
-                    // Header card
                     templateHeaderCard
                 
-                    // Form section
                     formSection
                 
-                // Generate button
                     generateButton
                     
                     Spacer(minLength: 100)
@@ -490,29 +404,13 @@ struct TemplateDetailView: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 ZStack {
-                    if WinterTheme.isActive {
-                        Circle()
-                            .fill(
-                                LinearGradient(
-                                    colors: [Color.cyan.opacity(0.4), Color.teal.opacity(0.3)],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            )
-                            .frame(width: 56, height: 56)
-                        
-                        Image(systemName: template.category.iconName)
-                            .font(.title2)
-                            .foregroundColor(.cyan)
-                    } else {
-                        Circle()
-                            .fill(template.category.swiftUIColor.opacity(0.15))
-                            .frame(width: 56, height: 56)
-                        
-                        Image(systemName: template.category.iconName)
-                            .font(.title2)
-                            .foregroundColor(template.category.swiftUIColor)
-                    }
+                    Circle()
+                        .fill(template.category.swiftUIColor.opacity(0.15))
+                        .frame(width: 56, height: 56)
+                    
+                    Image(systemName: template.category.iconName)
+                        .font(.title2)
+                        .foregroundColor(template.category.swiftUIColor)
                 }
                 
                 Spacer()
@@ -533,28 +431,17 @@ struct TemplateDetailView: View {
             
             Text(template.description)
                 .font(.subheadline)
-                .foregroundColor(WinterTheme.isActive ? .white.opacity(0.8) : Theme.Colors.secondaryText)
+                .foregroundColor(Theme.Colors.secondaryText)
             
             HStack(spacing: 8) {
-                WinterTagPill(text: template.category.localizedName, color: template.category.swiftUIColor)
-                WinterTagPill(text: template.templateType.localizedName, color: .purple)
+                TagPill(text: template.category.localizedName, color: template.category.swiftUIColor)
+                TagPill(text: template.templateType.localizedName, color: .purple)
             }
         }
         .padding(Theme.Spacing.md)
         .background(
-            Group {
-                if WinterTheme.isActive {
-                    RoundedRectangle(cornerRadius: 16)
-                        .fill(Theme.Colors.adaptiveCard)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 16)
-                                .stroke(Color.cyan.opacity(0.2), lineWidth: 1)
-                        )
-                } else {
-                    RoundedRectangle(cornerRadius: 16)
-                        .fill(Theme.Colors.card)
-                }
-            }
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Theme.Colors.card)
         )
     }
     
@@ -562,18 +449,14 @@ struct TemplateDetailView: View {
     private var formSection: some View {
         VStack(alignment: .leading, spacing: Theme.Spacing.md) {
             HStack {
-                if WinterTheme.isActive {
-                    Text("📝")
-                        .font(.title3)
-                }
                 Text("Заповніть форму")
                     .font(.headline.weight(.semibold))
-                    .foregroundColor(WinterTheme.isActive ? .white : Theme.Colors.primaryText)
+                    .foregroundColor(Theme.Colors.primaryText)
             }
             
             VStack(spacing: Theme.Spacing.md) {
                 ForEach(template.placeholders.sorted { $0.order < $1.order }) { placeholder in
-                    WinterTemplateFieldView(
+                    TemplateFieldView(
                         placeholder: placeholder,
                         value: Binding(
                             get: { fieldValues[placeholder.id] ?? "" },
@@ -611,15 +494,7 @@ struct TemplateDetailView: View {
                 .background(
                     Group {
                         if allRequiredFieldsFilled {
-                            if WinterTheme.isActive {
-                                LinearGradient(
-                                    colors: [Color.teal, Color.cyan.opacity(0.8)],
-                                    startPoint: .leading,
-                                    endPoint: .trailing
-                                )
-                            } else {
-                                Theme.Colors.accent
-                            }
+                            Theme.Colors.accent
                         } else {
                             Color.gray.opacity(0.3)
                         }
@@ -671,8 +546,8 @@ struct TemplateDetailView: View {
     }
 }
 
-// MARK: - Winter Template Field View
-struct WinterTemplateFieldView: View {
+// MARK: - Template Field View
+struct TemplateFieldView: View {
     let placeholder: TemplatePlaceholder
     @Binding var value: String
     
@@ -691,11 +566,10 @@ struct WinterTemplateFieldView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            // Label
             HStack(spacing: 4) {
                 Text(placeholder.label)
                     .font(.subheadline.weight(.medium))
-                    .foregroundColor(WinterTheme.isActive ? .white : Theme.Colors.primaryText)
+                    .foregroundColor(Theme.Colors.primaryText)
                 
                 if placeholder.isRequired {
                     Text("*")
@@ -707,27 +581,15 @@ struct WinterTemplateFieldView: View {
             if let description = placeholder.description {
                 Text(description)
                     .font(.caption)
-                    .foregroundColor(WinterTheme.isActive ? .white.opacity(0.5) : Theme.Colors.tertiaryText)
+                    .foregroundColor(Theme.Colors.tertiaryText)
             }
             
-            // Input field
             fieldInput
         }
         .padding(Theme.Spacing.md)
         .background(
-            Group {
-                if WinterTheme.isActive {
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.white.opacity(0.06))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(Color.cyan.opacity(0.15), lineWidth: 1)
-                        )
-                } else {
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Theme.Colors.tertiaryBackground)
-                }
-            }
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Theme.Colors.tertiaryBackground)
         )
     }
     
@@ -735,37 +597,37 @@ struct WinterTemplateFieldView: View {
     private var fieldInput: some View {
                 switch placeholder.type {
                 case .text:
-            winterTextField(placeholder: "Введіть \(placeholder.label.lowercased())")
+            styledTextField(placeholder: "Введіть \(placeholder.label.lowercased())")
                 
                 case .multilineText:
-            winterTextField(placeholder: "Введіть \(placeholder.label.lowercased())", isMultiline: true)
+            styledTextField(placeholder: "Введіть \(placeholder.label.lowercased())", isMultiline: true)
                 
                 case .email:
-            winterTextField(placeholder: "Введіть email", keyboardType: .emailAddress)
+            styledTextField(placeholder: "Введіть email", keyboardType: .emailAddress)
                 
                 case .phone:
-            winterTextField(placeholder: "Введіть номер телефону", keyboardType: .phonePad)
+            styledTextField(placeholder: "Введіть номер телефону", keyboardType: .phonePad)
                 
                 case .number:
-            winterTextField(placeholder: "Введіть число", keyboardType: .numberPad)
+            styledTextField(placeholder: "Введіть число", keyboardType: .numberPad)
                 
                 case .date:
-            winterDatePicker
+            styledDatePicker
                 
                 case .dropdown:
                     if let options = placeholder.options {
-                winterDropdown(options: options)
+                styledDropdown(options: options)
                     }
                 
                 case .checkbox:
-            winterToggle
+            styledToggle
                 
                 default:
-            winterTextField(placeholder: "Введіть \(placeholder.label.lowercased())")
+            styledTextField(placeholder: "Введіть \(placeholder.label.lowercased())")
         }
     }
     
-    private func winterTextField(placeholder placeholderText: String, keyboardType: UIKeyboardType = .default, isMultiline: Bool = false) -> some View {
+    private func styledTextField(placeholder placeholderText: String, keyboardType: UIKeyboardType = .default, isMultiline: Bool = false) -> some View {
         Group {
             if isMultiline {
                 TextField(placeholderText, text: $value, axis: .vertical)
@@ -779,35 +641,35 @@ struct WinterTemplateFieldView: View {
         .padding(12)
         .background(
             RoundedRectangle(cornerRadius: 10)
-                .fill(WinterTheme.isActive ? Theme.Colors.adaptiveCard : Color.white)
+                .fill(Color.white)
         )
         .overlay(
             RoundedRectangle(cornerRadius: 10)
-                .stroke(WinterTheme.isActive ? Color.cyan.opacity(0.3) : Color.gray.opacity(0.2), lineWidth: 1)
+                .stroke(Color.gray.opacity(0.2), lineWidth: 1)
         )
-        .foregroundColor(WinterTheme.isActive ? .white : Theme.Colors.primaryText)
+        .foregroundColor(Theme.Colors.primaryText)
     }
     
-    private var winterDatePicker: some View {
+    private var styledDatePicker: some View {
         DatePicker("", selection: Binding(
             get: { Self.iso8601Formatter.date(from: value) ?? Date() },
             set: { value = Self.iso8601Formatter.string(from: $0) }
         ), displayedComponents: .date)
         .datePickerStyle(.compact)
         .labelsHidden()
-        .tint(WinterTheme.isActive ? .cyan : Theme.Colors.accent)
+        .tint(Theme.Colors.accent)
         .padding(8)
         .background(
             RoundedRectangle(cornerRadius: 10)
-                .fill(WinterTheme.isActive ? Theme.Colors.adaptiveCard : Color.white)
+                .fill(Color.white)
         )
         .overlay(
             RoundedRectangle(cornerRadius: 10)
-                .stroke(WinterTheme.isActive ? Color.cyan.opacity(0.3) : Color.gray.opacity(0.2), lineWidth: 1)
+                .stroke(Color.gray.opacity(0.2), lineWidth: 1)
         )
     }
     
-    private func winterDropdown(options: [String]) -> some View {
+    private func styledDropdown(options: [String]) -> some View {
         Menu {
             ForEach(options, id: \.self) { option in
                 Button(option) {
@@ -818,33 +680,33 @@ struct WinterTemplateFieldView: View {
             HStack {
                 Text(value.isEmpty ? "Оберіть..." : value)
                     .foregroundColor(value.isEmpty
-                        ? (WinterTheme.isActive ? .white.opacity(0.4) : Theme.Colors.tertiaryText)
-                        : (WinterTheme.isActive ? .white : Theme.Colors.primaryText))
+                        ? Theme.Colors.tertiaryText
+                        : Theme.Colors.primaryText)
                 Spacer()
                 Image(systemName: "chevron.down")
                     .font(.caption)
-                    .foregroundColor(WinterTheme.isActive ? .cyan.opacity(0.7) : Theme.Colors.secondaryText)
+                    .foregroundColor(Theme.Colors.secondaryText)
             }
             .padding(12)
             .background(
                 RoundedRectangle(cornerRadius: 10)
-                    .fill(WinterTheme.isActive ? Theme.Colors.adaptiveCard : Color.white)
+                    .fill(Color.white)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 10)
-                    .stroke(WinterTheme.isActive ? Color.cyan.opacity(0.3) : Color.gray.opacity(0.2), lineWidth: 1)
+                    .stroke(Color.gray.opacity(0.2), lineWidth: 1)
             )
         }
     }
     
-    private var winterToggle: some View {
+    private var styledToggle: some View {
         Toggle(isOn: Binding(
             get: { value == "true" },
             set: { value = $0 ? "true" : "false" }
         )) {
             EmptyView()
         }
-        .toggleStyle(SwitchToggleStyle(tint: WinterTheme.isActive ? .cyan : Theme.Colors.accent))
+        .toggleStyle(SwitchToggleStyle(tint: Theme.Colors.accent))
     }
 }
 
@@ -867,29 +729,15 @@ struct DocumentPreviewView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                // Background
-                if WinterTheme.isActive {
-                    LinearGradient(
-                        colors: [
-                            Color(red: 0.05, green: 0.1, blue: 0.2),
-                            Color(red: 0.08, green: 0.15, blue: 0.25)
-                        ],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                    .ignoresSafeArea()
-                } else {
-                    Theme.Colors.primaryBackground.ignoresSafeArea()
-                }
+                Theme.Colors.primaryBackground.ignoresSafeArea()
                 
             ScrollView {
                 VStack(alignment: .leading, spacing: Theme.Spacing.md) {
-                        // Language switcher
                         if availableLanguages.count > 1 {
                             HStack(spacing: 8) {
                                 Text("Мова листа")
                                     .font(.caption)
-                                    .foregroundColor(WinterTheme.isActive ? .white.opacity(0.7) : Theme.Colors.secondaryText)
+                                    .foregroundColor(Theme.Colors.secondaryText)
                                 
                                 Spacer()
                                 
@@ -905,19 +753,18 @@ struct DocumentPreviewView: View {
                             .padding(.horizontal, Theme.Spacing.md)
                         }
                         
-                        // Document content
                         Text(generatedContent)
                             .font(.system(.body, design: .monospaced))
-                            .foregroundColor(WinterTheme.isActive ? .white : Theme.Colors.primaryText)
+                            .foregroundColor(Theme.Colors.primaryText)
                             .padding(Theme.Spacing.lg)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .background(
                                 RoundedRectangle(cornerRadius: 12)
-                                    .fill(WinterTheme.isActive ? Theme.Colors.adaptiveCard : Color.white)
+                                    .fill(Color.white)
                             )
                             .overlay(
                                 RoundedRectangle(cornerRadius: 12)
-                                    .stroke(WinterTheme.isActive ? Color.cyan.opacity(0.2) : Color.gray.opacity(0.1), lineWidth: 1)
+                                    .stroke(Color.gray.opacity(0.1), lineWidth: 1)
                             )
                         
                         Spacer(minLength: 100)
@@ -931,7 +778,7 @@ struct DocumentPreviewView: View {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button(action: { dismiss() }) {
                         Image(systemName: "xmark.circle.fill")
-                            .foregroundStyle(WinterTheme.isActive ? .white.opacity(0.7) : Theme.Colors.secondaryText)
+                            .foregroundStyle(Theme.Colors.secondaryText)
                     }
                 }
                 
@@ -942,7 +789,7 @@ struct DocumentPreviewView: View {
                             Text("Копіювати")
                         }
                         .font(.subheadline.weight(.medium))
-                        .foregroundColor(WinterTheme.isActive ? .cyan : Theme.Colors.accent)
+                        .foregroundColor(Theme.Colors.accent)
                     }
                     
                     Button(action: shareDocument) {
@@ -951,7 +798,7 @@ struct DocumentPreviewView: View {
                             Text("Експорт")
                         }
                         .font(.subheadline.weight(.medium))
-                        .foregroundColor(WinterTheme.isActive ? .cyan : Theme.Colors.accent)
+                        .foregroundColor(Theme.Colors.accent)
                     }
                 }
             }
@@ -1045,22 +892,22 @@ struct DocumentPreviewView: View {
     }
 }
 
-// MARK: - Winter Template Shimmer
-struct WinterTemplateShimmer: View {
+// MARK: - Template Shimmer View
+struct TemplateShimmerView: View {
     @State private var animate = false
     
     var body: some View {
         HStack(spacing: Theme.Spacing.md) {
             Circle()
-                .fill(WinterTheme.isActive ? Color.cyan.opacity(0.1) : Color.gray.opacity(0.2))
+                .fill(Color.gray.opacity(0.2))
                 .frame(width: 50, height: 50)
             
             VStack(alignment: .leading, spacing: 8) {
                 RoundedRectangle(cornerRadius: 4)
-                    .fill(WinterTheme.isActive ? Color.cyan.opacity(0.1) : Color.gray.opacity(0.2))
+                    .fill(Color.gray.opacity(0.2))
                     .frame(height: 16)
                 RoundedRectangle(cornerRadius: 4)
-                    .fill(WinterTheme.isActive ? Color.cyan.opacity(0.1) : Color.gray.opacity(0.2))
+                    .fill(Color.gray.opacity(0.2))
                     .frame(width: 160, height: 14)
             }
             Spacer()
@@ -1068,17 +915,17 @@ struct WinterTemplateShimmer: View {
         .padding(Theme.Spacing.md)
         .background(
             RoundedRectangle(cornerRadius: 16)
-                .fill(WinterTheme.isActive ? Color.white.opacity(0.05) : Color.gray.opacity(0.05))
+                .fill(Color.gray.opacity(0.05))
         )
         .overlay(
             RoundedRectangle(cornerRadius: 16)
-                .stroke(WinterTheme.isActive ? Color.cyan.opacity(0.1) : Color.gray.opacity(0.1), lineWidth: 1)
+                .stroke(Color.gray.opacity(0.1), lineWidth: 1)
         )
         .overlay(
             LinearGradient(
                 colors: [
                     Color.white.opacity(0),
-                    Color.white.opacity(WinterTheme.isActive ? 0.1 : 0.3),
+                    Color.white.opacity(0.3),
                     Color.white.opacity(0)
                 ],
                 startPoint: .leading,
@@ -1099,7 +946,7 @@ struct WinterTemplateShimmer: View {
 // MARK: - Template Shimmer Row (Legacy support)
 struct TemplateShimmerRow: View {
     var body: some View {
-        WinterTemplateShimmer()
+        TemplateShimmerView()
     }
 }
 
@@ -1108,7 +955,7 @@ struct TemplateCard: View {
     let template: DocumentTemplate
     
     var body: some View {
-        WinterTemplateCard(template: template)
+        TemplateCardView(template: template)
     }
 }
 

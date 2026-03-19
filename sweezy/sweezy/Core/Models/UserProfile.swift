@@ -18,6 +18,7 @@ struct UserProfile: Codable, Identifiable {
     var goals: [UserGoal]
     var familySize: Int
     var hasChildren: Bool
+    var familyStatus: FamilyStatus?
     var preferredLanguage: String
     var address: Address?
     var phoneNumber: String?
@@ -35,6 +36,7 @@ struct UserProfile: Codable, Identifiable {
         goals: [UserGoal] = [],
         familySize: Int = 1,
         hasChildren: Bool = false,
+        familyStatus: FamilyStatus? = nil,
         preferredLanguage: String = "uk"
     ) {
         self.id = UUID()
@@ -46,9 +48,26 @@ struct UserProfile: Codable, Identifiable {
         self.goals = goals
         self.familySize = familySize
         self.hasChildren = hasChildren
+        self.familyStatus = familyStatus
         self.preferredLanguage = preferredLanguage
         self.createdAt = Date()
         self.updatedAt = Date()
+    }
+}
+
+enum FamilyStatus: String, CaseIterable, Codable, Hashable, Identifiable {
+    case single
+    case married
+    case partner
+    
+    var id: String { rawValue }
+    
+    var localizedName: String {
+        switch self {
+        case .single: return "Single"
+        case .married: return "Married"
+        case .partner: return "Partner"
+        }
     }
 }
 
@@ -146,6 +165,7 @@ enum PermitType: String, CaseIterable, Codable, Hashable {
     case f = "F"  // Provisional admission
     case n = "N"  // Asylum seeker
     case l = "L"  // Short-term residence
+    case other = "Other"
     
     var localizedName: String {
         switch self {
@@ -155,6 +175,7 @@ enum PermitType: String, CaseIterable, Codable, Hashable {
         case .f: return "F - Provisional Admission"
         case .n: return "N - Asylum Seeker"
         case .l: return "L - Short-term Residence"
+        case .other: return "Other"
         }
     }
     
@@ -166,6 +187,7 @@ enum PermitType: String, CaseIterable, Codable, Hashable {
         case .f: return "Provisional admission"
         case .n: return "Asylum seeker permit"
         case .l: return "Short-term residence permit"
+        case .other: return "Other permit or status"
         }
     }
 }

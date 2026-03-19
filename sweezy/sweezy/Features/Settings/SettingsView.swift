@@ -30,6 +30,7 @@ struct SettingsView: View {
     @State private var showingDeleteAlert = false
     @State private var showingDeleteAccountAlert = false
     @State private var deleteAccountError: String? = nil
+    @State private var biometricsMessage: String? = nil
     @State private var exportDocument = SweezyBackupDocument(data: Data())
     
     // Lightweight live gamification mirrors
@@ -58,28 +59,38 @@ struct SettingsView: View {
                         }
                         // Biometrics - Winter styled
                         WinterSettingsCard {
-                            HStack(spacing: Theme.Spacing.md) {
-                                Image(systemName: lockManager.biometryDisplayName == "Face ID" ? "faceid" : "touchid")
-                                    .font(.system(size: 20, weight: .semibold))
-                                    .foregroundColor(.cyan)
-                                    .frame(width: 24)
-                                Toggle("Use \(lockManager.biometryDisplayName)", isOn: Binding(
-                                    get: { lockManager.biometricsEnabled },
-                                    set: { newValue in
-                                        Task { @MainActor in
-                                            if newValue {
-                                                lockManager.biometricsEnabled = true
-                                                lockManager.isLocked = true
-                                                let ok = await lockManager.authenticate(reason: "Enable \(lockManager.biometryDisplayName)")
-                                                if !ok { lockManager.biometricsEnabled = false }
-                                            } else {
-                                                lockManager.biometricsEnabled = false
-                                                lockManager.isLocked = false
+                            VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
+                                HStack(spacing: Theme.Spacing.md) {
+                                    Image(systemName: lockManager.biometryDisplayName == "Face ID" ? "faceid" : "touchid")
+                                        .font(.system(size: 20, weight: .semibold))
+                                        .foregroundColor(lockManager.isBiometryAvailable ? .cyan : .gray)
+                                        .frame(width: 24)
+                                    Toggle("Use \(lockManager.biometryDisplayName)", isOn: Binding(
+                                        get: { lockManager.biometricsEnabled },
+                                        set: { newValue in
+                                            Task { @MainActor in
+                                                let ok = await lockManager.setBiometricsEnabled(newValue)
+                                                if !ok {
+                                                    biometricsMessage = lockManager.biometryUnavailableReason ?? lockManager.lastAuthErrorDescription
+                                                } else {
+                                                    biometricsMessage = nil
+                                                }
                                             }
                                         }
-                                    }
-                                ))
-                                .tint(.cyan)
+                                    ))
+                                    .tint(.cyan)
+                                    .disabled(!lockManager.isBiometryAvailable)
+                                }
+                                
+                                if let biometricsMessage {
+                                    Text(biometricsMessage)
+                                        .font(Theme.Typography.caption)
+                                        .foregroundColor(.white.opacity(0.7))
+                                } else if !lockManager.isBiometryAvailable, let reason = lockManager.biometryUnavailableReason {
+                                    Text(reason)
+                                        .font(Theme.Typography.caption)
+                                        .foregroundColor(.white.opacity(0.7))
+                                }
                             }
                         }
                     }
@@ -106,6 +117,7 @@ struct SettingsView: View {
         }
         .onAppear {
             print("⚙️ SettingsView onAppear")
+            lockManager.loadBiometryType()
             // Seed live gamification state
             liveXP = appContainer.gamification.totalXP
             liveLastAward = appContainer.gamification.lastAwardedXP
@@ -191,25 +203,8 @@ struct SettingsView: View {
         .sheet(isPresented: $showingDataManagement) {
             NavigationStack {
                 ZStack {
-                    // Winter / New Year background
-                    if WinterTheme.isActive {
-                        LinearGradient(
-                            colors: [
-                                Color(red: 0.05, green: 0.1, blue: 0.2),
-                                Color(red: 0.08, green: 0.15, blue: 0.28),
-                                Color(red: 0.06, green: 0.12, blue: 0.22)
-                            ],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
+                    Color(.systemGroupedBackground)
                         .ignoresSafeArea()
-                        
-                        WinterSceneLite(intensity: .light)
-                            .ignoresSafeArea()
-                    } else {
-                        Color(.systemGroupedBackground)
-                            .ignoresSafeArea()
-                    }
                     
                     ScrollView {
                         VStack(spacing: Theme.Spacing.lg) {
@@ -289,8 +284,6 @@ private extension SettingsView {
             badges: badges
         )
     }
-    // TEMPORARY (App Store review): subscription/paywall UI removed.
-    
     func winterBenefitRow(_ icon: String, _ text: String) -> some View {
         HStack(spacing: 8) {
             Image(systemName: icon)
@@ -366,14 +359,9 @@ private extension SettingsView {
                 
                 // Info
                 VStack(alignment: .leading, spacing: 6) {
-                    // Name row
-                    HStack(spacing: 10) {
-                        Text(profileName)
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(.white)
-                        
-                        profileStatusChip
-                    }
+                    Text(profileName)
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundColor(.white)
                     
                     // Subtitle with icon
                     HStack(spacing: 6) {
@@ -543,7 +531,6 @@ private extension SettingsView {
 // MARK: - Computed
 
 private extension SettingsView {
-    // TEMPORARY (App Store review): IAP/subscription removed — treat plan as fully unlocked.
     var profileName: String {
         if let name = appContainer.userProfile?.fullName, !name.isEmpty { return name }
         return "settings.default_user_name".localized
@@ -561,12 +548,7 @@ private extension SettingsView {
     var profileSubtitle: String {
         "settings.profile".localized
     }
-    
-    @ViewBuilder
-    var profileStatusChip: some View {
-        PlanChip(icon: "checkmark.seal.fill", text: "Unlocked", color: Color.cyan.opacity(0.35))
-    }
-    
+
     var currentLanguageName: String {
         let languages = appContainer.localizationService.availableLanguages
         let currentCode = appContainer.currentLocale.identifier
@@ -867,20 +849,16 @@ struct ProfileEditView: View {
             if sessionManager.isAuthenticated {
                 NavigationStack {
                     ZStack {
-                        // Winter gradient background (always festive on Profile Edit)
                         LinearGradient(
                             colors: [
-                                Color(red: 0.05, green: 0.1, blue: 0.2),
-                                Color(red: 0.08, green: 0.15, blue: 0.28),
-                                Color(red: 0.06, green: 0.12, blue: 0.22)
+                                Theme.Colors.primaryDark,
+                                Theme.Colors.primary.opacity(0.85),
+                                Theme.Colors.primaryDark
                             ],
                             startPoint: .top,
                             endPoint: .bottom
                         )
                         .ignoresSafeArea()
-                        
-                        // Subtle snowfall
-                        WinterSceneLite(intensity: .light)
                         
                         ScrollView(showsIndicators: false) {
                             VStack(spacing: 20) {
@@ -1363,7 +1341,7 @@ struct ProfileEditView: View {
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
         .background(
-            Color(red: 0.05, green: 0.1, blue: 0.2).opacity(0.95)
+            Theme.Colors.darkBackground.opacity(0.95)
         )
     }
     private var profileLocationCard: some View {
@@ -1998,6 +1976,7 @@ private extension PermitType {
         case .f: return .orange
         case .n: return .purple
         case .l: return .cyan
+        case .other: return .gray
         }
     }
     var shortName: String {
@@ -2008,6 +1987,7 @@ private extension PermitType {
         case .f: return "Прийняття"
         case .n: return "Біженець"
         case .l: return "Короткий"
+        case .other: return "Інше"
         }
     }
 }
@@ -2029,25 +2009,8 @@ private extension Canton {
 struct AboutView: View {
     var body: some View {
         ZStack {
-            // Winter / New Year background
-            if WinterTheme.isActive {
-                LinearGradient(
-                    colors: [
-                        Color(red: 0.05, green: 0.1, blue: 0.2),
-                        Color(red: 0.08, green: 0.15, blue: 0.28),
-                        Color(red: 0.06, green: 0.12, blue: 0.22)
-                    ],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
+            Theme.Colors.primaryBackground
                 .ignoresSafeArea()
-                
-                WinterSceneLite(intensity: .light)
-                    .ignoresSafeArea()
-            } else {
-                Theme.Colors.primaryBackground
-                    .ignoresSafeArea()
-            }
             
             ScrollView {
                 VStack(alignment: .leading, spacing: Theme.Spacing.lg) {

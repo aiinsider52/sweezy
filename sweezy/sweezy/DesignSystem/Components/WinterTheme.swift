@@ -11,17 +11,7 @@ import SwiftUI
 // MARK: - Winter Theme Toggle
 
 struct WinterTheme {
-    static var isActive: Bool {
-        let calendar = Calendar.current
-        let now = Date()
-        let month = calendar.component(.month, from: now)
-        let day = calendar.component(.day, from: now)
-        
-        // Active from Dec 15 to Jan 10
-        if month == 12 && day >= 15 { return true }
-        if month == 1 && day <= 10 { return true }
-        return UserDefaults.standard.bool(forKey: "force_winter_theme")
-    }
+    static var isActive: Bool { false }
 
     /// Returns true only for days after New Year (Jan 1-10).
     /// In December (before New Year) this will be false.

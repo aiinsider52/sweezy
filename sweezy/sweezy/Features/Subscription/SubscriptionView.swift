@@ -20,15 +20,15 @@ struct SubscriptionView: View {
                 AdaptivePageBackground()
 
                 VStack(spacing: 14) {
-                    Image(systemName: "checkmark.seal.fill")
+                    Image(systemName: "info.circle.fill")
                         .font(.system(size: 40, weight: .semibold))
                         .foregroundColor(.cyan)
 
-                    Text("All features unlocked")
+                    Text("Account & access")
                         .font(.system(size: 22, weight: .bold, design: .rounded))
                         .foregroundColor(.white)
 
-                    Text("This version has no subscriptions and no in-app purchases.\nEverything is available for everyone.")
+                    Text("Your account settings and app access options will appear here when available.")
                         .font(.subheadline)
                         .foregroundColor(.white.opacity(0.7))
                         .multilineTextAlignment(.center)

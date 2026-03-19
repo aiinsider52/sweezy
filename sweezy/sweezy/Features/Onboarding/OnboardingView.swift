@@ -118,7 +118,6 @@ import SwiftUI
 
 struct IntroOnboardingView: View {
     @EnvironmentObject private var appContainer: AppContainer
-    @State private var showWinterGreeting = WinterTheme.isActive
     @State private var currentPage = 0
     @State private var showLanguageSelection = false
     
@@ -126,50 +125,8 @@ struct IntroOnboardingView: View {
     
     var body: some View {
         ZStack {
-            if showWinterGreeting {
-                WinterGreetingScreen {
-                    withAnimation(Theme.Animation.smooth) {
-                        showWinterGreeting = false
-                    }
-                }
-                .transition(.opacity)
-            } else {
-                // Background - winter or regular
-                ZStack {
-                    if WinterTheme.isActive {
-                        // Winter night background
-                        LinearGradient(
-                            colors: [
-                                Color(red: 0.05, green: 0.1, blue: 0.25),
-                                Color(red: 0.1, green: 0.15, blue: 0.35),
-                                Color(red: 0.08, green: 0.12, blue: 0.3)
-                            ],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
-                        .ignoresSafeArea()
-                        
-                        // Northern lights hint
-                        LinearGradient(
-                            colors: [
-                                Color.cyan.opacity(0.1),
-                                Color.green.opacity(0.05),
-                                Color.clear
-                            ],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                        .blur(radius: 40)
-                        .ignoresSafeArea()
-                        
-                        // Snowfall
-                        SnowfallView(particleCount: 20, speed: 0.6)
-                            .ignoresSafeArea()
-                    } else {
-                        Theme.Colors.primaryGradient
-                            .ignoresSafeArea()
-                    }
-                }
+                Theme.Colors.primaryGradient
+                    .ignoresSafeArea()
                 
                 if showLanguageSelection {
                     LanguageSelectionView()
@@ -184,10 +141,8 @@ struct IntroOnboardingView: View {
                             removal: .move(edge: .trailing)
                         ))
                 }
-            }
         }
         .animation(Theme.Animation.smooth, value: showLanguageSelection)
-        .animation(Theme.Animation.smooth, value: showWinterGreeting)
     }
     
     private var onboardingContent: some View {
@@ -214,22 +169,14 @@ struct IntroOnboardingView: View {
             
             // Bottom section
             VStack(spacing: Theme.Spacing.lg) {
-                // Page indicator - winter snowflakes or regular dots
+                // Page indicator
                 HStack(spacing: Theme.Spacing.sm) {
                     ForEach(pages.indices, id: \.self) { index in
-                        if WinterTheme.isActive {
-                            Text(index == currentPage ? "❄️" : "•")
-                                .font(.system(size: index == currentPage ? 16 : 12))
-                                .foregroundColor(index == currentPage ? Color.cyan : Color.white.opacity(0.4))
-                                .scaleEffect(index == currentPage ? 1.1 : 1.0)
-                                .animation(Theme.Animation.quick, value: currentPage)
-                        } else {
-                            Circle()
-                                .fill(index == currentPage ? Color.white : Color.white.opacity(0.3))
-                                .frame(width: 8, height: 8)
-                                .scaleEffect(index == currentPage ? 1.2 : 1.0)
-                                .animation(Theme.Animation.quick, value: currentPage)
-                        }
+                        Circle()
+                            .fill(index == currentPage ? Color.white : Color.white.opacity(0.3))
+                            .frame(width: 8, height: 8)
+                            .scaleEffect(index == currentPage ? 1.2 : 1.0)
+                            .animation(Theme.Animation.quick, value: currentPage)
                     }
                 }
                 
@@ -282,59 +229,18 @@ struct OnboardingPageView: View {
         VStack(spacing: Theme.Spacing.xl) {
             Spacer()
             
-            // Animation placeholder with winter decorations
             ZStack {
-                // Background circle with winter glow
                 Circle()
-                    .fill(
-                        WinterTheme.isActive 
-                            ? Color.cyan.opacity(0.15) 
-                            : Color.white.opacity(0.1)
-                    )
+                    .fill(Color.white.opacity(0.1))
                     .frame(width: 200, height: 200)
-                
-                // Winter frost ring
-                if WinterTheme.isActive {
-                    Circle()
-                        .stroke(
-                            LinearGradient(
-                                colors: [Color.cyan.opacity(0.4), Color.white.opacity(0.2)],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            ),
-                            lineWidth: 2
-                        )
-                        .frame(width: 200, height: 200)
-                }
                 
                 Image(systemName: page.iconName)
                     .font(.system(size: 80, weight: .light))
                     .foregroundColor(.white)
-                
-                // Winter snowflake decorations
-                if WinterTheme.isActive {
-                    Text("❄️")
-                        .font(.system(size: 24))
-                        .opacity(0.8)
-                        .offset(x: 80, y: -70)
-                    
-                    Text("✨")
-                        .font(.system(size: 18))
-                        .opacity(0.7)
-                        .offset(x: -75, y: 65)
-                }
             }
             .padding(.bottom, Theme.Spacing.lg)
             
             VStack(spacing: Theme.Spacing.md) {
-                // Winter greeting prefix on first page
-                if WinterTheme.isActive && index == 0 {
-                    Text(WinterTheme.isPostNewYear ? "🎄 З Новим Роком!" : "🎄 Святкова зима разом із Sweezy")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(Color.cyan)
-                        .padding(.bottom, 4)
-                }
-                
                 Text(page.title)
                     .font(Theme.Typography.largeTitle)
                     .fontWeight(.bold)
@@ -367,13 +273,6 @@ struct LanguageSelectionView: View {
             Spacer()
             
             VStack(spacing: Theme.Spacing.lg) {
-                // Winter greeting
-                if WinterTheme.isActive {
-                    Text("🎄")
-                        .font(.system(size: 40))
-                        .padding(.bottom, 8)
-                }
-                
                 Text(LocalizationKeys.Onboarding.selectLanguage.localized)
                     .font(Theme.Typography.largeTitle)
                     .fontWeight(.bold)
@@ -448,34 +347,19 @@ struct LanguageOptionView: View {
                 Spacer()
                 
                 if isSelected {
-                    if WinterTheme.isActive {
-                        Text("❄️")
-                            .font(.title2)
-                            .accessibilityIdentifier("onboarding.language.selectedIcon")
-                    } else {
-                        Image(systemName: "checkmark.circle.fill")
-                            .foregroundColor(.white)
-                            .font(.title2)
-                            .accessibilityIdentifier("onboarding.language.selectedIcon")
-                    }
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundColor(.white)
+                        .font(.title2)
+                        .accessibilityIdentifier("onboarding.language.selectedIcon")
                 }
             }
             .padding(Theme.Spacing.md)
             .background(
                 RoundedRectangle(cornerRadius: Theme.CornerRadius.md)
-                    .fill(
-                        WinterTheme.isActive && isSelected 
-                            ? Color.cyan.opacity(0.2) 
-                            : .white.opacity(isSelected ? 0.2 : 0.1)
-                    )
+                    .fill(.white.opacity(isSelected ? 0.2 : 0.1))
                     .overlay(
                         RoundedRectangle(cornerRadius: Theme.CornerRadius.md)
-                            .stroke(
-                                WinterTheme.isActive && isSelected 
-                                    ? Color.cyan.opacity(0.5) 
-                                    : .white.opacity(0.3), 
-                                lineWidth: WinterTheme.isActive && isSelected ? 1.5 : 1
-                            )
+                            .stroke(.white.opacity(0.3), lineWidth: 1)
                     )
             )
         }

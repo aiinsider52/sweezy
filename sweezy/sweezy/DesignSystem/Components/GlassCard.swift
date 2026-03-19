@@ -22,7 +22,7 @@ struct GlassCard<Content: View>: View {
         innerGlow: Bool = true,
         @ViewBuilder content: () -> Content
     ) {
-        self.cornerRadius = cornerRadius
+        self.cornerRadius = max(cornerRadius, 12)
         self.padding = padding
         self.enableGradientStroke = gradientStroke
         self.enableInnerGlow = innerGlow
@@ -64,27 +64,6 @@ struct GlassCard<Content: View>: View {
             )
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
             .themeShadow(Theme.Shadows.level2)
-            .overlay(
-                // Winter frost glow
-                Group {
-                    if WinterTheme.isActive {
-                        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                            .stroke(
-                                LinearGradient(
-                                    colors: [
-                                        Color.cyan.opacity(0.2),
-                                        Color.blue.opacity(0.1),
-                                        Color.cyan.opacity(0.15)
-                                    ],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                ),
-                                lineWidth: 0.5
-                            )
-                            .allowsHitTesting(false)
-                    }
-                }
-            )
     }
 }
 

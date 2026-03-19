@@ -27,11 +27,6 @@ struct MountainRoadmapView: View {
             // Stars (subtle)
             StarsOverlay()
             
-            // Winter snowfall with enhanced effects
-            if WinterTheme.isActive {
-                WinterSceneLite(intensity: .medium)
-            }
-            
             // Main content
             ScrollViewReader { proxy in
                 ScrollView(.vertical, showsIndicators: false) {

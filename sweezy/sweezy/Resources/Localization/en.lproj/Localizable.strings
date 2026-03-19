@@ -783,3 +783,15 @@
 "common.cancel" = "Cancel";
 "common.close" = "Close";
 "common.ok" = "OK";
+
+// MARK: - Auth Entry
+"auth.entry.title" = "Sign in or create an account";
+"auth.entry.subtitle" = "Save your profile, settings, and personalized Sweezy experience.";
+"auth.entry.benefits_title" = "Why create an account";
+"auth.entry.benefit.profile" = "Complete your profile and personalize the app";
+"auth.entry.benefit.sync" = "Sync your progress and saved data";
+"auth.entry.benefit.features" = "Unlock account-based features";
+"auth.entry.create_account" = "Create account";
+"auth.entry.sign_in" = "Sign in";
+"auth.entry.open_auth" = "Sign in or create an account";
+"auth.login.create_account" = "No account yet? Create one";

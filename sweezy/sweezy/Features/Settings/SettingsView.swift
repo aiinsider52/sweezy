@@ -24,6 +24,7 @@ struct SettingsView: View {
     @State private var regPassword: String = ""
     @State private var showingRegistration = false
     @State private var showingLogin = false
+    @State private var showingAuthEntry = false
     @State private var showingPrivacy = false
     @State private var showingAbout = false
     @State private var showingDataManagement = false
@@ -213,6 +214,12 @@ struct SettingsView: View {
                 .environmentObject(appContainer)
                 .environmentObject(lockManager)
         }
+        .sheet(isPresented: $showingAuthEntry) {
+            AuthEntryView()
+                .environmentObject(appContainer)
+                .environmentObject(lockManager)
+                .environmentObject(sessionManager)
+        }
         .sheet(isPresented: $showingAbout) {
             AboutView()
         }
@@ -333,7 +340,13 @@ private extension SettingsView {
     }
     
     var profileCard: some View {
-        Button { showingProfileEdit = true } label: {
+        Button {
+            if sessionManager.isAuthenticated {
+                showingProfileEdit = true
+            } else {
+                showingAuthEntry = true
+            }
+        } label: {
             HStack(spacing: 16) {
                 // Avatar with gradient ring - always winter styled
                 ZStack {
@@ -837,6 +850,7 @@ struct LanguageSelectionSheet: View {
 
 struct ProfileEditView: View {
     @EnvironmentObject private var appContainer: AppContainer
+    @EnvironmentObject private var lockManager: AppLockManager
     @EnvironmentObject private var sessionManager: SessionManager
     @Environment(\.dismiss) private var dismiss
     
@@ -856,8 +870,7 @@ struct ProfileEditView: View {
     @State private var hasChanges = false
     @State private var showCantonPicker = false
     @State private var showPermitPicker = false
-    @State private var showLogin: Bool = false
-    @State private var didAutoPromptLogin: Bool = false
+    @State private var showAuthEntry: Bool = false
     
     // Validation
     private var isEmailValid: Bool {
@@ -955,20 +968,11 @@ struct ProfileEditView: View {
                 guestGateContent
             }
         }
-        .sheet(isPresented: $showLogin, onDismiss: {
-            // If auth was dismissed and user is still a guest, close Profile Edit.
-            if !sessionManager.isAuthenticated {
-                dismiss()
-            }
-        }) {
-            LoginView()
-        }
-        .onAppear {
-            // Auto-redirect guests to Login when they reach a protected screen.
-            if !sessionManager.isAuthenticated && !didAutoPromptLogin {
-                didAutoPromptLogin = true
-                showLogin = true
-            }
+        .sheet(isPresented: $showAuthEntry) {
+            AuthEntryView()
+                .environmentObject(appContainer)
+                .environmentObject(lockManager)
+                .environmentObject(sessionManager)
         }
     }
 
@@ -992,9 +996,9 @@ struct ProfileEditView: View {
                         .multilineTextAlignment(.center)
                     
                     Button {
-                        showLogin = true
+                        showAuthEntry = true
                     } label: {
-                        Text("auth.login.button")
+                        Text("auth.entry.open_auth")
                             .font(.subheadline.weight(.semibold))
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)

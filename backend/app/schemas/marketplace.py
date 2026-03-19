@@ -69,6 +69,11 @@ class ServiceListingDetail(ServiceListingResponse):
     contact_value: str
 
 
+class AdminServiceListingDetail(ServiceListingDetail):
+    ai_score: Optional[int] = None
+    ai_score_reason: Optional[str] = None
+
+
 class ServiceListingPage(BaseModel):
     items: list[ServiceListingResponse]
     total: int

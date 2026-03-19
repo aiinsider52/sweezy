@@ -24,6 +24,8 @@ class ServiceListing(Base):
     author_name: Mapped[str] = mapped_column(String(100), nullable=False)
     status: Mapped[str] = mapped_column(String(20), nullable=False, default="pending", index=True)
     rejection_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
+    ai_score: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    ai_score_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
     view_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
 
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)

@@ -812,3 +812,15 @@
 "common.cancel" = "Скасувати";
 "common.close" = "Закрити";
 "common.ok" = "OK";
+
+// MARK: - Auth Entry
+"auth.entry.title" = "Увійди або створи акаунт";
+"auth.entry.subtitle" = "Збережи свої налаштування, профіль та персональні можливості Sweezy.";
+"auth.entry.benefits_title" = "Що дає акаунт";
+"auth.entry.benefit.profile" = "Заповнений профіль і персоналізований досвід";
+"auth.entry.benefit.sync" = "Синхронізація прогресу та даних";
+"auth.entry.benefit.features" = "Доступ до акаунт-залежних функцій";
+"auth.entry.create_account" = "Створити акаунт";
+"auth.entry.sign_in" = "Увійти";
+"auth.entry.open_auth" = "Увійти або створити акаунт";
+"auth.login.create_account" = "Немає акаунта? Створити";

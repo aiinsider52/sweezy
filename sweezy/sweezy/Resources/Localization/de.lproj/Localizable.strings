@@ -569,3 +569,15 @@
 "common.cancel" = "Abbrechen";
 "common.close" = "Schliessen";
 "common.ok" = "OK";
+
+// MARK: - Auth Entry
+"auth.entry.title" = "Anmelden oder Konto erstellen";
+"auth.entry.subtitle" = "Speichere dein Profil, deine Einstellungen und dein personalisiertes Sweezy-Erlebnis.";
+"auth.entry.benefits_title" = "Warum ein Konto sinnvoll ist";
+"auth.entry.benefit.profile" = "Profil ausfüllen und die App personalisieren";
+"auth.entry.benefit.sync" = "Fortschritt und Daten synchronisieren";
+"auth.entry.benefit.features" = "Zugang zu kontobasierten Funktionen";
+"auth.entry.create_account" = "Konto erstellen";
+"auth.entry.sign_in" = "Anmelden";
+"auth.entry.open_auth" = "Anmelden oder Konto erstellen";
+"auth.login.create_account" = "Noch kein Konto? Erstellen";

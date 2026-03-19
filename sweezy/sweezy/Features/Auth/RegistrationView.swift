@@ -1,8 +1,11 @@
 import SwiftUI
 
 struct RegistrationView: View {
+    var onRequestLogin: (() -> Void)? = nil
+
     @EnvironmentObject private var appContainer: AppContainer
     @EnvironmentObject private var lockManager: AppLockManager
+    @EnvironmentObject private var sessionManager: SessionManager
     @Environment(\.dismiss) private var dismiss
     
     @State private var name: String = ""
@@ -70,6 +73,7 @@ struct RegistrationView: View {
             LoginView()
                 .environmentObject(appContainer)
                 .environmentObject(lockManager)
+                .environmentObject(sessionManager)
         }
     }
     
@@ -247,7 +251,14 @@ struct RegistrationView: View {
             
             // Login link
             Button {
-                showLogin = true
+                if let onRequestLogin {
+                    dismiss()
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                        onRequestLogin()
+                    }
+                } else {
+                    showLogin = true
+                }
             } label: {
                 Text("Уже є акаунт? Увійти")
                     .font(.subheadline.weight(.medium))

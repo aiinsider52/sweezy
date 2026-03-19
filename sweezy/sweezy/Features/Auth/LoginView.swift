@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct LoginView: View {
+    var onRequestRegistration: (() -> Void)? = nil
+
     @EnvironmentObject private var appContainer: AppContainer
     @EnvironmentObject private var lockManager: AppLockManager
     @EnvironmentObject private var sessionManager: SessionManager
@@ -11,6 +13,7 @@ struct LoginView: View {
     @State private var isLoading: Bool = false
     @State private var errorMessage: String?
     @State private var showReset: Bool = false
+    @State private var showRegistration: Bool = false
     @State private var showPassword: Bool = false
     @State private var animateIcon: Bool = false
 
@@ -55,6 +58,12 @@ struct LoginView: View {
         }
         .sheet(isPresented: $showReset) {
             PasswordResetSheet(initialEmail: email)
+        }
+        .sheet(isPresented: $showRegistration) {
+            RegistrationView()
+                .environmentObject(appContainer)
+                .environmentObject(lockManager)
+                .environmentObject(sessionManager)
         }
         .onAppear {
             withAnimation(.easeOut(duration: 0.8).delay(0.2)) {
@@ -282,6 +291,22 @@ struct LoginView: View {
                                 .stroke(Color.white.opacity(0.16), lineWidth: 1)
                         )
                 )
+            }
+            .buttonStyle(.plain)
+
+            Button {
+                if let onRequestRegistration {
+                    dismiss()
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                        onRequestRegistration()
+                    }
+                } else {
+                    showRegistration = true
+                }
+            } label: {
+                Text("auth.login.create_account")
+                    .font(.subheadline.weight(.medium))
+                    .foregroundColor(Theme.Colors.primary)
             }
             .buttonStyle(.plain)
 

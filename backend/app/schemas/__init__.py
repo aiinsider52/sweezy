@@ -6,6 +6,7 @@ from .security import Token, TokenPair
 from .user import UserCreate, UserLogin, UserOut
 from .remote_config import RemoteConfigOut
 from .marketplace import (
+    AdminServiceListingDetail,
     ServiceListingCreate,
     ServiceListingDetail,
     ServiceListingPage,
@@ -32,6 +33,7 @@ __all__ = [
     "UserLogin",
     "UserOut",
     "RemoteConfigOut",
+    "AdminServiceListingDetail",
     "ServiceListingCreate",
     "ServiceListingDetail",
     "ServiceListingPage",

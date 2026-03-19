@@ -418,7 +418,7 @@ struct HomeViewRedesigned: View {
                 subtitle: nil,
                 accentColor: Color.gray
             ) {
-                NotificationCenter.default.post(name: .switchTab, object: 3)
+                NotificationCenter.default.post(name: .switchTab, object: 4)
             }
         ]
     }

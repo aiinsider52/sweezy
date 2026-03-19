@@ -51,16 +51,27 @@ struct MainTabView: View {
                 }
                 .tag(2)
             
-            // Tab 3 - Settings
+            // Tab 3 - Marketplace
+            MarketplaceView()
+                .tabItem {
+                    Label {
+                        Text("marketplace.tab".localized)
+                    } icon: {
+                        NewYearTabIcon(baseSystemName: "bag.fill", isSelected: selectedTab == 3)
+                    }
+                }
+                .tag(3)
+            
+            // Tab 4 - Settings
             SettingsView()
                 .tabItem {
                     Label {
                         Text("settings.title".localized)
                     } icon: {
-                        NewYearTabIcon(baseSystemName: "gearshape.fill", isSelected: selectedTab == 3)
+                        NewYearTabIcon(baseSystemName: "gearshape.fill", isSelected: selectedTab == 4)
                     }
                 }
-                .tag(3)
+                .tag(4)
         }
         .onAppear {
             AppLogger.ui("MainTabView appeared")
@@ -1162,7 +1173,7 @@ struct HomeSimplifiedView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
-                        NotificationCenter.default.post(name: .switchTab, object: 3)
+                        NotificationCenter.default.post(name: .switchTab, object: 4)
                     } label: {
                         Image(systemName: "person.circle.fill")
                             .font(.title2)
@@ -1220,7 +1231,8 @@ struct HomeSimplifiedView: View {
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
                 QuickAction(title: "guides.title".localized, icon: "book.fill", color: .blue, tab: 1)
                 QuickAction(title: "qa.map".localized, icon: "map.fill", color: .orange, tab: 2)
-                QuickAction(title: "settings.title".localized, icon: "gearshape.fill", color: .gray, tab: 3)
+                QuickAction(title: "marketplace.tab".localized, icon: "bag.fill", color: Theme.Colors.primary, tab: 3)
+                QuickAction(title: "settings.title".localized, icon: "gearshape.fill", color: .gray, tab: 4)
             }
         }
     }

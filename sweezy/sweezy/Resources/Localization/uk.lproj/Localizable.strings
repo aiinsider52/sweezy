@@ -736,3 +736,79 @@
 
 // MARK: - Offline
 "offline.banner" = "Ви офлайн — деякі функції можуть бути обмежені";
+
+// MARK: - Marketplace
+"marketplace.tab" = "Маркет";
+"marketplace.title" = "Маркетплейс";
+"marketplace.search" = "Пошук послуг…";
+"marketplace.create_listing" = "Створити оголошення";
+"marketplace.empty_title" = "Поки немає оголошень";
+"marketplace.empty_subtitle" = "Станьте першим — опублікуйте свою послугу!";
+"marketplace.canton_filter" = "Кантон";
+"marketplace.select_canton" = "Оберіть кантон";
+"marketplace.canton.all" = "Вся Швейцарія";
+"marketplace.canton.all_cantons" = "Всі кантони";
+"marketplace.updated_just_now" = "Оновлено щойно";
+"marketplace.updated_minutes_ago" = "Оновлено %d хв тому";
+
+// Categories
+"marketplace.category.translation" = "Переклад";
+"marketplace.category.documents" = "Документи";
+"marketplace.category.tutoring" = "Репетиторство";
+"marketplace.category.it" = "IT послуги";
+"marketplace.category.beauty" = "Краса";
+"marketplace.category.cleaning" = "Прибирання";
+"marketplace.category.accounting" = "Бухгалтерія";
+"marketplace.category.legal" = "Юридичні";
+"marketplace.category.childcare" = "Догляд за дітьми";
+"marketplace.category.moving" = "Переїзд";
+"marketplace.category.repair" = "Ремонт";
+"marketplace.category.other" = "Інше";
+
+// Contact
+"marketplace.contact.phone" = "Телефон";
+"marketplace.contact_via_telegram" = "Написати в Telegram";
+"marketplace.contact_via_whatsapp" = "Написати в WhatsApp";
+"marketplace.contact_via_email" = "Написати Email";
+"marketplace.contact_via_phone" = "Зателефонувати";
+
+// Detail
+"marketplace.description" = "Опис";
+"marketplace.author_label" = "Автор оголошення";
+"marketplace.detail_error" = "Не вдалося завантажити оголошення";
+"marketplace.share" = "Поділитися";
+"marketplace.share_message" = "Подивись цю послугу в Sweezy!";
+
+// Create
+"marketplace.create_title" = "Нове оголошення";
+"marketplace.field.title" = "Заголовок";
+"marketplace.field.title_placeholder" = "Наприклад: Переклад документів DE↔UA";
+"marketplace.field.category" = "Категорія";
+"marketplace.field.canton" = "Кантон";
+"marketplace.field.description" = "Опис послуги";
+"marketplace.field.description_min" = "Мінімум 20 символів";
+"marketplace.field.price" = "Ціна";
+"marketplace.field.price_placeholder" = "50 CHF/год або залиш порожнім";
+"marketplace.field.contact" = "Спосіб зв'язку";
+"marketplace.field.author" = "Ваше ім'я";
+"marketplace.field.author_placeholder" = "Як тебе звати?";
+"marketplace.optional" = "необов'язково";
+"marketplace.submit" = "Опублікувати";
+"marketplace.error_title" = "Помилка";
+"marketplace.my_listings" = "Мої оголошення";
+
+// Success
+"marketplace.success_title" = "Оголошення на перевірці ✅";
+"marketplace.success_subtitle" = "Ми перевіримо його протягом 24 годин і повідомимо.";
+
+// My listings
+"marketplace.my_empty_title" = "У тебе поки немає оголошень";
+"marketplace.my_empty_subtitle" = "Створи перше оголошення, щоб запропонувати свої послуги";
+"marketplace.status.pending" = "На перевірці";
+"marketplace.status.approved" = "Активне";
+"marketplace.status.rejected" = "Відхилено";
+
+// Common (shared)
+"common.cancel" = "Скасувати";
+"common.close" = "Закрити";
+"common.ok" = "OK";

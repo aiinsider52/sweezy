@@ -714,3 +714,72 @@
 
 // MARK: - Offline
 "offline.banner" = "You're offline — some features may be limited";
+
+// MARK: - Marketplace
+"marketplace.tab" = "Market";
+"marketplace.title" = "Marketplace";
+"marketplace.search" = "Search services…";
+"marketplace.create_listing" = "Create listing";
+"marketplace.empty_title" = "No listings yet";
+"marketplace.empty_subtitle" = "Be the first — publish your service!";
+"marketplace.canton_filter" = "Canton";
+"marketplace.select_canton" = "Select canton";
+"marketplace.canton.all" = "All Switzerland";
+"marketplace.canton.all_cantons" = "All cantons";
+"marketplace.updated_just_now" = "Updated just now";
+"marketplace.updated_minutes_ago" = "Updated %d min ago";
+
+"marketplace.category.translation" = "Translation";
+"marketplace.category.documents" = "Documents";
+"marketplace.category.tutoring" = "Tutoring";
+"marketplace.category.it" = "IT Services";
+"marketplace.category.beauty" = "Beauty";
+"marketplace.category.cleaning" = "Cleaning";
+"marketplace.category.accounting" = "Accounting";
+"marketplace.category.legal" = "Legal";
+"marketplace.category.childcare" = "Childcare";
+"marketplace.category.moving" = "Moving";
+"marketplace.category.repair" = "Repair";
+"marketplace.category.other" = "Other";
+
+"marketplace.contact.phone" = "Phone";
+"marketplace.contact_via_telegram" = "Message on Telegram";
+"marketplace.contact_via_whatsapp" = "Message on WhatsApp";
+"marketplace.contact_via_email" = "Send Email";
+"marketplace.contact_via_phone" = "Call";
+
+"marketplace.description" = "Description";
+"marketplace.author_label" = "Listing author";
+"marketplace.detail_error" = "Failed to load listing";
+"marketplace.share" = "Share";
+"marketplace.share_message" = "Check out this service on Sweezy!";
+
+"marketplace.create_title" = "New Listing";
+"marketplace.field.title" = "Title";
+"marketplace.field.title_placeholder" = "e.g. Document Translation DE↔UA";
+"marketplace.field.category" = "Category";
+"marketplace.field.canton" = "Canton";
+"marketplace.field.description" = "Service description";
+"marketplace.field.description_min" = "Minimum 20 characters";
+"marketplace.field.price" = "Price";
+"marketplace.field.price_placeholder" = "50 CHF/h or leave empty";
+"marketplace.field.contact" = "Contact method";
+"marketplace.field.author" = "Your name";
+"marketplace.field.author_placeholder" = "What's your name?";
+"marketplace.optional" = "optional";
+"marketplace.submit" = "Publish";
+"marketplace.error_title" = "Error";
+"marketplace.my_listings" = "My Listings";
+
+"marketplace.success_title" = "Listing under review ✅";
+"marketplace.success_subtitle" = "We'll review it within 24 hours and let you know.";
+
+"marketplace.my_empty_title" = "You don't have any listings yet";
+"marketplace.my_empty_subtitle" = "Create your first listing to offer your services";
+"marketplace.status.pending" = "Under review";
+"marketplace.status.approved" = "Active";
+"marketplace.status.rejected" = "Rejected";
+
+"common.cancel" = "Cancel";
+"common.close" = "Close";
+"common.ok" = "OK";

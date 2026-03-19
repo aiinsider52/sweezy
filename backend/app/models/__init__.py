@@ -5,6 +5,7 @@ from .template import Template
 from .appointment import Appointment
 from .user import User
 from .subscription import Subscription, SubscriptionEvent
+from .marketplace import ServiceListing
 
 __all__ = [
     "Guide",
@@ -14,6 +15,7 @@ __all__ = [
     "User",
     "Subscription",
     "SubscriptionEvent",
+    "ServiceListing",
 ]
 
 

@@ -500,3 +500,72 @@
 
 // MARK: - Offline
 "offline.banner" = "Sie sind offline — einige Funktionen können eingeschränkt sein";
+
+// MARK: - Marketplace
+"marketplace.tab" = "Markt";
+"marketplace.title" = "Marktplatz";
+"marketplace.search" = "Dienstleistungen suchen…";
+"marketplace.create_listing" = "Inserat erstellen";
+"marketplace.empty_title" = "Noch keine Inserate";
+"marketplace.empty_subtitle" = "Seien Sie der Erste — veröffentlichen Sie Ihren Service!";
+"marketplace.canton_filter" = "Kanton";
+"marketplace.select_canton" = "Kanton auswählen";
+"marketplace.canton.all" = "Ganze Schweiz";
+"marketplace.canton.all_cantons" = "Alle Kantone";
+"marketplace.updated_just_now" = "Gerade aktualisiert";
+"marketplace.updated_minutes_ago" = "Vor %d Min. aktualisiert";
+
+"marketplace.category.translation" = "Übersetzung";
+"marketplace.category.documents" = "Dokumente";
+"marketplace.category.tutoring" = "Nachhilfe";
+"marketplace.category.it" = "IT-Dienste";
+"marketplace.category.beauty" = "Schönheit";
+"marketplace.category.cleaning" = "Reinigung";
+"marketplace.category.accounting" = "Buchhaltung";
+"marketplace.category.legal" = "Recht";
+"marketplace.category.childcare" = "Kinderbetreuung";
+"marketplace.category.moving" = "Umzug";
+"marketplace.category.repair" = "Reparatur";
+"marketplace.category.other" = "Sonstiges";
+
+"marketplace.contact.phone" = "Telefon";
+"marketplace.contact_via_telegram" = "Auf Telegram schreiben";
+"marketplace.contact_via_whatsapp" = "Auf WhatsApp schreiben";
+"marketplace.contact_via_email" = "E-Mail senden";
+"marketplace.contact_via_phone" = "Anrufen";
+
+"marketplace.description" = "Beschreibung";
+"marketplace.author_label" = "Autor des Inserats";
+"marketplace.detail_error" = "Inserat konnte nicht geladen werden";
+"marketplace.share" = "Teilen";
+"marketplace.share_message" = "Schau dir diesen Service auf Sweezy an!";
+
+"marketplace.create_title" = "Neues Inserat";
+"marketplace.field.title" = "Titel";
+"marketplace.field.title_placeholder" = "z.B. Dokumentenübersetzung DE↔UA";
+"marketplace.field.category" = "Kategorie";
+"marketplace.field.canton" = "Kanton";
+"marketplace.field.description" = "Dienstbeschreibung";
+"marketplace.field.description_min" = "Mindestens 20 Zeichen";
+"marketplace.field.price" = "Preis";
+"marketplace.field.price_placeholder" = "50 CHF/h oder leer lassen";
+"marketplace.field.contact" = "Kontaktmethode";
+"marketplace.field.author" = "Ihr Name";
+"marketplace.field.author_placeholder" = "Wie heissen Sie?";
+"marketplace.optional" = "optional";
+"marketplace.submit" = "Veröffentlichen";
+"marketplace.error_title" = "Fehler";
+"marketplace.my_listings" = "Meine Inserate";
+
+"marketplace.success_title" = "Inserat wird überprüft ✅";
+"marketplace.success_subtitle" = "Wir überprüfen es innerhalb von 24 Stunden.";
+
+"marketplace.my_empty_title" = "Sie haben noch keine Inserate";
+"marketplace.my_empty_subtitle" = "Erstellen Sie Ihr erstes Inserat, um Ihre Dienste anzubieten";
+"marketplace.status.pending" = "In Prüfung";
+"marketplace.status.approved" = "Aktiv";
+"marketplace.status.rejected" = "Abgelehnt";
+
+"common.cancel" = "Abbrechen";
+"common.close" = "Schliessen";
+"common.ok" = "OK";

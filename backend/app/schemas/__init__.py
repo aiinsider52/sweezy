@@ -5,6 +5,13 @@ from .appointment import AppointmentCreate, AppointmentUpdate, AppointmentOut
 from .security import Token, TokenPair
 from .user import UserCreate, UserLogin, UserOut
 from .remote_config import RemoteConfigOut
+from .marketplace import (
+    ServiceListingCreate,
+    ServiceListingDetail,
+    ServiceListingPage,
+    ServiceListingResponse,
+    ServiceListingUpdate,
+)
 
 __all__ = [
     "GuideCreate",
@@ -25,6 +32,11 @@ __all__ = [
     "UserLogin",
     "UserOut",
     "RemoteConfigOut",
+    "ServiceListingCreate",
+    "ServiceListingDetail",
+    "ServiceListingPage",
+    "ServiceListingResponse",
+    "ServiceListingUpdate",
 ]
 
 

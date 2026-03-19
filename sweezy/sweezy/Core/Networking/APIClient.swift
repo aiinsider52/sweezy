@@ -475,6 +475,72 @@ enum APIClient {
     }
 }
 
+// MARK: - Marketplace
+extension APIClient {
+    static func fetchListings(category: ServiceCategory? = nil,
+                              canton: String? = nil,
+                              page: Int = 1) async throws -> ServiceListingPage {
+        var comps = URLComponents(url: url("marketplace"), resolvingAgainstBaseURL: false)
+        var items: [URLQueryItem] = [URLQueryItem(name: "page", value: String(page))]
+        if let category { items.append(URLQueryItem(name: "category", value: category.rawValue)) }
+        if let canton, canton != "all" { items.append(URLQueryItem(name: "canton", value: canton)) }
+        comps?.queryItems = items
+        guard let finalURL = comps?.url else { throw URLError(.badURL) }
+        let (data, resp) = try await timedData(from: finalURL, context: "marketplace_list")
+        guard let http = resp as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+            throw URLError(.badServerResponse)
+        }
+        return try JSONDecoder().decode(ServiceListingPage.self, from: data)
+    }
+
+    static func fetchListingDetail(id: String) async throws -> ServiceListing {
+        let (data, resp) = try await timedData(from: url("marketplace/\(id)"), context: "marketplace_detail")
+        guard let http = resp as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+            throw URLError(.badServerResponse)
+        }
+        return try JSONDecoder().decode(ServiceListing.self, from: data)
+    }
+
+    static func createListing(_ listing: ServiceListingCreate) async throws -> ServiceListing {
+        let endpoint = url("marketplace")
+        var req = URLRequest(url: endpoint)
+        req.httpMethod = "POST"
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.timeoutInterval = 15
+        attachAuth(&req)
+        req.httpBody = try JSONEncoder().encode(listing)
+        let (data, resp) = try await URLSession.shared.data(for: req)
+        guard let http = resp as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+            if let msg = String(data: data, encoding: .utf8) {
+                throw NSError(domain: "API", code: (resp as? HTTPURLResponse)?.statusCode ?? 0,
+                              userInfo: [NSLocalizedDescriptionKey: msg])
+            }
+            throw URLError(.badServerResponse)
+        }
+        return try JSONDecoder().decode(ServiceListing.self, from: data)
+    }
+
+    static func fetchMyListings() async throws -> [ServiceListing] {
+        let endpoint = url("marketplace/my")
+        let (data, resp) = try await authorizedData(from: endpoint)
+        guard let http = resp as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+            throw URLError(.badServerResponse)
+        }
+        return try JSONDecoder().decode([ServiceListing].self, from: data)
+    }
+
+    static func deleteListing(id: String) async throws {
+        var req = URLRequest(url: url("marketplace/\(id)"))
+        req.httpMethod = "DELETE"
+        req.timeoutInterval = 15
+        attachAuth(&req)
+        let (_, resp) = try await URLSession.shared.data(for: req)
+        guard let http = resp as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+            throw URLError(.badServerResponse)
+        }
+    }
+}
+
 // MARK: - Analytics
 extension APIClient {
     static func logPaywall(eventType: String, context: String?) {

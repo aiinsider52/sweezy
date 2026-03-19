@@ -681,6 +681,8 @@ struct GuideDetailView: View {
             
             // Фіксуємо "прочитано" і даємо XP тільки один раз
             appContainer.userStats.markGuideRead(id: guide.id)
+            AppReviewManager.recordGuideRead()
+            appContainer.analytics.track("guide_read", properties: ["guide_id": guide.id, "category": guide.category.rawValue])
             didAwardXP = true
             
             // Анімація тоста з XP така ж, як була раніше
@@ -1407,9 +1409,8 @@ struct MarkdownContentView: View {
                 blocks.append(.bullet(String(trimmed.dropFirst(2))))
             }
             // Numbered list
-            else if trimmed.range(of: #"^\d+\.\s"#, options: .regularExpression) != nil {
+            else if let dotSpace = trimmed.range(of: #"^\d+\.\s"#, options: .regularExpression) {
                 let num = Int(trimmed.prefix(while: { $0.isNumber })) ?? 1
-                let dotSpace = trimmed.range(of: #"^\d+\.\s"#, options: .regularExpression)!
                 let content = String(trimmed[dotSpace.upperBound...])
                 blocks.append(.numbered(number: num, text: content))
             }

@@ -1,0 +1,111 @@
+[
+  {
+    "id": "b1111111-1111-1111-1111-111111111111",
+    "name": "Health Insurance Subsidy (ZH)",
+    "description": "Monthly subsidy for health insurance premiums in canton Zürich (demo values)",
+    "category": "health_insurance",
+    "canton": "ZH",
+    "permitTypes": ["S", "B", "F", "N"],
+    "conditions": [
+      {"id": "c-1", "type": "income", "operator": "less_than", "value": 45000, "description": "Income below threshold"},
+      {"id": "c-2", "type": "family_size", "operator": "greater_than_or_equal", "value": 1, "description": "At least 1 person"}
+    ],
+    "calculationFormula": {"type": "income_based_sliding", "baseAmount": 400, "parameters": {"max_income": 45000, "min_subsidy": 50}},
+    "maxAmount": 400,
+    "minAmount": 50,
+    "currency": "CHF",
+    "validFrom": "2023-01-01T00:00:00Z",
+    "validUntil": null,
+    "isActive": true,
+    "officialSource": "https://www.zh.ch/de/gesundheit/gesundheitsversorgung/praemienverbilligung.html",
+    "lastUpdated": "2023-10-14T10:00:00Z",
+    "disclaimer": "These are demo reference values for MVP. Always verify eligibility and amounts on your official cantonal website."
+  },
+  {
+    "id": "b2222222-2222-2222-2222-222222222222",
+    "name": "Health Insurance Subsidy (GE)",
+    "description": "Monthly subsidy for health insurance premiums in canton Geneva (demo values)",
+    "category": "health_insurance",
+    "canton": "GE",
+    "permitTypes": ["S", "B", "F", "N"],
+    "conditions": [
+      {"id": "c-3", "type": "income", "operator": "less_than", "value": 42000, "description": "Income below threshold"}
+    ],
+    "calculationFormula": {"type": "income_based_sliding", "baseAmount": 380, "parameters": {"max_income": 42000, "min_subsidy": 50}},
+    "maxAmount": 380,
+    "minAmount": 50,
+    "currency": "CHF",
+    "validFrom": "2023-01-01T00:00:00Z",
+    "validUntil": null,
+    "isActive": true,
+    "officialSource": "https://www.ge.ch/reduire-prime-assurance-maladie",
+    "lastUpdated": "2023-10-14T10:00:00Z",
+    "disclaimer": "Reference values for demo. Verify on official cantonal websites."
+  },
+  {
+    "id": "eeeeeeee-ffff-1111-2222-000000000501",
+    "name": "Vaud Health Insurance Premium Reduction",
+    "description": "Canton Vaud provides subsidies for health insurance premiums (Réduction de primes) based on income and family size. Official source: https://www.vd.ch/assurance-maladie",
+    "category": "health_insurance",
+    "canton": "VD",
+    "permitTypes": ["S", "B", "C", "F", "N"],
+    "conditions": [
+      {
+        "id": "11111111-2222-3333-4444-000000000511",
+        "type": "income",
+        "operator": "less_than_or_equal",
+        "value": 60000,
+        "description": "Annual income ≤ CHF 60,000"
+      }
+    ],
+    "calculationFormula": {
+      "type": "income_based_sliding",
+      "baseAmount": 3600,
+      "percentage": null,
+      "perPersonAmount": null,
+      "childBonus": null,
+      "parameters": {"max_income": 60000}
+    },
+    "maxAmount": 3600,
+    "minAmount": 0,
+    "currency": "CHF",
+    "validFrom": "2025-01-01T00:00:00Z",
+    "validUntil": null,
+    "isActive": true,
+    "officialSource": "https://www.vd.ch/assurance-maladie",
+    "lastUpdated": "2025-01-15T10:00:00Z"
+  },
+  {
+    "id": "eeeeeeee-ffff-1111-2222-000000000502",
+    "name": "Ticino Health Insurance Premium Reduction",
+    "description": "Canton Ticino offers premium reductions (Riduzione dei premi) for low-income families. Official source: https://www4.ti.ch/dss/dasi/upcd/temi/riduzione-dei-premi/",
+    "category": "health_insurance",
+    "canton": "TI",
+    "permitTypes": ["S", "B", "C", "F", "N"],
+    "conditions": [
+      {
+        "id": "11111111-2222-3333-4444-000000000521",
+        "type": "income",
+        "operator": "less_than_or_equal",
+        "value": 55000,
+        "description": "Annual income ≤ CHF 55,000"
+      }
+    ],
+    "calculationFormula": {
+      "type": "income_based_sliding",
+      "baseAmount": 3200,
+      "percentage": null,
+      "perPersonAmount": null,
+      "childBonus": null,
+      "parameters": {"max_income": 55000}
+    },
+    "maxAmount": 3200,
+    "minAmount": 0,
+    "currency": "CHF",
+    "validFrom": "2025-01-01T00:00:00Z",
+    "validUntil": null,
+    "isActive": true,
+    "officialSource": "https://www4.ti.ch/dss/dasi/upcd/temi/riduzione-dei-premi/",
+    "lastUpdated": "2025-01-15T10:00:00Z"
+  }
+]

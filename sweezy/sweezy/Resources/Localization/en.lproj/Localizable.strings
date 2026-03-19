@@ -47,6 +47,10 @@
 "onboarding.choose_style.title" = "Choose your style";
 "onboarding.choose_style.subtitle" = "You can change it later in Settings";
 "onboarding.skip" = "Skip";
+"onboarding.notifications_title" = "Notifications";
+"onboarding.notifications_subtitle" = "Get reminders about important first-week tasks and appointments";
+"onboarding.notifications_allow" = "Allow Notifications";
+"onboarding.notifications_later" = "Later";
 
 // MARK: - Feature Onboarding
 "onboarding.understood" = "Got it";
@@ -545,3 +549,168 @@
 
 "auth.reset.error.send_email_failed" = "Couldn't send the email. Please try again later.";
 "auth.reset.error.reset_failed" = "Couldn't change the password. Check the code.";
+
+// MARK: - Checklist Categories
+"checklist.category.arrival" = "First Steps";
+"checklist.category.housing" = "Housing";
+"checklist.category.insurance" = "Insurance";
+"checklist.category.work" = "Employment";
+"checklist.category.education" = "Education";
+"checklist.category.integration" = "Integration";
+"checklist.category.family" = "Family";
+"checklist.category.healthcare" = "Healthcare";
+"checklist.category.legal" = "Legal";
+"checklist.category.finance" = "Finance";
+
+// MARK: - Appointment Statuses
+"appointment.status.scheduled" = "Scheduled";
+"appointment.status.confirmed" = "Confirmed";
+"appointment.status.cancelled" = "Cancelled";
+"appointment.status.completed" = "Completed";
+"appointment.status.no_show" = "No Show";
+"appointment.status.rescheduled" = "Rescheduled";
+
+// MARK: - Place Categories
+"place.category.migration_office" = "Migration Office";
+"place.category.gemeinde" = "Municipality";
+"place.category.embassy" = "Embassy";
+"place.category.police_station" = "Police Station";
+"place.category.hospital" = "Hospital";
+"place.category.clinic" = "Clinic";
+"place.category.pharmacy" = "Pharmacy";
+"place.category.dentist" = "Dentist";
+"place.category.psychologist" = "Psychologist";
+"place.category.counseling_center" = "Counseling Center";
+"place.category.mental_health" = "Mental Health";
+"place.category.emergency_room" = "Emergency Room";
+"place.category.legal_aid" = "Legal Aid";
+"place.category.lawyer" = "Lawyer";
+"place.category.notary" = "Notary";
+"place.category.social_services" = "Social Services";
+"place.category.refugee_center" = "Refugee Center";
+"place.category.integration_center" = "Integration Center";
+"place.category.food_assistance" = "Food Assistance";
+"place.category.food_bank" = "Food Bank";
+"place.category.secondhand_shop" = "Secondhand Shop";
+"place.category.job_center" = "Job Center";
+"place.category.employment_agency" = "Employment Agency";
+"place.category.career_counseling" = "Career Counseling";
+"place.category.school" = "School";
+"place.category.university" = "University";
+"place.category.language_school" = "Language School";
+"place.category.library" = "Library";
+"place.category.language_cafe" = "Language Café";
+"place.category.bank" = "Bank";
+"place.category.insurance_company" = "Insurance Company";
+"place.category.post_office" = "Post Office";
+"place.category.train_station" = "Train Station";
+"place.category.bus_stop" = "Bus Stop";
+"place.category.airport" = "Airport";
+"place.category.community_center" = "Community Center";
+"place.category.religious_center" = "Religious Center";
+"place.category.cultural_center" = "Cultural Center";
+"place.category.community_cafe" = "Community Café";
+"place.category.supermarket" = "Supermarket";
+"place.category.youth_center" = "Youth Center";
+
+// MARK: - User Goals
+"user.goal.housing" = "Find Housing";
+"user.goal.work" = "Find a Job";
+"user.goal.language" = "Learn a Language";
+"user.goal.education" = "Education";
+"user.goal.documents" = "Process Documents";
+"user.goal.finance" = "Finance";
+"user.goal.health" = "Healthcare";
+
+// MARK: - Onboarding (Profile & Family)
+"onboarding.profile_title" = "Tell us about yourself";
+"onboarding.profile_subtitle" = "Choose your canton, permit type, and roughly\nwhen you arrived in Switzerland.";
+"onboarding.canton" = "Canton of residence";
+"onboarding.permit_type" = "Permit type";
+"onboarding.arrival_date" = "Arrival date";
+"onboarding.family_title" = "Your family";
+"onboarding.family_subtitle" = "This step is optional. It helps us\npick better starter tasks for you.";
+"onboarding.family_status" = "Family status";
+"onboarding.has_children" = "Do you have children";
+"onboarding.yes" = "Yes";
+"onboarding.no" = "No";
+"onboarding.children_count" = "Number of children";
+"onboarding.skip_step" = "Skip this step";
+
+// MARK: - Home (missing key)
+"home.see_all" = "Show All";
+
+// MARK: - Home (Localization fix)
+"home.priority_tasks" = "Priority Tasks";
+"home.recommended_content" = "Recommended Content";
+"home.no_critical_tasks" = "No critical tasks today";
+"home.greeting.hello_name" = "Hello, %@!";
+"home.greeting.hello" = "Hello!";
+"home.priority_tasks.progress_format" = "%d of %d completed";
+"home.switzerland_genitive" = "Switzerland";
+"home.insider.benefits_format" = "Benefits %@";
+"home.insider.benefits_summary" = "Quick list of payments and benefits.";
+"home.insider.jobs_summary" = "3 jobs of the week.";
+"home.switzerland" = "Switzerland";
+"home.deadline_format" = "Deadline: %@";
+"home.countdown.today" = "today";
+"home.countdown.in_days_format" = "in %dd";
+"home.countdown.in_hours_format" = "in %dh";
+"home.reminder" = "Reminder";
+"home.career_genitive" = "career";
+"home.telegram.community" = "Ukrainian community in Switzerland";
+"home.telegram.support" = "Support";
+"home.read_more" = "Read";
+"home.stats.checklists" = "checklists";
+"home.stats.templates" = "templates";
+"home.focus.today" = "today";
+"home.focus.week" = "week";
+"home.focus.completed" = "completed";
+"home.focus.next_up" = "Next up";
+"home.focus.today_label" = "Today";
+"home.focus.tasks_for_day_format" = "Tasks for %@, %d";
+"home.focus.plus_more_tasks_format" = "+ %d more tasks";
+"home.focus.no_tasks" = "No tasks";
+"home.focus.day_free_format" = "%@ is free of tasks";
+"home.focus.plus_more_format" = "%@ + %d more";
+"home.achievements" = "Achievements";
+"home.accessibility.stage_details" = "Open stage details";
+
+// MARK: - Weekdays (short)
+"weekday.short.mon" = "Mon";
+"weekday.short.tue" = "Tue";
+"weekday.short.wed" = "Wed";
+"weekday.short.thu" = "Thu";
+"weekday.short.fri" = "Fri";
+"weekday.short.sat" = "Sat";
+"weekday.short.sun" = "Sun";
+
+// MARK: - Common (new)
+"common.coming_soon" = "Coming soon";
+
+// MARK: - Map (new)
+"map.title_short" = "Map";
+"map.tap_to_open" = "Tap to open";
+"map.accessible" = "Accessible";
+
+// MARK: - Home Simplified / Settings Lite
+"home.welcome_name_format" = "Welcome, %@! 👋";
+"home.subtitle" = "Your guide for life in Switzerland";
+"home.stats.guides_short" = "Guides";
+"home.stats.level" = "Level";
+"home.open_format" = "Open %@";
+"home.guides_coming_soon" = "Guides coming soon";
+"home.checklists_coming_soon" = "Checklists coming soon";
+"home.steps_format" = "%d/%d steps";
+"home.level_format" = "Level %d";
+"settings.support" = "Support & Feedback";
+"settings.send_feedback" = "Send Feedback";
+"settings.rate_app" = "Rate Sweezy";
+"settings.telegram_support" = "Telegram Support";
+"settings.write_telegram" = "Write on Telegram";
+"settings.email_support" = "Email support";
+"settings.version_label" = "Version";
+"settings.terms" = "Terms of Use";
+
+// MARK: - Offline
+"offline.banner" = "You're offline — some features may be limited";

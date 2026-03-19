@@ -116,13 +116,8 @@ struct JobsView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                // Background
-                LinearGradient(
-                    colors: [Color(red: 0.04, green: 0.06, blue: 0.10), Color(red: 0.02, green: 0.12, blue: 0.16)],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .ignoresSafeArea()
+                Theme.Colors.darkBackground
+                    .ignoresSafeArea()
                 
                 ScrollView(.vertical, showsIndicators: false) {
                     LazyVStack(spacing: 20) {
@@ -232,7 +227,7 @@ struct JobsView: View {
                 icon: "sparkles",
                 value: "\(newTodayCount)",
                 label: "Нових сьогодні",
-                color: .cyan
+                color: Theme.Colors.primary
             )
             
             DashboardMetricCard(
@@ -246,7 +241,7 @@ struct JobsView: View {
                 icon: "paperplane.fill",
                 value: "\(appliedCount)",
                 label: "Відгуків",
-                color: .green
+                color: Theme.Colors.success
             )
         }
     }
@@ -365,7 +360,7 @@ struct JobsView: View {
                     .padding(.vertical, 12)
                     .background(
                         LinearGradient(
-                            colors: hasAIProfile ? [Color.cyan, Color.green] : [Color.gray.opacity(0.6), Color.gray.opacity(0.8)],
+                            colors: hasAIProfile ? [Theme.Colors.primary, Theme.Colors.primaryLight] : [Color.gray.opacity(0.6), Color.gray.opacity(0.8)],
                             startPoint: .leading,
                             endPoint: .trailing
                         )
@@ -440,7 +435,7 @@ struct JobsView: View {
                 if showMatchResults {
                     HStack(spacing: 6) {
                         Image(systemName: "wand.and.stars")
-                            .foregroundColor(.cyan)
+                            .foregroundColor(Theme.Colors.primary)
                         Text("AI Результати")
                             .font(.headline)
                             .foregroundColor(.white)
@@ -794,7 +789,7 @@ private struct AIMatchProfileSheet: View {
                         Image(systemName: "wand.and.stars")
                             .font(.system(size: 48))
                             .foregroundStyle(
-                                LinearGradient(colors: [.cyan, .green], startPoint: .topLeading, endPoint: .bottomTrailing)
+                                LinearGradient(colors: [Theme.Colors.primary, Theme.Colors.primaryLight], startPoint: .topLeading, endPoint: .bottomTrailing)
                             )
                         
                         Text("AI Match Profile")
@@ -925,7 +920,7 @@ private struct AIMatchProfileSheet: View {
                         .frame(maxWidth: .infinity)
                         .padding()
                         .background(
-                            LinearGradient(colors: [.cyan, .green], startPoint: .leading, endPoint: .trailing)
+                            LinearGradient(colors: [Theme.Colors.primary, Theme.Colors.primaryLight], startPoint: .leading, endPoint: .trailing)
                         )
                         .cornerRadius(14)
                     }
@@ -979,24 +974,24 @@ private struct JobsOnboardingSheet: View {
     private let slides: [(icon: String, color1: Color, color2: Color, title: String, subtitle: String, features: [String])] = [
         (
             icon: "briefcase.fill",
-            color1: Color(red: 0.0, green: 0.8, blue: 0.9),
-            color2: Color(red: 0.0, green: 0.6, blue: 0.8),
+            color1: Theme.Colors.primary,
+            color2: Theme.Colors.primaryDark,
             title: "Знайди роботу мрії",
             subtitle: "Агрегатор вакансій зі Швейцарії",
             features: ["RAV + Indeed", "Тисячі вакансій", "Щоденні оновлення"]
         ),
         (
             icon: "magnifyingglass",
-            color1: Color(red: 0.4, green: 0.3, blue: 0.9),
-            color2: Color(red: 0.6, green: 0.2, blue: 0.8),
+            color1: Theme.Colors.accent,
+            color2: Theme.Colors.accentCoral,
             title: "Розумний пошук",
             subtitle: "Знаходь швидко та точно",
             features: ["Пошук по ключовим словам", "Фільтри по кантону", "Тип зайнятості"]
         ),
         (
             icon: "wand.and.stars",
-            color1: Color(red: 0.0, green: 0.9, blue: 0.5),
-            color2: Color(red: 0.0, green: 0.7, blue: 0.9),
+            color1: Theme.Colors.primaryLight,
+            color2: Theme.Colors.primary,
             title: "AI Match",
             subtitle: "Персоналізовані рекомендації",
             features: ["Заповни профіль", "AI підбере вакансії", "Оцінка відповідності"]
@@ -1005,16 +1000,8 @@ private struct JobsOnboardingSheet: View {
     
     var body: some View {
         ZStack {
-            // Background gradient
-            LinearGradient(
-                colors: [
-                    Color(red: 0.05, green: 0.05, blue: 0.12),
-                    Color(red: 0.08, green: 0.10, blue: 0.18)
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .ignoresSafeArea()
+            Theme.Colors.darkBackground
+                .ignoresSafeArea()
             
             VStack(spacing: 0) {
                 // Close button
@@ -1076,7 +1063,7 @@ private struct JobsOnboardingSheet: View {
                             .padding(.vertical, 16)
                             .background(
                                 LinearGradient(
-                                    colors: [Color.cyan, Color.green],
+                                    colors: [Theme.Colors.primary, Theme.Colors.primaryLight],
                                     startPoint: .leading,
                                     endPoint: .trailing
                                 )
@@ -1295,7 +1282,7 @@ private struct FilterChip: View {
             .foregroundColor(isActive ? .black : .white.opacity(0.8))
             .padding(.horizontal, 14)
             .padding(.vertical, 10)
-            .background(isActive ? Color.cyan : Color.white.opacity(0.1))
+            .background(isActive ? Theme.Colors.primary : Color.white.opacity(0.1))
             .cornerRadius(10)
         }
         .buttonStyle(.plain)
@@ -1312,14 +1299,14 @@ private struct QuickTagChip: View {
         Button(action: action) {
             Text(text)
                 .font(.system(size: 13, weight: .medium))
-                .foregroundColor(isSelected ? .black : .cyan)
+                .foregroundColor(isSelected ? .black : Theme.Colors.primary)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 10)
-                .background(isSelected ? Color.cyan : Color.cyan.opacity(0.15))
+                .background(isSelected ? Theme.Colors.primary : Theme.Colors.primary.opacity(0.15))
                 .cornerRadius(20)
                 .overlay(
                     RoundedRectangle(cornerRadius: 20)
-                        .stroke(Color.cyan.opacity(0.3), lineWidth: 1)
+                        .stroke(Theme.Colors.primary.opacity(0.3), lineWidth: 1)
                 )
         }
         .buttonStyle(.plain)
@@ -1362,7 +1349,7 @@ private struct JobCard: View {
                         
                         Text(String((job.company ?? "C").prefix(1)))
                             .font(.system(size: 20, weight: .bold))
-                            .foregroundColor(.cyan)
+                            .foregroundColor(Theme.Colors.primary)
                     }
                     
                     VStack(alignment: .leading, spacing: 4) {
@@ -1441,7 +1428,7 @@ private struct JobCard: View {
             .cornerRadius(20)
             .overlay(
                 RoundedRectangle(cornerRadius: 20)
-                    .stroke(matchScore != nil ? Color.cyan.opacity(0.3) : Color.white.opacity(0.08), lineWidth: 1)
+                    .stroke(matchScore != nil ? Theme.Colors.primary.opacity(0.3) : Color.white.opacity(0.08), lineWidth: 1)
             )
             .scaleEffect(isPressed ? 0.98 : 1.0)
         }
@@ -1546,7 +1533,7 @@ private struct JobsEmptyState: View {
         VStack(spacing: 16) {
             Image(systemName: isAIMatch ? "wand.and.stars" : (hasSearched ? "magnifyingglass" : "briefcase.fill"))
                 .font(.system(size: 48))
-                .foregroundColor(.cyan.opacity(0.5))
+                .foregroundColor(Theme.Colors.primary.opacity(0.5))
             
             Text(isAIMatch ? "Немає відповідних вакансій" : (hasSearched ? "Нічого не знайдено" : "Почніть пошук"))
                 .font(.headline)
@@ -1605,7 +1592,7 @@ private struct JobDetailSheet: View {
                             }
                             .frame(maxWidth: .infinity)
                             .padding()
-                            .background(Color.blue)
+                            .background(Theme.Colors.primary)
                             .foregroundColor(.white)
                             .cornerRadius(12)
                         }
@@ -1619,7 +1606,7 @@ private struct JobDetailSheet: View {
                             }
                             .frame(maxWidth: .infinity)
                             .padding()
-                            .background(Color.purple)
+                            .background(Theme.Colors.accent)
                             .foregroundColor(.white)
                             .cornerRadius(12)
                         }

@@ -97,7 +97,7 @@ struct HomeViewRedesigned: View {
                 .environmentObject(lockManager)
         }
         .onAppear {
-            print("🏠 HomeViewRedesigned onAppear")
+            AppLogger.ui("HomeViewRedesigned onAppear")
             // Defer heavy operations to not block UI
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                 checkForWhatsNew()
@@ -713,7 +713,7 @@ struct HomeViewRedesigned: View {
         VStack(alignment: .leading, spacing: Theme.Spacing.md) {
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Першочергові задачі")
+                    Text("home.priority_tasks".localized)
                         .font(.title3.weight(.bold))
                         .foregroundColor(Theme.Colors.textPrimary)
                     Text(priorityTasksSubtitle)
@@ -723,7 +723,7 @@ struct HomeViewRedesigned: View {
                 
                 Spacer()
                 
-                Button("Показать все") {
+                Button("home.see_all".localized) {
                     NotificationCenter.default.post(
                         name: .switchTab,
                         object: SwitchTabPayload(tab: 1, section: .checklists)
@@ -815,7 +815,7 @@ struct HomeViewRedesigned: View {
     
     private var curatedContentSection: some View {
         VStack(spacing: Theme.Spacing.md) {
-            SectionHeader("Рекомендований контент")
+            SectionHeader("home.recommended_content".localized)
             
             if !topRecommendedCards.isEmpty {
                 StackedRecommendationList(
@@ -900,12 +900,12 @@ struct HomeViewRedesigned: View {
     
     private func focusSubtitle(for tasks: [FirstWeekChecklistService.TaskItem]) -> String {
         guard let first = tasks.first else {
-            return "Сьогодні без критичних задач"
+            return "home.no_critical_tasks".localized
         }
         if tasks.count == 1 {
             return first.title
         }
-        return "\(first.title) + ще \(tasks.count - 1)"
+        return "home.focus.plus_more_format".localized(with: first.title, tasks.count - 1)
     }
     
     private var dynamicGreeting: String {
@@ -920,9 +920,9 @@ struct HomeViewRedesigned: View {
     
     private var greetingTitle: String {
         if lockManager.isRegistered, !lockManager.userName.isEmpty {
-            return "Привіт, \(lockManager.userName)!"
+            return "home.greeting.hello_name".localized(with: lockManager.userName)
         }
-        return "Привіт!"
+        return "home.greeting.hello".localized
     }
     
     private var formattedGreetingDate: String {
@@ -947,7 +947,7 @@ struct HomeViewRedesigned: View {
         let completed = checklistTasks.filter(\.isDone).count
         let total = checklistTasks.count
         guard total > 0 else { return "" }
-        return "\(completed) из \(total) выполнено"
+        return "home.priority_tasks.progress_format".localized(with: completed, total)
     }
     
     private func checkForWhatsNew() {
@@ -971,10 +971,10 @@ struct HomeViewRedesigned: View {
     }
     
     private var insiderMoments: [InsiderMoment] {
-        let cantonName = appContainer.userProfile?.canton.localizedName ?? "Швейцарії"
+        let cantonName = appContainer.userProfile?.canton.localizedName ?? "home.switzerland_genitive".localized
         return [
-            InsiderMoment(title: "Пільги \(cantonName)", summary: "Короткий список виплат та гарантій.", icon: "bolt.fill", tag: "Benefits", accent: Theme.Colors.accentTurquoise, gradient: [Theme.Colors.primary, Theme.Colors.accentTurquoise], isNew: true, count: 5),
-            InsiderMoment(title: "Career Pulse", summary: "3 вакансії тижня.", icon: "chart.line.uptrend.xyaxis", tag: "Jobs", accent: Theme.Colors.accentCoral, gradient: [Theme.Colors.accentCoral, Theme.Colors.accent], isNew: false, count: 3)
+            InsiderMoment(title: "home.insider.benefits_format".localized(with: cantonName), summary: "home.insider.benefits_summary".localized, icon: "bolt.fill", tag: "Benefits", accent: Theme.Colors.accentTurquoise, gradient: [Theme.Colors.primary, Theme.Colors.accentTurquoise], isNew: true, count: 5),
+            InsiderMoment(title: "Career Pulse", summary: "home.insider.jobs_summary".localized, icon: "chart.line.uptrend.xyaxis", tag: "Jobs", accent: Theme.Colors.accentCoral, gradient: [Theme.Colors.accentCoral, Theme.Colors.accent], isNew: false, count: 3)
         ]
     }
     
@@ -1006,7 +1006,7 @@ struct HomeViewRedesigned: View {
     }
     
     private func taglineForGuide(_ guide: Guide) -> String {
-        let cantonName = appContainer.userProfile?.canton.localizedName ?? "Швейцарія"
+        let cantonName = appContainer.userProfile?.canton.localizedName ?? "home.switzerland".localized
         return "\(cantonName) • \(guide.category.localizedName)"
     }
     
@@ -1024,7 +1024,7 @@ struct HomeViewRedesigned: View {
         var arr: [ChipItem] = []
         let soonTasks = checklistTasks.filter { !$0.isDone }.sorted { $0.dueDate < $1.dueDate }.prefix(3)
         for task in soonTasks {
-            arr.append(.init(text: "Дедлайн: \(task.title)", color: Theme.Colors.warning, countdown: countdownString(to: task.dueDate)))
+            arr.append(.init(text: "home.deadline_format".localized(with: task.title), color: Theme.Colors.warning, countdown: countdownString(to: task.dueDate)))
         }
         return arr
     }
@@ -1032,21 +1032,21 @@ struct HomeViewRedesigned: View {
     private func countdownString(to date: Date) -> String? {
         let comps = Calendar.current.dateComponents([.day, .hour], from: Date(), to: date)
         guard let day = comps.day, let hour = comps.hour else { return nil }
-        if day <= 0 && hour <= 0 { return "сьогодні" }
-        if day > 0 { return "через \(day)d" }
-        return "через \(max(1, hour))h"
+        if day <= 0 && hour <= 0 { return "home.countdown.today".localized }
+        if day > 0 { return "home.countdown.in_days_format".localized(with: day) }
+        return "home.countdown.in_hours_format".localized(with: max(1, hour))
     }
     
     private var ambientAlerts: [AmbientAlert] {
         var alerts: [AmbientAlert] = []
         if let next = appContainer.firstWeekService.nextDueTask {
-            alerts.append(AmbientAlert(title: "Нагадування", detail: next.title, icon: "bell.badge.fill", accent: Theme.Colors.warning, time: countdownString(to: next.dueDate) ?? "сьогодні"))
+            alerts.append(AmbientAlert(title: "home.reminder".localized, detail: next.title, icon: "bell.badge.fill", accent: Theme.Colors.warning, time: countdownString(to: next.dueDate) ?? "home.countdown.today".localized))
         }
         return alerts
     }
     
     private var nextFocusTitle: String {
-        todayFocus.first?.title ?? "Сьогодні без критичних задач"
+        todayFocus.first?.title ?? "home.no_critical_tasks".localized
     }
     
     private var documentsProgress: Double {
@@ -1058,7 +1058,7 @@ struct HomeViewRedesigned: View {
     }
     
     private var primaryGoalName: String {
-        appContainer.userProfile?.goals.first?.localizedName ?? "кар'єри"
+        appContainer.userProfile?.goals.first?.localizedName ?? "home.career_genitive".localized
     }
 }
 
@@ -1165,14 +1165,14 @@ private struct TelegramCommunityCard: View {
                             )
                         }
                         
-                        Text("Спільнота українців у Швейцарії")
+                        Text("home.telegram.community".localized)
                             .font(.system(size: 13, weight: .medium))
                             .foregroundColor(Theme.Colors.textSecondary)
                         
                         // Stats
                         HStack(spacing: 12) {
                             Label("500+", systemImage: "person.2.fill")
-                            Label("Підтримка", systemImage: "bubble.left.and.bubble.right.fill")
+                            Label("home.telegram.support".localized, systemImage: "bubble.left.and.bubble.right.fill")
                         }
                         .font(.system(size: 11, weight: .medium))
                         .foregroundColor(telegramBlue)
@@ -1419,7 +1419,7 @@ private struct FeaturedNewsInlineCard: View {
                     .lineLimit(3)
                 
                 HStack {
-                    Text("Читати")
+                    Text("home.read_more".localized)
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundColor(accentColor)
                     Spacer()
@@ -1546,7 +1546,7 @@ private struct BentoStatsGrid: View {
                     BentoMiniCard(
                         icon: "book.fill",
                         value: "\(guidesRead)",
-                        label: "гідів",
+                        label: "gamification.guides".localized,
                         color: Theme.Colors.primary
                     )
                     .frame(maxWidth: .infinity)
@@ -1555,7 +1555,7 @@ private struct BentoStatsGrid: View {
                     BentoMiniCard(
                         icon: "checkmark.circle.fill",
                         value: "\(checklists)",
-                        label: "чеклістів",
+                        label: "home.stats.checklists".localized,
                         color: Theme.Colors.success
                     )
                     .frame(maxWidth: .infinity)
@@ -1569,7 +1569,7 @@ private struct BentoStatsGrid: View {
                 BentoMediumCard(
                     icon: "clock.fill",
                     value: "\(hoursSaved)",
-                    label: "годин збережено",
+                    label: "gamification.hours_saved".localized,
                     color: Theme.Colors.accentTurquoise
                 )
                 .frame(maxWidth: .infinity)
@@ -1578,7 +1578,7 @@ private struct BentoStatsGrid: View {
                 BentoMediumCard(
                     icon: "doc.text.fill",
                     value: "\(templates)",
-                    label: "шаблонів",
+                    label: "home.stats.templates".localized,
                     color: Theme.Colors.accent
                 )
                 .frame(maxWidth: .infinity)
@@ -1897,7 +1897,7 @@ private struct RecommendationCard: View {
                     
                     Text(card.guide.subtitle ?? card.guide.category.localizedName)
                         .font(.system(size: 13))
-                        .foregroundColor(Theme.Colors.secondaryText)
+                        .foregroundColor(Theme.Colors.textSecondary)
                         .lineLimit(2)
                         .minimumScaleFactor(0.9)
                     
@@ -2082,7 +2082,7 @@ private struct WeekStripFocusView: View {
     }
     
     private func shortDayName(for index: Int) -> String {
-        ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Нд"][index]
+        ["weekday.short.mon", "weekday.short.tue", "weekday.short.wed", "weekday.short.thu", "weekday.short.fri", "weekday.short.sat", "weekday.short.sun"][index].localized
     }
     
     private func tasksForDay(_ date: Date) -> [FirstWeekChecklistService.TaskItem] {
@@ -2197,7 +2197,7 @@ private struct WeekStripFocusView: View {
             FocusSummaryItem(
                 icon: "sun.max.fill",
                 value: "\(todayTasks.count)",
-                label: "сьогодні",
+                label: "home.focus.today".localized,
                 color: Color.orange
             )
             
@@ -2208,7 +2208,7 @@ private struct WeekStripFocusView: View {
             FocusSummaryItem(
                 icon: "calendar",
                 value: "\(weekTasks.count)",
-                label: "тиждень",
+                label: "home.focus.week".localized,
                 color: Theme.Colors.accentTurquoise
             )
             
@@ -2219,7 +2219,7 @@ private struct WeekStripFocusView: View {
             FocusSummaryItem(
                 icon: "checkmark.circle.fill",
                 value: "\(completedPercentage)%",
-                label: "виконано",
+                label: "home.focus.completed".localized,
                 color: Color.green
             )
         }
@@ -2269,7 +2269,7 @@ private struct QuickTaskPreview: View {
             }
             
             VStack(alignment: .leading, spacing: 3) {
-                Text("Найближче")
+                Text("home.focus.next_up".localized)
                     .font(.system(size: 11, weight: .medium))
                     .foregroundColor(Theme.Colors.textTertiary)
                 
@@ -2283,7 +2283,7 @@ private struct QuickTaskPreview: View {
             
             // Час
             if isUrgent {
-                Text("Сьогодні")
+                Text("home.focus.today_label".localized)
                     .font(.system(size: 12, weight: .bold))
                     .foregroundColor(.orange)
                     .padding(.horizontal, 10)
@@ -2322,7 +2322,7 @@ private struct ExpandableDayTasks: View {
         VStack(alignment: .leading, spacing: 10) {
             // Header
             HStack {
-                Text("Задачі на \(day.shortName), \(day.dayNumber)")
+                Text("home.focus.tasks_for_day_format".localized(with: day.shortName, day.dayNumber))
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundColor(Theme.Colors.textSecondary)
                 
@@ -2349,7 +2349,7 @@ private struct ExpandableDayTasks: View {
                 if tasks.count > 5 {
                     HStack {
                         Spacer()
-                        Text("+ ще \(tasks.count - 5) задач")
+                        Text("home.focus.plus_more_tasks_format".localized(with: tasks.count - 5))
                             .font(.system(size: 12, weight: .medium))
                             .foregroundColor(Theme.Colors.textTertiary)
                         Spacer()
@@ -2458,11 +2458,11 @@ private struct EmptyDayView: View {
                 .foregroundColor(Color.green.opacity(0.6))
             
             VStack(alignment: .leading, spacing: 2) {
-                Text("Немає задач")
+                Text("home.focus.no_tasks".localized)
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundColor(Theme.Colors.textPrimary)
                 
-                Text("\(dayName) вільний від завдань")
+                Text("home.focus.day_free_format".localized(with: dayName))
                     .font(.system(size: 12))
                     .foregroundColor(Theme.Colors.textTertiary)
             }
@@ -2704,7 +2704,7 @@ private struct AmbientNotificationCard: View {
                     .foregroundColor(Theme.Colors.textPrimary)
                 Text(alert.detail)
                     .font(Theme.Typography.caption)
-                    .foregroundColor(Theme.Colors.secondaryText)
+                    .foregroundColor(Theme.Colors.textSecondary)
             }
             Spacer()
             Text(alert.time)
@@ -3136,7 +3136,7 @@ private struct JourneyRoadmapView: View {
                         .id(stage.id)
                         .accessibilityElement(children: .ignore)
                         .accessibilityLabel(Text("\(stage.title), \(Int(stage.progress * 100))%"))
-                        .accessibilityHint(Text("Відкрити деталі етапу"))
+                        .accessibilityHint(Text("home.accessibility.stage_details".localized))
                         
                         // Label below node
                         VStack(spacing: 4) {
@@ -3300,7 +3300,7 @@ private struct RoadmapStageDetail: View {
                 }
                 Text(stage.detail)
                     .font(Theme.Typography.caption)
-                    .foregroundColor(Theme.Colors.secondaryText)
+                    .foregroundColor(Theme.Colors.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
@@ -3375,12 +3375,12 @@ private struct HomeStatusBadge: View {
 private func bulletRow(_ text: String) -> some View {
     HStack(alignment: .top, spacing: 8) {
         Circle()
-            .fill(Theme.Colors.secondaryText)
+            .fill(Theme.Colors.textSecondary)
             .frame(width: 4, height: 4)
             .offset(y: 6)
         Text(text)
             .font(Theme.Typography.caption)
-            .foregroundColor(Theme.Colors.secondaryText)
+            .foregroundColor(Theme.Colors.textSecondary)
             .multilineTextAlignment(.leading)
     }
 }
@@ -3784,7 +3784,7 @@ struct GamificationLevelCard: View {
                     .padding(.horizontal, 16)
                 
                 VStack(alignment: .leading, spacing: 10) {
-                    Text("Досягнення")
+                    Text("home.achievements".localized)
                         .font(.system(size: 12, weight: .semibold))
                         .foregroundColor(Theme.Colors.textSecondary)
                     
@@ -4141,7 +4141,7 @@ private struct KnowledgeMindMapView: View {
                     Text(guide.title)
                         .font(Theme.Typography.caption2)
                         .fontWeight(.medium)
-                        .foregroundColor(isSelected ? Theme.Colors.textPrimary : Theme.Colors.secondaryText)
+                        .foregroundColor(isSelected ? Theme.Colors.textPrimary : Theme.Colors.textSecondary)
                         .lineLimit(2)
                         .multilineTextAlignment(.center)
                         .frame(width: 90)
@@ -4162,7 +4162,7 @@ private struct KnowledgeMindMapView: View {
                         if let subtitle = guide.subtitle {
                             Text(subtitle)
                                 .font(Theme.Typography.caption)
-                                .foregroundColor(Theme.Colors.secondaryText)
+                                .foregroundColor(Theme.Colors.textSecondary)
                                 .lineLimit(2)
                                 .multilineTextAlignment(.center)
                         }
@@ -4170,7 +4170,7 @@ private struct KnowledgeMindMapView: View {
                         Button {
                             onSelect(guide)
                         } label: {
-                            Text("Відкрити")
+                            Text("common.open".localized)
                                 .font(Theme.Typography.caption)
                                 .fontWeight(.semibold)
                                 .foregroundColor(.white)

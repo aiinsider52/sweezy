@@ -59,7 +59,7 @@ class NotificationService: NotificationServiceProtocol {
             try await notificationCenter.add(request)
             return true
         } catch {
-            print("Failed to schedule generic reminder: \\(error)")
+            AppLogger.notification("Failed to schedule generic reminder: \(error)", isError: true)
             return false
         }
     }
@@ -84,7 +84,7 @@ class NotificationService: NotificationServiceProtocol {
             try await notificationCenter.add(request)
             return true
         } catch {
-            print("Failed to schedule trial end reminder: \(error)")
+            AppLogger.notification("Failed to schedule trial end reminder: \(error)", isError: true)
             return false
         }
     }
@@ -104,7 +104,7 @@ class NotificationService: NotificationServiceProtocol {
             try await notificationCenter.add(request)
             return true
         } catch {
-            print("Failed to schedule reengage reminder: \(error)")
+            AppLogger.notification("Failed to schedule reengage reminder: \(error)", isError: true)
             return false
         }
     }
@@ -115,19 +115,19 @@ class NotificationService: NotificationServiceProtocol {
             await updateAuthorizationStatus()
             return granted
         } catch {
-            print("Notification permission request failed: \(error)")
+            AppLogger.notification("Permission request failed: \(error)", isError: true)
             return false
         }
     }
     
     func scheduleAppointmentReminder(for appointment: Appointment) async -> Bool {
         guard isAuthorized else {
-            print("Notifications not authorized")
+            AppLogger.notification("Not authorized")
             return false
         }
         
         guard appointment.reminderSettings.isEnabled else {
-            print("Reminders disabled for appointment")
+            AppLogger.notification("Reminders disabled for appointment")
             return false
         }
         
@@ -162,9 +162,9 @@ class NotificationService: NotificationServiceProtocol {
             
             do {
                 try await notificationCenter.add(request)
-                print("Scheduled notification for appointment: \(appointment.title) at \(triggerDate)")
+                AppLogger.notification("Scheduled notification for appointment: \(appointment.title) at \(triggerDate)")
             } catch {
-                print("Failed to schedule notification: \(error)")
+                AppLogger.notification("Failed to schedule notification: \(error)", isError: true)
                 success = false
             }
         }
@@ -174,12 +174,12 @@ class NotificationService: NotificationServiceProtocol {
     
     func cancelNotification(with identifier: String) {
         notificationCenter.removePendingNotificationRequests(withIdentifiers: [identifier])
-        print("Cancelled notification with identifier: \(identifier)")
+        AppLogger.notification("Cancelled notification with identifier: \(identifier)")
     }
     
     func cancelAllNotifications() {
         notificationCenter.removeAllPendingNotificationRequests()
-        print("Cancelled all pending notifications")
+        AppLogger.notification("Cancelled all pending notifications")
     }
     
     func getPendingNotifications() async -> [UNNotificationRequest] {
@@ -198,7 +198,7 @@ class NotificationService: NotificationServiceProtocol {
             let identifiers = appointmentNotifications.map { $0.identifier }
             notificationCenter.removePendingNotificationRequests(withIdentifiers: identifiers)
             
-            print("Cancelled \(identifiers.count) notifications for appointment: \(appointmentId)")
+            AppLogger.notification("Cancelled \(identifiers.count) notifications for appointment: \(appointmentId)")
         }
     }
     
@@ -229,7 +229,7 @@ class NotificationService: NotificationServiceProtocol {
             try await notificationCenter.add(request)
             return true
         } catch {
-            print("Failed to schedule content update notification: \(error)")
+            AppLogger.notification("Failed to schedule content update notification: \(error)", isError: true)
             return false
         }
     }

@@ -26,7 +26,7 @@ struct SweezyApp: App {
         _lockManager = StateObject(wrappedValue: lockManager)
         _sessionManager = StateObject(wrappedValue: SessionManager(lockManager: lockManager))
 
-        print("🚀 SweezyApp init started")
+        AppLogger.debug("SweezyApp init started")
     }
     
     var body: some Scene {
@@ -39,11 +39,13 @@ struct SweezyApp: App {
                 .environmentObject(lockManager)
                 .environmentObject(sessionManager)
                 .onAppear {
-                    print("🎉 App UI appeared")
+                    AppLogger.ui("App UI appeared")
                     if ProcessInfo.processInfo.environment["UITESTS"] != "1" {
                         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { _, _ in }
                     }
                     lockManager.loadBiometryType()
+                    
+                    AppReviewManager.recordFirstLaunchIfNeeded()
                     
                     // Start crash reporter (no-op if SDK absent)
                     appContainer.crashReporter.start()
@@ -80,7 +82,10 @@ struct MainAppContent: View {
                     // IMPORTANT (App Store 5.1.1):
                     // Do NOT force account creation on launch.
                     // Guest users can access all public (non-account-based) content from the main app.
-                    MainTabView()
+                    VStack(spacing: 0) {
+                        OfflineBanner()
+                        MainTabView()
+                    }
                 } else {
                     OnboardingViewRedesigned()
                 }

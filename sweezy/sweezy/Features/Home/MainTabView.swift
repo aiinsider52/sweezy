@@ -63,7 +63,7 @@ struct MainTabView: View {
                 .tag(3)
         }
         .onAppear {
-            print("📱 MainTabView appeared")
+            AppLogger.ui("MainTabView appeared")
         }
         .onReceive(NotificationCenter.default.publisher(for: .switchTab)) { output in
             if let payload = output.object as? SwitchTabPayload {
@@ -128,7 +128,7 @@ struct PlaceholderTab: View {
                     .foregroundColor(color)
                 Text(title)
                     .font(.title2.bold())
-                Text("Скоро буде доступно")
+                Text("common.coming_soon".localized)
                     .foregroundColor(.secondary)
             }
             .navigationTitle(title)
@@ -145,7 +145,7 @@ struct LazyHomeWrapper: View {
             if showOriginal {
                 HomeViewRedesigned()
                     .onAppear {
-                        print("🏠 HomeViewRedesigned loaded")
+                        AppLogger.ui("HomeViewRedesigned loaded")
                     }
             } else {
                 // Show simplified version while loading
@@ -170,7 +170,7 @@ struct LazyGuidesWrapper: View {
             if showOriginal {
                 GuidesView()
                     .onAppear {
-                        print("📚 GuidesView (original) loaded")
+                        AppLogger.ui("GuidesView (original) loaded")
                     }
             } else {
                 GuidesLiteView()
@@ -193,7 +193,7 @@ struct LazyChecklistsWrapper: View {
             if showOriginal {
                 ChecklistsView()
                     .onAppear {
-                        print("✅ ChecklistsView (original) loaded")
+                        AppLogger.ui("ChecklistsView (original) loaded")
                     }
             } else {
                 ChecklistsLiteView()
@@ -216,7 +216,7 @@ struct LazySettingsWrapper: View {
             if showOriginal {
                 SettingsView()
                     .onAppear {
-                        print("⚙️ SettingsView (original) loaded")
+                        AppLogger.ui("SettingsView (original) loaded")
                     }
             } else {
                 SettingsLiteView()
@@ -252,7 +252,7 @@ struct LazyMapWrapper: View {
                 // Small delay to let tab animation complete
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                     showMap = true
-                    print("🗺️ MapView loaded (tab selected)")
+                    AppLogger.ui("MapView loaded (tab selected)")
                 }
             }
         }
@@ -274,10 +274,10 @@ struct MapPlaceholderView: View {
                         )
                     )
                 
-                Text("Карта")
+                Text("map.title_short".localized)
                     .font(.title2.bold())
                 
-                Text("Натисніть щоб відкрити")
+                Text("map.tap_to_open".localized)
                     .font(.subheadline)
                     .foregroundColor(.secondary)
             }
@@ -292,7 +292,7 @@ struct MapPlaceholderView: View {
                     endPoint: .bottom
                 )
             )
-            .navigationTitle("Карта")
+            .navigationTitle("map.title_short".localized)
         }
     }
 }
@@ -814,7 +814,7 @@ struct PlaceDetailSheet: View {
                 
                 // Accessible
                 if place.isAccessible {
-                    infoChip(icon: "figure.roll", text: "Доступно", color: .blue)
+                    infoChip(icon: "figure.roll", text: "map.accessible".localized, color: .blue)
                 }
             }
         }
@@ -1184,9 +1184,9 @@ struct HomeSimplifiedView: View {
     // MARK: - Welcome Card
     private var welcomeCard: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Вітаємо, \(userName)! 👋")
+            Text("home.welcome_name_format".localized(with: userName))
                 .font(.title2.bold())
-            Text("Ваш гід для життя в Швейцарії")
+            Text("home.subtitle".localized)
                 .font(.subheadline)
                 .foregroundColor(.secondary)
         }
@@ -1205,22 +1205,22 @@ struct HomeSimplifiedView: View {
     // MARK: - Stats Row
     private var statsRow: some View {
         HStack(spacing: 12) {
-            StatCard(title: "Гіди", value: "\(guidesCount)", icon: "book.fill", color: .blue)
+            StatCard(title: "home.stats.guides_short".localized, value: "\(guidesCount)", icon: "book.fill", color: .blue)
             StatCard(title: "XP", value: "\(totalXP)", icon: "star.fill", color: .orange)
-            StatCard(title: "Рівень", value: "\(level)", icon: "trophy.fill", color: .purple)
+            StatCard(title: "home.stats.level".localized, value: "\(level)", icon: "trophy.fill", color: .purple)
         }
     }
     
     // MARK: - Quick Actions
     private var quickActionsGrid: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Швидкі дії")
+            Text("home.quick_actions".localized)
                 .font(.headline)
             
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-                QuickAction(title: "Довідник", icon: "book.fill", color: .blue, tab: 1)
-                QuickAction(title: "Карта", icon: "map.fill", color: .orange, tab: 2)
-                QuickAction(title: "Налаштування", icon: "gearshape.fill", color: .gray, tab: 3)
+                QuickAction(title: "guides.title".localized, icon: "book.fill", color: .blue, tab: 1)
+                QuickAction(title: "qa.map".localized, icon: "map.fill", color: .orange, tab: 2)
+                QuickAction(title: "settings.title".localized, icon: "gearshape.fill", color: .gray, tab: 3)
             }
         }
     }
@@ -1281,7 +1281,7 @@ struct QuickAction: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel(title)
-        .accessibilityHint("Відкрити \(title)")
+        .accessibilityHint("home.open_format".localized(with: title))
     }
 }
 
@@ -1315,13 +1315,13 @@ struct GuidesLiteView: View {
         NavigationStack {
             Group {
                 if isLoading {
-                    ProgressView("Завантаження...")
+                    ProgressView("common.loading".localized)
                 } else if guides.isEmpty {
                     VStack(spacing: 16) {
                         Image(systemName: "book")
                             .font(.system(size: 50))
                             .foregroundColor(.secondary)
-                        Text("Гіди незабаром з'являться")
+                        Text("home.guides_coming_soon".localized)
                             .foregroundColor(.secondary)
                     }
                 } else {
@@ -1330,7 +1330,7 @@ struct GuidesLiteView: View {
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 8) {
                                 LiteCategoryChip(
-                                    title: "Всі",
+                                    title: "common.all".localized,
                                     isSelected: selectedCategory == nil,
                                     color: .blue
                                 ) {
@@ -1364,11 +1364,11 @@ struct GuidesLiteView: View {
                     .listStyle(.plain)
                 }
             }
-            .navigationTitle("Довідник")
-            .searchable(text: $searchText, prompt: "Пошук гідів...")
+            .navigationTitle("guides.title".localized)
+            .searchable(text: $searchText, prompt: Text("guides.search_placeholder".localized))
         }
         .onAppear {
-            print("📚 GuidesLiteView appeared")
+            AppLogger.ui("GuidesLiteView appeared")
             loadGuides()
         }
     }
@@ -1383,7 +1383,7 @@ struct GuidesLiteView: View {
                     await MainActor.run {
                         guides = loadedGuides
                         isLoading = false
-                        print("📚 Loaded \(guides.count) guides on attempt \(attempt)")
+                        AppLogger.content("Loaded \(guides.count) guides on attempt \(attempt)")
                     }
                     return
                 }
@@ -1392,7 +1392,7 @@ struct GuidesLiteView: View {
             await MainActor.run {
                 guides = appContainer.contentService.guides
                 isLoading = false
-                print("📚 Loaded \(guides.count) guides (final)")
+                AppLogger.content("Loaded \(guides.count) guides (final)")
             }
         }
     }
@@ -1474,13 +1474,13 @@ struct ChecklistsLiteView: View {
         NavigationStack {
             Group {
                 if isLoading {
-                    ProgressView("Завантаження...")
+                    ProgressView("common.loading".localized)
                 } else if checklists.isEmpty {
                     VStack(spacing: 16) {
                         Image(systemName: "checklist")
                             .font(.system(size: 50))
                             .foregroundColor(.secondary)
-                        Text("Чек-листи незабаром з'являться")
+                        Text("home.checklists_coming_soon".localized)
                             .foregroundColor(.secondary)
                     }
                 } else {
@@ -1505,10 +1505,10 @@ struct ChecklistsLiteView: View {
                     .listStyle(.plain)
                 }
             }
-            .navigationTitle("Чек-листи")
+            .navigationTitle("checklists.title".localized)
         }
         .onAppear {
-            print("✅ ChecklistsLiteView appeared")
+            AppLogger.ui("ChecklistsLiteView appeared")
             loadChecklists()
         }
     }
@@ -1523,7 +1523,7 @@ struct ChecklistsLiteView: View {
                     await MainActor.run {
                         checklists = loadedChecklists
                         isLoading = false
-                        print("✅ Loaded \(checklists.count) checklists on attempt \(attempt)")
+                        AppLogger.content("Loaded \(checklists.count) checklists on attempt \(attempt)")
                     }
                     return
                 }
@@ -1532,7 +1532,7 @@ struct ChecklistsLiteView: View {
             await MainActor.run {
                 checklists = appContainer.contentService.checklists
                 isLoading = false
-                print("✅ Loaded \(checklists.count) checklists (final)")
+                AppLogger.content("Loaded \(checklists.count) checklists (final)")
             }
         }
     }
@@ -1567,7 +1567,7 @@ struct ChecklistRow: View {
                         .font(.subheadline.bold())
                         .lineLimit(1)
                     
-                    Text("\(completedSteps)/\(checklist.steps.count) кроків")
+                    Text("home.steps_format".localized(with: completedSteps, checklist.steps.count))
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
@@ -1710,7 +1710,7 @@ struct SettingsLiteView: View {
                     VStack(spacing: 12) {
                         HStack {
                             VStack(alignment: .leading) {
-                                Text("Рівень \(level)")
+                                Text("home.level_format".localized(with: level))
                                     .font(.headline)
                                 Text("\(totalXP) XP")
                                     .font(.caption)
@@ -1757,52 +1757,56 @@ struct SettingsLiteView: View {
                 }
                 
                 // App Settings
-                Section("Налаштування") {
+                Section("settings.title".localized) {
                     NavigationLink {
                         LanguageSettingsView()
                     } label: {
-                        Label("Мова", systemImage: "globe")
+                        Label("settings.language".localized, systemImage: "globe")
                     }
                     
                     NavigationLink {
                         NotificationSettingsView()
                     } label: {
-                        Label("Сповіщення", systemImage: "bell")
+                        Label("settings.notifications".localized, systemImage: "bell")
                     }
                     
                     NavigationLink {
                         ThemeSettingsView()
                     } label: {
-                        Label("Тема", systemImage: "paintbrush")
+                        Label("settings.theme.title".localized, systemImage: "paintbrush")
                     }
                 }
                 
                 // Support
-                Section("Підтримка") {
-                    Link(destination: URL(string: "https://t.me/sweezy_support")!) {
-                        Label("Написати в Telegram", systemImage: "paperplane")
+                Section("settings.support".localized) {
+                    if let telegramURL = URL(string: "https://t.me/sweezy_support") {
+                        Link(destination: telegramURL) {
+                            Label("settings.write_telegram".localized, systemImage: "paperplane")
+                        }
                     }
                     
-                    Link(destination: URL(string: "mailto:support@sweezy.app")!) {
-                        Label("Email підтримка", systemImage: "envelope")
+                    if let emailURL = URL(string: "mailto:support@sweezy.app") {
+                        Link(destination: emailURL) {
+                            Label("settings.email_support".localized, systemImage: "envelope")
+                        }
                     }
                 }
                 
                 // About
-                Section("Про додаток") {
+                Section("settings.about".localized) {
                     HStack {
-                        Text("Версія")
+                        Text("settings.version_label".localized)
                         Spacer()
                         Text(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0")
                             .foregroundColor(.secondary)
                     }
                     
                     NavigationLink(destination: PrivacyPolicyView()) {
-                        Text("Політика конфіденційності")
+                        Text("privacy.title".localized)
                     }
                     
                     NavigationLink(destination: TermsOfUseView()) {
-                        Text("Умови використання")
+                        Text("settings.terms".localized)
                     }
                 }
                 
@@ -1813,19 +1817,19 @@ struct SettingsLiteView: View {
                     } label: {
                         HStack {
                             Spacer()
-                            Text("Вийти")
+                            Text("settings.logout".localized)
                             Spacer()
                         }
                     }
                 }
             }
-            .navigationTitle("Налаштування")
+            .navigationTitle("settings.title".localized)
             .refreshable {
                 loadData()
             }
         }
         .onAppear {
-            print("⚙️ SettingsLiteView appeared")
+            AppLogger.ui("SettingsLiteView appeared")
             loadData()
         }
     }
@@ -1855,7 +1859,7 @@ struct LanguageSettingsView: View {
             Text("English")
             Text("Deutsch")
         }
-        .navigationTitle("Мова")
+        .navigationTitle("settings.language".localized)
     }
 }
 
@@ -1864,9 +1868,9 @@ struct NotificationSettingsView: View {
     
     var body: some View {
         List {
-            Toggle("Сповіщення", isOn: $notificationsEnabled)
+            Toggle("settings.notifications".localized, isOn: $notificationsEnabled)
         }
-        .navigationTitle("Сповіщення")
+        .navigationTitle("settings.notifications".localized)
     }
 }
 
@@ -1877,7 +1881,7 @@ struct ThemeSettingsView: View {
         List {
             ForEach(["system", "light", "dark"], id: \.self) { theme in
                 HStack {
-                    Text(theme == "system" ? "Системна" : theme == "light" ? "Світла" : "Темна")
+                    Text(theme == "system" ? "settings.theme.system".localized : theme == "light" ? "settings.theme.light".localized : "settings.theme.dark".localized)
                     Spacer()
                     if selectedTheme == theme {
                         Image(systemName: "checkmark")
@@ -1890,7 +1894,7 @@ struct ThemeSettingsView: View {
                 }
             }
         }
-        .navigationTitle("Тема")
+        .navigationTitle("settings.theme.title".localized)
     }
 }
 

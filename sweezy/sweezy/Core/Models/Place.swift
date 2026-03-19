@@ -312,47 +312,47 @@ enum PlaceCategory: String, CaseIterable, Codable, Hashable {
     
     var localizedName: String {
         switch self {
-        case .migrationOffice: return "Migration Office"
-        case .gemeinde: return "Municipality"
-        case .embassy: return "Embassy"
-        case .policeStation: return "Police Station"
-        case .hospital: return "Hospital"
-        case .clinic: return "Clinic"
-        case .pharmacy: return "Pharmacy"
-        case .dentist: return "Dentist"
-        case .psychologist: return "Psychologist"
-        case .counselingCenter: return "Counseling Center"
-        case .mentalHealth: return "Mental Health"
-        case .emergencyRoom: return "Emergency Room"
-        case .legalAid: return "Legal Aid"
-        case .lawyer: return "Lawyer"
-        case .notary: return "Notary"
-        case .socialServices: return "Social Services"
-        case .refugeeCenter: return "Refugee Center"
-        case .integrationCenter: return "Integration Center"
-        case .foodAssistance: return "Food Assistance"
-        case .foodBank: return "Food Bank"
-        case .secondhandShop: return "Secondhand Shop"
-        case .jobCenter: return "Job Center"
-        case .employmentAgency: return "Employment Agency"
-        case .careerCounseling: return "Career Counseling"
-        case .school: return "School"
-        case .university: return "University"
-        case .languageSchool: return "Language School"
-        case .library: return "Library"
-        case .languageCafe: return "Language Café"
-        case .bank: return "Bank"
-        case .insuranceCompany: return "Insurance Company"
-        case .postOffice: return "Post Office"
-        case .trainStation: return "Train Station"
-        case .busStop: return "Bus Stop"
-        case .airport: return "Airport"
-        case .communityCenter: return "Community Center"
-        case .religiousCenter: return "Religious Center"
-        case .culturalCenter: return "Cultural Center"
-        case .communityCafe: return "Community Café"
-        case .supermarket: return "Supermarket"
-        case .youthCenter: return "Youth Center"
+        case .migrationOffice: return "place.category.migration_office".localized
+        case .gemeinde: return "place.category.gemeinde".localized
+        case .embassy: return "place.category.embassy".localized
+        case .policeStation: return "place.category.police_station".localized
+        case .hospital: return "place.category.hospital".localized
+        case .clinic: return "place.category.clinic".localized
+        case .pharmacy: return "place.category.pharmacy".localized
+        case .dentist: return "place.category.dentist".localized
+        case .psychologist: return "place.category.psychologist".localized
+        case .counselingCenter: return "place.category.counseling_center".localized
+        case .mentalHealth: return "place.category.mental_health".localized
+        case .emergencyRoom: return "place.category.emergency_room".localized
+        case .legalAid: return "place.category.legal_aid".localized
+        case .lawyer: return "place.category.lawyer".localized
+        case .notary: return "place.category.notary".localized
+        case .socialServices: return "place.category.social_services".localized
+        case .refugeeCenter: return "place.category.refugee_center".localized
+        case .integrationCenter: return "place.category.integration_center".localized
+        case .foodAssistance: return "place.category.food_assistance".localized
+        case .foodBank: return "place.category.food_bank".localized
+        case .secondhandShop: return "place.category.secondhand_shop".localized
+        case .jobCenter: return "place.category.job_center".localized
+        case .employmentAgency: return "place.category.employment_agency".localized
+        case .careerCounseling: return "place.category.career_counseling".localized
+        case .school: return "place.category.school".localized
+        case .university: return "place.category.university".localized
+        case .languageSchool: return "place.category.language_school".localized
+        case .library: return "place.category.library".localized
+        case .languageCafe: return "place.category.language_cafe".localized
+        case .bank: return "place.category.bank".localized
+        case .insuranceCompany: return "place.category.insurance_company".localized
+        case .postOffice: return "place.category.post_office".localized
+        case .trainStation: return "place.category.train_station".localized
+        case .busStop: return "place.category.bus_stop".localized
+        case .airport: return "place.category.airport".localized
+        case .communityCenter: return "place.category.community_center".localized
+        case .religiousCenter: return "place.category.religious_center".localized
+        case .culturalCenter: return "place.category.cultural_center".localized
+        case .communityCafe: return "place.category.community_cafe".localized
+        case .supermarket: return "place.category.supermarket".localized
+        case .youthCenter: return "place.category.youth_center".localized
         }
     }
 }

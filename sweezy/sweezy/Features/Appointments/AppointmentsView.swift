@@ -90,32 +90,6 @@ struct AppointmentsView: View {
         selectedSegment == 0 ? upcomingAppointments : pastAppointments
     }
     
-    private var emptyStateView: some View {
-        VStack(spacing: Theme.Spacing.lg) {
-            Image(systemName: "calendar")
-                .font(.system(size: 60))
-                .foregroundColor(Theme.Colors.tertiaryText)
-            
-            VStack(spacing: Theme.Spacing.sm) {
-                Text("appointments.no_appointments".localized)
-                    .font(Theme.Typography.headline)
-                    .foregroundColor(Theme.Colors.primaryText)
-                
-                Text("Add your first appointment to get started")
-                    .font(Theme.Typography.subheadline)
-                    .foregroundColor(Theme.Colors.secondaryText)
-                    .multilineTextAlignment(.center)
-            }
-            
-            PrimaryButton("appointments.add".localized) {
-                showingAddAppointment = true
-            }
-            .frame(maxWidth: 200)
-        }
-        .padding(Theme.Spacing.xl)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-    
     private var appointmentsList: some View {
         ScrollView {
             LazyVStack(spacing: Theme.Spacing.md) {
@@ -191,12 +165,12 @@ struct AppointmentCard: View {
                         Text(appointment.title)
                             .font(Theme.Typography.subheadline)
                             .fontWeight(.medium)
-                            .foregroundColor(Theme.Colors.primaryText)
+                            .foregroundColor(Theme.Colors.textPrimary)
                         
                         if let description = appointment.description {
                             Text(description)
                                 .font(Theme.Typography.caption)
-                                .foregroundColor(Theme.Colors.secondaryText)
+                                .foregroundColor(Theme.Colors.textSecondary)
                                 .lineLimit(2)
                         }
                     }
@@ -216,7 +190,7 @@ struct AppointmentCard: View {
                         Text(appointment.formattedDate)
                             .font(Theme.Typography.caption)
                     }
-                    .foregroundColor(Theme.Colors.secondaryText)
+                    .foregroundColor(Theme.Colors.textSecondary)
                     
                     if let location = appointment.location {
                         HStack(spacing: Theme.Spacing.xs) {
@@ -225,7 +199,7 @@ struct AppointmentCard: View {
                             Text(location.name)
                                 .font(Theme.Typography.caption)
                         }
-                        .foregroundColor(Theme.Colors.secondaryText)
+                        .foregroundColor(Theme.Colors.textSecondary)
                     }
                     
                     Spacer()

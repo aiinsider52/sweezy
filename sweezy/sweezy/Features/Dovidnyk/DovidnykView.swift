@@ -854,7 +854,7 @@ struct LazyDovidnykWrapper: View {
             if showOriginal {
                 DovidnykView(requestedSection: requestedSection, routeID: routeID)
                     .onAppear {
-                        print("📚 DovidnykView loaded")
+                        AppLogger.ui("DovidnykView loaded")
                     }
             } else {
                 DovidnykLiteView()

@@ -127,16 +127,16 @@ enum ChecklistCategory: String, CaseIterable, Codable, Hashable {
     
     var localizedName: String {
         switch self {
-        case .arrival: return "First Steps"
-        case .housing: return "Housing"
-        case .insurance: return "Insurance"
-        case .work: return "Employment"
-        case .education: return "Education"
-        case .integration: return "Integration"
-        case .family: return "Family"
-        case .healthcare: return "Healthcare"
-        case .legal: return "Legal"
-        case .finance: return "Finance"
+        case .arrival: return "checklist.category.arrival".localized
+        case .housing: return "checklist.category.housing".localized
+        case .insurance: return "checklist.category.insurance".localized
+        case .work: return "checklist.category.work".localized
+        case .education: return "checklist.category.education".localized
+        case .integration: return "checklist.category.integration".localized
+        case .family: return "checklist.category.family".localized
+        case .healthcare: return "checklist.category.healthcare".localized
+        case .legal: return "checklist.category.legal".localized
+        case .finance: return "checklist.category.finance".localized
         }
     }
     

@@ -85,13 +85,13 @@ enum UserGoal: String, CaseIterable, Codable, Hashable, Identifiable {
     
     var localizedName: String {
         switch self {
-        case .housing: return "Знайти житло"
-        case .work: return "Знайти роботу"
-        case .language: return "Вивчити мову"
-        case .education: return "Освіта"
-        case .documents: return "Оформити документи"
-        case .finance: return "Фінанси"
-        case .health: return "Медицина"
+        case .housing: return "user.goal.housing".localized
+        case .work: return "user.goal.work".localized
+        case .language: return "user.goal.language".localized
+        case .education: return "user.goal.education".localized
+        case .documents: return "user.goal.documents".localized
+        case .finance: return "user.goal.finance".localized
+        case .health: return "user.goal.health".localized
         }
     }
 }

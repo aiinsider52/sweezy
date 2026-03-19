@@ -1,0 +1,111 @@
+[
+  {
+    "id": "b1111111-1111-1111-1111-111111111111",
+    "name": "Субсидія на медичне страхування (ZH)",
+    "description": "Щомісячна субсидія на медичне страхування в кантоні Цюріх (демо-значення)",
+    "category": "health_insurance",
+    "canton": "ZH",
+    "permitTypes": ["S", "B", "F", "N"],
+    "conditions": [
+      {"id": "c-1", "type": "income", "operator": "less_than", "value": 45000, "description": "Дохід нижче порогу"},
+      {"id": "c-2", "type": "family_size", "operator": "greater_than_or_equal", "value": 1, "description": "Щонайменше 1 особа"}
+    ],
+    "calculationFormula": {"type": "income_based_sliding", "baseAmount": 400, "parameters": {"max_income": 45000, "min_subsidy": 50}},
+    "maxAmount": 400,
+    "minAmount": 50,
+    "currency": "CHF",
+    "validFrom": "2023-01-01T00:00:00Z",
+    "validUntil": null,
+    "isActive": true,
+    "officialSource": "https://www.zh.ch/de/gesundheit/gesundheitsversorgung/praemienverbilligung.html",
+    "lastUpdated": "2023-10-14T10:00:00Z",
+    "disclaimer": "Це демонстраційні довідкові значення для MVP. Завжди перевіряйте право на отримання та суми на офіційному вебсайті вашого кантону."
+  },
+  {
+    "id": "b2222222-2222-2222-2222-222222222222",
+    "name": "Субсидія на медичне страхування (GE)",
+    "description": "Щомісячна субсидія на медичне страхування в кантоні Женева (демо-значення)",
+    "category": "health_insurance",
+    "canton": "GE",
+    "permitTypes": ["S", "B", "F", "N"],
+    "conditions": [
+      {"id": "c-3", "type": "income", "operator": "less_than", "value": 42000, "description": "Дохід нижче порогу"}
+    ],
+    "calculationFormula": {"type": "income_based_sliding", "baseAmount": 380, "parameters": {"max_income": 42000, "min_subsidy": 50}},
+    "maxAmount": 380,
+    "minAmount": 50,
+    "currency": "CHF",
+    "validFrom": "2023-01-01T00:00:00Z",
+    "validUntil": null,
+    "isActive": true,
+    "officialSource": "https://www.ge.ch/reduire-prime-assurance-maladie",
+    "lastUpdated": "2023-10-14T10:00:00Z",
+    "disclaimer": "Довідкові значення для демо. Перевіряйте на офіційних сайтах кантону."
+  },
+  {
+    "id": "eeeeeeee-ffff-1111-2222-000000000501",
+    "name": "Зниження страхових внесків (VD)",
+    "description": "Кантон Во надає субсидії на медичне страхування (Réduction de primes) залежно від доходу та розміру сім'ї. Офіційне джерело: https://www.vd.ch/assurance-maladie",
+    "category": "health_insurance",
+    "canton": "VD",
+    "permitTypes": ["S", "B", "C", "F", "N"],
+    "conditions": [
+      {
+        "id": "11111111-2222-3333-4444-000000000511",
+        "type": "income",
+        "operator": "less_than_or_equal",
+        "value": 60000,
+        "description": "Річний дохід ≤ CHF 60 000"
+      }
+    ],
+    "calculationFormula": {
+      "type": "income_based_sliding",
+      "baseAmount": 3600,
+      "percentage": null,
+      "perPersonAmount": null,
+      "childBonus": null,
+      "parameters": {"max_income": 60000}
+    },
+    "maxAmount": 3600,
+    "minAmount": 0,
+    "currency": "CHF",
+    "validFrom": "2025-01-01T00:00:00Z",
+    "validUntil": null,
+    "isActive": true,
+    "officialSource": "https://www.vd.ch/assurance-maladie",
+    "lastUpdated": "2025-01-15T10:00:00Z"
+  },
+  {
+    "id": "eeeeeeee-ffff-1111-2222-000000000502",
+    "name": "Зниження страхових внесків (TI)",
+    "description": "Кантон Тічіно пропонує зниження страхових внесків (Riduzione dei premi) для малозабезпечених сімей. Офіційне джерело: https://www4.ti.ch/dss/dasi/upcd/temi/riduzione-dei-premi/",
+    "category": "health_insurance",
+    "canton": "TI",
+    "permitTypes": ["S", "B", "C", "F", "N"],
+    "conditions": [
+      {
+        "id": "11111111-2222-3333-4444-000000000521",
+        "type": "income",
+        "operator": "less_than_or_equal",
+        "value": 55000,
+        "description": "Річний дохід ≤ CHF 55 000"
+      }
+    ],
+    "calculationFormula": {
+      "type": "income_based_sliding",
+      "baseAmount": 3200,
+      "percentage": null,
+      "perPersonAmount": null,
+      "childBonus": null,
+      "parameters": {"max_income": 55000}
+    },
+    "maxAmount": 3200,
+    "minAmount": 0,
+    "currency": "CHF",
+    "validFrom": "2025-01-01T00:00:00Z",
+    "validUntil": null,
+    "isActive": true,
+    "officialSource": "https://www4.ti.ch/dss/dasi/upcd/temi/riduzione-dei-premi/",
+    "lastUpdated": "2025-01-15T10:00:00Z"
+  }
+]

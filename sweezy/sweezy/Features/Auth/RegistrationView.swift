@@ -18,17 +18,8 @@ struct RegistrationView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                // Deep gradient background
-                LinearGradient(
-                    colors: [
-                        Color(red: 0.04, green: 0.08, blue: 0.16),
-                        Color(red: 0.06, green: 0.12, blue: 0.24),
-                        Color(red: 0.04, green: 0.1, blue: 0.2)
-                    ],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .ignoresSafeArea()
+                Theme.Colors.darkBackground
+                    .ignoresSafeArea()
                 
                 // Aurora background
                 AuthAuroraBackground()
@@ -91,7 +82,7 @@ struct RegistrationView: View {
                 Circle()
                     .fill(
                         RadialGradient(
-                            colors: [.green.opacity(0.25), .clear],
+                            colors: [Theme.Colors.primary.opacity(0.25), .clear],
                             center: .center,
                             startRadius: 0,
                             endRadius: 70
@@ -105,7 +96,7 @@ struct RegistrationView: View {
                 Circle()
                     .fill(
                         LinearGradient(
-                            colors: [.green.opacity(0.3), .cyan.opacity(0.2)],
+                            colors: [Theme.Colors.primary.opacity(0.3), Theme.Colors.primaryLight.opacity(0.2)],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )
@@ -115,7 +106,7 @@ struct RegistrationView: View {
                         Circle()
                             .stroke(
                                 LinearGradient(
-                                    colors: [.green.opacity(0.6), .cyan.opacity(0.3)],
+                                    colors: [Theme.Colors.primary.opacity(0.6), Theme.Colors.primaryLight.opacity(0.3)],
                                     startPoint: .topLeading,
                                     endPoint: .bottomTrailing
                                 ),
@@ -130,7 +121,7 @@ struct RegistrationView: View {
                     .font(.system(size: 40))
                     .foregroundStyle(
                         LinearGradient(
-                            colors: [.green, .white],
+                            colors: [Theme.Colors.primary, .white],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )
@@ -240,7 +231,7 @@ struct RegistrationView: View {
                             )
                         } else {
                             LinearGradient(
-                                colors: [.green, .cyan],
+                                colors: [Theme.Colors.primary, Theme.Colors.primaryLight],
                                 startPoint: .leading,
                                 endPoint: .trailing
                             )
@@ -249,7 +240,7 @@ struct RegistrationView: View {
                 )
                 .foregroundColor(.white)
                 .cornerRadius(16)
-                .shadow(color: disabled ? .clear : .green.opacity(0.4), radius: 12, y: 6)
+                .shadow(color: disabled ? .clear : Theme.Colors.primary.opacity(0.4), radius: 12, y: 6)
             }
             .disabled(disabled || isRegistering)
             .animation(.easeInOut(duration: 0.2), value: disabled)
@@ -260,7 +251,7 @@ struct RegistrationView: View {
             } label: {
                 Text("Уже є акаунт? Увійти")
                     .font(.subheadline.weight(.medium))
-                    .foregroundColor(.cyan)
+                    .foregroundColor(Theme.Colors.primary)
             }
             .padding(.top, 4)
         }
@@ -272,7 +263,7 @@ struct RegistrationView: View {
                     RoundedRectangle(cornerRadius: 24)
                         .stroke(
                             LinearGradient(
-                                colors: [.green.opacity(0.4), .white.opacity(0.1), .cyan.opacity(0.3)],
+                                colors: [Theme.Colors.primary.opacity(0.4), .white.opacity(0.1), Theme.Colors.primaryLight.opacity(0.3)],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             ),
@@ -289,7 +280,7 @@ struct RegistrationView: View {
             // Security note
             HStack(spacing: 8) {
                 Image(systemName: "lock.shield.fill")
-                    .foregroundColor(.green.opacity(0.7))
+                    .foregroundColor(Theme.Colors.primary.opacity(0.7))
                 Text("Дані зберігаються локально на пристрої")
                     .font(.caption)
                     .foregroundColor(.white.opacity(0.5))
@@ -313,7 +304,7 @@ struct RegistrationView: View {
         HStack(spacing: 14) {
             Image(systemName: icon)
                 .font(.system(size: 18))
-                .foregroundColor(.green.opacity(0.8))
+                .foregroundColor(Theme.Colors.primary.opacity(0.8))
                 .frame(width: 24)
             
             TextField("", text: text, prompt: Text(placeholder).foregroundColor(.white.opacity(0.4)))
@@ -332,7 +323,7 @@ struct RegistrationView: View {
                     RoundedRectangle(cornerRadius: 14)
                         .stroke(
                             !text.wrappedValue.isEmpty
-                                ? LinearGradient(colors: [.green.opacity(0.5), .cyan.opacity(0.3)], startPoint: .topLeading, endPoint: .bottomTrailing)
+                                ? LinearGradient(colors: [Theme.Colors.primary.opacity(0.5), Theme.Colors.primaryLight.opacity(0.3)], startPoint: .topLeading, endPoint: .bottomTrailing)
                                 : LinearGradient(colors: [.white.opacity(0.15), .white.opacity(0.1)], startPoint: .topLeading, endPoint: .bottomTrailing),
                             lineWidth: 1
                         )
@@ -350,7 +341,7 @@ struct RegistrationView: View {
         HStack(spacing: 14) {
             Image(systemName: icon)
                 .font(.system(size: 18))
-                .foregroundColor(.green.opacity(0.8))
+                .foregroundColor(Theme.Colors.primary.opacity(0.8))
                 .frame(width: 24)
             
             Group {
@@ -382,7 +373,7 @@ struct RegistrationView: View {
                     RoundedRectangle(cornerRadius: 14)
                         .stroke(
                             !text.wrappedValue.isEmpty
-                                ? LinearGradient(colors: [.green.opacity(0.5), .cyan.opacity(0.3)], startPoint: .topLeading, endPoint: .bottomTrailing)
+                                ? LinearGradient(colors: [Theme.Colors.primary.opacity(0.5), Theme.Colors.primaryLight.opacity(0.3)], startPoint: .topLeading, endPoint: .bottomTrailing)
                                 : LinearGradient(colors: [.white.opacity(0.15), .white.opacity(0.1)], startPoint: .topLeading, endPoint: .bottomTrailing),
                             lineWidth: 1
                         )
@@ -430,7 +421,7 @@ struct RegistrationView: View {
             }
         } catch {
             // Backend failed or timed out - continue with local registration
-            print("⚠️ Backend registration failed: \(error.localizedDescription). Using local-only mode.")
+            AppLogger.auth("Backend registration failed: \(error.localizedDescription). Using local-only mode.", isError: true)
         }
         
         // Always save locally (works offline)

@@ -17,17 +17,8 @@ struct LoginView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                // Deep gradient background
-                LinearGradient(
-                    colors: [
-                        Color(red: 0.04, green: 0.08, blue: 0.16),
-                        Color(red: 0.06, green: 0.12, blue: 0.24),
-                        Color(red: 0.04, green: 0.1, blue: 0.2)
-                    ],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .ignoresSafeArea()
+                Theme.Colors.darkBackground
+                    .ignoresSafeArea()
                 
                 // Aurora background
                 AuthAuroraBackground()
@@ -81,7 +72,7 @@ struct LoginView: View {
                 Circle()
                     .fill(
                         RadialGradient(
-                            colors: [.cyan.opacity(0.25), .clear],
+                            colors: [Theme.Colors.primary.opacity(0.25), .clear],
                             center: .center,
                             startRadius: 0,
                             endRadius: 70
@@ -95,7 +86,7 @@ struct LoginView: View {
                 Circle()
                     .fill(
                         LinearGradient(
-                            colors: [.cyan.opacity(0.3), .blue.opacity(0.2)],
+                            colors: [Theme.Colors.primary.opacity(0.3), Theme.Colors.primaryDark.opacity(0.2)],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )
@@ -105,7 +96,7 @@ struct LoginView: View {
                         Circle()
                             .stroke(
                                 LinearGradient(
-                                    colors: [.cyan.opacity(0.6), .blue.opacity(0.3)],
+                                    colors: [Theme.Colors.primary.opacity(0.6), Theme.Colors.primaryDark.opacity(0.3)],
                                     startPoint: .topLeading,
                                     endPoint: .bottomTrailing
                                 ),
@@ -120,7 +111,7 @@ struct LoginView: View {
                     .font(.system(size: 40))
                     .foregroundStyle(
                         LinearGradient(
-                            colors: [.cyan, .white],
+                            colors: [Theme.Colors.primary, .white],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )
@@ -169,7 +160,7 @@ struct LoginView: View {
                 } label: {
                     Text("auth.login.forgot_password")
                         .font(.subheadline.weight(.medium))
-                        .foregroundColor(.cyan)
+                        .foregroundColor(Theme.Colors.primary)
                 }
             }
             
@@ -218,7 +209,7 @@ struct LoginView: View {
                             )
                         } else {
                             LinearGradient(
-                                colors: [.cyan, .blue],
+                                colors: [Theme.Colors.primary, Theme.Colors.primaryDark],
                                 startPoint: .leading,
                                 endPoint: .trailing
                             )
@@ -227,7 +218,7 @@ struct LoginView: View {
                 )
                 .foregroundColor(.white)
                 .cornerRadius(16)
-                .shadow(color: email.isEmpty || password.isEmpty ? .clear : .cyan.opacity(0.4), radius: 12, y: 6)
+                .shadow(color: email.isEmpty || password.isEmpty ? .clear : Theme.Colors.primary.opacity(0.4), radius: 12, y: 6)
             }
             .disabled(email.isEmpty || password.isEmpty || isLoading)
             .animation(.easeInOut(duration: 0.2), value: email.isEmpty || password.isEmpty)
@@ -240,7 +231,7 @@ struct LoginView: View {
                     RoundedRectangle(cornerRadius: 24)
                         .stroke(
                             LinearGradient(
-                                colors: [.cyan.opacity(0.4), .white.opacity(0.1), .blue.opacity(0.3)],
+                                colors: [Theme.Colors.primary.opacity(0.4), .white.opacity(0.1), Theme.Colors.primaryDark.opacity(0.3)],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             ),
@@ -297,7 +288,7 @@ struct LoginView: View {
             // Security note
             HStack(spacing: 8) {
                 Image(systemName: "lock.shield.fill")
-                    .foregroundColor(.cyan.opacity(0.7))
+                    .foregroundColor(Theme.Colors.primary.opacity(0.7))
                 Text("auth.secure_connection")
                     .font(.caption)
                     .foregroundColor(.white.opacity(0.5))
@@ -315,7 +306,7 @@ struct LoginView: View {
         HStack(spacing: 14) {
             Image(systemName: icon)
                 .font(.system(size: 18))
-                .foregroundColor(.cyan.opacity(0.8))
+                .foregroundColor(Theme.Colors.primary.opacity(0.8))
                 .frame(width: 24)
             
             TextField("", text: text, prompt: Text(LocalizedStringKey(placeholder)).foregroundColor(.white.opacity(0.4)))
@@ -334,7 +325,7 @@ struct LoginView: View {
                     RoundedRectangle(cornerRadius: 14)
                         .stroke(
                             !text.wrappedValue.isEmpty
-                                ? LinearGradient(colors: [.cyan.opacity(0.5), .blue.opacity(0.3)], startPoint: .topLeading, endPoint: .bottomTrailing)
+                                ? LinearGradient(colors: [Theme.Colors.primary.opacity(0.5), Theme.Colors.primaryDark.opacity(0.3)], startPoint: .topLeading, endPoint: .bottomTrailing)
                                 : LinearGradient(colors: [.white.opacity(0.15), .white.opacity(0.1)], startPoint: .topLeading, endPoint: .bottomTrailing),
                             lineWidth: 1
                         )
@@ -352,7 +343,7 @@ struct LoginView: View {
         HStack(spacing: 14) {
             Image(systemName: icon)
                 .font(.system(size: 18))
-                .foregroundColor(.cyan.opacity(0.8))
+                .foregroundColor(Theme.Colors.primary.opacity(0.8))
                 .frame(width: 24)
             
             Group {
@@ -384,7 +375,7 @@ struct LoginView: View {
                     RoundedRectangle(cornerRadius: 14)
                         .stroke(
                             !text.wrappedValue.isEmpty
-                                ? LinearGradient(colors: [.cyan.opacity(0.5), .blue.opacity(0.3)], startPoint: .topLeading, endPoint: .bottomTrailing)
+                                ? LinearGradient(colors: [Theme.Colors.primary.opacity(0.5), Theme.Colors.primaryDark.opacity(0.3)], startPoint: .topLeading, endPoint: .bottomTrailing)
                                 : LinearGradient(colors: [.white.opacity(0.15), .white.opacity(0.1)], startPoint: .topLeading, endPoint: .bottomTrailing),
                             lineWidth: 1
                         )
@@ -449,7 +440,7 @@ struct AuthAuroraBackground: View {
             Circle()
                 .fill(
                     RadialGradient(
-                        colors: [.cyan.opacity(0.15), .clear],
+                        colors: [Theme.Colors.primary.opacity(0.15), .clear],
                         center: .center,
                         startRadius: 0,
                         endRadius: 200
@@ -462,7 +453,7 @@ struct AuthAuroraBackground: View {
             Circle()
                 .fill(
                     RadialGradient(
-                        colors: [.blue.opacity(0.12), .clear],
+                        colors: [Theme.Colors.primaryDark.opacity(0.12), .clear],
                         center: .center,
                         startRadius: 0,
                         endRadius: 180
@@ -475,7 +466,7 @@ struct AuthAuroraBackground: View {
             Circle()
                 .fill(
                     RadialGradient(
-                        colors: [.purple.opacity(0.1), .clear],
+                        colors: [Theme.Colors.accent.opacity(0.1), .clear],
                         center: .center,
                         startRadius: 0,
                         endRadius: 150
@@ -549,17 +540,8 @@ struct PasswordResetSheet: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                // Beautiful gradient background
-                LinearGradient(
-                    colors: [
-                        Color(red: 0.04, green: 0.08, blue: 0.16),
-                        Color(red: 0.06, green: 0.12, blue: 0.24),
-                        Color(red: 0.04, green: 0.1, blue: 0.2)
-                    ],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .ignoresSafeArea()
+                Theme.Colors.darkBackground
+                    .ignoresSafeArea()
                 
                 // Animated aurora effect
                 AuthAuroraBackground()
@@ -599,7 +581,7 @@ struct PasswordResetSheet: View {
                                 Image(systemName: "chevron.left")
                                 Text("common.back".localized)
                             }
-                            .foregroundColor(.cyan)
+                            .foregroundColor(Theme.Colors.primary)
                         }
                     }
                 }
@@ -626,7 +608,7 @@ struct PasswordResetSheet: View {
                         .fill(
                             LinearGradient(
                                 colors: currentStep.rawValue >= step.rawValue
-                                    ? [.cyan, .blue]
+                                    ? [Theme.Colors.primary, Theme.Colors.primaryDark]
                                     : [Color.white.opacity(0.2), Color.white.opacity(0.2)],
                                 startPoint: .leading,
                                 endPoint: .trailing
@@ -642,14 +624,14 @@ struct PasswordResetSheet: View {
                         .fill(
                             LinearGradient(
                                 colors: currentStep.rawValue >= step.rawValue
-                                    ? [.cyan, .blue]
+                                    ? [Theme.Colors.primary, Theme.Colors.primaryDark]
                                     : [Color.white.opacity(0.15), Color.white.opacity(0.15)],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             )
                         )
                         .frame(width: 36, height: 36)
-                        .shadow(color: currentStep == step ? .cyan.opacity(0.5) : .clear, radius: 8)
+                        .shadow(color: currentStep == step ? Theme.Colors.primary.opacity(0.5) : .clear, radius: 8)
                     
                     if currentStep.rawValue > step.rawValue {
                         Image(systemName: "checkmark")
@@ -689,13 +671,13 @@ struct PasswordResetSheet: View {
             // Icon
             ZStack {
                 Circle()
-                    .fill(LinearGradient(colors: [.cyan.opacity(0.3), .blue.opacity(0.2)], startPoint: .topLeading, endPoint: .bottomTrailing))
+                    .fill(LinearGradient(colors: [Theme.Colors.primary.opacity(0.3), Theme.Colors.primaryDark.opacity(0.2)], startPoint: .topLeading, endPoint: .bottomTrailing))
                     .frame(width: 80, height: 80)
                 
                 Image(systemName: "envelope.badge.shield.half.filled")
                     .font(.system(size: 36))
                     .foregroundStyle(
-                        LinearGradient(colors: [.cyan, .white], startPoint: .topLeading, endPoint: .bottomTrailing)
+                        LinearGradient(colors: [Theme.Colors.primary, .white], startPoint: .topLeading, endPoint: .bottomTrailing)
                     )
             }
             .padding(.top, 10)
@@ -751,7 +733,7 @@ struct PasswordResetSheet: View {
                     .overlay(
                         RoundedRectangle(cornerRadius: 20)
                             .stroke(
-                                LinearGradient(colors: [.cyan.opacity(0.4), .white.opacity(0.1)], startPoint: .topLeading, endPoint: .bottomTrailing),
+                                LinearGradient(colors: [Theme.Colors.primary.opacity(0.4), .white.opacity(0.1)], startPoint: .topLeading, endPoint: .bottomTrailing),
                                 lineWidth: 1
                             )
                     )
@@ -774,11 +756,11 @@ struct PasswordResetSheet: View {
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 16)
                 .background(
-                    LinearGradient(colors: [.cyan, .blue], startPoint: .leading, endPoint: .trailing)
+                    LinearGradient(colors: [Theme.Colors.primary, Theme.Colors.primaryDark], startPoint: .leading, endPoint: .trailing)
                 )
                 .foregroundColor(.white)
                 .cornerRadius(14)
-                .shadow(color: .cyan.opacity(0.4), radius: 10, y: 5)
+                .shadow(color: Theme.Colors.primary.opacity(0.4), radius: 10, y: 5)
             }
             .disabled(email.isEmpty || isLoading)
             .opacity(email.isEmpty ? 0.6 : 1)
@@ -791,13 +773,13 @@ struct PasswordResetSheet: View {
             // Icon
             ZStack {
                 Circle()
-                    .fill(LinearGradient(colors: [.yellow.opacity(0.3), .orange.opacity(0.2)], startPoint: .topLeading, endPoint: .bottomTrailing))
+                    .fill(LinearGradient(colors: [Theme.Colors.accent.opacity(0.3), Theme.Colors.accentCoral.opacity(0.2)], startPoint: .topLeading, endPoint: .bottomTrailing))
                     .frame(width: 80, height: 80)
                 
                 Image(systemName: "key.viewfinder")
                     .font(.system(size: 36))
                     .foregroundStyle(
-                        LinearGradient(colors: [.yellow, .orange], startPoint: .topLeading, endPoint: .bottomTrailing)
+                        LinearGradient(colors: [Theme.Colors.accent, Theme.Colors.accentCoral], startPoint: .topLeading, endPoint: .bottomTrailing)
                     )
             }
             .padding(.top, 10)
@@ -817,7 +799,7 @@ struct PasswordResetSheet: View {
             VStack(spacing: 16) {
                 HStack {
                     Image(systemName: "key.fill")
-                        .foregroundColor(.cyan)
+                        .foregroundColor(Theme.Colors.primary)
                     
                     TextField("auth.reset.enter_code.placeholder".localized, text: $token)
                         .font(.system(.body, design: .monospaced))
@@ -841,9 +823,9 @@ struct PasswordResetSheet: View {
                         }
                     } label: {
                         Image(systemName: "doc.on.clipboard")
-                            .foregroundColor(.cyan)
+                            .foregroundColor(Theme.Colors.primary)
                             .padding(8)
-                            .background(Circle().fill(.cyan.opacity(0.2)))
+                            .background(Circle().fill(Theme.Colors.primary.opacity(0.2)))
                     }
                 }
                 .padding()
@@ -869,7 +851,7 @@ struct PasswordResetSheet: View {
                 // Hint
                 HStack(spacing: 6) {
                     Image(systemName: "lightbulb.fill")
-                        .foregroundColor(.yellow.opacity(0.8))
+                        .foregroundColor(Theme.Colors.accent.opacity(0.8))
                     Text("auth.reset.enter_code.hint")
                         .font(.caption)
                         .foregroundColor(.white.opacity(0.6))
@@ -882,7 +864,7 @@ struct PasswordResetSheet: View {
                     .overlay(
                         RoundedRectangle(cornerRadius: 20)
                             .stroke(
-                                LinearGradient(colors: [.yellow.opacity(0.4), .white.opacity(0.1)], startPoint: .topLeading, endPoint: .bottomTrailing),
+                                LinearGradient(colors: [Theme.Colors.accent.opacity(0.4), .white.opacity(0.1)], startPoint: .topLeading, endPoint: .bottomTrailing),
                                 lineWidth: 1
                             )
                     )
@@ -903,11 +885,11 @@ struct PasswordResetSheet: View {
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 16)
                 .background(
-                    LinearGradient(colors: [.yellow, .orange], startPoint: .leading, endPoint: .trailing)
+                    LinearGradient(colors: [Theme.Colors.accent, Theme.Colors.accentCoral], startPoint: .leading, endPoint: .trailing)
                 )
                 .foregroundColor(.white)
                 .cornerRadius(14)
-                .shadow(color: .orange.opacity(0.4), radius: 10, y: 5)
+                .shadow(color: Theme.Colors.accent.opacity(0.4), radius: 10, y: 5)
             }
             .disabled(!canProceedToPassword)
             .opacity(canProceedToPassword ? 1 : 0.6)
@@ -918,7 +900,7 @@ struct PasswordResetSheet: View {
             } label: {
                 Text("auth.reset.resend_code")
                     .font(.subheadline)
-                    .foregroundColor(.cyan)
+                    .foregroundColor(Theme.Colors.primary)
             }
             .disabled(isLoading)
         }
@@ -930,13 +912,13 @@ struct PasswordResetSheet: View {
             // Icon
             ZStack {
                 Circle()
-                    .fill(LinearGradient(colors: [.green.opacity(0.3), .cyan.opacity(0.2)], startPoint: .topLeading, endPoint: .bottomTrailing))
+                    .fill(LinearGradient(colors: [Theme.Colors.success.opacity(0.3), Theme.Colors.primary.opacity(0.2)], startPoint: .topLeading, endPoint: .bottomTrailing))
                     .frame(width: 80, height: 80)
                 
                 Image(systemName: "lock.shield.fill")
                     .font(.system(size: 36))
                     .foregroundStyle(
-                        LinearGradient(colors: [.green, .cyan], startPoint: .topLeading, endPoint: .bottomTrailing)
+                        LinearGradient(colors: [Theme.Colors.success, Theme.Colors.primary], startPoint: .topLeading, endPoint: .bottomTrailing)
                     )
             }
             .padding(.top, 10)
@@ -997,7 +979,7 @@ struct PasswordResetSheet: View {
                     .overlay(
                         RoundedRectangle(cornerRadius: 20)
                             .stroke(
-                                LinearGradient(colors: [.green.opacity(0.4), .white.opacity(0.1)], startPoint: .topLeading, endPoint: .bottomTrailing),
+                                LinearGradient(colors: [Theme.Colors.success.opacity(0.4), .white.opacity(0.1)], startPoint: .topLeading, endPoint: .bottomTrailing),
                                 lineWidth: 1
                             )
                     )
@@ -1020,11 +1002,11 @@ struct PasswordResetSheet: View {
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 16)
                 .background(
-                    LinearGradient(colors: [.green, .cyan], startPoint: .leading, endPoint: .trailing)
+                    LinearGradient(colors: [Theme.Colors.success, Theme.Colors.primary], startPoint: .leading, endPoint: .trailing)
                 )
                 .foregroundColor(.white)
                 .cornerRadius(14)
-                .shadow(color: .green.opacity(0.4), radius: 10, y: 5)
+                .shadow(color: Theme.Colors.success.opacity(0.4), radius: 10, y: 5)
             }
             .disabled(!canResetPassword || isLoading)
             .opacity(canResetPassword ? 1 : 0.6)
@@ -1042,7 +1024,7 @@ struct PasswordResetSheet: View {
                 Circle()
                     .fill(
                         RadialGradient(
-                            colors: [.green.opacity(0.3), .clear],
+                            colors: [Theme.Colors.success.opacity(0.3), .clear],
                             center: .center,
                             startRadius: 0,
                             endRadius: 80
@@ -1054,9 +1036,9 @@ struct PasswordResetSheet: View {
                 
                 // Inner circle
                 Circle()
-                    .fill(LinearGradient(colors: [.green, .cyan], startPoint: .topLeading, endPoint: .bottomTrailing))
+                    .fill(LinearGradient(colors: [Theme.Colors.success, Theme.Colors.primary], startPoint: .topLeading, endPoint: .bottomTrailing))
                     .frame(width: 100, height: 100)
-                    .shadow(color: .green.opacity(0.5), radius: 20)
+                    .shadow(color: Theme.Colors.success.opacity(0.5), radius: 20)
                     .scaleEffect(showSuccessAnimation ? 1 : 0)
                 
                 // Checkmark
@@ -1100,11 +1082,11 @@ struct PasswordResetSheet: View {
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 16)
                 .background(
-                    LinearGradient(colors: [.green, .cyan], startPoint: .leading, endPoint: .trailing)
+                    LinearGradient(colors: [Theme.Colors.success, Theme.Colors.primary], startPoint: .leading, endPoint: .trailing)
                 )
                 .foregroundColor(.white)
                 .cornerRadius(14)
-                .shadow(color: .green.opacity(0.4), radius: 10, y: 5)
+                .shadow(color: Theme.Colors.success.opacity(0.4), radius: 10, y: 5)
             }
             .opacity(showSuccessAnimation ? 1 : 0)
             .animation(.easeOut.delay(0.5), value: showSuccessAnimation)

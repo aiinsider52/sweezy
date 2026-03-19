@@ -17,7 +17,7 @@ struct LockOverlayView: View {
                 .foregroundColor(Theme.Colors.ukrainianBlue)
             Text(message)
                 .font(Theme.Typography.subheadline)
-                .foregroundColor(Theme.Colors.primaryText)
+                .foregroundColor(Theme.Colors.textPrimary)
                 .multilineTextAlignment(.center)
         }
         .padding(16)

@@ -199,12 +199,12 @@ enum AppointmentStatus: String, CaseIterable, Codable, Hashable {
     
     var localizedName: String {
         switch self {
-        case .scheduled: return "Scheduled"
-        case .confirmed: return "Confirmed"
-        case .cancelled: return "Cancelled"
-        case .completed: return "Completed"
-        case .noShow: return "No Show"
-        case .rescheduled: return "Rescheduled"
+        case .scheduled: return "appointment.status.scheduled".localized
+        case .confirmed: return "appointment.status.confirmed".localized
+        case .cancelled: return "appointment.status.cancelled".localized
+        case .completed: return "appointment.status.completed".localized
+        case .noShow: return "appointment.status.no_show".localized
+        case .rescheduled: return "appointment.status.rescheduled".localized
         }
     }
     

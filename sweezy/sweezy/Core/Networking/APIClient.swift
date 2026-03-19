@@ -446,10 +446,10 @@ enum APIClient {
         do {
             let (data, resp) = try await URLSession.shared.data(for: req)
             if let http = resp as? HTTPURLResponse {
-                print("🔐 [Auth] password/forgot status = \\(http.statusCode)")
+                AppLogger.auth("password/forgot status = \(http.statusCode)")
                 if !(200..<300).contains(http.statusCode) {
                     if let body = String(data: data, encoding: .utf8) {
-                        print("🔐 [Auth] password/forgot error body: \\(body)")
+                        AppLogger.auth("password/forgot error body: \(body)", isError: true)
                     }
                     return false;
                 }
@@ -457,7 +457,7 @@ enum APIClient {
             }
             return false
         } catch {
-            print("🔐 [Auth] password/forgot network error: \\(error)")
+            AppLogger.auth("password/forgot network error: \(error)", isError: true)
             return false
         }
     }

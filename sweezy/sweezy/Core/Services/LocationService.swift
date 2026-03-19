@@ -149,7 +149,7 @@ extension LocationService {
     }
     
     fileprivate func handleDidFailWithError(_ error: Error) {
-        print("Location manager failed with error: \(error)")
+        AppLogger.location("Manager failed with error: \(error)", isError: true)
         if let clError = error as? CLError {
             switch clError.code {
             case .denied:
@@ -223,7 +223,7 @@ extension LocationService {
             
             return addressComponents.joined(separator: ", ")
         } catch {
-            print("Reverse geocoding failed: \(error)")
+            AppLogger.location("Reverse geocoding failed: \(error)", isError: true)
             return nil
         }
     }
@@ -236,7 +236,7 @@ extension LocationService {
             let placemarks = try await geocoder.geocodeAddressString(address)
             return placemarks.first?.location?.coordinate
         } catch {
-            print("Geocoding failed: \(error)")
+            AppLogger.location("Geocoding failed: \(error)", isError: true)
             return nil
         }
     }

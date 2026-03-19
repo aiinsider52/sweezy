@@ -174,7 +174,7 @@ private struct BentoFeaturedCard: View {
                     // Title
                     Text(item.title)
                         .font(.system(size: 20, weight: .bold, design: .rounded))
-                        .foregroundColor(Theme.Colors.primaryText)
+                        .foregroundColor(Theme.Colors.textPrimary)
                         .lineLimit(2)
                         .opacity(item.isLocked ? 0.6 : 1)
                     
@@ -182,7 +182,7 @@ private struct BentoFeaturedCard: View {
                     if let subtitle = item.subtitle {
                         Text(subtitle)
                             .font(.system(size: 13, weight: .medium))
-                            .foregroundColor(Theme.Colors.secondaryText)
+                            .foregroundColor(Theme.Colors.textSecondary)
                             .lineLimit(2)
                             .opacity(item.isLocked ? 0.5 : 1)
                     }
@@ -331,7 +331,7 @@ private struct BentoCompactCard: View {
                     // Title - адаптивний текст
                     Text(item.title)
                         .font(.system(size: 13, weight: .semibold, design: .rounded))
-                        .foregroundColor(Theme.Colors.primaryText)
+                        .foregroundColor(Theme.Colors.textPrimary)
                         .lineLimit(2)
                         .minimumScaleFactor(0.75)
                         .multilineTextAlignment(.leading)
@@ -340,7 +340,7 @@ private struct BentoCompactCard: View {
                     // Arrow
                     Image(systemName: "chevron.right")
                         .font(.system(size: 11, weight: .semibold))
-                        .foregroundColor(Theme.Colors.secondaryText.opacity(0.5))
+                        .foregroundColor(Theme.Colors.textSecondary.opacity(0.5))
                         .flexibleFrame(minWidth: 16, maxWidth: 16)
                 }
                 .padding(.horizontal, 12)

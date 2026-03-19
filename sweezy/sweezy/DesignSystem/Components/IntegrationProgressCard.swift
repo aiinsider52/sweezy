@@ -92,12 +92,12 @@ struct IntegrationProgressCard: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(title)
                         .font(.system(size: 17, weight: .bold, design: .rounded))
-                        .foregroundColor(inHero ? .white : Theme.Colors.primaryText)
+                        .foregroundColor(inHero ? .white : Theme.Colors.textPrimary)
                         .lineLimit(1)
                     
                     Text(subtitleText)
                         .font(.system(size: 13, weight: .medium))
-                        .foregroundColor(inHero ? .white.opacity(0.75) : Theme.Colors.secondaryText)
+                        .foregroundColor(inHero ? .white.opacity(0.75) : Theme.Colors.textSecondary)
                         .lineLimit(1)
                     
                     // Mini progress bar
@@ -138,7 +138,7 @@ struct IntegrationProgressCard: View {
                 // Arrow indicator
                 Image(systemName: "chevron.right")
                     .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(inHero ? .white.opacity(0.5) : Theme.Colors.secondaryText.opacity(0.5))
+                    .foregroundColor(inHero ? .white.opacity(0.5) : Theme.Colors.textSecondary.opacity(0.5))
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 14)

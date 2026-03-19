@@ -47,6 +47,10 @@
 "onboarding.choose_style.title" = "Оберіть стиль";
 "onboarding.choose_style.subtitle" = "Це можна змінити в Налаштуваннях";
 "onboarding.skip" = "Пропустити";
+"onboarding.notifications_title" = "Сповіщення";
+"onboarding.notifications_subtitle" = "Отримуйте нагадування про важливі завдання першого тижня та записи на прийом";
+"onboarding.notifications_allow" = "Дозволити сповіщення";
+"onboarding.notifications_later" = "Пізніше";
 
 // MARK: - Feature Onboarding
 "onboarding.understood" = "Зрозуміло";
@@ -570,3 +574,165 @@
 
 "auth.reset.error.send_email_failed" = "Не вдалося надіслати лист. Спробуйте пізніше.";
 "auth.reset.error.reset_failed" = "Не вдалося змінити пароль. Перевірте код.";
+
+// MARK: - Checklist Categories
+"checklist.category.arrival" = "Перші кроки";
+"checklist.category.housing" = "Житло";
+"checklist.category.insurance" = "Страхування";
+"checklist.category.work" = "Працевлаштування";
+"checklist.category.education" = "Освіта";
+"checklist.category.integration" = "Інтеграція";
+"checklist.category.family" = "Сім'я";
+"checklist.category.healthcare" = "Охорона здоров'я";
+"checklist.category.legal" = "Юридичні питання";
+"checklist.category.finance" = "Фінанси";
+
+// MARK: - Appointment Statuses
+"appointment.status.scheduled" = "Заплановано";
+"appointment.status.confirmed" = "Підтверджено";
+"appointment.status.cancelled" = "Скасовано";
+"appointment.status.completed" = "Завершено";
+"appointment.status.no_show" = "Не з'явився";
+"appointment.status.rescheduled" = "Перенесено";
+
+// MARK: - Place Categories
+"place.category.migration_office" = "Міграційна служба";
+"place.category.gemeinde" = "Муніципалітет";
+"place.category.embassy" = "Посольство";
+"place.category.police_station" = "Поліцейський відділок";
+"place.category.hospital" = "Лікарня";
+"place.category.clinic" = "Клініка";
+"place.category.pharmacy" = "Аптека";
+"place.category.dentist" = "Стоматолог";
+"place.category.psychologist" = "Психолог";
+"place.category.counseling_center" = "Консультаційний центр";
+"place.category.mental_health" = "Психічне здоров'я";
+"place.category.emergency_room" = "Приймальне відділення";
+"place.category.legal_aid" = "Юридична допомога";
+"place.category.lawyer" = "Адвокат";
+"place.category.notary" = "Нотаріус";
+"place.category.social_services" = "Соціальні служби";
+"place.category.refugee_center" = "Центр для біженців";
+"place.category.integration_center" = "Інтеграційний центр";
+"place.category.food_assistance" = "Продовольча допомога";
+"place.category.food_bank" = "Банк їжі";
+"place.category.secondhand_shop" = "Секонд-хенд";
+"place.category.job_center" = "Центр зайнятості";
+"place.category.employment_agency" = "Агентство з працевлаштування";
+"place.category.career_counseling" = "Кар'єрне консультування";
+"place.category.school" = "Школа";
+"place.category.university" = "Університет";
+"place.category.language_school" = "Мовна школа";
+"place.category.library" = "Бібліотека";
+"place.category.language_cafe" = "Мовне кафе";
+"place.category.bank" = "Банк";
+"place.category.insurance_company" = "Страхова компанія";
+"place.category.post_office" = "Пошта";
+"place.category.train_station" = "Залізнична станція";
+"place.category.bus_stop" = "Автобусна зупинка";
+"place.category.airport" = "Аеропорт";
+"place.category.community_center" = "Громадський центр";
+"place.category.religious_center" = "Релігійний центр";
+"place.category.cultural_center" = "Культурний центр";
+"place.category.community_cafe" = "Громадське кафе";
+"place.category.supermarket" = "Супермаркет";
+"place.category.youth_center" = "Молодіжний центр";
+
+// MARK: - User Goals
+"user.goal.housing" = "Знайти житло";
+"user.goal.work" = "Знайти роботу";
+"user.goal.language" = "Вивчити мову";
+"user.goal.education" = "Освіта";
+"user.goal.documents" = "Оформити документи";
+"user.goal.finance" = "Фінанси";
+"user.goal.health" = "Медицина";
+
+// MARK: - Onboarding (Profile & Family)
+"onboarding.profile_title" = "Розкажи про себе";
+"onboarding.profile_subtitle" = "Обери кантон, тип дозволу та приблизно\nвкажи, коли ти приїхав у Швейцарію.";
+"onboarding.canton" = "Кантон проживання";
+"onboarding.permit_type" = "Тип дозволу";
+"onboarding.arrival_date" = "Дата приїзду";
+"onboarding.family_title" = "Твоя сім'я";
+"onboarding.family_subtitle" = "Цей крок необов'язковий. Він допоможе\nкраще підібрати стартові завдання.";
+"onboarding.family_status" = "Сімейний стан";
+"onboarding.has_children" = "Чи є діти";
+"onboarding.yes" = "Так";
+"onboarding.no" = "Ні";
+"onboarding.children_count" = "Кількість дітей";
+"onboarding.skip_step" = "Пропустити цей крок";
+
+// MARK: - Home (Localization fix)
+"home.priority_tasks" = "Першочергові задачі";
+"home.recommended_content" = "Рекомендований контент";
+"home.no_critical_tasks" = "Сьогодні без критичних задач";
+"home.greeting.hello_name" = "Привіт, %@!";
+"home.greeting.hello" = "Привіт!";
+"home.priority_tasks.progress_format" = "%d з %d виконано";
+"home.switzerland_genitive" = "Швейцарії";
+"home.insider.benefits_format" = "Пільги %@";
+"home.insider.benefits_summary" = "Короткий список виплат та гарантій.";
+"home.insider.jobs_summary" = "3 вакансії тижня.";
+"home.switzerland" = "Швейцарія";
+"home.deadline_format" = "Дедлайн: %@";
+"home.countdown.today" = "сьогодні";
+"home.countdown.in_days_format" = "через %dd";
+"home.countdown.in_hours_format" = "через %dh";
+"home.reminder" = "Нагадування";
+"home.career_genitive" = "кар'єри";
+"home.telegram.community" = "Спільнота українців у Швейцарії";
+"home.telegram.support" = "Підтримка";
+"home.read_more" = "Читати";
+"home.stats.checklists" = "чеклістів";
+"home.stats.templates" = "шаблонів";
+"home.focus.today" = "сьогодні";
+"home.focus.week" = "тиждень";
+"home.focus.completed" = "виконано";
+"home.focus.next_up" = "Найближче";
+"home.focus.today_label" = "Сьогодні";
+"home.focus.tasks_for_day_format" = "Задачі на %@, %d";
+"home.focus.plus_more_tasks_format" = "+ ще %d задач";
+"home.focus.no_tasks" = "Немає задач";
+"home.focus.day_free_format" = "%@ вільний від завдань";
+"home.focus.plus_more_format" = "%@ + ще %d";
+"home.achievements" = "Досягнення";
+"home.accessibility.stage_details" = "Відкрити деталі етапу";
+
+// MARK: - Weekdays (short)
+"weekday.short.mon" = "Пн";
+"weekday.short.tue" = "Вт";
+"weekday.short.wed" = "Ср";
+"weekday.short.thu" = "Чт";
+"weekday.short.fri" = "Пт";
+"weekday.short.sat" = "Сб";
+"weekday.short.sun" = "Нд";
+
+// MARK: - Common (new)
+"common.coming_soon" = "Скоро буде доступно";
+
+// MARK: - Map (new)
+"map.title_short" = "Карта";
+"map.tap_to_open" = "Натисніть щоб відкрити";
+"map.accessible" = "Доступно";
+
+// MARK: - Home Simplified / Settings Lite
+"home.welcome_name_format" = "Вітаємо, %@! 👋";
+"home.subtitle" = "Ваш гід для життя в Швейцарії";
+"home.stats.guides_short" = "Гіди";
+"home.stats.level" = "Рівень";
+"home.open_format" = "Відкрити %@";
+"home.guides_coming_soon" = "Гіди незабаром з'являться";
+"home.checklists_coming_soon" = "Чек-листи незабаром з'являться";
+"home.steps_format" = "%d/%d кроків";
+"home.level_format" = "Рівень %d";
+"settings.support" = "Підтримка та відгук";
+"settings.send_feedback" = "Надіслати відгук";
+"settings.rate_app" = "Оцінити Sweezy";
+"settings.telegram_support" = "Telegram підтримка";
+"settings.write_telegram" = "Написати в Telegram";
+"settings.email_support" = "Email підтримка";
+"settings.version_label" = "Версія";
+"settings.terms" = "Умови використання";
+
+// MARK: - Offline
+"offline.banner" = "Ви офлайн — деякі функції можуть бути обмежені";

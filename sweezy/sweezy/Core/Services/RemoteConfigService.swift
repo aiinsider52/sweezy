@@ -71,7 +71,7 @@ class RemoteConfigService: RemoteConfigServiceProtocol {
             remoteVersion = config.version
             isUpdateAvailable = isVersionNewer(config.version, than: currentVersion)
             if isUpdateAvailable {
-                print("✅ Update available: \(config.version)")
+                AppLogger.info("Update available: \(config.version)")
             }
         }
     }
@@ -101,7 +101,7 @@ class RemoteConfigService: RemoteConfigServiceProtocol {
             
             return true
         } catch {
-            print("Failed to download updates: \(error)")
+            AppLogger.error("Failed to download updates: \(error)")
             return false
         }
     }
@@ -141,7 +141,7 @@ class RemoteConfigService: RemoteConfigServiceProtocol {
                     let data = try Data(contentsOf: url)
                     return try decoder.decode(RemoteConfig.self, from: data)
                 } catch {
-                    print("Failed to load bundled remote config: \(error)")
+                    AppLogger.error("Failed to load bundled remote config: \(error)")
                 }
             }
             return createMockRemoteConfig()
@@ -387,10 +387,10 @@ extension RemoteConfigService {
             let fileURL = cacheDirectory.appendingPathComponent(fileName)
             try fileStorage.write(data: data, to: fileURL)
             
-            print("Updated content for \(contentType)")
+            AppLogger.content("Updated content for \(contentType)")
             return true
         } catch {
-            print("Failed to update content for \(contentType): \(error)")
+            AppLogger.content("Failed to update content for \(contentType): \(error)", isError: true)
             return false
         }
     }

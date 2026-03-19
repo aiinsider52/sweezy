@@ -25,11 +25,11 @@ struct EmptyStateView: View {
                 Text(title)
                     .font(Theme.Typography.title2)
                     .fontWeight(.semibold)
-                    .foregroundColor(Theme.Colors.primaryText)
+                    .foregroundColor(Theme.Colors.textPrimary)
                 if let subtitle = subtitle {
                     Text(subtitle)
                         .font(Theme.Typography.body)
-                        .foregroundColor(Theme.Colors.secondaryText)
+                        .foregroundColor(Theme.Colors.textSecondary)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, Theme.Spacing.xl)
                 }
@@ -66,11 +66,11 @@ struct LoadingStateView: View {
                 .modifier(PulseAnimation())
             Text(title)
                 .font(Theme.Typography.subheadline)
-                .foregroundColor(Theme.Colors.secondaryText)
+                .foregroundColor(Theme.Colors.textSecondary)
             if let subtitle = subtitle {
                 Text(subtitle)
                     .font(Theme.Typography.caption)
-                    .foregroundColor(Theme.Colors.tertiaryText)
+                    .foregroundColor(Theme.Colors.textTertiary)
             }
         }
         .padding(Theme.Spacing.xl)
@@ -102,10 +102,10 @@ struct ErrorStateView: View {
             Text(title)
                 .font(Theme.Typography.title2)
                 .fontWeight(.semibold)
-                .foregroundColor(Theme.Colors.primaryText)
+                .foregroundColor(Theme.Colors.textPrimary)
             Text(message)
                 .font(Theme.Typography.body)
-                .foregroundColor(Theme.Colors.secondaryText)
+                .foregroundColor(Theme.Colors.textSecondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, Theme.Spacing.xl)
             PrimaryButton(retryTitle) {

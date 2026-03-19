@@ -378,7 +378,7 @@ struct PlaceBottomSheet: View {
                         .font(Theme.Typography.headline)
                     Text(place.type.localizedName)
                         .font(Theme.Typography.caption)
-                        .foregroundColor(Theme.Colors.secondaryText)
+                        .foregroundColor(Theme.Colors.textSecondary)
                 }
                 Spacer()
             }
@@ -391,27 +391,27 @@ struct PlaceBottomSheet: View {
                     .font(Theme.Typography.caption)
                     .foregroundColor(openNowLine.color)
                 Text("·")
-                    .foregroundColor(Theme.Colors.tertiaryText)
+                    .foregroundColor(Theme.Colors.textTertiary)
                 Text(todayHoursLine)
                     .font(Theme.Typography.caption)
-                    .foregroundColor(Theme.Colors.secondaryText)
+                    .foregroundColor(Theme.Colors.textSecondary)
                 
                 if let liveWait {
                     Text("·")
-                        .foregroundColor(Theme.Colors.tertiaryText)
+                        .foregroundColor(Theme.Colors.textTertiary)
                     HStack(spacing: 4) {
                         Image(systemName: "clock")
                         Text("\(liveWait) min")
                     }
                     .font(Theme.Typography.caption)
-                    .foregroundColor(Theme.Colors.secondaryText)
+                    .foregroundColor(Theme.Colors.textSecondary)
                 }
             }
             
             // Address
             HStack(alignment: .top, spacing: 8) {
                 Image(systemName: "mappin.circle.fill")
-                    .foregroundColor(Theme.Colors.secondaryText)
+                    .foregroundColor(Theme.Colors.textSecondary)
                 VStack(alignment: .leading, spacing: 2) {
                     Text("\(place.address.street) \(place.address.houseNumber)")
                     Text("\(place.address.postalCode) \(place.address.city)")
@@ -536,25 +536,25 @@ struct PlaceCard: View {
                         Text(place.name)
                             .font(Theme.Typography.subheadline)
                             .fontWeight(.medium)
-                            .foregroundColor(Theme.Colors.primaryText)
+                            .foregroundColor(Theme.Colors.textPrimary)
                         
                         Text(place.type.localizedName)
                             .font(Theme.Typography.caption)
-                            .foregroundColor(Theme.Colors.secondaryText)
+                            .foregroundColor(Theme.Colors.textSecondary)
                         
                         HStack(spacing: 6) {
                             openBadge
                             if let today = place.openingHours.first(where: { $0.weekday == Calendar.current.component(.weekday, from: Date()) }) {
                                 Text("\(today.openTime.formatted)–\(today.closeTime.formatted)")
                                     .font(Theme.Typography.caption2)
-                                    .foregroundColor(Theme.Colors.tertiaryText)
+                                    .foregroundColor(Theme.Colors.textTertiary)
                             }
                         }
                         
                         if let description = place.description {
                             Text(description)
                                 .font(Theme.Typography.caption)
-                                .foregroundColor(Theme.Colors.tertiaryText)
+                                .foregroundColor(Theme.Colors.textTertiary)
                                 .lineLimit(2)
                         }
                     }
@@ -570,11 +570,11 @@ struct PlaceCard: View {
                 HStack(spacing: Theme.Spacing.xs) {
                     Image(systemName: "location")
                         .font(.caption)
-                        .foregroundColor(Theme.Colors.tertiaryText)
+                        .foregroundColor(Theme.Colors.textTertiary)
                     
                     Text(place.formattedAddress)
                         .font(Theme.Typography.caption)
-                        .foregroundColor(Theme.Colors.tertiaryText)
+                        .foregroundColor(Theme.Colors.textTertiary)
                 }
                 
                 // Actions

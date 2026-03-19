@@ -88,15 +88,15 @@ struct TemplatesView: View {
         HStack(spacing: 12) {
             HStack(spacing: 10) {
                 Image(systemName: "magnifyingglass")
-                    .foregroundColor(Theme.Colors.secondaryText)
+                    .foregroundColor(Theme.Colors.textSecondary)
                 
                 TextField("Пошук шаблонів...", text: $searchText)
-                    .foregroundColor(Theme.Colors.primaryText)
+                    .foregroundColor(Theme.Colors.textPrimary)
                 
                 if !searchText.isEmpty {
                     Button(action: { searchText = "" }) {
                         Image(systemName: "xmark.circle.fill")
-                            .foregroundColor(Theme.Colors.tertiaryText)
+                            .foregroundColor(Theme.Colors.textTertiary)
                     }
                 }
             }
@@ -170,16 +170,16 @@ struct TemplatesView: View {
         VStack(spacing: Theme.Spacing.lg) {
             Image(systemName: "doc.text")
                 .font(.system(size: 60))
-                .foregroundColor(Theme.Colors.tertiaryText)
+                .foregroundColor(Theme.Colors.textTertiary)
             
             VStack(spacing: Theme.Spacing.sm) {
                 Text("Шаблони не знайдено")
                     .font(Theme.Typography.headline)
-                    .foregroundColor(Theme.Colors.primaryText)
+                    .foregroundColor(Theme.Colors.textPrimary)
                 
                 Text("Спробуйте змінити фільтри")
                     .font(Theme.Typography.subheadline)
-                    .foregroundColor(Theme.Colors.secondaryText)
+                    .foregroundColor(Theme.Colors.textSecondary)
             }
             
             Button(action: { selectedCategory = nil; searchText = "" }) {
@@ -200,11 +200,11 @@ struct TemplatesView: View {
             
             Text("Зареєструйтесь для доступу")
                 .font(.headline)
-                .foregroundColor(Theme.Colors.primaryText)
+                .foregroundColor(Theme.Colors.textPrimary)
             
             Text("Шаблони доступні для зареєстрованих користувачів")
                 .font(.subheadline)
-                .foregroundColor(Theme.Colors.secondaryText)
+                .foregroundColor(Theme.Colors.textSecondary)
                 .multilineTextAlignment(.center)
         }
         .padding(Theme.Spacing.xl)
@@ -261,7 +261,7 @@ struct TemplateCategoryChip: View {
             .foregroundColor(
                 isSelected
                     ? .white
-                    : Theme.Colors.primaryText
+                    : Theme.Colors.textPrimary
             )
             .cornerRadius(20)
             .overlay(
@@ -297,13 +297,13 @@ struct TemplateCardView: View {
                 VStack(alignment: .leading, spacing: 4) {
                         Text(template.title)
                         .font(.subheadline.weight(.semibold))
-                        .foregroundColor(Theme.Colors.primaryText)
+                        .foregroundColor(Theme.Colors.textPrimary)
                             .lineLimit(2)
                         .multilineTextAlignment(.leading)
                         
                         Text(template.description)
                         .font(.caption)
-                        .foregroundColor(Theme.Colors.secondaryText)
+                        .foregroundColor(Theme.Colors.textSecondary)
                         .lineLimit(2)
                         .multilineTextAlignment(.leading)
                     }
@@ -312,7 +312,7 @@ struct TemplateCardView: View {
                     
                 Image(systemName: "chevron.right")
                     .font(.caption)
-                    .foregroundColor(Theme.Colors.tertiaryText)
+                    .foregroundColor(Theme.Colors.textTertiary)
             }
             
             // Tags row
@@ -431,7 +431,7 @@ struct TemplateDetailView: View {
             
             Text(template.description)
                 .font(.subheadline)
-                .foregroundColor(Theme.Colors.secondaryText)
+                .foregroundColor(Theme.Colors.textSecondary)
             
             HStack(spacing: 8) {
                 TagPill(text: template.category.localizedName, color: template.category.swiftUIColor)
@@ -451,7 +451,7 @@ struct TemplateDetailView: View {
             HStack {
                 Text("Заповніть форму")
                     .font(.headline.weight(.semibold))
-                    .foregroundColor(Theme.Colors.primaryText)
+                    .foregroundColor(Theme.Colors.textPrimary)
             }
             
             VStack(spacing: Theme.Spacing.md) {
@@ -569,7 +569,7 @@ struct TemplateFieldView: View {
             HStack(spacing: 4) {
                 Text(placeholder.label)
                     .font(.subheadline.weight(.medium))
-                    .foregroundColor(Theme.Colors.primaryText)
+                    .foregroundColor(Theme.Colors.textPrimary)
                 
                 if placeholder.isRequired {
                     Text("*")
@@ -581,7 +581,7 @@ struct TemplateFieldView: View {
             if let description = placeholder.description {
                 Text(description)
                     .font(.caption)
-                    .foregroundColor(Theme.Colors.tertiaryText)
+                    .foregroundColor(Theme.Colors.textTertiary)
             }
             
             fieldInput
@@ -647,7 +647,7 @@ struct TemplateFieldView: View {
             RoundedRectangle(cornerRadius: 10)
                 .stroke(Color.gray.opacity(0.2), lineWidth: 1)
         )
-        .foregroundColor(Theme.Colors.primaryText)
+        .foregroundColor(Theme.Colors.textPrimary)
     }
     
     private var styledDatePicker: some View {
@@ -680,12 +680,12 @@ struct TemplateFieldView: View {
             HStack {
                 Text(value.isEmpty ? "Оберіть..." : value)
                     .foregroundColor(value.isEmpty
-                        ? Theme.Colors.tertiaryText
-                        : Theme.Colors.primaryText)
+                        ? Theme.Colors.textTertiary
+                        : Theme.Colors.textPrimary)
                 Spacer()
                 Image(systemName: "chevron.down")
                     .font(.caption)
-                    .foregroundColor(Theme.Colors.secondaryText)
+                    .foregroundColor(Theme.Colors.textSecondary)
             }
             .padding(12)
             .background(
@@ -737,7 +737,7 @@ struct DocumentPreviewView: View {
                             HStack(spacing: 8) {
                                 Text("Мова листа")
                                     .font(.caption)
-                                    .foregroundColor(Theme.Colors.secondaryText)
+                                    .foregroundColor(Theme.Colors.textSecondary)
                                 
                                 Spacer()
                                 
@@ -755,7 +755,7 @@ struct DocumentPreviewView: View {
                         
                         Text(generatedContent)
                             .font(.system(.body, design: .monospaced))
-                            .foregroundColor(Theme.Colors.primaryText)
+                            .foregroundColor(Theme.Colors.textPrimary)
                             .padding(Theme.Spacing.lg)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .background(
@@ -778,7 +778,7 @@ struct DocumentPreviewView: View {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button(action: { dismiss() }) {
                         Image(systemName: "xmark.circle.fill")
-                            .foregroundStyle(Theme.Colors.secondaryText)
+                            .foregroundStyle(Theme.Colors.textSecondary)
                     }
                 }
                 
@@ -879,7 +879,7 @@ struct DocumentPreviewView: View {
             }
             return tempURL
         } catch {
-            print("❌ Failed to create PDF: \(error)")
+            AppLogger.error("Failed to create PDF: \(error)")
             return nil
         }
     }

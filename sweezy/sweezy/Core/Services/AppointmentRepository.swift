@@ -89,7 +89,7 @@ final class AppointmentRepository: ObservableObject {
             let data = try encoder.encode(sortedAppointments(appointments))
             try data.write(to: localURL, options: .atomic)
         } catch {
-            print("Failed to save appointments locally: \(error)")
+            AppLogger.error("Failed to save appointments locally: \(error)")
         }
     }
 
@@ -99,10 +99,10 @@ final class AppointmentRepository: ObservableObject {
             iCloudStore.set(data, forKey: iCloudKey)
             let didSynchronize = iCloudStore.synchronize()
             if !didSynchronize {
-                print("iCloud sync unavailable, keeping local appointments only")
+                AppLogger.warning("iCloud sync unavailable, keeping local appointments only")
             }
         } catch {
-            print("Failed to mirror appointments to iCloud: \(error)")
+            AppLogger.error("Failed to mirror appointments to iCloud: \(error)")
         }
     }
 
@@ -117,7 +117,7 @@ final class AppointmentRepository: ObservableObject {
             appointments = try decodeAppointments(from: data)
         } catch {
             appointments = []
-            print("Failed to load appointments locally: \(error)")
+            AppLogger.error("Failed to load appointments locally: \(error)")
         }
     }
 
@@ -136,7 +136,7 @@ final class AppointmentRepository: ObservableObject {
             saveToLocal()
             saveToiCloud()
         } catch {
-            print("Failed to sync appointments from iCloud: \(error)")
+            AppLogger.error("Failed to sync appointments from iCloud: \(error)")
         }
     }
 

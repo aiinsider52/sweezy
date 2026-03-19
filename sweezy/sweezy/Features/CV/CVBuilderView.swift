@@ -92,17 +92,8 @@ struct CVBuilderView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                // Winter background
-                LinearGradient(
-                    colors: [
-                        Color(red: 0.04, green: 0.08, blue: 0.16),
-                        Color(red: 0.06, green: 0.12, blue: 0.22),
-                        Color(red: 0.05, green: 0.1, blue: 0.18)
-                    ],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-                .ignoresSafeArea()
+                Theme.Colors.darkBackground
+                    .ignoresSafeArea()
                 
                 VStack(spacing: 0) {
                     // Progress indicator
@@ -136,7 +127,7 @@ struct CVBuilderView: View {
                         showTips.toggle()
                     } label: {
                         Image(systemName: "lightbulb.fill")
-                            .foregroundColor(.yellow)
+                            .foregroundColor(Theme.Colors.accent)
                     }
                 }
             }
@@ -154,26 +145,26 @@ struct CVBuilderView: View {
     private var progressBar: some View {
         HStack(spacing: 4) {
             ForEach(CVStep.allCases, id: \.rawValue) { step in
-                VStack(spacing: 6) {
+                    VStack(spacing: 6) {
                     Circle()
-                        .fill(step.rawValue <= currentStep.rawValue ? Color.cyan : Color.white.opacity(0.2))
+                        .fill(step.rawValue <= currentStep.rawValue ? Theme.Colors.primary : Color.white.opacity(0.2))
                         .frame(width: step == currentStep ? 12 : 8, height: step == currentStep ? 12 : 8)
                         .overlay(
                             Circle()
-                                .stroke(Color.cyan.opacity(0.5), lineWidth: step == currentStep ? 2 : 0)
+                                .stroke(Theme.Colors.primary.opacity(0.5), lineWidth: step == currentStep ? 2 : 0)
                                 .frame(width: 16, height: 16)
                         )
                     
                     if step == currentStep {
                         Text(step.title)
                             .font(.caption2.bold())
-                            .foregroundColor(.cyan)
+                            .foregroundColor(Theme.Colors.primary)
                     }
                 }
                 
                 if step != CVStep.allCases.last {
                     Rectangle()
-                        .fill(step.rawValue < currentStep.rawValue ? Color.cyan : Color.white.opacity(0.15))
+                        .fill(step.rawValue < currentStep.rawValue ? Theme.Colors.primary : Color.white.opacity(0.15))
                         .frame(height: 2)
                 }
             }
@@ -351,7 +342,7 @@ struct CVBuilderView: View {
                     VStack(alignment: .leading, spacing: 8) {
                         Label("Ключові навички", systemImage: "checkmark.seal.fill")
                             .font(.subheadline.bold())
-                            .foregroundColor(.cyan)
+                            .foregroundColor(Theme.Colors.primary)
                         
                         Text("Введіть через кому")
                             .font(.caption)
@@ -374,7 +365,7 @@ struct CVBuilderView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         Label("Мови", systemImage: "globe")
                             .font(.subheadline.bold())
-                            .foregroundColor(.cyan)
+                            .foregroundColor(Theme.Colors.primary)
                         
                         ForEach($cv.languages.indices, id: \.self) { index in
                             HStack(spacing: 12) {
@@ -395,7 +386,7 @@ struct CVBuilderView: View {
                                     Text("Рідна").tag("Рідна")
                                 }
                                 .pickerStyle(.menu)
-                                .tint(.cyan)
+                                .tint(Theme.Colors.primary)
                             }
                         }
                         
@@ -428,7 +419,7 @@ struct CVBuilderView: View {
                 if isTranslating {
                     HStack {
                         ProgressView()
-                            .tint(.cyan)
+                            .tint(Theme.Colors.primary)
                         Text("Перекладаємо на німецьку...")
                             .font(.caption)
                             .foregroundColor(.white.opacity(0.7))
@@ -463,7 +454,7 @@ struct CVBuilderView: View {
                         .font(.subheadline.bold())
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 14)
-                        .background(Color.cyan)
+                        .background(Theme.Colors.primary)
                         .foregroundColor(.white)
                         .cornerRadius(14)
                     }
@@ -518,7 +509,7 @@ struct CVBuilderView: View {
                     .padding(.vertical, 10)
                     .background(
                         previewLanguage == lang
-                            ? Color.cyan.opacity(0.3)
+                            ? Theme.Colors.primary.opacity(0.3)
                             : Color.clear
                     )
                 }
@@ -545,7 +536,7 @@ struct CVBuilderView: View {
                 if !displayCV.personal.title.isEmpty {
                     Text(displayCV.personal.title)
                         .font(.subheadline)
-                        .foregroundColor(.cyan)
+                        .foregroundColor(Theme.Colors.primary)
                 }
                 
                 let contacts = [displayCV.personal.location, displayCV.personal.phone, displayCV.personal.email].filter { !$0.isEmpty }
@@ -568,7 +559,7 @@ struct CVBuilderView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     Text(previewLanguage == .german ? "BERUFSERFAHRUNG" : "ДОСВІД РОБОТИ")
                         .font(.caption.bold())
-                        .foregroundColor(.cyan)
+                        .foregroundColor(Theme.Colors.primary)
                     
                     ForEach(displayCV.experience.filter { !$0.company.isEmpty }) { exp in
                         VStack(alignment: .leading, spacing: 2) {
@@ -594,7 +585,7 @@ struct CVBuilderView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     Text(previewLanguage == .german ? "AUSBILDUNG" : "ОСВІТА")
                         .font(.caption.bold())
-                        .foregroundColor(.cyan)
+                        .foregroundColor(Theme.Colors.primary)
                     
                     ForEach(displayCV.education.filter { !$0.school.isEmpty }) { edu in
                         VStack(alignment: .leading, spacing: 2) {
@@ -619,7 +610,7 @@ struct CVBuilderView: View {
                 VStack(alignment: .leading, spacing: 6) {
                     Text(previewLanguage == .german ? "SPRACHEN" : "МОВИ")
                         .font(.caption.bold())
-                        .foregroundColor(.cyan)
+                        .foregroundColor(Theme.Colors.primary)
                     
                     Text(displayCV.languages.filter { !$0.name.isEmpty }.map { "\($0.name) — \($0.level)" }.joined(separator: ", "))
                         .font(.caption)
@@ -635,7 +626,7 @@ struct CVBuilderView: View {
                     RoundedRectangle(cornerRadius: 20)
                         .stroke(
                             LinearGradient(
-                                colors: [Color.cyan.opacity(0.5), Color.white.opacity(0.1)],
+                                colors: [Theme.Colors.primary.opacity(0.5), Color.white.opacity(0.1)],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             ),
@@ -649,7 +640,7 @@ struct CVBuilderView: View {
         VStack(alignment: .leading, spacing: 6) {
             Text(title)
                 .font(.caption.bold())
-                .foregroundColor(.cyan)
+                .foregroundColor(Theme.Colors.primary)
             Text(content)
                 .font(.caption)
                 .foregroundColor(.white.opacity(0.8))
@@ -738,13 +729,13 @@ struct CVBuilderView: View {
                     .padding(.vertical, 14)
                     .background(
                         LinearGradient(
-                            colors: [Color.cyan, Color.blue],
+                            colors: [Theme.Colors.primary, Theme.Colors.primaryDark],
                             startPoint: .leading,
                             endPoint: .trailing
                         )
                     )
                     .cornerRadius(14)
-                    .shadow(color: .cyan.opacity(0.4), radius: 8, y: 4)
+                    .shadow(color: Theme.Colors.primary.opacity(0.4), radius: 8, y: 4)
                 }
             }
         }
@@ -760,7 +751,7 @@ struct CVBuilderView: View {
                 Circle()
                     .fill(
                         LinearGradient(
-                            colors: [Color.cyan.opacity(0.3), Color.blue.opacity(0.2)],
+                            colors: [Theme.Colors.primary.opacity(0.3), Theme.Colors.primaryDark.opacity(0.2)],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )
@@ -769,7 +760,7 @@ struct CVBuilderView: View {
                 
                 Image(systemName: icon)
                     .font(.title3)
-                    .foregroundColor(.cyan)
+                    .foregroundColor(Theme.Colors.primary)
             }
             
             VStack(alignment: .leading, spacing: 2) {
@@ -788,7 +779,7 @@ struct CVBuilderView: View {
     private func swissTip(_ text: String) -> some View {
         HStack(alignment: .top, spacing: 10) {
             Image(systemName: "lightbulb.fill")
-                .foregroundColor(.yellow)
+                .foregroundColor(Theme.Colors.accent)
             Text(text)
                 .font(.caption)
                 .foregroundColor(.white.opacity(0.8))
@@ -796,10 +787,10 @@ struct CVBuilderView: View {
         .padding(14)
         .background(
             RoundedRectangle(cornerRadius: 14)
-                .fill(Color.yellow.opacity(0.1))
+                .fill(Theme.Colors.accent.opacity(0.1))
                 .overlay(
                     RoundedRectangle(cornerRadius: 14)
-                        .stroke(Color.yellow.opacity(0.3), lineWidth: 1)
+                        .stroke(Theme.Colors.accent.opacity(0.3), lineWidth: 1)
                 )
         )
     }
@@ -811,14 +802,14 @@ struct CVBuilderView: View {
                 Text(title)
             }
             .font(.subheadline.bold())
-            .foregroundColor(.cyan)
+            .foregroundColor(Theme.Colors.primary)
             .padding(.vertical, 12)
             .frame(maxWidth: .infinity)
-            .background(Color.cyan.opacity(0.1))
+            .background(Theme.Colors.primary.opacity(0.1))
             .cornerRadius(12)
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
-                    .stroke(Color.cyan.opacity(0.3), lineWidth: 1)
+                    .stroke(Theme.Colors.primary.opacity(0.3), lineWidth: 1)
             )
         }
     }
@@ -837,13 +828,13 @@ struct CVBuilderView: View {
                 }
                 .padding(20)
             }
-            .background(Color(red: 0.05, green: 0.1, blue: 0.18).ignoresSafeArea())
+            .background(Theme.Colors.darkBackground.ignoresSafeArea())
             .navigationTitle("Швейцарські стандарти CV")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Готово") { showTips = false }
-                        .foregroundColor(.cyan)
+                        .foregroundColor(Theme.Colors.primary)
                 }
             }
         }
@@ -853,7 +844,7 @@ struct CVBuilderView: View {
         HStack(alignment: .top, spacing: 12) {
             Image(systemName: icon)
                 .font(.title2)
-                .foregroundColor(.cyan)
+                .foregroundColor(Theme.Colors.primary)
             
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
@@ -1068,7 +1059,7 @@ private struct CVInputField: View {
         VStack(alignment: .leading, spacing: 6) {
             Label(title, systemImage: icon)
                 .font(.caption.bold())
-                .foregroundColor(.cyan.opacity(0.9))
+                .foregroundColor(Theme.Colors.primary.opacity(0.9))
             
             TextField(placeholder, text: $text)
                 .font(.subheadline)
@@ -1095,7 +1086,7 @@ private struct CVTextArea: View {
         VStack(alignment: .leading, spacing: 6) {
             Text(title)
                 .font(.caption.bold())
-                .foregroundColor(.cyan.opacity(0.9))
+                .foregroundColor(Theme.Colors.primary.opacity(0.9))
             
             ZStack(alignment: .topLeading) {
                 TextEditor(text: $text)

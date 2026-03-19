@@ -848,6 +848,7 @@ struct ChecklistDetailView: View {
             if new >= 1.0 && old < 1.0 {
                 withAnimation(.spring()) { showCelebration = true }
                 UINotificationFeedbackGenerator().notificationOccurred(.success)
+                AppReviewManager.recordChecklistCompleted()
                 
                 // Award bonus XP (use centralized XP table so UI and totals always match)
                 let bonus = GamificationXP.value(for: .checklistCompleted)
@@ -1051,7 +1052,7 @@ struct ChecklistDetailView: View {
         // Sync active state
         appContainer.userStats.setChecklistActive(id: checklist.id, active: !completedSteps.isEmpty)
         
-        // Gamification
+        // Gamification + analytics
         if !wasCompleted {
             EventBus.shared.emit(
                 GamEvent(
@@ -1062,6 +1063,18 @@ struct ChecklistDetailView: View {
                     ]
                 )
             )
+            appContainer.analytics.track("checklist_step_completed", properties: [
+                "checklist_id": checklist.id.uuidString,
+                "step_id": step.id.uuidString,
+                "category": checklist.category.rawValue
+            ])
+            let total = checklist.steps.count
+            if completedSteps.count == total {
+                appContainer.analytics.track("checklist_completed", properties: [
+                    "checklist_id": checklist.id.uuidString,
+                    "category": checklist.category.rawValue
+                ])
+            }
         }
         
         UIImpactFeedbackGenerator(style: .medium).impactOccurred()

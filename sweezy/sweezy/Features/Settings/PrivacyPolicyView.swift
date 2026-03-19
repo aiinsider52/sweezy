@@ -23,10 +23,10 @@ struct PrivacyPolicyView: View {
                         Text("privacy.title".localized)
                             .font(Theme.Typography.largeTitle)
                             .fontWeight(.bold)
-                            .foregroundColor(Theme.Colors.primaryText)
+                            .foregroundColor(Theme.Colors.textPrimary)
                         Text(String(format: "privacy.last_updated".localized, formattedDate(lastUpdatedDate)))
                             .font(Theme.Typography.subheadline)
-                            .foregroundColor(Theme.Colors.secondaryText)
+                            .foregroundColor(Theme.Colors.textSecondary)
                     }
                     .padding(.horizontal, Theme.Spacing.md)
                     PrivacySection(
@@ -87,10 +87,10 @@ private struct PrivacySection: View {
             Text(title)
                 .font(Theme.Typography.headline)
                 .fontWeight(.semibold)
-                .foregroundColor(Theme.Colors.primaryText)
+                .foregroundColor(Theme.Colors.textPrimary)
             Text(content)
                 .font(Theme.Typography.body)
-                .foregroundColor(Theme.Colors.secondaryText)
+                .foregroundColor(Theme.Colors.textSecondary)
         }
         .padding(.horizontal, Theme.Spacing.md)
     }

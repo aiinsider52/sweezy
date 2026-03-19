@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import UserNotifications
 
 struct OnboardingViewRedesigned: View {
     @AppStorage("preferredLanguage") private var preferredLanguage = "uk"
@@ -79,9 +80,12 @@ struct OnboardingViewRedesigned: View {
                         onSkip: skipFamilyStep
                     )
                     .tag(pages.count + 2)
-                    // Theme picker page (second to last)
+                    // Theme picker page
                     ThemePickerPage(selectedTheme: $themeManager.selectedTheme)
                         .tag(pages.count + 3)
+                    // Notification permission page
+                    NotificationPermissionPage(onNext: goNext)
+                        .tag(pages.count + 4)
                     // Success page (last)
                     SuccessPageView()
                         .tag(totalPages - 1)
@@ -126,6 +130,7 @@ struct OnboardingViewRedesigned: View {
                             .animation(Theme.Animation.smooth, value: currentPage)
                     }
                 }
+                .accessibilityLabel("Step \(currentPage + 1) of \(totalPages)")
                 .padding(.bottom, Theme.Spacing.lg)
                 
                 // Navigation buttons
@@ -195,6 +200,7 @@ struct OnboardingViewRedesigned: View {
     
     private func goNext() {
         if currentPage < totalPages - 1 {
+            appContainer.analytics.track("onboarding_step_completed", properties: ["step": currentPage])
             withAnimation(Theme.Animation.smooth) {
                 currentPage += 1
             }
@@ -214,6 +220,10 @@ struct OnboardingViewRedesigned: View {
     }
     
     private func completeOnboarding() {
+        appContainer.analytics.track("onboarding_completed", properties: [
+            "skipped_profile": skippedAboutStep,
+            "skipped_family": skippedFamilyStep
+        ])
         persistOnboardingProfile()
         withAnimation(Theme.Animation.smooth) {
             appContainer.completeOnboarding()
@@ -231,7 +241,7 @@ struct OnboardingViewRedesigned: View {
         goNext()
     }
     
-    private var totalPages: Int { pages.count + 5 }
+    private var totalPages: Int { pages.count + 6 }
     
     private var languageDisplayName: String {
         switch preferredLanguage {
@@ -311,6 +321,106 @@ struct OnboardingViewRedesigned: View {
             return 2
         default:
             return 1
+        }
+    }
+}
+
+// MARK: - Notification Permission Page
+
+private struct NotificationPermissionPage: View {
+    let onNext: () -> Void
+    @State private var titleAppeared = false
+    @State private var permissionGranted = false
+    
+    var body: some View {
+        OnboardingDetailsBackground {
+            VStack(spacing: Theme.Spacing.lg) {
+                Spacer()
+                
+                VStack(spacing: Theme.Spacing.md) {
+                    ZStack {
+                        Circle()
+                            .fill(Color.white.opacity(0.1))
+                            .frame(width: 72, height: 72)
+                        Image(systemName: "bell.badge.fill")
+                            .font(.system(size: 32, weight: .medium))
+                            .foregroundColor(.white)
+                            .symbolEffect(.pulse, options: .repeating.speed(0.3))
+                    }
+                    .opacity(titleAppeared ? 1 : 0)
+                    .scaleEffect(titleAppeared ? 1 : 0.5)
+                    
+                    VStack(spacing: 8) {
+                        Text("onboarding.notifications_title".localized)
+                            .font(.system(size: 28, weight: .bold, design: .rounded))
+                            .foregroundColor(.white)
+                            .multilineTextAlignment(.center)
+                        Text("onboarding.notifications_subtitle".localized)
+                            .font(.system(size: 16))
+                            .foregroundColor(.white.opacity(0.78))
+                            .multilineTextAlignment(.center)
+                            .lineSpacing(3)
+                            .padding(.horizontal, Theme.Spacing.lg)
+                    }
+                    .opacity(titleAppeared ? 1 : 0)
+                    .offset(y: titleAppeared ? 0 : 15)
+                }
+                
+                VStack(spacing: 14) {
+                    Button {
+                        requestNotificationPermission()
+                    } label: {
+                        HStack(spacing: 10) {
+                            Image(systemName: "bell.fill")
+                                .font(.system(size: 16, weight: .semibold))
+                            Text("onboarding.notifications_allow".localized)
+                                .font(.system(size: 17, weight: .bold))
+                        }
+                        .foregroundColor(Theme.Colors.primaryDark)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .background(
+                            Capsule()
+                                .fill(Color.white)
+                                .shadow(color: Color.black.opacity(0.15), radius: 12, x: 0, y: 4)
+                        )
+                    }
+                    .padding(.horizontal, Theme.Spacing.lg)
+                    .accessibilityIdentifier("onboarding.notifications.allowButton")
+                    
+                    Button {
+                        onNext()
+                    } label: {
+                        Text("onboarding.notifications_later".localized)
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundColor(.white.opacity(0.75))
+                            .padding(.horizontal, 24)
+                            .padding(.vertical, 10)
+                            .background(
+                                Capsule().stroke(Color.white.opacity(0.25), lineWidth: 1)
+                            )
+                    }
+                    .accessibilityIdentifier("onboarding.notifications.laterButton")
+                }
+                
+                Spacer()
+                Spacer()
+            }
+        }
+        .onAppear {
+            withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                titleAppeared = true
+            }
+        }
+        .accessibilityIdentifier("onboarding.notificationPermissionPage")
+    }
+    
+    private func requestNotificationPermission() {
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, _ in
+            DispatchQueue.main.async {
+                permissionGranted = granted
+                onNext()
+            }
         }
     }
 }
@@ -483,11 +593,11 @@ private struct ProfileDetailsPage: View {
                         .scaleEffect(titleAppeared ? 1 : 0.5)
                         
                         VStack(spacing: 8) {
-                            Text("Расскажи о себе")
+                            Text("onboarding.profile_title".localized)
                                 .font(.system(size: 28, weight: .bold, design: .rounded))
                                 .foregroundColor(.white)
                                 .multilineTextAlignment(.center)
-                            Text("Выбери кантон, тип разрешения и примерно\nукажи, когда ты приехал в Швейцарию.")
+                            Text("onboarding.profile_subtitle".localized)
                                 .font(.system(size: 16))
                                 .foregroundColor(.white.opacity(0.78))
                                 .multilineTextAlignment(.center)
@@ -498,7 +608,7 @@ private struct ProfileDetailsPage: View {
                     }
                     
                     VStack(spacing: 14) {
-                        OnboardingFieldCard(title: "Кантон проживания", icon: "mappin.and.ellipse", delay: 0.15) {
+                        OnboardingFieldCard(title: "onboarding.canton".localized, icon: "mappin.and.ellipse", delay: 0.15) {
                             Menu {
                                 ForEach(Canton.allCases, id: \.self) { canton in
                                     Button(canton.localizedName) {
@@ -524,7 +634,7 @@ private struct ProfileDetailsPage: View {
                             }
                         }
                         
-                        OnboardingFieldCard(title: "Тип разрешения", icon: "doc.badge.gearshape", delay: 0.25) {
+                        OnboardingFieldCard(title: "onboarding.permit_type".localized, icon: "doc.badge.gearshape", delay: 0.25) {
                             VStack(spacing: 4) {
                                 ForEach(permitOptions, id: \.self) { permit in
                                     OnboardingChoiceRow(
@@ -538,7 +648,7 @@ private struct ProfileDetailsPage: View {
                             }
                         }
                         
-                        OnboardingFieldCard(title: "Дата приезда", icon: "calendar", delay: 0.35) {
+                        OnboardingFieldCard(title: "onboarding.arrival_date".localized, icon: "calendar", delay: 0.35) {
                             HStack(spacing: 12) {
                                 Picker("Month", selection: $arrivalMonth) {
                                     ForEach(months, id: \.self) { month in
@@ -564,7 +674,7 @@ private struct ProfileDetailsPage: View {
                     Button {
                         onSkip()
                     } label: {
-                        Text("Пропустить")
+                        Text("onboarding.skip".localized)
                             .font(.system(size: 15, weight: .semibold))
                             .foregroundColor(.white.opacity(0.75))
                             .padding(.horizontal, 24)
@@ -622,10 +732,10 @@ private struct FamilyDetailsPage: View {
                         .scaleEffect(titleAppeared ? 1 : 0.5)
                         
                         VStack(spacing: 8) {
-                            Text("Твоя семья")
+                            Text("onboarding.family_title".localized)
                                 .font(.system(size: 28, weight: .bold, design: .rounded))
                                 .foregroundColor(.white)
-                            Text("Этот шаг необязательный. Он поможет\nлучше подобрать стартовые задачи.")
+                            Text("onboarding.family_subtitle".localized)
                                 .font(.system(size: 16))
                                 .foregroundColor(.white.opacity(0.78))
                                 .multilineTextAlignment(.center)
@@ -636,7 +746,7 @@ private struct FamilyDetailsPage: View {
                     }
                     
                     VStack(spacing: 14) {
-                        OnboardingFieldCard(title: "Семейное положение", icon: "heart.circle", delay: 0.15) {
+                        OnboardingFieldCard(title: "onboarding.family_status".localized, icon: "heart.circle", delay: 0.15) {
                             VStack(spacing: 4) {
                                 ForEach(FamilyStatus.allCases) { status in
                                     OnboardingChoiceRow(
@@ -650,9 +760,9 @@ private struct FamilyDetailsPage: View {
                             }
                         }
                         
-                        OnboardingFieldCard(title: "Есть ли дети", icon: "figure.and.child.holdinghands", delay: 0.25) {
+                        OnboardingFieldCard(title: "onboarding.has_children".localized, icon: "figure.and.child.holdinghands", delay: 0.25) {
                             Toggle(isOn: $hasChildren) {
-                                Text(hasChildren ? "Да" : "Нет")
+                                Text(hasChildren ? "onboarding.yes".localized : "onboarding.no".localized)
                                     .font(.system(size: 15, weight: .semibold))
                                     .foregroundColor(.white)
                             }
@@ -660,7 +770,7 @@ private struct FamilyDetailsPage: View {
                         }
                         
                         if hasChildren {
-                            OnboardingFieldCard(title: "Количество детей", icon: "number.circle", delay: 0.35) {
+                            OnboardingFieldCard(title: "onboarding.children_count".localized, icon: "number.circle", delay: 0.35) {
                                 Stepper(value: $childrenCount, in: 1...5) {
                                     Text("\(childrenCount)")
                                         .font(.system(size: 17, weight: .bold))
@@ -677,7 +787,7 @@ private struct FamilyDetailsPage: View {
                     Button {
                         onSkip()
                     } label: {
-                        Text("Пропустить этот шаг")
+                        Text("onboarding.skip_step".localized)
                             .font(.system(size: 15, weight: .semibold))
                             .foregroundColor(.white.opacity(0.75))
                             .padding(.horizontal, 24)

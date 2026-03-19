@@ -67,11 +67,6 @@ struct Theme {
         static let error = Color(red: 0.827, green: 0.184, blue: 0.184) // #D32F2F
         static let info = Color(red: 0.008, green: 0.533, blue: 0.820) // #0288D1
         
-        // Backwards-compatibility aliases
-        static var primaryText: Color { textPrimary }
-        static var secondaryText: Color { textSecondary }
-        static var tertiaryText: Color { textTertiary }
-        
         // MARK: Dark Mode Specific
         static let darkBackground = Color(red: 0.102, green: 0.137, blue: 0.094) // #1A2318
         static let darkSurface = Color.white.opacity(0.06)

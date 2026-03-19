@@ -17,7 +17,7 @@ enum AdminSyncService {
             try await syncChecklists(contentService.checklists)
             try await syncNews((contentService as? ContentService)?.news ?? [])
         } catch {
-            print("[AdminSyncService] sync failed: \(error)")
+            AppLogger.error("[AdminSyncService] sync failed: \(error)")
         }
     }
 

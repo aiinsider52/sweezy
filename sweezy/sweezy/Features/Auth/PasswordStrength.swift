@@ -65,11 +65,11 @@ struct PasswordChecklist: View {
     private func row(for rule: ChecklistRule) -> some View {
         HStack(spacing: 6) {
             Image(systemName: rule.isOk ? "checkmark.circle.fill" : "circle")
-                .foregroundColor(rule.isOk ? .green : Theme.Colors.tertiaryText)
+                .foregroundColor(rule.isOk ? .green : Theme.Colors.textTertiary)
                 .font(.system(size: 12))
             Text(rule.text)
                 .font(Theme.Typography.caption)
-                .foregroundColor(rule.isOk ? Theme.Colors.secondaryText : Theme.Colors.tertiaryText)
+                .foregroundColor(rule.isOk ? Theme.Colors.textSecondary : Theme.Colors.textTertiary)
                 .strikethrough(rule.isOk)
         }
     }

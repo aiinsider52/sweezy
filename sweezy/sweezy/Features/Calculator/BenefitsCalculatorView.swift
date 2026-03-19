@@ -64,7 +64,7 @@ struct BenefitsCalculatorView: View {
             
             Text("Calculate your potential benefits and subsidies in Switzerland")
                 .font(Theme.Typography.body)
-                .foregroundColor(Theme.Colors.secondaryText)
+                .foregroundColor(Theme.Colors.textSecondary)
                 .multilineTextAlignment(.center)
         }
     }
@@ -76,7 +76,7 @@ struct BenefitsCalculatorView: View {
                 Text("calculator.income".localized)
                     .font(Theme.Typography.subheadline)
                     .fontWeight(.medium)
-                    .foregroundColor(Theme.Colors.primaryText)
+                    .foregroundColor(Theme.Colors.textPrimary)
                 
                 TextField("0", text: $income)
                     .keyboardType(.numberPad)
@@ -88,25 +88,25 @@ struct BenefitsCalculatorView: View {
                 Text("calculator.family_size".localized)
                     .font(Theme.Typography.subheadline)
                     .fontWeight(.medium)
-                    .foregroundColor(Theme.Colors.primaryText)
+                    .foregroundColor(Theme.Colors.textPrimary)
                 
                 Stepper(value: $familySize, in: 1...20) {
                     Text("\(familySize) \(familySize == 1 ? "person" : "people")")
-                        .foregroundColor(Theme.Colors.primaryText)
+                        .foregroundColor(Theme.Colors.textPrimary)
                 }
             }
             
             // Has children
             Toggle("calculator.has_children".localized, isOn: $hasChildren)
                 .font(Theme.Typography.subheadline)
-                .foregroundColor(Theme.Colors.primaryText)
+                .foregroundColor(Theme.Colors.textPrimary)
             
             // Canton
             VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
                 Text("calculator.canton".localized)
                     .font(Theme.Typography.subheadline)
                     .fontWeight(.medium)
-                    .foregroundColor(Theme.Colors.primaryText)
+                    .foregroundColor(Theme.Colors.textPrimary)
                 
                 Picker("Canton", selection: $selectedCanton) {
                     ForEach(Canton.allCases, id: \.self) { canton in
@@ -122,7 +122,7 @@ struct BenefitsCalculatorView: View {
                 Text("calculator.permit_type".localized)
                     .font(Theme.Typography.subheadline)
                     .fontWeight(.medium)
-                    .foregroundColor(Theme.Colors.primaryText)
+                    .foregroundColor(Theme.Colors.textPrimary)
                 
                 Picker("Permit Type", selection: $selectedPermitType) {
                     ForEach(PermitType.allCases, id: \.self) { permit in
@@ -153,7 +153,7 @@ struct BenefitsCalculatorView: View {
             Text("calculator.results".localized)
                 .font(Theme.Typography.title2)
                 .fontWeight(.semibold)
-                .foregroundColor(Theme.Colors.primaryText)
+                .foregroundColor(Theme.Colors.textPrimary)
             
             if results.isEmpty {
                 EmptyStateView(
@@ -178,12 +178,12 @@ struct BenefitsCalculatorView: View {
                     Text("Important Notice")
                         .font(Theme.Typography.subheadline)
                         .fontWeight(.medium)
-                        .foregroundColor(Theme.Colors.primaryText)
+                        .foregroundColor(Theme.Colors.textPrimary)
                 }
                 
                 Text("calculator.disclaimer".localized)
                     .font(Theme.Typography.caption)
-                    .foregroundColor(Theme.Colors.secondaryText)
+                    .foregroundColor(Theme.Colors.textSecondary)
             }
         }
     }
@@ -232,7 +232,7 @@ struct BenefitResultCard: View {
                         Text(result.isEligible ? "calculator.eligible".localized : "calculator.not_eligible".localized)
                             .font(Theme.Typography.subheadline)
                             .fontWeight(.medium)
-                            .foregroundColor(Theme.Colors.primaryText)
+                            .foregroundColor(Theme.Colors.textPrimary)
                         
                         if result.isEligible {
                             Text("calculator.estimated_amount".localized(with: result.formattedAmount))
@@ -248,7 +248,7 @@ struct BenefitResultCard: View {
                 if let reason = result.reason {
                     Text(reason)
                         .font(Theme.Typography.caption)
-                        .foregroundColor(Theme.Colors.secondaryText)
+                        .foregroundColor(Theme.Colors.textSecondary)
                 }
                 
                 if result.isEligible {

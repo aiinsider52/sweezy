@@ -56,7 +56,7 @@ struct WhatsNewView: View {
                         dismiss()
                     }) {
                         Image(systemName: "xmark.circle.fill")
-                            .foregroundColor(Theme.Colors.tertiaryText)
+                            .foregroundColor(Theme.Colors.textTertiary)
                     }
                 }
             }
@@ -80,17 +80,17 @@ struct WhatsNewView: View {
             Text("whats_new.title".localized)
                 .font(Theme.Typography.largeTitle)
                 .fontWeight(.bold)
-                .foregroundColor(Theme.Colors.primaryText)
+                .foregroundColor(Theme.Colors.textPrimary)
             
             // Version
             Text("whats_new.version".localized(with: currentVersion))
                 .font(Theme.Typography.subheadline)
-                .foregroundColor(Theme.Colors.secondaryText)
+                .foregroundColor(Theme.Colors.textSecondary)
             
             // Subtitle
             Text("whats_new.subtitle".localized)
                 .font(Theme.Typography.body)
-                .foregroundColor(Theme.Colors.secondaryText)
+                .foregroundColor(Theme.Colors.textSecondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, Theme.Spacing.xl)
         }
@@ -121,11 +121,11 @@ struct WhatsNewFeatureRow: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(feature.title)
                     .font(Theme.Typography.headline)
-                    .foregroundColor(Theme.Colors.primaryText)
+                    .foregroundColor(Theme.Colors.textPrimary)
                 
                 Text(feature.description)
                     .font(Theme.Typography.subheadline)
-                    .foregroundColor(Theme.Colors.secondaryText)
+                    .foregroundColor(Theme.Colors.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
             

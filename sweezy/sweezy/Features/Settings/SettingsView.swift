@@ -4,6 +4,7 @@
 //
 
 import SwiftUI
+import StoreKit
 import UniformTypeIdentifiers
 import Combine
 
@@ -16,6 +17,7 @@ struct SettingsView: View {
     
     @State private var showingLanguageSelection = false
     @State private var showingProfileEdit = false
+    @State private var showingNotificationSettings = false
     
     @State private var regName: String = ""
     @State private var regEmail: String = ""
@@ -95,6 +97,25 @@ struct SettingsView: View {
                         }
                     }
                     
+                    // Support & Feedback
+                    VStack(alignment: .leading, spacing: Theme.Spacing.md) {
+                        WinterSectionHeader(title: "settings.support".localized)
+                        winterSettingsRow(icon: "bell.badge", title: "settings.notifications".localized) {
+                            showingNotificationSettings = true
+                        }
+                        winterSettingsRow(icon: "envelope", title: "settings.send_feedback".localized) {
+                            sendFeedbackEmail()
+                        }
+                        winterSettingsRow(icon: "star", title: "settings.rate_app".localized) {
+                            requestAppReview()
+                        }
+                        winterSettingsRow(icon: "paperplane", title: "settings.telegram_support".localized) {
+                            if let url = URL(string: "https://t.me/sweezy_support") {
+                                UIApplication.shared.open(url)
+                            }
+                        }
+                    }
+                    
                     // About - Winter styled
                     VStack(alignment: .leading, spacing: Theme.Spacing.md) {
                         WinterSectionHeader(title: "settings.about".localized)
@@ -116,7 +137,7 @@ struct SettingsView: View {
             .featureOnboarding(.settings)
         }
         .onAppear {
-            print("⚙️ SettingsView onAppear")
+            AppLogger.ui("SettingsView onAppear")
             lockManager.loadBiometryType()
             // Seed live gamification state
             liveXP = appContainer.gamification.totalXP
@@ -194,6 +215,11 @@ struct SettingsView: View {
         }
         .sheet(isPresented: $showingAbout) {
             AboutView()
+        }
+        .sheet(isPresented: $showingNotificationSettings) {
+            NavigationStack {
+                NotificationSettingsView()
+            }
         }
         .sheet(isPresented: $showingLogin) {
             LoginView()
@@ -302,7 +328,7 @@ private extension SettingsView {
                 .foregroundStyle(Theme.Colors.gradientPrimaryAdaptive)
             Text(text)
                 .font(Theme.Typography.caption)
-                .foregroundColor(Theme.Colors.secondaryText)
+                .foregroundColor(Theme.Colors.textSecondary)
         }
     }
     
@@ -605,6 +631,24 @@ private extension SettingsView {
     }
 }
 
+// MARK: - Support & Feedback helpers
+
+private extension SettingsView {
+    func sendFeedbackEmail() {
+        let subject = "Sweezy Feedback v\(Bundle.main.appVersion)"
+        let urlString = "mailto:support@sweezy.app?subject=\(subject.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")"
+        if let url = URL(string: urlString) {
+            UIApplication.shared.open(url)
+        }
+    }
+    
+    func requestAppReview() {
+        if let scene = UIApplication.shared.connectedScenes.first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene {
+            SKStoreReviewController.requestReview(in: scene)
+        }
+    }
+}
+
 // MARK: - Backup/Import helpers
 
 private extension SettingsView {
@@ -672,7 +716,7 @@ private extension SettingsView {
             }
             appContainer.updateLocale(Locale(identifier: backup.locale))
         } catch {
-            print("Import failed: \\(error)")
+            AppLogger.error("Import failed: \(error)")
         }
     }
     
@@ -763,10 +807,10 @@ struct LanguageSelectionSheet: View {
                                 Text(language.nativeName)
                                     .font(Theme.Typography.subheadline)
                                     .fontWeight(.medium)
-                                    .foregroundColor(Theme.Colors.primaryText)
+                                    .foregroundColor(Theme.Colors.textPrimary)
                                 Text(language.name)
                                     .font(Theme.Typography.caption)
-                                    .foregroundColor(Theme.Colors.secondaryText)
+                                    .foregroundColor(Theme.Colors.textSecondary)
                             }
                             Spacer()
                             if appContainer.currentLocale.identifier == language.code {
@@ -2127,10 +2171,10 @@ struct FeatureRow: View {
                 Text(title)
                     .font(Theme.Typography.subheadline)
                     .fontWeight(.medium)
-                    .foregroundColor(Theme.Colors.primaryText)
+                    .foregroundColor(Theme.Colors.textPrimary)
                 Text(description)
                     .font(Theme.Typography.caption)
-                    .foregroundColor(Theme.Colors.secondaryText)
+                    .foregroundColor(Theme.Colors.textSecondary)
             }
         }
     }
@@ -2155,7 +2199,7 @@ private struct SmallPillButton: View {
                 }
                 Text(title)
                     .font(Theme.Typography.subheadline)
-                    .foregroundColor(style == .filled ? .white : Theme.Colors.primaryText)
+                    .foregroundColor(style == .filled ? .white : Theme.Colors.textPrimary)
                     .lineLimit(1)
                     .minimumScaleFactor(0.9)
                     .padding(.horizontal, 16)

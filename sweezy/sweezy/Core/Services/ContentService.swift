@@ -244,7 +244,7 @@ class ContentService: ContentServiceProtocol {
             }
             await loadAdditionalGuides()
         } catch {
-            print("Error loading guides: \(error)")
+            AppLogger.content("Error loading guides: \(error)", isError: true)
             guides = []
         }
     }
@@ -310,7 +310,7 @@ class ContentService: ContentServiceProtocol {
             }
             await loadAdditionalChecklists()
         } catch {
-            print("Error loading checklists: \(error)")
+            AppLogger.content("Error loading checklists: \(error)", isError: true)
             checklists = []
         }
     }
@@ -325,7 +325,7 @@ class ContentService: ContentServiceProtocol {
             }
             await loadAdditionalPlaces()
         } catch {
-            print("Error loading places: \(error)")
+            AppLogger.content("Error loading places: \(error)", isError: true)
             places = []
         }
     }
@@ -371,7 +371,7 @@ class ContentService: ContentServiceProtocol {
             }
             await loadAdditionalTemplates()
         } catch {
-            print("Error loading templates: \(error)")
+            AppLogger.content("Error loading templates: \(error)", isError: true)
             templates = []
         }
     }
@@ -386,7 +386,7 @@ class ContentService: ContentServiceProtocol {
             }
             await loadAdditionalBenefitRules()
         } catch {
-            print("Error loading benefit rules: \(error)")
+            AppLogger.content("Error loading benefit rules: \(error)", isError: true)
             benefitRules = []
         }
     }
@@ -443,7 +443,7 @@ class ContentService: ContentServiceProtocol {
             }
             await loadAdditionalNews()
         } catch {
-            print("Error loading news: \\(error)")
+            AppLogger.content("Error loading news: \(error)", isError: true)
             news = []
         }
     }
@@ -497,16 +497,16 @@ class ContentService: ContentServiceProtocol {
                 let existingIDs = Set(guides.map { $0.id })
                 let newGuides = extra.filter { !existingIDs.contains($0.id) }
                 guides.append(contentsOf: newGuides)
-                print("📚 Loaded \(newGuides.count) guides from \(filename)")
+                AppLogger.content("Loaded \(newGuides.count) guides from \(filename)")
             } else if let cached = try? loadFromCache(filename, type: [Guide].self) {
                 let existingIDs = Set(guides.map { $0.id })
                 let newGuides = cached.filter { !existingIDs.contains($0.id) }
                 guides.append(contentsOf: newGuides)
-                print("📚 Loaded \(newGuides.count) cached guides from \(filename)")
+                AppLogger.content("Loaded \(newGuides.count) cached guides from \(filename)")
             }
         }
         
-        print("📚 Total guides loaded: \(guides.count)")
+        AppLogger.content("Total guides loaded: \(guides.count)")
     }
     private func loadAdditionalChecklists(language: String? = nil) async {
         _ = language // reserved for future language-specific extras

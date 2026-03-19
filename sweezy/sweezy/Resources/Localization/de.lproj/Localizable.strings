@@ -320,3 +320,183 @@
 
 "auth.reset.error.send_email_failed" = "E-Mail konnte nicht gesendet werden. Bitte später erneut versuchen.";
 "auth.reset.error.reset_failed" = "Passwort konnte nicht geändert werden. Prüfen Sie den Code.";
+
+// MARK: - Checklist Categories
+"checklist.category.arrival" = "Erste Schritte";
+"checklist.category.housing" = "Wohnen";
+"checklist.category.insurance" = "Versicherung";
+"checklist.category.work" = "Beschäftigung";
+"checklist.category.education" = "Bildung";
+"checklist.category.integration" = "Integration";
+"checklist.category.family" = "Familie";
+"checklist.category.healthcare" = "Gesundheit";
+"checklist.category.legal" = "Recht";
+"checklist.category.finance" = "Finanzen";
+
+// MARK: - Appointment Statuses
+"appointment.status.scheduled" = "Geplant";
+"appointment.status.confirmed" = "Bestätigt";
+"appointment.status.cancelled" = "Abgesagt";
+"appointment.status.completed" = "Abgeschlossen";
+"appointment.status.no_show" = "Nicht erschienen";
+"appointment.status.rescheduled" = "Verschoben";
+
+// MARK: - Place Categories
+"place.category.migration_office" = "Migrationsamt";
+"place.category.gemeinde" = "Gemeinde";
+"place.category.embassy" = "Botschaft";
+"place.category.police_station" = "Polizeistation";
+"place.category.hospital" = "Krankenhaus";
+"place.category.clinic" = "Klinik";
+"place.category.pharmacy" = "Apotheke";
+"place.category.dentist" = "Zahnarzt";
+"place.category.psychologist" = "Psychologe";
+"place.category.counseling_center" = "Beratungsstelle";
+"place.category.mental_health" = "Psychische Gesundheit";
+"place.category.emergency_room" = "Notaufnahme";
+"place.category.legal_aid" = "Rechtshilfe";
+"place.category.lawyer" = "Anwalt";
+"place.category.notary" = "Notar";
+"place.category.social_services" = "Sozialdienste";
+"place.category.refugee_center" = "Flüchtlingszentrum";
+"place.category.integration_center" = "Integrationszentrum";
+"place.category.food_assistance" = "Lebensmittelhilfe";
+"place.category.food_bank" = "Lebensmittelbank";
+"place.category.secondhand_shop" = "Secondhand-Laden";
+"place.category.job_center" = "Jobcenter";
+"place.category.employment_agency" = "Arbeitsvermittlung";
+"place.category.career_counseling" = "Berufsberatung";
+"place.category.school" = "Schule";
+"place.category.university" = "Universität";
+"place.category.language_school" = "Sprachschule";
+"place.category.library" = "Bibliothek";
+"place.category.language_cafe" = "Sprachcafé";
+"place.category.bank" = "Bank";
+"place.category.insurance_company" = "Versicherungsgesellschaft";
+"place.category.post_office" = "Postamt";
+"place.category.train_station" = "Bahnhof";
+"place.category.bus_stop" = "Bushaltestelle";
+"place.category.airport" = "Flughafen";
+"place.category.community_center" = "Gemeindezentrum";
+"place.category.religious_center" = "Religiöses Zentrum";
+"place.category.cultural_center" = "Kulturzentrum";
+"place.category.community_cafe" = "Gemeinschaftscafé";
+"place.category.supermarket" = "Supermarkt";
+"place.category.youth_center" = "Jugendzentrum";
+
+// MARK: - User Goals
+"user.goal.housing" = "Wohnung finden";
+"user.goal.work" = "Arbeit finden";
+"user.goal.language" = "Sprache lernen";
+"user.goal.education" = "Bildung";
+"user.goal.documents" = "Dokumente bearbeiten";
+"user.goal.finance" = "Finanzen";
+"user.goal.health" = "Gesundheit";
+
+// MARK: - Onboarding
+"onboarding.welcome" = "Willkommen bei Sweezy";
+"onboarding.select_language" = "Sprache wählen";
+"onboarding.get_started" = "Los geht's";
+"onboarding.page1.title" = "Willkommen!";
+"onboarding.page1.subtitle" = "Dein Assistent fürs Leben in der Schweiz";
+"onboarding.page2.title" = "Guides, Checklisten, Vorlagen";
+"onboarding.page2.subtitle" = "Alles, was du brauchst, in einer App";
+"onboarding.page3.title" = "Schnellstart";
+"onboarding.page3.subtitle" = "Richte die App nach deinen Bedürfnissen ein";
+"onboarding.choose_style.title" = "Wähle deinen Stil";
+"onboarding.choose_style.subtitle" = "Du kannst es später in den Einstellungen ändern";
+"onboarding.skip" = "Überspringen";
+"onboarding.notifications_title" = "Benachrichtigungen";
+"onboarding.notifications_subtitle" = "Erhalten Sie Erinnerungen an wichtige Aufgaben der ersten Woche und Termine";
+"onboarding.notifications_allow" = "Benachrichtigungen erlauben";
+"onboarding.notifications_later" = "Später";
+
+// MARK: - Onboarding (Profile & Family)
+"onboarding.profile_title" = "Erzähl uns von dir";
+"onboarding.profile_subtitle" = "Wähle deinen Kanton, Bewilligungstyp und ungefähr,\nwann du in die Schweiz gekommen bist.";
+"onboarding.canton" = "Wohnkanton";
+"onboarding.permit_type" = "Bewilligungstyp";
+"onboarding.arrival_date" = "Ankunftsdatum";
+"onboarding.family_title" = "Deine Familie";
+"onboarding.family_subtitle" = "Dieser Schritt ist optional. Er hilft uns,\nbessere Startaufgaben für dich auszuwählen.";
+"onboarding.family_status" = "Familienstand";
+"onboarding.has_children" = "Hast du Kinder";
+"onboarding.yes" = "Ja";
+"onboarding.no" = "Nein";
+"onboarding.children_count" = "Anzahl der Kinder";
+"onboarding.skip_step" = "Diesen Schritt überspringen";
+
+// MARK: - Home (Localization fix)
+"home.priority_tasks" = "Prioritätsaufgaben";
+"home.recommended_content" = "Empfohlene Inhalte";
+"home.no_critical_tasks" = "Heute keine kritischen Aufgaben";
+"home.greeting.hello_name" = "Hallo, %@!";
+"home.greeting.hello" = "Hallo!";
+"home.priority_tasks.progress_format" = "%d von %d erledigt";
+"home.switzerland_genitive" = "der Schweiz";
+"home.insider.benefits_format" = "Leistungen %@";
+"home.insider.benefits_summary" = "Kurze Liste der Zahlungen und Leistungen.";
+"home.insider.jobs_summary" = "3 Stellenangebote der Woche.";
+"home.switzerland" = "Schweiz";
+"home.deadline_format" = "Frist: %@";
+"home.countdown.today" = "heute";
+"home.countdown.in_days_format" = "in %dT";
+"home.countdown.in_hours_format" = "in %dh";
+"home.reminder" = "Erinnerung";
+"home.career_genitive" = "Karriere";
+"home.telegram.community" = "Ukrainische Gemeinschaft in der Schweiz";
+"home.telegram.support" = "Unterstützung";
+"home.read_more" = "Lesen";
+"home.stats.checklists" = "Checklisten";
+"home.stats.templates" = "Vorlagen";
+"home.focus.today" = "heute";
+"home.focus.week" = "Woche";
+"home.focus.completed" = "erledigt";
+"home.focus.next_up" = "Als Nächstes";
+"home.focus.today_label" = "Heute";
+"home.focus.tasks_for_day_format" = "Aufgaben für %@, %d";
+"home.focus.plus_more_tasks_format" = "+ %d weitere Aufgaben";
+"home.focus.no_tasks" = "Keine Aufgaben";
+"home.focus.day_free_format" = "%@ ist aufgabenfrei";
+"home.focus.plus_more_format" = "%@ + %d weitere";
+"home.achievements" = "Erfolge";
+"home.accessibility.stage_details" = "Stufendetails öffnen";
+
+// MARK: - Weekdays (short)
+"weekday.short.mon" = "Mo";
+"weekday.short.tue" = "Di";
+"weekday.short.wed" = "Mi";
+"weekday.short.thu" = "Do";
+"weekday.short.fri" = "Fr";
+"weekday.short.sat" = "Sa";
+"weekday.short.sun" = "So";
+
+// MARK: - Common (new)
+"common.coming_soon" = "Bald verfügbar";
+
+// MARK: - Map (new)
+"map.title_short" = "Karte";
+"map.tap_to_open" = "Tippen zum Öffnen";
+"map.accessible" = "Barrierefrei";
+
+// MARK: - Home Simplified / Settings Lite
+"home.welcome_name_format" = "Willkommen, %@! 👋";
+"home.subtitle" = "Dein Ratgeber fürs Leben in der Schweiz";
+"home.stats.guides_short" = "Guides";
+"home.stats.level" = "Level";
+"home.open_format" = "%@ öffnen";
+"home.guides_coming_soon" = "Guides erscheinen bald";
+"home.checklists_coming_soon" = "Checklisten erscheinen bald";
+"home.steps_format" = "%d/%d Schritte";
+"home.level_format" = "Level %d";
+"settings.support" = "Support & Feedback";
+"settings.send_feedback" = "Feedback senden";
+"settings.rate_app" = "Sweezy bewerten";
+"settings.telegram_support" = "Telegram-Support";
+"settings.write_telegram" = "In Telegram schreiben";
+"settings.email_support" = "E-Mail-Support";
+"settings.version_label" = "Version";
+"settings.terms" = "Nutzungsbedingungen";
+
+// MARK: - Offline
+"offline.banner" = "Sie sind offline — einige Funktionen können eingeschränkt sein";

@@ -74,7 +74,7 @@ struct TagChip: View {
         case (.filter, true):
             return .white
         case (.filter, false):
-            return Theme.Colors.primaryText
+            return Theme.Colors.textPrimary
         case (.category, _):
             return Theme.Colors.primaryDark
         case (.status, _):

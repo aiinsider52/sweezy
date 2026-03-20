@@ -528,6 +528,7 @@ struct GuideCardCompact: View {
 struct ChecklistsContentView: View {
     @EnvironmentObject private var appContainer: AppContainer
     @EnvironmentObject private var lockManager: AppLockManager
+    @AppStorage("checklist_progress_version") private var checklistProgressVersion = 0
     
     @State private var selectedCategory: ChecklistCategory?
     
@@ -568,6 +569,7 @@ struct ChecklistsContentView: View {
     }
     
     var body: some View {
+        let _ = checklistProgressVersion
         ScrollView(showsIndicators: false) {
             LazyVStack(spacing: Theme.Spacing.lg) {
                 // Progress card

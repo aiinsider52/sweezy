@@ -9,6 +9,7 @@ import SwiftUI
 struct ChecklistsView: View {
     @EnvironmentObject private var appContainer: AppContainer
     @EnvironmentObject private var lockManager: AppLockManager
+    @AppStorage("checklist_progress_version") private var checklistProgressVersion = 0
     @State private var selectedCategory: ChecklistCategory?
     @State private var viewMode: ViewMode = .list
     @Namespace private var animation
@@ -73,6 +74,7 @@ struct ChecklistsView: View {
     }
     
     var body: some View {
+        let _ = checklistProgressVersion
         NavigationStack {
             ZStack {
                 AdaptivePageBackground()
@@ -471,6 +473,7 @@ struct ChecklistsView: View {
         var completed = Set((UserDefaults.standard.array(forKey: key) as? [String] ?? []))
         completed.insert(step.id.uuidString)
         UserDefaults.standard.set(Array(completed), forKey: key)
+        checklistProgressVersion += 1
         
         // Gamification
         EventBus.shared.emit(GamEvent(type: .checklistStepCompleted, metadata: ["stepId": step.id.uuidString]))
@@ -803,6 +806,7 @@ private struct TimelineChecklistRow: View {
 struct ChecklistDetailView: View {
     let checklist: Checklist
     @EnvironmentObject private var appContainer: AppContainer
+    @AppStorage("checklist_progress_version") private var checklistProgressVersion = 0
     @State private var completedSteps: Set<UUID> = []
     @State private var expandedSteps: Set<UUID> = []
     @State private var showCelebration = false
@@ -1072,6 +1076,7 @@ struct ChecklistDetailView: View {
         // Save
         let key = "checklist_\(checklist.id.uuidString)_completed"
         UserDefaults.standard.set(completedSteps.map { $0.uuidString }, forKey: key)
+        checklistProgressVersion += 1
         // Sync active state
         appContainer.userStats.setChecklistActive(id: checklist.id, active: !completedSteps.isEmpty)
         

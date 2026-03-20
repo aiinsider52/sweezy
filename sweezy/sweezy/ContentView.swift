@@ -128,6 +128,9 @@ struct MainAppContent: View {
         .onChange(of: appContainer.isOnboardingCompleted) { _, _ in
             updatePostOnboardingAuthPresentation()
         }
+        .onChange(of: appContainer.shouldPresentInitialAuthEntry) { _, _ in
+            updatePostOnboardingAuthPresentation()
+        }
         .onChange(of: appContainer.hasCompletedInitialAuthChoice) { _, _ in
             updatePostOnboardingAuthPresentation()
         }
@@ -166,8 +169,7 @@ struct MainAppContent: View {
 
     private func updatePostOnboardingAuthPresentation() {
         showPostOnboardingAuthEntry =
-            appContainer.isOnboardingCompleted &&
-            !appContainer.hasCompletedInitialAuthChoice &&
+            appContainer.shouldPresentInitialAuthEntry &&
             !lockManager.isRegistered &&
             !sessionManager.isAuthenticated
     }

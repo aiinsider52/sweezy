@@ -171,6 +171,11 @@
 "guides.articles_available_format" = "%d articles available";
 "guides.reading_time" = "%d min read";
 "guides.updated" = "Updated %@";
+"guides.verified" = "Verified %@";
+"guides.next_steps" = "Next Steps";
+"guides.next_steps.open_checklist" = "Open checklist";
+"guides.next_steps.open_template" = "Open template";
+"guides.next_steps.find_specialist" = "Find a specialist";
 "guides.new" = "New";
 "guides.bookmark" = "Bookmark";
 "guides.share" = "Share";
@@ -726,6 +731,7 @@
 "marketplace.select_canton" = "Select canton";
 "marketplace.canton.all" = "All Switzerland";
 "marketplace.canton.all_cantons" = "All cantons";
+"marketplace.canton.search" = "Search canton";
 "marketplace.updated_just_now" = "Updated just now";
 "marketplace.updated_minutes_ago" = "Updated %d min ago";
 

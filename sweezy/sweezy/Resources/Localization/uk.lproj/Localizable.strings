@@ -191,6 +191,11 @@
 "guides.articles_available_format" = "%d статей доступно";
 "guides.reading_time" = "%d хв читання";
 "guides.updated" = "Оновлено %@";
+"guides.verified" = "Перевірено %@";
+"guides.next_steps" = "Наступні кроки";
+"guides.next_steps.open_checklist" = "Відкрити чеклист";
+"guides.next_steps.open_template" = "Відкрити шаблон";
+"guides.next_steps.find_specialist" = "Знайти спеціаліста";
 "guides.new" = "Нове";
 "guides.bookmark" = "Додати в закладки";
 "guides.share" = "Поділитися";
@@ -748,6 +753,7 @@
 "marketplace.select_canton" = "Оберіть кантон";
 "marketplace.canton.all" = "Вся Швейцарія";
 "marketplace.canton.all_cantons" = "Всі кантони";
+"marketplace.canton.search" = "Пошук кантону";
 "marketplace.updated_just_now" = "Оновлено щойно";
 "marketplace.updated_minutes_ago" = "Оновлено %d хв тому";
 

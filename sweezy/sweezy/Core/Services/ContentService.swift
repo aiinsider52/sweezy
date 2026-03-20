@@ -205,6 +205,7 @@ class ContentService: ContentServiceProtocol {
                         Guide(
                             title: g.title,
                             subtitle: g.description,
+                            summary: nil,
                             bodyMarkdown: g.content ?? "",
                             tags: [],
                             category: GuideCategory(rawValue: g.category ?? "documents") ?? .documents,
@@ -219,7 +220,10 @@ class ContentService: ContentServiceProtocol {
                             language: "uk",
                             verifiedAt: nil,
                             source: nil,
-                            heroImage: g.image_url
+                            heroImage: g.image_url,
+                            relatedChecklistId: nil,
+                            relatedTemplateIds: [],
+                            relatedMarketplaceTags: []
                         )
                     }
                     didLoadRemoteGuides = true

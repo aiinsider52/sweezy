@@ -1,10 +1,14 @@
 import SwiftUI
 
 struct MarketplaceView: View {
-    @StateObject private var vm = MarketplaceViewModel()
+    @StateObject private var vm: MarketplaceViewModel
     @State private var showCreateSheet = false
     @State private var selectedListing: ServiceListing?
     @State private var showCantonPicker = false
+
+    init(initialCategory: ServiceCategory? = nil, initialCanton: String? = nil) {
+        _vm = StateObject(wrappedValue: MarketplaceViewModel(initialCategory: initialCategory, initialCanton: initialCanton))
+    }
 
     var body: some View {
         NavigationStack {

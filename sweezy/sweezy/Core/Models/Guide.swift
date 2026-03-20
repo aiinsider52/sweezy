@@ -13,6 +13,7 @@ struct Guide: Codable, Identifiable, Hashable {
     let id: UUID
     let title: String
     let subtitle: String?
+    let summary: String?
     let bodyMarkdown: String
     let tags: [String]
     let category: GuideCategory
@@ -28,11 +29,15 @@ struct Guide: Codable, Identifiable, Hashable {
     let verifiedAt: Date? // When content was last verified
     let source: String? // URL or authority reference
     let heroImage: String? // Hero image path
+    let relatedChecklistId: String?
+    let relatedTemplateIds: [String]
+    let relatedMarketplaceTags: [String]
     
     private enum CodingKeys: String, CodingKey {
-        case id, title, subtitle, bodyMarkdown, tags, category, cantonCodes, links
+        case id, title, subtitle, summary, bodyMarkdown, tags, category, cantonCodes, links
         case priority, isNew, isPremium, estimatedReadingTime, lastUpdated, createdAt
         case language, verifiedAt, source, heroImage
+        case relatedChecklistId, relatedTemplateIds, relatedMarketplaceTags
     }
     
     init(from decoder: Decoder) throws {
@@ -47,6 +52,7 @@ struct Guide: Codable, Identifiable, Hashable {
         }
         self.title = (try? container.decode(String.self, forKey: .title)) ?? ""
         self.subtitle = try? container.decode(String.self, forKey: .subtitle)
+        self.summary = try? container.decodeIfPresent(String.self, forKey: .summary)
         self.bodyMarkdown = (try? container.decode(String.self, forKey: .bodyMarkdown)) ?? ""
         self.tags = (try? container.decode([String].self, forKey: .tags)) ?? []
         self.category = (try? container.decode(GuideCategory.self, forKey: .category)) ?? .documents
@@ -76,11 +82,15 @@ struct Guide: Codable, Identifiable, Hashable {
         self.verifiedAt = try? container.decode(Date.self, forKey: .verifiedAt)
         self.source = try? container.decode(String.self, forKey: .source)
         self.heroImage = try? container.decode(String.self, forKey: .heroImage)
+        self.relatedChecklistId = try? container.decodeIfPresent(String.self, forKey: .relatedChecklistId)
+        self.relatedTemplateIds = (try? container.decode([String].self, forKey: .relatedTemplateIds)) ?? []
+        self.relatedMarketplaceTags = (try? container.decode([String].self, forKey: .relatedMarketplaceTags)) ?? []
     }
     
     init(
         title: String,
         subtitle: String? = nil,
+        summary: String? = nil,
         bodyMarkdown: String,
         tags: [String] = [],
         category: GuideCategory,
@@ -93,11 +103,15 @@ struct Guide: Codable, Identifiable, Hashable {
         language: String? = nil,
         verifiedAt: Date? = nil,
         source: String? = nil,
-        heroImage: String? = nil
+        heroImage: String? = nil,
+        relatedChecklistId: String? = nil,
+        relatedTemplateIds: [String] = [],
+        relatedMarketplaceTags: [String] = []
     ) {
         self.id = UUID()
         self.title = title
         self.subtitle = subtitle
+        self.summary = summary
         self.bodyMarkdown = bodyMarkdown
         self.tags = tags
         self.category = category
@@ -113,6 +127,9 @@ struct Guide: Codable, Identifiable, Hashable {
         self.verifiedAt = verifiedAt
         self.source = source
         self.heroImage = heroImage
+        self.relatedChecklistId = relatedChecklistId
+        self.relatedTemplateIds = relatedTemplateIds
+        self.relatedMarketplaceTags = relatedMarketplaceTags
     }
     
     /// Check if guide applies to specific canton

@@ -15,6 +15,11 @@ final class MarketplaceViewModel: ObservableObject {
     private let cacheKey = "marketplace_cache"
     private let cacheTTLSeconds: TimeInterval = 300 // 5 min
 
+    init(initialCategory: ServiceCategory? = nil, initialCanton: String? = nil) {
+        self.selectedCategory = initialCategory
+        self.selectedCanton = initialCanton
+    }
+
     var filteredListings: [ServiceListing] {
         guard !searchText.isEmpty else { return listings }
         let q = searchText.lowercased()

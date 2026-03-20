@@ -12,11 +12,29 @@ struct TemplatesView: View {
     @EnvironmentObject private var lockManager: AppLockManager
     @EnvironmentObject private var accountManager: AccountManager
     @Environment(\.dismiss) private var dismiss
+    private let initialTemplateIDs: Set<String>
     @State private var selectedCategory: TemplateCategory?
     @State private var searchText: String = ""
+
+    init(initialTemplateIDs: [String] = []) {
+        self.initialTemplateIDs = Set(initialTemplateIDs.map { $0.lowercased() })
+    }
+
+    private var baseTemplates: [DocumentTemplate] {
+        let localeTemplates = appContainer.contentService.getTemplatesForLocale(appContainer.currentLocale.identifier)
+        guard !initialTemplateIDs.isEmpty else {
+            return localeTemplates
+        }
+
+        let explicitMatches = appContainer.contentService.templates.filter {
+            initialTemplateIDs.contains($0.id.uuidString.lowercased())
+        }
+
+        return explicitMatches.isEmpty ? localeTemplates : explicitMatches
+    }
     
     private var filteredTemplates: [DocumentTemplate] {
-        let templates = appContainer.contentService.getTemplatesForLocale(appContainer.currentLocale.identifier)
+        let templates = baseTemplates
         
         let byCategory = selectedCategory == nil ? templates : templates.filter { $0.category == selectedCategory }
         let trimmed = searchText.trimmingCharacters(in: .whitespacesAndNewlines)

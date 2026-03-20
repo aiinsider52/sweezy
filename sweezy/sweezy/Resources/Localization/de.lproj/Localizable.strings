@@ -147,6 +147,11 @@
 "guides.no_results" = "Keine Ergebnisse";
 "guides.reading_time" = "%d Min. Lesezeit";
 "guides.updated" = "Aktualisiert %@";
+"guides.verified" = "Geprueft %@";
+"guides.next_steps" = "Naechste Schritte";
+"guides.next_steps.open_checklist" = "Checkliste oeffnen";
+"guides.next_steps.open_template" = "Vorlage oeffnen";
+"guides.next_steps.find_specialist" = "Spezialisten finden";
 "guides.new" = "Neu";
 "guides.hero_title" = "Leitfaden für die Schweiz";
 "guides.articles_available" = "Artikel verfügbar";
@@ -512,6 +517,7 @@
 "marketplace.select_canton" = "Kanton auswählen";
 "marketplace.canton.all" = "Ganze Schweiz";
 "marketplace.canton.all_cantons" = "Alle Kantone";
+"marketplace.canton.search" = "Kanton suchen";
 "marketplace.updated_just_now" = "Gerade aktualisiert";
 "marketplace.updated_minutes_ago" = "Vor %d Min. aktualisiert";
 

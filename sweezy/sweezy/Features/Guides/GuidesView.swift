@@ -510,6 +510,8 @@ struct GuideDetailView: View {
     @State private var didAwardXP = false
     @State private var timeOnPage: TimeInterval = 0
     @State private var timerActive: Bool = false
+    @State private var selectedTemplateFilter: RelatedTemplateFilter?
+    @State private var selectedMarketplaceCategory: ServiceCategory?
     
     // Для теперішнього релізу повністю відкриваємо всі гайди:
     // - немає ліміту "безкоштовних" гайдів
@@ -578,6 +580,44 @@ struct GuideDetailView: View {
         
         return merged
     }
+
+    private var summaryText: String? {
+        let trimmed = guide.summary?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        return trimmed.isEmpty ? nil : trimmed
+    }
+
+    private var relatedChecklist: Checklist? {
+        guard let rawID = guide.relatedChecklistId?.trimmingCharacters(in: .whitespacesAndNewlines),
+              let uuid = UUID(uuidString: rawID) else {
+            return nil
+        }
+        return appContainer.contentService.getChecklist(by: uuid)
+    }
+
+    private var explicitRelatedTemplates: [DocumentTemplate] {
+        guard !guide.relatedTemplateIds.isEmpty else { return [] }
+
+        let requestedIDs = Set(guide.relatedTemplateIds.map { $0.lowercased() })
+        return appContainer.contentService.templates.filter {
+            requestedIDs.contains($0.id.uuidString.lowercased())
+        }
+    }
+
+    private var marketplaceCategories: [ServiceCategory] {
+        guide.relatedMarketplaceTags.compactMap { ServiceCategory(rawValue: $0.lowercased()) }
+    }
+
+    private var primaryMarketplaceCategory: ServiceCategory? {
+        marketplaceCategories.first
+    }
+
+    private var shouldShowTrustSignal: Bool {
+        guide.verifiedAt != nil
+    }
+
+    private var hasNextSteps: Bool {
+        relatedChecklist != nil || !explicitRelatedTemplates.isEmpty || primaryMarketplaceCategory != nil
+    }
     
     var body: some View {
         ZStack(alignment: .top) {
@@ -597,10 +637,17 @@ struct GuideDetailView: View {
                     
                     // Content
                     VStack(alignment: .leading, spacing: Theme.Spacing.lg) {
-                        // TL;DR Summary
-                        tldrSection
-                        
-                        Divider().background(Theme.Colors.chipBorder)
+                        if summaryText != nil {
+                            tldrSection
+                        }
+
+                        if shouldShowTrustSignal {
+                            trustSignalRow
+                        }
+
+                        if summaryText != nil || shouldShowTrustSignal {
+                            Divider().background(Theme.Colors.chipBorder)
+                        }
                         
                         // Main content (with blur if locked)
                         contentSection
@@ -618,6 +665,10 @@ struct GuideDetailView: View {
                         // Tags
                         if !guide.tags.isEmpty {
                             tagsSection
+                        }
+
+                        if hasNextSteps && !isLocked {
+                            nextStepsSection
                         }
                         
                         // XP reward info
@@ -654,6 +705,12 @@ struct GuideDetailView: View {
         )
         .sheet(isPresented: $showShareSheet) {
             GuidesShareSheet(items: [guide.title, guide.bodyMarkdown])
+        }
+        .sheet(item: $selectedTemplateFilter) { filter in
+            TemplatesView(initialTemplateIDs: filter.templateIDs)
+        }
+        .sheet(item: $selectedMarketplaceCategory) { category in
+            MarketplaceView(initialCategory: category)
         }
         .overlay(alignment: .top) {
             if showXPToast {
@@ -796,38 +853,92 @@ struct GuideDetailView: View {
     
     // MARK: - TL;DR Section
     private var tldrSection: some View {
+        HStack(spacing: 0) {
+            Rectangle()
+                .fill(Theme.Colors.primary)
+                .frame(width: 3)
+
+            Text(summaryText ?? "")
+                .font(Theme.Typography.body)
+                .foregroundColor(Theme.Colors.textPrimary)
+                .padding(12)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .background(Theme.Colors.secondaryBackground)
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+    }
+
+    private var trustSignalRow: some View {
+        HStack(spacing: 6) {
+            Image(systemName: "checkmark.circle.fill")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundColor(Theme.Colors.primary)
+
+            Text(trustSignalText)
+                .font(.system(size: 12, weight: .medium))
+                .foregroundColor(Theme.Colors.textTertiary)
+        }
+    }
+
+    private var trustSignalText: String {
+        let verified = "guides.verified".localized(with: formatMonthYear(guide.verifiedAt ?? guide.lastUpdated))
+        guard let source = guide.source?.trimmingCharacters(in: .whitespacesAndNewlines), !source.isEmpty else {
+            return verified
+        }
+        return "\(verified) · \(source)"
+    }
+
+    private var nextStepsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack(spacing: 8) {
-                Image(systemName: "bolt.fill")
-                    .foregroundColor(.yellow)
-                Text("Головне за 30 секунд")
-                    .font(Theme.Typography.headline)
-                    .fontWeight(.semibold)
-            }
-            .foregroundColor(Theme.Colors.textPrimary)
-            
-            // Extract first 3-5 bullet points or summary
-            VStack(alignment: .leading, spacing: 8) {
-                ForEach(extractKeyPoints().prefix(5), id: \.self) { point in
-                    HStack(alignment: .top, spacing: 10) {
-                        Circle()
-                            .fill(guide.category.swiftUIColor)
-                            .frame(width: 6, height: 6)
-                            .padding(.top, 6)
-                        Text(point)
-                            .font(Theme.Typography.body)
-                            .foregroundColor(Theme.Colors.textPrimary)
+            Text("guides.next_steps".localized)
+                .font(Theme.Typography.headline)
+                .fontWeight(.semibold)
+                .foregroundColor(Theme.Colors.textPrimary)
+
+            VStack(spacing: 10) {
+                if let checklist = relatedChecklist {
+                    NavigationLink {
+                        ChecklistDetailView(checklist: checklist)
+                    } label: {
+                        nextStepCard(
+                            title: "guides.next_steps.open_checklist".localized,
+                            subtitle: checklist.title,
+                            icon: "checklist"
+                        )
                     }
+                    .buttonStyle(.plain)
+                }
+
+                ForEach(explicitRelatedTemplates, id: \.id) { template in
+                    Button {
+                        selectedTemplateFilter = RelatedTemplateFilter(templateIDs: [template.id.uuidString])
+                    } label: {
+                        nextStepCard(
+                            title: "guides.next_steps.open_template".localized,
+                            subtitle: template.title,
+                            icon: "doc.text.fill"
+                        )
+                    }
+                    .buttonStyle(.plain)
+                }
+
+                if let marketplaceCategory = primaryMarketplaceCategory {
+                    Button {
+                        selectedMarketplaceCategory = marketplaceCategory
+                    } label: {
+                        nextStepCard(
+                            title: "guides.next_steps.find_specialist".localized,
+                            subtitle: marketplaceCategories.map(\.displayName).joined(separator: " · "),
+                            icon: "storefront.fill"
+                        )
+                    }
+                    .buttonStyle(.plain)
                 }
             }
-            .padding(16)
-            .background(guide.category.swiftUIColor.opacity(0.08))
-            .cornerRadius(16)
-            .overlay(
-                RoundedRectangle(cornerRadius: 16)
-                    .stroke(guide.category.swiftUIColor.opacity(0.2), lineWidth: 1)
-            )
         }
+        .padding(16)
+        .background(Theme.Colors.secondaryBackground)
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
     
     // MARK: - Content Section
@@ -971,37 +1082,54 @@ struct GuideDetailView: View {
     }
     
     // MARK: - Helpers
-    private func extractKeyPoints() -> [String] {
-        // Extract bullet points or first sentences
-        let lines = guide.bodyMarkdown.components(separatedBy: .newlines)
-        var points: [String] = []
-        for line in lines {
-            let trimmed = line.trimmingCharacters(in: .whitespaces)
-            if trimmed.hasPrefix("- ") || trimmed.hasPrefix("• ") {
-                points.append(String(trimmed.dropFirst(2)))
-            } else if trimmed.hasPrefix("1. ") || trimmed.hasPrefix("2. ") || trimmed.hasPrefix("3. ") {
-                if let idx = trimmed.firstIndex(of: " ") {
-                    points.append(String(trimmed[trimmed.index(after: idx)...]))
-                }
-            }
-            if points.count >= 5 { break }
-        }
-        // Fallback: first sentences
-        if points.isEmpty {
-            let sentences = guide.bodyMarkdown.components(separatedBy: ". ")
-            points = sentences.prefix(3).map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-        }
-        return points
-    }
-    
     private func formatDate(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
         return formatter.string(from: date)
     }
+
+    private func formatMonthYear(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: appContainer.currentLocale.identifier)
+        formatter.dateFormat = "LLLL yyyy"
+        return formatter.string(from: date)
+    }
     
     private func haptic(_ style: UIImpactFeedbackGenerator.FeedbackStyle) {
         UIImpactFeedbackGenerator(style: style).impactOccurred()
+    }
+
+    private func nextStepCard(title: String, subtitle: String, icon: String) -> some View {
+        HStack(spacing: 12) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .fill(Theme.Colors.primary.opacity(0.12))
+                    .frame(width: 40, height: 40)
+
+                Image(systemName: icon)
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(Theme.Colors.primary)
+            }
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text(title)
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(Theme.Colors.textPrimary)
+                Text(subtitle)
+                    .font(.system(size: 13))
+                    .foregroundColor(Theme.Colors.textSecondary)
+                    .multilineTextAlignment(.leading)
+            }
+
+            Spacer()
+
+            Image(systemName: "chevron.right")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundColor(Theme.Colors.textTertiary)
+        }
+        .padding(12)
+        .background(Theme.Colors.primaryBackground.opacity(0.55))
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
     
     // MARK: - Template Helpers (in-scope)
@@ -1032,6 +1160,14 @@ struct GuideDetailView: View {
 }
 
 // MARK: - Scroll Offset Preference Key
+
+private struct RelatedTemplateFilter: Identifiable {
+    let templateIDs: [String]
+
+    var id: String {
+        templateIDs.joined(separator: "|")
+    }
+}
 
 private struct ScrollOffsetKey: PreferenceKey {
     static var defaultValue: CGFloat = 0

@@ -576,32 +576,31 @@ private struct ProfileDetailsPage: View {
         OnboardingDetailsBackground {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: Theme.Spacing.lg) {
-                    Spacer().frame(height: 20)
+                    Spacer().frame(height: 16)
                     
                     // Hero icon + title
-                    VStack(spacing: Theme.Spacing.md) {
+                    VStack(spacing: Theme.Spacing.sm) {
                         ZStack {
                             Circle()
-                                .fill(Color.white.opacity(0.1))
-                                .frame(width: 72, height: 72)
+                                .fill(Color.white.opacity(0.12))
+                                .frame(width: 64, height: 64)
                             Image(systemName: "person.text.rectangle")
-                                .font(.system(size: 32, weight: .medium))
+                                .font(.system(size: 28, weight: .medium))
                                 .foregroundColor(.white)
-                                .symbolEffect(.pulse, options: .repeating.speed(0.3))
                         }
                         .opacity(titleAppeared ? 1 : 0)
                         .scaleEffect(titleAppeared ? 1 : 0.5)
                         
-                        VStack(spacing: 8) {
+                        VStack(spacing: 6) {
                             Text("onboarding.profile_title".localized)
-                                .font(.system(size: 28, weight: .bold, design: .rounded))
+                                .font(.system(size: 24, weight: .bold, design: .rounded))
                                 .foregroundColor(.white)
                                 .multilineTextAlignment(.center)
                             Text("onboarding.profile_subtitle".localized)
-                                .font(.system(size: 16))
-                                .foregroundColor(.white.opacity(0.78))
+                                .font(.system(size: 14))
+                                .foregroundColor(.white.opacity(0.75))
                                 .multilineTextAlignment(.center)
-                                .lineSpacing(3)
+                                .lineSpacing(2)
                         }
                         .opacity(titleAppeared ? 1 : 0)
                         .offset(y: titleAppeared ? 0 : 15)
@@ -675,17 +674,17 @@ private struct ProfileDetailsPage: View {
                         onSkip()
                     } label: {
                         Text("onboarding.skip".localized)
-                            .font(.system(size: 15, weight: .semibold))
-                            .foregroundColor(.white.opacity(0.75))
-                            .padding(.horizontal, 24)
-                            .padding(.vertical, 10)
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(.white.opacity(0.65))
+                            .padding(.horizontal, 20)
+                            .padding(.vertical, 9)
                             .background(
-                                Capsule().stroke(Color.white.opacity(0.25), lineWidth: 1)
+                                Capsule().stroke(Color.white.opacity(0.2), lineWidth: 1)
                             )
                     }
                     .accessibilityIdentifier("onboarding.profile.skipButton")
                     
-                    Spacer().frame(height: 12)
+                    Spacer().frame(height: 170)
                 }
             }
         }
@@ -715,31 +714,30 @@ private struct FamilyDetailsPage: View {
         OnboardingDetailsBackground {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: Theme.Spacing.lg) {
-                    Spacer().frame(height: 40)
+                    Spacer().frame(height: 16)
                     
                     // Hero icon + title
-                    VStack(spacing: Theme.Spacing.md) {
+                    VStack(spacing: Theme.Spacing.sm) {
                         ZStack {
                             Circle()
-                                .fill(Color.white.opacity(0.1))
-                                .frame(width: 72, height: 72)
+                                .fill(Color.white.opacity(0.12))
+                                .frame(width: 64, height: 64)
                             Image(systemName: "figure.2.and.child.holdinghands")
-                                .font(.system(size: 30, weight: .medium))
+                                .font(.system(size: 26, weight: .medium))
                                 .foregroundColor(.white)
-                                .symbolEffect(.pulse, options: .repeating.speed(0.3))
                         }
                         .opacity(titleAppeared ? 1 : 0)
                         .scaleEffect(titleAppeared ? 1 : 0.5)
                         
-                        VStack(spacing: 8) {
+                        VStack(spacing: 6) {
                             Text("onboarding.family_title".localized)
-                                .font(.system(size: 28, weight: .bold, design: .rounded))
+                                .font(.system(size: 24, weight: .bold, design: .rounded))
                                 .foregroundColor(.white)
                             Text("onboarding.family_subtitle".localized)
-                                .font(.system(size: 16))
-                                .foregroundColor(.white.opacity(0.78))
+                                .font(.system(size: 14))
+                                .foregroundColor(.white.opacity(0.75))
                                 .multilineTextAlignment(.center)
-                                .lineSpacing(3)
+                                .lineSpacing(2)
                         }
                         .opacity(titleAppeared ? 1 : 0)
                         .offset(y: titleAppeared ? 0 : 15)
@@ -788,17 +786,17 @@ private struct FamilyDetailsPage: View {
                         onSkip()
                     } label: {
                         Text("onboarding.skip_step".localized)
-                            .font(.system(size: 15, weight: .semibold))
-                            .foregroundColor(.white.opacity(0.75))
-                            .padding(.horizontal, 24)
-                            .padding(.vertical, 10)
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(.white.opacity(0.65))
+                            .padding(.horizontal, 20)
+                            .padding(.vertical, 9)
                             .background(
-                                Capsule().stroke(Color.white.opacity(0.25), lineWidth: 1)
+                                Capsule().stroke(Color.white.opacity(0.2), lineWidth: 1)
                             )
                     }
                     .accessibilityIdentifier("onboarding.family.skipButton")
                     
-                    Spacer().frame(height: 12)
+                    Spacer().frame(height: 170)
                 }
             }
         }
@@ -1201,58 +1199,145 @@ private struct LanguagePickerPage: View {
 
 private struct SuccessPageView: View {
     @State private var appeared = false
-    
+    @State private var glowPulse = false
+
+    private let features: [(icon: String, title: String, color: Color)] = [
+        ("book.fill",      "Гайди та довідник",         Color.cyan.opacity(0.9)),
+        ("checklist",      "Чек-листи з прогресом",     Color.green.opacity(0.9)),
+        ("storefront.fill","Маркет послуг у Швейцарії", Color.orange.opacity(0.9)),
+    ]
+
     var body: some View {
         ZStack {
-            Theme.Colors.gradientSunrise
-                .ignoresSafeArea()
-            
-            VStack(spacing: Theme.Spacing.lg) {
+            // App-style green gradient background
+            LinearGradient(
+                colors: [Theme.Colors.primaryDark, Theme.Colors.primary, Theme.Colors.accentTurquoise.opacity(0.75)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
+
+            // Decorative background blobs
+            Circle()
+                .fill(Color.white.opacity(0.06))
+                .frame(width: 320, height: 320)
+                .offset(x: 120, y: -240)
+            Circle()
+                .fill(Color.white.opacity(0.04))
+                .frame(width: 220, height: 220)
+                .offset(x: -100, y: 280)
+
+            FloatingParticlesOverlayV2().opacity(0.18)
+
+            VStack(spacing: 0) {
                 Spacer()
-                
+
+                // Animated checkmark badge
                 ZStack {
+                    // Outer glow ring — pulses
                     Circle()
-                        .fill(Color.white.opacity(0.20))
-                        .frame(width: 180, height: 180)
-                        .blur(radius: 25)
-                    
-                    Image(systemName: "sun.max.fill")
-                        .font(.system(size: 44))
-                        .foregroundColor(.white.opacity(0.15))
-                        .offset(x: -40, y: -30)
-                        .rotationEffect(.degrees(appeared ? 15 : 0))
-                    
-                    Image(systemName: "leaf.fill")
-                        .font(.system(size: 32))
-                        .foregroundColor(.white.opacity(0.12))
-                        .offset(x: 45, y: 25)
-                        .rotationEffect(.degrees(appeared ? -10 : 0))
-                    
-                    Image(systemName: "checkmark.seal.fill")
-                        .font(.system(size: 80, weight: .semibold))
+                        .fill(Color.white.opacity(0.07))
+                        .frame(width: 190, height: 190)
+                        .scaleEffect(glowPulse ? 1.12 : 0.95)
+                        .animation(.easeInOut(duration: 1.6).repeatForever(autoreverses: true), value: glowPulse)
+
+                    // Middle ring
+                    Circle()
+                        .fill(Color.white.opacity(0.12))
+                        .frame(width: 150, height: 150)
+                        .scaleEffect(appeared ? 1 : 0.3)
+                        .animation(.spring(response: 0.55, dampingFraction: 0.7).delay(0.1), value: appeared)
+
+                    // Inner solid circle
+                    Circle()
+                        .fill(
+                            LinearGradient(
+                                colors: [Color.white.opacity(0.3), Color.white.opacity(0.15)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .frame(width: 110, height: 110)
+                        .scaleEffect(appeared ? 1 : 0.2)
+                        .animation(.spring(response: 0.5, dampingFraction: 0.65).delay(0.05), value: appeared)
+
+                    // Checkmark
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 46, weight: .bold, design: .rounded))
                         .foregroundColor(.white)
-                        .scaleEffect(appeared ? 1.0 : 0.7)
+                        .scaleEffect(appeared ? 1 : 0.1)
+                        .opacity(appeared ? 1 : 0)
+                        .animation(.spring(response: 0.45, dampingFraction: 0.6).delay(0.28), value: appeared)
                 }
-                
-                Text("onboarding.page3.title".localized)
-                    .font(Theme.Typography.largeTitle)
-                    .fontWeight(.bold)
-                    .foregroundColor(.white)
-                    .multilineTextAlignment(.center)
-                
-                Text("onboarding.page3.subtitle".localized)
-                    .font(Theme.Typography.body)
-                    .foregroundColor(.white.opacity(0.9))
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, Theme.Spacing.xl)
-                
+                .padding(.bottom, 28)
+
+                // Title + subtitle
+                VStack(spacing: 10) {
+                    Text("onboarding.page3.title".localized)
+                        .font(.system(size: 34, weight: .bold, design: .rounded))
+                        .foregroundColor(.white)
+                        .multilineTextAlignment(.center)
+                        .opacity(appeared ? 1 : 0)
+                        .offset(y: appeared ? 0 : 22)
+                        .animation(.spring(response: 0.5, dampingFraction: 0.8).delay(0.38), value: appeared)
+
+                    Text("onboarding.page3.subtitle".localized)
+                        .font(.system(size: 16))
+                        .foregroundColor(.white.opacity(0.82))
+                        .multilineTextAlignment(.center)
+                        .lineSpacing(4)
+                        .padding(.horizontal, 36)
+                        .opacity(appeared ? 1 : 0)
+                        .offset(y: appeared ? 0 : 18)
+                        .animation(.spring(response: 0.5, dampingFraction: 0.8).delay(0.46), value: appeared)
+                }
+                .padding(.bottom, 32)
+
+                // Feature highlights
+                VStack(spacing: 10) {
+                    ForEach(Array(features.enumerated()), id: \.offset) { idx, feature in
+                        HStack(spacing: 14) {
+                            ZStack {
+                                Circle()
+                                    .fill(feature.color.opacity(0.18))
+                                    .frame(width: 44, height: 44)
+                                Image(systemName: feature.icon)
+                                    .font(.system(size: 18, weight: .semibold))
+                                    .foregroundColor(.white)
+                            }
+                            Text(feature.title)
+                                .font(.system(size: 15, weight: .semibold))
+                                .foregroundColor(.white)
+                            Spacer()
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.system(size: 17))
+                                .foregroundColor(.white.opacity(0.55))
+                        }
+                        .padding(.horizontal, 18)
+                        .padding(.vertical, 13)
+                        .background(
+                            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                .fill(Color.white.opacity(0.1))
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                .stroke(Color.white.opacity(0.18), lineWidth: 1)
+                        )
+                        .opacity(appeared ? 1 : 0)
+                        .offset(x: appeared ? 0 : 32)
+                        .animation(.spring(response: 0.5, dampingFraction: 0.8).delay(0.56 + Double(idx) * 0.1), value: appeared)
+                    }
+                }
+                .padding(.horizontal, 28)
+
                 Spacer()
                 Spacer()
             }
         }
         .onAppear {
-            withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
-                appeared = true
+            withAnimation { appeared = true }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                glowPulse = true
             }
         }
     }

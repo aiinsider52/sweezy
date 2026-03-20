@@ -13,8 +13,19 @@ struct AuthEntryView: View {
     @EnvironmentObject private var sessionManager: SessionManager
     @Environment(\.dismiss) private var dismiss
 
+    private let showsCloseButton: Bool
+    private let onComplete: (() -> Void)?
+
     @State private var activeDestination: AuthDestination?
     @State private var animateIcon = false
+
+    init(
+        showsCloseButton: Bool = true,
+        onComplete: (() -> Void)? = nil
+    ) {
+        self.showsCloseButton = showsCloseButton
+        self.onComplete = onComplete
+    }
 
     var body: some View {
         NavigationStack {
@@ -40,13 +51,15 @@ struct AuthEntryView: View {
             }
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.title3)
-                            .foregroundStyle(.white.opacity(0.6))
+                if showsCloseButton {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
+                            dismiss()
+                        } label: {
+                            Image(systemName: "xmark.circle.fill")
+                                .font(.title3)
+                                .foregroundStyle(.white.opacity(0.6))
+                        }
                     }
                 }
             }
@@ -71,6 +84,7 @@ struct AuthEntryView: View {
         }
         .onReceive(sessionManager.$state) { state in
             if case .authenticated = state {
+                onComplete?()
                 dismiss()
             }
         }
@@ -220,6 +234,7 @@ struct AuthEntryView: View {
 
             Button {
                 sessionManager.continueAsGuest()
+                onComplete?()
                 dismiss()
             } label: {
                 Text("auth.login.continue_as_guest")

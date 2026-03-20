@@ -74,6 +74,7 @@ struct MainAppContent: View {
     
     @State private var showGlobalReset: Bool = false
     @State private var resetToken: String? = nil
+    @State private var showPostOnboardingAuthEntry: Bool = false
     
     var body: some View {
         ZStack {
@@ -112,6 +113,30 @@ struct MainAppContent: View {
         .sheet(isPresented: $showGlobalReset) {
             PasswordResetSheet(initialEmail: lockManager.userEmail, initialToken: resetToken)
         }
+        .fullScreenCover(isPresented: $showPostOnboardingAuthEntry) {
+            AuthEntryView(
+                showsCloseButton: false,
+                onComplete: {
+                    appContainer.markInitialAuthChoiceCompleted()
+                    showPostOnboardingAuthEntry = false
+                }
+            )
+        }
+        .onAppear {
+            updatePostOnboardingAuthPresentation()
+        }
+        .onChange(of: appContainer.isOnboardingCompleted) { _, _ in
+            updatePostOnboardingAuthPresentation()
+        }
+        .onChange(of: appContainer.hasCompletedInitialAuthChoice) { _, _ in
+            updatePostOnboardingAuthPresentation()
+        }
+        .onChange(of: lockManager.isRegistered) { _, _ in
+            updatePostOnboardingAuthPresentation()
+        }
+        .onChange(of: sessionManager.isAuthenticated) { _, _ in
+            updatePostOnboardingAuthPresentation()
+        }
     }
     
     private var shouldShowLockOverlay: Bool {
@@ -137,5 +162,13 @@ struct MainAppContent: View {
         default:
             break
         }
+    }
+
+    private func updatePostOnboardingAuthPresentation() {
+        showPostOnboardingAuthEntry =
+            appContainer.isOnboardingCompleted &&
+            !appContainer.hasCompletedInitialAuthChoice &&
+            !lockManager.isRegistered &&
+            !sessionManager.isAuthenticated
     }
 }

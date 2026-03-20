@@ -102,6 +102,7 @@ class AppContainer: ObservableObject {
     
     // MARK: - State
     @Published var isOnboardingCompleted: Bool
+    @Published var hasCompletedInitialAuthChoice: Bool
     @Published var currentLocale: Locale
     @Published var userProfile: UserProfile?
     
@@ -127,6 +128,7 @@ class AppContainer: ObservableObject {
             UserDefaults.standard.removeObject(forKey: "onboarding_completed")
         }
         self.isOnboardingCompleted = UserDefaults.standard.bool(forKey: "onboarding_completed")
+        self.hasCompletedInitialAuthChoice = UserDefaults.standard.bool(forKey: "initial_auth_choice_completed")
         
         // Prefer previously selected locale, otherwise **always default to Ukrainian**.
         // We intentionally do NOT follow system language so that:
@@ -188,6 +190,11 @@ class AppContainer: ObservableObject {
     func completeOnboarding() {
         isOnboardingCompleted = true
         UserDefaults.standard.set(true, forKey: "onboarding_completed")
+    }
+
+    func markInitialAuthChoiceCompleted() {
+        hasCompletedInitialAuthChoice = true
+        UserDefaults.standard.set(true, forKey: "initial_auth_choice_completed")
     }
     
     func updateLocale(_ locale: Locale) {

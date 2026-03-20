@@ -511,114 +511,129 @@ private struct ChecklistProgressCard: View {
     private var isCompleted: Bool { completion >= 1.0 }
     private var isNotStarted: Bool { completedSteps.isEmpty }
     
+    private var statusColor: Color {
+        if isCompleted { return .green }
+        if !isNotStarted { return checklist.category.swiftUIColor }
+        return Color.gray.opacity(0.3)
+    }
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            HStack(alignment: .top, spacing: 14) {
-                // Icon with status
-                ZStack {
-                    RoundedRectangle(cornerRadius: 16)
-                        .fill(checklist.category.swiftUIColor.opacity(isCompleted ? 0.25 : 0.15))
-                        .frame(width: 60, height: 60)
-                    
-                    if isCompleted {
-                        Image(systemName: "checkmark.circle.fill")
-                            .font(.system(size: 28))
-                            .foregroundColor(Theme.Colors.primary)
-                    } else {
-                        Image(systemName: checklist.category.iconName)
-                            .font(.system(size: 26))
-                            .foregroundColor(checklist.category.swiftUIColor)
-                    }
-                }
-                
-                VStack(alignment: .leading, spacing: 6) {
-                    HStack {
-                        Text(checklist.title)
-                            .font(.system(size: 17, weight: .semibold, design: .rounded))
-                            .foregroundColor(Theme.Colors.textPrimary)
-                            .lineLimit(2)
-                        
-                        Spacer()
-                        
-                        // Status badges
+        HStack(spacing: 0) {
+            // Left status strip
+            RoundedRectangle(cornerRadius: 3, style: .continuous)
+                .fill(statusColor)
+                .frame(width: 5)
+                .padding(.vertical, 8)
+                .padding(.leading, 6)
+
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(alignment: .top, spacing: 12) {
+                    // Icon with status
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 14)
+                            .fill(isCompleted ? Color.green.opacity(0.12) : checklist.category.swiftUIColor.opacity(0.12))
+                            .frame(width: 54, height: 54)
+
                         if isCompleted {
-                            completedBadge
-                        } else if checklist.isNew {
-                            newBadge
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.system(size: 26))
+                                .foregroundColor(.green)
+                        } else {
+                            Image(systemName: checklist.category.iconName)
+                                .font(.system(size: 24))
+                                .foregroundColor(checklist.category.swiftUIColor)
                         }
                     }
-                    
-                    Text(checklist.description)
-                        .font(Theme.Typography.caption)
-                        .foregroundColor(Theme.Colors.textSecondary)
-                        .lineLimit(2)
-                    
-                    // Meta info
-                    HStack(spacing: 12) {
-                        Label(checklist.estimatedDuration, systemImage: "clock")
-                        Label(checklist.difficulty.localizedName, systemImage: "speedometer")
+
+                    VStack(alignment: .leading, spacing: 5) {
+                        HStack {
+                            Text(checklist.title)
+                                .font(.system(size: 16, weight: .semibold, design: .rounded))
+                                .foregroundColor(Theme.Colors.textPrimary)
+                                .lineLimit(2)
+
+                            Spacer()
+
+                            if isCompleted {
+                                completedBadge
+                            } else if checklist.isNew {
+                                newBadge
+                            }
+                        }
+
+                        Text(checklist.description)
+                            .font(Theme.Typography.caption)
+                            .foregroundColor(Theme.Colors.textSecondary)
+                            .lineLimit(2)
+
+                        HStack(spacing: 12) {
+                            Label(checklist.estimatedDuration, systemImage: "clock")
+                            Label(checklist.difficulty.localizedName, systemImage: "speedometer")
+                        }
+                        .font(.system(size: 11))
+                        .foregroundColor(Theme.Colors.textTertiary)
                     }
-                    .font(.system(size: 11))
-                    .foregroundColor(Theme.Colors.textTertiary)
                 }
-            }
-            
-            // Progress bar with glow
-            GeometryReader { geo in
-                ZStack(alignment: .leading) {
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(checklist.category.swiftUIColor.opacity(0.2))
-                        .frame(height: 8)
-                    
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(
-                            LinearGradient(
-                                colors: isCompleted 
-                                    ? [.green, .green.opacity(0.7)]
-                                    : [checklist.category.swiftUIColor, checklist.category.swiftUIColor.opacity(0.7)],
-                                startPoint: .leading,
-                                endPoint: .trailing
+
+                // Progress bar with glow
+                GeometryReader { geo in
+                    ZStack(alignment: .leading) {
+                        RoundedRectangle(cornerRadius: 4)
+                            .fill(checklist.category.swiftUIColor.opacity(0.15))
+                            .frame(height: 7)
+
+                        RoundedRectangle(cornerRadius: 4)
+                            .fill(
+                                LinearGradient(
+                                    colors: isCompleted
+                                        ? [.green, .green.opacity(0.7)]
+                                        : [checklist.category.swiftUIColor, checklist.category.swiftUIColor.opacity(0.7)],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
                             )
-                        )
-                        .frame(width: geo.size.width * completion, height: 8)
-                        .shadow(color: (isCompleted ? Color.green : checklist.category.swiftUIColor).opacity(0.5), radius: 4, x: 0, y: 0)
-                        .animation(.spring(response: 0.5), value: completion)
+                            .frame(width: geo.size.width * completion, height: 7)
+                            .shadow(color: (isCompleted ? Color.green : checklist.category.swiftUIColor).opacity(0.45), radius: 4, x: 0, y: 0)
+                            .animation(.spring(response: 0.5), value: completion)
+                    }
+                }
+                .frame(height: 7)
+
+                // Bottom stats
+                HStack {
+                    HStack(spacing: 5) {
+                        Image(systemName: isCompleted ? "checkmark.circle.fill" : "chart.bar.fill")
+                            .font(.system(size: 12))
+                            .foregroundColor(isCompleted ? .green : checklist.category.swiftUIColor)
+                        Text(isCompleted ? "Завершено" : "\(Int(completion * 100))%")
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundColor(isCompleted ? .green : Theme.Colors.textSecondary)
+                    }
+
+                    Spacer()
+
+                    Text("\(completedSteps.count)/\(checklist.steps.count) кроків")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(Theme.Colors.textSecondary)
+
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundColor(Theme.Colors.textTertiary)
+                        .padding(.leading, 6)
                 }
             }
-            .frame(height: 8)
-            
-            // Bottom stats
-            HStack {
-                HStack(spacing: 6) {
-                    Image(systemName: isCompleted ? "checkmark.circle.fill" : "chart.bar.fill")
-                        .font(.system(size: 12))
-                        .foregroundColor(isCompleted ? Theme.Colors.primary : checklist.category.swiftUIColor)
-                    Text(isCompleted ? "Завершено" : "\(Int(completion * 100))%")
-                        .font(.system(size: 13, weight: .medium))
-                        .foregroundColor(isCompleted ? Theme.Colors.primary : Theme.Colors.textSecondary)
-                }
-                
-                Spacer()
-                
-                Text("\(completedSteps.count)/\(checklist.steps.count)")
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundColor(Theme.Colors.textSecondary)
-                
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(Theme.Colors.textTertiary)
-            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 14)
         }
-        .padding(16)
         .background(.ultraThinMaterial)
-        .cornerRadius(20)
+        .cornerRadius(18)
         .overlay(
-            RoundedRectangle(cornerRadius: 20)
+            RoundedRectangle(cornerRadius: 18)
                 .stroke(
-                    isCompleted 
-                        ? Color.green.opacity(0.4)
-                        : (isNotStarted ? Theme.Colors.chipBorder : checklist.category.swiftUIColor.opacity(0.3)),
-                    lineWidth: isCompleted ? 2 : 1
+                    isCompleted
+                        ? Color.green.opacity(0.35)
+                        : (isNotStarted ? Theme.Colors.chipBorder : checklist.category.swiftUIColor.opacity(0.25)),
+                    lineWidth: isCompleted ? 1.5 : 1
                 )
         )
         .scaleEffect(isPressed ? 0.97 : 1)
@@ -970,24 +985,32 @@ struct ChecklistDetailView: View {
     }
     
     private var stepsSection: some View {
-        VStack(alignment: .leading, spacing: 14) {
+        VStack(alignment: .leading, spacing: 0) {
             HStack {
                 Text("Кроки")
                     .font(Theme.Typography.headline)
                     .foregroundColor(Theme.Colors.textPrimary)
-                
+
                 Spacer()
-                
+
                 let stepXP = GamificationXP.value(for: .checklistStepCompleted)
                 Text("+\(stepXP) XP за крок")
                     .font(.system(size: 11, weight: .semibold))
                     .foregroundColor(.orange)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Color.orange.opacity(0.1))
+                    .clipShape(Capsule())
             }
             .padding(.horizontal, Theme.Spacing.md)
-            
-            ForEach(sortedSteps) { step in
+            .padding(.bottom, 16)
+
+            ForEach(Array(sortedSteps.enumerated()), id: \.element.id) { index, step in
                 StepCard(
                     step: step,
+                    stepNumber: index + 1,
+                    isFirst: index == 0,
+                    isLast: index == sortedSteps.count - 1,
                     isCompleted: completedSteps.contains(step.id),
                     isExpanded: expandedSteps.contains(step.id),
                     categoryColor: checklist.category.swiftUIColor,
@@ -1081,156 +1104,195 @@ struct ChecklistDetailView: View {
     }
 }
 
-// MARK: - Step Card
+// MARK: - Step Card (Timeline style)
 
 private struct StepCard: View {
     let step: ChecklistStep
+    let stepNumber: Int
+    let isFirst: Bool
+    let isLast: Bool
     let isCompleted: Bool
     let isExpanded: Bool
     let categoryColor: Color
     var onToggle: () -> Void
     var onExpand: () -> Void
-    
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            // Main row
-            HStack(spacing: 14) {
-                // Checkbox
+        HStack(alignment: .top, spacing: 0) {
+            // Timeline column
+            VStack(spacing: 0) {
+                // Top connector line
+                Rectangle()
+                    .fill(
+                        isFirst ? Color.clear
+                        : (isCompleted ? categoryColor.opacity(0.5) : Theme.Colors.chipBorder)
+                    )
+                    .frame(width: 2, height: 18)
+
+                // Step circle (tap to toggle)
                 Button(action: onToggle) {
                     ZStack {
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(isCompleted ? categoryColor : Color.clear)
-                            .frame(width: 28, height: 28)
-                        
-                        RoundedRectangle(cornerRadius: 8)
+                        Circle()
+                            .fill(isCompleted ? categoryColor : Theme.Colors.primaryBackground)
+                            .frame(width: 34, height: 34)
+                            .shadow(color: isCompleted ? categoryColor.opacity(0.3) : .clear, radius: 4, x: 0, y: 2)
+
+                        Circle()
                             .stroke(isCompleted ? categoryColor : Theme.Colors.chipBorder, lineWidth: 2)
-                            .frame(width: 28, height: 28)
-                        
+                            .frame(width: 34, height: 34)
+
                         if isCompleted {
                             Image(systemName: "checkmark")
-                                .font(.system(size: 14, weight: .bold))
+                                .font(.system(size: 13, weight: .bold))
                                 .foregroundColor(.white)
+                        } else {
+                            Text("\(stepNumber)")
+                                .font(.system(size: 13, weight: .bold))
+                                .foregroundColor(Theme.Colors.textTertiary)
                         }
                     }
                 }
                 .accessibilityLabel(isCompleted ? "Скасувати виконання" : "Виконати крок")
                 .accessibilityHint(step.title)
-                
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(step.title)
-                        .font(.system(size: 15, weight: .medium))
-                        .foregroundColor(isCompleted ? Theme.Colors.textTertiary : Theme.Colors.textPrimary)
-                        .strikethrough(isCompleted)
-                    
-                    HStack(spacing: 10) {
-                        if let time = step.estimatedTime {
-                            Label(time, systemImage: "clock")
-                        }
-                        if step.isOptional {
-                            Text("Опціонально")
-                                .foregroundColor(.orange)
-                        }
-                    }
-                    .font(.system(size: 11))
-                    .foregroundColor(Theme.Colors.textTertiary)
-                }
-                
-                Spacer()
-                
-                // XP indicator
-                if !isCompleted {
-                    Text("+10")
-                        .font(.system(size: 11, weight: .bold))
-                        .foregroundColor(.orange)
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 3)
-                        .background(Color.orange.opacity(0.15))
-                        .cornerRadius(6)
-                }
-                
-                // Expand button
-                if !step.description.isEmpty || !step.links.isEmpty || !step.tips.isEmpty {
-                    Button(action: onExpand) {
-                        Image(systemName: "chevron.down")
-                            .font(.system(size: 12, weight: .semibold))
-                            .foregroundColor(categoryColor)
-                            .rotationEffect(.degrees(isExpanded ? 180 : 0))
-                    }
+
+                // Bottom connector line (fills remaining space)
+                if !isLast {
+                    Rectangle()
+                        .fill(isCompleted ? categoryColor.opacity(0.4) : Theme.Colors.chipBorder)
+                        .frame(width: 2)
+                        .frame(maxHeight: .infinity)
+                        .padding(.top, 0)
                 }
             }
-            .padding(14)
-            
-            // Expanded content
-            if isExpanded {
-                VStack(alignment: .leading, spacing: 12) {
-                    if !step.description.isEmpty {
-                        Text(step.description)
-                            .font(Theme.Typography.caption)
-                            .foregroundColor(Theme.Colors.textSecondary)
-                    }
-                    
-                    if !step.tips.isEmpty {
-                        VStack(alignment: .leading, spacing: 6) {
-                            Text("💡 Поради")
-                                .font(.system(size: 12, weight: .semibold))
-                                .foregroundColor(Theme.Colors.textPrimary)
-                            
-                            ForEach(step.tips, id: \.self) { tip in
-                                HStack(alignment: .top, spacing: 8) {
-                                    Circle()
-                                        .fill(categoryColor)
-                                        .frame(width: 4, height: 4)
-                                        .padding(.top, 6)
-                                    Text(tip)
-                                        .font(Theme.Typography.caption)
-                                        .foregroundColor(Theme.Colors.textSecondary)
-                                }
+            .frame(width: 34)
+            .padding(.leading, Theme.Spacing.md)
+
+            // Card content
+            VStack(alignment: .leading, spacing: 0) {
+                // Main row
+                HStack(spacing: 12) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(step.title)
+                            .font(.system(size: 15, weight: .medium))
+                            .foregroundColor(isCompleted ? Theme.Colors.textTertiary : Theme.Colors.textPrimary)
+                            .strikethrough(isCompleted, color: Theme.Colors.textTertiary)
+
+                        HStack(spacing: 10) {
+                            if let time = step.estimatedTime {
+                                Label(time, systemImage: "clock")
+                                    .foregroundColor(Theme.Colors.textTertiary)
+                            }
+                            if step.isOptional {
+                                Text("Опціонально")
+                                    .foregroundColor(.orange)
                             }
                         }
+                        .font(.system(size: 11))
                     }
-                    
-                    if !step.links.isEmpty {
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("🔗 Корисні посилання")
+
+                    Spacer()
+
+                    if !isCompleted {
+                        Text("+\(GamificationXP.value(for: .checklistStepCompleted))")
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundColor(.orange)
+                            .padding(.horizontal, 7)
+                            .padding(.vertical, 3)
+                            .background(Color.orange.opacity(0.12))
+                            .clipShape(Capsule())
+                    }
+
+                    if !step.description.isEmpty || !step.links.isEmpty || !step.tips.isEmpty {
+                        Button(action: onExpand) {
+                            Image(systemName: "chevron.down")
                                 .font(.system(size: 12, weight: .semibold))
-                                .foregroundColor(Theme.Colors.textPrimary)
-                            
-                            ForEach(step.links) { link in
-                                Button {
-                                    if let url = URL(string: link.url) {
-                                        UIApplication.shared.open(url)
-                                    }
-                                } label: {
-                                    HStack(spacing: 8) {
-                                        Image(systemName: "link")
-                                            .font(.system(size: 12))
-                                        Text(link.title)
-                                            .font(.system(size: 13))
-                                        Spacer()
-                                        Image(systemName: "arrow.up.right")
-                                            .font(.system(size: 10))
-                                    }
-                                    .foregroundColor(categoryColor)
-                                    .padding(10)
-                                    .background(categoryColor.opacity(0.1))
-                                    .cornerRadius(10)
-                                }
-                            }
+                                .foregroundColor(categoryColor)
+                                .rotationEffect(.degrees(isExpanded ? 180 : 0))
+                                .animation(.spring(response: 0.3), value: isExpanded)
                         }
                     }
                 }
                 .padding(.horizontal, 14)
-                .padding(.bottom, 14)
-                .transition(.opacity.combined(with: .move(edge: .top)))
+                .padding(.top, 14)
+                .padding(.bottom, isExpanded ? 8 : 14)
+
+                // Expanded content
+                if isExpanded {
+                    VStack(alignment: .leading, spacing: 12) {
+                        if !step.description.isEmpty {
+                            Text(step.description)
+                                .font(Theme.Typography.caption)
+                                .foregroundColor(Theme.Colors.textSecondary)
+                        }
+
+                        if !step.tips.isEmpty {
+                            VStack(alignment: .leading, spacing: 6) {
+                                Label("Поради", systemImage: "lightbulb.fill")
+                                    .font(.system(size: 12, weight: .semibold))
+                                    .foregroundColor(Theme.Colors.textPrimary)
+
+                                ForEach(step.tips, id: \.self) { tip in
+                                    HStack(alignment: .top, spacing: 8) {
+                                        Circle()
+                                            .fill(categoryColor)
+                                            .frame(width: 5, height: 5)
+                                            .padding(.top, 5)
+                                        Text(tip)
+                                            .font(Theme.Typography.caption)
+                                            .foregroundColor(Theme.Colors.textSecondary)
+                                    }
+                                }
+                            }
+                        }
+
+                        if !step.links.isEmpty {
+                            VStack(alignment: .leading, spacing: 8) {
+                                Label("Корисні посилання", systemImage: "link")
+                                    .font(.system(size: 12, weight: .semibold))
+                                    .foregroundColor(Theme.Colors.textPrimary)
+
+                                ForEach(step.links) { link in
+                                    Button {
+                                        if let url = URL(string: link.url) {
+                                            UIApplication.shared.open(url)
+                                        }
+                                    } label: {
+                                        HStack(spacing: 8) {
+                                            Text(link.title)
+                                                .font(.system(size: 13))
+                                            Spacer()
+                                            Image(systemName: "arrow.up.right")
+                                                .font(.system(size: 10))
+                                        }
+                                        .foregroundColor(categoryColor)
+                                        .padding(10)
+                                        .background(categoryColor.opacity(0.08))
+                                        .cornerRadius(10)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 14)
+                    .padding(.bottom, 14)
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+                }
             }
+            .background(
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .fill(.ultraThinMaterial)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .stroke(
+                        isCompleted ? categoryColor.opacity(0.25) : Theme.Colors.chipBorder,
+                        lineWidth: 1
+                    )
+            )
+            .padding(.leading, 14)
+            .padding(.trailing, Theme.Spacing.md)
         }
-        .background(.ultraThinMaterial)
-        .cornerRadius(16)
-        .overlay(
-            RoundedRectangle(cornerRadius: 16)
-                .stroke(isCompleted ? Color.green.opacity(0.3) : Theme.Colors.chipBorder, lineWidth: 1)
-        )
-        .padding(.horizontal, Theme.Spacing.md)
+        .padding(.bottom, isLast ? 0 : 4)
     }
 }
 

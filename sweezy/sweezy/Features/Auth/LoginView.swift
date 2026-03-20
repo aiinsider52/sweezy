@@ -438,6 +438,10 @@ struct LoginView: View {
             if var profile = appContainer.userProfile {
                 profile.email = email
                 appContainer.userProfile = profile
+                sessionManager.activateAuthenticatedSession(
+                    email: email,
+                    name: profile.fullName.isEmpty ? nil : profile.fullName
+                )
             } else {
                 var profile = UserProfile()
                 // Derive a readable name from email local-part if possible
@@ -446,6 +450,10 @@ struct LoginView: View {
                 profile.email = email
                 profile.preferredLanguage = appContainer.currentLocale.identifier
                 appContainer.userProfile = profile
+                sessionManager.activateAuthenticatedSession(
+                    email: email,
+                    name: profile.fullName
+                )
             }
             dismiss()
         } catch {

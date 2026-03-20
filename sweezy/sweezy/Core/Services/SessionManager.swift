@@ -99,6 +99,19 @@ final class SessionManager: ObservableObject {
         state = .guest
     }
 
+    /// Force an immediate authenticated state update after login/registration.
+    /// This avoids waiting for downstream storage propagation before the whole app reacts.
+    func activateAuthenticatedSession(email: String, name: String?) {
+        let trimmedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedName = name?.trimmingCharacters(in: .whitespacesAndNewlines)
+        state = .authenticated(
+            User(
+                email: trimmedEmail.isEmpty ? "user@local" : trimmedEmail,
+                name: (trimmedName?.isEmpty == false) ? trimmedName : nil
+            )
+        )
+    }
+
     // MARK: - Internal
 
     private func recomputeStateFromStorage() {

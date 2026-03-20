@@ -101,44 +101,47 @@ struct DovidnykView: View {
     
     // MARK: - Tab Switcher
     private var tabSwitcher: some View {
-        HStack(spacing: 0) {
+        HStack(spacing: 6) {
             ForEach(DovidnykTab.allCases, id: \.self) { tab in
                 Button {
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
                         selectedTab = tab
                     }
                     haptic(.light)
                 } label: {
-                    VStack(spacing: 6) {
-                        HStack(spacing: 6) {
-                            Image(systemName: tab.icon)
-                                .font(.system(size: 14, weight: .semibold))
-                            Text(tab.title)
-                                .font(.system(size: 15, weight: .semibold))
-                            
-                            // Winter snowflake on active tab
+                    HStack(spacing: 7) {
+                        Image(systemName: tab.icon)
+                            .font(.system(size: 13, weight: .semibold))
+                        Text(tab.title)
+                            .font(.system(size: 14, weight: selectedTab == tab ? .semibold : .medium))
+                    }
+                    .foregroundColor(selectedTab == tab ? .white : Theme.Colors.textSecondary)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 10)
+                    .background(
+                        Group {
                             if selectedTab == tab {
-                                Text("❄️")
-                                    .font(.system(size: 10))
+                                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                    .fill(Theme.Colors.primary)
+                                    .shadow(color: Theme.Colors.primary.opacity(0.3), radius: 6, x: 0, y: 3)
                             }
                         }
-                        .foregroundColor(selectedTab == tab ? Color.cyan : Theme.Colors.textTertiary)
-                        .padding(.vertical, 10)
-                        .frame(maxWidth: .infinity)
-                        
-                        // Indicator
-                        Rectangle()
-                            .fill(selectedTab == tab ? Color.cyan : Color.clear)
-                            .frame(height: 3)
-                            .cornerRadius(1.5)
-                    }
+                    )
                 }
                 .buttonStyle(.plain)
+                .animation(.spring(response: 0.35, dampingFraction: 0.8), value: selectedTab)
             }
         }
+        .padding(5)
+        .background(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .fill(Theme.Colors.adaptiveCard)
+        )
         .padding(.horizontal, Theme.Spacing.md)
-        .background(Theme.Colors.adaptiveSurface
-            .shadow(.drop(color: Color.cyan.opacity(0.08), radius: 4, x: 0, y: 2))
+        .padding(.vertical, 8)
+        .background(
+            Theme.Colors.primaryBackground
+                .shadow(.drop(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2))
         )
     }
 }
@@ -276,60 +279,100 @@ struct GuidesContentView: View {
             GuideDetailView(guide: guide)
         } label: {
             ZStack(alignment: .bottomLeading) {
-                // Background
-                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                // Background gradient
+                RoundedRectangle(cornerRadius: 22, style: .continuous)
                     .fill(
                         LinearGradient(
-                            colors: [guide.category.swiftUIColor, guide.category.swiftUIColor.opacity(0.7)],
+                            colors: [
+                                guide.category.swiftUIColor.opacity(0.95),
+                                guide.category.swiftUIColor.opacity(0.6)
+                            ],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )
                     )
-                    .frame(height: 180)
-                
-                
+                    .frame(height: 210)
+
+                // Decorative large icon
+                Image(systemName: guide.category.iconName)
+                    .font(.system(size: 110, weight: .thin))
+                    .foregroundColor(.white.opacity(0.12))
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .trailing)
+                    .offset(x: -16, y: -10)
+
+                // Dark gradient overlay at bottom for text legibility
+                LinearGradient(
+                    colors: [.clear, .black.opacity(0.3)],
+                    startPoint: .center,
+                    endPoint: .bottom
+                )
+                .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+
                 // Content
-                VStack(alignment: .leading, spacing: 8) {
-                    // Badge
-                    HStack {
-                        if guide.isNew {
+                VStack(alignment: .leading, spacing: 10) {
+                    // Top badges row
+                    HStack(spacing: 8) {
+                        HStack(spacing: 5) {
+                            Image(systemName: guide.category.iconName)
+                                .font(.system(size: 10, weight: .semibold))
+                            Text(guide.category.localizedName)
+                                .font(.system(size: 11, weight: .semibold))
+                        }
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 5)
+                        .background(.ultraThinMaterial)
+                        .clipShape(Capsule())
+
+                        if appContainer.userStats.isGuideRead(id: guide.id) {
+                            HStack(spacing: 4) {
+                                Image(systemName: "checkmark.circle.fill")
+                                Text("Прочитано")
+                            }
+                            .font(.system(size: 11, weight: .semibold))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 5)
+                            .background(Capsule().fill(Color.green.opacity(0.7)))
+                        } else {
                             Text("Рекомендовано")
-                                .font(.caption.bold())
-                                .padding(.horizontal, 10)
-                                .padding(.vertical, 4)
-                                .background(Capsule().fill(Color.white.opacity(0.25)))
+                                .font(.system(size: 11, weight: .semibold))
                                 .foregroundColor(.white)
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 5)
+                                .background(Capsule().fill(Color.white.opacity(0.2)))
                         }
                         Spacer()
-                        Image(systemName: guide.category.iconName)
-                            .font(.title2)
-                            .foregroundColor(.white.opacity(0.8))
                     }
-                    
+
                     Spacer()
-                    
+
                     Text(guide.title)
-                        .font(.title3.bold())
+                        .font(.system(size: 21, weight: .bold, design: .rounded))
                         .foregroundColor(.white)
                         .lineLimit(2)
-                    
+
                     if let subtitle = guide.subtitle {
                         Text(subtitle)
-                            .font(.subheadline)
-                            .foregroundColor(.white.opacity(0.9))
-                            .lineLimit(2)
+                            .font(.system(size: 13))
+                            .foregroundColor(.white.opacity(0.85))
+                            .lineLimit(1)
                     }
-                    
-                    HStack(spacing: 12) {
-                        Label("\(guide.estimatedReadingTime) хв", systemImage: "clock")
-                        Label(guide.category.localizedName, systemImage: "folder")
+
+                    HStack(spacing: 14) {
+                        Label("\(guide.estimatedReadingTime) хв читання", systemImage: "clock")
+                        if !guide.tags.isEmpty {
+                            Label(guide.tags.prefix(2).joined(separator: ", "), systemImage: "tag")
+                                .lineLimit(1)
+                        }
                     }
-                    .font(.caption)
-                    .foregroundColor(.white.opacity(0.8))
+                    .font(.system(size: 12))
+                    .foregroundColor(.white.opacity(0.75))
                 }
-                .padding(20)
-                
+                .padding(18)
             }
+            .frame(height: 210)
+            .shadow(color: guide.category.swiftUIColor.opacity(0.35), radius: 14, x: 0, y: 6)
         }
         .buttonStyle(.plain)
     }
@@ -403,91 +446,78 @@ struct GuideCardCompact: View {
     }
     
     var body: some View {
-        HStack(spacing: 14) {
-            // Icon
-            ZStack {
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .fill(guide.category.swiftUIColor.opacity(0.15))
-                    .frame(width: 56, height: 56)
-                
-                Image(systemName: guide.category.iconName)
-                    .font(.title2)
-                    .foregroundColor(guide.category.swiftUIColor)
-                
-            }
-            
-            // Content
-            VStack(alignment: .leading, spacing: 4) {
-                HStack(spacing: 6) {
-                    Text(guide.title)
-                        .font(.subheadline.bold())
-                        .foregroundColor(Theme.Colors.textPrimary)
-                        .lineLimit(2)
-                    
-                    if guide.isNew {
-                        Text("New")
-                            .font(.caption2.bold())
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(Theme.Colors.success)
-                            .foregroundColor(.white)
-                            .cornerRadius(4)
-                    }
+        HStack(spacing: 0) {
+            // Left accent strip (colored by category, green if read)
+            RoundedRectangle(cornerRadius: 2.5, style: .continuous)
+                .fill(isRead ? Theme.Colors.success : guide.category.swiftUIColor)
+                .frame(width: 4)
+                .padding(.vertical, 10)
+                .padding(.leading, 6)
+
+            HStack(spacing: 12) {
+                // Icon
+                ZStack {
+                    RoundedRectangle(cornerRadius: 11, style: .continuous)
+                        .fill(guide.category.swiftUIColor.opacity(isRead ? 0.08 : 0.13))
+                        .frame(width: 50, height: 50)
+                    Image(systemName: isRead ? "checkmark.circle.fill" : guide.category.iconName)
+                        .font(.system(size: 20, weight: .medium))
+                        .foregroundColor(isRead ? Theme.Colors.success : guide.category.swiftUIColor)
                 }
-                
-                if let subtitle = guide.subtitle {
-                    Text(subtitle)
-                        .font(.caption)
-                        .foregroundColor(Theme.Colors.textSecondary)
-                        .lineLimit(1)
-                }
-                
-                HStack(spacing: 8) {
-                    // Category
-                    Text(guide.category.localizedName)
-                        .font(.caption2)
-                        .foregroundColor(Theme.Colors.textTertiary)
-                    
-                    // Related checklist indicator
-                    if hasRelatedChecklist {
-                        HStack(spacing: 2) {
-                            Image(systemName: "checklist")
-                                .font(.caption2)
-                            Text("+ чек-лист")
-                                .font(.caption2)
+
+                // Content
+                VStack(alignment: .leading, spacing: 3) {
+                    HStack(spacing: 6) {
+                        Text(guide.title)
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundColor(isRead ? Theme.Colors.textSecondary : Theme.Colors.textPrimary)
+                            .lineLimit(2)
+                        if guide.isNew {
+                            Text("New")
+                                .font(.system(size: 9, weight: .bold))
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 5)
+                                .padding(.vertical, 2)
+                                .background(Capsule().fill(Color.red))
                         }
-                        .foregroundColor(Theme.Colors.success)
                     }
-                    
-                    Spacer()
-                    
-                    // Read indicator
-                    if isRead {
-                        Image(systemName: "checkmark.circle.fill")
-                            .font(.caption)
-                            .foregroundColor(Theme.Colors.success)
+
+                    if let subtitle = guide.subtitle {
+                        Text(subtitle)
+                            .font(.system(size: 12))
+                            .foregroundColor(Theme.Colors.textSecondary)
+                            .lineLimit(1)
                     }
-                    
-                    // TEMPORARY (App Store review): no subscription locks in this build.
+
+                    HStack(spacing: 10) {
+                        Label("\(guide.estimatedReadingTime) хв", systemImage: "clock")
+                            .font(.system(size: 11))
+                            .foregroundColor(Theme.Colors.textTertiary)
+                        if hasRelatedChecklist {
+                            Label("+ чек-лист", systemImage: "checklist")
+                                .font(.system(size: 11))
+                                .foregroundColor(Theme.Colors.primary.opacity(0.8))
+                        }
+                    }
                 }
+
+                Spacer(minLength: 0)
+
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundColor(Theme.Colors.textTertiary)
             }
-            
-            Spacer(minLength: 0)
-            
-            // Arrow
-            Image(systemName: "chevron.right")
-                .font(.caption)
-                .foregroundColor(Theme.Colors.textTertiary)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 13)
         }
-        .padding(14)
         .background(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
                 .fill(Color(.secondarySystemBackground))
         )
         .overlay(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
                 .stroke(
-                    Color.gray.opacity(0.15),
+                    isRead ? Theme.Colors.success.opacity(0.2) : Color.gray.opacity(0.1),
                     lineWidth: 1
                 )
         )
@@ -571,65 +601,72 @@ struct ChecklistsContentView: View {
     private var progressCard: some View {
         let progress = overallProgress
         let percent = Int(progress.percentage * 100)
-        
-        return HStack(spacing: 16) {
-            // Progress ring
-            ZStack {
-                Circle()
-                    .stroke(
-                        Color.gray.opacity(0.2),
-                        lineWidth: 6
-                    )
-                    .frame(width: 60, height: 60)
-                
-                Circle()
-                    .trim(from: 0, to: progress.percentage)
-                    .stroke(
-                        LinearGradient(
-                            colors: [Theme.Colors.accent, Theme.Colors.accentTurquoise],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ),
-                        style: StrokeStyle(lineWidth: 6, lineCap: .round)
-                    )
-                    .frame(width: 60, height: 60)
-                    .rotationEffect(.degrees(-90))
-                    .shadow(color: Color.clear, radius: 4)
-                
-                Text("\(percent)%")
-                    .font(.system(size: 14, weight: .bold, design: .rounded))
-                    .foregroundColor(Theme.Colors.textPrimary)
-            }
-            
-            VStack(alignment: .leading, spacing: 4) {
-                HStack(spacing: 4) {
-                    Text("Ваш прогрес")
-                        .font(.headline)
-                        .foregroundColor(Theme.Colors.textPrimary)
-                }
-                
-                Text("\(progress.completed) з \(progress.total) завдань виконано")
-                    .font(.subheadline)
-                    .foregroundColor(Theme.Colors.textSecondary)
-                
-                Text(progressMessage(for: percent))
-                    .font(.caption)
-                    .foregroundColor(Theme.Colors.accent)
-            }
-            
-            Spacer()
-        }
-        .padding(16)
-        .background(
+        let isAllDone = progress.total > 0 && progress.completed == progress.total
+
+        return ZStack {
             RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .fill(Color(.secondarySystemBackground))
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .stroke(
-                    Color.gray.opacity(0.15),
-                    lineWidth: 1
+                .fill(
+                    LinearGradient(
+                        colors: isAllDone
+                            ? [Color.green.opacity(0.85), Color.green.opacity(0.55)]
+                            : [Theme.Colors.accentTurquoise.opacity(0.9), Theme.Colors.accent.opacity(0.65)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
                 )
+
+            // Decorative circle
+            Circle()
+                .fill(.white.opacity(0.07))
+                .frame(width: 100, height: 100)
+                .offset(x: 100, y: -30)
+
+            HStack(spacing: 18) {
+                // Circular progress
+                ZStack {
+                    Circle()
+                        .stroke(.white.opacity(0.3), lineWidth: 8)
+                        .frame(width: 76, height: 76)
+
+                    Circle()
+                        .trim(from: 0, to: progress.percentage)
+                        .stroke(.white, style: StrokeStyle(lineWidth: 8, lineCap: .round))
+                        .frame(width: 76, height: 76)
+                        .rotationEffect(.degrees(-90))
+                        .animation(.spring(response: 0.8), value: progress.percentage)
+
+                    VStack(spacing: 1) {
+                        Text("\(percent)%")
+                            .font(.system(size: 20, weight: .bold, design: .rounded))
+                            .foregroundColor(.white)
+                        Text("готово")
+                            .font(.system(size: 10))
+                            .foregroundColor(.white.opacity(0.8))
+                    }
+                }
+
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(isAllDone ? "Все виконано! 🏆" : "Ваш прогрес")
+                        .font(.system(size: 17, weight: .bold, design: .rounded))
+                        .foregroundColor(.white)
+
+                    Text("\(progress.completed) з \(progress.total) завдань")
+                        .font(.system(size: 13))
+                        .foregroundColor(.white.opacity(0.9))
+
+                    Text(progressMessage(for: percent))
+                        .font(.system(size: 12))
+                        .foregroundColor(.white.opacity(0.75))
+                }
+
+                Spacer()
+            }
+            .padding(18)
+        }
+        .frame(height: 130)
+        .shadow(
+            color: (isAllDone ? Color.green : Theme.Colors.accentTurquoise).opacity(0.3),
+            radius: 12, x: 0, y: 6
         )
     }
     
@@ -732,111 +769,104 @@ struct ChecklistCardCompact: View {
         }
     }
     
+    private var statusStripColor: Color {
+        if isCompleted { return Theme.Colors.success }
+        if progress > 0 { return checklist.category.swiftUIColor }
+        return Color.gray.opacity(0.3)
+    }
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(spacing: 14) {
-                // Icon
-                ZStack {
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .fill(isCompleted ? Theme.Colors.success.opacity(0.15) : checklist.category.swiftUIColor.opacity(0.15))
-                        .frame(width: 56, height: 56)
-                    
-                    Image(systemName: isCompleted ? "checkmark.circle.fill" : checklist.category.iconName)
-                        .font(.title2)
-                        .foregroundColor(isCompleted ? Theme.Colors.success : checklist.category.swiftUIColor)
-                    
-                }
-                
-                // Content
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack(spacing: 6) {
-                        Text(checklist.title)
-                            .font(.subheadline.bold())
-                            .foregroundColor(Theme.Colors.textPrimary)
-                            .lineLimit(2)
-                        
-                        if isCompleted {
-                            Text("Готово")
-                                .font(.caption2.bold())
-                                .padding(.horizontal, 6)
-                                .padding(.vertical, 2)
-                                .background(Theme.Colors.success)
-                                .foregroundColor(.white)
-                                .cornerRadius(4)
-                        } else if checklist.isNew {
-                            Text("New")
-                                .font(.caption2.bold())
-                                .padding(.horizontal, 6)
-                                .padding(.vertical, 2)
-                                .background(Theme.Colors.accent)
-                                .foregroundColor(.white)
-                                .cornerRadius(4)
-                        }
+        HStack(spacing: 0) {
+            // Left status strip
+            RoundedRectangle(cornerRadius: 2.5, style: .continuous)
+                .fill(statusStripColor)
+                .frame(width: 4)
+                .padding(.vertical, 10)
+                .padding(.leading, 6)
+
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(spacing: 12) {
+                    // Icon
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 11, style: .continuous)
+                            .fill(isCompleted ? Theme.Colors.success.opacity(0.12) : checklist.category.swiftUIColor.opacity(0.12))
+                            .frame(width: 50, height: 50)
+                        Image(systemName: isCompleted ? "checkmark.circle.fill" : checklist.category.iconName)
+                            .font(.system(size: 20, weight: .medium))
+                            .foregroundColor(isCompleted ? Theme.Colors.success : checklist.category.swiftUIColor)
                     }
-                    
-                    Text(checklist.description)
-                        .font(.caption)
-                        .foregroundColor(Theme.Colors.textSecondary)
-                        .lineLimit(1)
-                    
-                    HStack(spacing: 8) {
-                        // Duration
-                        Label(checklist.estimatedDuration, systemImage: "clock")
-                            .font(.caption2)
-                            .foregroundColor(Theme.Colors.textTertiary)
-                        
-                        // Related guide indicator
-                        if hasRelatedGuide {
-                            HStack(spacing: 2) {
-                                Image(systemName: "book.fill")
-                                    .font(.caption2)
-                                Text("+ гайд")
-                                    .font(.caption2)
+
+                    // Content
+                    VStack(alignment: .leading, spacing: 3) {
+                        HStack(spacing: 6) {
+                            Text(checklist.title)
+                                .font(.system(size: 15, weight: .semibold))
+                                .foregroundColor(Theme.Colors.textPrimary)
+                                .lineLimit(2)
+                            Spacer()
+                            if isCompleted {
+                                Text("Готово")
+                                    .font(.system(size: 9, weight: .bold))
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 6)
+                                    .padding(.vertical, 2)
+                                    .background(Capsule().fill(Theme.Colors.success))
+                            } else if checklist.isNew {
+                                Text("New")
+                                    .font(.system(size: 9, weight: .bold))
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 6)
+                                    .padding(.vertical, 2)
+                                    .background(Capsule().fill(Theme.Colors.accent))
                             }
-                            .foregroundColor(Theme.Colors.info)
                         }
-                        
-                        Spacer()
-                        
-                        // Steps count
-                        Text("\(completedSteps)/\(checklist.steps.count)")
-                            .font(.caption.bold())
+
+                        Text(checklist.description)
+                            .font(.system(size: 12))
                             .foregroundColor(Theme.Colors.textSecondary)
+                            .lineLimit(1)
+
+                        HStack(spacing: 10) {
+                            Label(checklist.estimatedDuration, systemImage: "clock")
+                                .font(.system(size: 11))
+                                .foregroundColor(Theme.Colors.textTertiary)
+                            Spacer()
+                            Text("\(completedSteps)/\(checklist.steps.count) кроків")
+                                .font(.system(size: 11, weight: .semibold))
+                                .foregroundColor(isCompleted ? Theme.Colors.success : Theme.Colors.textSecondary)
+                        }
+                    }
+
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundColor(Theme.Colors.textTertiary)
+                }
+
+                // Progress bar
+                GeometryReader { geo in
+                    ZStack(alignment: .leading) {
+                        RoundedRectangle(cornerRadius: 3)
+                            .fill(Color.gray.opacity(0.15))
+                            .frame(height: 5)
+                        RoundedRectangle(cornerRadius: 3)
+                            .fill(isCompleted ? Theme.Colors.success : checklist.category.swiftUIColor)
+                            .frame(width: geo.size.width * progress, height: 5)
+                            .animation(.spring(response: 0.4), value: progress)
                     }
                 }
-                
-                Spacer(minLength: 0)
-                
-                // Arrow
-                Image(systemName: "chevron.right")
-                    .font(.caption)
-                    .foregroundColor(Theme.Colors.textTertiary)
+                .frame(height: 5)
             }
-            
-            GeometryReader { geo in
-                ZStack(alignment: .leading) {
-                    RoundedRectangle(cornerRadius: 2)
-                        .fill(Color.gray.opacity(0.2))
-                        .frame(height: 4)
-                    
-                    RoundedRectangle(cornerRadius: 2)
-                        .fill(isCompleted ? Theme.Colors.success : checklist.category.swiftUIColor)
-                        .frame(width: geo.size.width * progress, height: 4)
-                }
-            }
-            .frame(height: 4)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 12)
         }
-        .padding(14)
         .background(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
                 .fill(Color(.secondarySystemBackground))
         )
         .overlay(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
                 .stroke(
-                    isCompleted 
-                        ? Theme.Colors.success.opacity(0.3) 
-                        : Color.gray.opacity(0.15),
+                    isCompleted ? Theme.Colors.success.opacity(0.25) : Color.gray.opacity(0.1),
                     lineWidth: 1
                 )
         )

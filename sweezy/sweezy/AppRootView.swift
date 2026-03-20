@@ -11,9 +11,11 @@ struct AppRootView: View {
     @EnvironmentObject private var appContainer: AppContainer
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var lockManager: AppLockManager
+    @EnvironmentObject private var sessionManager: SessionManager
     @Environment(\.scenePhase) private var scenePhase
     @State private var showGlobalReset: Bool = false
     @State private var resetToken: String? = nil
+    @State private var showPostOnboardingAuthEntry: Bool = false
     
     var body: some View {
         mainContent
@@ -28,6 +30,30 @@ struct AppRootView: View {
             .sheet(isPresented: $showGlobalReset) {
                 PasswordResetSheet(initialEmail: lockManager.userEmail, initialToken: resetToken)
             }
+            .fullScreenCover(isPresented: $showPostOnboardingAuthEntry) {
+                AuthEntryView(
+                    showsCloseButton: false,
+                    onComplete: {
+                        appContainer.markInitialAuthChoiceCompleted()
+                        showPostOnboardingAuthEntry = false
+                    }
+                )
+            }
+            .onAppear {
+                updatePostOnboardingAuthPresentation()
+            }
+            .onChange(of: appContainer.isOnboardingCompleted) { _, _ in
+                updatePostOnboardingAuthPresentation()
+            }
+            .onChange(of: appContainer.hasCompletedInitialAuthChoice) { _, _ in
+                updatePostOnboardingAuthPresentation()
+            }
+            .onChange(of: lockManager.isRegistered) { _, _ in
+                updatePostOnboardingAuthPresentation()
+            }
+            .onChange(of: sessionManager.isAuthenticated) { _, _ in
+                updatePostOnboardingAuthPresentation()
+            }
             .task {
                 lockManager.loadBiometryType()
             }
@@ -36,14 +62,10 @@ struct AppRootView: View {
     @ViewBuilder
     private var mainContent: some View {
         if appContainer.isOnboardingCompleted {
-            if lockManager.isRegistered {
-                if lockManager.biometricsEnabled && lockManager.isLocked {
-                    BiometricUnlockView()
-                } else {
-                    MainTabView()
-                }
+            if lockManager.biometricsEnabled && lockManager.isLocked {
+                BiometricUnlockView()
             } else {
-                RegistrationView()
+                MainTabView()
             }
         } else {
             OnboardingViewRedesigned()
@@ -70,6 +92,14 @@ struct AppRootView: View {
             break
         }
     }
+
+    private func updatePostOnboardingAuthPresentation() {
+        showPostOnboardingAuthEntry =
+            appContainer.isOnboardingCompleted &&
+            !appContainer.hasCompletedInitialAuthChoice &&
+            !lockManager.isRegistered &&
+            !sessionManager.isAuthenticated
+    }
 }
 
 #if DEBUG
@@ -78,6 +108,7 @@ struct AppRootView: View {
         .environmentObject(AppContainer())
         .environmentObject(ThemeManager())
         .environmentObject(AppLockManager())
+        .environmentObject(SessionManager(lockManager: AppLockManager()))
 }
 #endif
 

@@ -273,65 +273,68 @@ struct GuidesView: View {
     }
     
     private func compactGuideCard(_ guide: Guide) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
-            // Hero area
-            ZStack(alignment: .topTrailing) {
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
+        let isRead = appContainer.userStats.isGuideRead(id: guide.id)
+        return VStack(alignment: .leading, spacing: 0) {
+            // Hero area with gradient
+            ZStack(alignment: .bottomLeading) {
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
                     .fill(
                         LinearGradient(
-                            colors: [guide.category.swiftUIColor.opacity(0.25), guide.category.swiftUIColor.opacity(0.1)],
+                            colors: [guide.category.swiftUIColor.opacity(0.85), guide.category.swiftUIColor.opacity(0.5)],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )
                     )
-                    .frame(width: 160, height: 100)
-                    .overlay(
-                        Image(systemName: guide.category.iconName)
-                            .font(.system(size: 36))
-                            .foregroundColor(guide.category.swiftUIColor.opacity(0.5))
-                    )
-                
-                // Badges
-                HStack(spacing: 4) {
-                    if guide.isNew {
-                        smallBadge("NEW", color: .red)
-                    }
-                    if guide.isPremium && !isPremium {
-                        smallBadge("PRO", color: .yellow)
-                    }
-                    let quotaLocked = (!isPremium && appContainer.userStats.guidesReadCount >= freeGuidesLimit && !appContainer.userStats.isGuideRead(id: guide.id))
-                    if quotaLocked {
-                        Image(systemName: "lock.fill")
-                            .font(.system(size: 12))
-                            .foregroundColor(.gray)
-                    }
-                    if appContainer.userStats.isGuideRead(id: guide.id) {
+                    .frame(width: 165, height: 95)
+
+                // Decorative icon
+                Image(systemName: guide.category.iconName)
+                    .font(.system(size: 44, weight: .thin))
+                    .foregroundColor(.white.opacity(0.2))
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .trailing)
+                    .offset(x: -8, y: -6)
+
+                // Bottom: time + read badge
+                HStack(spacing: 6) {
+                    Label("\(guide.estimatedReadingTime) хв", systemImage: "clock")
+                        .font(.system(size: 10, weight: .medium))
+                        .foregroundColor(.white.opacity(0.9))
+                    Spacer()
+                    if isRead {
                         Image(systemName: "checkmark.circle.fill")
                             .font(.system(size: 14))
-                            .foregroundColor(.green)
+                            .foregroundColor(.white)
+                    } else if guide.isNew {
+                        smallBadge("NEW", color: .red)
+                    } else if guide.isPremium && !isPremium {
+                        smallBadge("PRO", color: .yellow)
                     }
                 }
-                .padding(8)
+                .padding(.horizontal, 10)
+                .padding(.bottom, 8)
             }
-            
+            .frame(width: 165, height: 95)
+
             // Title
             Text(guide.title)
-                .font(Theme.Typography.subheadline)
-                .fontWeight(.semibold)
-                .foregroundColor(Theme.Colors.textPrimary)
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundColor(isRead ? Theme.Colors.textSecondary : Theme.Colors.textPrimary)
                 .lineLimit(2)
-                .frame(width: 160, alignment: .leading)
-            
-            // Meta
-            HStack(spacing: 6) {
-                Image(systemName: "clock")
-                    .font(.system(size: 10))
-                Text("\(guide.estimatedReadingTime) хв")
-                    .font(.system(size: 11))
-            }
-            .foregroundColor(Theme.Colors.textTertiary)
+                .frame(width: 165, alignment: .leading)
+                .padding(.horizontal, 4)
+                .padding(.top, 8)
+                .padding(.bottom, 4)
         }
-        .frame(width: 160)
+        .frame(width: 165)
+        .background(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(Theme.Colors.secondaryBackground)
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .stroke(isRead ? Color.green.opacity(0.2) : Theme.Colors.chipBorder, lineWidth: 1)
+        )
     }
     
     // MARK: - Filtered List
@@ -352,66 +355,65 @@ struct GuidesView: View {
     }
     
     private func listGuideCard(_ guide: Guide) -> some View {
-        HStack(spacing: 14) {
-            // Icon
-            ZStack {
-                RoundedRectangle(cornerRadius: 14)
-                    .fill(guide.category.swiftUIColor.opacity(0.15))
-                    .frame(width: 56, height: 56)
-                Image(systemName: guide.category.iconName)
-                    .font(.system(size: 24))
-                    .foregroundColor(guide.category.swiftUIColor)
+        let isRead = appContainer.userStats.isGuideRead(id: guide.id)
+        return HStack(spacing: 0) {
+            // Left accent strip
+            RoundedRectangle(cornerRadius: 2.5, style: .continuous)
+                .fill(isRead ? Color.green : guide.category.swiftUIColor)
+                .frame(width: 4)
+                .padding(.vertical, 10)
+                .padding(.leading, 6)
+
+            HStack(spacing: 12) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .fill(guide.category.swiftUIColor.opacity(isRead ? 0.08 : 0.13))
+                        .frame(width: 50, height: 50)
+                    Image(systemName: isRead ? "checkmark.circle.fill" : guide.category.iconName)
+                        .font(.system(size: 20, weight: .medium))
+                        .foregroundColor(isRead ? .green : guide.category.swiftUIColor)
+                }
+
+                VStack(alignment: .leading, spacing: 3) {
+                    HStack(spacing: 6) {
+                        Text(guide.title)
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundColor(isRead ? Theme.Colors.textSecondary : Theme.Colors.textPrimary)
+                            .lineLimit(2)
+                        if guide.isNew { smallBadge("NEW", color: .red) }
+                        if guide.isPremium && !isPremium { smallBadge("PRO", color: .yellow) }
+                    }
+                    if let subtitle = guide.subtitle {
+                        Text(subtitle)
+                            .font(.system(size: 12))
+                            .foregroundColor(Theme.Colors.textSecondary)
+                            .lineLimit(1)
+                    }
+                    HStack(spacing: 10) {
+                        Label("\(guide.estimatedReadingTime) хв", systemImage: "clock")
+                        if isRead {
+                            Label("Прочитано", systemImage: "checkmark.circle.fill")
+                                .foregroundColor(.green)
+                        }
+                    }
+                    .font(.system(size: 11))
+                    .foregroundColor(Theme.Colors.textTertiary)
+                }
+
+                Spacer()
+
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(Theme.Colors.textTertiary)
             }
-            
-            VStack(alignment: .leading, spacing: 4) {
-                HStack(spacing: 6) {
-                    Text(guide.title)
-                        .font(Theme.Typography.subheadline)
-                        .fontWeight(.semibold)
-                        .foregroundColor(Theme.Colors.textPrimary)
-                        .lineLimit(1)
-                    if guide.isNew {
-                        smallBadge("NEW", color: .red)
-                    }
-                    if guide.isPremium && !isPremium {
-                        smallBadge("PRO", color: .yellow)
-                    }
-                    let quotaLocked = (!isPremium && appContainer.userStats.guidesReadCount >= freeGuidesLimit && !appContainer.userStats.isGuideRead(id: guide.id))
-                    if quotaLocked {
-                        Image(systemName: "lock.fill")
-                            .font(.system(size: 11))
-                            .foregroundColor(.gray)
-                    }
-                }
-                if let subtitle = guide.subtitle {
-                    Text(subtitle)
-                        .font(Theme.Typography.caption)
-                        .foregroundColor(Theme.Colors.textSecondary)
-                        .lineLimit(1)
-                }
-                HStack(spacing: 10) {
-                    Label("\(guide.estimatedReadingTime) хв", systemImage: "clock")
-                    if appContainer.userStats.isGuideRead(id: guide.id) {
-                        Label("Прочитано", systemImage: "checkmark.circle.fill")
-                            .foregroundColor(.green)
-                    }
-                }
-                .font(.system(size: 11))
-                .foregroundColor(Theme.Colors.textTertiary)
-            }
-            
-            Spacer()
-            
-            Image(systemName: "chevron.right")
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(Theme.Colors.textTertiary)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 12)
         }
-        .padding(14)
         .background(.ultraThinMaterial)
-        .cornerRadius(18)
+        .cornerRadius(16)
         .overlay(
-            RoundedRectangle(cornerRadius: 18)
-                .stroke(Theme.Colors.chipBorder, lineWidth: 1)
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(isRead ? Color.green.opacity(0.2) : Theme.Colors.chipBorder, lineWidth: 1)
         )
     }
     

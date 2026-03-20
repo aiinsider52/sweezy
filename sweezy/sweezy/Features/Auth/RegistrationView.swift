@@ -451,6 +451,7 @@ struct RegistrationView: View {
             profile.email = email
             profile.preferredLanguage = appContainer.currentLocale.identifier
             appContainer.userProfile = profile
+            sessionManager.activateAuthenticatedSession(email: email, name: name)
         }
         
         let generator = UINotificationFeedbackGenerator()

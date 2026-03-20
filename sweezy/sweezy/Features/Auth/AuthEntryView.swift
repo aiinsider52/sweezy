@@ -64,12 +64,14 @@ struct AuthEntryView: View {
                 }
             }
         }
+        .environment(\.locale, appContainer.currentLocale)
         .sheet(item: $activeDestination) { destination in
             switch destination {
             case .login:
                 LoginView(onRequestRegistration: {
                     activeDestination = .register
                 })
+                .environment(\.locale, appContainer.currentLocale)
                 .environmentObject(appContainer)
                 .environmentObject(lockManager)
                 .environmentObject(sessionManager)
@@ -77,6 +79,7 @@ struct AuthEntryView: View {
                 RegistrationView(onRequestLogin: {
                     activeDestination = .login
                 })
+                .environment(\.locale, appContainer.currentLocale)
                 .environmentObject(appContainer)
                 .environmentObject(lockManager)
                 .environmentObject(sessionManager)

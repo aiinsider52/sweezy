@@ -26,7 +26,7 @@ struct OnboardingViewRedesigned: View {
     @State private var skippedFamilyStep = false
     @State private var didSeedProfileState = false
     
-    private let pages: [OnboardingV2Page] = [
+    private let introPages: [OnboardingV2Page] = [
         OnboardingV2Page(
             id: 1,
             icon: "hand.wave.fill",
@@ -55,16 +55,16 @@ struct OnboardingViewRedesigned: View {
         ZStack {
                 // Full-screen paged content
                 TabView(selection: $currentPage) {
-                    ForEach(pages) { page in
-                        OnboardingV2PageView(page: page)
-                            .tag(page.id - 1)
-                    }
+                    OnboardingV2PageView(page: introPages[0])
+                        .tag(0)
                     // Language picker page
                     LanguagePickerPage(selectedLanguage: $preferredLanguage) { code in
                         preferredLanguage = code
                         appContainer.updateLocale(Locale(identifier: code))
                     }
-                    .tag(pages.count)
+                    .tag(1)
+                    OnboardingV2PageView(page: introPages[1])
+                        .tag(2)
                     ProfileDetailsPage(
                         selectedCanton: $selectedCanton,
                         selectedPermitType: $selectedPermitType,
@@ -72,20 +72,20 @@ struct OnboardingViewRedesigned: View {
                         arrivalYear: $arrivalYear,
                         onSkip: skipAboutStep
                     )
-                    .tag(pages.count + 1)
+                    .tag(3)
                     FamilyDetailsPage(
                         hasChildren: $hasChildren,
                         childrenCount: $childrenCount,
                         familyStatus: $familyStatus,
                         onSkip: skipFamilyStep
                     )
-                    .tag(pages.count + 2)
+                    .tag(4)
                     // Theme picker page
                     ThemePickerPage(selectedTheme: $themeManager.selectedTheme)
-                        .tag(pages.count + 3)
+                        .tag(5)
                     // Notification permission page
                     NotificationPermissionPage(onNext: goNext)
-                        .tag(pages.count + 4)
+                        .tag(6)
                     // Success page (last)
                     SuccessPageView()
                         .tag(totalPages - 1)
@@ -190,6 +190,10 @@ struct OnboardingViewRedesigned: View {
         .animation(Theme.Animation.smooth, value: currentPage)
         .onAppear {
             seedProfileStateIfNeeded()
+            syncAppLocaleWithPreferredLanguage()
+        }
+        .onChange(of: preferredLanguage) { _, _ in
+            syncAppLocaleWithPreferredLanguage()
         }
         .sheet(isPresented: $showLanguageSelection) {
             LanguageSelectionSheetV2(selectedLanguage: $preferredLanguage)
@@ -241,7 +245,7 @@ struct OnboardingViewRedesigned: View {
         goNext()
     }
     
-    private var totalPages: Int { pages.count + 6 }
+    private var totalPages: Int { introPages.count + 6 }
     
     private var languageDisplayName: String {
         switch preferredLanguage {
@@ -278,6 +282,14 @@ struct OnboardingViewRedesigned: View {
         let adults = adultCount(for: profile.familyStatus)
         if profile.hasChildren {
             childrenCount = max(1, profile.familySize - adults)
+        }
+    }
+
+    private func syncAppLocaleWithPreferredLanguage() {
+        let selectedCode = preferredLanguage.trimmingCharacters(in: .whitespacesAndNewlines)
+        let resolvedCode = selectedCode.isEmpty ? "uk" : selectedCode
+        if appContainer.currentLocale.identifier != resolvedCode {
+            appContainer.updateLocale(Locale(identifier: resolvedCode))
         }
     }
     
@@ -575,8 +587,8 @@ private struct ProfileDetailsPage: View {
     var body: some View {
         OnboardingDetailsBackground {
             ScrollView(showsIndicators: false) {
-                VStack(spacing: Theme.Spacing.lg) {
-                    Spacer().frame(height: 16)
+                VStack(spacing: 14) {
+                    Spacer().frame(height: 12)
                     
                     // Hero icon + title
                     VStack(spacing: Theme.Spacing.sm) {
@@ -606,7 +618,7 @@ private struct ProfileDetailsPage: View {
                         .offset(y: titleAppeared ? 0 : 15)
                     }
                     
-                    VStack(spacing: 14) {
+                    VStack(spacing: 12) {
                         OnboardingFieldCard(title: "onboarding.canton".localized, icon: "mappin.and.ellipse", delay: 0.15) {
                             Menu {
                                 ForEach(Canton.allCases, id: \.self) { canton in
@@ -668,23 +680,9 @@ private struct ProfileDetailsPage: View {
                         }
                     }
                     .padding(.horizontal, Theme.Spacing.lg)
-                    
-                    // Skip styled as pill
-                    Button {
-                        onSkip()
-                    } label: {
-                        Text("onboarding.skip".localized)
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundColor(.white.opacity(0.65))
-                            .padding(.horizontal, 20)
-                            .padding(.vertical, 9)
-                            .background(
-                                Capsule().stroke(Color.white.opacity(0.2), lineWidth: 1)
-                            )
-                    }
-                    .accessibilityIdentifier("onboarding.profile.skipButton")
-                    
-                    Spacer().frame(height: 170)
+
+                    // Extra clearance for page indicator + bottom nav buttons
+                    Spacer().frame(height: 220)
                 }
             }
         }
@@ -713,8 +711,8 @@ private struct FamilyDetailsPage: View {
     var body: some View {
         OnboardingDetailsBackground {
             ScrollView(showsIndicators: false) {
-                VStack(spacing: Theme.Spacing.lg) {
-                    Spacer().frame(height: 16)
+                VStack(spacing: 14) {
+                    Spacer().frame(height: 12)
                     
                     // Hero icon + title
                     VStack(spacing: Theme.Spacing.sm) {
@@ -743,7 +741,7 @@ private struct FamilyDetailsPage: View {
                         .offset(y: titleAppeared ? 0 : 15)
                     }
                     
-                    VStack(spacing: 14) {
+                    VStack(spacing: 12) {
                         OnboardingFieldCard(title: "onboarding.family_status".localized, icon: "heart.circle", delay: 0.15) {
                             VStack(spacing: 4) {
                                 ForEach(FamilyStatus.allCases) { status in
@@ -780,23 +778,9 @@ private struct FamilyDetailsPage: View {
                     }
                     .padding(.horizontal, Theme.Spacing.lg)
                     .animation(.spring(response: 0.4, dampingFraction: 0.8), value: hasChildren)
-                    
-                    // Skip styled as pill
-                    Button {
-                        onSkip()
-                    } label: {
-                        Text("onboarding.skip_step".localized)
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundColor(.white.opacity(0.65))
-                            .padding(.horizontal, 20)
-                            .padding(.vertical, 9)
-                            .background(
-                                Capsule().stroke(Color.white.opacity(0.2), lineWidth: 1)
-                            )
-                    }
-                    .accessibilityIdentifier("onboarding.family.skipButton")
-                    
-                    Spacer().frame(height: 170)
+
+                    // Extra clearance for page indicator + bottom nav buttons
+                    Spacer().frame(height: 220)
                 }
             }
         }
@@ -878,7 +862,7 @@ private struct OnboardingFieldCard<Content: View>: View {
     }
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 8) {
                 if let icon {
                     Image(systemName: icon)
@@ -893,7 +877,7 @@ private struct OnboardingFieldCard<Content: View>: View {
             }
             content
         }
-        .padding(Theme.Spacing.md + 2)
+        .padding(16)
         .background(
             RoundedRectangle(cornerRadius: 20, style: .continuous)
                 .fill(.ultraThinMaterial.opacity(0.45))
@@ -964,7 +948,7 @@ private struct OnboardingChoiceRow: View {
                 .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isSelected)
             }
             .padding(.horizontal, 14)
-            .padding(.vertical, 12)
+            .padding(.vertical, 10)
             .background(
                 RoundedRectangle(cornerRadius: 14, style: .continuous)
                     .fill(isSelected ? Color.white.opacity(0.14) : Color.clear)

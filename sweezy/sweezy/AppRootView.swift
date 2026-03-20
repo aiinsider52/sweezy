@@ -38,6 +38,7 @@ struct AppRootView: View {
                         showPostOnboardingAuthEntry = false
                     }
                 )
+                .environment(\.locale, appContainer.currentLocale)
             }
             .onAppear {
                 updatePostOnboardingAuthPresentation()

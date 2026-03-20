@@ -1,8 +1,13 @@
 import SwiftUI
 
 struct MarketplaceView: View {
+    @EnvironmentObject private var appContainer: AppContainer
+    @EnvironmentObject private var lockManager: AppLockManager
+    @EnvironmentObject private var sessionManager: SessionManager
     @StateObject private var vm: MarketplaceViewModel
     @State private var showCreateSheet = false
+    @State private var showAuthEntry = false
+    @State private var pendingCreateAfterAuth = false
     @State private var selectedListing: ServiceListing?
     @State private var showCantonPicker = false
 
@@ -23,7 +28,7 @@ struct MarketplaceView: View {
                 // FAB
                 Button {
                     UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                    showCreateSheet = true
+                    handleCreateTap()
                 } label: {
                     Image(systemName: "plus")
                         .font(.system(size: 22, weight: .bold))
@@ -57,10 +62,33 @@ struct MarketplaceView: View {
                     Task { await vm.refresh() }
                 })
             }
+            .sheet(isPresented: $showAuthEntry) {
+                AuthEntryView(
+                    showsCloseButton: true,
+                    onComplete: {
+                        showAuthEntry = false
+                    }
+                )
+                .environment(\.locale, appContainer.currentLocale)
+                .environmentObject(appContainer)
+                .environmentObject(lockManager)
+                .environmentObject(sessionManager)
+            }
             .sheet(isPresented: $showCantonPicker) {
                 cantonPickerSheet
             }
             .task { await vm.loadListings(refresh: true) }
+            .onChange(of: sessionManager.isAuthenticated) { _, isAuthenticated in
+                guard isAuthenticated, pendingCreateAfterAuth else { return }
+                pendingCreateAfterAuth = false
+                showAuthEntry = false
+                showCreateSheet = true
+            }
+            .onChange(of: showAuthEntry) { _, isPresented in
+                if !isPresented, !sessionManager.isAuthenticated {
+                    pendingCreateAfterAuth = false
+                }
+            }
         }
     }
 
@@ -266,6 +294,16 @@ struct MarketplaceView: View {
             }
         }
         .presentationDetents([.medium, .large])
+    }
+
+    private func handleCreateTap() {
+        guard sessionManager.isAuthenticated else {
+            pendingCreateAfterAuth = true
+            showAuthEntry = true
+            return
+        }
+
+        showCreateSheet = true
     }
 }
 

@@ -749,10 +749,20 @@ struct ChecklistCardCompact: View {
     let checklist: Checklist
     
     @EnvironmentObject private var appContainer: AppContainer
+    @AppStorage("checklist_progress_version") private var checklistProgressVersion = 0
+    @State private var completedStepIDs: Set<UUID> = []
+    
+    private var storageKey: String { "checklist_\(checklist.id.uuidString)_completed" }
+    
+    init(checklist: Checklist) {
+        self.checklist = checklist
+        if let saved = UserDefaults.standard.array(forKey: "checklist_\(checklist.id.uuidString)_completed") as? [String] {
+            _completedStepIDs = State(initialValue: Set(saved.compactMap { UUID(uuidString: $0) }))
+        }
+    }
     
     private var completedSteps: Int {
-        let key = "checklist_\(checklist.id.uuidString)_completed"
-        return (UserDefaults.standard.array(forKey: key) as? [String])?.count ?? 0
+        completedStepIDs.count
     }
     
     private var progress: Double {
@@ -778,6 +788,7 @@ struct ChecklistCardCompact: View {
     }
 
     var body: some View {
+        let _ = checklistProgressVersion
         HStack(spacing: 0) {
             // Left status strip
             RoundedRectangle(cornerRadius: 2.5, style: .continuous)
@@ -872,6 +883,24 @@ struct ChecklistCardCompact: View {
                     lineWidth: 1
                 )
         )
+        .onAppear { reloadCompletedSteps() }
+        .onChange(of: checklistProgressVersion) { _, _ in reloadCompletedSteps() }
+        .onReceive(EventBus.shared.publisher) { event in
+            switch event.type {
+            case .checklistStepCompleted, .checklistCompleted:
+                reloadCompletedSteps()
+            default:
+                break
+            }
+        }
+    }
+    
+    private func reloadCompletedSteps() {
+        if let saved = UserDefaults.standard.array(forKey: storageKey) as? [String] {
+            completedStepIDs = Set(saved.compactMap { UUID(uuidString: $0) })
+        } else {
+            completedStepIDs = []
+        }
     }
 }
 

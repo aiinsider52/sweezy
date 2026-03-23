@@ -300,7 +300,7 @@ struct TemplateCardView: View {
     let template: DocumentTemplate
     
     var body: some View {
-            VStack(alignment: .leading, spacing: Theme.Spacing.md) {
+        VStack(alignment: .leading, spacing: Theme.Spacing.md) {
             HStack(alignment: .top, spacing: 12) {
                 ZStack {
                     Circle()
@@ -354,7 +354,11 @@ struct TemplateCardView: View {
         .padding(Theme.Spacing.md)
         .background(
             RoundedRectangle(cornerRadius: 16)
-                .fill(Theme.Colors.card)
+                .fill(Theme.Colors.adaptiveCard)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(Theme.Colors.adaptiveBorder.opacity(0.45), lineWidth: 1)
+                )
                 .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 4)
         )
     }
@@ -459,7 +463,11 @@ struct TemplateDetailView: View {
         .padding(Theme.Spacing.md)
         .background(
             RoundedRectangle(cornerRadius: 16)
-                .fill(Theme.Colors.card)
+                .fill(Theme.Colors.adaptiveCard)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(Theme.Colors.adaptiveBorder.opacity(0.45), lineWidth: 1)
+                )
         )
     }
     
@@ -659,11 +667,11 @@ struct TemplateFieldView: View {
         .padding(12)
         .background(
             RoundedRectangle(cornerRadius: 10)
-                .fill(Color.white)
+                .fill(Theme.Colors.adaptiveSurface)
         )
         .overlay(
             RoundedRectangle(cornerRadius: 10)
-                .stroke(Color.gray.opacity(0.2), lineWidth: 1)
+                .stroke(Theme.Colors.adaptiveBorder.opacity(0.45), lineWidth: 1)
         )
         .foregroundColor(Theme.Colors.textPrimary)
     }
@@ -679,11 +687,11 @@ struct TemplateFieldView: View {
         .padding(8)
         .background(
             RoundedRectangle(cornerRadius: 10)
-                .fill(Color.white)
+                .fill(Theme.Colors.adaptiveSurface)
         )
         .overlay(
             RoundedRectangle(cornerRadius: 10)
-                .stroke(Color.gray.opacity(0.2), lineWidth: 1)
+                .stroke(Theme.Colors.adaptiveBorder.opacity(0.45), lineWidth: 1)
         )
     }
     
@@ -708,11 +716,11 @@ struct TemplateFieldView: View {
             .padding(12)
             .background(
                 RoundedRectangle(cornerRadius: 10)
-                    .fill(Color.white)
+                    .fill(Theme.Colors.adaptiveSurface)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 10)
-                    .stroke(Color.gray.opacity(0.2), lineWidth: 1)
+                    .stroke(Theme.Colors.adaptiveBorder.opacity(0.45), lineWidth: 1)
             )
         }
     }
@@ -778,11 +786,11 @@ struct DocumentPreviewView: View {
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .background(
                                 RoundedRectangle(cornerRadius: 12)
-                                    .fill(Color.white)
+                                    .fill(Theme.Colors.adaptiveCard)
                             )
                             .overlay(
                                 RoundedRectangle(cornerRadius: 12)
-                                    .stroke(Color.gray.opacity(0.1), lineWidth: 1)
+                                    .stroke(Theme.Colors.adaptiveBorder.opacity(0.45), lineWidth: 1)
                             )
                         
                         Spacer(minLength: 100)

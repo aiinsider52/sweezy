@@ -242,3 +242,17 @@ def admin_reject_listing(
     db.commit()
     db.refresh(listing)
     return AdminServiceListingDetail.model_validate(listing)
+
+
+@admin_router.delete("/marketplace/{listing_id}", status_code=status.HTTP_204_NO_CONTENT)
+def admin_delete_listing(
+    listing_id: str,
+    _: CurrentAdmin,
+    db: DBSession,
+) -> None:
+    listing = db.get(ServiceListing, listing_id)
+    if not listing:
+        raise HTTPException(status_code=404, detail="Listing not found")
+
+    db.delete(listing)
+    db.commit()

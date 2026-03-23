@@ -1443,8 +1443,12 @@ struct MarkdownContentView: View {
                 .padding(.vertical, 12)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Theme.Colors.backgroundStone)
+            .background(Theme.Colors.adaptiveCard)
             .cornerRadius(8)
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(Theme.Colors.adaptiveBorder.opacity(0.45), lineWidth: 1)
+            )
             .padding(.top, 8)
             
         case .task(let text, let done):

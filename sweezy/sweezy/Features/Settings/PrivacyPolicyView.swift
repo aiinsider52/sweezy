@@ -12,7 +12,7 @@ struct PrivacyPolicyView: View {
     private var supportEmail: String {
         let raw = (Bundle.main.object(forInfoDictionaryKey: "SUPPORT_EMAIL") as? String) ?? ""
         let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
-        return trimmed.isEmpty ? "support@sweezy.app" : trimmed
+        return trimmed.isEmpty ? "support@sweezy.world" : trimmed
     }
     
     var body: some View {

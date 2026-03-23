@@ -529,6 +529,27 @@ extension APIClient {
         return try JSONDecoder().decode([ServiceListing].self, from: data)
     }
 
+    static func updateListing(id: String, payload: ServiceListingUpdate) async throws -> ServiceListing {
+        var req = URLRequest(url: url("marketplace/\(id)"))
+        req.httpMethod = "PATCH"
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.timeoutInterval = 15
+        attachAuth(&req)
+        req.httpBody = try JSONEncoder().encode(payload)
+        let (data, resp) = try await URLSession.shared.data(for: req)
+        guard let http = resp as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+            if let msg = String(data: data, encoding: .utf8) {
+                throw NSError(
+                    domain: "API",
+                    code: (resp as? HTTPURLResponse)?.statusCode ?? 0,
+                    userInfo: [NSLocalizedDescriptionKey: msg]
+                )
+            }
+            throw URLError(.badServerResponse)
+        }
+        return try JSONDecoder().decode(ServiceListing.self, from: data)
+    }
+
     static func deleteListing(id: String) async throws {
         var req = URLRequest(url: url("marketplace/\(id)"))
         req.httpMethod = "DELETE"

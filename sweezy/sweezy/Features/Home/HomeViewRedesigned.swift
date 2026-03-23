@@ -1074,7 +1074,7 @@ private struct TelegramCommunityCard: View {
     var body: some View {
         Button(action: {
             haptic(.medium)
-            if let url = URL(string: "https://t.me/sweezy_swiss") {
+            if let url = URL(string: "https://t.me/sweezyxswiss") {
                 UIApplication.shared.open(url)
             }
         }) {

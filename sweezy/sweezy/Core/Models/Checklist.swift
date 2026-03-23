@@ -5,6 +5,7 @@
 //  Created by Vladyslav Katash on 14.10.2025.
 //
 
+import CryptoKit
 import Foundation
 import SwiftUI
 
@@ -68,11 +69,12 @@ struct Checklist: Codable, Identifiable, Hashable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
         // Tolerant UUID decoding
-        if let idString = try? container.decode(String.self, forKey: .id),
-           let uuid = UUID(uuidString: idString) {
-            self.id = uuid
+        if let idString = try? container.decode(String.self, forKey: .id) {
+            self.id = Self.stableUUID(from: idString)
         } else {
-            self.id = UUID()
+            let fallbackTitle = (try? container.decode(String.self, forKey: .title)) ?? "checklist"
+            let fallbackCategory = (try? container.decode(ChecklistCategory.self, forKey: .category).rawValue) ?? "arrival"
+            self.id = Self.stableUUID(from: "\(fallbackCategory)|\(fallbackTitle)")
         }
         
         self.title = (try? container.decode(String.self, forKey: .title)) ?? "Untitled"
@@ -97,6 +99,22 @@ struct Checklist: Codable, Identifiable, Hashable {
         case id, title, description, category, estimatedDuration, difficulty, steps
         case tags, cantonCodes, priority, isNew, createdAt, lastUpdated
         case language, verifiedAt, source, heroImage
+    }
+
+    private static func stableUUID(from raw: String) -> UUID {
+        if let uuid = UUID(uuidString: raw) {
+            return uuid
+        }
+
+        let digest = SHA256.hash(data: Data(raw.utf8))
+        let bytes = Array(digest)
+        let tuple: uuid_t = (
+            bytes[0], bytes[1], bytes[2], bytes[3],
+            bytes[4], bytes[5], bytes[6], bytes[7],
+            bytes[8], bytes[9], bytes[10], bytes[11],
+            bytes[12], bytes[13], bytes[14], bytes[15]
+        )
+        return UUID(uuid: tuple)
     }
     
     /// Check if checklist applies to specific canton
@@ -240,11 +258,12 @@ struct ChecklistStep: Codable, Identifiable, Hashable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
         // Tolerant UUID decoding
-        if let idString = try? container.decode(String.self, forKey: .id),
-           let uuid = UUID(uuidString: idString) {
-            self.id = uuid
+        if let idString = try? container.decode(String.self, forKey: .id) {
+            self.id = Self.stableUUID(from: idString)
         } else {
-            self.id = UUID()
+            let fallbackTitle = (try? container.decode(String.self, forKey: .title)) ?? "step"
+            let fallbackOrder = (try? container.decode(Int.self, forKey: .order)) ?? 0
+            self.id = Self.stableUUID(from: "\(fallbackOrder)|\(fallbackTitle)")
         }
         
         self.title = (try? container.decode(String.self, forKey: .title)) ?? "Step"
@@ -259,6 +278,22 @@ struct ChecklistStep: Codable, Identifiable, Hashable {
     
     private enum CodingKeys: String, CodingKey {
         case id, title, description, estimatedTime, isOptional, links, requiredDocuments, tips, order
+    }
+
+    private static func stableUUID(from raw: String) -> UUID {
+        if let uuid = UUID(uuidString: raw) {
+            return uuid
+        }
+
+        let digest = SHA256.hash(data: Data(raw.utf8))
+        let bytes = Array(digest)
+        let tuple: uuid_t = (
+            bytes[0], bytes[1], bytes[2], bytes[3],
+            bytes[4], bytes[5], bytes[6], bytes[7],
+            bytes[8], bytes[9], bytes[10], bytes[11],
+            bytes[12], bytes[13], bytes[14], bytes[15]
+        )
+        return UUID(uuid: tuple)
     }
 }
 

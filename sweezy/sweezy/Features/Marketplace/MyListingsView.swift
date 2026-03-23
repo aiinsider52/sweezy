@@ -1,24 +1,48 @@
 import SwiftUI
 
 struct MyListingsView: View {
+    var onListingsChanged: (() -> Void)?
+
     @Environment(\.dismiss) private var dismiss
     @State private var listings: [ServiceListing] = []
     @State private var isLoading = true
-    @State private var error: Error?
+    @State private var errorMessage: String?
+    @State private var selectedListing: ServiceListing?
+    @State private var listingToEdit: ServiceListing?
+    @State private var listingToDelete: ServiceListing?
 
     var body: some View {
         NavigationStack {
             ZStack {
                 AdaptivePageBackground()
 
-                Group {
-                    if isLoading {
-                        ProgressView("common.loading".localized)
-                    } else if listings.isEmpty {
-                        emptyState
-                    } else {
-                        listContent
+                if isLoading {
+                    ProgressView("common.loading".localized)
+                } else {
+                    ScrollView(showsIndicators: false) {
+                        VStack(spacing: 16) {
+                            summaryHero
+
+                            if listings.isEmpty {
+                                emptyState
+                            } else {
+                                LazyVStack(spacing: 12) {
+                                    ForEach(listings) { listing in
+                                        MyListingCard(
+                                            listing: listing,
+                                            onOpen: { selectedListing = listing },
+                                            onEdit: { listingToEdit = listing },
+                                            onDelete: { listingToDelete = listing }
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 12)
+                        .padding(.bottom, 24)
                     }
+                    .refreshable { await loadListings() }
                 }
             }
             .navigationTitle("marketplace.my_listings".localized)
@@ -28,30 +52,115 @@ struct MyListingsView: View {
                     Button("common.close".localized) { dismiss() }
                 }
             }
-            .refreshable { await loadListings() }
             .task { await loadListings() }
+            .sheet(item: $selectedListing) { listing in
+                ListingDetailView(listingId: listing.id)
+                    .presentationDetents([.large])
+                    .presentationDragIndicator(.visible)
+            }
+            .sheet(item: $listingToEdit) { listing in
+                EditListingView(listing: listing) { updated in
+                    replaceListing(updated)
+                    onListingsChanged?()
+                }
+            }
+            .alert("marketplace.delete_title".localized, isPresented: .init(
+                get: { listingToDelete != nil },
+                set: { if !$0 { listingToDelete = nil } }
+            )) {
+                Button("common.cancel".localized, role: .cancel) {
+                    listingToDelete = nil
+                }
+                Button("common.delete".localized, role: .destructive) {
+                    guard let listingToDelete else { return }
+                    Task { await deleteListing(listingToDelete) }
+                }
+            } message: {
+                Text("marketplace.delete_message".localized)
+            }
+            .alert("marketplace.error_title".localized, isPresented: .init(
+                get: { errorMessage != nil },
+                set: { if !$0 { errorMessage = nil } }
+            )) {
+                Button("common.ok".localized) { errorMessage = nil }
+            } message: {
+                Text(errorMessage ?? "")
+            }
         }
     }
 
-    // MARK: - List
+    private var summaryHero: some View {
+        ZStack(alignment: .topTrailing) {
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            Theme.Colors.primaryDark.opacity(0.95),
+                            Theme.Colors.primary.opacity(0.82),
+                            Theme.Colors.accentTurquoise.opacity(0.55)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
 
-    private var listContent: some View {
-        List {
-            ForEach(listings) { listing in
-                MyListingRow(listing: listing)
-                    .listRowSeparator(.hidden)
-                    .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
-                    .listRowBackground(Color.clear)
+            Circle()
+                .fill(Color.white.opacity(0.15))
+                .frame(width: 140, height: 140)
+                .blur(radius: 12)
+                .offset(x: 40, y: -30)
+
+            VStack(alignment: .leading, spacing: 16) {
+                HStack {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("marketplace.cabinet_title".localized)
+                            .font(.system(size: 22, weight: .bold, design: .rounded))
+                            .foregroundColor(.white)
+                        Text("marketplace.cabinet_subtitle".localized)
+                            .font(.subheadline)
+                            .foregroundColor(.white.opacity(0.78))
+                    }
+
+                    Spacer()
+
+                    Image(systemName: "briefcase.fill")
+                        .font(.system(size: 28, weight: .semibold))
+                        .foregroundColor(.white.opacity(0.92))
+                }
+
+                HStack(spacing: 10) {
+                    summaryPill(title: "marketplace.cabinet.total".localized, value: listings.count, tint: .white)
+                    summaryPill(title: "marketplace.status.approved".localized, value: approvedCount, tint: Theme.Colors.primaryLight)
+                    summaryPill(title: "marketplace.status.pending".localized, value: pendingCount, tint: .orange)
+                    summaryPill(title: "marketplace.status.rejected".localized, value: rejectedCount, tint: .red.opacity(0.9))
+                }
             }
-            .onDelete { indexSet in
-                Task { await deleteListing(at: indexSet) }
-            }
+            .padding(18)
         }
-        .listStyle(.plain)
-        .scrollContentBackground(.hidden)
+        .shadow(color: Theme.Colors.primary.opacity(0.22), radius: 20, y: 10)
     }
 
-    // MARK: - Empty
+    private func summaryPill(title: String, value: Int, tint: Color) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text("\(value)")
+                .font(.system(size: 20, weight: .bold, design: .rounded))
+                .foregroundColor(.white)
+            Text(title)
+                .font(.caption2.weight(.semibold))
+                .foregroundColor(.white.opacity(0.8))
+                .lineLimit(1)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(12)
+        .background(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(tint.opacity(0.14))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .stroke(Color.white.opacity(0.16), lineWidth: 1)
+                )
+        )
+    }
 
     private var emptyState: some View {
         VStack(spacing: 16) {
@@ -67,128 +176,189 @@ struct MyListingsView: View {
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 40)
         }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 40)
     }
 
-    // MARK: - Actions
+    private var approvedCount: Int {
+        listings.filter { $0.status == .approved }.count
+    }
+
+    private var pendingCount: Int {
+        listings.filter { $0.status == .pending }.count
+    }
+
+    private var rejectedCount: Int {
+        listings.filter { $0.status == .rejected }.count
+    }
 
     private func loadListings() async {
         isLoading = listings.isEmpty
         do {
             listings = try await APIClient.fetchMyListings()
         } catch {
-            self.error = error
+            errorMessage = error.localizedDescription
         }
         isLoading = false
     }
 
-    private func deleteListing(at offsets: IndexSet) async {
-        for index in offsets {
-            let listing = listings[index]
-            do {
-                try await APIClient.deleteListing(id: listing.id)
-                listings.remove(at: index)
-            } catch {
-                self.error = error
-            }
+    private func deleteListing(_ listing: ServiceListing) async {
+        do {
+            try await APIClient.deleteListing(id: listing.id)
+            listings.removeAll { $0.id == listing.id }
+            listingToDelete = nil
+            onListingsChanged?()
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    private func replaceListing(_ updated: ServiceListing) {
+        if let index = listings.firstIndex(where: { $0.id == updated.id }) {
+            listings[index] = updated
         }
     }
 }
 
-// MARK: - Row
-
-private struct MyListingRow: View {
+private struct MyListingCard: View {
     let listing: ServiceListing
+    let onOpen: () -> Void
+    let onEdit: () -> Void
+    let onDelete: () -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack(alignment: .top) {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(alignment: .top, spacing: 12) {
                 ZStack {
-                    RoundedRectangle(cornerRadius: 10, style: .continuous)
-                        .fill(listing.category.color.opacity(0.15))
-                        .frame(width: 40, height: 40)
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .fill(listing.category.color.opacity(0.16))
+                        .frame(width: 48, height: 48)
                     Image(systemName: listing.category.icon)
-                        .font(.system(size: 16, weight: .semibold))
+                        .font(.system(size: 18, weight: .semibold))
                         .foregroundColor(listing.category.color)
                 }
 
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: 6) {
                     Text(listing.title)
-                        .font(.system(size: 15, weight: .semibold))
+                        .font(.system(size: 16, weight: .semibold))
                         .foregroundColor(Theme.Colors.textPrimary)
                         .lineLimit(2)
 
-                    statusBadge
+                    HStack(spacing: 6) {
+                        StatusBadge(status: listing.status)
+                        ListingBadgePill(text: listing.category.displayName, color: listing.category.color)
+                    }
                 }
 
                 Spacer()
+            }
 
+            HStack(spacing: 14) {
+                Label(listing.canton == "all" ? "🇨🇭" : listing.canton, systemImage: "mappin.circle.fill")
+                Label("\(listing.viewCount)", systemImage: "eye.fill")
                 if let date = listing.createdAt {
                     Text(date, style: .relative)
-                        .font(.caption2)
-                        .foregroundColor(Theme.Colors.textTertiary)
+                }
+            }
+            .font(.caption)
+            .foregroundColor(Theme.Colors.textSecondary)
+
+            if let price = listing.priceInfo, !price.isEmpty {
+                HStack(spacing: 6) {
+                    Image(systemName: "banknote.fill")
+                        .foregroundColor(Theme.Colors.primary)
+                    Text(price)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundColor(Theme.Colors.primary)
                 }
             }
 
             if listing.status == .rejected, let reason = listing.rejectionReason, !reason.isEmpty {
-                HStack(spacing: 6) {
+                HStack(alignment: .top, spacing: 8) {
                     Image(systemName: "exclamationmark.triangle.fill")
-                        .font(.caption2)
                         .foregroundColor(Theme.Colors.error)
                     Text(reason)
                         .font(.caption)
-                        .foregroundColor(Theme.Colors.error.opacity(0.9))
+                        .foregroundColor(Theme.Colors.error.opacity(0.95))
+                        .fixedSize(horizontal: false, vertical: true)
                 }
-                .padding(10)
+                .padding(12)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(
-                    RoundedRectangle(cornerRadius: 10)
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
                         .fill(Theme.Colors.error.opacity(0.08))
                         .overlay(
-                            RoundedRectangle(cornerRadius: 10)
-                                .stroke(Theme.Colors.error.opacity(0.15), lineWidth: 1)
+                            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                .stroke(Theme.Colors.error.opacity(0.16), lineWidth: 1)
                         )
                 )
             }
+
+            HStack(spacing: 10) {
+                actionButton(title: "marketplace.open".localized, icon: "arrow.up.right.square", fill: Theme.Colors.adaptiveSurface, tint: Theme.Colors.textPrimary, action: onOpen)
+                actionButton(title: "marketplace.edit".localized, icon: "pencil", fill: listing.category.color.opacity(0.14), tint: listing.category.color, action: onEdit)
+                actionButton(title: "common.delete".localized, icon: "trash", fill: Theme.Colors.error.opacity(0.12), tint: Theme.Colors.error, action: onDelete)
+            }
         }
-        .padding(14)
+        .padding(16)
         .background(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
                 .fill(Theme.Colors.adaptiveCard)
                 .overlay(
-                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    RoundedRectangle(cornerRadius: 20, style: .continuous)
                         .stroke(Theme.Colors.adaptiveBorder.opacity(0.45), lineWidth: 1)
                 )
         )
+        .shadow(color: .black.opacity(0.06), radius: 10, y: 4)
     }
 
-    private var statusBadge: some View {
-        HStack(spacing: 4) {
-            Circle()
-                .fill(statusColor)
-                .frame(width: 6, height: 6)
-            Text(statusText)
-                .font(.caption.bold())
-                .foregroundColor(statusColor)
+    private func actionButton(title: String, icon: String, fill: Color, tint: Color, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: 6) {
+                Image(systemName: icon)
+                Text(title)
+            }
+            .font(.caption.weight(.semibold))
+            .foregroundColor(tint)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 10)
+            .background(
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .fill(fill)
+            )
         }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 4)
-        .background(
-            Capsule()
-                .fill(statusColor.opacity(0.12))
-        )
+        .buttonStyle(.plain)
+    }
+}
+
+private struct StatusBadge: View {
+    let status: ListingStatus
+
+    var body: some View {
+        HStack(spacing: 5) {
+            Circle()
+                .fill(color)
+                .frame(width: 7, height: 7)
+            Text(text)
+                .font(.caption.bold())
+                .foregroundColor(color)
+        }
+        .padding(.horizontal, 9)
+        .padding(.vertical, 5)
+        .background(Capsule().fill(color.opacity(0.12)))
     }
 
-    private var statusColor: Color {
-        switch listing.status {
-        case .pending:  return .orange
+    private var color: Color {
+        switch status {
+        case .pending: return .orange
         case .approved: return Theme.Colors.primary
         case .rejected: return Theme.Colors.error
         }
     }
 
-    private var statusText: String {
-        switch listing.status {
-        case .pending:  return "marketplace.status.pending".localized
+    private var text: String {
+        switch status {
+        case .pending: return "marketplace.status.pending".localized
         case .approved: return "marketplace.status.approved".localized
         case .rejected: return "marketplace.status.rejected".localized
         }

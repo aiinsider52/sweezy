@@ -17,6 +17,7 @@ from ..schemas.marketplace import (
     ServiceListingDetail,
     ServiceListingPage,
     ServiceListingResponse,
+    ServiceListingUpdate,
 )
 from ..services.marketplace_moderation import moderate_listing
 from ..services.users import UserService
@@ -150,6 +151,42 @@ def delete_listing(listing_id: str, db: DBSession, user: CurrentUser) -> None:
 
     db.delete(listing)
     db.commit()
+
+
+@router.patch("/{listing_id}", response_model=ServiceListingDetail)
+def update_listing(
+    listing_id: str,
+    payload: ServiceListingUpdate,
+    db: DBSession,
+    user: CurrentUser,
+) -> ServiceListingDetail:
+    listing = db.get(ServiceListing, listing_id)
+    if not listing:
+        raise HTTPException(status_code=404, detail="Listing not found")
+
+    is_owner = listing.author_id in {user.id, getattr(user, "email", None)}
+    if not is_owner:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized")
+
+    data = payload.model_dump(exclude_unset=True)
+    if not data:
+        return ServiceListingDetail.model_validate(listing)
+
+    if "title" in data:
+        listing.title = data["title"]
+    if "description" in data:
+        listing.description = data["description"]
+    if "price_info" in data:
+        listing.price_info = data["price_info"]
+
+    if listing.status == "rejected":
+        listing.status = "pending"
+        listing.rejection_reason = None
+
+    db.add(listing)
+    db.commit()
+    db.refresh(listing)
+    return ServiceListingDetail.model_validate(listing)
 
 
 # ── Admin endpoints ──────────────────────────────────────────────────────────

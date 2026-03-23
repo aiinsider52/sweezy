@@ -494,6 +494,7 @@ struct ChecklistsView: View {
 
 private struct ChecklistProgressCard: View {
     let checklist: Checklist
+    @AppStorage("checklist_progress_version") private var checklistProgressVersion = 0
     @State private var completedSteps: Set<UUID> = []
     @State private var isPressed = false
     
@@ -521,6 +522,7 @@ private struct ChecklistProgressCard: View {
     }
 
     var body: some View {
+        let _ = checklistProgressVersion
         HStack(spacing: 0) {
             // Left status strip
             RoundedRectangle(cornerRadius: 3, style: .continuous)
@@ -642,15 +644,23 @@ private struct ChecklistProgressCard: View {
         .scaleEffect(isPressed ? 0.97 : 1)
         .animation(.spring(response: 0.3), value: isPressed)
         .onLongPressGesture(minimumDuration: .infinity, pressing: { isPressed = $0 }, perform: {})
+        .onAppear { reloadCompletedSteps() }
+        .onChange(of: checklistProgressVersion) { _, _ in reloadCompletedSteps() }
         .onReceive(EventBus.shared.publisher) { event in
             switch event.type {
             case .checklistStepCompleted, .checklistCompleted:
-                if let saved = UserDefaults.standard.array(forKey: storageKey) as? [String] {
-                    completedSteps = Set(saved.compactMap { UUID(uuidString: $0) })
-                }
+                reloadCompletedSteps()
             default:
                 break
             }
+        }
+    }
+
+    private func reloadCompletedSteps() {
+        if let saved = UserDefaults.standard.array(forKey: storageKey) as? [String] {
+            completedSteps = Set(saved.compactMap { UUID(uuidString: $0) })
+        } else {
+            completedSteps = []
         }
     }
     
@@ -684,6 +694,7 @@ private struct TimelineChecklistRow: View {
     let checklist: Checklist
     let isFirst: Bool
     let isLast: Bool
+    @AppStorage("checklist_progress_version") private var checklistProgressVersion = 0
     @State private var completedSteps: Set<UUID> = []
     private var storageKey: String { "checklist_\(checklist.id.uuidString)_completed" }
     
@@ -705,6 +716,7 @@ private struct TimelineChecklistRow: View {
     private var isInProgress: Bool { !completedSteps.isEmpty && completion < 1.0 }
     
     var body: some View {
+        let _ = checklistProgressVersion
         HStack(alignment: .top, spacing: 16) {
             // Timeline line + dot
             VStack(spacing: 0) {
@@ -788,15 +800,23 @@ private struct TimelineChecklistRow: View {
             .buttonStyle(.plain)
         }
         .padding(.bottom, 8)
+        .onAppear { reloadCompletedSteps() }
+        .onChange(of: checklistProgressVersion) { _, _ in reloadCompletedSteps() }
         .onReceive(EventBus.shared.publisher) { event in
             switch event.type {
             case .checklistStepCompleted, .checklistCompleted:
-                if let saved = UserDefaults.standard.array(forKey: storageKey) as? [String] {
-                    completedSteps = Set(saved.compactMap { UUID(uuidString: $0) })
-                }
+                reloadCompletedSteps()
             default:
                 break
             }
+        }
+    }
+
+    private func reloadCompletedSteps() {
+        if let saved = UserDefaults.standard.array(forKey: storageKey) as? [String] {
+            completedSteps = Set(saved.compactMap { UUID(uuidString: $0) })
+        } else {
+            completedSteps = []
         }
     }
 }
@@ -848,8 +868,11 @@ struct ChecklistDetailView: View {
         .navigationTitle(checklist.title)
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
-            // Sync active checklist state with stats service
+            reloadCompletedSteps()
             appContainer.userStats.setChecklistActive(id: checklist.id, active: !completedSteps.isEmpty)
+        }
+        .onChange(of: checklistProgressVersion) { _, _ in
+            reloadCompletedSteps()
         }
         .overlay(alignment: .center) {
             if showCelebration {
@@ -1106,6 +1129,15 @@ struct ChecklistDetailView: View {
         }
         
         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+    }
+
+    private func reloadCompletedSteps() {
+        let key = "checklist_\(checklist.id.uuidString)_completed"
+        if let saved = UserDefaults.standard.array(forKey: key) as? [String] {
+            completedSteps = Set(saved.compactMap { UUID(uuidString: $0) })
+        } else {
+            completedSteps = []
+        }
     }
 }
 

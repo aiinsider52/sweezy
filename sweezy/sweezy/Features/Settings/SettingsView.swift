@@ -104,16 +104,18 @@ struct SettingsView: View {
                         winterSettingsRow(icon: "bell.badge", title: "settings.notifications".localized) {
                             showingNotificationSettings = true
                         }
-                        winterSettingsRow(icon: "envelope", title: "settings.send_feedback".localized) {
-                            sendFeedbackEmail()
+                        if let reviewURL = appStoreWriteReviewURL {
+                            winterSettingsLinkRow(icon: "square.and.pencil", title: "settings.send_feedback".localized, destination: reviewURL)
+                        } else {
+                            winterSettingsRow(icon: "square.and.pencil", title: "settings.send_feedback".localized) {
+                                requestAppReview()
+                            }
                         }
                         winterSettingsRow(icon: "star", title: "settings.rate_app".localized) {
                             requestAppReview()
                         }
-                        winterSettingsRow(icon: "paperplane", title: "settings.telegram_support".localized) {
-                            if let url = URL(string: "https://t.me/sweezy_support") {
-                                UIApplication.shared.open(url)
-                            }
+                        if let supportURL = supportEmailURL {
+                            winterSettingsLinkRow(icon: "envelope", title: "settings.email_support".localized, destination: supportURL)
                         }
                     }
                     
@@ -520,6 +522,32 @@ private extension SettingsView {
         }
         .buttonStyle(CardPressStyle())
     }
+
+    func winterSettingsLinkRow(icon: String, title: String, value: String? = nil, tinted: Color? = nil, destination: URL) -> some View {
+        Link(destination: destination) {
+            WinterSettingsCard {
+                HStack(spacing: Theme.Spacing.md) {
+                    Image(systemName: icon)
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundColor(tinted ?? .cyan)
+                        .frame(width: 24)
+                    Text(title)
+                        .font(Theme.Typography.body)
+                        .foregroundColor(tinted == .red ? .red : Theme.Colors.textPrimary)
+                    Spacer()
+                    if let value = value {
+                        Text(value)
+                            .font(Theme.Typography.subheadline)
+                            .foregroundColor(Theme.Colors.textSecondary)
+                    }
+                    Image(systemName: "chevron.right")
+                        .foregroundColor(Theme.Colors.textTertiary)
+                }
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(CardPressStyle())
+    }
     
     var accountBlock: some View {
         Group {
@@ -647,12 +675,14 @@ private extension SettingsView {
 // MARK: - Support & Feedback helpers
 
 private extension SettingsView {
-    func sendFeedbackEmail() {
-        let subject = "Sweezy Feedback v\(Bundle.main.appVersion)"
-        let urlString = "mailto:support@sweezy.app?subject=\(subject.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")"
-        if let url = URL(string: urlString) {
-            UIApplication.shared.open(url)
-        }
+    var supportEmailURL: URL? {
+        let subject = "Sweezy Support v\(Bundle.main.appVersion)"
+        let encodedSubject = subject.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        return URL(string: "mailto:support@sweezy.world?subject=\(encodedSubject)")
+    }
+
+    var appStoreWriteReviewURL: URL? {
+        URL(string: "itms-apps://itunes.apple.com/app/id1633413795?action=write-review")
     }
     
     func requestAppReview() {

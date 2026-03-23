@@ -1791,13 +1791,13 @@ struct SettingsLiteView: View {
                 
                 // Support
                 Section("settings.support".localized) {
-                    if let telegramURL = URL(string: "https://t.me/sweezy_support") {
-                        Link(destination: telegramURL) {
-                            Label("settings.write_telegram".localized, systemImage: "paperplane")
+                    if let emailURL = URL(string: "mailto:support@sweezy.world") {
+                        Link(destination: emailURL) {
+                            Label("settings.email_support".localized, systemImage: "envelope")
                         }
                     }
                     
-                    if let emailURL = URL(string: "mailto:support@sweezy.app") {
+                    if let emailURL = URL(string: "mailto:support@sweezy.world") {
                         Link(destination: emailURL) {
                             Label("settings.email_support".localized, systemImage: "envelope")
                         }

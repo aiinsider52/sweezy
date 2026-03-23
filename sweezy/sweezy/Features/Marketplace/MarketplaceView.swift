@@ -7,7 +7,9 @@ struct MarketplaceView: View {
     @StateObject private var vm: MarketplaceViewModel
     @State private var showCreateSheet = false
     @State private var showAuthEntry = false
+    @State private var showMyListings = false
     @State private var pendingCreateAfterAuth = false
+    @State private var pendingCabinetAfterAuth = false
     @State private var selectedListing: ServiceListing?
     @State private var showCantonPicker = false
 
@@ -50,6 +52,18 @@ struct MarketplaceView: View {
             }
             .navigationTitle("marketplace.title".localized)
             .navigationBarTitleDisplayMode(.large)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        handleCabinetTap()
+                    } label: {
+                        Image(systemName: sessionManager.isAuthenticated ? "person.crop.circle.fill" : "lock.circle")
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundColor(sessionManager.isAuthenticated ? Theme.Colors.primary : Theme.Colors.textSecondary)
+                    }
+                    .accessibilityLabel("marketplace.my_listings".localized)
+                }
+            }
             .searchable(text: $vm.searchText, prompt: Text("marketplace.search".localized))
             .refreshable { await vm.refresh() }
             .sheet(item: $selectedListing) { listing in
@@ -59,6 +73,11 @@ struct MarketplaceView: View {
             }
             .sheet(isPresented: $showCreateSheet) {
                 CreateListingView(onCreated: {
+                    Task { await vm.refresh() }
+                })
+            }
+            .sheet(isPresented: $showMyListings) {
+                MyListingsView(onListingsChanged: {
                     Task { await vm.refresh() }
                 })
             }
@@ -79,14 +98,20 @@ struct MarketplaceView: View {
             }
             .task { await vm.loadListings(refresh: true) }
             .onChange(of: sessionManager.isAuthenticated) { _, isAuthenticated in
-                guard isAuthenticated, pendingCreateAfterAuth else { return }
-                pendingCreateAfterAuth = false
                 showAuthEntry = false
-                showCreateSheet = true
+                if isAuthenticated, pendingCreateAfterAuth {
+                    pendingCreateAfterAuth = false
+                    showCreateSheet = true
+                }
+                if isAuthenticated, pendingCabinetAfterAuth {
+                    pendingCabinetAfterAuth = false
+                    showMyListings = true
+                }
             }
             .onChange(of: showAuthEntry) { _, isPresented in
                 if !isPresented, !sessionManager.isAuthenticated {
                     pendingCreateAfterAuth = false
+                    pendingCabinetAfterAuth = false
                 }
             }
         }
@@ -304,6 +329,16 @@ struct MarketplaceView: View {
         }
 
         showCreateSheet = true
+    }
+
+    private func handleCabinetTap() {
+        guard sessionManager.isAuthenticated else {
+            pendingCabinetAfterAuth = true
+            showAuthEntry = true
+            return
+        }
+
+        showMyListings = true
     }
 }
 

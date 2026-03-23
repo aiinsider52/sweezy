@@ -187,6 +187,17 @@ struct ServiceListingCreate: Codable {
     }
 }
 
+struct ServiceListingUpdate: Codable {
+    var title: String?
+    var description: String?
+    var priceInfo: String?
+
+    private enum CodingKeys: String, CodingKey {
+        case title, description
+        case priceInfo = "price_info"
+    }
+}
+
 // MARK: - Paginated Response
 
 struct ServiceListingPage: Decodable {

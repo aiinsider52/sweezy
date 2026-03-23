@@ -7,6 +7,7 @@
 
 // MARK: - Common
 "common.ok" = "OK";
+"common.continue" = "Continue";
 "common.cancel" = "Cancel";
 "common.save" = "Save";
 "common.delete" = "Delete";
@@ -365,8 +366,8 @@
 "whats_new.feature2.description" = "200+ places: government offices, medical centers, Ukrainian hubs and more.";
 "whats_new.feature3.title" = "Document Templates";
 "whats_new.feature3.description" = "Ready-made forms with PDF export for all official procedures.";
-"whats_new.feature4.title" = "4 Languages";
-"whats_new.feature4.description" = "Ukrainian, Russian, English and German with instant switching.";
+"whats_new.feature4.title" = "3 Languages";
+"whats_new.feature4.description" = "Ukrainian, English and German with instant switching.";
 "whats_new.feature5.title" = "Privacy";
 "whats_new.feature5.description" = "No ads or marketing trackers, minimal analytics and crash reports only to improve Sweezy, full accessibility support.";
 "settings.default_user_name" = "User";
@@ -429,8 +430,8 @@
 "whats_new.feature2.description" = "200+ places: government offices, medical centers, Ukrainian hubs and more.";
 "whats_new.feature3.title" = "Document Templates";
 "whats_new.feature3.description" = "Ready-made forms with PDF export for all official procedures.";
-"whats_new.feature4.title" = "4 Languages";
-"whats_new.feature4.description" = "Ukrainian, Russian, English and German with instant switching.";
+"whats_new.feature4.title" = "3 Languages";
+"whats_new.feature4.description" = "Ukrainian, English and German with instant switching.";
 "whats_new.feature5.title" = "Privacy";
 "whats_new.feature5.description" = "No ads or marketing trackers, minimal analytics and crash reports only to improve Sweezy, full accessibility support.";
 
@@ -785,10 +786,27 @@
 "marketplace.status.pending" = "Under review";
 "marketplace.status.approved" = "Active";
 "marketplace.status.rejected" = "Rejected";
+"marketplace.cabinet_title" = "Your listings cabinet";
+"marketplace.cabinet_subtitle" = "Track status, improve your offer, and manage every listing in one place.";
+"marketplace.cabinet.total" = "Total";
+"marketplace.open" = "Open";
+"marketplace.edit" = "Edit";
+"marketplace.edit_title" = "Edit listing";
+"marketplace.edit_hint" = "Update the title, description, or price. Rejected listings will be sent for review again.";
+"marketplace.save_changes" = "Save changes";
+"marketplace.delete_title" = "Delete listing?";
+"marketplace.delete_message" = "This action cannot be undone.";
+"marketplace.detail.location" = "Location";
+"marketplace.detail.contact" = "Contact";
+"marketplace.detail.views" = "Views";
+"marketplace.detail.published" = "Published";
+"marketplace.detail.author_hint" = "Reach out using the contact button below.";
+"marketplace.detail.footer" = "Always double-check the service details and agree on timing and price before proceeding.";
 
 "common.cancel" = "Cancel";
 "common.close" = "Close";
 "common.ok" = "OK";
+"common.continue" = "Continue";
 
 // MARK: - Auth Entry
 "auth.entry.title" = "Sign in or create an account";

@@ -7,6 +7,7 @@
 
 // MARK: - Common
 "common.ok" = "Гаразд";
+"common.continue" = "Продовжити";
 "common.cancel" = "Скасувати";
 "common.save" = "Зберегти";
 "common.delete" = "Видалити";
@@ -389,8 +390,8 @@
 "whats_new.feature2.description" = "200+ місць: державні установи, медичні центри, українські хаби та більше.";
 "whats_new.feature3.title" = "Шаблони документів";
 "whats_new.feature3.description" = "Готові форми з експортом у PDF для всіх офіційних процедур.";
-"whats_new.feature4.title" = "4 мови";
-"whats_new.feature4.description" = "Українська, російська, англійська та німецька з миттєвим перемиканням.";
+"whats_new.feature4.title" = "3 мови";
+"whats_new.feature4.description" = "Українська, англійська та німецька з миттєвим перемиканням.";
 "whats_new.feature5.title" = "Приватність";
 "whats_new.feature5.description" = "Без реклами та маркетингових трекерів, мінімальна аналітика й crash‑репорти лише для покращення Sweezy, повна підтримка accessibility.";
 
@@ -453,8 +454,8 @@
 "whats_new.feature2.description" = "200+ місць: державні установи, медичні центри, українські хаби та більше.";
 "whats_new.feature3.title" = "Шаблони документів";
 "whats_new.feature3.description" = "Готові форми з експортом у PDF для всіх офіційних процедур.";
-"whats_new.feature4.title" = "4 мови";
-"whats_new.feature4.description" = "Українська, російська, англійська та німецька з миттєвим перемиканням.";
+"whats_new.feature4.title" = "3 мови";
+"whats_new.feature4.description" = "Українська, англійська та німецька з миттєвим перемиканням.";
 "whats_new.feature5.title" = "Приватність";
 "whats_new.feature5.description" = "Без реклами та маркетингових трекерів, мінімальна аналітика й crash‑репорти лише для покращення Sweezy, повна підтримка accessibility.";
 
@@ -813,11 +814,28 @@
 "marketplace.status.pending" = "На перевірці";
 "marketplace.status.approved" = "Активне";
 "marketplace.status.rejected" = "Відхилено";
+"marketplace.cabinet_title" = "Кабінет оголошень";
+"marketplace.cabinet_subtitle" = "Стеж за статусами, покращуй опис і керуй усіма оголошеннями в одному місці.";
+"marketplace.cabinet.total" = "Усього";
+"marketplace.open" = "Відкрити";
+"marketplace.edit" = "Редагувати";
+"marketplace.edit_title" = "Редагувати оголошення";
+"marketplace.edit_hint" = "Онови заголовок, опис або ціну. Відхилені оголошення підуть на повторну перевірку.";
+"marketplace.save_changes" = "Зберегти зміни";
+"marketplace.delete_title" = "Видалити оголошення?";
+"marketplace.delete_message" = "Цю дію не можна скасувати.";
+"marketplace.detail.location" = "Локація";
+"marketplace.detail.contact" = "Контакт";
+"marketplace.detail.views" = "Перегляди";
+"marketplace.detail.published" = "Опубліковано";
+"marketplace.detail.author_hint" = "Зв'яжися через кнопку контакту нижче.";
+"marketplace.detail.footer" = "Перед домовленістю ще раз перевір деталі послуги, терміни та ціну.";
 
 // Common (shared)
 "common.cancel" = "Скасувати";
 "common.close" = "Закрити";
 "common.ok" = "OK";
+"common.continue" = "Продовжити";
 
 // MARK: - Auth Entry
 "auth.entry.title" = "Увійди або створи акаунт";

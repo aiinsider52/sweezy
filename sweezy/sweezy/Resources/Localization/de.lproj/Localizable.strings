@@ -4,6 +4,7 @@
 */
 
 "common.ok" = "OK";
+"common.continue" = "Weiter";
 "common.cancel" = "Abbrechen";
 "common.save" = "Speichern";
 "common.delete" = "Löschen";
@@ -571,10 +572,27 @@
 "marketplace.status.pending" = "In Prüfung";
 "marketplace.status.approved" = "Aktiv";
 "marketplace.status.rejected" = "Abgelehnt";
+"marketplace.cabinet_title" = "Ihr Inserate-Bereich";
+"marketplace.cabinet_subtitle" = "Behalten Sie Status im Blick, verbessern Sie Ihr Angebot und verwalten Sie alle Inserate an einem Ort.";
+"marketplace.cabinet.total" = "Gesamt";
+"marketplace.open" = "Öffnen";
+"marketplace.edit" = "Bearbeiten";
+"marketplace.edit_title" = "Inserat bearbeiten";
+"marketplace.edit_hint" = "Aktualisieren Sie Titel, Beschreibung oder Preis. Abgelehnte Inserate gehen erneut in die Prüfung.";
+"marketplace.save_changes" = "Änderungen speichern";
+"marketplace.delete_title" = "Inserat löschen?";
+"marketplace.delete_message" = "Diese Aktion kann nicht rückgängig gemacht werden.";
+"marketplace.detail.location" = "Ort";
+"marketplace.detail.contact" = "Kontakt";
+"marketplace.detail.views" = "Aufrufe";
+"marketplace.detail.published" = "Veröffentlicht";
+"marketplace.detail.author_hint" = "Nehmen Sie über die Kontakt-Schaltfläche unten Verbindung auf.";
+"marketplace.detail.footer" = "Bitte prüfen Sie Leistungsdetails, Zeitrahmen und Preis vor der Vereinbarung noch einmal.";
 
 "common.cancel" = "Abbrechen";
 "common.close" = "Schliessen";
 "common.ok" = "OK";
+"common.continue" = "Weiter";
 
 // MARK: - Auth Entry
 "auth.entry.title" = "Anmelden oder Konto erstellen";

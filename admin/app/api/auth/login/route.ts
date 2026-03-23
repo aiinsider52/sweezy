@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 
+export async function GET(req: NextRequest) {
+  return NextResponse.redirect(new URL('/login', req.url))
+}
+
 export async function POST(req: NextRequest) {
   const { email, password } = await req.json()
   const api = process.env.NEXT_PUBLIC_API_URL || 'https://sweezy-9xyk.onrender.com/api/v1'

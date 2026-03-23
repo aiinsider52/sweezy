@@ -1,7 +1,7 @@
 export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://sweezy-9xyk.onrender.com/api/v1'
 
 export async function apiLogin(email: string, password: string) {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL ?? ''}/api/auth/login`, {
+  const res = await fetch('/api/auth/login', {
     method: 'POST',
     body: JSON.stringify({ email, password }),
     headers: { 'Content-Type': 'application/json' }

@@ -6,6 +6,7 @@ from .appointment import Appointment
 from .user import User
 from .subscription import Subscription, SubscriptionEvent
 from .marketplace import ServiceListing
+from .event_listing import EventListing
 
 __all__ = [
     "Guide",
@@ -16,6 +17,7 @@ __all__ = [
     "Subscription",
     "SubscriptionEvent",
     "ServiceListing",
+    "EventListing",
 ]
 
 

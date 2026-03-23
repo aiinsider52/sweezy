@@ -2,7 +2,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
-import { LayoutDashboard, Users, BookOpenText, FileText, Activity, CheckSquare, Calendar, SlidersHorizontal, Newspaper, Rss, ListChecks, Languages, Briefcase, CreditCard, Store } from 'lucide-react'
+import { LayoutDashboard, Users, BookOpenText, FileText, Activity, CheckSquare, Calendar, SlidersHorizontal, Newspaper, Rss, ListChecks, Languages, Briefcase, CreditCard, Store, CalendarDays } from 'lucide-react'
 
 const items = [
   { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -18,6 +18,7 @@ const items = [
   { href: '/admin/glossary', label: 'Glossary', icon: Languages },
   { href: '/admin/jobs', label: 'Jobs', icon: Briefcase },
   { href: '/admin/marketplace', label: 'Marketplace', icon: Store },
+  { href: '/admin/events', label: 'Events', icon: CalendarDays },
   { href: '/admin/appointments', label: 'Appointments', icon: Calendar },
   { href: '/admin/config', label: 'Config', icon: SlidersHorizontal },
   { href: '/admin/monitoring', label: 'Monitoring', icon: Activity }

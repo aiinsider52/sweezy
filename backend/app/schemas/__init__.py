@@ -13,6 +13,13 @@ from .marketplace import (
     ServiceListingResponse,
     ServiceListingUpdate,
 )
+from .events import (
+    EventListingCreate,
+    EventListingDetail,
+    EventListingPage,
+    EventListingResponse,
+    EventListingUpdate,
+)
 
 __all__ = [
     "GuideCreate",
@@ -39,6 +46,11 @@ __all__ = [
     "ServiceListingPage",
     "ServiceListingResponse",
     "ServiceListingUpdate",
+    "EventListingCreate",
+    "EventListingDetail",
+    "EventListingPage",
+    "EventListingResponse",
+    "EventListingUpdate",
 ]
 
 

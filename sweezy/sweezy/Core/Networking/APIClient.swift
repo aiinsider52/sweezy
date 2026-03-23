@@ -477,6 +477,17 @@ enum APIClient {
 
 // MARK: - Marketplace
 extension APIClient {
+    private static func marketplaceJSONEncoder() -> JSONEncoder {
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .custom { date, encoder in
+            var container = encoder.singleValueContainer()
+            let formatter = ISO8601DateFormatter()
+            formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+            try container.encode(formatter.string(from: date))
+        }
+        return encoder
+    }
+
     static func fetchListings(category: ServiceCategory? = nil,
                               canton: String? = nil,
                               page: Int = 1) async throws -> ServiceListingPage {
@@ -508,7 +519,7 @@ extension APIClient {
         req.setValue("application/json", forHTTPHeaderField: "Content-Type")
         req.timeoutInterval = 15
         attachAuth(&req)
-        req.httpBody = try JSONEncoder().encode(listing)
+        req.httpBody = try marketplaceJSONEncoder().encode(listing)
         let (data, resp) = try await URLSession.shared.data(for: req)
         guard let http = resp as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
             if let msg = String(data: data, encoding: .utf8) {
@@ -548,6 +559,90 @@ extension APIClient {
             throw URLError(.badServerResponse)
         }
         return try JSONDecoder().decode(ServiceListing.self, from: data)
+    }
+
+    static func fetchEvents(category: EventCategory? = nil,
+                            canton: String? = nil,
+                            page: Int = 1) async throws -> EventListingPage {
+        var comps = URLComponents(url: url("events"), resolvingAgainstBaseURL: false)
+        var items: [URLQueryItem] = [
+            URLQueryItem(name: "page", value: String(page)),
+            URLQueryItem(name: "upcoming_only", value: "true"),
+        ]
+        if let category { items.append(URLQueryItem(name: "category", value: category.rawValue)) }
+        if let canton, canton != "all" { items.append(URLQueryItem(name: "canton", value: canton)) }
+        comps?.queryItems = items
+        guard let finalURL = comps?.url else { throw URLError(.badURL) }
+        let (data, resp) = try await timedData(from: finalURL, context: "events_list")
+        guard let http = resp as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+            throw URLError(.badServerResponse)
+        }
+        return try JSONDecoder().decode(EventListingPage.self, from: data)
+    }
+
+    static func fetchEventDetail(id: String) async throws -> EventListing {
+        let (data, resp) = try await timedData(from: url("events/\(id)"), context: "event_detail")
+        guard let http = resp as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+            throw URLError(.badServerResponse)
+        }
+        return try JSONDecoder().decode(EventListing.self, from: data)
+    }
+
+    static func createEvent(_ event: EventListingCreate) async throws -> EventListing {
+        let endpoint = url("events")
+        var req = URLRequest(url: endpoint)
+        req.httpMethod = "POST"
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.timeoutInterval = 15
+        attachAuth(&req)
+        req.httpBody = try marketplaceJSONEncoder().encode(event)
+        let (data, resp) = try await URLSession.shared.data(for: req)
+        guard let http = resp as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+            if let msg = String(data: data, encoding: .utf8) {
+                throw NSError(domain: "API", code: (resp as? HTTPURLResponse)?.statusCode ?? 0,
+                              userInfo: [NSLocalizedDescriptionKey: msg])
+            }
+            throw URLError(.badServerResponse)
+        }
+        return try JSONDecoder().decode(EventListing.self, from: data)
+    }
+
+    static func fetchMyEvents() async throws -> [EventListing] {
+        let endpoint = url("events/my")
+        let (data, resp) = try await authorizedData(from: endpoint)
+        guard let http = resp as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+            throw URLError(.badServerResponse)
+        }
+        return try JSONDecoder().decode([EventListing].self, from: data)
+    }
+
+    static func updateEvent(id: String, payload: EventListingUpdate) async throws -> EventListing {
+        var req = URLRequest(url: url("events/\(id)"))
+        req.httpMethod = "PATCH"
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.timeoutInterval = 15
+        attachAuth(&req)
+        req.httpBody = try marketplaceJSONEncoder().encode(payload)
+        let (data, resp) = try await URLSession.shared.data(for: req)
+        guard let http = resp as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+            if let msg = String(data: data, encoding: .utf8) {
+                throw NSError(domain: "API", code: (resp as? HTTPURLResponse)?.statusCode ?? 0,
+                              userInfo: [NSLocalizedDescriptionKey: msg])
+            }
+            throw URLError(.badServerResponse)
+        }
+        return try JSONDecoder().decode(EventListing.self, from: data)
+    }
+
+    static func deleteEvent(id: String) async throws {
+        var req = URLRequest(url: url("events/\(id)"))
+        req.httpMethod = "DELETE"
+        req.timeoutInterval = 15
+        attachAuth(&req)
+        let (_, resp) = try await URLSession.shared.data(for: req)
+        guard let http = resp as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+            throw URLError(.badServerResponse)
+        }
     }
 
     static func deleteListing(id: String) async throws {

@@ -40,6 +40,8 @@ from .routers.telemetry import router as telemetry_router
 from .routers.legal import router as legal_router
 from .routers.marketplace import router as marketplace_router
 from .routers.marketplace import admin_router as marketplace_admin_router
+from .routers.events import router as events_router
+from .routers.events import admin_router as events_admin_router
 
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
@@ -294,6 +296,8 @@ app.include_router(analytics_router, prefix=f"{API_PREFIX}/analytics", tags=["an
 app.include_router(telemetry_router, prefix=f"{API_PREFIX}/telemetry", tags=["telemetry"])
 app.include_router(marketplace_router, prefix=f"{API_PREFIX}/marketplace", tags=["marketplace"])
 app.include_router(marketplace_admin_router, prefix=f"{API_PREFIX}/admin", tags=["admin", "marketplace"])
+app.include_router(events_router, prefix=f"{API_PREFIX}/events", tags=["events"])
+app.include_router(events_admin_router, prefix=f"{API_PREFIX}/admin", tags=["admin", "events"])
 
 # Public pages (App Store / legal)
 app.include_router(legal_router, tags=["legal"])

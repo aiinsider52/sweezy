@@ -5,16 +5,24 @@ struct MarketplaceView: View {
     @EnvironmentObject private var lockManager: AppLockManager
     @EnvironmentObject private var sessionManager: SessionManager
     @StateObject private var vm: MarketplaceViewModel
+    @StateObject private var eventsVM: EventsViewModel
+    @State private var selectedMode: MarketplaceMode = .services
     @State private var showCreateSheet = false
+    @State private var showCreateEventSheet = false
     @State private var showAuthEntry = false
     @State private var showMyListings = false
+    @State private var showMyEvents = false
     @State private var pendingCreateAfterAuth = false
     @State private var pendingCabinetAfterAuth = false
+    @State private var pendingEventCreateAfterAuth = false
+    @State private var pendingEventCabinetAfterAuth = false
     @State private var selectedListing: ServiceListing?
+    @State private var selectedEvent: EventListing?
     @State private var showCantonPicker = false
 
     init(initialCategory: ServiceCategory? = nil, initialCanton: String? = nil) {
         _vm = StateObject(wrappedValue: MarketplaceViewModel(initialCategory: initialCategory, initialCanton: initialCanton))
+        _eventsVM = StateObject(wrappedValue: EventsViewModel(initialCanton: initialCanton))
     }
 
     var body: some View {
@@ -64,10 +72,15 @@ struct MarketplaceView: View {
                     .accessibilityLabel("marketplace.my_listings".localized)
                 }
             }
-            .searchable(text: $vm.searchText, prompt: Text("marketplace.search".localized))
-            .refreshable { await vm.refresh() }
+            .searchable(text: activeSearchBinding, prompt: Text(searchPrompt))
+            .refreshable { await refreshActiveMode() }
             .sheet(item: $selectedListing) { listing in
                 ListingDetailView(listingId: listing.id)
+                    .presentationDetents([.large])
+                    .presentationDragIndicator(.visible)
+            }
+            .sheet(item: $selectedEvent) { event in
+                EventDetailView(eventId: event.id)
                     .presentationDetents([.large])
                     .presentationDragIndicator(.visible)
             }
@@ -76,9 +89,19 @@ struct MarketplaceView: View {
                     Task { await vm.refresh() }
                 })
             }
+            .sheet(isPresented: $showCreateEventSheet) {
+                CreateEventView(onCreated: {
+                    Task { await eventsVM.refresh() }
+                })
+            }
             .sheet(isPresented: $showMyListings) {
                 MyListingsView(onListingsChanged: {
                     Task { await vm.refresh() }
+                })
+            }
+            .sheet(isPresented: $showMyEvents) {
+                MyEventsView(onEventsChanged: {
+                    Task { await eventsVM.refresh() }
                 })
             }
             .sheet(isPresented: $showAuthEntry) {
@@ -97,6 +120,16 @@ struct MarketplaceView: View {
                 cantonPickerSheet
             }
             .task { await vm.loadListings(refresh: true) }
+            .task { await eventsVM.loadEvents(refresh: true) }
+            .onChange(of: selectedMode) { _, mode in
+                Task {
+                    if mode == .services, vm.listings.isEmpty {
+                        await vm.loadListings(refresh: true)
+                    } else if mode == .events, eventsVM.events.isEmpty {
+                        await eventsVM.loadEvents(refresh: true)
+                    }
+                }
+            }
             .onChange(of: sessionManager.isAuthenticated) { _, isAuthenticated in
                 showAuthEntry = false
                 if isAuthenticated, pendingCreateAfterAuth {
@@ -107,11 +140,21 @@ struct MarketplaceView: View {
                     pendingCabinetAfterAuth = false
                     showMyListings = true
                 }
+                if isAuthenticated, pendingEventCreateAfterAuth {
+                    pendingEventCreateAfterAuth = false
+                    showCreateEventSheet = true
+                }
+                if isAuthenticated, pendingEventCabinetAfterAuth {
+                    pendingEventCabinetAfterAuth = false
+                    showMyEvents = true
+                }
             }
             .onChange(of: showAuthEntry) { _, isPresented in
                 if !isPresented, !sessionManager.isAuthenticated {
                     pendingCreateAfterAuth = false
                     pendingCabinetAfterAuth = false
+                    pendingEventCreateAfterAuth = false
+                    pendingEventCabinetAfterAuth = false
                 }
             }
         }
@@ -121,9 +164,17 @@ struct MarketplaceView: View {
 
     private var filtersSection: some View {
         VStack(spacing: 8) {
+            Picker("marketplace.content_mode".localized, selection: $selectedMode) {
+                ForEach(MarketplaceMode.allCases) { mode in
+                    Text(mode.title).tag(mode)
+                }
+            }
+            .pickerStyle(.segmented)
+            .padding(.horizontal, 16)
+            .padding(.top, 8)
+
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
-                    // Canton filter button
                     Button {
                         showCantonPicker = true
                     } label: {
@@ -137,39 +188,55 @@ struct MarketplaceView: View {
                         .padding(.vertical, 9)
                         .background(
                             Capsule()
-                                .fill(vm.selectedCanton != nil
+                                .fill(activeSelectedCanton != nil
                                       ? Theme.Colors.primary.opacity(0.2)
                                       : Theme.Colors.adaptiveCard)
                         )
                         .overlay(
                             Capsule()
-                                .stroke(vm.selectedCanton != nil
+                                .stroke(activeSelectedCanton != nil
                                         ? Theme.Colors.primary.opacity(0.4)
                                         : Theme.Colors.adaptiveBorder.opacity(0.5), lineWidth: 1)
                         )
-                        .foregroundColor(vm.selectedCanton != nil ? Theme.Colors.primary : Theme.Colors.textPrimary)
+                        .foregroundColor(activeSelectedCanton != nil ? Theme.Colors.primary : Theme.Colors.textPrimary)
                     }
                     .buttonStyle(.plain)
 
-                    // Category: "all"
                     MapFilterChip(
                         title: "common.all".localized,
-                        isSelected: vm.selectedCategory == nil,
+                        isSelected: selectedMode == .services ? vm.selectedCategory == nil : eventsVM.selectedCategory == nil,
                         color: Theme.Colors.primary
                     ) {
                         UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                        vm.selectedCategory = nil
-                        Task { await vm.applyFilters() }
+                        if selectedMode == .services {
+                            vm.selectedCategory = nil
+                        } else {
+                            eventsVM.selectedCategory = nil
+                        }
+                        Task { await applyActiveFilters() }
                     }
 
-                    ForEach(ServiceCategory.allCases) { cat in
-                        MarketplaceCategoryChip(
-                            category: cat,
-                            isSelected: vm.selectedCategory == cat
-                        ) {
-                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                            vm.selectedCategory = vm.selectedCategory == cat ? nil : cat
-                            Task { await vm.applyFilters() }
+                    if selectedMode == .services {
+                        ForEach(ServiceCategory.allCases) { cat in
+                            MarketplaceCategoryChip(
+                                category: cat,
+                                isSelected: vm.selectedCategory == cat
+                            ) {
+                                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                                vm.selectedCategory = vm.selectedCategory == cat ? nil : cat
+                                Task { await vm.applyFilters() }
+                            }
+                        }
+                    } else {
+                        ForEach(EventCategory.allCases) { cat in
+                            EventCategoryChip(
+                                category: cat,
+                                isSelected: eventsVM.selectedCategory == cat
+                            ) {
+                                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                                eventsVM.selectedCategory = eventsVM.selectedCategory == cat ? nil : cat
+                                Task { await eventsVM.applyFilters() }
+                            }
                         }
                     }
                 }
@@ -177,8 +244,7 @@ struct MarketplaceView: View {
             }
             .padding(.vertical, 8)
 
-            // Offline banner
-            if vm.error != nil, !vm.listings.isEmpty, let age = vm.cacheAgeText {
+            if activeHasOfflineBanner, let age = activeCacheAgeText {
                 HStack(spacing: 6) {
                     Image(systemName: "wifi.slash")
                         .font(.caption2)
@@ -198,7 +264,7 @@ struct MarketplaceView: View {
 
     private var contentSection: some View {
         Group {
-            if vm.isLoading && vm.listings.isEmpty {
+            if selectedMode == .services, vm.isLoading && vm.listings.isEmpty {
                 ScrollView {
                     LazyVStack(spacing: 12) {
                         ForEach(0..<4, id: \.self) { _ in
@@ -208,24 +274,54 @@ struct MarketplaceView: View {
                     .padding(.horizontal, 16)
                     .padding(.top, 8)
                 }
-            } else if vm.filteredListings.isEmpty {
+            } else if selectedMode == .events, eventsVM.isLoading && eventsVM.events.isEmpty {
+                ScrollView {
+                    LazyVStack(spacing: 12) {
+                        ForEach(0..<4, id: \.self) { _ in
+                            ListingSkeletonCard()
+                        }
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.top, 8)
+                }
+            } else if selectedMode == .services, vm.filteredListings.isEmpty {
                 emptyState
+            } else if selectedMode == .events, eventsVM.filteredEvents.isEmpty {
+                eventsEmptyState
             } else {
                 ScrollView {
                     LazyVStack(spacing: 12) {
-                        ForEach(vm.filteredListings) { listing in
-                            ListingCardView(listing: listing)
-                                .onTapGesture {
-                                    selectedListing = listing
-                                }
-                                .onAppear {
-                                    if listing.id == vm.filteredListings.last?.id {
-                                        Task { await vm.loadMore() }
+                        if selectedMode == .services {
+                            ForEach(vm.filteredListings) { listing in
+                                ListingCardView(listing: listing)
+                                    .onTapGesture {
+                                        selectedListing = listing
                                     }
-                                }
+                                    .onAppear {
+                                        if listing.id == vm.filteredListings.last?.id {
+                                            Task { await vm.loadMore() }
+                                        }
+                                    }
+                            }
+                        } else {
+                            ForEach(eventsVM.filteredEvents) { event in
+                                EventCardView(event: event)
+                                    .onTapGesture {
+                                        selectedEvent = event
+                                    }
+                                    .onAppear {
+                                        if event.id == eventsVM.filteredEvents.last?.id {
+                                            Task { await eventsVM.loadMore() }
+                                        }
+                                    }
+                            }
                         }
 
-                        if vm.isLoading && !vm.listings.isEmpty {
+                        if selectedMode == .services, vm.isLoading && !vm.listings.isEmpty {
+                            ProgressView()
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                        } else if selectedMode == .events, eventsVM.isLoading && !eventsVM.events.isEmpty {
                             ProgressView()
                                 .frame(maxWidth: .infinity)
                                 .padding()
@@ -266,10 +362,35 @@ struct MarketplaceView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
+    private var eventsEmptyState: some View {
+        VStack(spacing: 16) {
+            Spacer()
+            Image(systemName: "calendar.badge.plus")
+                .font(.system(size: 48))
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: [Color.purple, Theme.Colors.primary],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+            Text("events.empty_title".localized)
+                .font(.title3.bold())
+                .foregroundColor(Theme.Colors.textPrimary)
+            Text("events.empty_subtitle".localized)
+                .font(.subheadline)
+                .foregroundColor(Theme.Colors.textSecondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 40)
+            Spacer()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
     // MARK: - Canton Picker
 
     private var cantonLabel: String {
-        if let code = vm.selectedCanton {
+        if let code = activeSelectedCanton {
             return SwissCanton.all.first { $0.code == code }?.name ?? code
         }
         return "marketplace.canton_filter".localized
@@ -279,14 +400,14 @@ struct MarketplaceView: View {
         NavigationStack {
             List {
                 Button {
-                    vm.selectedCanton = nil
+                    setActiveCanton(nil)
                     showCantonPicker = false
-                    Task { await vm.applyFilters() }
+                    Task { await applyActiveFilters() }
                 } label: {
                     HStack {
                         Text("marketplace.canton.all_cantons".localized)
                         Spacer()
-                        if vm.selectedCanton == nil {
+                        if activeSelectedCanton == nil {
                             Image(systemName: "checkmark")
                                 .foregroundColor(Theme.Colors.primary)
                         }
@@ -295,14 +416,14 @@ struct MarketplaceView: View {
 
                 ForEach(SwissCanton.all.dropFirst(), id: \.code) { canton in
                     Button {
-                        vm.selectedCanton = canton.code
+                        setActiveCanton(canton.code)
                         showCantonPicker = false
-                        Task { await vm.applyFilters() }
+                        Task { await applyActiveFilters() }
                     } label: {
                         HStack {
                             Text("\(canton.code) — \(canton.name)")
                             Spacer()
-                            if vm.selectedCanton == canton.code {
+                            if activeSelectedCanton == canton.code {
                                 Image(systemName: "checkmark")
                                     .foregroundColor(Theme.Colors.primary)
                             }
@@ -322,23 +443,117 @@ struct MarketplaceView: View {
     }
 
     private func handleCreateTap() {
-        guard sessionManager.isAuthenticated else {
-            pendingCreateAfterAuth = true
-            showAuthEntry = true
-            return
+        switch selectedMode {
+        case .services:
+            guard sessionManager.isAuthenticated else {
+                pendingCreateAfterAuth = true
+                showAuthEntry = true
+                return
+            }
+            showCreateSheet = true
+        case .events:
+            guard sessionManager.isAuthenticated else {
+                pendingEventCreateAfterAuth = true
+                showAuthEntry = true
+                return
+            }
+            showCreateEventSheet = true
         }
-
-        showCreateSheet = true
     }
 
     private func handleCabinetTap() {
-        guard sessionManager.isAuthenticated else {
-            pendingCabinetAfterAuth = true
-            showAuthEntry = true
-            return
+        switch selectedMode {
+        case .services:
+            guard sessionManager.isAuthenticated else {
+                pendingCabinetAfterAuth = true
+                showAuthEntry = true
+                return
+            }
+            showMyListings = true
+        case .events:
+            guard sessionManager.isAuthenticated else {
+                pendingEventCabinetAfterAuth = true
+                showAuthEntry = true
+                return
+            }
+            showMyEvents = true
         }
+    }
 
-        showMyListings = true
+    private var activeSearchBinding: Binding<String> {
+        Binding(
+            get: { selectedMode == .services ? vm.searchText : eventsVM.searchText },
+            set: { newValue in
+                if selectedMode == .services {
+                    vm.searchText = newValue
+                } else {
+                    eventsVM.searchText = newValue
+                }
+            }
+        )
+    }
+
+    private var searchPrompt: String {
+        selectedMode == .services ? "marketplace.search".localized : "events.search".localized
+    }
+
+    private var activeSelectedCanton: String? {
+        selectedMode == .services ? vm.selectedCanton : eventsVM.selectedCanton
+    }
+
+    private var activeHasOfflineBanner: Bool {
+        (selectedMode == .services && vm.error != nil && !vm.listings.isEmpty)
+            || (selectedMode == .events && eventsVM.error != nil && !eventsVM.events.isEmpty)
+    }
+
+    private var activeCacheAgeText: String? {
+        selectedMode == .services ? vm.cacheAgeText : eventsCacheAgeText
+    }
+
+    private var eventsCacheAgeText: String? {
+        let ts = UserDefaults.standard.double(forKey: "events_cache_ts")
+        guard ts > 0 else { return nil }
+        let age = Date().timeIntervalSince1970 - ts
+        if age < 60 { return "marketplace.updated_just_now".localized }
+        return "marketplace.updated_minutes_ago".localized(with: Int(age / 60))
+    }
+
+    private func setActiveCanton(_ value: String?) {
+        if selectedMode == .services {
+            vm.selectedCanton = value
+        } else {
+            eventsVM.selectedCanton = value
+        }
+    }
+
+    private func applyActiveFilters() async {
+        if selectedMode == .services {
+            await vm.applyFilters()
+        } else {
+            await eventsVM.applyFilters()
+        }
+    }
+
+    private func refreshActiveMode() async {
+        if selectedMode == .services {
+            await vm.refresh()
+        } else {
+            await eventsVM.refresh()
+        }
+    }
+}
+
+private enum MarketplaceMode: String, CaseIterable, Identifiable {
+    case services
+    case events
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .services: return "marketplace.mode.services".localized
+        case .events: return "marketplace.mode.events".localized
+        }
     }
 }
 
@@ -370,6 +585,35 @@ private struct MarketplaceCategoryChip: View {
             .overlay(
                 Capsule()
                     .stroke(isSelected ? category.color.opacity(0.4) : Theme.Colors.adaptiveBorder.opacity(0.5), lineWidth: 1)
+            )
+            .foregroundColor(isSelected ? category.color : Theme.Colors.textPrimary)
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+private struct EventCategoryChip: View {
+    let category: EventCategory
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 4) {
+                Image(systemName: category.icon)
+                    .font(.system(size: 11))
+                Text(category.displayName)
+                    .font(.system(size: 13, weight: .semibold))
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 9)
+            .background(
+                Capsule()
+                    .fill(isSelected ? category.color.opacity(0.16) : Theme.Colors.adaptiveCard)
+            )
+            .overlay(
+                Capsule()
+                    .stroke(isSelected ? category.color.opacity(0.5) : Theme.Colors.adaptiveBorder.opacity(0.5), lineWidth: 1)
             )
             .foregroundColor(isSelected ? category.color : Theme.Colors.textPrimary)
         }

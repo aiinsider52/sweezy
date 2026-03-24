@@ -60,6 +60,7 @@ struct MarketplaceView: View {
             }
             .navigationTitle("marketplace.title".localized)
             .navigationBarTitleDisplayMode(.large)
+            .featureOnboarding(.marketplace)
             .searchable(text: activeSearchBinding, prompt: Text(searchPrompt))
             .refreshable { await refreshActiveMode() }
             .sheet(item: $selectedListing) { listing in

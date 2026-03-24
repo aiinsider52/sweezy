@@ -54,6 +54,12 @@
 "onboarding.map.title" = "Karte nützlicher Orte";
 "onboarding.map.description" = "Finden Sie Ämter, Schulen, Geschäfte und ukrainische Gemeinschaften in Ihrer Nähe.";
 
+// Marketplace
+"onboarding.marketplace.title" = "Dienstleistungsmarkt";
+"onboarding.marketplace.description" = "Finden Sie vertrauenswürdige Fachleute in der Schweiz oder veröffentlichen Sie Ihre eigenen Dienstleistungen. Alles ist nach Kategorie, Kanton und Kontaktart geordnet.";
+"onboarding.events.title" = "Events und Treffen";
+"onboarding.events.description" = "Entdecken Sie lokale Events, Workshops und Community-Treffen oder erstellen Sie eigene. So finden Nutzer schneller passende Aktivitäten in der Nähe.";
+
 // Jobs
 "onboarding.jobs.title" = "Jobsuche";
 "onboarding.jobs.description" = "Aktuelle Stellenangebote für Ukrainer in der Schweiz. Filtern nach Region und Branche.";
@@ -440,6 +446,9 @@
 "onboarding.family_title" = "Deine Familie";
 "onboarding.family_subtitle" = "Dieser Schritt ist optional. Er hilft uns,\nbessere Startaufgaben für dich auszuwählen.";
 "onboarding.family_status" = "Familienstand";
+"onboarding.family_status.single" = "Ledig";
+"onboarding.family_status.married" = "Verheiratet";
+"onboarding.family_status.partner" = "In Partnerschaft";
 "onboarding.has_children" = "Hast du Kinder";
 "onboarding.yes" = "Ja";
 "onboarding.no" = "Nein";

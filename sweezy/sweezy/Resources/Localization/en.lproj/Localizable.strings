@@ -80,6 +80,12 @@
 "onboarding.map.title" = "Useful Places Map";
 "onboarding.map.description" = "Find nearby offices, schools, shops, and Ukrainian communities around you.";
 
+// Marketplace
+"onboarding.marketplace.title" = "Services Marketplace";
+"onboarding.marketplace.description" = "Find trusted specialists in Switzerland or publish your own services. Everything is organized by category, canton, and contact type.";
+"onboarding.events.title" = "Events and Meetups";
+"onboarding.events.description" = "Discover local events, workshops, and community meetups or create your own. It helps users quickly find useful activities nearby.";
+
 // Jobs
 "onboarding.jobs.title" = "Job Search";
 "onboarding.jobs.description" = "Current job openings for Ukrainians in Switzerland. Filter by region and industry.";
@@ -651,6 +657,9 @@
 "onboarding.family_title" = "Your family";
 "onboarding.family_subtitle" = "This step is optional. It helps us\npick better starter tasks for you.";
 "onboarding.family_status" = "Family status";
+"onboarding.family_status.single" = "Single";
+"onboarding.family_status.married" = "Married";
+"onboarding.family_status.partner" = "In a partnership";
 "onboarding.has_children" = "Do you have children";
 "onboarding.yes" = "Yes";
 "onboarding.no" = "No";

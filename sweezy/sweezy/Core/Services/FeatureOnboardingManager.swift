@@ -16,6 +16,7 @@ enum OnboardingFeature: String, CaseIterable {
     case checklists = "feature.checklists"
     case guides = "feature.guides"
     case map = "feature.map"
+    case marketplace = "feature.marketplace"
     case jobs = "feature.jobs"
     case templates = "feature.templates"
     case settings = "feature.settings"
@@ -40,6 +41,7 @@ enum OnboardingFeature: String, CaseIterable {
         case .checklists: return 1
         case .guides: return 1
         case .map: return 1
+        case .marketplace: return 1
         case .jobs: return 1
         case .templates: return 1
         case .settings: return 1
@@ -171,6 +173,24 @@ extension FeatureOnboardingContent {
         iconColor: Theme.Colors.success,
         title: "onboarding.map.title".localized,
         description: "onboarding.map.description".localized
+    )
+
+    static let marketplace = FeatureOnboardingContent(
+        feature: .marketplace,
+        slides: [
+            OnboardingSlide(
+                icon: "storefront.fill",
+                iconColor: Theme.Colors.primary,
+                title: "onboarding.marketplace.title".localized,
+                description: "onboarding.marketplace.description".localized
+            ),
+            OnboardingSlide(
+                icon: "calendar.badge.plus",
+                iconColor: Theme.Colors.accentTurquoise,
+                title: "onboarding.events.title".localized,
+                description: "onboarding.events.description".localized
+            )
+        ]
     )
     
     static let jobs = FeatureOnboardingContent(

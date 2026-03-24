@@ -64,9 +64,9 @@ enum FamilyStatus: String, CaseIterable, Codable, Hashable, Identifiable {
     
     var localizedName: String {
         switch self {
-        case .single: return "Single"
-        case .married: return "Married"
-        case .partner: return "Partner"
+        case .single: return "onboarding.family_status.single".localized
+        case .married: return "onboarding.family_status.married".localized
+        case .partner: return "onboarding.family_status.partner".localized
         }
     }
 }

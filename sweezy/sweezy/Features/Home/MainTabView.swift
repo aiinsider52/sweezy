@@ -1027,6 +1027,11 @@ private struct MapDiscoveryPlaceCard: View {
     let distanceText: String?
     let badge: String?
     let action: () -> Void
+    @EnvironmentObject private var appContainer: AppContainer
+
+    private var localizedDescription: String? {
+        place.localizedDescription(for: appContainer.currentLocale)
+    }
     
     var body: some View {
         Button(action: action) {
@@ -1074,7 +1079,7 @@ private struct MapDiscoveryPlaceCard: View {
                     }
                 }
                 
-                if let description = place.description, !description.isEmpty {
+                if let description = localizedDescription, !description.isEmpty {
                     Text(description)
                         .font(.system(size: 12))
                         .foregroundColor(Theme.Colors.textSecondary)
@@ -1215,6 +1220,10 @@ struct PlaceDetailSheet: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var appContainer: AppContainer
     @State private var distanceText: String?
+
+    private var localizedDescription: String? {
+        place.localizedDescription(for: appContainer.currentLocale)
+    }
     
     private var todayHours: String {
         let weekday = Calendar.current.component(.weekday, from: Date())
@@ -1261,7 +1270,7 @@ struct PlaceDetailSheet: View {
                     quickInfoSection
                     
                     // Description if available
-                    if let desc = place.description, !desc.isEmpty {
+                    if let desc = localizedDescription, !desc.isEmpty {
                         descriptionSection(desc)
                     }
                     

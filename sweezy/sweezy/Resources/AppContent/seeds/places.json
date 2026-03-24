@@ -5,6 +5,11 @@
     "type": "government",
     "category": "migration_office",
     "description": "Main migration office for Zurich canton",
+    "descriptions": {
+      "uk": "Головне міграційне відомство кантону Цюрих.",
+      "en": "Main migration office for Zurich canton.",
+      "de": "Hauptmigrationsamt des Kantons Zürich."
+    },
     "address": {
       "street": "Berninastrasse",
       "houseNumber": "45",
@@ -37,6 +42,11 @@
     "type": "healthcare",
     "category": "hospital",
     "description": "Major university hospital with emergency services",
+    "descriptions": {
+      "uk": "Велика університетська лікарня з відділенням невідкладної допомоги.",
+      "en": "Major university hospital with emergency services.",
+      "de": "Grosses Universitätsspital mit Notfalldienst."
+    },
     "address": {
       "street": "Rämistrasse",
       "houseNumber": "100",
@@ -71,6 +81,11 @@
     "type": "government",
     "category": "gemeinde",
     "description": "Municipal administration for Zurich city",
+    "descriptions": {
+      "uk": "Міська адміністрація Цюриха для муніципальних послуг і реєстрацій.",
+      "en": "Municipal administration for Zurich city.",
+      "de": "Stadtverwaltung von Zürich für kommunale Dienstleistungen und Anmeldungen."
+    },
     "address": {
       "street": "Stadthausquai",
       "houseNumber": "17",
@@ -103,6 +118,11 @@
     "type": "banking",
     "category": "insurance_company",
     "description": "Health insurance provider office",
+    "descriptions": {
+      "uk": "Офіс медичного страхування для консультацій, внесків і заявок.",
+      "en": "Health insurance provider office.",
+      "de": "Geschäftsstelle einer Krankenversicherung für Beratung, Prämien und Anträge."
+    },
     "address": {
       "street": "Tribschenstrasse",
       "houseNumber": "21",
@@ -135,6 +155,11 @@
     "type": "legal",
     "category": "legal_aid",
     "description": "Free legal consultation for foreigners",
+    "descriptions": {
+      "uk": "Безкоштовна юридична консультація для іноземців.",
+      "en": "Free legal consultation for foreigners.",
+      "de": "Kostenlose Rechtsberatung für Ausländerinnen und Ausländer."
+    },
     "address": {
       "street": "Langstrasse",
       "houseNumber": "149",
@@ -164,6 +189,11 @@
     "type": "social",
     "category": "refugee_center",
     "description": "Support services for refugees and newcomers",
+    "descriptions": {
+      "uk": "Сервіси підтримки для біженців і новоприбулих.",
+      "en": "Support services for refugees and newcomers.",
+      "de": "Unterstützungsangebote für Geflüchtete und Neuankommende."
+    },
     "address": {"street": "Laupenstrasse", "houseNumber": "35", "postalCode": "3008", "city": "Bern", "canton": "BE"},
     "coordinate": {"latitude": 46.9466, "longitude": 7.4446},
     "canton": "BE",
@@ -186,6 +216,11 @@
     "type": "healthcare",
     "category": "hospital",
     "description": "University hospitals of Geneva",
+    "descriptions": {
+      "uk": "Женевські університетські лікарні з широким спектром медичних послуг.",
+      "en": "University hospitals of Geneva.",
+      "de": "Universitätsspitäler Genf mit einem breiten medizinischen Angebot."
+    },
     "address": {"street": "Rue Gabrielle-Perret-Gentil", "houseNumber": "4", "postalCode": "1205", "city": "Genève", "canton": "GE"},
     "coordinate": {"latitude": 46.1909, "longitude": 6.1457},
     "canton": "GE",
@@ -208,6 +243,11 @@
     "type": "education",
     "category": "library",
     "description": "Main city library with free internet and multilingual books",
+    "descriptions": {
+      "uk": "Головна міська бібліотека з безкоштовним інтернетом і книжками різними мовами.",
+      "en": "Main city library with free internet and multilingual books.",
+      "de": "Hauptstadtbibliothek mit kostenlosem Internet und mehrsprachigen Büchern."
+    },
     "address": {"street": "Zähringerplatz", "houseNumber": "6", "postalCode": "8001", "city": "Zürich", "canton": "ZH"},
     "coordinate": {"latitude": 47.3745, "longitude": 8.5450},
     "canton": "ZH",
@@ -234,6 +274,11 @@
     "type": "employment",
     "category": "job_center",
     "description": "Government employment services and job counseling",
+    "descriptions": {
+      "uk": "Державна служба зайнятості та консультації з працевлаштування.",
+      "en": "Government employment services and job counseling.",
+      "de": "Staatliche Arbeitsvermittlung und Beratung zur Jobsuche."
+    },
     "address": {"street": "Förrlibuckstrasse", "houseNumber": "60", "postalCode": "8005", "city": "Zürich", "canton": "ZH"},
     "coordinate": {"latitude": 47.3867, "longitude": 8.5199},
     "canton": "ZH",
@@ -259,6 +304,11 @@
     "type": "shopping",
     "category": "supermarket",
     "description": "Major Swiss supermarket chain",
+    "descriptions": {
+      "uk": "Велика швейцарська мережа супермаркетів для щоденних покупок.",
+      "en": "Major Swiss supermarket chain.",
+      "de": "Grosse Schweizer Supermarktkette für den täglichen Einkauf."
+    },
     "address": {"street": "Europaallee", "houseNumber": "15", "postalCode": "8004", "city": "Zürich", "canton": "ZH"},
     "coordinate": {"latitude": 47.3781, "longitude": 8.5372},
     "canton": "ZH",
@@ -287,6 +337,11 @@
     "type": "banking",
     "category": "bank",
     "description": "Swiss postal bank offering low-cost banking services",
+    "descriptions": {
+      "uk": "Швейцарський поштовий банк із доступними банківськими послугами.",
+      "en": "Swiss postal bank offering low-cost banking services.",
+      "de": "Schweizer Postbank mit günstigen Bankdienstleistungen."
+    },
     "address": {"street": "Mingerstrasse", "houseNumber": "20", "postalCode": "3014", "city": "Bern", "canton": "BE"},
     "coordinate": {"latitude": 46.9659, "longitude": 7.4300},
     "canton": "BE",
@@ -313,6 +368,11 @@
     "type": "emergency",
     "category": "emergency_room",
     "description": "Emergency department of Bern University Hospital",
+    "descriptions": {
+      "uk": "Відділення невідкладної допомоги університетської лікарні Берна.",
+      "en": "Emergency department of Bern University Hospital.",
+      "de": "Notfallstation des Universitätsspitals Bern."
+    },
     "address": {"street": "Freiburgstrasse", "houseNumber": "10", "postalCode": "3010", "city": "Bern", "canton": "BE"},
     "coordinate": {"latitude": 46.9436, "longitude": 7.4281},
     "canton": "BE",
@@ -341,6 +401,11 @@
     "type": "community",
     "category": "community_center",
     "description": "Support and information center for Ukrainian refugees",
+    "descriptions": {
+      "uk": "Центр підтримки та інформації для українських біженців.",
+      "en": "Support and information center for Ukrainian refugees.",
+      "de": "Unterstützungs- und Informationszentrum für ukrainische Geflüchtete."
+    },
     "address": {"street": "Rue du Stand", "houseNumber": "26", "postalCode": "1204", "city": "Genève", "canton": "GE"},
     "coordinate": {"latitude": 46.2018, "longitude": 6.1397},
     "canton": "GE",
@@ -365,6 +430,11 @@
     "type": "transport",
     "category": "train_station",
     "description": "Main train station with ticket office and information",
+    "descriptions": {
+      "uk": "Головний вокзал із касами, інформаційною стійкою та пересадками.",
+      "en": "Main train station with ticket office and information.",
+      "de": "Hauptbahnhof mit Ticketschalter und Information."
+    },
     "address": {"street": "Bahnhofplatz", "houseNumber": "1", "postalCode": "8001", "city": "Zürich", "canton": "ZH"},
     "coordinate": {"latitude": 47.3778, "longitude": 8.5403},
     "canton": "ZH",
@@ -393,6 +463,11 @@
     "type": "healthcare",
     "category": "counseling_center",
     "description": "Free health counseling for refugees, help with Swiss healthcare system",
+    "descriptions": {
+      "uk": "Безкоштовні медичні консультації для біженців і допомога з системою охорони здоров'я Швейцарії.",
+      "en": "Free health counseling for refugees, help with Swiss healthcare system.",
+      "de": "Kostenlose Gesundheitsberatung für Geflüchtete und Hilfe im Schweizer Gesundheitssystem."
+    },
     "address": {"street": "Rosenbergstrasse", "houseNumber": "41", "postalCode": "9000", "city": "St. Gallen", "canton": "SG"},
     "coordinate": {"latitude": 47.4245, "longitude": 9.3767},
     "canton": "SG",
@@ -417,6 +492,11 @@
     "type": "healthcare",
     "category": "mental_health",
     "description": "Free anonymous psychological support hotline (143)",
+    "descriptions": {
+      "uk": "Безкоштовна анонімна лінія психологічної підтримки (143).",
+      "en": "Free anonymous psychological support hotline (143).",
+      "de": "Kostenlose anonyme Hotline für psychologische Unterstützung (143)."
+    },
     "address": {"street": "Hardturmstrasse", "houseNumber": "261", "postalCode": "8005", "city": "Zürich", "canton": "ZH"},
     "coordinate": {"latitude": 47.3881, "longitude": 8.5177},
     "canton": "ZH",
@@ -445,6 +525,11 @@
     "type": "social",
     "category": "food_assistance",
     "description": "Social supermarket with discounted food and vouchers for refugees",
+    "descriptions": {
+      "uk": "Соціальний супермаркет зі знижками на продукти та ваучерами для біженців.",
+      "en": "Social supermarket with discounted food and vouchers for refugees.",
+      "de": "Sozialsupermarkt mit vergünstigten Lebensmitteln und Gutscheinen für Geflüchtete."
+    },
     "address": {"street": "Zürcherstrasse", "houseNumber": "137", "postalCode": "9014", "city": "St. Gallen", "canton": "SG"},
     "coordinate": {"latitude": 47.4164, "longitude": 9.3841},
     "canton": "SG",
@@ -471,6 +556,11 @@
     "type": "social",
     "category": "food_bank",
     "description": "Free food distribution for people in need",
+    "descriptions": {
+      "uk": "Безкоштовна роздача їжі для людей у скрутному становищі.",
+      "en": "Free food distribution for people in need.",
+      "de": "Kostenlose Lebensmittelverteilung für Menschen in Not."
+    },
     "address": {"street": "Bahnhofstrasse", "houseNumber": "24", "postalCode": "9500", "city": "Wil", "canton": "SG"},
     "coordinate": {"latitude": 47.4617, "longitude": 9.0458},
     "canton": "SG",
@@ -494,6 +584,11 @@
     "type": "shopping",
     "category": "secondhand_shop",
     "description": "Social secondhand shop with free/cheap clothing distribution",
+    "descriptions": {
+      "uk": "Соціальний секонд-хенд із безкоштовним або дуже дешевим одягом.",
+      "en": "Social secondhand shop with free/cheap clothing distribution.",
+      "de": "Sozialer Secondhandladen mit kostenloser oder günstiger Kleiderausgabe."
+    },
     "address": {"street": "Kreuzbleicheweg", "houseNumber": "4", "postalCode": "9000", "city": "St. Gallen", "canton": "SG"},
     "coordinate": {"latitude": 47.4266, "longitude": 9.3741},
     "canton": "SG",
@@ -520,6 +615,11 @@
     "type": "education",
     "category": "language_school",
     "description": "German language courses for Ukrainians (free with voucher)",
+    "descriptions": {
+      "uk": "Курси німецької мови для українців, безкоштовні за ваучером.",
+      "en": "German language courses for Ukrainians (free with voucher).",
+      "de": "Deutschkurse für Ukrainerinnen und Ukrainer, mit Gutschein kostenlos."
+    },
     "address": {"street": "Bahnhofplatz", "houseNumber": "2", "postalCode": "9001", "city": "St. Gallen", "canton": "SG"},
     "coordinate": {"latitude": 47.4231, "longitude": 9.3700},
     "canton": "SG",
@@ -546,6 +646,11 @@
     "type": "community",
     "category": "language_cafe",
     "description": "Free German conversation practice with locals",
+    "descriptions": {
+      "uk": "Безкоштовна практика німецької мови в розмовних зустрічах із місцевими.",
+      "en": "Free German conversation practice with locals.",
+      "de": "Kostenlose Deutsch-Konversationspraxis mit Einheimischen."
+    },
     "address": {"street": "Notkerstrasse", "houseNumber": "22", "postalCode": "9000", "city": "St. Gallen", "canton": "SG"},
     "coordinate": {"latitude": 47.4235, "longitude": 9.3758},
     "canton": "SG",
@@ -569,6 +674,11 @@
     "type": "employment",
     "category": "job_center",
     "description": "Free job coaching and work integration for refugees",
+    "descriptions": {
+      "uk": "Безкоштовний кар'єрний коучинг і підтримка інтеграції на ринок праці для біженців.",
+      "en": "Free job coaching and work integration for refugees.",
+      "de": "Kostenloses Jobcoaching und Arbeitsintegration für Geflüchtete."
+    },
     "address": {"street": "Rosenbergstrasse", "houseNumber": "41", "postalCode": "9000", "city": "St. Gallen", "canton": "SG"},
     "coordinate": {"latitude": 47.4245, "longitude": 9.3767},
     "canton": "SG",
@@ -594,6 +704,11 @@
     "type": "legal",
     "category": "legal_aid",
     "description": "Free legal counseling for refugees in Eastern Switzerland",
+    "descriptions": {
+      "uk": "Безкоштовна юридична допомога для біженців у Східній Швейцарії.",
+      "en": "Free legal counseling for refugees in Eastern Switzerland.",
+      "de": "Kostenlose Rechtsberatung für Geflüchtete in der Ostschweiz."
+    },
     "address": {"street": "Davidstrasse", "houseNumber": "41", "postalCode": "9000", "city": "St. Gallen", "canton": "SG"},
     "coordinate": {"latitude": 47.4210, "longitude": 9.3712},
     "canton": "SG",
@@ -617,6 +732,11 @@
     "type": "social",
     "category": "integration_center",
     "description": "Integration support, job market programs, coordination center",
+    "descriptions": {
+      "uk": "Підтримка інтеграції, програми виходу на ринок праці та координаційний центр.",
+      "en": "Integration support, job market programs, coordination center.",
+      "de": "Integrationsunterstützung, Arbeitsmarktprogramme und Koordinationszentrum."
+    },
     "address": {"street": "Schützengasse", "houseNumber": "1", "postalCode": "9000", "city": "St. Gallen", "canton": "SG"},
     "coordinate": {"latitude": 47.4239, "longitude": 9.3732},
     "canton": "SG",
@@ -643,6 +763,11 @@
     "type": "government",
     "category": "social_services",
     "description": "Social services coordination for Thurgau canton",
+    "descriptions": {
+      "uk": "Координація соціальних служб для кантону Тургау.",
+      "en": "Social services coordination for Thurgau canton.",
+      "de": "Koordination der Sozialdienste für den Kanton Thurgau."
+    },
     "address": {"street": "Schlossmühlestrasse", "houseNumber": "9", "postalCode": "8510", "city": "Frauenfeld", "canton": "TG"},
     "coordinate": {"latitude": 47.5586, "longitude": 8.8988},
     "canton": "TG",
@@ -668,6 +793,11 @@
     "type": "social",
     "category": "refugee_center",
     "description": "Refugee aid organization with document and housing help",
+    "descriptions": {
+      "uk": "Організація допомоги біженцям із документами та житлом.",
+      "en": "Refugee aid organization with document and housing help.",
+      "de": "Hilfsorganisation für Geflüchtete mit Unterstützung bei Dokumenten und Wohnraum."
+    },
     "address": {"street": "Unterer Graben", "houseNumber": "9", "postalCode": "9000", "city": "St. Gallen", "canton": "SG"},
     "coordinate": {"latitude": 47.4226, "longitude": 9.3745},
     "canton": "SG",
@@ -692,6 +822,11 @@
     "type": "community",
     "category": "youth_center",
     "description": "Youth center with activities, sports, and events (free entry)",
+    "descriptions": {
+      "uk": "Молодіжний центр із активностями, спортом та подіями, вхід безкоштовний.",
+      "en": "Youth center with activities, sports, and events (free entry).",
+      "de": "Jugendzentrum mit Aktivitäten, Sport und Veranstaltungen, kostenloser Eintritt."
+    },
     "address": {"street": "Lattichstrasse", "houseNumber": "5", "postalCode": "9012", "city": "St. Gallen", "canton": "SG"},
     "coordinate": {"latitude": 47.4188, "longitude": 9.3823},
     "canton": "SG",
@@ -716,6 +851,11 @@
     "type": "employment",
     "category": "career_counseling",
     "description": "Career counseling, diploma recognition, apprenticeship support",
+    "descriptions": {
+      "uk": "Кар'єрні консультації, визнання дипломів і підтримка з навчанням та стажуванням.",
+      "en": "Career counseling, diploma recognition, apprenticeship support.",
+      "de": "Berufsberatung, Anerkennung von Diplomen und Unterstützung bei Ausbildung und Lehre."
+    },
     "address": {"street": "Davidstrasse", "houseNumber": "31", "postalCode": "9001", "city": "St. Gallen", "canton": "SG"},
     "coordinate": {"latitude": 47.4212, "longitude": 9.3715},
     "canton": "SG",
@@ -741,6 +881,11 @@
     "type": "community",
     "category": "community_cafe",
     "description": "Informal cafe to meet other Ukrainians and locals",
+    "descriptions": {
+      "uk": "Неформальне кафе для знайомств з українцями та місцевими мешканцями.",
+      "en": "Informal cafe to meet other Ukrainians and locals.",
+      "de": "Ungezwungenes Café, um andere Ukrainerinnen, Ukrainer und Einheimische zu treffen."
+    },
     "address": {"street": "Linsebühlstrasse", "houseNumber": "77", "postalCode": "9000", "city": "St. Gallen", "canton": "SG"},
     "coordinate": {"latitude": 47.4198, "longitude": 9.3701},
     "canton": "SG",

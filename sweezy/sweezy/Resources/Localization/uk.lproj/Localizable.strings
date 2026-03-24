@@ -80,6 +80,12 @@
 "onboarding.map.title" = "Карта корисних місць";
 "onboarding.map.description" = "Знайди ближчі офіси, школи, магазини та українські ком'юніті поблизу.";
 
+// Marketplace
+"onboarding.marketplace.title" = "Маркет послуг";
+"onboarding.marketplace.description" = "Знаходь перевірених спеціалістів у Швейцарії або публікуй власні послуги. Усе зручно розкладено за категоріями, кантонами та контактами.";
+"onboarding.events.title" = "Події та зустрічі";
+"onboarding.events.description" = "Відкривай локальні події, майстер-класи та зустрічі спільноти або створюй свої. Так легше знаходити корисні активності поруч.";
+
 // Jobs
 "onboarding.jobs.title" = "Пошук роботи";
 "onboarding.jobs.description" = "Актуальні вакансії для українців у Швейцарії. Фільтруй за регіоном та галуззю.";
@@ -676,6 +682,9 @@
 "onboarding.family_title" = "Твоя сім'я";
 "onboarding.family_subtitle" = "Цей крок необов'язковий. Він допоможе\nкраще підібрати стартові завдання.";
 "onboarding.family_status" = "Сімейний стан";
+"onboarding.family_status.single" = "Неодружений / неодружена";
+"onboarding.family_status.married" = "Одружений / заміжня";
+"onboarding.family_status.partner" = "У партнерстві";
 "onboarding.has_children" = "Чи є діти";
 "onboarding.yes" = "Так";
 "onboarding.no" = "Ні";

@@ -16,6 +16,7 @@ struct Place: Codable, Identifiable, Hashable {
     let type: PlaceType
     let category: PlaceCategory
     let description: String?
+    let descriptions: [String: String]?
     let address: Address
     let coordinate: Coordinate
     let canton: Canton
@@ -37,6 +38,7 @@ struct Place: Codable, Identifiable, Hashable {
         type: PlaceType,
         category: PlaceCategory,
         description: String? = nil,
+        descriptions: [String: String]? = nil,
         address: Address,
         coordinate: Coordinate,
         canton: Canton,
@@ -57,6 +59,7 @@ struct Place: Codable, Identifiable, Hashable {
         self.type = type
         self.category = category
         self.description = description
+        self.descriptions = descriptions
         self.address = address
         self.coordinate = coordinate
         self.canton = canton
@@ -75,7 +78,7 @@ struct Place: Codable, Identifiable, Hashable {
     }
     
     private enum CodingKeys: String, CodingKey {
-        case id, name, type, category, description, address, coordinate, canton,
+        case id, name, type, category, description, descriptions, address, coordinate, canton,
              phoneNumber, email, website, openingHours, languages, services,
              isAccessible, rating, reviewCount, lastUpdated, verifiedAt, source
     }
@@ -94,6 +97,7 @@ struct Place: Codable, Identifiable, Hashable {
         self.type = (try? c.decode(PlaceType.self, forKey: .type)) ?? .government
         self.category = (try? c.decode(PlaceCategory.self, forKey: .category)) ?? .migrationOffice
         self.description = try? c.decode(String.self, forKey: .description)
+        self.descriptions = try? c.decode([String: String].self, forKey: .descriptions)
         self.address = (try? c.decode(Address.self, forKey: .address)) ?? Address(street: "", houseNumber: "", postalCode: "", city: "", canton: .zurich)
         self.coordinate = (try? c.decode(Coordinate.self, forKey: .coordinate)) ?? Coordinate(latitude: 0, longitude: 0)
         self.canton = (try? c.decode(Canton.self, forKey: .canton)) ?? .zurich
@@ -152,6 +156,46 @@ struct Place: Codable, Identifiable, Hashable {
     /// Get formatted address string
     var formattedAddress: String {
         address.fullAddress
+    }
+
+    func localizedDescription(for locale: Locale) -> String? {
+        let cleanedDescriptions = (descriptions ?? [:]).reduce(into: [String: String]()) { result, pair in
+            let key = pair.key.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+            let value = pair.value.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !key.isEmpty, !value.isEmpty {
+                result[key] = value
+            }
+        }
+        let fallbackDescription = description?.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        if cleanedDescriptions.isEmpty {
+            return fallbackDescription?.isEmpty == false ? fallbackDescription : nil
+        }
+
+        let localeIdentifier = locale.identifier.replacingOccurrences(of: "_", with: "-").lowercased()
+        let languageCode = locale.language.languageCode?.identifier.lowercased()
+            ?? locale.languageCode?.lowercased()
+            ?? localeIdentifier.split(separator: "-").first.map(String.init)
+
+        let candidateKeys = [
+            localeIdentifier,
+            languageCode,
+            "uk",
+            "en",
+            "de"
+        ].compactMap { $0 }
+
+        for key in candidateKeys {
+            if let text = cleanedDescriptions[key], !text.isEmpty {
+                return text
+            }
+        }
+
+        if let fallbackDescription, !fallbackDescription.isEmpty {
+            return fallbackDescription
+        }
+
+        return cleanedDescriptions.values.first
     }
     
     /// Check if place supports specific language

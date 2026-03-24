@@ -32,6 +32,7 @@ struct HomeViewRedesigned: View {
     @State private var statHoursSaved: Int = 0
     @State private var dismissedNewsIDs: Set<UUID> = []
     @State private var selectedJourneyStage: JourneyStage?
+    @State private var recentlyCompletedTaskIDs: Set<UUID> = []
     // Forces lightweight refresh on day change / foreground to keep "today focus" accurate
     @State private var dayToken: Date = Date()
     
@@ -673,11 +674,19 @@ struct HomeViewRedesigned: View {
     }
     
     private var priorityTasks: [FirstWeekChecklistService.TaskItem] {
-        checklistTasks
+        let recentCompleted = checklistTasks
+            .filter { $0.isDone && recentlyCompletedTaskIDs.contains($0.id) }
+            .sorted { $0.dueDate < $1.dueDate }
+        let pending = checklistTasks
             .filter { !$0.isDone }
             .sorted { $0.dueDate < $1.dueDate }
-            .prefix(3)
-            .map { $0 }
+        var visible: [FirstWeekChecklistService.TaskItem] = []
+        for task in recentCompleted + pending {
+            guard !visible.contains(where: { $0.id == task.id }) else { continue }
+            visible.append(task)
+            if visible.count == 3 { break }
+        }
+        return visible
     }
     
     private var compactProgressSection: some View {
@@ -757,10 +766,29 @@ struct HomeViewRedesigned: View {
                     PriorityTaskRow(
                         task: task,
                         countdownText: countdownString(to: task.dueDate),
+                        isRecentlyCompleted: recentlyCompletedTaskIDs.contains(task.id),
                         onToggle: {
-                            appContainer.firstWeekService.toggle(task.id)
+                            let taskWasDone = task.isDone
+                            withAnimation(.spring(response: 0.35, dampingFraction: 0.82)) {
+                                appContainer.firstWeekService.toggle(task.id)
+                                if taskWasDone {
+                                    recentlyCompletedTaskIDs.remove(task.id)
+                                } else {
+                                    recentlyCompletedTaskIDs.insert(task.id)
+                                }
+                            }
+
+                            guard !taskWasDone else { return }
+                            let completedTaskID = task.id
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 1.8) {
+                                withAnimation(.easeInOut(duration: 0.3)) {
+                                    recentlyCompletedTaskIDs.remove(completedTaskID)
+                                }
+                            }
                         }
                     )
+                    .transition(.asymmetric(insertion: .move(edge: .top).combined(with: .opacity),
+                                            removal: .scale(scale: 0.92).combined(with: .opacity)))
                 }
             }
         }
@@ -1322,6 +1350,7 @@ private struct HomeQuickActionTile: View {
 private struct PriorityTaskRow: View {
     let task: FirstWeekChecklistService.TaskItem
     let countdownText: String?
+    let isRecentlyCompleted: Bool
     let onToggle: () -> Void
     
     var body: some View {
@@ -1329,11 +1358,11 @@ private struct PriorityTaskRow: View {
             HStack(spacing: 12) {
                 ZStack {
                     Circle()
-                        .stroke(Theme.Colors.accentTurquoise.opacity(0.55), lineWidth: 2)
+                        .stroke((task.isDone ? Color.green : Theme.Colors.accentTurquoise).opacity(0.55), lineWidth: 2)
                         .frame(width: 24, height: 24)
                     if task.isDone {
                         Circle()
-                            .fill(Theme.Colors.accentTurquoise)
+                            .fill(Color.green)
                             .frame(width: 24, height: 24)
                         Image(systemName: "checkmark")
                             .font(.system(size: 11, weight: .bold))
@@ -1344,12 +1373,13 @@ private struct PriorityTaskRow: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(task.title)
                         .font(.system(size: 15, weight: .semibold))
-                        .foregroundColor(Theme.Colors.textPrimary)
+                        .foregroundColor(task.isDone ? Theme.Colors.textSecondary : Theme.Colors.textPrimary)
+                        .strikethrough(task.isDone, color: Theme.Colors.textTertiary)
                         .multilineTextAlignment(.leading)
                     if let details = task.details, !details.isEmpty {
                         Text(details)
                             .font(Theme.Typography.caption)
-                            .foregroundColor(Theme.Colors.textSecondary)
+                            .foregroundColor(task.isDone ? Theme.Colors.textTertiary : Theme.Colors.textSecondary)
                             .multilineTextAlignment(.leading)
                             .lineLimit(2)
                     }
@@ -1357,7 +1387,17 @@ private struct PriorityTaskRow: View {
                 
                 Spacer()
                 
-                if let countdownText {
+                if task.isDone {
+                    Label("common.done".localized, systemImage: "sparkles")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundColor(Color.green)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(
+                            Capsule()
+                                .fill(Color.green.opacity(0.12))
+                        )
+                } else if let countdownText {
                     Text(countdownText)
                         .font(.system(size: 11, weight: .bold))
                         .foregroundColor(Theme.Colors.accentTurquoise)
@@ -1372,8 +1412,15 @@ private struct PriorityTaskRow: View {
             .padding(14)
             .background(
                 RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .fill(Theme.Colors.secondaryBackground.opacity(0.65))
+                    .fill(task.isDone ? Color.green.opacity(0.08) : Theme.Colors.secondaryBackground.opacity(0.65))
             )
+            .overlay(
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .stroke(task.isDone ? Color.green.opacity(0.22) : Color.clear, lineWidth: 1)
+            )
+            .scaleEffect(isRecentlyCompleted ? 1.015 : 1)
+            .animation(.spring(response: 0.35, dampingFraction: 0.82), value: task.isDone)
+            .animation(.easeInOut(duration: 0.25), value: isRecentlyCompleted)
         }
         .buttonStyle(.plain)
     }

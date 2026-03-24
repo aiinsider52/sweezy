@@ -28,6 +28,7 @@
 "common.new" = "Нове";
 "common.open" = "Відкрити";
 "common.soon" = "Скоро";
+"auth.session_expired" = "Сесію завершено. Увійди ще раз, будь ласка.";
 
 // MARK: - Onboarding
 "onboarding.welcome" = "Ласкаво просимо до Sweezy";

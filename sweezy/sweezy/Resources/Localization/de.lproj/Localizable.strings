@@ -26,6 +26,7 @@
 "common.new" = "Neu";
 "common.open" = "Öffnen";
 "common.soon" = "Bald";
+"auth.session_expired" = "Deine Sitzung ist abgelaufen. Bitte melde dich erneut an.";
 
 // MARK: - Feature Onboarding
 "onboarding.understood" = "Verstanden";

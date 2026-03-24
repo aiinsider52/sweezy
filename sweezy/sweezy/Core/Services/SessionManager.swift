@@ -115,7 +115,8 @@ final class SessionManager: ObservableObject {
     // MARK: - Internal
 
     private func recomputeStateFromStorage() {
-        if lockManager.isRegistered {
+        let hasToken = !(KeychainStore.get("access_token") ?? "").isEmpty
+        if lockManager.isRegistered && hasToken {
             let email = lockManager.userEmail.trimmingCharacters(in: .whitespacesAndNewlines)
             let name = lockManager.userName.trimmingCharacters(in: .whitespacesAndNewlines)
             let user = User(email: email.isEmpty ? "user@local" : email, name: name.isEmpty ? nil : name)

@@ -40,6 +40,10 @@ class PasswordResetConfirm(BaseModel):
         return v
 
 
+class RefreshTokenRequest(BaseModel):
+    refresh_token: str = Field(..., min_length=10)
+
+
 @router.post("/token", response_model=Token)
 def login(form_data: OAuth2PasswordRequestForm = Depends()) -> Token:
     token = AuthService.authenticate_admin(form_data.username, form_data.password)
@@ -67,10 +71,47 @@ def login_user(
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
 
-    access = create_access_token(subject=user.email, is_admin=user.is_superuser, role=getattr(user, "role", None), expires_delta=timedelta(minutes=15))
+    settings = get_settings()
+    access_minutes = settings.ACCESS_TOKEN_EXPIRE_MINUTES
+    access = create_access_token(
+        subject=user.email,
+        is_admin=user.is_superuser,
+        role=getattr(user, "role", None),
+        expires_delta=timedelta(minutes=access_minutes),
+    )
     refresh = create_refresh_token(subject=user.email, expires_delta=timedelta(days=7))
 
-    return TokenPair(access_token=access, refresh_token=refresh, expires_in=15 * 60)
+    return TokenPair(access_token=access, refresh_token=refresh, expires_in=access_minutes * 60)
+
+
+@router.post("/refresh", response_model=TokenPair)
+def refresh_access_token(payload: RefreshTokenRequest, db: Session = Depends(get_db)) -> TokenPair:
+    try:
+        token_data = decode_token(payload.refresh_token)
+    except Exception:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token")
+
+    if token_data.get("type") != "refresh":
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token")
+
+    email = token_data.get("sub")
+    if not email:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token")
+
+    user = UserService.get_by_email(db, email)
+    if not user or not user.is_active:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid user")
+
+    settings = get_settings()
+    access_minutes = settings.ACCESS_TOKEN_EXPIRE_MINUTES
+    access = create_access_token(
+        subject=user.email,
+        is_admin=user.is_superuser,
+        role=getattr(user, "role", None),
+        expires_delta=timedelta(minutes=access_minutes),
+    )
+    refresh = create_refresh_token(subject=user.email, expires_delta=timedelta(days=7))
+    return TokenPair(access_token=access, refresh_token=refresh, expires_in=access_minutes * 60)
 
 
 @router.post("/password/forgot")

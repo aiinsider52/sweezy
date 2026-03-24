@@ -28,6 +28,7 @@
 "common.copy" = "Copy";
 "common.settings" = "Settings";
 "common.open" = "Open";
+"auth.session_expired" = "Your session expired. Please sign in again.";
 
 // MARK: - Onboarding
 "onboarding.welcome" = "Welcome to Sweezy";

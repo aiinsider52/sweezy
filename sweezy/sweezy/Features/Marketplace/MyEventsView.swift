@@ -4,6 +4,7 @@ struct MyEventsView: View {
     var onEventsChanged: (() -> Void)?
 
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var sessionManager: SessionManager
     @State private var events: [EventListing] = []
     @State private var isLoading = true
     @State private var errorMessage: String?
@@ -173,7 +174,12 @@ struct MyEventsView: View {
         do {
             events = try await APIClient.fetchMyEvents()
         } catch {
-            errorMessage = error.localizedDescription
+            if (error as NSError).code == 401 {
+                sessionManager.signOut()
+                errorMessage = "auth.session_expired".localized
+            } else {
+                errorMessage = error.localizedDescription
+            }
         }
         isLoading = false
     }

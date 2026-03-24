@@ -173,6 +173,8 @@ struct MarketplaceView: View {
             .padding(.horizontal, 16)
             .padding(.top, 8)
 
+            cabinetShortcutRow
+
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
                     Button {
@@ -258,6 +260,36 @@ struct MarketplaceView: View {
                 .padding(.bottom, 4)
             }
         }
+    }
+
+    private var cabinetShortcutRow: some View {
+        HStack(spacing: 10) {
+            Button {
+                handleCabinetTap()
+            } label: {
+                HStack(spacing: 8) {
+                    Image(systemName: sessionManager.isAuthenticated ? "person.crop.circle.fill" : "lock.circle.fill")
+                    Text(selectedMode == .services ? "marketplace.my_listings".localized : "events.my_events".localized)
+                        .font(.system(size: 13, weight: .semibold))
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 11, weight: .semibold))
+                }
+                .foregroundColor(sessionManager.isAuthenticated ? Theme.Colors.textPrimary : Theme.Colors.textSecondary)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 12)
+                .background(
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .fill(Theme.Colors.adaptiveCard)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                .stroke(Theme.Colors.adaptiveBorder.opacity(0.45), lineWidth: 1)
+                        )
+                )
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.horizontal, 16)
     }
 
     // MARK: - Content

@@ -59,6 +59,34 @@ enum APIClient {
         return try JSONDecoder().decode(TokenPair.self, from: data)
     }
 
+    static func refreshAccessToken() async throws -> TokenPair {
+        guard let refreshToken = KeychainStore.get("refresh_token"), !refreshToken.isEmpty else {
+            throw NSError(domain: "API", code: 401, userInfo: [NSLocalizedDescriptionKey: "Session expired. Please sign in again."])
+        }
+
+        let endpoint = url("auth/refresh")
+        var req = URLRequest(url: endpoint)
+        req.httpMethod = "POST"
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.timeoutInterval = 15
+        req.httpBody = try JSONSerialization.data(withJSONObject: ["refresh_token": refreshToken])
+
+        let (data, resp) = try await URLSession.shared.data(for: req)
+        guard let httpResp = resp as? HTTPURLResponse else {
+            throw URLError(.badServerResponse)
+        }
+        guard httpResp.statusCode == 200 else {
+            if let message = String(data: data, encoding: .utf8), !message.isEmpty {
+                throw NSError(domain: "API", code: httpResp.statusCode, userInfo: [NSLocalizedDescriptionKey: message])
+            }
+            throw NSError(domain: "API", code: httpResp.statusCode, userInfo: [NSLocalizedDescriptionKey: "Session expired. Please sign in again."])
+        }
+        let tokens = try JSONDecoder().decode(TokenPair.self, from: data)
+        try KeychainStore.save(tokens.access_token, for: "access_token")
+        try KeychainStore.save(tokens.refresh_token, for: "refresh_token")
+        return tokens
+    }
+
     static func deleteAccount() async throws {
         let url = url("auth/me")
         var req = URLRequest(url: url)
@@ -81,7 +109,25 @@ enum APIClient {
     static func authorizedData(from url: URL) async throws -> (Data, URLResponse) {
         var req = URLRequest(url: url)
         attachAuth(&req)
-        return try await timedData(for: req, context: "authorized:\(url.lastPathComponent)")
+        let result = try await timedData(for: req, context: "authorized:\(url.lastPathComponent)")
+        if let http = result.1 as? HTTPURLResponse, http.statusCode == 401 {
+            let body = String(data: result.0, encoding: .utf8) ?? ""
+            if body.localizedCaseInsensitiveContains("invalid authentication")
+                || body.localizedCaseInsensitiveContains("invalid token")
+                || body.localizedCaseInsensitiveContains("invalid user") {
+                do {
+                    _ = try await refreshAccessToken()
+                    var retryReq = URLRequest(url: url)
+                    attachAuth(&retryReq)
+                    return try await timedData(for: retryReq, context: "authorized-retry:\(url.lastPathComponent)")
+                } catch {
+                    KeychainStore.delete("access_token")
+                    KeychainStore.delete("refresh_token")
+                    throw error
+                }
+            }
+        }
+        return result
     }
 
     // MARK: - Content
@@ -477,6 +523,14 @@ enum APIClient {
 
 // MARK: - Marketplace
 extension APIClient {
+    private static func httpError(data: Data, response: URLResponse?) -> Error {
+        let status = (response as? HTTPURLResponse)?.statusCode ?? 0
+        if let text = String(data: data, encoding: .utf8), !text.isEmpty {
+            return NSError(domain: "API", code: status, userInfo: [NSLocalizedDescriptionKey: text])
+        }
+        return URLError(.badServerResponse)
+    }
+
     private static func marketplaceJSONEncoder() -> JSONEncoder {
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .custom { date, encoder in
@@ -535,7 +589,7 @@ extension APIClient {
         let endpoint = url("marketplace/my")
         let (data, resp) = try await authorizedData(from: endpoint)
         guard let http = resp as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
-            throw URLError(.badServerResponse)
+            throw httpError(data: data, response: resp)
         }
         return try JSONDecoder().decode([ServiceListing].self, from: data)
     }
@@ -611,7 +665,7 @@ extension APIClient {
         let endpoint = url("events/my")
         let (data, resp) = try await authorizedData(from: endpoint)
         guard let http = resp as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
-            throw URLError(.badServerResponse)
+            throw httpError(data: data, response: resp)
         }
         return try JSONDecoder().decode([EventListing].self, from: data)
     }

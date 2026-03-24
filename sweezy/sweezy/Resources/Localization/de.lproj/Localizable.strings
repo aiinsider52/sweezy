@@ -204,6 +204,19 @@
 "map.description" = "Beschreibung";
 "map.services_label" = "Leistungen";
 "map.directions" = "Route";
+"map.hero_title" = "Passende Orte schneller finden";
+"map.hero_subtitle" = "Entdecke die besten Treffer in deiner Naehe, aktuell offene Services und die nuetzlichsten Kategorien in der ganzen Schweiz.";
+"map.best_matches" = "Beste Treffer fuer dich";
+"map.nearby_now" = "Jetzt in der Naehe";
+"map.popular_services" = "Beliebte Services";
+"map.all_places" = "Alle Orte";
+"map.best_match" = "Bester Treffer";
+"map.open_now" = "Jetzt offen";
+"map.verified" = "Geprueft";
+"map.nearby_requires_location" = "Aktiviere den Standort, um Empfehlungen in deiner Naehe und aktuell offene Services zu sehen.";
+"map.open_settings" = "Einstellungen oeffnen";
+"map.location_denied_title" = "Standortzugriff ist deaktiviert";
+"map.location_denied_subtitle" = "Erlaube den Standortzugriff in den Einstellungen, damit die Karte Services in deiner Naehe anzeigen und nach Entfernung sortieren kann.";
 
 // MARK: - Gamification
 "gamification.xp_earned" = "XP verdient";

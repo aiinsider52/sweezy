@@ -36,7 +36,13 @@ class AppContainer: ObservableObject {
     private var _locationService: LocationService?
     var locationService: any LocationServiceProtocol {
         if _locationService == nil {
-            _locationService = LocationService()
+            let service = LocationService()
+            service.objectWillChange
+                .sink { [weak self] _ in
+                    self?.objectWillChange.send()
+                }
+                .store(in: &cancellables)
+            _locationService = service
         }
         return _locationService!
     }

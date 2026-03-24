@@ -251,6 +251,19 @@
 "map.open" = "Open";
 "map.location_permission" = "Location Permission";
 "map.enable_location" = "Enable Location";
+"map.open_settings" = "Open Settings";
+"map.location_denied_title" = "Location access is off";
+"map.location_denied_subtitle" = "Allow location access in Settings so the map can show services around you and sort them by distance.";
+"map.hero_title" = "Find the right place faster";
+"map.hero_subtitle" = "Discover the best nearby matches, open services right now, and the most useful categories across Switzerland.";
+"map.best_matches" = "Best matches for you";
+"map.nearby_now" = "Nearby now";
+"map.popular_services" = "Popular services";
+"map.all_places" = "All places";
+"map.best_match" = "Best match";
+"map.open_now" = "Open now";
+"map.verified" = "Verified";
+"map.nearby_requires_location" = "Turn on location to unlock nearby recommendations and open services around you.";
 
 // MARK: - Gamification
 "gamification.xp_earned" = "XP earned";

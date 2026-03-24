@@ -312,7 +312,6 @@ struct MapPlaceholderView: View {
 struct OptimizedMapView: View {
     @EnvironmentObject private var appContainer: AppContainer
     
-    // Режим диапазона: только рядом или все сервисы
     private enum RangeMode {
         case nearby
         case all
@@ -324,17 +323,24 @@ struct OptimizedMapView: View {
     @State private var isLoading = true
     @State private var cameraPosition: MapCameraPosition = .region(
         MKCoordinateRegion(
-            center: CLLocationCoordinate2D(latitude: 46.8182, longitude: 8.2275), // Switzerland center
+            center: CLLocationCoordinate2D(latitude: 46.8182, longitude: 8.2275),
             span: MKCoordinateSpan(latitudeDelta: 2.5, longitudeDelta: 2.5)
         )
     )
     @State private var rangeMode: RangeMode = .nearby
+    @State private var hasAutoCenteredOnUser = false
     
-    /// Радиус "поруч" — 10 км
     private let nearbyRadiusMeters: Double = 10_000
     
+    private var currentLanguageCode: String {
+        String(appContainer.currentLocale.identifier.prefix(2)).lowercased()
+    }
+    
+    private var userLocation: CLLocation? {
+        appContainer.locationService.currentLocation
+    }
+    
     private var filteredPlaces: [Place] {
-        // Сначала фильтр по типу сервиса
         let typedPlaces: [Place]
         if let type = selectedType {
             typedPlaces = places.filter { $0.type == type }
@@ -342,9 +348,8 @@ struct OptimizedMapView: View {
             typedPlaces = places
         }
         
-        // Затем — опциональный фильтр "поруч" по геолокации
         guard rangeMode == .nearby,
-              let userLocation = appContainer.locationService.currentLocation else {
+              let userLocation else {
             return typedPlaces
         }
         
@@ -356,9 +361,62 @@ struct OptimizedMapView: View {
         }
     }
     
-    // Limit annotations for performance
     private var visiblePlaces: [Place] {
         Array(filteredPlaces.prefix(50))
+    }
+    
+    private var openNowCount: Int {
+        filteredPlaces.filter { $0.isOpen() }.count
+    }
+    
+    private var nearbyPlaces: [Place] {
+        guard let userLocation else { return [] }
+        return filteredPlaces
+            .filter { $0.distance(from: userLocation) <= nearbyRadiusMeters }
+            .sorted { lhs, rhs in
+                lhs.distance(from: userLocation) < rhs.distance(from: userLocation)
+            }
+    }
+    
+    private var bestMatches: [Place] {
+        Array(filteredPlaces.sorted { score(for: $0) > score(for: $1) }.prefix(6))
+    }
+    
+    private var nearbyNow: [Place] {
+        guard let userLocation else { return [] }
+        return nearbyPlaces
+            .sorted { lhs, rhs in
+                if lhs.isOpen() != rhs.isOpen() {
+                    return lhs.isOpen() && !rhs.isOpen()
+                }
+                return lhs.distance(from: userLocation) < rhs.distance(from: userLocation)
+            }
+            .prefix(6)
+            .map { $0 }
+    }
+    
+    private var popularTypes: [(type: PlaceType, count: Int)] {
+        Dictionary(grouping: filteredPlaces, by: \.type)
+            .map { (type: $0.key, count: $0.value.count) }
+            .sorted { lhs, rhs in
+                if lhs.count == rhs.count {
+                    return lhs.type.localizedName < rhs.type.localizedName
+                }
+                return lhs.count > rhs.count
+            }
+    }
+    
+    private var allPlacesSorted: [Place] {
+        if let userLocation {
+            return filteredPlaces.sorted { lhs, rhs in
+                lhs.distance(from: userLocation) < rhs.distance(from: userLocation)
+            }
+        }
+        return filteredPlaces.sorted { score(for: $0) > score(for: $1) }
+    }
+    
+    private var featuredPlace: Place? {
+        selectedPlace ?? bestMatches.first ?? filteredPlaces.first
     }
     
     var body: some View {
@@ -366,27 +424,55 @@ struct OptimizedMapView: View {
             ZStack {
                 AdaptivePageBackground()
                 
-                VStack(spacing: 0) {
-                    // Filters - lightweight horizontal scroll
-                    filtersSection
-                    
-                    // Map section
-                    if isLoading {
-                        mapLoadingPlaceholder
-                    } else {
-                        mapSection
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 16) {
+                        filtersSection
+                        
+                        if isLoading {
+                            mapLoadingPlaceholder
+                        } else {
+                            heroMapSection
+                            discoverySections
+                        }
                     }
-                    
-                    // Places list
-                    placesListSection
+                    .padding(.bottom, 100)
                 }
             }
             .navigationTitle("map.title".localized)
             .navigationBarTitleDisplayMode(.large)
             .toolbarBackground(.hidden, for: .navigationBar)
         }
+        .sheet(item: $selectedPlace) { place in
+            PlaceDetailSheet(place: place)
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
+                .presentationBackground(.clear)
+        }
         .onAppear {
             loadPlacesOnce()
+            ensureLocationFlow()
+        }
+        .onChange(of: userLocation?.coordinate.latitude) { _, _ in
+            autoCenterIfNeeded()
+        }
+        .onChange(of: userLocation?.coordinate.longitude) { _, _ in
+            autoCenterIfNeeded()
+        }
+        .onChange(of: rangeMode) { _, mode in
+            if mode == .nearby {
+                ensureLocationFlow()
+            }
+        }
+        .onChange(of: appContainer.locationService.authorizationStatus) { _, status in
+            switch status {
+            case .authorizedAlways, .authorizedWhenInUse:
+                appContainer.locationService.startLocationUpdates()
+                autoCenterIfNeeded(force: true)
+            case .denied, .restricted:
+                hasAutoCenteredOnUser = false
+            default:
+                break
+            }
         }
     }
     
@@ -447,7 +533,6 @@ struct OptimizedMapView: View {
         .padding(.vertical, 8)
     }
     
-    // MARK: - Map Loading Placeholder
     private var mapLoadingPlaceholder: some View {
         ZStack {
             LinearGradient(
@@ -474,11 +559,9 @@ struct OptimizedMapView: View {
         .padding(.horizontal)
     }
     
-    // MARK: - Map Section
-    private var mapSection: some View {
+    private var heroMapSection: some View {
         ZStack(alignment: .bottomTrailing) {
             Map(position: $cameraPosition) {
-                // Limit annotations to prevent lag
                 ForEach(visiblePlaces) { place in
                     Annotation(place.name, coordinate: place.coordinate.clLocationCoordinate) {
                         PlaceAnnotationView(place: place) {
@@ -503,7 +586,41 @@ struct OptimizedMapView: View {
             )
             .shadow(color: Color.cyan.opacity(0.18), radius: 14, y: 6)
             
-            // Location button
+            VStack(alignment: .leading, spacing: 14) {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("map.hero_title".localized)
+                        .font(.system(size: 24, weight: .bold, design: .rounded))
+                        .foregroundColor(.white)
+                    Text("map.hero_subtitle".localized)
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(.white.opacity(0.84))
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        mapHeroChip(icon: "mappin.circle.fill", text: "\(filteredPlaces.count)")
+                        mapHeroChip(icon: "location.fill", text: userLocation == nil ? "—" : "\(nearbyPlaces.count)")
+                        mapHeroChip(icon: "clock.fill", text: "\(openNowCount)")
+                    }
+                }
+
+                if let featuredPlace {
+                    Button {
+                        selectedPlace = featuredPlace
+                    } label: {
+                        MapHeroFeaturedCard(
+                            place: featuredPlace,
+                            distanceText: distanceText(for: featuredPlace),
+                            badge: featuredPlace == bestMatches.first ? "map.best_match".localized : nil
+                        )
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(18)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+
             Button {
                 centerOnUserLocation()
             } label: {
@@ -526,75 +643,191 @@ struct OptimizedMapView: View {
             .padding(12)
         }
         .padding(.horizontal)
-        .sheet(item: $selectedPlace) { place in
-            PlaceDetailSheet(place: place)
-                .presentationDetents([.medium, .large])
-                .presentationDragIndicator(.visible)
-                .presentationBackground(.clear)
-        }
     }
     
-    // MARK: - Places List
-    private var placesListSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Text(rangeMode == .nearby ? "map.nearby_services".localized : "map.services".localized)
-                    .font(.system(size: 20, weight: .bold))
-                    .foregroundColor(Theme.Colors.textPrimary)
-                Spacer()
-                if !filteredPlaces.isEmpty {
-                    HStack(spacing: 4) {
-                        Image(systemName: "mappin.circle.fill")
-                            .font(.system(size: 12))
-                            .foregroundColor(.cyan)
-                        Text("\(filteredPlaces.count)")
-                            .font(.system(size: 13, weight: .semibold))
-                            .foregroundColor(Theme.Colors.textPrimary)
+    private func mapHeroChip(icon: String, text: String) -> some View {
+        HStack(spacing: 6) {
+            Image(systemName: icon)
+                .font(.system(size: 11, weight: .semibold))
+            Text(text)
+                .font(.system(size: 12, weight: .bold, design: .rounded))
+        }
+        .foregroundColor(.white)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 7)
+        .background(.ultraThinMaterial)
+        .clipShape(Capsule())
+    }
+    
+    private var discoverySections: some View {
+        VStack(alignment: .leading, spacing: 18) {
+            mapSectionHeader("map.best_matches".localized, count: bestMatches.count)
+            if bestMatches.isEmpty {
+                mapSectionEmptyState
+            } else {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 12) {
+                        ForEach(Array(bestMatches.enumerated()), id: \.element.id) { index, place in
+                            MapDiscoveryPlaceCard(
+                                place: place,
+                                distanceText: distanceText(for: place),
+                                badge: index == 0 ? "map.best_match".localized : nil,
+                                action: { selectedPlace = place }
+                            )
+                        }
                     }
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(
-                        Capsule()
-                            .fill(Color.cyan.opacity(0.16))
-                            .overlay(Capsule().stroke(Color.cyan.opacity(0.25), lineWidth: 1))
-                    )
+                    .padding(.horizontal, 16)
                 }
             }
-            .padding(.horizontal, 16)
-            .padding(.top, 12)
-            
-            if filteredPlaces.isEmpty {
-                VStack(spacing: 12) {
-                    Image(systemName: "mappin.slash")
-                        .font(.title)
-                        .foregroundColor(.secondary)
-                    Text("map.no_places".localized)
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
+
+            mapSectionHeader("map.nearby_now".localized, count: nearbyNow.count)
+            if userLocation == nil {
+                MapLocationPermissionCard(
+                    title: locationCardTitle,
+                    subtitle: locationCardSubtitle,
+                    buttonTitle: locationCardButtonTitle
+                ) {
+                    handleLocationAction()
                 }
-                .frame(maxWidth: .infinity, minHeight: 100)
+                .padding(.horizontal, 16)
+            } else if nearbyNow.isEmpty {
+                mapSectionEmptyState
             } else {
-                // Use List for efficient scrolling
-                List {
-                    ForEach(filteredPlaces.prefix(30)) { place in
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 12) {
+                        ForEach(nearbyNow) { place in
+                            MapDiscoveryPlaceCard(
+                                place: place,
+                                distanceText: distanceText(for: place),
+                                badge: place.isOpen() ? "map.open_now".localized : nil,
+                                action: { selectedPlace = place }
+                            )
+                        }
+                    }
+                    .padding(.horizontal, 16)
+                }
+            }
+
+            mapSectionHeader("map.popular_services".localized, count: popularTypes.count)
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 12) {
+                    ForEach(popularTypes, id: \.type) { item in
+                        Button {
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
+                                selectedType = selectedType == item.type ? nil : item.type
+                            }
+                        } label: {
+                            MapPopularTypeCard(
+                                type: item.type,
+                                count: item.count,
+                                isSelected: selectedType == item.type
+                            )
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding(.horizontal, 16)
+            }
+
+            mapSectionHeader("map.all_places".localized, count: allPlacesSorted.count)
+            if allPlacesSorted.isEmpty {
+                mapSectionEmptyState
+            } else {
+                LazyVStack(spacing: 12) {
+                    ForEach(allPlacesSorted.prefix(24)) { place in
                         PlaceLiteRow(place: place)
-                            .listRowSeparator(.hidden)
-                            .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
-                            .listRowBackground(Color.clear)
                             .onTapGesture {
                                 selectedPlace = place
                             }
                     }
                 }
-                .listStyle(.plain)
-                .scrollContentBackground(.hidden) // show winter gradient behind list
-                .background(Color.clear)
+                .padding(.horizontal, 16)
             }
         }
     }
     
-    // MARK: - Distance helper
-    /// Лёгкая по ресурсам функция для расчёта расстояния между двумя точками (метры)
+    private func mapSectionHeader(_ title: String, count: Int) -> some View {
+        HStack {
+            Text(title)
+                .font(.system(size: 20, weight: .bold, design: .rounded))
+                .foregroundColor(Theme.Colors.textPrimary)
+            Spacer()
+            if count > 0 {
+                Text("\(count)")
+                    .font(.system(size: 12, weight: .semibold, design: .rounded))
+                    .foregroundColor(Theme.Colors.textPrimary)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .background(
+                        Capsule()
+                            .fill(Theme.Colors.adaptiveCard)
+                            .overlay(
+                                Capsule().stroke(Theme.Colors.adaptiveBorder.opacity(0.55), lineWidth: 1)
+                            )
+                    )
+            }
+        }
+        .padding(.horizontal, 16)
+    }
+    
+    private var mapSectionEmptyState: some View {
+        VStack(spacing: 10) {
+            Image(systemName: "mappin.slash")
+                .font(.title3)
+                .foregroundColor(Theme.Colors.textTertiary)
+            Text("map.no_places".localized)
+                .font(.subheadline)
+                .foregroundColor(Theme.Colors.textSecondary)
+        }
+        .frame(maxWidth: .infinity, minHeight: 100)
+        .padding(.horizontal, 16)
+    }
+    
+    private func score(for place: Place) -> Double {
+        var total = 0.0
+        
+        if let selectedType, place.type == selectedType {
+            total += 18
+        }
+        if place.isOpen() {
+            total += 16
+        }
+        if place.supportsLanguage(currentLanguageCode) {
+            total += 14
+        }
+        if place.supportsLanguage("uk") {
+            total += 10
+        }
+        if place.verifiedAt != nil {
+            total += 8
+        }
+        if place.isAccessible {
+            total += 5
+        }
+        total += min(place.rating ?? 0, 5) * 2
+        total += min(Double(place.reviewCount), 25) * 0.25
+        total += min(Double(place.services.count), 6)
+        
+        if let userLocation {
+            let distance = place.distance(from: userLocation)
+            total += max(0, 30 - min(distance / 500, 30))
+            if distance <= nearbyRadiusMeters {
+                total += 12
+            }
+        }
+        
+        return total
+    }
+    
+    private func distanceText(for place: Place) -> String? {
+        guard let userLocation else { return nil }
+        let distance = place.distance(from: userLocation)
+        if distance < 1000 {
+            return "\(Int(distance)) м"
+        }
+        return String(format: "%.1f км", distance / 1000)
+    }
+    
     private func distanceMeters(from: CLLocationCoordinate2D, to: CLLocationCoordinate2D) -> Double {
         let earthRadiusKm = 6_371.0
         
@@ -610,12 +843,10 @@ struct OptimizedMapView: View {
         return earthRadiusKm * c * 1_000 // в метры
     }
     
-    // MARK: - Actions
     private func loadPlacesOnce() {
         guard places.isEmpty else { return }
         
         Task {
-            // Quick check first
             let loadedPlaces = appContainer.contentService.places
             if !loadedPlaces.isEmpty {
                 await MainActor.run {
@@ -625,7 +856,6 @@ struct OptimizedMapView: View {
                 return
             }
             
-            // Retry if needed
             for _ in 1...5 {
                 try? await Task.sleep(nanoseconds: 200_000_000)
                 let retryPlaces = await MainActor.run { appContainer.contentService.places }
@@ -646,13 +876,315 @@ struct OptimizedMapView: View {
     }
     
     private func centerOnUserLocation() {
-        guard let location = appContainer.locationService.currentLocation else { return }
+        guard let location = appContainer.locationService.currentLocation else {
+            handleLocationAction()
+            return
+        }
         withAnimation {
             cameraPosition = .region(MKCoordinateRegion(
                 center: location.coordinate,
                 span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
             ))
         }
+    }
+    
+    private var locationCardTitle: String {
+        switch appContainer.locationService.authorizationStatus {
+        case .denied, .restricted:
+            return "map.location_denied_title".localized
+        default:
+            return "map.location_permission".localized
+        }
+    }
+    
+    private var locationCardSubtitle: String {
+        switch appContainer.locationService.authorizationStatus {
+        case .denied, .restricted:
+            return "map.location_denied_subtitle".localized
+        default:
+            return "map.nearby_requires_location".localized
+        }
+    }
+    
+    private var locationCardButtonTitle: String {
+        switch appContainer.locationService.authorizationStatus {
+        case .denied, .restricted:
+            return "map.open_settings".localized
+        default:
+            return "map.enable_location".localized
+        }
+    }
+    
+    private func handleLocationAction() {
+        switch appContainer.locationService.authorizationStatus {
+        case .denied, .restricted:
+            appContainer.locationService.openAppSettings()
+        case .authorizedAlways, .authorizedWhenInUse:
+            appContainer.locationService.startLocationUpdates()
+            autoCenterIfNeeded(force: true)
+        case .notDetermined:
+            appContainer.locationService.requestLocationPermission()
+        @unknown default:
+            appContainer.locationService.requestLocationPermission()
+        }
+    }
+    
+    private func ensureLocationFlow() {
+        guard rangeMode == .nearby else { return }
+        switch appContainer.locationService.authorizationStatus {
+        case .authorizedAlways, .authorizedWhenInUse:
+            appContainer.locationService.startLocationUpdates()
+            autoCenterIfNeeded()
+        case .notDetermined:
+            appContainer.locationService.requestLocationPermission()
+        case .denied, .restricted:
+            break
+        @unknown default:
+            break
+        }
+    }
+    
+    private func autoCenterIfNeeded(force: Bool = false) {
+        guard let location = appContainer.locationService.currentLocation else { return }
+        guard force || !hasAutoCenteredOnUser else { return }
+        hasAutoCenteredOnUser = true
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+            cameraPosition = .region(
+                MKCoordinateRegion(
+                    center: location.coordinate,
+                    span: MKCoordinateSpan(latitudeDelta: 0.08, longitudeDelta: 0.08)
+                )
+            )
+        }
+    }
+}
+
+private struct MapHeroFeaturedCard: View {
+    let place: Place
+    let distanceText: String?
+    let badge: String?
+    
+    var body: some View {
+        HStack(spacing: 12) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .fill(place.type.swiftUIColor.opacity(0.22))
+                    .frame(width: 48, height: 48)
+                Image(systemName: place.type.iconName)
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundColor(place.type.swiftUIColor)
+            }
+            
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 6) {
+                    Text(place.name)
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(.white)
+                        .lineLimit(1)
+                    if let badge {
+                        Text(badge)
+                            .font(.system(size: 9, weight: .bold))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 3)
+                            .background(Capsule().fill(Color.orange.opacity(0.9)))
+                    }
+                }
+                
+                Text(place.type.localizedName)
+                    .font(.system(size: 12))
+                    .foregroundColor(.white.opacity(0.72))
+                    .lineLimit(1)
+                
+                HStack(spacing: 8) {
+                    if let distanceText {
+                        mapMeta(text: distanceText, color: .cyan)
+                    }
+                    mapMeta(text: place.isOpen() ? "map.open".localized : "map.closed".localized, color: place.isOpen() ? .green : .red)
+                }
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(14)
+        .background(.ultraThinMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+    }
+    
+    private func mapMeta(text: String, color: Color) -> some View {
+        HStack(spacing: 5) {
+            Circle()
+                .fill(color)
+                .frame(width: 6, height: 6)
+            Text(text)
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundColor(.white.opacity(0.9))
+        }
+    }
+}
+
+private struct MapDiscoveryPlaceCard: View {
+    let place: Place
+    let distanceText: String?
+    let badge: String?
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            VStack(alignment: .leading, spacing: 14) {
+                HStack(alignment: .top) {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            .fill(place.type.swiftUIColor.opacity(0.18))
+                            .frame(width: 52, height: 52)
+                        Image(systemName: place.type.iconName)
+                            .font(.system(size: 20, weight: .semibold))
+                            .foregroundColor(place.type.swiftUIColor)
+                    }
+                    
+                    Spacer()
+                    
+                    if let badge {
+                        Text(badge)
+                            .font(.system(size: 10, weight: .bold))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 5)
+                            .background(Capsule().fill(Color.orange.opacity(0.85)))
+                    }
+                }
+                
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(place.name)
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(Theme.Colors.textPrimary)
+                        .lineLimit(2)
+                    Text(place.type.localizedName)
+                        .font(.system(size: 13))
+                        .foregroundColor(Theme.Colors.textSecondary)
+                        .lineLimit(1)
+                }
+                
+                HStack(spacing: 8) {
+                    statusCapsule(text: place.isOpen() ? "map.open".localized : "map.closed".localized, color: place.isOpen() ? .green : .red)
+                    if let distanceText {
+                        statusCapsule(text: distanceText, color: .cyan)
+                    }
+                    if place.verifiedAt != nil {
+                        statusCapsule(text: "map.verified".localized, color: .blue)
+                    }
+                }
+                
+                if let description = place.description, !description.isEmpty {
+                    Text(description)
+                        .font(.system(size: 12))
+                        .foregroundColor(Theme.Colors.textSecondary)
+                        .lineLimit(2)
+                }
+            }
+            .frame(width: 270, alignment: .leading)
+            .padding(16)
+            .background(
+                RoundedRectangle(cornerRadius: 22, style: .continuous)
+                    .fill(Theme.Colors.adaptiveCard)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 22, style: .continuous)
+                            .stroke(Theme.Colors.adaptiveBorder.opacity(0.45), lineWidth: 1)
+                    )
+            )
+        }
+        .buttonStyle(.plain)
+    }
+    
+    private func statusCapsule(text: String, color: Color) -> some View {
+        Text(text)
+            .font(.system(size: 10, weight: .semibold))
+            .foregroundColor(color)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 5)
+            .background(Capsule().fill(color.opacity(0.12)))
+    }
+}
+
+private struct MapPopularTypeCard: View {
+    let type: PlaceType
+    let count: Int
+    let isSelected: Bool
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .fill(type.swiftUIColor.opacity(0.16))
+                    .frame(width: 42, height: 42)
+                Image(systemName: type.iconName)
+                    .foregroundColor(type.swiftUIColor)
+            }
+            
+            Text(type.localizedName)
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(Theme.Colors.textPrimary)
+                .lineLimit(2)
+            
+            Text("\(count)")
+                .font(.system(size: 22, weight: .bold, design: .rounded))
+                .foregroundColor(isSelected ? type.swiftUIColor : Theme.Colors.textPrimary)
+        }
+        .frame(width: 140, alignment: .leading)
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .fill(isSelected ? type.swiftUIColor.opacity(0.12) : Theme.Colors.adaptiveCard)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 20, style: .continuous)
+                        .stroke(isSelected ? type.swiftUIColor.opacity(0.5) : Theme.Colors.adaptiveBorder.opacity(0.45), lineWidth: 1)
+                )
+        )
+    }
+}
+
+private struct MapLocationPermissionCard: View {
+    let title: String
+    let subtitle: String
+    let buttonTitle: String
+    let action: () -> Void
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 10) {
+                Image(systemName: "location.slash.fill")
+                    .foregroundColor(.cyan)
+                Text(title)
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(Theme.Colors.textPrimary)
+            }
+            
+            Text(subtitle)
+                .font(.system(size: 13))
+                .foregroundColor(Theme.Colors.textSecondary)
+            
+            Button(action: action) {
+                HStack(spacing: 8) {
+                    Image(systemName: "location.fill")
+                    Text(buttonTitle)
+                        .fontWeight(.semibold)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 12)
+                .background(Theme.Colors.primary)
+                .foregroundColor(.white)
+                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .fill(Theme.Colors.adaptiveCard)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 20, style: .continuous)
+                        .stroke(Theme.Colors.adaptiveBorder.opacity(0.45), lineWidth: 1)
+                )
+        )
     }
 }
 
@@ -1069,10 +1601,19 @@ struct MapFilterChip: View {
 // MARK: - Place Lite Row
 struct PlaceLiteRow: View {
     let place: Place
+    @EnvironmentObject private var appContainer: AppContainer
+    
+    private var distanceText: String? {
+        guard let userLocation = appContainer.locationService.currentLocation else { return nil }
+        let distance = place.distance(from: userLocation)
+        if distance < 1000 {
+            return "\(Int(distance)) м"
+        }
+        return String(format: "%.1f км", distance / 1000)
+    }
     
     var body: some View {
         HStack(spacing: 14) {
-            // Icon (compact gradient tile)
             ZStack {
                 RoundedRectangle(cornerRadius: 12, style: .continuous)
                     .fill(
@@ -1089,7 +1630,6 @@ struct PlaceLiteRow: View {
                     .foregroundColor(place.type.swiftUIColor)
             }
             
-            // Info
             VStack(alignment: .leading, spacing: 4) {
                 Text(place.name)
                     .font(.system(size: 15, weight: .semibold))
@@ -1108,11 +1648,19 @@ struct PlaceLiteRow: View {
                         .font(.system(size: 12, weight: .medium))
                         .foregroundColor(place.isOpen() ? .green : .red)
                 }
+                
+                HStack(spacing: 6) {
+                    if let distanceText {
+                        rowBadge(text: distanceText, color: .cyan)
+                    }
+                    if place.verifiedAt != nil {
+                        rowBadge(text: "map.verified".localized, color: .blue)
+                    }
+                }
             }
             
             Spacer()
             
-            // Direction button
             Button {
                 openInMaps()
             } label: {
@@ -1132,6 +1680,15 @@ struct PlaceLiteRow: View {
                         .stroke(Theme.Colors.adaptiveBorder.opacity(0.45), lineWidth: 1)
                 )
         )
+    }
+    
+    private func rowBadge(text: String, color: Color) -> some View {
+        Text(text)
+            .font(.system(size: 10, weight: .semibold))
+            .foregroundColor(color)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(Capsule().fill(color.opacity(0.12)))
     }
     
     private func openInMaps() {

@@ -8,6 +8,7 @@
 import Foundation
 import CoreLocation
 import Combine
+import UIKit
 
 /// Protocol for location services
 @MainActor
@@ -19,6 +20,7 @@ protocol LocationServiceProtocol: ObservableObject {
     func requestLocationPermission()
     func startLocationUpdates()
     func stopLocationUpdates()
+    func openAppSettings()
     func distance(to coordinate: CLLocationCoordinate2D) -> CLLocationDistance?
     func nearbyPlaces(from places: [Place], radius: CLLocationDistance) -> [Place]
 }
@@ -81,6 +83,11 @@ class LocationService: NSObject, LocationServiceProtocol {
         
         isUpdatingLocation = false
         _locationManager?.stopUpdatingLocation()
+    }
+    
+    func openAppSettings() {
+        guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
+        UIApplication.shared.open(url)
     }
     
     func distance(to coordinate: CLLocationCoordinate2D) -> CLLocationDistance? {

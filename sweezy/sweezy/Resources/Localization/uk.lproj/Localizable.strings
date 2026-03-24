@@ -301,6 +301,19 @@
 "qa.cv_builder" = "CV Builder";
 "map.location_permission" = "Дозвіл на геолокацію";
 "map.enable_location" = "Увімкнути геолокацію";
+"map.open_settings" = "Відкрити налаштування";
+"map.location_denied_title" = "Доступ до геолокації вимкнено";
+"map.location_denied_subtitle" = "Дозвольте доступ до геолокації в Налаштуваннях, щоб карта показувала сервіси поруч і сортувала їх за відстанню.";
+"map.hero_title" = "Знайдіть потрібний сервіс швидше";
+"map.hero_subtitle" = "Переглядайте найкращі збіги поруч, відкриті зараз сервіси та найкорисніші категорії по всій Швейцарії.";
+"map.best_matches" = "Найкращі варіанти для вас";
+"map.nearby_now" = "Поруч зараз";
+"map.popular_services" = "Популярні сервіси";
+"map.all_places" = "Усі місця";
+"map.best_match" = "Найкращий збіг";
+"map.open_now" = "Відчинено зараз";
+"map.verified" = "Перевірено";
+"map.nearby_requires_location" = "Увімкніть геолокацію, щоб бачити рекомендації поруч і відкриті сервіси навколо вас.";
 
 // MARK: - Appointments
 "appointments.title" = "Зустрічі";

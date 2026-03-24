@@ -108,8 +108,13 @@ enum APIClient {
 
     static func authorizedData(from url: URL) async throws -> (Data, URLResponse) {
         var req = URLRequest(url: url)
+        return try await authorizedData(for: req, context: "authorized:\(url.lastPathComponent)")
+    }
+
+    static func authorizedData(for request: URLRequest, context: String) async throws -> (Data, URLResponse) {
+        var req = request
         attachAuth(&req)
-        let result = try await timedData(for: req, context: "authorized:\(url.lastPathComponent)")
+        let result = try await timedData(for: req, context: context)
         if let http = result.1 as? HTTPURLResponse, http.statusCode == 401 {
             let body = String(data: result.0, encoding: .utf8) ?? ""
             if body.localizedCaseInsensitiveContains("invalid authentication")
@@ -117,9 +122,9 @@ enum APIClient {
                 || body.localizedCaseInsensitiveContains("invalid user") {
                 do {
                     _ = try await refreshAccessToken()
-                    var retryReq = URLRequest(url: url)
+                    var retryReq = request
                     attachAuth(&retryReq)
-                    return try await timedData(for: retryReq, context: "authorized-retry:\(url.lastPathComponent)")
+                    return try await timedData(for: retryReq, context: "\(context)-retry")
                 } catch {
                     KeychainStore.delete("access_token")
                     KeychainStore.delete("refresh_token")
@@ -572,9 +577,8 @@ extension APIClient {
         req.httpMethod = "POST"
         req.setValue("application/json", forHTTPHeaderField: "Content-Type")
         req.timeoutInterval = 15
-        attachAuth(&req)
         req.httpBody = try marketplaceJSONEncoder().encode(listing)
-        let (data, resp) = try await URLSession.shared.data(for: req)
+        let (data, resp) = try await authorizedData(for: req, context: "marketplace_create")
         guard let http = resp as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
             if let msg = String(data: data, encoding: .utf8) {
                 throw NSError(domain: "API", code: (resp as? HTTPURLResponse)?.statusCode ?? 0,
@@ -599,9 +603,8 @@ extension APIClient {
         req.httpMethod = "PATCH"
         req.setValue("application/json", forHTTPHeaderField: "Content-Type")
         req.timeoutInterval = 15
-        attachAuth(&req)
         req.httpBody = try JSONEncoder().encode(payload)
-        let (data, resp) = try await URLSession.shared.data(for: req)
+        let (data, resp) = try await authorizedData(for: req, context: "marketplace_update")
         guard let http = resp as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
             if let msg = String(data: data, encoding: .utf8) {
                 throw NSError(
@@ -648,9 +651,8 @@ extension APIClient {
         req.httpMethod = "POST"
         req.setValue("application/json", forHTTPHeaderField: "Content-Type")
         req.timeoutInterval = 15
-        attachAuth(&req)
         req.httpBody = try marketplaceJSONEncoder().encode(event)
-        let (data, resp) = try await URLSession.shared.data(for: req)
+        let (data, resp) = try await authorizedData(for: req, context: "events_create")
         guard let http = resp as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
             if let msg = String(data: data, encoding: .utf8) {
                 throw NSError(domain: "API", code: (resp as? HTTPURLResponse)?.statusCode ?? 0,
@@ -675,9 +677,8 @@ extension APIClient {
         req.httpMethod = "PATCH"
         req.setValue("application/json", forHTTPHeaderField: "Content-Type")
         req.timeoutInterval = 15
-        attachAuth(&req)
         req.httpBody = try marketplaceJSONEncoder().encode(payload)
-        let (data, resp) = try await URLSession.shared.data(for: req)
+        let (data, resp) = try await authorizedData(for: req, context: "events_update")
         guard let http = resp as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
             if let msg = String(data: data, encoding: .utf8) {
                 throw NSError(domain: "API", code: (resp as? HTTPURLResponse)?.statusCode ?? 0,
@@ -692,8 +693,7 @@ extension APIClient {
         var req = URLRequest(url: url("events/\(id)"))
         req.httpMethod = "DELETE"
         req.timeoutInterval = 15
-        attachAuth(&req)
-        let (_, resp) = try await URLSession.shared.data(for: req)
+        let (_, resp) = try await authorizedData(for: req, context: "events_delete")
         guard let http = resp as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
             throw URLError(.badServerResponse)
         }
@@ -703,8 +703,7 @@ extension APIClient {
         var req = URLRequest(url: url("marketplace/\(id)"))
         req.httpMethod = "DELETE"
         req.timeoutInterval = 15
-        attachAuth(&req)
-        let (_, resp) = try await URLSession.shared.data(for: req)
+        let (_, resp) = try await authorizedData(for: req, context: "marketplace_delete")
         guard let http = resp as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
             throw URLError(.badServerResponse)
         }

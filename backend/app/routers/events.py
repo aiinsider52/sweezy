@@ -39,11 +39,13 @@ def _get_optional_user_id(
         payload = decode_token(credentials.credentials)
         email = payload.get("sub")
         if not email:
-            return None
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication")
         user = UserService.get_by_email(db, email)
-        return user.id if user else None
+        if not user:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication")
+        return user.id
     except Exception:
-        return None
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication")
 
 
 @router.get("/", response_model=EventListingPage)

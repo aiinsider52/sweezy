@@ -60,18 +60,6 @@ struct MarketplaceView: View {
             }
             .navigationTitle("marketplace.title".localized)
             .navigationBarTitleDisplayMode(.large)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        handleCabinetTap()
-                    } label: {
-                        Image(systemName: sessionManager.isAuthenticated ? "person.crop.circle.fill" : "lock.circle")
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(sessionManager.isAuthenticated ? Theme.Colors.primary : Theme.Colors.textSecondary)
-                    }
-                    .accessibilityLabel("marketplace.my_listings".localized)
-                }
-            }
             .searchable(text: activeSearchBinding, prompt: Text(searchPrompt))
             .refreshable { await refreshActiveMode() }
             .sheet(item: $selectedListing) { listing in

@@ -57,6 +57,7 @@ struct SettingsView: View {
                         winterSettingsRow(icon: "globe", title: "settings.language".localized, value: currentLanguageName) {
                             showingLanguageSelection = true
                         }
+                        winterThemePickerCard
                         winterSettingsRow(icon: "hand.raised.fill", title: "privacy.title".localized) {
                             showingPrivacy = true
                         }
@@ -88,11 +89,11 @@ struct SettingsView: View {
                                 if let biometricsMessage {
                                     Text(biometricsMessage)
                                         .font(Theme.Typography.caption)
-                                        .foregroundColor(.white.opacity(0.7))
+                                        .foregroundColor(Theme.Colors.textSecondary)
                                 } else if !lockManager.isBiometryAvailable, let reason = lockManager.biometryUnavailableReason {
                                     Text(reason)
                                         .font(Theme.Typography.caption)
-                                        .foregroundColor(.white.opacity(0.7))
+                                        .foregroundColor(Theme.Colors.textSecondary)
                                 }
                             }
                         }
@@ -326,7 +327,7 @@ private extension SettingsView {
                 .foregroundColor(.cyan)
             Text(text)
                 .font(Theme.Typography.caption)
-                .foregroundColor(.white.opacity(0.7))
+                .foregroundColor(Theme.Colors.textSecondary)
         }
     }
     
@@ -402,16 +403,16 @@ private extension SettingsView {
                 VStack(alignment: .leading, spacing: 6) {
                     Text(profileName)
                         .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(.white)
+                        .foregroundColor(Theme.Colors.textPrimary)
                     
                     // Subtitle with icon
                     HStack(spacing: 6) {
                         Image(systemName: "person.text.rectangle")
                             .font(.system(size: 12))
-                            .foregroundColor(.white.opacity(0.4))
+                            .foregroundColor(Theme.Colors.textTertiary)
                         Text(profileSubtitle)
                             .font(.system(size: 13))
-                            .foregroundColor(.white.opacity(0.6))
+                            .foregroundColor(Theme.Colors.textSecondary)
                     }
                     
                     // Quick stats row
@@ -436,7 +437,7 @@ private extension SettingsView {
                         .frame(width: 36, height: 36)
                     Image(systemName: "chevron.right")
                         .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(.white.opacity(0.6))
+                        .foregroundColor(Theme.Colors.textSecondary)
                 }
             }
             .padding(16)
@@ -470,7 +471,41 @@ private extension SettingsView {
         return "\(max(0, days))"
     }
     
-    // Appearance chips removed per design – theme now controlled globally / by system
+    private var winterThemePickerCard: some View {
+        WinterSettingsCard {
+            VStack(alignment: .leading, spacing: 14) {
+                HStack(spacing: Theme.Spacing.md) {
+                    Image(systemName: "paintbrush.pointed.fill")
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundColor(.cyan)
+                        .frame(width: 24)
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text("settings.theme.title".localized)
+                            .font(Theme.Typography.body)
+                            .foregroundColor(Theme.Colors.textPrimary)
+                        Text(themeManager.selectedTheme.localizedName)
+                            .font(Theme.Typography.caption)
+                            .foregroundColor(Theme.Colors.textSecondary)
+                    }
+                    Spacer()
+                }
+                
+                HStack(spacing: 10) {
+                    ForEach(AppTheme.allCases) { theme in
+                        ThemeSelectionButton(
+                            theme: theme,
+                            isSelected: themeManager.selectedTheme == theme
+                        ) {
+                            withAnimation(Theme.Animation.smooth) {
+                                themeManager.selectedTheme = theme
+                            }
+                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                        }
+                    }
+                }
+            }
+        }
+    }
     
     func settingsRow(icon: String, title: String, value: String? = nil, tinted: Color? = nil, action: @escaping () -> Void) -> some View {
         Button(action: action) {
@@ -883,6 +918,7 @@ struct ProfileEditView: View {
     @EnvironmentObject private var lockManager: AppLockManager
     @EnvironmentObject private var sessionManager: SessionManager
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) private var colorScheme
     
     // Form state
     @State private var fullName: String = ""
@@ -931,20 +967,50 @@ struct ProfileEditView: View {
         return .red
     }
     
+    private var isDarkTheme: Bool { colorScheme == .dark }
+    
+    private var winterPrimaryText: Color {
+        isDarkTheme ? .white : Theme.Colors.textPrimary
+    }
+    
+    private var winterSecondaryText: Color {
+        isDarkTheme ? .white.opacity(0.68) : Theme.Colors.textSecondary
+    }
+    
+    private var winterTertiaryText: Color {
+        isDarkTheme ? .white.opacity(0.5) : Theme.Colors.textTertiary
+    }
+    
+    private var winterScreenBackground: LinearGradient {
+        if isDarkTheme {
+            return LinearGradient(
+                colors: [
+                    Theme.Colors.primaryDark,
+                    Theme.Colors.primary.opacity(0.85),
+                    Theme.Colors.primaryDark
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        }
+        
+        return LinearGradient(
+            colors: [
+                Theme.Colors.primaryBackground,
+                Theme.Colors.backgroundStone,
+                Color.white
+            ],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+    }
+    
     var body: some View {
         Group {
             if sessionManager.isAuthenticated {
                 NavigationStack {
                     ZStack {
-                        LinearGradient(
-                            colors: [
-                                Theme.Colors.primaryDark,
-                                Theme.Colors.primary.opacity(0.85),
-                                Theme.Colors.primaryDark
-                            ],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
+                        winterScreenBackground
                         .ignoresSafeArea()
                         
                         ScrollView(showsIndicators: false) {
@@ -971,7 +1037,7 @@ struct ProfileEditView: View {
                     .navigationBarTitleDisplayMode(.inline)
                     .toolbar {
                         ToolbarItem(placement: .navigationBarLeading) {
-                            Button { dismiss() } label: { Text("Скасувати").foregroundColor(.white.opacity(0.7)) }
+                            Button { dismiss() } label: { Text("Скасувати").foregroundColor(winterSecondaryText) }
                         }
                         ToolbarItem(placement: .navigationBarTrailing) {
                             Button { saveProfile() } label: { Text("Зберегти").fontWeight(.semibold).foregroundColor(.cyan) }
@@ -1014,15 +1080,15 @@ struct ProfileEditView: View {
                 VStack(spacing: 12) {
                     Image(systemName: "lock.fill")
                         .font(.system(size: 34, weight: .semibold))
-                        .foregroundColor(.white.opacity(0.85))
+                        .foregroundColor(winterPrimaryText)
                     
                     Text("auth.login.title")
                         .font(.system(size: 20, weight: .bold))
-                        .foregroundColor(.white)
+                        .foregroundColor(winterPrimaryText)
                     
                     Text("auth.login.subtitle")
                         .font(.subheadline)
-                        .foregroundColor(.white.opacity(0.7))
+                        .foregroundColor(winterSecondaryText)
                         .multilineTextAlignment(.center)
                     
                     Button {
@@ -1044,7 +1110,7 @@ struct ProfileEditView: View {
                     Button { dismiss() } label: {
                         Text("common.close")
                             .font(.subheadline.weight(.medium))
-                            .foregroundColor(.white.opacity(0.75))
+                            .foregroundColor(winterSecondaryText)
                     }
                     .buttonStyle(.plain)
                 }
@@ -1054,7 +1120,7 @@ struct ProfileEditView: View {
                         .fill(Theme.Colors.adaptiveCard)
                         .overlay(
                             RoundedRectangle(cornerRadius: 20, style: .continuous)
-                                .stroke(Color.white.opacity(0.14), lineWidth: 1)
+                                .stroke(Theme.Colors.adaptiveBorder.opacity(0.7), lineWidth: 1)
                         )
                 )
                 .padding(.horizontal, 20)
@@ -1065,7 +1131,7 @@ struct ProfileEditView: View {
                     Button { dismiss() } label: {
                         Image(systemName: "xmark")
                             .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(.white.opacity(0.7))
+                            .foregroundColor(winterSecondaryText)
                     }
                 }
             }
@@ -1163,12 +1229,12 @@ struct ProfileEditView: View {
             VStack(spacing: 6) {
                 Text(fullName.isEmpty ? "Ваше ім'я" : fullName)
                     .font(.system(size: 22, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
+                    .foregroundColor(winterPrimaryText)
                 
                 if !email.isEmpty {
                     Text(email)
                         .font(.system(size: 14))
-                        .foregroundColor(.white.opacity(0.6))
+                        .foregroundColor(winterSecondaryText)
                 }
                 
                 HStack(spacing: 6) {
@@ -1177,7 +1243,7 @@ struct ProfileEditView: View {
                     Text("Профіль заповнено на \(Int(completionPercentage * 100))%")
                         .font(.system(size: 12, weight: .medium))
                 }
-                .foregroundColor(completionPercentage >= 1 ? .green : .white.opacity(0.5))
+                .foregroundColor(completionPercentage >= 1 ? .green : winterTertiaryText)
                 .padding(.top, 4)
             }
         }
@@ -1217,13 +1283,13 @@ struct ProfileEditView: View {
                 Button { showCantonPicker = true } label: {
                     HStack {
                         Image(systemName: "building.2").foregroundColor(.orange).frame(width: 24)
-                        Text("Кантон").foregroundColor(.white.opacity(0.6))
+                        Text("Кантон").foregroundColor(winterSecondaryText)
                         Spacer()
                         HStack(spacing: 6) {
                             Text(selectedCanton.flag).font(.system(size: 18))
-                            Text(selectedCanton.localizedName).foregroundColor(.white)
+                            Text(selectedCanton.localizedName).foregroundColor(winterPrimaryText)
                         }
-                        Image(systemName: "chevron.right").foregroundColor(.white.opacity(0.4))
+                        Image(systemName: "chevron.right").foregroundColor(winterTertiaryText)
                     }
                     .padding(14)
                     .background(Theme.Colors.adaptiveCard)
@@ -1234,7 +1300,7 @@ struct ProfileEditView: View {
                 Button { showPermitPicker = true } label: {
                     HStack {
                         Image(systemName: "doc.badge.gearshape").foregroundColor(selectedPermitType.color).frame(width: 24)
-                        Text("Тип дозволу").foregroundColor(.white.opacity(0.6))
+                        Text("Тип дозволу").foregroundColor(winterSecondaryText)
                         Spacer()
                         HStack(spacing: 6) {
                             Text(selectedPermitType.rawValue)
@@ -1242,9 +1308,9 @@ struct ProfileEditView: View {
                                 .foregroundColor(.white)
                                 .padding(.horizontal, 8).padding(.vertical, 4)
                                 .background(selectedPermitType.color).cornerRadius(6)
-                            Text(selectedPermitType.shortName).foregroundColor(.white)
+                            Text(selectedPermitType.shortName).foregroundColor(winterPrimaryText)
                         }
-                        Image(systemName: "chevron.right").foregroundColor(.white.opacity(0.4))
+                        Image(systemName: "chevron.right").foregroundColor(winterTertiaryText)
                     }
                     .padding(14)
                     .background(Theme.Colors.adaptiveCard)
@@ -1264,10 +1330,10 @@ struct ProfileEditView: View {
                             Circle().fill(Color.green).frame(width: 16, height: 16)
                             Circle().fill(.white).frame(width: 6, height: 6)
                         }
-                        Text("Прибуття").font(.system(size: 11, weight: .medium)).foregroundColor(.white.opacity(0.6))
+                        Text("Прибуття").font(.system(size: 11, weight: .medium)).foregroundColor(winterSecondaryText)
                         Text(arrivalDate.formatted(.dateTime.day().month(.abbreviated)))
                             .font(.system(size: 13, weight: .semibold))
-                            .foregroundColor(.white)
+                            .foregroundColor(winterPrimaryText)
                     }.frame(maxWidth: .infinity)
                     
                     VStack {
@@ -1284,10 +1350,10 @@ struct ProfileEditView: View {
                             Circle().fill(permitStatusColor).frame(width: 16, height: 16)
                             Circle().fill(.white).frame(width: 6, height: 6)
                         }
-                        Text("Закінчення").font(.system(size: 11, weight: .medium)).foregroundColor(.white.opacity(0.6))
+                        Text("Закінчення").font(.system(size: 11, weight: .medium)).foregroundColor(winterSecondaryText)
                         Text(permitExpiry.formatted(.dateTime.day().month(.abbreviated).year()))
                             .font(.system(size: 13, weight: .semibold))
-                            .foregroundColor(.white)
+                            .foregroundColor(winterPrimaryText)
                     }.frame(maxWidth: .infinity)
                 }
                 
@@ -1308,13 +1374,11 @@ struct ProfileEditView: View {
                         .labelsHidden()
                         .datePickerStyle(.compact)
                         .scaleEffect(0.9)
-                        .colorScheme(.dark)
-                    Text("→").foregroundColor(.white.opacity(0.4))
+                    Text("→").foregroundColor(winterTertiaryText)
                     DatePicker("", selection: $permitExpiry, displayedComponents: .date)
                         .labelsHidden()
                         .datePickerStyle(.compact)
                         .scaleEffect(0.9)
-                        .colorScheme(.dark)
                 }
             }
         }
@@ -1324,7 +1388,7 @@ struct ProfileEditView: View {
         WinterSectionCard(icon: "figure.2.and.child.holdinghands", title: "Сім'я", color: .pink) {
             VStack(spacing: 16) {
                 HStack {
-                    Text("Розмір сім'ї").foregroundColor(.white.opacity(0.6))
+                    Text("Розмір сім'ї").foregroundColor(winterSecondaryText)
                     Spacer()
                     HStack(spacing: 0) {
                         Button { if familySize > 1 { familySize -= 1 } } label: {
@@ -1340,7 +1404,7 @@ struct ProfileEditView: View {
                             Image(systemName: "plus").frame(width: 36, height: 36)
                         }
                     }
-                    .foregroundColor(.white)
+                    .foregroundColor(winterPrimaryText)
                     .background(Theme.Colors.adaptiveSurface)
                     .cornerRadius(10)
                 }
@@ -1348,9 +1412,9 @@ struct ProfileEditView: View {
                 HStack {
                     HStack(spacing: 10) {
                         Image(systemName: hasChildren ? "figure.and.child.holdinghands" : "figure.2")
-                            .foregroundColor(hasChildren ? .pink : .white.opacity(0.4))
+                            .foregroundColor(hasChildren ? .pink : winterTertiaryText)
                             .frame(width: 24)
-                        Text("Є діти").foregroundColor(.white)
+                        Text("Є діти").foregroundColor(winterPrimaryText)
                     }
                     Spacer()
                     Toggle("", isOn: $hasChildren).labelsHidden().tint(.pink)
@@ -1398,7 +1462,7 @@ struct ProfileEditView: View {
                 .font(.system(size: 16, weight: .semibold))
                 .frame(maxWidth: .infinity)
                 .frame(height: 54)
-                .foregroundColor(.white)
+                .foregroundColor(hasChanges ? .white : Theme.Colors.textPrimary)
                 .background(
                     hasChanges
                         ? AnyShapeStyle(LinearGradient(
@@ -1419,7 +1483,7 @@ struct ProfileEditView: View {
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
         .background(
-            Theme.Colors.darkBackground.opacity(0.95)
+            (isDarkTheme ? Theme.Colors.darkBackground : Theme.Colors.primaryBackground).opacity(0.95)
         )
     }
     private var profileLocationCard: some View {
@@ -1701,6 +1765,7 @@ private struct WinterQuickStat: View {
     let icon: String
     let value: String
     let label: String
+    @Environment(\.colorScheme) private var colorScheme
     
     var body: some View {
         HStack(spacing: 4) {
@@ -1709,10 +1774,10 @@ private struct WinterQuickStat: View {
                 .foregroundColor(.cyan)
             Text(value)
                 .font(.system(size: 12, weight: .bold))
-                .foregroundColor(.white)
+                .foregroundColor(colorScheme == .dark ? .white : Theme.Colors.textPrimary)
             Text(label)
                 .font(.system(size: 11))
-                .foregroundColor(.white.opacity(0.5))
+                .foregroundColor(colorScheme == .dark ? .white.opacity(0.5) : Theme.Colors.textTertiary)
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 4)
@@ -1871,6 +1936,7 @@ private struct WinterSectionCard<Content: View>: View {
     let title: String
     let color: Color
     let content: Content
+    @Environment(\.colorScheme) private var colorScheme
     
     init(icon: String, title: String, color: Color, @ViewBuilder content: () -> Content) {
         self.icon = icon
@@ -1898,7 +1964,7 @@ private struct WinterSectionCard<Content: View>: View {
                 
                 Text(title)
                     .font(.system(size: 15, weight: .semibold))
-                    .foregroundColor(.white)
+                    .foregroundColor(colorScheme == .dark ? .white : Theme.Colors.textPrimary)
             }
             content
         }
@@ -1928,20 +1994,21 @@ private struct WinterTextField: View {
     var keyboardType: UIKeyboardType = .default
     var isValid: Bool = true
     var validationMessage: String? = nil
+    @Environment(\.colorScheme) private var colorScheme
     
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 12) {
                 Image(systemName: icon)
                     .font(.system(size: 16))
-                    .foregroundColor(isValid ? .white.opacity(0.4) : .red)
+                    .foregroundColor(isValid ? (colorScheme == .dark ? .white.opacity(0.4) : Theme.Colors.textTertiary) : .red)
                     .frame(width: 24)
                 
                 TextField(placeholder, text: $text)
                     .font(.system(size: 15))
                     .keyboardType(keyboardType)
                     .autocapitalization(keyboardType == .emailAddress ? .none : .words)
-                    .foregroundColor(.white)
+                    .foregroundColor(colorScheme == .dark ? .white : Theme.Colors.textPrimary)
                 
                 if !text.isEmpty {
                     Image(systemName: isValid ? "checkmark.circle.fill" : "exclamationmark.circle.fill")
@@ -1972,6 +2039,7 @@ private struct WinterGoalChip: View {
     let goal: UserGoal
     let isSelected: Bool
     let onTap: () -> Void
+    @Environment(\.colorScheme) private var colorScheme
     
     private var goalIcon: String {
         switch goal {
@@ -2012,7 +2080,7 @@ private struct WinterGoalChip: View {
                 
                 Text(goal.localizedName)
                     .font(.system(size: 13, weight: .medium))
-                    .foregroundColor(.white)
+                    .foregroundColor(colorScheme == .dark ? .white : Theme.Colors.textPrimary)
                     .lineLimit(2)
                     .minimumScaleFactor(0.8)
                 
@@ -2122,11 +2190,11 @@ struct AboutView: View {
                         
                         Text("Sweezy")
                             .font(.system(size: 32, weight: .bold))
-                            .foregroundColor(.white)
+                            .foregroundColor(Theme.Colors.textPrimary)
                         
                         Text("Your guide to life in Switzerland")
                             .font(Theme.Typography.body)
-                            .foregroundColor(.white.opacity(0.75))
+                            .foregroundColor(Theme.Colors.textSecondary)
                             .multilineTextAlignment(.center)
                     }
                     .frame(maxWidth: .infinity)
@@ -2135,10 +2203,10 @@ struct AboutView: View {
                     VStack(alignment: .leading, spacing: Theme.Spacing.md) {
                         Text("About Sweezy")
                             .font(Theme.Typography.headline)
-                            .foregroundColor(.white)
+                            .foregroundColor(Theme.Colors.textPrimary)
                         Text("Sweezy is designed to help Ukrainian refugees and other newcomers navigate life in Switzerland. We provide essential information, step-by-step guides, and useful tools to make your integration journey smoother.")
                             .font(Theme.Typography.body)
-                            .foregroundColor(.white.opacity(0.85))
+                            .foregroundColor(Theme.Colors.textSecondary)
                     }
                     .padding(16)
                     .background(
@@ -2148,7 +2216,7 @@ struct AboutView: View {
                                 RoundedRectangle(cornerRadius: 20)
                                     .stroke(
                                         LinearGradient(
-                                            colors: [Color.cyan.opacity(0.4), Color.white.opacity(0.15)],
+                                            colors: [Color.cyan.opacity(0.4), Theme.Colors.adaptiveBorder.opacity(0.65)],
                                             startPoint: .topLeading,
                                             endPoint: .bottomTrailing
                                         ),
@@ -2161,7 +2229,7 @@ struct AboutView: View {
                     VStack(alignment: .leading, spacing: Theme.Spacing.md) {
                         Text("Features")
                             .font(Theme.Typography.headline)
-                            .foregroundColor(.white)
+                            .foregroundColor(Theme.Colors.textPrimary)
                         VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
                             FeatureRow(icon: "book", title: "Comprehensive Guides", description: "Step-by-step information on housing, healthcare, work, and more")
                             FeatureRow(icon: "checklist", title: "Interactive Checklists", description: "Track your progress through important tasks")
@@ -2175,7 +2243,7 @@ struct AboutView: View {
                                 .fill(Theme.Colors.adaptiveCard.opacity(0.5))
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 20)
-                                        .stroke(Color.white.opacity(0.12), lineWidth: 1)
+                                        .stroke(Theme.Colors.adaptiveBorder.opacity(0.65), lineWidth: 1)
                                 )
                         )
                     }
@@ -2372,6 +2440,51 @@ private struct TrialCountdownChip: View {
     var body: some View {
         PlanChip(icon: "clock.fill", text: text, color: .yellow)
             .onReceive(Timer.publish(every: 60, on: .main, in: .common).autoconnect()) { _ in now = Date() }
+    }
+}
+
+private struct ThemeSelectionButton: View {
+    let theme: AppTheme
+    let isSelected: Bool
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 10) {
+                Image(systemName: theme.iconName)
+                    .font(.system(size: 18, weight: .semibold))
+                Text(theme.localizedName)
+                    .font(.system(size: 12, weight: .semibold))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.85)
+            }
+            .foregroundColor(isSelected ? .white : Theme.Colors.textPrimary)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 12)
+            .background(
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .fill(
+                        isSelected
+                            ? AnyShapeStyle(
+                                LinearGradient(
+                                    colors: [Color.cyan, Theme.Colors.primary],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                            : AnyShapeStyle(Theme.Colors.adaptiveSurface)
+                    )
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .stroke(
+                        isSelected ? Color.cyan.opacity(0.45) : Theme.Colors.adaptiveBorder.opacity(0.55),
+                        lineWidth: 1
+                    )
+            )
+            .shadow(color: isSelected ? Color.cyan.opacity(0.18) : .clear, radius: 10, y: 4)
+        }
+        .buttonStyle(.plain)
     }
 }
 

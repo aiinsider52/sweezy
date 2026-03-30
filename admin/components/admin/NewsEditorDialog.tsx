@@ -20,7 +20,7 @@ export default function NewsEditorDialog({ news, trigger }: { news?: News; trigg
   const [language, setLanguage] = useState(news?.language ?? 'uk')
   const [publishedAt, setPublishedAt] = useState<string>(news?.published_at ?? new Date().toISOString())
   const [imageUrl, setImageUrl] = useState(news?.image_url ?? '')
-  const [status, setStatus] = useState<( 'draft' | 'published')>((news as any)?.status ?? 'published')
+  const [status, setStatus] = useState<('draft' | 'published' | 'archived')>((news as any)?.status ?? 'published')
   const [loading, setLoading] = useState(false)
   const [showPreview, setShowPreview] = useState(true)
   const qc = useQueryClient()
@@ -119,6 +119,7 @@ export default function NewsEditorDialog({ news, trigger }: { news?: News; trigg
                   options={[
                     { value: 'published', label: 'published' },
                     { value: 'draft', label: 'draft' },
+                    { value: 'archived', label: 'archived' },
                   ]}
                 />
               </div>
@@ -130,7 +131,7 @@ export default function NewsEditorDialog({ news, trigger }: { news?: News; trigg
                   options={[
                     { value: 'uk', label: 'uk' },
                     { value: 'en', label: 'en' },
-                    { value: 'ru', label: 'ru' },
+                    { value: 'de', label: 'de' },
                   ]}
                 />
               </div>

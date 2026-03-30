@@ -7,6 +7,9 @@ from .user import User
 from .subscription import Subscription, SubscriptionEvent
 from .marketplace import ServiceListing
 from .event_listing import EventListing
+from .news import News
+from .rss_feed import RSSFeed
+from .brave_news_query import BraveNewsQuery
 
 __all__ = [
     "Guide",
@@ -18,6 +21,9 @@ __all__ = [
     "SubscriptionEvent",
     "ServiceListing",
     "EventListing",
+    "News",
+    "RSSFeed",
+    "BraveNewsQuery",
 ]
 
 

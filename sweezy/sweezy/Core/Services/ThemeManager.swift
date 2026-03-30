@@ -14,6 +14,14 @@ enum AppTheme: String, CaseIterable, Identifiable {
     
     var id: String { rawValue }
     
+    var iconName: String {
+        switch self {
+        case .system: return "circle.lefthalf.filled"
+        case .light: return "sun.max.fill"
+        case .dark: return "moon.fill"
+        }
+    }
+    
     var localizedName: String {
         switch self {
         case .system: return "settings.theme.system".localized

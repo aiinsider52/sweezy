@@ -63,25 +63,39 @@ async def _background_tick() -> None:
     from .core.database import SessionLocal
     from .models.rss_feed import RSSFeed
     from .services.rss_importer import RSSImporter
+    from .services.brave_search_importer import BraveSearchImporter
 
     interval = int(os.getenv("FEED_IMPORT_INTERVAL_SEC", "900"))
+    brave_interval = int(os.getenv("BRAVE_REFRESH_INTERVAL_SEC", str(settings.BRAVE_REFRESH_INTERVAL_SEC)))
     last_run = 0.0
+    last_brave_run = 0.0
     while True:
         await asyncio.sleep(60)
         now = _time.monotonic()
         if now - last_run < interval:
+            pass
+        else:
+            last_run = now
+            try:
+                with SessionLocal() as db:
+                    feeds: List[RSSFeed] = db.query(RSSFeed).filter(RSSFeed.enabled == True).all()  # noqa: E712
+                    for f in feeds:
+                        try:
+                            RSSImporter.import_feed_record(db, f)
+                        except Exception:
+                            continue
+            except Exception:
+                # never break background loop
+                pass
+
+        if not settings.BRAVE_API_KEY or now - last_brave_run < brave_interval:
             continue
-        last_run = now
+
+        last_brave_run = now
         try:
             with SessionLocal() as db:
-                feeds: List[RSSFeed] = db.query(RSSFeed).filter(RSSFeed.enabled == True).all()  # noqa: E712
-                for f in feeds:
-                    try:
-                        RSSImporter.import_feed_record(db, f)
-                    except Exception:
-                        continue
+                BraveSearchImporter.import_enabled_queries(db)
         except Exception:
-            # never break background loop
             pass
 
 

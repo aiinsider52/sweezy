@@ -11,10 +11,20 @@ from ..models.news import News
 
 class NewsService:
   @staticmethod
-  def list_news(db: Session, language: Optional[str] = None, limit: int = 50, *, status: Optional[str] = None, include_drafts: bool = False) -> List[News]:
+  def list_news(
+    db: Session,
+    language: Optional[str] = None,
+    limit: int = 50,
+    *,
+    status: Optional[str] = None,
+    include_drafts: bool = False,
+    import_source: Optional[str] = None,
+  ) -> List[News]:
     query = db.query(News).order_by(News.published_at.desc())
     if language:
       query = query.filter(News.language == language)
+    if import_source:
+      query = query.filter(News.import_source == import_source)
     if status:
       query = query.filter(News.status == status)
     elif not include_drafts:
@@ -36,6 +46,8 @@ class NewsService:
       source=data.get("source", "Sweezy"),
       language=data.get("language", "uk"),
       status=data.get("status", "published"),
+      import_source=data.get("import_source", "manual"),
+      import_reference_id=data.get("import_reference_id"),
       published_at=data.get("published_at") or datetime.utcnow(),
       image_url=str(data["image_url"]) if data.get("image_url") else None,
       created_at=datetime.utcnow(),

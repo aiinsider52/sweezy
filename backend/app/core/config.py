@@ -62,6 +62,12 @@ class Settings(BaseSettings):
     # Remote config
     REMOTE_FLAGS: dict = Field(default_factory=lambda: {"enableNewOnboarding": True})
 
+    # Brave Search API / automated news research
+    BRAVE_API_KEY: str | None = Field(default=None)
+    BRAVE_SEARCH_BASE_URL: str = Field(default="https://api.search.brave.com/res/v1/web/search")
+    BRAVE_REFRESH_INTERVAL_SEC: int = Field(default=60 * 60 * 24 * 7)
+    BRAVE_MAX_RESULTS_PER_QUERY: int = Field(default=8)
+
 
     def parsed_cors_origins(self) -> List[str]:
         raw = self.CORS_ORIGINS

@@ -27,7 +27,16 @@ class RSSImporter:
     return ""
 
   @staticmethod
-  def import_from_url(db: Session, feed_url: str, *, language: str = "uk", status: str = "draft", max_items: int = 50, download_images: bool = True) -> Dict[str, int]:
+  def import_from_url(
+    db: Session,
+    feed_url: str,
+    *,
+    language: str = "uk",
+    status: str = "draft",
+    max_items: int = 50,
+    download_images: bool = True,
+    import_reference_id: str | None = None,
+  ) -> Dict[str, int]:
     client = httpx.Client(timeout=10, follow_redirects=True, headers={
       "User-Agent": "SweezyRSS/1.0 (+https://sweezy-9xyk.onrender.com)"
     })
@@ -94,6 +103,8 @@ class RSSImporter:
           "status": status,
           "published_at": pub_dt,
           "image_url": image_url,
+          "import_source": "rss",
+          "import_reference_id": import_reference_id,
         }
         existing = db.query(News).filter(News.url == feed_url).first()
         if existing:
@@ -149,6 +160,8 @@ class RSSImporter:
           "status": status,
           "published_at": pub_dt,
           "image_url": image_url,
+          "import_source": "rss",
+          "import_reference_id": import_reference_id,
         }
         if existing:
           NewsService.update(db, existing, **data); updated += 1
@@ -169,6 +182,7 @@ class RSSImporter:
       status=feed.status,
       max_items=feed.max_items,
       download_images=feed.download_images,
+      import_reference_id=feed.id,
     )
     feed.last_imported_at = datetime.utcnow()
     db.add(feed)

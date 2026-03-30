@@ -18,7 +18,9 @@ from ..schemas import GuideCreate, TemplateCreate, ChecklistCreate
 from ..core.config import get_settings
 from ..routers.media import UPLOAD_DIR
 from ..models.rss_feed import RSSFeed
+from ..models.brave_news_query import BraveNewsQuery
 from ..services.rss_importer import RSSImporter
+from ..services.brave_search_importer import BraveSearchImporter
 from ..models.subscription import Subscription, SubscriptionEvent
 from ..models.analytics import PaywallEvent
 from ..services import stripe_service
@@ -595,6 +597,102 @@ def update_rss_feed(feed_id: str, payload: Dict[str, Any], db: DBSession, _: Cur
     r.updated_at = __import__("datetime").datetime.utcnow()
     db.add(r); db.commit()
     return {"ok": True}
+
+
+@router.get("/brave-news/queries")
+def list_brave_news_queries(_: CurrentAdmin, db: DBSession) -> List[Dict[str, Any]]:
+    rows = db.query(BraveNewsQuery).order_by(BraveNewsQuery.created_at.desc()).all()
+    return [{
+        "id": row.id,
+        "query": row.query,
+        "language": row.language,
+        "country": row.country,
+        "status": row.status,
+        "enabled": bool(row.enabled),
+        "max_results": row.max_results,
+        "freshness_days": row.freshness_days,
+        "last_imported_at": row.last_imported_at.isoformat() if row.last_imported_at else None,
+        "created_at": row.created_at.isoformat() if row.created_at else None,
+        "updated_at": row.updated_at.isoformat() if row.updated_at else None,
+    } for row in rows]
+
+
+@router.post("/brave-news/queries")
+def create_brave_news_query(payload: Dict[str, Any], db: DBSession, _: CurrentAdmin) -> Dict[str, Any]:
+    query = str(payload.get("query") or "").strip()
+    if not query:
+        raise HTTPException(status_code=400, detail="query is required")
+
+    row = BraveNewsQuery(
+        id=str(__import__("uuid").uuid4()),
+        query=query,
+        language=str(payload.get("language") or "uk"),
+        country=(str(payload["country"]).strip().upper() if payload.get("country") else None),
+        status=str(payload.get("status") or "published"),
+        enabled=bool(payload.get("enabled", True)),
+        max_results=max(1, min(int(payload.get("max_results", 8)), 10)),
+        freshness_days=max(1, min(int(payload.get("freshness_days", 7)), 365)),
+        created_at=__import__("datetime").datetime.utcnow(),
+        updated_at=__import__("datetime").datetime.utcnow(),
+    )
+    db.add(row)
+    db.commit()
+    return {"id": row.id}
+
+
+@router.patch("/brave-news/queries/{query_id}")
+def update_brave_news_query(query_id: str, payload: Dict[str, Any], db: DBSession, _: CurrentAdmin) -> Dict[str, Any]:
+    row = db.query(BraveNewsQuery).filter(BraveNewsQuery.id == query_id).first()
+    if not row:
+        raise HTTPException(status_code=404, detail="Not found")
+
+    if "query" in payload and payload["query"] is not None:
+        row.query = str(payload["query"]).strip()
+    if "language" in payload and payload["language"] is not None:
+        row.language = str(payload["language"])
+    if "country" in payload:
+        row.country = (str(payload["country"]).strip().upper() or None) if payload["country"] is not None else None
+    if "status" in payload and payload["status"] is not None:
+        row.status = str(payload["status"])
+    if "enabled" in payload:
+        row.enabled = bool(payload["enabled"])
+    if "max_results" in payload and payload["max_results"] is not None:
+        row.max_results = max(1, min(int(payload["max_results"]), 10))
+    if "freshness_days" in payload and payload["freshness_days"] is not None:
+        row.freshness_days = max(1, min(int(payload["freshness_days"]), 365))
+    row.updated_at = __import__("datetime").datetime.utcnow()
+    db.add(row)
+    db.commit()
+    return {"ok": True}
+
+
+@router.delete("/brave-news/queries/{query_id}")
+def delete_brave_news_query(query_id: str, db: DBSession, _: CurrentAdmin) -> Dict[str, Any]:
+    row = db.query(BraveNewsQuery).filter(BraveNewsQuery.id == query_id).first()
+    if not row:
+        raise HTTPException(status_code=404, detail="Not found")
+    db.delete(row)
+    db.commit()
+    return {"ok": True}
+
+
+@router.post("/brave-news/queries/{query_id}/run")
+def run_brave_news_query(query_id: str, db: DBSession, _: CurrentAdmin) -> Dict[str, Any]:
+    row = db.query(BraveNewsQuery).filter(BraveNewsQuery.id == query_id).first()
+    if not row:
+        raise HTTPException(status_code=404, detail="Not found")
+    try:
+        return BraveSearchImporter.import_query(db, row)
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+
+@router.post("/brave-news/run-all")
+def run_all_brave_news_queries(db: DBSession, _: CurrentAdmin) -> Dict[str, Any]:
+    try:
+        return BraveSearchImporter.import_enabled_queries(db)
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
 
 @router.post("/import/templates")
 def import_templates(payload: Dict[str, Any], db: DBSession, _: CurrentAdmin) -> Dict[str, Any]:

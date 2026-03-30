@@ -719,7 +719,10 @@ struct HomeViewRedesigned: View {
     }
     
     private var priorityTasksSection: some View {
-        VStack(alignment: .leading, spacing: Theme.Spacing.md) {
+        let priorityBorderColor: Color = Theme.Colors.accentTurquoise.opacity(0.25)
+        let priorityShadowColor: Color = Theme.Colors.accentTurquoise.opacity(0.12)
+
+        return VStack(alignment: .leading, spacing: Theme.Spacing.md) {
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("home.priority_tasks".localized)
@@ -772,9 +775,9 @@ struct HomeViewRedesigned: View {
                             withAnimation(.spring(response: 0.35, dampingFraction: 0.82)) {
                                 appContainer.firstWeekService.toggle(task.id)
                                 if taskWasDone {
-                                    recentlyCompletedTaskIDs.remove(task.id)
+                                    _ = recentlyCompletedTaskIDs.remove(task.id)
                                 } else {
-                                    recentlyCompletedTaskIDs.insert(task.id)
+                                    _ = recentlyCompletedTaskIDs.insert(task.id)
                                 }
                             }
 
@@ -782,7 +785,7 @@ struct HomeViewRedesigned: View {
                             let completedTaskID = task.id
                             DispatchQueue.main.asyncAfter(deadline: .now() + 1.8) {
                                 withAnimation(.easeInOut(duration: 0.3)) {
-                                    recentlyCompletedTaskIDs.remove(completedTaskID)
+                                    _ = recentlyCompletedTaskIDs.remove(completedTaskID)
                                 }
                             }
                         }
@@ -799,9 +802,9 @@ struct HomeViewRedesigned: View {
         )
         .overlay(
             RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .stroke(Theme.Colors.accentTurquoise.opacity(0.25), lineWidth: 1.5)
+                .stroke(priorityBorderColor, lineWidth: 1.5)
         )
-        .shadow(color: Theme.Colors.accentTurquoise.opacity(0.12), radius: 18, x: 0, y: 8)
+        .shadow(color: priorityShadowColor, radius: 18, x: 0, y: 8)
         .padding(.horizontal, Theme.Spacing.lg)
         .accessibilityIdentifier("home.priorityTasksSection")
     }

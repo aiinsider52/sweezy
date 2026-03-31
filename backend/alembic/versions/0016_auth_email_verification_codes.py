@@ -1,6 +1,6 @@
 """add email verification fields and auth email codes
 
-Revision ID: 0016_auth_email_verification_codes
+Revision ID: 0016_auth_email_codes
 Revises: 0015_brave_news_queries
 Create Date: 2026-03-31
 """
@@ -10,7 +10,7 @@ from alembic import op
 import sqlalchemy as sa
 
 
-revision = "0016_auth_email_verification_codes"
+revision = "0016_auth_email_codes"
 down_revision = "0015_brave_news_queries"
 branch_labels = None
 depends_on = None

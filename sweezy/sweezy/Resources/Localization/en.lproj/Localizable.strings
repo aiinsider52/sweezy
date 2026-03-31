@@ -804,6 +804,7 @@
 "marketplace.create_title" = "New Listing";
 "marketplace.field.title" = "Title";
 "marketplace.field.title_placeholder" = "e.g. Document Translation DE↔UA";
+"marketplace.field.photos" = "Photos";
 "marketplace.field.category" = "Category";
 "marketplace.field.canton" = "Canton";
 "marketplace.field.description" = "Service description";
@@ -817,6 +818,12 @@
 "marketplace.submit" = "Publish";
 "marketplace.error_title" = "Error";
 "marketplace.my_listings" = "My Listings";
+"marketplace.photos_placeholder" = "Add up to %d photos";
+"marketplace.photos_hint" = "Photos help your listing feel real and trusted.";
+"marketplace.photos_add_more" = "Add more";
+"marketplace.photo_remove" = "Remove photo";
+"marketplace.photos_empty" = "No photo";
+"marketplace.photos_uploading" = "Uploading photos...";
 
 "marketplace.success_title" = "Listing under review ✅";
 "marketplace.success_subtitle" = "We'll review it within 24 hours and let you know.";

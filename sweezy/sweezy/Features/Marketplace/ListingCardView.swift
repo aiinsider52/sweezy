@@ -5,6 +5,10 @@ struct ListingCardView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
+            if !listing.resolvedImageURLs.isEmpty {
+                MarketplaceRemoteImageView(url: listing.primaryImageURL, height: 184, cornerRadius: 16)
+            }
+
             // Header: icon + title
             HStack(alignment: .top, spacing: 12) {
                 ZStack {
@@ -132,5 +136,94 @@ struct ListingSkeletonCard: View {
         .opacity(shimmer ? 0.5 : 1.0)
         .animation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true), value: shimmer)
         .onAppear { shimmer = true }
+    }
+}
+
+struct MarketplaceListingImageCarousel: View {
+    let urls: [URL]
+    var height: CGFloat
+    var cornerRadius: CGFloat = 20
+
+    @State private var selectedIndex = 0
+
+    var body: some View {
+        VStack(spacing: 10) {
+            if urls.count <= 1 {
+                MarketplaceRemoteImageView(url: urls.first, height: height, cornerRadius: cornerRadius)
+            } else {
+                TabView(selection: $selectedIndex) {
+                    ForEach(Array(urls.enumerated()), id: \.offset) { index, url in
+                        MarketplaceRemoteImageView(url: url, height: height, cornerRadius: cornerRadius)
+                            .tag(index)
+                    }
+                }
+                .frame(height: height)
+                .tabViewStyle(.page(indexDisplayMode: .never))
+
+                HStack(spacing: 6) {
+                    ForEach(Array(urls.indices), id: \.self) { index in
+                        Capsule()
+                            .fill(index == selectedIndex ? Theme.Colors.primary : Theme.Colors.adaptiveBorder.opacity(0.6))
+                            .frame(width: index == selectedIndex ? 18 : 6, height: 6)
+                    }
+                }
+            }
+        }
+    }
+}
+
+struct MarketplaceRemoteImageView: View {
+    let url: URL?
+    var height: CGFloat
+    var cornerRadius: CGFloat = 20
+
+    var body: some View {
+        AsyncImage(url: url) { phase in
+            switch phase {
+            case .success(let image):
+                image
+                    .resizable()
+                    .scaledToFill()
+            case .failure:
+                placeholder
+            case .empty:
+                placeholder.overlay {
+                    ProgressView()
+                        .tint(Theme.Colors.primary)
+                }
+            @unknown default:
+                placeholder
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .frame(height: height)
+        .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                .stroke(Theme.Colors.adaptiveBorder.opacity(0.45), lineWidth: 1)
+        )
+    }
+
+    private var placeholder: some View {
+        ZStack {
+            LinearGradient(
+                colors: [
+                    Theme.Colors.primary.opacity(0.18),
+                    Theme.Colors.accentTurquoise.opacity(0.14),
+                    Theme.Colors.adaptiveSurface
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+
+            VStack(spacing: 8) {
+                Image(systemName: "photo.on.rectangle.angled")
+                    .font(.system(size: 26, weight: .semibold))
+                    .foregroundColor(Theme.Colors.primary.opacity(0.8))
+                Text("marketplace.photos_empty".localized)
+                    .font(.caption.weight(.semibold))
+                    .foregroundColor(Theme.Colors.textSecondary)
+            }
+        }
     }
 }

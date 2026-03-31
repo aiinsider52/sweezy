@@ -611,6 +611,43 @@ extension APIClient {
         return encoder
     }
 
+    static func resolveMediaURL(_ raw: String) -> URL? {
+        guard !raw.isEmpty else { return nil }
+        if let absolute = URL(string: raw), absolute.scheme != nil {
+            return absolute
+        }
+        let normalized = raw.hasPrefix("/") ? String(raw.dropFirst()) : raw
+        return baseURL.appendingPathComponent(normalized)
+    }
+
+    private struct MediaUploadResponse: Decodable {
+        let url: String
+        let filename: String
+    }
+
+    static func uploadMarketplaceImage(data: Data, filename: String, mimeType: String = "image/jpeg") async throws -> String {
+        let boundary = "Boundary-\(UUID().uuidString)"
+        var req = URLRequest(url: url("media/upload"))
+        req.httpMethod = "POST"
+        req.timeoutInterval = 60
+        req.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+
+        var body = Data()
+        body.append(Data("--\(boundary)\r\n".utf8))
+        body.append(Data("Content-Disposition: form-data; name=\"file\"; filename=\"\(filename)\"\r\n".utf8))
+        body.append(Data("Content-Type: \(mimeType)\r\n\r\n".utf8))
+        body.append(data)
+        body.append(Data("\r\n--\(boundary)--\r\n".utf8))
+        req.httpBody = body
+
+        let (responseData, response) = try await authorizedData(for: req, context: "marketplace_image_upload")
+        guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+            throw httpError(data: responseData, response: response)
+        }
+
+        return try JSONDecoder().decode(MediaUploadResponse.self, from: responseData).url
+    }
+
     static func fetchListings(category: ServiceCategory? = nil,
                               canton: String? = nil,
                               page: Int = 1) async throws -> ServiceListingPage {

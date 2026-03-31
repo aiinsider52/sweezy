@@ -1,5 +1,6 @@
 "use client"
 import Link from 'next/link'
+import { useEffect, useMemo, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { LayoutDashboard, Users, BookOpenText, FileText, Activity, CheckSquare, Calendar, SlidersHorizontal, Newspaper, Rss, ListChecks, Languages, Briefcase, CreditCard, Store, CalendarDays } from 'lucide-react'
@@ -26,6 +27,49 @@ const items = [
 
 export default function Sidebar() {
   const pathname = usePathname()
+  const [pendingMarketplaceIds, setPendingMarketplaceIds] = useState<string[]>([])
+  const [unseenMarketplaceCount, setUnseenMarketplaceCount] = useState(0)
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function loadMarketplacePending() {
+      try {
+        const res = await fetch('/api/admin/marketplace', { cache: 'no-store' })
+        const data = await res.json().catch(() => [])
+        if (!Array.isArray(data) || cancelled) return
+        const pendingIds = data
+          .filter((item: { status?: string; id?: string }) => item?.status === 'pending' && item?.id)
+          .map((item: { id: string }) => item.id)
+
+        setPendingMarketplaceIds(pendingIds)
+
+        if (typeof window !== 'undefined') {
+          const seen = JSON.parse(localStorage.getItem('marketplace_seen_pending_ids') || '[]') as string[]
+          const unseen = pendingIds.filter(id => !seen.includes(id))
+          setUnseenMarketplaceCount(unseen.length)
+        }
+      } catch {
+        if (!cancelled) setPendingMarketplaceIds([])
+      }
+    }
+
+    loadMarketplacePending()
+    const interval = window.setInterval(loadMarketplacePending, 30000)
+    return () => {
+      cancelled = true
+      window.clearInterval(interval)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!pathname?.startsWith('/admin/marketplace') || typeof window === 'undefined') return
+    localStorage.setItem('marketplace_seen_pending_ids', JSON.stringify(pendingMarketplaceIds))
+    setUnseenMarketplaceCount(0)
+  }, [pathname, pendingMarketplaceIds])
+
+  const marketplacePendingCount = useMemo(() => pendingMarketplaceIds.length, [pendingMarketplaceIds])
+
   return (
     <aside className="w-72 p-6 space-y-4 sticky top-0 h-screen">
       <div className="glass p-5">
@@ -39,7 +83,18 @@ export default function Sidebar() {
             href={it.href}
             className={cn('flex items-center gap-2 rounded-lg px-3 py-2 hover:bg-white/10 transition', pathname?.startsWith(it.href) && 'bg-white/15')}
           >
-            <it.icon size={16} aria-hidden="true" /> {it.label}
+            <it.icon size={16} aria-hidden="true" />
+            <span className="flex flex-1 items-center justify-between gap-2">
+              <span>{it.label}</span>
+              {it.href === '/admin/marketplace' && marketplacePendingCount > 0 && (
+                <span className="flex items-center gap-2">
+                  {unseenMarketplaceCount > 0 && <span className="h-2.5 w-2.5 rounded-full bg-red-500" />}
+                  <span className="rounded-full bg-red-500/20 px-2 py-0.5 text-xs font-semibold text-red-200">
+                    {marketplacePendingCount}
+                  </span>
+                </span>
+              )}
+            </span>
           </Link>
         ))}
       </nav>

@@ -29,6 +29,18 @@ admin_router = APIRouter()
 _optional_bearer = HTTPBearer(auto_error=False)
 
 
+def _ensure_ai_metadata(listing: ServiceListing) -> bool:
+    if listing.ai_score is not None:
+        return False
+
+    from ..services.marketplace_moderation import _fallback_score
+
+    _, _, score, score_reason = _fallback_score(listing)
+    listing.ai_score = score
+    listing.ai_score_reason = score_reason
+    return True
+
+
 def _get_optional_user_id(
     db: DBSession,
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(_optional_bearer),
@@ -127,6 +139,7 @@ def create_listing(
         price_info=payload.price_info,
         contact_type=payload.contact_type.value,
         contact_value=payload.contact_value,
+        image_urls=payload.image_urls,
         author_id=user_id,
         author_name=payload.author_name,
         status="pending",
@@ -180,6 +193,8 @@ def update_listing(
         listing.description = data["description"]
     if "price_info" in data:
         listing.price_info = data["price_info"]
+    if "image_urls" in data and data["image_urls"] is not None:
+        listing.image_urls = data["image_urls"]
 
     if listing.status == "rejected":
         listing.status = "pending"
@@ -204,6 +219,17 @@ def admin_list_listings(
     if listing_status:
         stmt = stmt.where(ServiceListing.status == listing_status)
     rows = db.execute(stmt.order_by(ServiceListing.created_at.desc())).scalars().all()
+
+    updated = False
+    for row in rows:
+        if _ensure_ai_metadata(row):
+            updated = True
+
+    if updated:
+        db.commit()
+        for row in rows:
+            db.refresh(row)
+
     return [AdminServiceListingDetail.model_validate(r) for r in rows]
 
 
@@ -217,6 +243,7 @@ def admin_approve_listing(
 
     listing.status = "approved"
     listing.rejection_reason = None
+    _ensure_ai_metadata(listing)
     db.add(listing)
     db.commit()
     db.refresh(listing)
@@ -240,6 +267,7 @@ def admin_reject_listing(
 
     listing.status = "rejected"
     listing.rejection_reason = reason
+    _ensure_ai_metadata(listing)
     db.add(listing)
     db.commit()
     db.refresh(listing)

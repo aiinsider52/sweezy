@@ -11,6 +11,7 @@ type Listing = {
   price_info?: string | null
   contact_type: string
   contact_value?: string | null
+  image_urls?: string[] | null
   author_id?: string | null
   author_name: string
   status: "pending" | "approved" | "rejected" | string
@@ -43,6 +44,8 @@ export default function MarketplaceModerationList() {
 
   useEffect(() => {
     load()
+    const interval = window.setInterval(load, 30000)
+    return () => window.clearInterval(interval)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -125,7 +128,14 @@ export default function MarketplaceModerationList() {
                 status === value ? "bg-white/20" : "bg-white/5 hover:bg-white/10"
               }`}
             >
-              {value === "all" ? "All listings" : value[0].toUpperCase() + value.slice(1)}
+              <span className="inline-flex items-center gap-2">
+                {value === "all" ? "All listings" : value[0].toUpperCase() + value.slice(1)}
+                {value === "pending" && counts.pending > 0 && (
+                  <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 py-0.5 text-[10px] font-semibold leading-none text-white">
+                    {counts.pending}
+                  </span>
+                )}
+              </span>
             </button>
           ))}
         </div>
@@ -140,11 +150,17 @@ export default function MarketplaceModerationList() {
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
         <StatCard label="All" value={counts.total} />
-        <StatCard label="Pending" value={counts.pending} />
+        <StatCard label="Pending" value={counts.pending} highlight={counts.pending > 0} />
         <StatCard label="Approved" value={counts.approved} />
         <StatCard label="Rejected" value={counts.rejected} />
         <StatCard label="Visible" value={filteredItems.length} />
       </div>
+
+      {counts.pending > 0 && (
+        <div className="rounded-2xl border border-red-400/20 bg-red-500/10 px-4 py-3 text-sm text-red-100">
+          <span className="font-medium">{counts.pending}</span> listing(s) are waiting for approval.
+        </div>
+      )}
 
       {loading ? (
         <div className="glass rounded-xl p-6">Loading marketplace listings...</div>
@@ -162,6 +178,33 @@ export default function MarketplaceModerationList() {
 
             return (
               <div key={item.id} className="glass space-y-4 rounded-2xl p-5">
+                {item.image_urls && item.image_urls.length > 0 && (
+                  <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4">
+                    {item.image_urls.slice(0, 4).map((rawUrl, index) => {
+                      const src = resolveMediaUrl(rawUrl)
+                      return (
+                        <a
+                          key={`${item.id}-${index}`}
+                          href={src}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5"
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={src}
+                            alt={`${item.title} photo ${index + 1}`}
+                            className="h-36 w-full object-cover transition duration-300 group-hover:scale-[1.03]"
+                          />
+                          <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-3 py-2 text-xs text-white/80">
+                            Photo {index + 1}
+                          </div>
+                        </a>
+                      )
+                    })}
+                  </div>
+                )}
+
                 <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                   <div className="space-y-2">
                     <div className="flex flex-wrap items-center gap-2">
@@ -206,7 +249,7 @@ export default function MarketplaceModerationList() {
                   <InfoBlock label="Contact" value={`${item.contact_type}: ${item.contact_value ?? "hidden"}`} />
                   <InfoBlock label="Price" value={item.price_info || "Not specified"} />
                   <InfoBlock label="Views" value={String(item.view_count ?? 0)} />
-                  <InfoBlock label="Created" value={item.created_at || "n/a"} />
+                  <InfoBlock label="Created" value={formatCreatedAt(item.created_at)} />
                 </div>
 
                 {item.ai_score_reason && (
@@ -231,9 +274,9 @@ export default function MarketplaceModerationList() {
   )
 }
 
-function StatCard({ label, value }: { label: string; value: number }) {
+function StatCard({ label, value, highlight = false }: { label: string; value: number; highlight?: boolean }) {
   return (
-    <div className="glass rounded-xl p-4">
+    <div className={`glass rounded-xl p-4 ${highlight ? "border border-red-400/20 bg-red-500/10" : ""}`}>
       <div className="text-xs uppercase tracking-wide opacity-60">{label}</div>
       <div className="mt-1 text-2xl font-semibold">{value}</div>
     </div>
@@ -247,4 +290,18 @@ function InfoBlock({ label, value }: { label: string; value: string }) {
       <div className="mt-1 text-sm opacity-85 break-all">{value}</div>
     </div>
   )
+}
+
+function resolveMediaUrl(rawUrl: string) {
+  if (/^https?:\/\//i.test(rawUrl)) return rawUrl
+  const apiBase = process.env.NEXT_PUBLIC_API_URL || "https://sweezy-9xyk.onrender.com/api/v1"
+  const origin = apiBase.replace(/\/api\/v1\/?$/, "")
+  return rawUrl.startsWith("/") ? `${origin}${rawUrl}` : `${origin}/${rawUrl}`
+}
+
+function formatCreatedAt(value?: string) {
+  if (!value) return "n/a"
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return value
+  return date.toLocaleString()
 }

@@ -38,12 +38,14 @@ class ServiceListingCreate(BaseModel):
     contact_type: ContactType
     contact_value: str = Field(..., min_length=1, max_length=255)
     author_name: str = Field(..., min_length=1, max_length=100)
+    image_urls: list[str] = Field(default_factory=list, max_length=6)
 
 
 class ServiceListingUpdate(BaseModel):
     title: Optional[str] = Field(None, min_length=3, max_length=100)
     description: Optional[str] = Field(None, min_length=10, max_length=1000)
     price_info: Optional[str] = Field(None, max_length=100)
+    image_urls: Optional[list[str]] = Field(None, max_length=6)
 
 
 class ServiceListingResponse(BaseModel):
@@ -56,6 +58,7 @@ class ServiceListingResponse(BaseModel):
     canton: str
     price_info: Optional[str] = None
     contact_type: str
+    image_urls: list[str] = Field(default_factory=list)
     author_id: Optional[str] = None
     author_name: str
     status: str

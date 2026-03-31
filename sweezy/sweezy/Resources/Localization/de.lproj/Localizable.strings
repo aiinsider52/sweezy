@@ -590,6 +590,7 @@
 "marketplace.create_title" = "Neues Inserat";
 "marketplace.field.title" = "Titel";
 "marketplace.field.title_placeholder" = "z.B. Dokumentenübersetzung DE↔UA";
+"marketplace.field.photos" = "Fotos";
 "marketplace.field.category" = "Kategorie";
 "marketplace.field.canton" = "Kanton";
 "marketplace.field.description" = "Dienstbeschreibung";
@@ -603,6 +604,12 @@
 "marketplace.submit" = "Veröffentlichen";
 "marketplace.error_title" = "Fehler";
 "marketplace.my_listings" = "Meine Inserate";
+"marketplace.photos_placeholder" = "Bis zu %d Fotos hinzufügen";
+"marketplace.photos_hint" = "Fotos machen dein Inserat glaubwürdiger und klarer.";
+"marketplace.photos_add_more" = "Mehr Fotos";
+"marketplace.photo_remove" = "Foto entfernen";
+"marketplace.photos_empty" = "Kein Foto";
+"marketplace.photos_uploading" = "Fotos werden hochgeladen...";
 
 "marketplace.success_title" = "Inserat wird überprüft ✅";
 "marketplace.success_subtitle" = "Wir überprüfen es innerhalb von 24 Stunden.";

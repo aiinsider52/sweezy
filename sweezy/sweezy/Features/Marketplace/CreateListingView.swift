@@ -1,4 +1,6 @@
+import PhotosUI
 import SwiftUI
+import UIKit
 
 struct CreateListingView: View {
     var onCreated: (() -> Void)?
@@ -19,11 +21,15 @@ struct CreateListingView: View {
     @State private var showMyListings = false
     @State private var showCantonPicker = false
     @State private var errorMessage: String?
+    @State private var selectedPhotoItems: [PhotosPickerItem] = []
+    @State private var selectedImages: [SelectedListingImage] = []
 
     @State private var suggestedCategory: ServiceCategory?
     @State private var categorySuggestionVisible = false
 
     @FocusState private var focusedField: FormField?
+
+    private let maxImages = 6
 
     private enum FormField: Hashable {
         case title, description, price, contact, author
@@ -44,6 +50,7 @@ struct CreateListingView: View {
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 20) {
                         titleCard
+                        photosCard
                         categoryCard
                         cantonCard
                         descriptionCard
@@ -79,6 +86,9 @@ struct CreateListingView: View {
             .sheet(isPresented: $showCantonPicker) {
                 CantonPickerSheet(selectedCanton: $canton)
             }
+            .onChange(of: selectedPhotoItems.map(\.itemIdentifier)) { _, _ in
+                Task { await appendSelectedPhotos(from: selectedPhotoItems) }
+            }
             .alert("marketplace.error_title".localized, isPresented: .init(
                 get: { errorMessage != nil },
                 set: { if !$0 { errorMessage = nil } }
@@ -87,6 +97,113 @@ struct CreateListingView: View {
             } message: {
                 Text(errorMessage ?? "")
             }
+        }
+    }
+
+    // MARK: - Photos Card
+
+    private var photosCard: some View {
+        formCard {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    formLabel("marketplace.field.photos".localized, icon: "photo.on.rectangle.angled", optional: true)
+                    Spacer()
+                    Text("\(selectedImages.count)/\(maxImages)")
+                        .font(.caption2.weight(.semibold))
+                        .foregroundColor(Theme.Colors.textTertiary)
+                }
+
+                if selectedImages.isEmpty {
+                    PhotosPicker(
+                        selection: $selectedPhotoItems,
+                        maxSelectionCount: maxImages,
+                        matching: .images
+                    ) {
+                        VStack(spacing: 10) {
+                            Image(systemName: "plus.circle.fill")
+                                .font(.system(size: 28, weight: .semibold))
+                                .foregroundColor(Theme.Colors.primary)
+                            Text("marketplace.photos_placeholder".localized(with: maxImages))
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundColor(Theme.Colors.textPrimary)
+                            Text("marketplace.photos_hint".localized)
+                                .font(.caption)
+                                .foregroundColor(Theme.Colors.textSecondary)
+                                .multilineTextAlignment(.center)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 24)
+                        .background(fieldBackground)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                .stroke(Theme.Colors.adaptiveBorder, style: StrokeStyle(lineWidth: 1, dash: [6]))
+                        )
+                    }
+                    .buttonStyle(.plain)
+                } else {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 12) {
+                            ForEach(selectedImages) { image in
+                                photoThumbnail(image)
+                            }
+
+                            if selectedImages.count < maxImages {
+                                PhotosPicker(
+                                    selection: $selectedPhotoItems,
+                                    maxSelectionCount: maxImages - selectedImages.count,
+                                    matching: .images
+                                ) {
+                                    VStack(spacing: 8) {
+                                        Image(systemName: "plus")
+                                            .font(.system(size: 22, weight: .bold))
+                                        Text("marketplace.photos_add_more".localized)
+                                            .font(.caption.weight(.semibold))
+                                            .multilineTextAlignment(.center)
+                                    }
+                                    .foregroundColor(Theme.Colors.primary)
+                                    .frame(width: 112, height: 112)
+                                    .background(fieldBackground)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                            .stroke(Theme.Colors.adaptiveBorder, style: StrokeStyle(lineWidth: 1, dash: [6]))
+                                    )
+                                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                    }
+
+                    Text("marketplace.photos_hint".localized)
+                        .font(.caption)
+                        .foregroundColor(Theme.Colors.textSecondary)
+                }
+            }
+        }
+    }
+
+    private func photoThumbnail(_ image: SelectedListingImage) -> some View {
+        ZStack(alignment: .topTrailing) {
+            Image(uiImage: image.image)
+                .resizable()
+                .scaledToFill()
+                .frame(width: 112, height: 112)
+                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .stroke(Theme.Colors.adaptiveBorder.opacity(0.45), lineWidth: 1)
+                )
+
+            Button {
+                removeSelectedImage(image)
+            } label: {
+                Image(systemName: "xmark.circle.fill")
+                    .font(.system(size: 22))
+                    .symbolRenderingMode(.hierarchical)
+                    .foregroundStyle(.white, Color.black.opacity(0.55))
+                    .padding(6)
+            }
+            .accessibilityLabel("marketplace.photo_remove".localized)
         }
     }
 
@@ -404,6 +521,8 @@ struct CreateListingView: View {
                 if isSubmitting {
                     ProgressView()
                         .tint(.white)
+                    Text(selectedImages.isEmpty ? "marketplace.submit".localized : "marketplace.photos_uploading".localized)
+                        .font(.headline)
                 } else {
                     Image(systemName: "paperplane.fill")
                         .font(.system(size: 15))
@@ -626,11 +745,14 @@ struct CreateListingView: View {
             priceInfo: priceInfo.isEmpty ? nil : priceInfo,
             contactType: contactType,
             contactValue: contactValue.trimmingCharacters(in: .whitespaces),
-            authorName: authorName.trimmingCharacters(in: .whitespaces)
+            authorName: authorName.trimmingCharacters(in: .whitespaces),
+            imageURLs: []
         )
 
         do {
-            _ = try await APIClient.createListing(payload)
+            var payloadWithImages = payload
+            payloadWithImages.imageURLs = try await uploadSelectedImages()
+            _ = try await APIClient.createListing(payloadWithImages)
             onCreated?()
             showSuccess = true
         } catch {
@@ -638,6 +760,64 @@ struct CreateListingView: View {
         }
 
         isSubmitting = false
+    }
+
+    private func appendSelectedPhotos(from items: [PhotosPickerItem]) async {
+        guard !items.isEmpty else { return }
+        let remainingSlots = maxImages - selectedImages.count
+        guard remainingSlots > 0 else {
+            selectedPhotoItems = []
+            return
+        }
+
+        var appended: [SelectedListingImage] = []
+        for item in items.prefix(remainingSlots) {
+            guard let data = try? await item.loadTransferable(type: Data.self),
+                  let prepared = prepareSelectedImage(from: data) else { continue }
+            appended.append(prepared)
+        }
+
+        if !appended.isEmpty {
+            selectedImages.append(contentsOf: appended)
+        }
+        selectedPhotoItems = []
+    }
+
+    private func prepareSelectedImage(from data: Data) -> SelectedListingImage? {
+        guard let original = UIImage(data: data) else { return nil }
+        let maxDimension: CGFloat = 1800
+        let largestSide = max(original.size.width, original.size.height)
+        let scale = largestSide > maxDimension ? maxDimension / largestSide : 1
+        let targetSize = CGSize(
+            width: max(1, original.size.width * scale),
+            height: max(1, original.size.height * scale)
+        )
+
+        let renderer = UIGraphicsImageRenderer(size: targetSize)
+        let rendered = renderer.image { _ in
+            original.draw(in: CGRect(origin: .zero, size: targetSize))
+        }
+
+        guard let jpegData = rendered.jpegData(compressionQuality: 0.82) else { return nil }
+        return SelectedListingImage(
+            image: rendered,
+            data: jpegData,
+            filename: "listing-\(UUID().uuidString).jpg"
+        )
+    }
+
+    private func removeSelectedImage(_ image: SelectedListingImage) {
+        selectedImages.removeAll { $0.id == image.id }
+    }
+
+    private func uploadSelectedImages() async throws -> [String] {
+        guard !selectedImages.isEmpty else { return [] }
+        var urls: [String] = []
+        for image in selectedImages {
+            let uploadedURL = try await APIClient.uploadMarketplaceImage(data: image.data, filename: image.filename)
+            urls.append(uploadedURL)
+        }
+        return urls
     }
 }
 
@@ -752,4 +932,11 @@ private struct CantonPickerSheet: View {
         default: return "📍"
         }
     }
+}
+
+private struct SelectedListingImage: Identifiable {
+    let id = UUID()
+    let image: UIImage
+    let data: Data
+    let filename: String
 }

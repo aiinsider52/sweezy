@@ -830,6 +830,7 @@
 "marketplace.create_title" = "Нове оголошення";
 "marketplace.field.title" = "Заголовок";
 "marketplace.field.title_placeholder" = "Наприклад: Переклад документів DE↔UA";
+"marketplace.field.photos" = "Фото";
 "marketplace.field.category" = "Категорія";
 "marketplace.field.canton" = "Кантон";
 "marketplace.field.description" = "Опис послуги";
@@ -843,6 +844,12 @@
 "marketplace.submit" = "Опублікувати";
 "marketplace.error_title" = "Помилка";
 "marketplace.my_listings" = "Мої оголошення";
+"marketplace.photos_placeholder" = "Додай до %d фото";
+"marketplace.photos_hint" = "Фото роблять оголошення живішим і викликають більше довіри.";
+"marketplace.photos_add_more" = "Ще фото";
+"marketplace.photo_remove" = "Видалити фото";
+"marketplace.photos_empty" = "Без фото";
+"marketplace.photos_uploading" = "Завантажую фото...";
 
 // Success
 "marketplace.success_title" = "Оголошення на перевірці ✅";

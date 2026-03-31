@@ -234,6 +234,10 @@ private struct MyListingCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
+            if !listing.resolvedImageURLs.isEmpty {
+                MarketplaceRemoteImageView(url: listing.primaryImageURL, height: 176, cornerRadius: 18)
+            }
+
             HStack(alignment: .top, spacing: 12) {
                 ZStack {
                     RoundedRectangle(cornerRadius: 14, style: .continuous)

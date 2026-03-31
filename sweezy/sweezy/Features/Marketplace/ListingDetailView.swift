@@ -49,66 +49,72 @@ struct ListingDetailView: View {
     }
 
     private func heroSection(_ listing: ServiceListing) -> some View {
-        ZStack(alignment: .topTrailing) {
-            RoundedRectangle(cornerRadius: 28, style: .continuous)
-                .fill(
-                    LinearGradient(
-                        colors: [
-                            listing.category.color.opacity(0.95),
-                            Theme.Colors.primaryDark.opacity(0.9),
-                            Theme.Colors.darkBackground
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
-
-            Circle()
-                .fill(Color.white.opacity(0.14))
-                .frame(width: 160, height: 160)
-                .blur(radius: 8)
-                .offset(x: 40, y: -34)
-
-            VStack(alignment: .leading, spacing: 18) {
-                HStack(alignment: .top) {
-                    HStack(spacing: 8) {
-                        pill(text: listing.category.displayName, icon: listing.category.icon, tint: .white.opacity(0.18))
-                        pill(
-                            text: listing.canton == "all" ? "marketplace.canton.all".localized : listing.canton,
-                            icon: "mappin.circle.fill",
-                            tint: .white.opacity(0.12)
-                        )
-                    }
-                    Spacer()
-                }
-
-                VStack(alignment: .leading, spacing: 10) {
-                    Text(listing.title)
-                        .font(.system(size: 28, weight: .bold, design: .rounded))
-                        .foregroundColor(.white)
-                        .fixedSize(horizontal: false, vertical: true)
-
-                    if let price = listing.priceInfo, !price.isEmpty {
-                        HStack(spacing: 8) {
-                            Image(systemName: "banknote.fill")
-                            Text(price)
-                                .font(.headline.weight(.bold))
-                        }
-                        .foregroundColor(.white.opacity(0.96))
-                    }
-                }
-
-                HStack(spacing: 18) {
-                    heroMeta(icon: "eye.fill", text: "\(listing.viewCount)")
-                    if let date = listing.createdAt {
-                        heroMeta(icon: "calendar", text: date.formatted(.dateTime.day().month(.abbreviated)))
-                    }
-                    heroMeta(icon: "person.fill", text: listing.authorName)
-                }
+        VStack(alignment: .leading, spacing: 14) {
+            if !listing.resolvedImageURLs.isEmpty {
+                MarketplaceListingImageCarousel(urls: listing.resolvedImageURLs, height: 260, cornerRadius: 28)
             }
-            .padding(22)
+
+            ZStack(alignment: .topTrailing) {
+                RoundedRectangle(cornerRadius: 28, style: .continuous)
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                listing.category.color.opacity(0.95),
+                                Theme.Colors.primaryDark.opacity(0.9),
+                                Theme.Colors.darkBackground
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+
+                Circle()
+                    .fill(Color.white.opacity(0.14))
+                    .frame(width: 160, height: 160)
+                    .blur(radius: 8)
+                    .offset(x: 40, y: -34)
+
+                VStack(alignment: .leading, spacing: 18) {
+                    HStack(alignment: .top) {
+                        HStack(spacing: 8) {
+                            pill(text: listing.category.displayName, icon: listing.category.icon, tint: .white.opacity(0.18))
+                            pill(
+                                text: listing.canton == "all" ? "marketplace.canton.all".localized : listing.canton,
+                                icon: "mappin.circle.fill",
+                                tint: .white.opacity(0.12)
+                            )
+                        }
+                        Spacer()
+                    }
+
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text(listing.title)
+                            .font(.system(size: 28, weight: .bold, design: .rounded))
+                            .foregroundColor(.white)
+                            .fixedSize(horizontal: false, vertical: true)
+
+                        if let price = listing.priceInfo, !price.isEmpty {
+                            HStack(spacing: 8) {
+                                Image(systemName: "banknote.fill")
+                                Text(price)
+                                    .font(.headline.weight(.bold))
+                            }
+                            .foregroundColor(.white.opacity(0.96))
+                        }
+                    }
+
+                    HStack(spacing: 18) {
+                        heroMeta(icon: "eye.fill", text: "\(listing.viewCount)")
+                        if let date = listing.createdAt {
+                            heroMeta(icon: "calendar", text: date.formatted(.dateTime.day().month(.abbreviated)))
+                        }
+                        heroMeta(icon: "person.fill", text: listing.authorName)
+                    }
+                }
+                .padding(22)
+            }
+            .shadow(color: listing.category.color.opacity(0.22), radius: 24, y: 14)
         }
-        .shadow(color: listing.category.color.opacity(0.22), radius: 24, y: 14)
     }
 
     private func metricsGrid(_ listing: ServiceListing) -> some View {

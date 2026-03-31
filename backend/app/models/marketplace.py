@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from uuid import uuid4
 
-from sqlalchemy import DateTime, Integer, String, Text, func
+from sqlalchemy import JSON, DateTime, Integer, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from ..core.database import Base
@@ -20,6 +20,7 @@ class ServiceListing(Base):
     price_info: Mapped[str | None] = mapped_column(String(100), nullable=True)
     contact_type: Mapped[str] = mapped_column(String(20), nullable=False)
     contact_value: Mapped[str] = mapped_column(String(255), nullable=False)
+    image_urls: Mapped[list[str]] = mapped_column(JSON, default=list, nullable=False)
     author_id: Mapped[str | None] = mapped_column(String(36), nullable=True, index=True)
     author_name: Mapped[str] = mapped_column(String(100), nullable=False)
     status: Mapped[str] = mapped_column(String(20), nullable=False, default="pending", index=True)

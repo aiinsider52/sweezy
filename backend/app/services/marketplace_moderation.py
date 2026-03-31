@@ -29,11 +29,12 @@ def moderate_listing(listing_id: str) -> None:
         if decision in ("approved", "rejected"):
             listing.status = decision
             listing.rejection_reason = reason
-            db.add(listing)
-            db.commit()
-            log.info("moderate_listing_done", listing_id=listing_id, decision=decision)
+            log.info("moderate_listing_done", listing_id=listing_id, decision=decision, ai_score=score)
         else:
-            log.info("moderate_listing_pending", listing_id=listing_id)
+            log.info("moderate_listing_pending", listing_id=listing_id, ai_score=score)
+
+        db.add(listing)
+        db.commit()
 
 
 def _call_openai(listing: ServiceListing) -> tuple[str, str | None, int | None, str | None]:
@@ -43,7 +44,7 @@ def _call_openai(listing: ServiceListing) -> tuple[str, str | None, int | None, 
     """
     api_key = os.getenv("OPENAI_API_KEY")
     if not api_key:
-        return ("pending", None, None, None)
+        return _fallback_score(listing)
 
     try:
         from openai import OpenAI
@@ -58,6 +59,7 @@ def _call_openai(listing: ServiceListing) -> tuple[str, str | None, int | None, 
             f"Ім'я автора: {listing.author_name}\n"
             f"Тип контакту: {listing.contact_type}\n"
             f"Контакт: {listing.contact_value}\n\n"
+            f"Кількість фото: {len(listing.image_urls or [])}\n\n"
             "Відхили якщо:\n"
             "- Спам або реклама нерелевантних товарів\n"
             "- Шахрайство або підозрілий контент\n"
@@ -88,7 +90,7 @@ def _call_openai(listing: ServiceListing) -> tuple[str, str | None, int | None, 
         score_reason = data.get("ai_score_reason")
 
         if decision not in ("approved", "rejected"):
-            return ("pending", None, None, None)
+            return _fallback_score(listing)
 
         try:
             score = max(0, min(10, int(score_raw)))
@@ -99,4 +101,54 @@ def _call_openai(listing: ServiceListing) -> tuple[str, str | None, int | None, 
 
     except Exception as exc:
         log.warning("openai_moderation_error", error=str(exc))
-        return ("pending", None, None, None)
+        return _fallback_score(listing)
+
+
+def _fallback_score(listing: ServiceListing) -> tuple[str, str | None, int | None, str | None]:
+    score = 3
+    reasons: list[str] = []
+
+    title = (listing.title or "").strip()
+    description = (listing.description or "").strip()
+    author_name = (listing.author_name or "").strip()
+    contact_value = (listing.contact_value or "").strip()
+    images_count = len(listing.image_urls or [])
+
+    if len(title) >= 12:
+        score += 1
+        reasons.append("title is descriptive")
+    else:
+        reasons.append("title is very short")
+
+    if len(description) >= 80:
+        score += 2
+        reasons.append("description has enough detail")
+    elif len(description) >= 30:
+        score += 1
+        reasons.append("description has some detail")
+    else:
+        reasons.append("description is too thin")
+
+    if author_name and len(author_name) >= 2:
+        score += 1
+        reasons.append("author name is present")
+
+    if contact_value and len(contact_value) >= 5:
+        score += 1
+        reasons.append("contact is present")
+
+    if images_count > 0:
+        score += min(2, images_count)
+        reasons.append(f"{images_count} photo(s) attached")
+    else:
+        reasons.append("no photos attached")
+
+    suspicious_tokens = ["bitcoin", "crypto", "casino", "adult", "loan", "escort"]
+    haystack = f"{title} {description}".lower()
+    if any(token in haystack for token in suspicious_tokens):
+        score = max(0, score - 3)
+        reasons.append("contains suspicious commercial keywords")
+
+    score = max(0, min(10, score))
+    score_reason = "Fallback moderation: " + "; ".join(reasons)
+    return ("pending", None, score, score_reason)

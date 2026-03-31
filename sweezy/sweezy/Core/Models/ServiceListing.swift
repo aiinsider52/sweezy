@@ -113,6 +113,7 @@ struct ServiceListing: Codable, Identifiable, Equatable {
     let priceInfo: String?
     let contactType: ContactType
     let contactValue: String?
+    let imageURLs: [String]
     let authorName: String
     let status: ListingStatus
     let viewCount: Int
@@ -124,6 +125,7 @@ struct ServiceListing: Codable, Identifiable, Equatable {
         case priceInfo = "price_info"
         case contactType = "contact_type"
         case contactValue = "contact_value"
+        case imageURLs = "image_urls"
         case authorName = "author_name"
         case status
         case viewCount = "view_count"
@@ -141,6 +143,7 @@ struct ServiceListing: Codable, Identifiable, Equatable {
         priceInfo = try? c.decode(String.self, forKey: .priceInfo)
         contactType = (try? c.decode(ContactType.self, forKey: .contactType)) ?? .telegram
         contactValue = try? c.decode(String.self, forKey: .contactValue)
+        imageURLs = (try? c.decode([String].self, forKey: .imageURLs)) ?? []
         authorName = (try? c.decode(String.self, forKey: .authorName)) ?? "—"
         status = (try? c.decode(ListingStatus.self, forKey: .status)) ?? .pending
         viewCount = (try? c.decode(Int.self, forKey: .viewCount)) ?? 0
@@ -177,6 +180,7 @@ struct ServiceListingCreate: Codable {
     var contactType: ContactType
     var contactValue: String
     var authorName: String
+    var imageURLs: [String]
 
     private enum CodingKeys: String, CodingKey {
         case title, description, category, canton
@@ -184,6 +188,7 @@ struct ServiceListingCreate: Codable {
         case contactType = "contact_type"
         case contactValue = "contact_value"
         case authorName = "author_name"
+        case imageURLs = "image_urls"
     }
 }
 
@@ -191,10 +196,12 @@ struct ServiceListingUpdate: Codable {
     var title: String?
     var description: String?
     var priceInfo: String?
+    var imageURLs: [String]?
 
     private enum CodingKeys: String, CodingKey {
         case title, description
         case priceInfo = "price_info"
+        case imageURLs = "image_urls"
     }
 }
 
@@ -229,4 +236,14 @@ enum SwissCanton {
         ("VD", "Vaud"), ("VS", "Valais"), ("NE", "Neuchâtel"),
         ("GE", "Genève"), ("JU", "Jura"),
     ]
+}
+
+extension ServiceListing {
+    var primaryImageURL: URL? {
+        imageURLs.first.flatMap(APIClient.resolveMediaURL)
+    }
+
+    var resolvedImageURLs: [URL] {
+        imageURLs.compactMap(APIClient.resolveMediaURL)
+    }
 }

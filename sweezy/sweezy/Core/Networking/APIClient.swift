@@ -26,9 +26,20 @@ enum APIClient {
 
     // MARK: - Auth
 
-    struct TokenPair: Decodable { let access_token: String; let refresh_token: String }
+    struct TokenPair: Decodable {
+        let access_token: String
+        let refresh_token: String
+        let token_type: String?
+        let expires_in: Int?
+    }
 
-    static func register(email: String, password: String) async throws {
+    struct AuthStatusResponse: Decodable {
+        let status: String
+        let email: String?
+        let message: String?
+    }
+
+    static func register(email: String, password: String) async throws -> AuthStatusResponse {
         let url = url("auth/register")
         var req = URLRequest(url: url)
         req.httpMethod = "POST"
@@ -38,12 +49,10 @@ enum APIClient {
         req.httpBody = try JSONSerialization.data(withJSONObject: body)
         let (data, resp) = try await URLSession.shared.data(for: req)
         guard let httpResp = resp as? HTTPURLResponse else { throw URLError(.badServerResponse) }
-        if httpResp.statusCode == 201 || httpResp.statusCode == 200 { return }
-        // bubble up message if present
-        if let message = String(data: data, encoding: .utf8) {
-            throw NSError(domain: "API", code: httpResp.statusCode, userInfo: [NSLocalizedDescriptionKey: message])
+        guard httpResp.statusCode == 201 || httpResp.statusCode == 200 else {
+            throw makeAPIError(data: data, response: httpResp, fallback: "Registration failed")
         }
-        throw NSError(domain: "API", code: httpResp.statusCode)
+        return try JSONDecoder().decode(AuthStatusResponse.self, from: data)
     }
 
     static func login(email: String, password: String) async throws -> TokenPair {
@@ -55,8 +64,46 @@ enum APIClient {
         let body = ["email": email, "password": password]
         req.httpBody = try JSONSerialization.data(withJSONObject: body)
         let (data, resp) = try await URLSession.shared.data(for: req)
-        guard let httpResp = resp as? HTTPURLResponse, httpResp.statusCode == 200 else { throw URLError(.badServerResponse) }
+        guard let httpResp = resp as? HTTPURLResponse else { throw URLError(.badServerResponse) }
+        guard httpResp.statusCode == 200 else {
+            throw makeAPIError(data: data, response: httpResp, fallback: "Login failed")
+        }
         return try JSONDecoder().decode(TokenPair.self, from: data)
+    }
+
+    static func requestEmailVerification(email: String) async throws -> AuthStatusResponse {
+        let url = url("auth/verify-email/request")
+        var req = URLRequest(url: url)
+        req.httpMethod = "POST"
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.timeoutInterval = 15
+        req.httpBody = try JSONSerialization.data(withJSONObject: ["email": email])
+        let (data, resp) = try await URLSession.shared.data(for: req)
+        guard let httpResp = resp as? HTTPURLResponse else { throw URLError(.badServerResponse) }
+        guard (200..<300).contains(httpResp.statusCode) else {
+            throw makeAPIError(data: data, response: httpResp, fallback: "Verification request failed")
+        }
+        return try JSONDecoder().decode(AuthStatusResponse.self, from: data)
+    }
+
+    static func confirmEmailVerification(email: String, code: String) async throws -> TokenPair {
+        let url = url("auth/verify-email/confirm")
+        var req = URLRequest(url: url)
+        req.httpMethod = "POST"
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.timeoutInterval = 15
+        req.httpBody = try JSONSerialization.data(withJSONObject: ["email": email, "code": code])
+        let (data, resp) = try await URLSession.shared.data(for: req)
+        guard let httpResp = resp as? HTTPURLResponse else { throw URLError(.badServerResponse) }
+        guard httpResp.statusCode == 200 else {
+            throw makeAPIError(data: data, response: httpResp, fallback: "Verification failed")
+        }
+        return try JSONDecoder().decode(TokenPair.self, from: data)
+    }
+
+    static func isEmailNotVerified(_ error: Error) -> Bool {
+        let nsError = error as NSError
+        return (nsError.userInfo["api.code"] as? String) == "EMAIL_NOT_VERIFIED"
     }
 
     static func refreshAccessToken() async throws -> TokenPair {
@@ -488,46 +535,63 @@ enum APIClient {
     }
 
     // MARK: - Password reset (optional backend)
-    static func requestPasswordReset(email: String) async -> Bool {
+    static func requestPasswordReset(email: String) async throws -> AuthStatusResponse {
         let url = url("auth/password/forgot")
         var req = URLRequest(url: url)
         req.httpMethod = "POST"
         req.setValue("application/json", forHTTPHeaderField: "Content-Type")
         req.httpBody = try? JSONSerialization.data(withJSONObject: ["email": email])
-        do {
-            let (data, resp) = try await URLSession.shared.data(for: req)
-            if let http = resp as? HTTPURLResponse {
-                AppLogger.auth("password/forgot status = \(http.statusCode)")
-                if !(200..<300).contains(http.statusCode) {
-                    if let body = String(data: data, encoding: .utf8) {
-                        AppLogger.auth("password/forgot error body: \(body)", isError: true)
-                    }
-                    return false;
-                }
-                return true
+        let (data, resp) = try await URLSession.shared.data(for: req)
+        guard let http = resp as? HTTPURLResponse else { throw URLError(.badServerResponse) }
+        AppLogger.auth("password/forgot status = \(http.statusCode)")
+        guard (200..<300).contains(http.statusCode) else {
+            if let body = String(data: data, encoding: .utf8) {
+                AppLogger.auth("password/forgot error body: \(body)", isError: true)
             }
-            return false
-        } catch {
-            AppLogger.auth("password/forgot network error: \(error)", isError: true)
-            return false
+            throw makeAPIError(data: data, response: http, fallback: "Password reset request failed")
         }
+        return try JSONDecoder().decode(AuthStatusResponse.self, from: data)
     }
-    static func resetPassword(token: String, newPassword: String) async -> Bool {
+
+    static func resetPassword(email: String, code: String, newPassword: String) async throws -> AuthStatusResponse {
         let url = url("auth/password/reset")
         var req = URLRequest(url: url)
         req.httpMethod = "POST"
         req.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        req.httpBody = try? JSONSerialization.data(withJSONObject: ["token": token, "password": newPassword])
-        do {
-            let (_, resp) = try await URLSession.shared.data(for: req)
-            if let http = resp as? HTTPURLResponse { return (200..<300).contains(http.statusCode) }
-            return false
-        } catch { return false }
+        req.httpBody = try? JSONSerialization.data(withJSONObject: ["email": email, "code": code, "password": newPassword])
+        let (data, resp) = try await URLSession.shared.data(for: req)
+        guard let http = resp as? HTTPURLResponse else { throw URLError(.badServerResponse) }
+        guard (200..<300).contains(http.statusCode) else {
+            throw makeAPIError(data: data, response: http, fallback: "Password reset failed")
+        }
+        return try JSONDecoder().decode(AuthStatusResponse.self, from: data)
     }
 }
 
 // MARK: - Marketplace
 extension APIClient {
+    private static func makeAPIError(data: Data, response: HTTPURLResponse?, fallback: String) -> NSError {
+        let status = response?.statusCode ?? 0
+        if let jsonObject = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+           let detail = jsonObject["detail"] {
+            if let detailString = detail as? String {
+                return NSError(domain: "API", code: status, userInfo: [NSLocalizedDescriptionKey: detailString])
+            }
+            if let detailObject = detail as? [String: Any] {
+                let message = (detailObject["message"] as? String) ?? fallback
+                var userInfo: [String: Any] = [NSLocalizedDescriptionKey: message]
+                if let apiCode = detailObject["code"] as? String {
+                    userInfo["api.code"] = apiCode
+                }
+                return NSError(domain: "API", code: status, userInfo: userInfo)
+            }
+        }
+        if let text = String(data: data, encoding: .utf8), !text.isEmpty {
+            return NSError(domain: "API", code: status, userInfo: [NSLocalizedDescriptionKey: text])
+        }
+        return NSError(domain: "API", code: status, userInfo: [NSLocalizedDescriptionKey: fallback])
+    }
+
     private static func httpError(data: Data, response: URLResponse?) -> Error {
         let status = (response as? HTTPURLResponse)?.statusCode ?? 0
         if let text = String(data: data, encoding: .utf8), !text.isEmpty {

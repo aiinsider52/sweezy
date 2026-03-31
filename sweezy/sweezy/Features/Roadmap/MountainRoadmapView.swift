@@ -20,13 +20,11 @@ struct MountainRoadmapView: View {
     
     var body: some View {
         ZStack {
-            // Background gradient (sky)
-            MountainTheme.skyGradient
+            AdaptivePageBackground()
+
+            RoadmapAmbientBackdrop()
                 .ignoresSafeArea()
-            
-            // Stars (subtle)
-            StarsOverlay()
-            
+
             // Main content
             ScrollViewReader { proxy in
                 ScrollView(.vertical, showsIndicators: false) {
@@ -40,12 +38,6 @@ struct MountainRoadmapView: View {
                         
                         // Bottom padding
                         Spacer(minLength: 100)
-                    }
-                }
-                .onAppear {
-                    // Scroll to current level
-                    withAnimation(.easeOut(duration: 0.5)) {
-                        proxy.scrollTo(roadmapService.progress.currentLevel, anchor: .center)
                     }
                 }
             }
@@ -84,69 +76,56 @@ struct MountainRoadmapView: View {
     
     private var headerSection: some View {
         VStack(spacing: 16) {
-            // Title
             Text("Шлях інтеграції")
                 .font(.largeTitle.bold())
-                .foregroundColor(.white)
-            
-            // Overall progress
+                .foregroundColor(Theme.Colors.textPrimary)
+
             VStack(spacing: 8) {
                 HStack {
                     Text("Загальний прогрес")
                         .font(.subheadline)
-                        .foregroundColor(.white.opacity(0.8))
+                        .foregroundColor(Theme.Colors.textSecondary)
                     Spacer()
                     Text("\(Int(roadmapService.overallProgress * 100))%")
                         .font(.headline.bold())
-                        .foregroundColor(.white)
+                        .foregroundColor(Theme.Colors.primary)
                 }
-                
-                // Progress bar
+
                 GeometryReader { geo in
                     ZStack(alignment: .leading) {
                         RoundedRectangle(cornerRadius: 4)
-                            .fill(Color.white.opacity(0.2))
-                        
+                            .fill(Theme.Colors.adaptiveSurface)
+
                         RoundedRectangle(cornerRadius: 4)
-                            .fill(
-                                LinearGradient(
-                                    colors: [.green, .cyan],
-                                    startPoint: .leading,
-                                    endPoint: .trailing
-                                )
-                            )
-                            .frame(width: geo.size.width * roadmapService.overallProgress)
+                            .fill(Theme.Colors.gradientPrimaryAdaptive)
+                            .frame(width: max(geo.size.width * roadmapService.overallProgress, roadmapService.overallProgress > 0 ? 12 : 0))
                     }
                 }
                 .frame(height: 8)
-                
-                // Current milestone
+
                 Text(roadmapService.nextMilestone)
                     .font(.caption)
-                    .foregroundColor(.white.opacity(0.6))
+                    .foregroundColor(Theme.Colors.textSecondary)
             }
             .padding()
             .background(
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(Color.white.opacity(0.1))
-                    .background(
-                        RoundedRectangle(cornerRadius: 16)
-                            .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .fill(Theme.Colors.adaptiveCard)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 20, style: .continuous)
+                            .stroke(Theme.Colors.adaptiveBorder, lineWidth: 1)
                     )
             )
             .padding(.horizontal)
-            
-            // Altitude indicator
+
             HStack {
                 Image(systemName: "mountain.2.fill")
-                    .foregroundColor(.white.opacity(0.6))
+                    .foregroundColor(Theme.Colors.primary)
                 Text("Висота: \(roadmapService.currentLevel?.altitude ?? 0) м")
                     .font(.caption)
-                    .foregroundColor(.white.opacity(0.6))
-                
+                    .foregroundColor(Theme.Colors.textSecondary)
+
                 Spacer()
-                
-                // TEMPORARY: no subscription badges.
             }
             .padding(.horizontal, 24)
         }
@@ -184,7 +163,8 @@ struct LevelNode: View {
     let isPremium: Bool
     let isFirst: Bool
     let onTap: () -> Void
-    
+
+    @Environment(\.colorScheme) private var colorScheme
     @State private var isAnimating = false
     
     private var isLocked: Bool { status == .locked }
@@ -223,15 +203,15 @@ struct LevelNode: View {
                         if status == .completed {
                             Image(systemName: "checkmark.circle.fill")
                                 .font(.system(size: 30))
-                                .foregroundColor(.green)
+                                .foregroundColor(Theme.Colors.success)
                         } else if isLocked {
                             Image(systemName: "lock.fill")
                                 .font(.system(size: 24))
-                                .foregroundColor(.white.opacity(0.5))
+                                .foregroundColor(Theme.Colors.textTertiary)
                         } else {
                             Image(systemName: level.iconName)
                                 .font(.system(size: 24))
-                                .foregroundColor(.white)
+                                .foregroundColor(iconForegroundColor)
                         }
                         
                         // Level number badge
@@ -245,36 +225,36 @@ struct LevelNode: View {
                         // TEMPORARY (App Store review): no subscription badges.
                     }
                     .scaleEffect(isActive && isAnimating ? 1.05 : 1.0)
-                    .shadow(color: isActive ? MountainTheme.glowColor.opacity(0.5) : .clear, radius: 10)
+                    .shadow(color: isActive ? Theme.Colors.primary.opacity(0.18) : .clear, radius: 10)
                     
                     // Level info
                     VStack(alignment: .leading, spacing: 4) {
                         Text(level.title)
                             .font(.headline)
-                            .foregroundColor(isLocked ? .white.opacity(0.5) : .white)
+                            .foregroundColor(isLocked ? Theme.Colors.textSecondary : Theme.Colors.textPrimary)
                         
                         Text(level.subtitle)
                             .font(.subheadline)
-                            .foregroundColor(isLocked ? .white.opacity(0.3) : .white.opacity(0.7))
+                            .foregroundColor(isLocked ? Theme.Colors.textTertiary : Theme.Colors.textSecondary)
                         
                         // Progress or status
                         HStack(spacing: 8) {
                             if status == .completed {
                                 Label("Завершено", systemImage: "checkmark")
                                     .font(.caption)
-                                    .foregroundColor(.green)
+                                    .foregroundColor(Theme.Colors.success)
                             } else if isLocked {
                                 Label("Заблоковано", systemImage: "lock")
                                     .font(.caption)
-                                    .foregroundColor(.gray)
+                                    .foregroundColor(Theme.Colors.textTertiary)
                             } else {
                                 Text("\(Int(progress * 100))%")
                                     .font(.caption.bold())
-                                    .foregroundColor(MountainTheme.glowColor)
+                                    .foregroundColor(Theme.Colors.primary)
                                 
                                 Text("• \(level.estimatedDays)")
                                     .font(.caption)
-                                    .foregroundColor(.white.opacity(0.5))
+                                    .foregroundColor(Theme.Colors.textSecondary)
                             }
                         }
                     }
@@ -283,20 +263,21 @@ struct LevelNode: View {
                     
                     // Arrow
                     Image(systemName: "chevron.right")
-                        .foregroundColor(isLocked ? .white.opacity(0.3) : .white.opacity(0.6))
+                        .foregroundColor(isLocked ? Theme.Colors.textTertiary : Theme.Colors.textSecondary)
                 }
                 .padding()
                 .background(
-                    RoundedRectangle(cornerRadius: 16)
-                        .fill(isLocked ? Color.white.opacity(0.05) : Color.white.opacity(0.1))
+                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        .fill(isLocked ? Theme.Colors.adaptiveSurface.opacity(0.7) : Theme.Colors.adaptiveCard)
                         .overlay(
-                            RoundedRectangle(cornerRadius: 16)
+                            RoundedRectangle(cornerRadius: 18, style: .continuous)
                                 .stroke(
-                                    isActive ? MountainTheme.glowColor.opacity(0.5) : Color.white.opacity(0.1),
+                                    isActive ? Theme.Colors.primary.opacity(0.32) : Theme.Colors.adaptiveBorder,
                                     lineWidth: isActive ? 2 : 1
                                 )
                         )
                 )
+                .shadow(color: isActive ? Theme.Colors.primary.opacity(0.12) : .clear, radius: 14, y: 6)
             }
             .buttonStyle(.plain)
             .disabled(isLocked)
@@ -311,7 +292,20 @@ struct LevelNode: View {
     }
     
     private var levelBackgroundColor: Color {
-        MountainTheme.altitudeColor(for: level.altitude).opacity(0.3)
+        switch status {
+        case .completed:
+            return Theme.Colors.success.opacity(colorScheme == .dark ? 0.22 : 0.14)
+        case .inProgress:
+            return Theme.Colors.primary.opacity(colorScheme == .dark ? 0.28 : 0.16)
+        case .available:
+            return Theme.Colors.accent.opacity(colorScheme == .dark ? 0.24 : 0.14)
+        case .locked:
+            return Theme.Colors.adaptiveSurface
+        }
+    }
+
+    private var iconForegroundColor: Color {
+        isLocked ? Theme.Colors.textTertiary : Theme.Colors.textPrimary
     }
 }
 
@@ -322,13 +316,12 @@ struct PathLine: View {
     
     var body: some View {
         ZStack {
-            // Dashed line
             Path { path in
                 path.move(to: CGPoint(x: 51, y: 0))
                 path.addLine(to: CGPoint(x: 51, y: 40))
             }
             .stroke(
-                isCompleted ? Color.green : Color.white.opacity(0.3),
+                isCompleted ? Theme.Colors.success.opacity(0.7) : Theme.Colors.adaptiveBorder,
                 style: StrokeStyle(lineWidth: 2, dash: [5, 5])
             )
         }
@@ -336,21 +329,60 @@ struct PathLine: View {
     }
 }
 
-// MARK: - Stars Overlay
+private struct RoadmapAmbientBackdrop: View {
+    @Environment(\.colorScheme) private var colorScheme
 
-struct StarsOverlay: View {
     var body: some View {
-        GeometryReader { geo in
-            ForEach(0..<30, id: \.self) { _ in
-                Circle()
-                    .fill(Color.white.opacity(Double.random(in: 0.3...0.8)))
-                    .frame(width: CGFloat.random(in: 1...3))
-                    .position(
-                        x: CGFloat.random(in: 0...geo.size.width),
-                        y: CGFloat.random(in: 0...geo.size.height * 0.4)
+        ZStack {
+            VStack {
+                Spacer()
+                RoadmapBackdropAlps()
+                    .fill(
+                        LinearGradient(
+                            colors: colorScheme == .dark
+                                ? [Theme.Colors.primary.opacity(0.14), Theme.Colors.darkSurface.opacity(0.18)]
+                                : [Theme.Colors.primary.opacity(0.08), Theme.Colors.accentTurquoise.opacity(0.05)],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
                     )
+                    .frame(height: 240)
+            }
+
+            GeometryReader { geo in
+                ForEach(0..<16, id: \.self) { index in
+                    Circle()
+                        .fill((colorScheme == .dark ? Color.white : Theme.Colors.primary).opacity(colorScheme == .dark ? 0.12 : 0.08))
+                        .frame(width: index.isMultiple(of: 3) ? 3 : 2, height: index.isMultiple(of: 3) ? 3 : 2)
+                        .position(
+                            x: geo.size.width * (0.08 + (Double(index % 8) * 0.11)),
+                            y: geo.size.height * (0.08 + (Double(index / 8) * 0.16))
+                        )
+                }
             }
         }
+        .allowsHitTesting(false)
+    }
+}
+
+private struct RoadmapBackdropAlps: Shape {
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        let w = rect.width
+        let h = rect.height
+
+        path.move(to: CGPoint(x: 0, y: h))
+        path.addLine(to: CGPoint(x: 0, y: h * 0.76))
+        path.addLine(to: CGPoint(x: w * 0.12, y: h * 0.58))
+        path.addLine(to: CGPoint(x: w * 0.26, y: h * 0.72))
+        path.addLine(to: CGPoint(x: w * 0.42, y: h * 0.34))
+        path.addLine(to: CGPoint(x: w * 0.58, y: h * 0.66))
+        path.addLine(to: CGPoint(x: w * 0.73, y: h * 0.45))
+        path.addLine(to: CGPoint(x: w * 0.9, y: h * 0.78))
+        path.addLine(to: CGPoint(x: w, y: h * 0.7))
+        path.addLine(to: CGPoint(x: w, y: h))
+        path.closeSubpath()
+        return path
     }
 }
 

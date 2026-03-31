@@ -32,12 +32,15 @@ class Settings(BaseSettings):
     JWT_ALGORITHM: str = Field(default="HS256")
     ACCESS_TOKEN_EXPIRE_MINUTES: int = Field(default=60 * 24, alias="JWT_EXPIRE_MINUTES")
 
-    # Email / SMTP (optional, used for password reset and notifications)
+    # Email / SMTP (legacy optional settings; Resend is the primary provider)
     SMTP_HOST: str | None = Field(default=None, description="SMTP host for outgoing email")
     SMTP_PORT: int = Field(default=587, description="SMTP port (usually 587 for STARTTLS)")
     SMTP_USERNAME: str | None = Field(default=None, description="SMTP username/login")
     SMTP_PASSWORD: str | None = Field(default=None, description="SMTP password")
     SMTP_FROM: str | None = Field(default=None, description="From email address, defaults to SMTP_USERNAME")
+    RESEND_API_KEY: str | None = Field(default=None, description="Resend API key for transactional emails")
+    RESEND_FROM_EMAIL: str | None = Field(default=None, description="Verified sender email in Resend")
+    RESEND_FROM_NAME: str | None = Field(default="Sweezy", description="Optional sender name for Resend")
 
     # Demo admin (for issuing JWT tokens). In production, replace with real user store.
     ADMIN_EMAIL: str = Field(default="admin@sweeezy.app")

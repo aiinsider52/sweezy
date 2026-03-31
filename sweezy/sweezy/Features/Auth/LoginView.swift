@@ -14,6 +14,7 @@ struct LoginView: View {
     @State private var errorMessage: String?
     @State private var showReset: Bool = false
     @State private var showRegistration: Bool = false
+    @State private var showEmailVerification: Bool = false
     @State private var showPassword: Bool = false
     @State private var animateIcon: Bool = false
 
@@ -58,6 +59,14 @@ struct LoginView: View {
         }
         .sheet(isPresented: $showReset) {
             PasswordResetSheet(initialEmail: email)
+        }
+        .sheet(isPresented: $showEmailVerification) {
+            EmailVerificationSheet(initialEmail: email, initialName: appContainer.userProfile?.fullName.isEmpty == false ? appContainer.userProfile?.fullName : nil) {
+                dismiss()
+            }
+            .environmentObject(appContainer)
+            .environmentObject(lockManager)
+            .environmentObject(sessionManager)
         }
         .sheet(isPresented: $showRegistration) {
             RegistrationView()
@@ -457,7 +466,12 @@ struct LoginView: View {
             }
             dismiss()
         } catch {
-            errorMessage = (error as NSError).localizedDescription
+            if APIClient.isEmailNotVerified(error) {
+                errorMessage = nil
+                showEmailVerification = true
+            } else {
+                errorMessage = (error as NSError).localizedDescription
+            }
         }
         isLoading = false
     }
@@ -549,7 +563,7 @@ struct PasswordResetSheet: View {
     
     @State private var currentStep: ResetStep = .email
     @State private var email: String
-    @State private var token: String = ""
+    @State private var code: String = ""
     @State private var newPassword: String = ""
     @State private var confirmPassword: String = ""
     @State private var isLoading: Bool = false
@@ -560,14 +574,17 @@ struct PasswordResetSheet: View {
     init(initialEmail: String, initialToken: String? = nil) {
         _email = State(initialValue: initialEmail)
         if let token = initialToken, !token.isEmpty {
-            _token = State(initialValue: token)
-            _currentStep = State(initialValue: .code)
+            let digits = String(token.filter(\.isNumber).prefix(6))
+            if !digits.isEmpty {
+                _code = State(initialValue: digits)
+                _currentStep = State(initialValue: .code)
+            }
         }
     }
     
     private var passwordStrength: PasswordStrength { PasswordStrength(password: newPassword) }
     private var passwordsMatch: Bool { newPassword == confirmPassword && !confirmPassword.isEmpty }
-    private var canProceedToPassword: Bool { !token.isEmpty && token.count > 10 }
+    private var canProceedToPassword: Bool { code.count == 6 && code.allSatisfy(\.isNumber) }
     private var canResetPassword: Bool { passwordStrength.isStrong && passwordsMatch }
     
     var body: some View {
@@ -626,6 +643,12 @@ struct PasswordResetSheet: View {
                             .font(.title3)
                             .foregroundStyle(.white.opacity(0.6))
                     }
+                }
+            }
+            .onChange(of: code) { _, newValue in
+                let filtered = String(newValue.filter(\.isNumber).prefix(6))
+                if filtered != newValue {
+                    code = filtered
                 }
             }
         }
@@ -834,15 +857,16 @@ struct PasswordResetSheet: View {
                     Image(systemName: "key.fill")
                         .foregroundColor(Theme.Colors.primary)
                     
-                    TextField("auth.reset.enter_code.placeholder".localized, text: $token)
+                    TextField("auth.reset.enter_code.placeholder".localized, text: $code)
                         .font(.system(.body, design: .monospaced))
                         .foregroundColor(.white)
-                        .autocapitalization(.none)
+                        .keyboardType(.numberPad)
+                        .textContentType(.oneTimeCode)
                         .autocorrectionDisabled()
                     
-                    if !token.isEmpty {
+                    if !code.isEmpty {
                         Button {
-                            token = ""
+                            code = ""
                         } label: {
                             Image(systemName: "xmark.circle.fill")
                                 .foregroundColor(.white.opacity(0.5))
@@ -852,7 +876,7 @@ struct PasswordResetSheet: View {
                     // Paste button
                     Button {
                         if let clipboardString = UIPasteboard.general.string {
-                            token = clipboardString.trimmingCharacters(in: .whitespacesAndNewlines)
+                            code = String(clipboardString.filter(\.isNumber).prefix(6))
                         }
                     } label: {
                         Image(systemName: "doc.on.clipboard")
@@ -1131,12 +1155,11 @@ struct PasswordResetSheet: View {
     private func sendResetEmail() async {
         errorMessage = nil
         isLoading = true
-        
-        let success = await APIClient.requestPasswordReset(email: email)
-        
-        await MainActor.run {
-            isLoading = false
-            if success {
+
+        do {
+            _ = try await APIClient.requestPasswordReset(email: email)
+            await MainActor.run {
+                isLoading = false
                 emailSent = true
                 // Auto-advance to code step after a short delay
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
@@ -1144,8 +1167,11 @@ struct PasswordResetSheet: View {
                         currentStep = .code
                     }
                 }
-            } else {
-                errorMessage = "auth.reset.error.send_email_failed".localized
+            }
+        } catch {
+            await MainActor.run {
+                isLoading = false
+                errorMessage = (error as NSError).localizedDescription
             }
         }
     }
@@ -1153,17 +1179,19 @@ struct PasswordResetSheet: View {
     private func resetPassword() async {
         errorMessage = nil
         isLoading = true
-        
-        let success = await APIClient.resetPassword(token: token, newPassword: newPassword)
-        
-        await MainActor.run {
-            isLoading = false
-            if success {
+
+        do {
+            _ = try await APIClient.resetPassword(email: email, code: code, newPassword: newPassword)
+            await MainActor.run {
+                isLoading = false
                 withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
                     currentStep = .success
                 }
-            } else {
-                errorMessage = "auth.reset.error.reset_failed".localized
+            }
+        } catch {
+            await MainActor.run {
+                isLoading = false
+                errorMessage = (error as NSError).localizedDescription
             }
         }
     }

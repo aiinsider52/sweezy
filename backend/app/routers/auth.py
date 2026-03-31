@@ -1,47 +1,46 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status, BackgroundTasks, Response
+from datetime import datetime, timedelta, timezone
+
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, Response, status
 from fastapi.security import OAuth2PasswordRequestForm
+from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
-from ..schemas import Token, TokenPair
-from ..schemas.user import UserCreate, UserLogin, UserOut
-from ..services import AuthService
-from ..services.users import UserService, seed_admin_user
-from ..services.email import send_password_reset_email
-from ..core.security import create_access_token, create_refresh_token, decode_token, get_password_hash
-from ..core.password_policy import validate_password_strength
-from ..core.database import get_db
 from ..core.config import get_settings
+from ..core.database import get_db
 from ..core.rate_limit import limiter
+from ..core.security import create_access_token, create_refresh_token, decode_token, get_password_hash
 from ..dependencies import get_current_user
 from ..models.user import User
-from pydantic import BaseModel, EmailStr, Field, field_validator
-from datetime import timedelta
+from ..schemas import Token, TokenPair
+from ..schemas.auth import AuthStatus, EmailCodeConfirm, EmailCodeRequest, PasswordResetConfirm
+from ..schemas.user import UserCreate, UserLogin
+from ..services import AuthService
+from ..services.auth_email_codes import AuthEmailCodeService
+from ..services.email import send_password_reset_code_email, send_verification_code_email
+from ..services.users import UserService, seed_admin_user
 
 
 router = APIRouter()
-
-
-class PasswordResetRequest(BaseModel):
-    email: EmailStr
-
-
-class PasswordResetConfirm(BaseModel):
-    token: str = Field(..., min_length=10)
-    password: str = Field(..., min_length=8)
-
-    @field_validator("password")
-    @classmethod
-    def validate_password(cls, v: str) -> str:
-        ok, message = validate_password_strength(v)
-        if not ok:
-            raise ValueError(message or "Weak password")
-        return v
+OTP_TTL_MINUTES = 15
 
 
 class RefreshTokenRequest(BaseModel):
     refresh_token: str = Field(..., min_length=10)
+
+
+def _issue_token_pair(user: User) -> TokenPair:
+    settings = get_settings()
+    access_minutes = settings.ACCESS_TOKEN_EXPIRE_MINUTES
+    access = create_access_token(
+        subject=user.email,
+        is_admin=user.is_superuser,
+        role=getattr(user, "role", None),
+        expires_delta=timedelta(minutes=access_minutes),
+    )
+    refresh = create_refresh_token(subject=user.email, expires_delta=timedelta(days=7))
+    return TokenPair(access_token=access, refresh_token=refresh, expires_in=access_minutes * 60)
 
 
 @router.post("/token", response_model=Token)
@@ -52,12 +51,34 @@ def login(form_data: OAuth2PasswordRequestForm = Depends()) -> Token:
     return Token(access_token=token)
 
 
-@router.post("/register", response_model=UserOut, status_code=status.HTTP_201_CREATED)
-def register(user_in: UserCreate, db: Session = Depends(get_db)) -> UserOut:
-    if UserService.get_by_email(db, user_in.email):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
-    user = UserService.create(db, email=user_in.email, password=user_in.password)
-    return UserOut.model_validate(user)
+@router.post("/register", response_model=AuthStatus, status_code=status.HTTP_201_CREATED)
+def register(
+    user_in: UserCreate,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+) -> AuthStatus:
+    existing_user = UserService.get_by_email(db, user_in.email)
+    if existing_user:
+        if existing_user.email_verified:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
+        code = AuthEmailCodeService.issue_code(
+            db,
+            user=existing_user,
+            purpose=AuthEmailCodeService.VERIFY_EMAIL,
+            ttl_minutes=OTP_TTL_MINUTES,
+        )
+        background_tasks.add_task(send_verification_code_email, existing_user.email, code, OTP_TTL_MINUTES)
+        return AuthStatus(status="verification_required", email=existing_user.email, message="Verification code sent")
+
+    user = UserService.create(db, email=user_in.email, password=user_in.password, email_verified=False)
+    code = AuthEmailCodeService.issue_code(
+        db,
+        user=user,
+        purpose=AuthEmailCodeService.VERIFY_EMAIL,
+        ttl_minutes=OTP_TTL_MINUTES,
+    )
+    background_tasks.add_task(send_verification_code_email, user.email, code, OTP_TTL_MINUTES)
+    return AuthStatus(status="verification_required", email=user.email, message="Verification code sent")
 
 
 @router.post("/login", response_model=TokenPair)
@@ -70,18 +91,12 @@ def login_user(
     user = UserService.authenticate(db, email=payload.email, password=payload.password)
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
-
-    settings = get_settings()
-    access_minutes = settings.ACCESS_TOKEN_EXPIRE_MINUTES
-    access = create_access_token(
-        subject=user.email,
-        is_admin=user.is_superuser,
-        role=getattr(user, "role", None),
-        expires_delta=timedelta(minutes=access_minutes),
-    )
-    refresh = create_refresh_token(subject=user.email, expires_delta=timedelta(days=7))
-
-    return TokenPair(access_token=access, refresh_token=refresh, expires_in=access_minutes * 60)
+    if not user.email_verified:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={"code": "EMAIL_NOT_VERIFIED", "message": "Email not verified"},
+        )
+    return _issue_token_pair(user)
 
 
 @router.post("/refresh", response_model=TokenPair)
@@ -102,66 +117,111 @@ def refresh_access_token(payload: RefreshTokenRequest, db: Session = Depends(get
     if not user or not user.is_active:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid user")
 
-    settings = get_settings()
-    access_minutes = settings.ACCESS_TOKEN_EXPIRE_MINUTES
-    access = create_access_token(
-        subject=user.email,
-        is_admin=user.is_superuser,
-        role=getattr(user, "role", None),
-        expires_delta=timedelta(minutes=access_minutes),
+    return _issue_token_pair(user)
+
+
+@router.post("/verify-email/request", response_model=AuthStatus)
+@limiter.limit("3/15minute")
+def request_email_verification(
+    request: Request,
+    payload: EmailCodeRequest,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+) -> AuthStatus:
+    user = UserService.get_by_email(db, payload.email)
+    if not user or not user.is_active:
+        return AuthStatus(status="ok")
+    if user.email_verified:
+        return AuthStatus(status="already_verified", email=user.email)
+
+    code = AuthEmailCodeService.issue_code(
+        db,
+        user=user,
+        purpose=AuthEmailCodeService.VERIFY_EMAIL,
+        ttl_minutes=OTP_TTL_MINUTES,
     )
-    refresh = create_refresh_token(subject=user.email, expires_delta=timedelta(days=7))
-    return TokenPair(access_token=access, refresh_token=refresh, expires_in=access_minutes * 60)
+    background_tasks.add_task(send_verification_code_email, user.email, code, OTP_TTL_MINUTES)
+    return AuthStatus(status="verification_required", email=user.email, message="Verification code sent")
 
 
-@router.post("/password/forgot")
+@router.post("/verify-email/confirm", response_model=TokenPair)
+@limiter.limit("5/15minute")
+def confirm_email_verification(
+    request: Request,
+    payload: EmailCodeConfirm,
+    db: Session = Depends(get_db),
+) -> TokenPair:
+    result = AuthEmailCodeService.validate_code(
+        db,
+        email=payload.email,
+        purpose=AuthEmailCodeService.VERIFY_EMAIL,
+        code=payload.code,
+    )
+    if not result.ok or not result.user or not result.user.is_active:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid or expired code")
+
+    if not result.user.email_verified:
+        result.user.email_verified = True
+        result.user.email_verified_at = datetime.now(timezone.utc)
+        db.add(result.user)
+        db.commit()
+        db.refresh(result.user)
+    return _issue_token_pair(result.user)
+
+
+@router.post("/password/forgot", response_model=AuthStatus)
 @limiter.limit("5/minute")
 def forgot_password(
     request: Request,
-    payload: PasswordResetRequest,
+    payload: EmailCodeRequest,
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
-) -> dict:
+) -> AuthStatus:
     """
-    Issue a short‑lived password reset token and send it via email.
+    Issue a short-lived password reset code and send it via email.
 
     For security reasons, this endpoint always returns a generic success
     response even if the email does not exist, so that attackers cannot
     enumerate accounts.
     """
     user = UserService.get_by_email(db, payload.email)
-    if not user or not user.is_active:
-        # Do not leak whether the user exists.
-        return {"status": "ok"}
+    if not user or not user.is_active or not user.email_verified:
+        return AuthStatus(status="ok")
 
-    # Use a refresh‑style token with a short expiry specifically for password reset.
-    token = create_refresh_token(subject=user.email, expires_delta=timedelta(hours=1))
-    background_tasks.add_task(send_password_reset_email, user.email, token)
-    return {"status": "ok"}
+    code = AuthEmailCodeService.issue_code(
+        db,
+        user=user,
+        purpose=AuthEmailCodeService.RESET_PASSWORD,
+        ttl_minutes=OTP_TTL_MINUTES,
+    )
+    background_tasks.add_task(send_password_reset_code_email, user.email, code, OTP_TTL_MINUTES)
+    return AuthStatus(status="ok")
 
 
-@router.post("/password/reset")
-def reset_password(payload: PasswordResetConfirm, db: Session = Depends(get_db)) -> dict:
+@router.post("/password/reset", response_model=AuthStatus)
+@limiter.limit("5/15minute")
+def reset_password(
+    request: Request,
+    payload: PasswordResetConfirm,
+    db: Session = Depends(get_db),
+) -> AuthStatus:
     """
-    Validate a password reset token and set a new password.
+    Validate a password reset code and set a new password.
     """
-    try:
-        data = decode_token(payload.token)
-    except Exception:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid or expired token")
+    result = AuthEmailCodeService.validate_code(
+        db,
+        email=payload.email,
+        purpose=AuthEmailCodeService.RESET_PASSWORD,
+        code=payload.code,
+    )
+    if not result.ok or not result.user or not result.user.is_active:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid or expired code")
 
-    email = data.get("sub")
-    if not email:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid token")
-
-    user = UserService.get_by_email(db, email)
-    if not user or not user.is_active:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid token")
-
+    user = result.user
     user.hashed_password = get_password_hash(payload.password)
     db.add(user)
     db.commit()
-    return {"status": "ok"}
+    return AuthStatus(status="ok")
 
 
 @router.post("/seed-admin")

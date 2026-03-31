@@ -100,6 +100,10 @@
 "home.see_all" = "Alle anzeigen";
 "home.recommendations" = "Empfehlungen für dich";
 "home.focus" = "Dein Fokus";
+"home.next_action.subtitle" = "Das ist jetzt am wichtigsten";
+"home.next_action.open_checklist" = "Checkliste öffnen";
+"home.next_action.open_roadmap" = "Roadmap öffnen";
+"home.next_action.roadmap_progress_format" = "%d%% dieser Etappe abgeschlossen";
 "home.insider" = "Sweezy Insider";
 "home.roadmap" = "Integrations-Roadmap";
 "home.local_feed" = "Lokaler Feed";
@@ -327,9 +331,9 @@
 "auth.reset.send_code" = "Code senden";
 
 "auth.reset.enter_code.title" = "Code eingeben";
-"auth.reset.enter_code.subtitle_format" = "Fügen Sie den Code aus der E-Mail ein, die wir an\n%@ gesendet haben";
-"auth.reset.enter_code.placeholder" = "Code hier einfügen";
-"auth.reset.enter_code.hint" = "Der Code ist eine lange Zeichenfolge aus Buchstaben und Zahlen";
+"auth.reset.enter_code.subtitle_format" = "Geben Sie den 6-stelligen Code ein, den wir an\n%@ gesendet haben";
+"auth.reset.enter_code.placeholder" = "6-stelligen Code eingeben";
+"auth.reset.enter_code.hint" = "Der Code besteht aus 6 Ziffern";
 "auth.reset.resend_code" = "Code erneut senden";
 
 "auth.reset.new_password.title" = "Neues Passwort";
@@ -346,6 +350,19 @@
 
 "auth.reset.error.send_email_failed" = "E-Mail konnte nicht gesendet werden. Bitte später erneut versuchen.";
 "auth.reset.error.reset_failed" = "Passwort konnte nicht geändert werden. Prüfen Sie den Code.";
+"auth.verify.title" = "E-Mail bestätigen";
+"auth.verify.subtitle" = "Geben Sie den 6-stelligen Code aus der E-Mail ein, um Ihr Sweezy-Konto fertig einzurichten.";
+"auth.verify.email_label" = "E-Mail";
+"auth.verify.code_label" = "Bestätigungscode";
+"auth.verify.code_placeholder" = "6-stelliger Code";
+"auth.verify.code_hint" = "Wir haben einen 6-stelligen Code an Ihren Posteingang gesendet.";
+"auth.verify.confirm" = "E-Mail bestätigen";
+"auth.verify.resend" = "Code erneut senden";
+"auth.verify.resent" = "Ein neuer Code wurde gesendet.";
+"auth.verify.success.title" = "E-Mail bestätigt!";
+"auth.verify.success.subtitle" = "Ihr Konto ist bereit.";
+"auth.verify.success.body" = "Sie können Ihr bestätigtes Sweezy-Konto jetzt auf diesem Gerät verwenden.";
+"auth.verify.success.continue" = "Weiter";
 
 // MARK: - Checklist Categories
 "checklist.category.arrival" = "Erste Schritte";

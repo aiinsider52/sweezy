@@ -125,9 +125,15 @@ struct MainAppContent: View {
         }
         .onAppear {
             updatePostOnboardingAuthPresentation()
+            Task {
+                await refreshRetentionLoopsOnActive()
+            }
         }
         .onChange(of: appContainer.isOnboardingCompleted) { _, _ in
             updatePostOnboardingAuthPresentation()
+            Task {
+                await refreshRetentionLoopsOnActive()
+            }
         }
         .onChange(of: appContainer.shouldPresentInitialAuthEntry) { _, _ in
             updatePostOnboardingAuthPresentation()
@@ -149,10 +155,18 @@ struct MainAppContent: View {
     
     private func handleScenePhaseChange(_ phase: ScenePhase) {
         switch phase {
-        case .background, .inactive:
+        case .background:
+            lockManager.appDidEnterBackground()
+            Task {
+                await scheduleRetentionLoopsOnBackground()
+            }
+        case .inactive:
             lockManager.appDidEnterBackground()
         case .active:
             lockManager.appDidBecomeActive()
+            Task {
+                await refreshRetentionLoopsOnActive()
+            }
         @unknown default:
             break
         }
@@ -173,5 +187,61 @@ struct MainAppContent: View {
             appContainer.shouldPresentInitialAuthEntry &&
             !lockManager.isRegistered &&
             !sessionManager.isAuthenticated
+    }
+
+    private func refreshRetentionLoopsOnActive() async {
+        guard appContainer.isOnboardingCompleted else { return }
+
+        await ensureFirstWeekChecklistSeeded()
+
+        let notificationService = appContainer.notificationService
+        await cancelReengagementNotifications(using: notificationService)
+
+        guard notificationService.isAuthorized else { return }
+        await appContainer.firstWeekService.scheduleReminders(using: notificationService)
+    }
+
+    private func scheduleRetentionLoopsOnBackground() async {
+        guard appContainer.isOnboardingCompleted else { return }
+
+        await ensureFirstWeekChecklistSeeded()
+
+        let notificationService = appContainer.notificationService
+        await cancelReengagementNotifications(using: notificationService)
+
+        guard notificationService.isAuthorized else { return }
+
+        for day in await configuredReengagementDays() {
+            _ = await notificationService.scheduleReengageReminder(afterDays: day)
+        }
+    }
+
+    private func ensureFirstWeekChecklistSeeded() async {
+        guard appContainer.firstWeekService.tasks.isEmpty,
+              let profile = appContainer.userProfile else { return }
+
+        appContainer.firstWeekService.generateTasks(for: profile)
+    }
+
+    private func configuredReengagementDays() async -> [Int] {
+        if let remoteConfig = await appContainer.remoteConfigService.getRemoteConfig(),
+           let days = remoteConfig.reengageDays?
+            .filter({ $0 > 0 })
+            .sorted(),
+           !days.isEmpty {
+            return Array(Set(days)).sorted()
+        }
+
+        return [7, 14, 30]
+    }
+
+    private func cancelReengagementNotifications(using notificationService: any NotificationServiceProtocol) async {
+        let pendingNotifications = await notificationService.getPendingNotifications()
+        for request in pendingNotifications {
+            let type = request.content.userInfo["type"] as? String
+            if type == "reengage" || request.identifier.hasPrefix("reengage_") {
+                notificationService.cancelNotification(with: request.identifier)
+            }
+        }
     }
 }

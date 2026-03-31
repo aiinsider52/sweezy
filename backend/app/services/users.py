@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime, timezone
 import uuid
 
 from sqlalchemy.orm import Session
@@ -15,10 +16,20 @@ class UserService:
         return db.query(User).filter(User.email == email.lower()).one_or_none()
 
     @staticmethod
-    def create(db: Session, *, email: str, password: str, is_superuser: bool = False, role: str = "viewer") -> User:
+    def create(
+        db: Session,
+        *,
+        email: str,
+        password: str,
+        is_superuser: bool = False,
+        role: str = "viewer",
+        email_verified: bool = False,
+    ) -> User:
         user = User(
             email=email.lower(),
             hashed_password=get_password_hash(password),
+            email_verified=email_verified,
+            email_verified_at=datetime.now(timezone.utc) if email_verified else None,
             is_superuser=is_superuser,
             role=role,
             subscription_status="free",
@@ -71,6 +82,8 @@ class UserService:
 
         # Anonymize + deactivate
         user.is_active = False
+        user.email_verified = False
+        user.email_verified_at = None
         user.subscription_status = "free"
         user.subscription_expire_at = None
         user.stripe_customer_id = None
@@ -92,12 +105,16 @@ def seed_admin_user(db: Session) -> None:
         return
     user = UserService.get_by_email(db, admin_email)
     if user is None:
-        UserService.create(db, email=admin_email, password=admin_password, is_superuser=True)
+        UserService.create(db, email=admin_email, password=admin_password, is_superuser=True, email_verified=True)
         return
     # Ensure superuser flag and sync password from env if it has changed
     updated = False
     if not user.is_superuser:
         user.is_superuser = True
+        updated = True
+    if not user.email_verified:
+        user.email_verified = True
+        user.email_verified_at = datetime.now(timezone.utc)
         updated = True
     if not verify_password(admin_password, user.hashed_password):
         user.hashed_password = get_password_hash(admin_password)
@@ -126,12 +143,16 @@ def seed_demo_user(db: Session) -> None:
 
     user = UserService.get_by_email(db, demo_email)
     if user is None:
-        UserService.create(db, email=demo_email, password=demo_password, is_superuser=False, role="viewer")
+        UserService.create(db, email=demo_email, password=demo_password, is_superuser=False, role="viewer", email_verified=True)
         return
 
     updated = False
     if not user.is_active:
         user.is_active = True
+        updated = True
+    if not user.email_verified:
+        user.email_verified = True
+        user.email_verified_at = datetime.now(timezone.utc)
         updated = True
     if not verify_password(demo_password, user.hashed_password):
         user.hashed_password = get_password_hash(demo_password)

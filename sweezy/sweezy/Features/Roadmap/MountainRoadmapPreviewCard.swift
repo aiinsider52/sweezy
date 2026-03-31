@@ -8,200 +8,250 @@
 import SwiftUI
 
 struct MountainRoadmapPreviewCard: View {
+    private struct DotSpec: Identifiable {
+        let id: Int
+        let x: CGFloat
+        let y: CGFloat
+        let size: CGFloat
+        let opacity: Double
+    }
+
+    @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var appContainer: AppContainer
     @StateObject private var roadmapService = RoadmapService()
-    
+
     // TEMPORARY (App Store review): IAP removed — roadmap is fully unlocked.
     private var isPremium: Bool { true }
-    
+
+    private let cardCornerRadius: CGFloat = 28
+
+    private let dots: [DotSpec] = [
+        .init(id: 0, x: 0.08, y: 0.2, size: 3, opacity: 0.14),
+        .init(id: 1, x: 0.18, y: 0.3, size: 2, opacity: 0.12),
+        .init(id: 2, x: 0.33, y: 0.16, size: 2, opacity: 0.1),
+        .init(id: 3, x: 0.52, y: 0.22, size: 3, opacity: 0.12),
+        .init(id: 4, x: 0.7, y: 0.18, size: 2, opacity: 0.1),
+        .init(id: 5, x: 0.86, y: 0.28, size: 3, opacity: 0.12)
+    ]
+
     var body: some View {
         ZStack {
-            // Background with mountain gradient
-            RoundedRectangle(cornerRadius: 20)
-                .fill(
-                    LinearGradient(
-                        colors: [
-                            Color(red: 0.1, green: 0.15, blue: 0.3),
-                            Color(red: 0.15, green: 0.25, blue: 0.4),
-                            Color(red: 0.2, green: 0.35, blue: 0.5)
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
-            
-            // Stars
+            RoundedRectangle(cornerRadius: cardCornerRadius, style: .continuous)
+                .fill(cardFill)
+
+            RoundedRectangle(cornerRadius: cardCornerRadius, style: .continuous)
+                .fill(cardGlow)
+
             GeometryReader { geo in
-                ForEach(0..<15, id: \.self) { i in
-                    Circle()
-                        .fill(Color.white.opacity(Double.random(in: 0.3...0.7)))
-                        .frame(width: CGFloat.random(in: 1...2))
-                        .position(
-                            x: CGFloat(i * 25 + 10),
-                            y: CGFloat.random(in: 10...50)
-                        )
-                }
-            }
-            
-            // Mountain silhouette
-            MountainSilhouette()
-                .fill(
-                    LinearGradient(
-                        colors: [
-                            Color(red: 0.2, green: 0.25, blue: 0.35),
-                            Color(red: 0.15, green: 0.2, blue: 0.3)
-                        ],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                )
-                .frame(height: 80)
-                .offset(y: 50)
-            
-            // Content
-            VStack(alignment: .leading, spacing: 12) {
-                // Header
-                HStack {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(roadmapService.currentLevel?.title ?? "Базовий табір")
-                            .font(.headline)
-                            .foregroundColor(.white)
-                        
-                        Text("Рівень \(roadmapService.progress.currentLevel) з 10")
-                            .font(.caption)
-                            .foregroundColor(.white.opacity(0.7))
+                ZStack {
+                    ForEach(dots) { dot in
+                        Circle()
+                            .fill((colorScheme == .dark ? Color.white : Theme.Colors.primary).opacity(dot.opacity))
+                            .frame(width: dot.size, height: dot.size)
+                            .position(x: geo.size.width * dot.x, y: geo.size.height * dot.y)
                     }
-                    
-                    Spacer()
-                    
-                    // Current level icon
+
+                    Circle()
+                        .fill(Theme.Colors.primary.opacity(colorScheme == .dark ? 0.12 : 0.08))
+                        .frame(width: 170, height: 170)
+                        .blur(radius: 40)
+                        .position(x: geo.size.width * 0.14, y: geo.size.height * 0.16)
+
+                    Circle()
+                        .fill(Theme.Colors.accentTurquoise.opacity(colorScheme == .dark ? 0.08 : 0.06))
+                        .frame(width: 180, height: 180)
+                        .blur(radius: 44)
+                        .position(x: geo.size.width * 0.84, y: geo.size.height * 0.18)
+
+                    RoadmapPreviewAlps()
+                        .fill(alpsBackFill)
+                        .frame(height: geo.size.height * 0.26)
+                        .frame(maxHeight: .infinity, alignment: .bottom)
+                        .offset(y: 2)
+
+                    RoadmapPreviewAlps()
+                        .fill(alpsFrontFill)
+                        .frame(height: geo.size.height * 0.22)
+                        .frame(maxHeight: .infinity, alignment: .bottom)
+                }
+                .clipShape(RoundedRectangle(cornerRadius: cardCornerRadius, style: .continuous))
+            }
+
+            VStack(alignment: .leading, spacing: 16) {
+                HStack(alignment: .top, spacing: 16) {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(roadmapService.currentLevel?.title ?? "Базовий табір")
+                            .font(.system(size: 21, weight: .bold, design: .rounded))
+                            .foregroundColor(Theme.Colors.textPrimary)
+                            .lineLimit(2)
+
+                        Text("Рівень \(roadmapService.progress.currentLevel) з 10")
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundColor(Theme.Colors.textSecondary)
+                    }
+
+                    Spacer(minLength: 12)
+
                     ZStack {
                         Circle()
-                            .fill(Color.white.opacity(0.15))
-                            .frame(width: 50, height: 50)
-                        
+                            .fill(Theme.Colors.adaptiveSurface)
+                            .frame(width: 68, height: 68)
+
                         Circle()
-                            .trim(from: 0, to: roadmapService.levelProgress(for: roadmapService.progress.currentLevel))
-                            .stroke(Color.cyan, style: StrokeStyle(lineWidth: 3, lineCap: .round))
-                            .frame(width: 50, height: 50)
+                            .stroke(Theme.Colors.adaptiveBorder, lineWidth: 1)
+                            .frame(width: 68, height: 68)
+
+                        Circle()
+                            .trim(from: 0, to: max(0.04, roadmapService.levelProgress(for: roadmapService.progress.currentLevel)))
+                            .stroke(Theme.Colors.gradientPrimaryAdaptive, style: StrokeStyle(lineWidth: 4, lineCap: .round))
+                            .frame(width: 68, height: 68)
                             .rotationEffect(.degrees(-90))
-                        
+
                         Image(systemName: roadmapService.currentLevel?.iconName ?? "flag.fill")
-                            .font(.system(size: 20))
-                            .foregroundColor(.white)
+                            .font(.system(size: 24, weight: .semibold))
+                            .foregroundColor(Theme.Colors.textPrimary)
                     }
                 }
-                
-                // Progress bar
-                VStack(alignment: .leading, spacing: 6) {
+
+                VStack(alignment: .leading, spacing: 10) {
                     HStack {
                         Text("Загальний прогрес")
-                            .font(.caption)
-                            .foregroundColor(.white.opacity(0.6))
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(Theme.Colors.textSecondary)
                         Spacer()
                         Text("\(Int(roadmapService.overallProgress * 100))%")
-                            .font(.caption.bold())
-                            .foregroundColor(.cyan)
+                            .font(.system(size: 18, weight: .bold))
+                            .foregroundColor(Theme.Colors.primary)
                     }
-                    
+
                     GeometryReader { geo in
                         ZStack(alignment: .leading) {
-                            RoundedRectangle(cornerRadius: 3)
-                                .fill(Color.white.opacity(0.2))
-                            
-                            RoundedRectangle(cornerRadius: 3)
-                                .fill(
-                                    LinearGradient(
-                                        colors: [.green, .cyan],
-                                        startPoint: .leading,
-                                        endPoint: .trailing
-                                    )
-                                )
-                                .frame(width: geo.size.width * roadmapService.overallProgress)
+                            Capsule()
+                                .fill(Theme.Colors.adaptiveSurface)
+
+                            Capsule()
+                                .fill(Theme.Colors.gradientPrimaryAdaptive)
+                                .frame(width: max(geo.size.width * roadmapService.overallProgress, roadmapService.overallProgress > 0 ? 14 : 0))
                         }
                     }
-                    .frame(height: 6)
+                    .frame(height: 10)
                 }
-                
-                // Level indicators
-                HStack(spacing: 4) {
+
+                HStack(spacing: 7) {
                     ForEach(1...10, id: \.self) { levelId in
                         let level = roadmapService.levels.first { $0.id == levelId }
                         let status = level.map { roadmapService.status(for: $0, isPremium: isPremium) } ?? .locked
-                        
+
                         Circle()
                             .fill(levelIndicatorColor(for: status))
-                            .frame(width: 8, height: 8)
+                            .frame(width: 11, height: 11)
                             .overlay(
                                 Circle()
-                                    .stroke(Color.white.opacity(0.3), lineWidth: 0.5)
+                                    .stroke(Theme.Colors.adaptiveBorder.opacity(0.75), lineWidth: 1)
                             )
                     }
-                    
+
                     Spacer()
-                    
-                    // Tap hint
-                    HStack(spacing: 4) {
+
+                    HStack(spacing: 6) {
                         Text("Відкрити")
-                            .font(.caption2)
-                            .foregroundColor(.white.opacity(0.6))
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(Theme.Colors.textSecondary)
                         Image(systemName: "chevron.right")
-                            .font(.caption2)
-                            .foregroundColor(.white.opacity(0.6))
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundColor(Theme.Colors.textSecondary)
                     }
                 }
             }
-            .padding()
+            .padding(.horizontal, 22)
+            .padding(.vertical, 20)
         }
-        .frame(height: 160)
-        .clipShape(RoundedRectangle(cornerRadius: 20))
-        .shadow(color: .black.opacity(0.2), radius: 10, y: 5)
+        .frame(height: 180)
+        .clipShape(RoundedRectangle(cornerRadius: cardCornerRadius, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: cardCornerRadius, style: .continuous)
+                .stroke(Theme.Colors.adaptiveBorder, lineWidth: 1)
+        )
+        .shadow(color: shadowColor, radius: 18, y: 10)
+        .onAppear {
+            roadmapService.refreshFromStorage()
+        }
         .onReceive(NotificationCenter.default.publisher(for: .roadmapProgressUpdated)) { _ in
             roadmapService.refreshFromStorage()
         }
     }
-    
+
+    private var cardFill: some ShapeStyle {
+        LinearGradient(
+            colors: colorScheme == .dark
+                ? [Theme.Colors.darkCard, Theme.Colors.darkElevated, Theme.Colors.darkCard]
+                : [Theme.Colors.adaptiveCard, Theme.Colors.surface.opacity(0.96), Theme.Colors.adaptiveCard],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+    }
+
+    private var cardGlow: some ShapeStyle {
+        LinearGradient(
+            colors: [Theme.Colors.primary.opacity(colorScheme == .dark ? 0.16 : 0.08), .clear, Theme.Colors.accentTurquoise.opacity(colorScheme == .dark ? 0.08 : 0.05)],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+    }
+
+    private var alpsBackFill: some ShapeStyle {
+        LinearGradient(
+            colors: colorScheme == .dark
+                ? [Theme.Colors.primary.opacity(0.10), Theme.Colors.darkSurface.opacity(0.14)]
+                : [Theme.Colors.textTertiary.opacity(0.05), Theme.Colors.primary.opacity(0.025)],
+            startPoint: .top,
+            endPoint: .bottom
+        )
+    }
+
+    private var alpsFrontFill: some ShapeStyle {
+        LinearGradient(
+            colors: colorScheme == .dark
+                ? [Theme.Colors.primary.opacity(0.16), Theme.Colors.darkSurface.opacity(0.18)]
+                : [Theme.Colors.primary.opacity(0.07), Theme.Colors.accentTurquoise.opacity(0.05)],
+            startPoint: .top,
+            endPoint: .bottom
+        )
+    }
+
+    private var shadowColor: Color {
+        colorScheme == .dark
+            ? Color.black.opacity(0.22)
+            : Theme.Colors.primary.opacity(0.12)
+    }
+
     private func levelIndicatorColor(for status: LevelStatus) -> Color {
         switch status {
-        case .completed: return .green
-        case .inProgress: return .cyan
-        case .available: return .orange
-        case .locked: return .gray.opacity(0.5)
+        case .completed: return Theme.Colors.success
+        case .inProgress: return Theme.Colors.accent
+        case .available: return Theme.Colors.primary
+        case .locked: return Theme.Colors.adaptiveBorder.opacity(0.9)
         }
     }
 }
 
-// MARK: - Mountain Silhouette Shape
-
-struct MountainSilhouette: Shape {
+private struct RoadmapPreviewAlps: Shape {
     func path(in rect: CGRect) -> Path {
         var path = Path()
-        
         let w = rect.width
         let h = rect.height
-        
+
         path.move(to: CGPoint(x: 0, y: h))
-        
-        // First small hill
-        path.addLine(to: CGPoint(x: w * 0.1, y: h * 0.7))
-        path.addLine(to: CGPoint(x: w * 0.2, y: h * 0.85))
-        
-        // Main mountain
-        path.addLine(to: CGPoint(x: w * 0.35, y: h * 0.3))
-        path.addLine(to: CGPoint(x: w * 0.45, y: h * 0.1)) // Peak
-        path.addLine(to: CGPoint(x: w * 0.55, y: h * 0.25))
-        
-        // Second peak
-        path.addLine(to: CGPoint(x: w * 0.65, y: h * 0.15))
-        path.addLine(to: CGPoint(x: w * 0.75, y: h * 0.4))
-        
-        // Small hill
-        path.addLine(to: CGPoint(x: w * 0.85, y: h * 0.6))
-        path.addLine(to: CGPoint(x: w * 0.95, y: h * 0.75))
-        
+        path.addLine(to: CGPoint(x: 0, y: h * 0.72))
+        path.addLine(to: CGPoint(x: w * 0.1, y: h * 0.46))
+        path.addLine(to: CGPoint(x: w * 0.2, y: h * 0.66))
+        path.addLine(to: CGPoint(x: w * 0.34, y: h * 0.18))
+        path.addLine(to: CGPoint(x: w * 0.48, y: h * 0.56))
+        path.addLine(to: CGPoint(x: w * 0.63, y: h * 0.28))
+        path.addLine(to: CGPoint(x: w * 0.82, y: h * 0.7))
+        path.addLine(to: CGPoint(x: w, y: h * 0.92))
         path.addLine(to: CGPoint(x: w, y: h))
         path.closeSubpath()
-        
         return path
     }
 }
@@ -210,6 +260,5 @@ struct MountainSilhouette: Shape {
     MountainRoadmapPreviewCard()
         .environmentObject(AppContainer())
         .padding()
-        .background(Color.black)
+        .background(Theme.Colors.primaryBackground)
 }
-

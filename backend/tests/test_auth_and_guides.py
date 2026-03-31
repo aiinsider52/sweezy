@@ -1,12 +1,14 @@
 from __future__ import annotations
 
-from datetime import timedelta
 import uuid
 
 from fastapi.testclient import TestClient
 
 from backend.app.main import app
-from backend.app.core.security import create_access_token, create_refresh_token
+from backend.app.core.security import create_access_token
+from backend.app.core.database import SessionLocal
+from backend.app.models.user import User
+from backend.app.services.auth_email_codes import AuthEmailCodeService
 
 
 client = TestClient(app)
@@ -26,6 +28,12 @@ def _admin_headers() -> dict[str, str]:
     return {"Authorization": f"Bearer {token}"}
 
 
+def _issue_code(email: str, purpose: str) -> str:
+    with SessionLocal() as db:
+        user = db.query(User).filter(User.email == email.lower()).one()
+        return AuthEmailCodeService.issue_code(db, user=user, purpose=purpose, ttl_minutes=15)
+
+
 # --- Auth tests --------------------------------------------------------------
 
 
@@ -38,9 +46,21 @@ def test_register_and_login_success():
     assert res.status_code == 201
     data = res.json()
     assert data["email"] == email
-    assert data["is_active"] is True
+    assert data["status"] == "verification_required"
 
-    # Login with same credentials
+    # Login is blocked until email verification
+    res = client.post("/api/v1/auth/login", json={"email": email, "password": password})
+    assert res.status_code == 403
+    assert res.json()["detail"]["code"] == "EMAIL_NOT_VERIFIED"
+
+    code = _issue_code(email, AuthEmailCodeService.VERIFY_EMAIL)
+    res = client.post("/api/v1/auth/verify-email/confirm", json={"email": email, "code": code})
+    assert res.status_code == 200
+    tokens = res.json()
+    assert "access_token" in tokens
+    assert "refresh_token" in tokens
+
+    # Login with same credentials now works
     res = client.post("/api/v1/auth/login", json={"email": email, "password": password})
     assert res.status_code == 200
     tokens = res.json()
@@ -55,11 +75,10 @@ def test_register_duplicate_email_fails():
     res = client.post("/api/v1/auth/register", json={"email": email, "password": password})
     assert res.status_code == 201
 
-    # Second registration with same email should be rejected
+    # Second registration with same email should re-send verification while still unverified
     res = client.post("/api/v1/auth/register", json={"email": email, "password": password})
-    assert res.status_code == 400
-    body = res.json()
-    assert body.get("detail") in ("Email already registered", body.get("detail"))
+    assert res.status_code == 201
+    assert res.json()["status"] == "verification_required"
 
 
 def test_login_invalid_credentials_returns_401():
@@ -69,6 +88,10 @@ def test_login_invalid_credentials_returns_401():
     # create user
     res = client.post("/api/v1/auth/register", json={"email": email, "password": password})
     assert res.status_code == 201
+
+    code = _issue_code(email, AuthEmailCodeService.VERIFY_EMAIL)
+    res = client.post("/api/v1/auth/verify-email/confirm", json={"email": email, "code": code})
+    assert res.status_code == 200
 
     # wrong password
     res = client.post("/api/v1/auth/login", json={"email": email, "password": "WrongPass1!"})
@@ -91,13 +114,19 @@ def test_password_reset_flow_changes_password():
     res = client.post("/api/v1/auth/register", json={"email": email, "password": old_password})
     assert res.status_code == 201
 
-    # Manually issue reset token the same way the endpoint does
-    token = create_refresh_token(subject=email, expires_delta=timedelta(hours=1))
+    verify_code = _issue_code(email, AuthEmailCodeService.VERIFY_EMAIL)
+    res = client.post("/api/v1/auth/verify-email/confirm", json={"email": email, "code": verify_code})
+    assert res.status_code == 200
+
+    res = client.post("/api/v1/auth/password/forgot", json={"email": email})
+    assert res.status_code == 200
+
+    reset_code = _issue_code(email, AuthEmailCodeService.RESET_PASSWORD)
 
     # Reset password
     res = client.post(
         "/api/v1/auth/password/reset",
-        json={"token": token, "password": new_password},
+        json={"email": email, "code": reset_code, "password": new_password},
     )
     assert res.status_code == 200
     assert res.json() == {"status": "ok"}
@@ -113,10 +142,10 @@ def test_password_reset_flow_changes_password():
     assert "access_token" in tokens
 
 
-def test_password_reset_with_invalid_token_fails():
+def test_password_reset_with_invalid_code_fails():
     res = client.post(
         "/api/v1/auth/password/reset",
-        json={"token": "this-is-not-a-valid-token", "password": "AnotherPass1!"},
+        json={"email": _unique_email(), "code": "123456", "password": "AnotherPass1!"},
     )
     assert res.status_code == 400
 

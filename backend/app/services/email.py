@@ -1,99 +1,118 @@
 from __future__ import annotations
 
 """
-Lightweight email helper for transactional messages (e.g. password reset).
+Transactional email helper backed by Resend.
 
-If SMTP settings are not configured, the functions degrade gracefully by
-printing the email contents to stdout. This keeps local development simple
-while allowing real email delivery in staging/production once SMTP_* env vars
-are set.
+If Resend is not configured, emails degrade gracefully to stdout logging so
+local development and tests keep working without a real email provider.
 """
 
-from email.message import EmailMessage
-import smtplib
-from typing import Optional
+import html
+
+import httpx
 
 from ..core.config import get_settings
 
 
-def _build_smtp_client() -> Optional[smtplib.SMTP]:
-    """
-    Create an SMTP client using settings, or return None when SMTP is disabled.
-    """
-    settings = get_settings()
-    if not settings.SMTP_HOST:
-        # SMTP is not configured – caller should fall back to logging only.
-        return None
+RESEND_API_URL = "https://api.resend.com/emails"
 
-    host = settings.SMTP_HOST
-    port = settings.SMTP_PORT or 587
-    client = smtplib.SMTP(host, port, timeout=10)
+
+def _from_address() -> str:
+    settings = get_settings()
+    from_email = settings.RESEND_FROM_EMAIL or settings.SMTP_FROM or settings.SMTP_USERNAME or "no-reply@sweezy.app"
+    from_name = (settings.RESEND_FROM_NAME or "").strip()
+    if from_name:
+        return f"{from_name} <{from_email}>"
+    return from_email
+
+
+def _send_email(to_email: str, *, subject: str, text_body: str, html_body: str | None = None) -> None:
+    settings = get_settings()
+    api_key = settings.RESEND_API_KEY
+    if not api_key or not settings.RESEND_FROM_EMAIL:
+        print(f"📧 [DEV] Email to {to_email}")
+        print(f"📧 [DEV] Subject: {subject}")
+        print(f"📧 [DEV] Body:\n{text_body}")
+        return
+
+    payload: dict[str, object] = {
+        "from": _from_address(),
+        "to": [to_email],
+        "subject": subject,
+        "text": text_body,
+    }
+    if html_body:
+        payload["html"] = html_body
+
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+    }
     try:
-        # Use STARTTLS by default; most providers require it.
-        client.starttls()
-    except Exception:
-        # If STARTTLS fails, continue without TLS to avoid hard failure in
-        # misconfigured dev environments. In production, SMTP should be set up
-        # correctly.
-        pass
-
-    if settings.SMTP_USERNAME and settings.SMTP_PASSWORD:
-        try:
-            client.login(settings.SMTP_USERNAME, settings.SMTP_PASSWORD)
-        except Exception:
-            # Authentication failure – let caller decide how to handle.
-            client.quit()
-            raise
-
-    return client
+        with httpx.Client(timeout=10) as client:
+            response = client.post(RESEND_API_URL, headers=headers, json=payload)
+            response.raise_for_status()
+    except Exception as exc:
+        print(f"⚠️ Failed to send email to {to_email}: {exc}")
 
 
-def send_password_reset_email(to_email: str, token: str) -> None:
-    """
-    Send a password reset email with a short-lived token.
-
-    The email contains:
-      - The raw reset token (so user can paste it into the app)
-      - A mobile deep-link that the app can handle: sweezy://auth/password/reset
-    """
-    settings = get_settings()
-
-    # Deep link that the iOS app can handle via DeepLinkService.
-    reset_deep_link = f"sweezy://auth/password/reset?token={token}"
-
-    subject = "Sweezy – Відновлення паролю"
-    body = (
-        "Ви запросили відновлення паролю для свого акаунта Sweezy.\n\n"
-        "Ваш код для відновлення:\n"
-        f"{token}\n\n"
-        "Скопіюйте цей код у додатку Sweezy в екрані \"Забули пароль?\" "
-        "та введіть новий пароль.\n\n"
-        "Якщо додаток встановлено, можна також спробувати відкрити це посилання:\n"
-        f"{reset_deep_link}\n\n"
-        "Якщо ви не запитували зміну паролю — просто проігноруйте цей лист.\n"
+def _code_email_html(*, heading: str, intro: str, code: str, expires_minutes: int, footer: str) -> str:
+    escaped_heading = html.escape(heading)
+    escaped_intro = html.escape(intro)
+    escaped_code = html.escape(code)
+    escaped_footer = html.escape(footer)
+    return (
+        "<div style=\"font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;"
+        "background:#f6f7f9;padding:32px;color:#111827;\">"
+        "<div style=\"max-width:520px;margin:0 auto;background:#ffffff;border-radius:18px;"
+        "padding:32px;border:1px solid #e5e7eb;\">"
+        f"<h1 style=\"margin:0 0 12px;font-size:24px;\">{escaped_heading}</h1>"
+        f"<p style=\"margin:0 0 20px;font-size:15px;line-height:1.6;\">{escaped_intro}</p>"
+        "<div style=\"margin:24px 0;padding:18px;border-radius:16px;background:#f0fdf4;"
+        "border:1px solid #bbf7d0;text-align:center;\">"
+        f"<div style=\"font-size:32px;font-weight:700;letter-spacing:8px;\">{escaped_code}</div>"
+        "</div>"
+        f"<p style=\"margin:0 0 16px;font-size:14px;color:#4b5563;\">Код дійсний {expires_minutes} хвилин.</p>"
+        f"<p style=\"margin:0;font-size:13px;color:#6b7280;line-height:1.6;\">{escaped_footer}</p>"
+        "</div></div>"
     )
 
-    from_addr = settings.SMTP_FROM or settings.SMTP_USERNAME or "no-reply@sweezy.app"
 
-    msg = EmailMessage()
-    msg["Subject"] = subject
-    msg["From"] = from_addr
-    msg["To"] = to_email
-    msg.set_content(body)
+def send_verification_code_email(to_email: str, code: str, expires_minutes: int) -> None:
+    subject = "Sweezy - Підтвердження електронної пошти"
+    text_body = (
+        "Вітаємо в Sweezy.\n\n"
+        "Введіть цей код у додатку, щоб підтвердити електронну пошту:\n"
+        f"{code}\n\n"
+        f"Код дійсний {expires_minutes} хвилин.\n\n"
+        "Якщо ви не створювали акаунт у Sweezy, просто проігноруйте цей лист.\n"
+    )
+    html_body = _code_email_html(
+        heading="Підтвердьте вашу пошту",
+        intro="Введіть цей код у додатку Sweezy, щоб завершити реєстрацію.",
+        code=code,
+        expires_minutes=expires_minutes,
+        footer="Якщо ви не створювали акаунт у Sweezy, просто проігноруйте цей лист.",
+    )
+    _send_email(to_email, subject=subject, text_body=text_body, html_body=html_body)
 
-    try:
-        client = _build_smtp_client()
-        if client is None:
-            # Development fallback: log token to stdout.
-            print(f"📧 [DEV] Password reset email to {to_email}")
-            print(f"📧 [DEV] Token: {token}")
-            print(f"📧 [DEV] Deep link: {reset_deep_link}")
-            return
 
-        with client:
-            client.send_message(msg)
-    except Exception as exc:
-        # Never crash the API because of email issues; just log for debugging.
-        print(f"⚠️ Failed to send password reset email to {to_email}: {exc}")
+def send_password_reset_code_email(to_email: str, code: str, expires_minutes: int) -> None:
+    subject = "Sweezy - Відновлення пароля"
+    text_body = (
+        "Ви запросили відновлення пароля для акаунта Sweezy.\n\n"
+        "Введіть цей код у додатку, щоб встановити новий пароль:\n"
+        f"{code}\n\n"
+        f"Код дійсний {expires_minutes} хвилин.\n\n"
+        "Якщо ви не запитували зміну пароля, просто проігноруйте цей лист.\n"
+    )
+    html_body = _code_email_html(
+        heading="Код для відновлення пароля",
+        intro="Введіть цей код у додатку Sweezy, щоб встановити новий пароль.",
+        code=code,
+        expires_minutes=expires_minutes,
+        footer="Якщо ви не запитували зміну пароля, просто проігноруйте цей лист.",
+    )
+    _send_email(to_email, subject=subject, text_body=text_body, html_body=html_body)
 
 

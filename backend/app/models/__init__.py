@@ -10,6 +10,7 @@ from .event_listing import EventListing
 from .news import News
 from .rss_feed import RSSFeed
 from .brave_news_query import BraveNewsQuery
+from .auth_email_code import AuthEmailCode
 
 __all__ = [
     "Guide",
@@ -24,6 +25,7 @@ __all__ = [
     "News",
     "RSSFeed",
     "BraveNewsQuery",
+    "AuthEmailCode",
 ]
 
 

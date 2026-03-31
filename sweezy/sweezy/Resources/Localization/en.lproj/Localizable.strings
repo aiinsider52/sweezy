@@ -126,6 +126,10 @@
 "home.popular_guides" = "Popular guides";
 "home.recommendations" = "Recommended for you";
 "home.focus" = "Your focus";
+"home.next_action.subtitle" = "The one thing to focus on right now";
+"home.next_action.open_checklist" = "Open checklist";
+"home.next_action.open_roadmap" = "Open roadmap";
+"home.next_action.roadmap_progress_format" = "%d%% of this stage completed";
 "home.insider" = "Sweezy Insider";
 "home.roadmap" = "Integration Roadmap";
 "home.local_feed" = "Local feed";
@@ -556,9 +560,9 @@
 "auth.reset.send_code" = "Send code";
 
 "auth.reset.enter_code.title" = "Enter code";
-"auth.reset.enter_code.subtitle_format" = "Paste the code from the email we sent to\n%@";
-"auth.reset.enter_code.placeholder" = "Paste code here";
-"auth.reset.enter_code.hint" = "The code looks like a long string of letters and numbers";
+"auth.reset.enter_code.subtitle_format" = "Enter the 6-digit code we sent to\n%@";
+"auth.reset.enter_code.placeholder" = "Enter 6-digit code";
+"auth.reset.enter_code.hint" = "The code contains 6 digits";
 "auth.reset.resend_code" = "Resend code";
 
 "auth.reset.new_password.title" = "New password";
@@ -575,6 +579,19 @@
 
 "auth.reset.error.send_email_failed" = "Couldn't send the email. Please try again later.";
 "auth.reset.error.reset_failed" = "Couldn't change the password. Check the code.";
+"auth.verify.title" = "Verify your email";
+"auth.verify.subtitle" = "Enter the 6-digit code from your email to finish creating your Sweezy account.";
+"auth.verify.email_label" = "Email";
+"auth.verify.code_label" = "Verification code";
+"auth.verify.code_placeholder" = "6-digit code";
+"auth.verify.code_hint" = "We sent a 6-digit code to your inbox.";
+"auth.verify.confirm" = "Verify email";
+"auth.verify.resend" = "Resend code";
+"auth.verify.resent" = "A new code has been sent.";
+"auth.verify.success.title" = "Email verified!";
+"auth.verify.success.subtitle" = "Your account is ready.";
+"auth.verify.success.body" = "You can now use your verified Sweezy account on this device.";
+"auth.verify.success.continue" = "Continue";
 
 // MARK: - Checklist Categories
 "checklist.category.arrival" = "First Steps";

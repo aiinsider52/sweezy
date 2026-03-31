@@ -8,6 +8,21 @@
 import SwiftUI
 
 struct HomeViewRedesigned: View {
+    private struct NextBestActionDescriptor {
+        enum Destination {
+            case checklists
+            case roadmap
+        }
+
+        let title: String
+        let detail: String
+        let progressLabel: String
+        let ctaTitle: String
+        let iconName: String
+        let accent: Color
+        let destination: Destination
+    }
+
     @EnvironmentObject private var appContainer: AppContainer
     @EnvironmentObject private var lockManager: AppLockManager
     @EnvironmentObject private var themeManager: ThemeManager
@@ -19,9 +34,11 @@ struct HomeViewRedesigned: View {
     @State private var showSettings = false
     @State private var showCVBuilder = false
     @State private var showTemplates = false
+    @State private var showRoadmap = false
     @State private var selectedGuide: Guide?
     @State private var selectedNews: NewsItem?
     @State private var cachedFeaturedGuides: [Guide] = []
+    @StateObject private var roadmapService = RoadmapService()
     
     // Live stats mirrors (lightweight, avoid deep dependencies)
     @State private var statXP: Int = 0
@@ -48,6 +65,14 @@ struct HomeViewRedesigned: View {
                                 compactProgressSection
                             }
 
+                            if nextBestAction != nil {
+                                nextBestActionSection
+                            }
+
+                            if shouldShowRoadmapEntrySection {
+                                roadmapEntrySection
+                            }
+
                             if shouldShowPriorityTasksSection {
                                 priorityTasksSection
                             }
@@ -68,6 +93,10 @@ struct HomeViewRedesigned: View {
                 .navigationBarHidden(true)
                 .navigationDestination(item: $selectedGuide) { guide in
                     GuideDetailView(guide: guide)
+                }
+                .navigationDestination(isPresented: $showRoadmap) {
+                    MountainRoadmapView()
+                        .environmentObject(appContainer)
                 }
                 .navigationDestination(item: $selectedNews) { news in
                     NewsDetailView(news: news)
@@ -99,6 +128,7 @@ struct HomeViewRedesigned: View {
         }
         .onAppear {
             AppLogger.ui("HomeViewRedesigned onAppear")
+            roadmapService.refreshFromStorage()
             // Defer heavy operations to not block UI
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                 checkForWhatsNew()
@@ -153,6 +183,9 @@ struct HomeViewRedesigned: View {
             statGuides = appContainer.userStats.guidesReadCount
             statChecklists = appContainer.userStats.activeChecklistsCount
             statHoursSaved = max(0, appContainer.userStats.guidesReadCount * 2 + appContainer.userStats.activeChecklistsCount)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .roadmapProgressUpdated)) { _ in
+            roadmapService.refreshFromStorage()
         }
         // Recompute lightweight "todayFocus" on calendar day change
         .onReceive(NotificationCenter.default.publisher(for: .NSCalendarDayChanged)) { _ in
@@ -717,6 +750,116 @@ struct HomeViewRedesigned: View {
         }
         .padding(.horizontal, Theme.Spacing.lg)
     }
+
+    @ViewBuilder
+    private var nextBestActionSection: some View {
+        if let action = nextBestAction {
+            VStack(alignment: .leading, spacing: Theme.Spacing.md) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("home.focus".localized)
+                        .font(.title3.weight(.bold))
+                        .foregroundColor(Theme.Colors.textPrimary)
+                    Text("home.next_action.subtitle".localized)
+                        .font(Theme.Typography.caption)
+                        .foregroundColor(Theme.Colors.textSecondary)
+                }
+
+                Button {
+                    handleNextBestActionTap(action.destination)
+                } label: {
+                    HStack(alignment: .center, spacing: Theme.Spacing.md) {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                                .fill(action.accent.opacity(0.14))
+                                .frame(width: 56, height: 56)
+
+                            Image(systemName: action.iconName)
+                                .font(.system(size: 22, weight: .semibold))
+                                .foregroundColor(action.accent)
+                        }
+
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("home.focus.today_label".localized)
+                                .font(Theme.Typography.caption)
+                                .foregroundColor(Theme.Colors.textTertiary)
+                            Text(action.title)
+                                .font(.headline)
+                                .foregroundColor(Theme.Colors.textPrimary)
+                                .multilineTextAlignment(.leading)
+                            Text(action.detail)
+                                .font(Theme.Typography.caption)
+                                .foregroundColor(Theme.Colors.textSecondary)
+                                .multilineTextAlignment(.leading)
+                        }
+
+                        Spacer(minLength: 12)
+
+                        Image(systemName: "arrow.right.circle.fill")
+                            .font(.system(size: 24, weight: .semibold))
+                            .foregroundColor(action.accent)
+                    }
+                    .padding(Theme.Spacing.lg)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(
+                        RoundedRectangle(cornerRadius: 24, style: .continuous)
+                            .fill(Theme.Colors.adaptiveCard)
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 24, style: .continuous)
+                            .stroke(action.accent.opacity(0.22), lineWidth: 1.5)
+                    )
+                }
+                .buttonStyle(.plain)
+
+                HStack(spacing: Theme.Spacing.sm) {
+                    Label(action.progressLabel, systemImage: "chart.line.uptrend.xyaxis")
+                        .font(Theme.Typography.caption)
+                        .foregroundColor(Theme.Colors.textSecondary)
+
+                    Spacer()
+
+                    Button(action.ctaTitle) {
+                        handleNextBestActionTap(action.destination)
+                    }
+                    .font(Theme.Typography.caption)
+                    .fontWeight(.semibold)
+                    .foregroundColor(action.accent)
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(.horizontal, Theme.Spacing.lg)
+        }
+    }
+
+    private var roadmapEntrySection: some View {
+        VStack(alignment: .leading, spacing: Theme.Spacing.md) {
+            HStack(alignment: .center) {
+                Text("home.roadmap".localized)
+                    .font(.title3.weight(.bold))
+                    .foregroundColor(Theme.Colors.textPrimary)
+
+                Spacer()
+
+                Button("home.next_action.open_roadmap".localized) {
+                    showRoadmap = true
+                }
+                .font(Theme.Typography.caption)
+                .fontWeight(.semibold)
+                .foregroundColor(Theme.Colors.primary)
+                .buttonStyle(.plain)
+            }
+            .padding(.horizontal, Theme.Spacing.lg)
+
+            Button {
+                showRoadmap = true
+            } label: {
+                MountainRoadmapPreviewCard()
+                    .environmentObject(appContainer)
+            }
+            .buttonStyle(.plain)
+            .padding(.horizontal, Theme.Spacing.lg)
+        }
+    }
     
     private var priorityTasksSection: some View {
         let priorityBorderColor: Color = Theme.Colors.accentTurquoise.opacity(0.25)
@@ -811,6 +954,10 @@ struct HomeViewRedesigned: View {
     
     private var shouldShowProgressSection: Bool {
         statXP > 0 || appContainer.gamification.currentStreak() > 0 || statGuides > 0 || statChecklists > 0
+    }
+
+    private var shouldShowRoadmapEntrySection: Bool {
+        roadmapService.currentLevel != nil
     }
     
     private var quickActionColumns: [GridItem] {
@@ -979,6 +1126,47 @@ struct HomeViewRedesigned: View {
         let total = checklistTasks.count
         guard total > 0 else { return "" }
         return "home.priority_tasks.progress_format".localized(with: completed, total)
+    }
+
+    private var nextBestAction: NextBestActionDescriptor? {
+        if let nextTask = appContainer.firstWeekService.nextDueTask {
+            let countdown = countdownString(to: nextTask.dueDate) ?? "home.countdown.today".localized
+            return NextBestActionDescriptor(
+                title: nextTask.title,
+                detail: "\("home.reminder".localized) • \(countdown)",
+                progressLabel: priorityTasksSubtitle,
+                ctaTitle: "home.next_action.open_checklist".localized,
+                iconName: "checklist.checked",
+                accent: Theme.Colors.accentTurquoise,
+                destination: .checklists
+            )
+        }
+
+        if let currentLevel = roadmapService.currentLevel {
+            return NextBestActionDescriptor(
+                title: currentLevel.title,
+                detail: roadmapService.nextMilestone.isEmpty ? currentLevel.subtitle : roadmapService.nextMilestone,
+                progressLabel: "home.next_action.roadmap_progress_format".localized(with: Int(roadmapService.levelProgress(for: currentLevel.id) * 100)),
+                ctaTitle: "home.next_action.open_roadmap".localized,
+                iconName: currentLevel.iconName,
+                accent: Theme.Colors.primary,
+                destination: .roadmap
+            )
+        }
+
+        return nil
+    }
+
+    private func handleNextBestActionTap(_ destination: NextBestActionDescriptor.Destination) {
+        switch destination {
+        case .checklists:
+            NotificationCenter.default.post(
+                name: .switchTab,
+                object: SwitchTabPayload(tab: 1, section: .checklists)
+            )
+        case .roadmap:
+            showRoadmap = true
+        }
     }
     
     private func checkForWhatsNew() {

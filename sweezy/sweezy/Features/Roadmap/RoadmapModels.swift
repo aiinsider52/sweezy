@@ -80,10 +80,10 @@ enum LevelStatus: Codable {
     
     var color: Color {
         switch self {
-        case .locked: return .gray
-        case .available: return .blue
-        case .inProgress: return .orange
-        case .completed: return .green
+        case .locked: return Theme.Colors.textTertiary
+        case .available: return Theme.Colors.primary
+        case .inProgress: return Theme.Colors.accent
+        case .completed: return Theme.Colors.success
         }
     }
 }
@@ -440,20 +440,20 @@ extension RoadmapLevel {
 struct MountainTheme {
     static let skyGradient = LinearGradient(
         colors: [
-            Color(red: 0.1, green: 0.1, blue: 0.3),
-            Color(red: 0.2, green: 0.3, blue: 0.5),
-            Color(red: 0.4, green: 0.5, blue: 0.7)
+            Theme.Colors.primaryBackground,
+            Theme.Colors.secondaryBackground,
+            Theme.Colors.primaryBackground
         ],
         startPoint: .top,
         endPoint: .bottom
     )
     
-    static let snowColor = Color.white.opacity(0.9)
-    static let rockColor = Color(red: 0.4, green: 0.35, blue: 0.3)
-    static let grassColor = Color(red: 0.3, green: 0.5, blue: 0.3)
-    static let pathColor = Color.orange
-    static let lockedColor = Color.gray.opacity(0.5)
-    static let glowColor = Color.cyan
+    static let snowColor = Theme.Colors.adaptiveSurface
+    static let rockColor = Theme.Colors.secondaryBackground
+    static let grassColor = Theme.Colors.primary.opacity(0.18)
+    static let pathColor = Theme.Colors.accent
+    static let lockedColor = Theme.Colors.adaptiveSurface
+    static let glowColor = Theme.Colors.primary
     
     static func altitudeColor(for altitude: Int) -> Color {
         switch altitude {

@@ -31,6 +31,7 @@ class UserLogin(BaseModel):
 class UserOut(UserBase):
     id: str
     is_active: bool
+    email_verified: bool
     is_superuser: bool
     role: str = "viewer"
     created_at: datetime

@@ -158,6 +158,10 @@
 "news.empty" = "Новини поки що відсутні";
 "home.recommendations" = "Рекомендації для вас";
 "home.focus" = "Ваш фокус";
+"home.next_action.subtitle" = "Ось що варто зробити зараз";
+"home.next_action.open_checklist" = "Відкрити чекліст";
+"home.next_action.open_roadmap" = "Відкрити roadmap";
+"home.next_action.roadmap_progress_format" = "%d%% цього етапу виконано";
 "home.insider" = "Sweezy Insider";
 "home.roadmap" = "Roadmap інтеграції";
 "home.local_feed" = "Локальна стрічка";
@@ -581,9 +585,9 @@
 "auth.reset.send_code" = "Надіслати код";
 
 "auth.reset.enter_code.title" = "Введіть код";
-"auth.reset.enter_code.subtitle_format" = "Вставте код з листа, який ми надіслали на\n%@";
-"auth.reset.enter_code.placeholder" = "Вставте код сюди";
-"auth.reset.enter_code.hint" = "Код має вигляд довгого рядка букв і цифр";
+"auth.reset.enter_code.subtitle_format" = "Введіть 6-значний код, який ми надіслали на\n%@";
+"auth.reset.enter_code.placeholder" = "Введіть 6-значний код";
+"auth.reset.enter_code.hint" = "Код складається з 6 цифр";
 "auth.reset.resend_code" = "Надіслати код повторно";
 
 "auth.reset.new_password.title" = "Новий пароль";
@@ -600,6 +604,19 @@
 
 "auth.reset.error.send_email_failed" = "Не вдалося надіслати лист. Спробуйте пізніше.";
 "auth.reset.error.reset_failed" = "Не вдалося змінити пароль. Перевірте код.";
+"auth.verify.title" = "Підтвердіть електронну пошту";
+"auth.verify.subtitle" = "Введіть 6-значний код з листа, щоб завершити створення акаунта Sweezy.";
+"auth.verify.email_label" = "Email";
+"auth.verify.code_label" = "Код підтвердження";
+"auth.verify.code_placeholder" = "6-значний код";
+"auth.verify.code_hint" = "Ми надіслали 6-значний код на вашу пошту.";
+"auth.verify.confirm" = "Підтвердити пошту";
+"auth.verify.resend" = "Надіслати код повторно";
+"auth.verify.resent" = "Новий код уже надіслано.";
+"auth.verify.success.title" = "Пошту підтверджено!";
+"auth.verify.success.subtitle" = "Ваш акаунт готовий.";
+"auth.verify.success.body" = "Тепер ви можете користуватися підтвердженим акаунтом Sweezy на цьому пристрої.";
+"auth.verify.success.continue" = "Продовжити";
 
 // MARK: - Checklist Categories
 "checklist.category.arrival" = "Перші кроки";

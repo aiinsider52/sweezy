@@ -17,6 +17,7 @@ struct RegistrationView: View {
     @State private var showPassword: Bool = false
     @State private var animateIcon: Bool = false
     @State private var showLogin: Bool = false
+    @State private var showEmailVerification: Bool = false
     
     var body: some View {
         NavigationStack {
@@ -74,6 +75,14 @@ struct RegistrationView: View {
                 .environmentObject(appContainer)
                 .environmentObject(lockManager)
                 .environmentObject(sessionManager)
+        }
+        .sheet(isPresented: $showEmailVerification) {
+            EmailVerificationSheet(initialEmail: email, initialName: name) {
+                dismiss()
+            }
+            .environmentObject(appContainer)
+            .environmentObject(lockManager)
+            .environmentObject(sessionManager)
         }
     }
     
@@ -411,57 +420,25 @@ struct RegistrationView: View {
         guard !disabled else { return }
         errorMessage = nil
         isRegistering = true
-        
-        // Try backend registration with timeout, fallback to local-only
+
         do {
-            // Wrap in timeout task (5 seconds)
-            try await withThrowingTaskGroup(of: Void.self) { group in
-                group.addTask {
-                    try await APIClient.register(email: email, password: password)
-                    let tokens = try await APIClient.login(email: email, password: password)
-                    try KeychainStore.save(tokens.access_token, for: "access_token")
-                    try KeychainStore.save(tokens.refresh_token, for: "refresh_token")
+            let response = try await APIClient.register(email: email, password: password)
+            await MainActor.run {
+                isRegistering = false
+                if response.status == "verification_required" {
+                    let generator = UINotificationFeedbackGenerator()
+                    generator.notificationOccurred(.success)
+                    showEmailVerification = true
+                } else {
+                    errorMessage = response.message ?? "Registration failed"
                 }
-                group.addTask {
-                    try await Task.sleep(nanoseconds: 5_000_000_000) // 5 sec timeout
-                    throw URLError(.timedOut)
-                }
-                // Wait for first to complete
-                try await group.next()
-                group.cancelAll()
             }
         } catch {
-            // Backend failed or timed out - continue with local registration
-            AppLogger.auth("Backend registration failed: \(error.localizedDescription). Using local-only mode.", isError: true)
-        }
-        
-        // Always save locally (works offline)
-        await MainActor.run {
-            withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
-                lockManager.userName = name
-                lockManager.userEmail = email
-                lockManager.isRegistered = true
+            await MainActor.run {
+                isRegistering = false
+                errorMessage = (error as NSError).localizedDescription
             }
-            // Reset local stats and gamification for new account
-            appContainer.userStats.reset()
-            appContainer.gamification.resetForNewUser()
-            // Create/update local user profile
-            var profile = appContainer.userProfile ?? UserProfile()
-            profile.fullName = name
-            profile.email = email
-            profile.preferredLanguage = appContainer.currentLocale.identifier
-            appContainer.userProfile = profile
-            sessionManager.activateAuthenticatedSession(email: email, name: name)
         }
-        
-        let generator = UINotificationFeedbackGenerator()
-        generator.notificationOccurred(.success)
-        withAnimation(.easeInOut(duration: 0.3)) { showConfetti = true }
-        try? await Task.sleep(nanoseconds: 800_000_000) // shorter delay
-        withAnimation(.easeOut(duration: 0.3)) { showConfetti = false }
-        
-        isRegistering = false
-        dismiss()
     }
 }
 

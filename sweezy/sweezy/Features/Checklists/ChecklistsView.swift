@@ -47,7 +47,7 @@ struct ChecklistsView: View {
         var completedSteps = 0
         for checklist in allChecklists {
             totalSteps += checklist.steps.count
-            let key = "checklist_\(checklist.id.uuidString)_completed"
+            let key = AccountScopedStorage.checklistCompletedKey(for: checklist.id)
             if let saved = UserDefaults.standard.array(forKey: key) as? [String] {
                 completedSteps += saved.count
             }
@@ -59,7 +59,7 @@ struct ChecklistsView: View {
     // Today's recommended task
     private var todaysFocus: (checklist: Checklist, step: ChecklistStep)? {
         for checklist in allChecklists {
-            let key = "checklist_\(checklist.id.uuidString)_completed"
+            let key = AccountScopedStorage.checklistCompletedKey(for: checklist.id)
             let completed = Set((UserDefaults.standard.array(forKey: key) as? [String] ?? []).compactMap { UUID(uuidString: $0) })
             if let nextStep = checklist.steps.sorted(by: { $0.order < $1.order }).first(where: { !completed.contains($0.id) }) {
                 return (checklist, nextStep)
@@ -469,7 +469,7 @@ struct ChecklistsView: View {
     
     // MARK: - Helpers
     private func completeTask(checklist: Checklist, step: ChecklistStep) {
-        let key = "checklist_\(checklist.id.uuidString)_completed"
+        let key = AccountScopedStorage.checklistCompletedKey(for: checklist.id)
         var completed = Set((UserDefaults.standard.array(forKey: key) as? [String] ?? []))
         completed.insert(step.id.uuidString)
         UserDefaults.standard.set(Array(completed), forKey: key)
@@ -498,7 +498,7 @@ private struct ChecklistProgressCard: View {
     @State private var completedSteps: Set<UUID> = []
     @State private var isPressed = false
     
-    private var storageKey: String { "checklist_\(checklist.id.uuidString)_completed" }
+    private var storageKey: String { AccountScopedStorage.checklistCompletedKey(for: checklist.id) }
     
     init(checklist: Checklist) {
         self.checklist = checklist
@@ -696,7 +696,7 @@ private struct TimelineChecklistRow: View {
     let isLast: Bool
     @AppStorage("checklist_progress_version") private var checklistProgressVersion = 0
     @State private var completedSteps: Set<UUID> = []
-    private var storageKey: String { "checklist_\(checklist.id.uuidString)_completed" }
+    private var storageKey: String { AccountScopedStorage.checklistCompletedKey(for: checklist.id) }
     
     init(checklist: Checklist, isFirst: Bool, isLast: Bool) {
         self.checklist = checklist
@@ -841,7 +841,7 @@ struct ChecklistDetailView: View {
     
     init(checklist: Checklist) {
         self.checklist = checklist
-        let key = "checklist_\(checklist.id.uuidString)_completed"
+        let key = AccountScopedStorage.checklistCompletedKey(for: checklist.id)
         if let saved = UserDefaults.standard.array(forKey: key) as? [String] {
             _completedSteps = State(initialValue: Set(saved.compactMap { UUID(uuidString: $0) }))
         }
@@ -1097,7 +1097,7 @@ struct ChecklistDetailView: View {
         }
         
         // Save
-        let key = "checklist_\(checklist.id.uuidString)_completed"
+        let key = AccountScopedStorage.checklistCompletedKey(for: checklist.id)
         UserDefaults.standard.set(completedSteps.map { $0.uuidString }, forKey: key)
         checklistProgressVersion += 1
         // Sync active state
@@ -1132,7 +1132,7 @@ struct ChecklistDetailView: View {
     }
 
     private func reloadCompletedSteps() {
-        let key = "checklist_\(checklist.id.uuidString)_completed"
+        let key = AccountScopedStorage.checklistCompletedKey(for: checklist.id)
         if let saved = UserDefaults.standard.array(forKey: key) as? [String] {
             completedSteps = Set(saved.compactMap { UUID(uuidString: $0) })
         } else {

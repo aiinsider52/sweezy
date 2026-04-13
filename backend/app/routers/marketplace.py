@@ -129,7 +129,7 @@ def create_listing(
     payload: ServiceListingCreate,
     bg: BackgroundTasks,
     db: DBSession,
-    user_id: str | None = Depends(_get_optional_user_id),
+    user: CurrentUser,
 ) -> ServiceListingResponse:
     listing = ServiceListing(
         title=payload.title,
@@ -140,7 +140,7 @@ def create_listing(
         contact_type=payload.contact_type.value,
         contact_value=payload.contact_value,
         image_urls=payload.image_urls,
-        author_id=user_id,
+        author_id=user.id,
         author_name=payload.author_name,
         status="pending",
     )

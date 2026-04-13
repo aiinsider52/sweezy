@@ -5,6 +5,7 @@ struct CreateEventView: View {
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var colorScheme
+    @EnvironmentObject private var sessionManager: SessionManager
 
     @State private var title = ""
     @State private var description = ""
@@ -381,7 +382,12 @@ struct CreateEventView: View {
             onCreated?()
             showSuccess = true
         } catch {
-            errorMessage = error.localizedDescription
+            if (error as NSError).code == 401 {
+                sessionManager.signOut()
+                errorMessage = "auth.session_expired".localized
+            } else {
+                errorMessage = error.localizedDescription
+            }
         }
     }
 }

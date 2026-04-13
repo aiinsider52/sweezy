@@ -6,6 +6,7 @@ final class MarketplaceViewModel: ObservableObject {
     @Published var listings: [ServiceListing] = []
     @Published var isLoading = false
     @Published var hasMore = true
+    @Published var isShowingStaleData = false
     @Published var selectedCategory: ServiceCategory?
     @Published var selectedCanton: String?
     @Published var searchText = ""
@@ -53,11 +54,17 @@ final class MarketplaceViewModel: ObservableObject {
                 listings.append(contentsOf: page.items)
             }
             hasMore = currentPage < page.pages
-            saveCache(page.items)
+            isShowingStaleData = false
+            saveCache(listings)
         } catch {
             self.error = error
-            if listings.isEmpty {
-                loadCache()
+            if refresh || currentPage == 1 {
+                isShowingStaleData = true
+                if listings.isEmpty {
+                    loadCache()
+                }
+            } else {
+                currentPage = max(1, currentPage - 1)
             }
         }
 

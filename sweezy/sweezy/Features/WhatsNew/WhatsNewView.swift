@@ -39,8 +39,10 @@ struct WhatsNewView: View {
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
                             .padding()
-                            .background(Theme.Colors.ukrainianBlue)
-                            .cornerRadius(Theme.CornerRadius.md)
+                            .background(
+                                RoundedRectangle(cornerRadius: Theme.CornerRadius.md, style: .continuous)
+                                    .fill(Theme.Colors.gradientPrimaryAdaptive)
+                            )
                     }
                     .padding(.horizontal, Theme.Spacing.lg)
                     .padding(.top, Theme.Spacing.md)
@@ -69,11 +71,7 @@ struct WhatsNewView: View {
             Image(systemName: "sparkles")
                 .font(.system(size: 60))
                 .foregroundStyle(
-                    LinearGradient(
-                        colors: [Theme.Colors.ukrainianBlue, Theme.Colors.warmYellow],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
+                    Theme.Colors.gradientPrimaryAdaptive
                 )
             
             // Title
@@ -132,7 +130,11 @@ struct WhatsNewFeatureRow: View {
             Spacer(minLength: 0)
         }
         .padding(Theme.Spacing.md)
-        .background(Theme.Colors.secondaryBackground)
+        .background(Theme.Colors.adaptiveCard)
+        .overlay(
+            RoundedRectangle(cornerRadius: Theme.CornerRadius.md, style: .continuous)
+                .stroke(Theme.Colors.adaptiveBorder, lineWidth: 1)
+        )
         .cornerRadius(Theme.CornerRadius.md)
     }
 }
@@ -146,35 +148,35 @@ struct WhatsNewFeature: Identifiable {
     let title: String
     let description: String
     
-    // Version 1.0.0 features
+    // Current release highlights
     static let currentVersionFeatures: [WhatsNewFeature] = [
         WhatsNewFeature(
-            icon: "sparkles",
-            iconColor: .yellow,
+            icon: "storefront.fill",
+            iconColor: Theme.Colors.primary,
             title: "whats_new.feature1.title".localized,
             description: "whats_new.feature1.description".localized
         ),
         WhatsNewFeature(
-            icon: "map.fill",
-            iconColor: Theme.Colors.ukrainianBlue,
+            icon: "photo.on.rectangle.angled",
+            iconColor: Theme.Colors.accentTurquoise,
             title: "whats_new.feature2.title".localized,
             description: "whats_new.feature2.description".localized
         ),
         WhatsNewFeature(
-            icon: "doc.text.fill",
-            iconColor: .orange,
+            icon: "checkmark.shield.fill",
+            iconColor: Theme.Colors.warning,
             title: "whats_new.feature3.title".localized,
             description: "whats_new.feature3.description".localized
         ),
         WhatsNewFeature(
-            icon: "globe",
-            iconColor: .green,
+            icon: "tray.full.fill",
+            iconColor: Theme.Colors.info,
             title: "whats_new.feature4.title".localized,
             description: "whats_new.feature4.description".localized
         ),
         WhatsNewFeature(
-            icon: "hand.raised.fill",
-            iconColor: .purple,
+            icon: "wrench.and.screwdriver.fill",
+            iconColor: Theme.Colors.success,
             title: "whats_new.feature5.title".localized,
             description: "whats_new.feature5.description".localized
         )

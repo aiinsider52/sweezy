@@ -376,6 +376,21 @@
 "checklist.category.legal" = "Recht";
 "checklist.category.finance" = "Finanzen";
 
+// MARK: - Guide Categories
+"guide.category.documents" = "Dokumente";
+"guide.category.housing" = "Wohnen";
+"guide.category.insurance" = "Versicherung";
+"guide.category.work" = "Arbeit";
+"guide.category.finance" = "Finanzen";
+"guide.category.education" = "Bildung";
+"guide.category.healthcare" = "Gesundheit";
+"guide.category.legal" = "Rechtliches";
+"guide.category.emergency" = "Notfall";
+"guide.category.integration" = "Integration";
+"guide.category.transport" = "Transport";
+"guide.category.banking" = "Banking";
+"guide.category.lifestyle" = "Leben in der Schweiz";
+
 // MARK: - Appointment Statuses
 "appointment.status.scheduled" = "Geplant";
 "appointment.status.confirmed" = "Bestätigt";
@@ -453,6 +468,21 @@
 "onboarding.notifications_subtitle" = "Erhalten Sie Erinnerungen an wichtige Aufgaben der ersten Woche und Termine";
 "onboarding.notifications_allow" = "Benachrichtigungen erlauben";
 "onboarding.notifications_later" = "Später";
+
+// MARK: - What's New
+"whats_new.title" = "Neu in Sweezy";
+"whats_new.version" = "Version %@";
+"whats_new.subtitle" = "Dieses Update bringt neue Werkzeuge und behebt die schmerzhaftesten Abläufe in der App.";
+"whats_new.feature1.title" = "Dienstleistungs-Marktplatz";
+"whats_new.feature1.description" = "Du kannst jetzt eigene Inserate erstellen, Dienstleistungen anbieten und sie direkt in der App verwalten.";
+"whats_new.feature2.title" = "Fotos in Inseraten";
+"whats_new.feature2.description" = "Füge mehreren Fotos zu einem Inserat hinzu, damit dein Angebot auffällt und vertrauenswürdiger wirkt.";
+"whats_new.feature3.title" = "E-Mail-Bestätigung";
+"whats_new.feature3.description" = "Registrierung und Passwort-Reset laufen jetzt über Bestätigungscodes für einen sichereren Login.";
+"whats_new.feature4.title" = "Dein Inserate-Bereich";
+"whats_new.feature4.description" = "In My Listings kannst du Pending-, Active- und Rejected-Status jetzt leichter verfolgen und schneller zu deinen Angeboten zurückkehren.";
+"whats_new.feature5.title" = "Mehr Stabilität";
+"whats_new.feature5.description" = "Wir haben Probleme beim Kontowechsel, beim lokalen Fortschritt, beim Marketplace-Cache und bei der allgemeinen Zuverlässigkeit behoben.";
 
 // MARK: - Onboarding (Profile & Family)
 "onboarding.profile_title" = "Erzähl uns von dir";

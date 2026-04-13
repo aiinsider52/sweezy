@@ -15,20 +15,18 @@ final class UserStatsService: ObservableObject {
     @Published private(set) var lastUpdated: Date = Date()
     
     private let defaults = UserDefaults.standard
-    private let guidesKey = "stats.guidesReadIds"
-    private let activeChecklistsKey = "stats.activeChecklistIds"
-    
     private var guidesReadIds: Set<String> = []
     private var activeChecklistIds: Set<String> = []
+    private var cancellables = Set<AnyCancellable>()
     
     init() {
-        if let arr = defaults.array(forKey: guidesKey) as? [String] {
-            guidesReadIds = Set(arr)
-        }
-        if let arr = defaults.array(forKey: activeChecklistsKey) as? [String] {
-            activeChecklistIds = Set(arr)
-        }
-        recalc()
+        loadFromCurrentScope()
+        NotificationCenter.default.publisher(for: .accountScopeDidChange)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.loadFromCurrentScope()
+            }
+            .store(in: &cancellables)
     }
     
     func markGuideRead(id: UUID) {
@@ -67,8 +65,22 @@ final class UserStatsService: ObservableObject {
     }
     
     private func persist() {
-        defaults.set(Array(guidesReadIds), forKey: guidesKey)
-        defaults.set(Array(activeChecklistIds), forKey: activeChecklistsKey)
+        defaults.set(Array(guidesReadIds), forKey: AccountScopedStorage.statsGuidesReadIdsKey)
+        defaults.set(Array(activeChecklistIds), forKey: AccountScopedStorage.statsActiveChecklistIdsKey)
+        recalc()
+    }
+
+    private func loadFromCurrentScope() {
+        if let arr = defaults.array(forKey: AccountScopedStorage.statsGuidesReadIdsKey) as? [String] {
+            guidesReadIds = Set(arr)
+        } else {
+            guidesReadIds = []
+        }
+        if let arr = defaults.array(forKey: AccountScopedStorage.statsActiveChecklistIdsKey) as? [String] {
+            activeChecklistIds = Set(arr)
+        } else {
+            activeChecklistIds = []
+        }
         recalc()
     }
     

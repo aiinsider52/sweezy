@@ -65,14 +65,6 @@ struct HomeViewRedesigned: View {
                                 compactProgressSection
                             }
 
-                            if nextBestAction != nil {
-                                nextBestActionSection
-                            }
-
-                            if shouldShowRoadmapEntrySection {
-                                roadmapEntrySection
-                            }
-
                             if shouldShowPriorityTasksSection {
                                 priorityTasksSection
                             }

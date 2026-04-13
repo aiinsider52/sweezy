@@ -559,7 +559,7 @@ struct ChecklistsContentView: View {
         var completedSteps = 0
         for checklist in allChecklists {
             totalSteps += checklist.steps.count
-            let key = "checklist_\(checklist.id.uuidString)_completed"
+            let key = AccountScopedStorage.checklistCompletedKey(for: checklist.id)
             if let saved = UserDefaults.standard.array(forKey: key) as? [String] {
                 completedSteps += saved.count
             }
@@ -752,11 +752,11 @@ struct ChecklistCardCompact: View {
     @AppStorage("checklist_progress_version") private var checklistProgressVersion = 0
     @State private var completedStepIDs: Set<UUID> = []
     
-    private var storageKey: String { "checklist_\(checklist.id.uuidString)_completed" }
+    private var storageKey: String { AccountScopedStorage.checklistCompletedKey(for: checklist.id) }
     
     init(checklist: Checklist) {
         self.checklist = checklist
-        if let saved = UserDefaults.standard.array(forKey: "checklist_\(checklist.id.uuidString)_completed") as? [String] {
+        if let saved = UserDefaults.standard.array(forKey: storageKey) as? [String] {
             _completedStepIDs = State(initialValue: Set(saved.compactMap { UUID(uuidString: $0) }))
         }
     }

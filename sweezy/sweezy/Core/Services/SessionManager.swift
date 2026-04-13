@@ -11,6 +11,102 @@
 import Foundation
 import Combine
 
+extension Notification.Name {
+    static let accountScopeDidChange = Notification.Name("account.scope.didChange")
+}
+
+enum AccountScopedStorage {
+    private static let defaults = UserDefaults.standard
+
+    static func currentAccountKey() -> String {
+        let isRegistered = defaults.bool(forKey: "isRegistered")
+        let email = (defaults.string(forKey: "userEmail") ?? "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .lowercased()
+
+        guard isRegistered, !email.isEmpty else { return "guest" }
+
+        let sanitized = email.map { char -> Character in
+            if char.isLetter || char.isNumber { return char }
+            return "_"
+        }
+        return String(sanitized)
+    }
+
+    static func namespaced(_ key: String) -> String {
+        "acct.\(currentAccountKey()).\(key)"
+    }
+
+    static func notifyScopeChange(from oldScope: String) {
+        let newScope = currentAccountKey()
+        guard oldScope != newScope else { return }
+        let checklistVersion = defaults.integer(forKey: "checklist_progress_version")
+        defaults.set(checklistVersion + 1, forKey: "checklist_progress_version")
+        NotificationCenter.default.post(
+            name: .accountScopeDidChange,
+            object: nil,
+            userInfo: ["oldScope": oldScope, "newScope": newScope]
+        )
+    }
+
+    static func checklistCompletedKey(for checklistId: UUID) -> String {
+        namespaced("checklist.\(checklistId.uuidString).completed")
+    }
+
+    static func roadmapTaskCompletedKey(for taskId: String) -> String {
+        namespaced("roadmap.task.\(taskId).completed")
+    }
+
+    static var roadmapProgressKey: String {
+        namespaced("roadmap.progress.v1")
+    }
+
+    static var roadmapCompletedChecklistSlugsKey: String {
+        namespaced("roadmap.completedChecklistSlugs")
+    }
+
+    static var roadmapCompletedStageIdsKey: String {
+        namespaced("roadmap.completedStageIds")
+    }
+
+    static var roadmapTotalXPKey: String {
+        namespaced("roadmap.totalXPEarned")
+    }
+
+    static var statsGuidesReadIdsKey: String {
+        namespaced("stats.guidesReadIds")
+    }
+
+    static var statsActiveChecklistIdsKey: String {
+        namespaced("stats.activeChecklistIds")
+    }
+
+    static var userProfileKey: String {
+        namespaced("user_profile")
+    }
+
+    static func firstWeekTasksURL() -> URL {
+        let dir = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
+        return dir.appendingPathComponent("first_week_tasks_\(currentAccountKey()).json")
+    }
+
+    static func appointmentsFileName() -> String {
+        "appointments_\(currentAccountKey()).json"
+    }
+
+    static var appointmentsICloudKey: String {
+        namespaced("appointments")
+    }
+
+    static func jobsKey(_ suffix: String) -> String {
+        namespaced("jobs.\(suffix)")
+    }
+
+    static func aiMatchKey(_ suffix: String) -> String {
+        namespaced("aiMatch.\(suffix)")
+    }
+}
+
 /// Lightweight representation of an authenticated user for app-wide session state.
 /// We intentionally keep it minimal so it can be created from local persisted data (offline-safe).
 struct User: Codable, Equatable, Hashable, Identifiable {
@@ -36,9 +132,11 @@ final class SessionManager: ObservableObject {
 
     private let lockManager: AppLockManager
     private var cancellables = Set<AnyCancellable>()
+    private var currentScope: String
 
     init(lockManager: AppLockManager) {
         self.lockManager = lockManager
+        self.currentScope = AccountScopedStorage.currentAccountKey()
 
         // Default to guest unless an existing authenticated session is found.
         recomputeStateFromStorage()
@@ -87,6 +185,7 @@ final class SessionManager: ObservableObject {
     /// Centralized sign out (keeps the app usable as a guest afterwards).
     /// Call this instead of manually toggling `isRegistered` + clearing Keychain in multiple places.
     func signOut() {
+        let previousScope = AccountScopedStorage.currentAccountKey()
         KeychainStore.delete("access_token")
         KeychainStore.delete("refresh_token")
 
@@ -97,11 +196,14 @@ final class SessionManager: ObservableObject {
 
         // Guest is the default "logged out" experience in this app.
         state = .guest
+        AccountScopedStorage.notifyScopeChange(from: previousScope)
+        currentScope = AccountScopedStorage.currentAccountKey()
     }
 
     /// Force an immediate authenticated state update after login/registration.
     /// This avoids waiting for downstream storage propagation before the whole app reacts.
     func activateAuthenticatedSession(email: String, name: String?) {
+        let previousScope = AccountScopedStorage.currentAccountKey()
         let trimmedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedName = name?.trimmingCharacters(in: .whitespacesAndNewlines)
         state = .authenticated(
@@ -110,11 +212,14 @@ final class SessionManager: ObservableObject {
                 name: (trimmedName?.isEmpty == false) ? trimmedName : nil
             )
         )
+        AccountScopedStorage.notifyScopeChange(from: previousScope)
+        currentScope = AccountScopedStorage.currentAccountKey()
     }
 
     // MARK: - Internal
 
     private func recomputeStateFromStorage() {
+        let previousScope = currentScope
         let hasToken = !(KeychainStore.get("access_token") ?? "").isEmpty
         if lockManager.isRegistered && hasToken {
             let email = lockManager.userEmail.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -125,6 +230,8 @@ final class SessionManager: ObservableObject {
             // IMPORTANT: default to guest so general content is accessible without an account.
             state = .guest
         }
+        currentScope = AccountScopedStorage.currentAccountKey()
+        AccountScopedStorage.notifyScopeChange(from: previousScope)
     }
 }
 

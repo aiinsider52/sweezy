@@ -60,6 +60,21 @@ struct MarketplaceView: View {
             }
             .navigationTitle("marketplace.title".localized)
             .navigationBarTitleDisplayMode(.large)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button {
+                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                        handleCabinetTap()
+                    } label: {
+                        ZStack(alignment: .topTrailing) {
+                            Image(systemName: sessionManager.isAuthenticated ? "person.crop.circle.fill" : "person.crop.circle")
+                                .font(.system(size: 22))
+                                .foregroundColor(Theme.Colors.primary)
+                        }
+                    }
+                    .accessibilityLabel(selectedMode == .services ? "marketplace.my_listings".localized : "events.my_events".localized)
+                }
+            }
             .featureOnboarding(.marketplace)
             .searchable(text: activeSearchBinding, prompt: Text(searchPrompt))
             .refreshable { await refreshActiveMode() }
@@ -162,8 +177,6 @@ struct MarketplaceView: View {
             .padding(.horizontal, 16)
             .padding(.top, 8)
 
-            cabinetShortcutRow
-
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
                     Button {
@@ -251,36 +264,6 @@ struct MarketplaceView: View {
         }
     }
 
-    private var cabinetShortcutRow: some View {
-        HStack(spacing: 10) {
-            Button {
-                handleCabinetTap()
-            } label: {
-                HStack(spacing: 8) {
-                    Image(systemName: sessionManager.isAuthenticated ? "person.crop.circle.fill" : "lock.circle.fill")
-                    Text(selectedMode == .services ? "marketplace.my_listings".localized : "events.my_events".localized)
-                        .font(.system(size: 13, weight: .semibold))
-                    Spacer()
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 11, weight: .semibold))
-                }
-                .foregroundColor(sessionManager.isAuthenticated ? Theme.Colors.textPrimary : Theme.Colors.textSecondary)
-                .padding(.horizontal, 14)
-                .padding(.vertical, 12)
-                .background(
-                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .fill(Theme.Colors.adaptiveCard)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                .stroke(Theme.Colors.adaptiveBorder.opacity(0.45), lineWidth: 1)
-                        )
-                )
-            }
-            .buttonStyle(.plain)
-        }
-        .padding(.horizontal, 16)
-    }
-
     // MARK: - Content
 
     private var contentSection: some View {
@@ -311,49 +294,148 @@ struct MarketplaceView: View {
                 eventsEmptyState
             } else {
                 ScrollView {
-                    LazyVStack(spacing: 12) {
-                        if selectedMode == .services {
-                            ForEach(vm.filteredListings) { listing in
-                                ListingCardView(listing: listing)
-                                    .onTapGesture {
-                                        selectedListing = listing
-                                    }
-                                    .onAppear {
-                                        if listing.id == vm.filteredListings.last?.id {
-                                            Task { await vm.loadMore() }
-                                        }
-                                    }
-                            }
-                        } else {
-                            ForEach(eventsVM.filteredEvents) { event in
-                                EventCardView(event: event)
-                                    .onTapGesture {
-                                        selectedEvent = event
-                                    }
-                                    .onAppear {
-                                        if event.id == eventsVM.filteredEvents.last?.id {
-                                            Task { await eventsVM.loadMore() }
-                                        }
-                                    }
-                            }
-                        }
-
-                        if selectedMode == .services, vm.isLoading && !vm.listings.isEmpty {
-                            ProgressView()
-                                .frame(maxWidth: .infinity)
-                                .padding()
-                        } else if selectedMode == .events, eventsVM.isLoading && !eventsVM.events.isEmpty {
-                            ProgressView()
-                                .frame(maxWidth: .infinity)
-                                .padding()
-                        }
+                    if selectedMode == .services {
+                        servicesContent
+                    } else {
+                        eventsTimelineContent
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.top, 8)
-                    .padding(.bottom, 80)
                 }
             }
         }
+    }
+
+    // MARK: - Services Content (Hero + Grid/List)
+
+    private var servicesContent: some View {
+        let listings = vm.filteredListings
+        return LazyVStack(spacing: 12) {
+            ForEach(Array(listings.enumerated()), id: \.element.id) { index, listing in
+                Group {
+                    if index == 0 {
+                        HeroListingCardView(listing: listing)
+                    } else if listing.resolvedImageURLs.isEmpty {
+                        EmptyView() // handled in grid below
+                    } else {
+                        ListingCardView(listing: listing)
+                    }
+                }
+                .onTapGesture {
+                    selectedListing = listing
+                }
+                .onAppear {
+                    if listing.id == listings.last?.id {
+                        Task { await vm.loadMore() }
+                    }
+                }
+            }
+
+            // Grid section for listings without photos (skip first)
+            let noPhotoListings = listings.dropFirst().filter { $0.resolvedImageURLs.isEmpty }
+            if !noPhotoListings.isEmpty {
+                LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
+                    ForEach(Array(noPhotoListings)) { listing in
+                        CompactListingCardView(listing: listing)
+                            .onTapGesture { selectedListing = listing }
+                    }
+                }
+            }
+
+            if vm.isLoading && !vm.listings.isEmpty {
+                ProgressView()
+                    .frame(maxWidth: .infinity)
+                    .padding()
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 8)
+        .padding(.bottom, 80)
+    }
+
+    // MARK: - Events Timeline Content
+
+    private var eventsTimelineContent: some View {
+        let grouped = groupedEvents
+        return LazyVStack(alignment: .leading, spacing: 0) {
+            ForEach(grouped, id: \.label) { group in
+                VStack(alignment: .leading, spacing: 10) {
+                    // Section header
+                    HStack(spacing: 8) {
+                        Text(group.label)
+                            .font(.system(size: 13, weight: .bold))
+                            .foregroundColor(group.accentColor)
+                        Rectangle()
+                            .fill(group.accentColor.opacity(0.2))
+                            .frame(height: 1)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.top, 20)
+                    .padding(.bottom, 4)
+
+                    ForEach(group.events) { event in
+                        EventCardView(event: event)
+                            .padding(.horizontal, 16)
+                            .onTapGesture { selectedEvent = event }
+                            .onAppear {
+                                if event.id == eventsVM.filteredEvents.last?.id {
+                                    Task { await eventsVM.loadMore() }
+                                }
+                            }
+                    }
+                }
+            }
+
+            if eventsVM.isLoading && !eventsVM.events.isEmpty {
+                ProgressView()
+                    .frame(maxWidth: .infinity)
+                    .padding()
+            }
+        }
+        .padding(.bottom, 80)
+    }
+
+    private struct EventGroup {
+        let label: String
+        let accentColor: Color
+        let events: [EventListing]
+    }
+
+    private var groupedEvents: [EventGroup] {
+        let events = eventsVM.filteredEvents
+        let calendar = Calendar.current
+        let now = Date()
+        let startOfToday = calendar.startOfDay(for: now)
+        let startOfTomorrow = calendar.date(byAdding: .day, value: 1, to: startOfToday)!
+        let startOfNextWeek = calendar.date(byAdding: .weekOfYear, value: 1, to: startOfToday)!
+        let startOfNextMonth = calendar.date(byAdding: .month, value: 1, to: startOfToday)!
+
+        var today: [EventListing] = []
+        var thisWeek: [EventListing] = []
+        var nextWeek: [EventListing] = []
+        var thisMonth: [EventListing] = []
+        var later: [EventListing] = []
+
+        for event in events {
+            let date = event.startsAt ?? .distantFuture
+            if date < startOfTomorrow {
+                today.append(event)
+            } else if date < startOfNextWeek {
+                thisWeek.append(event)
+            } else if date < calendar.date(byAdding: .weekOfYear, value: 2, to: startOfToday)! {
+                nextWeek.append(event)
+            } else if date < startOfNextMonth {
+                thisMonth.append(event)
+            } else {
+                later.append(event)
+            }
+        }
+
+        var result: [EventGroup] = []
+        if !today.isEmpty { result.append(.init(label: "Сьогодні", accentColor: Theme.Colors.accent, events: today)) }
+        if !thisWeek.isEmpty { result.append(.init(label: "Цього тижня", accentColor: Theme.Colors.primary, events: thisWeek)) }
+        if !nextWeek.isEmpty { result.append(.init(label: "Наступного тижня", accentColor: .purple, events: nextWeek)) }
+        if !thisMonth.isEmpty { result.append(.init(label: "Цього місяця", accentColor: .orange, events: thisMonth)) }
+        if !later.isEmpty { result.append(.init(label: "Пізніше", accentColor: Theme.Colors.textSecondary, events: later)) }
+        return result
     }
 
     // MARK: - Empty State
@@ -523,8 +605,8 @@ struct MarketplaceView: View {
     }
 
     private var activeHasOfflineBanner: Bool {
-        (selectedMode == .services && vm.error != nil && !vm.listings.isEmpty)
-            || (selectedMode == .events && eventsVM.error != nil && !eventsVM.events.isEmpty)
+        (selectedMode == .services && vm.isShowingStaleData && !vm.listings.isEmpty)
+            || (selectedMode == .events && eventsVM.isShowingStaleData && !eventsVM.events.isEmpty)
     }
 
     private var activeCacheAgeText: String? {

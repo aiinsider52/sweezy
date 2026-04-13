@@ -18,7 +18,7 @@ struct JobsView: View {
     @State private var isLoading: Bool = false
     @State private var items: [APIClient.JobItem] = []
     @State private var sources: [String: Int] = [:]
-    @State private var favoriteIds: Set<String> = Set(UserDefaults.standard.stringArray(forKey: "job_favorite_ids") ?? [])
+    @State private var favoriteIds: Set<String> = []
     @State private var didSearchOnce: Bool = false
     @State private var selectedJob: APIClient.JobItem?
     @State private var favoritesCount: Int = 0
@@ -37,30 +37,29 @@ struct JobsView: View {
     @State private var showMatchResults: Bool = false
     
     // Onboarding
-    @AppStorage("jobs.didSeeOnboarding") private var didSeeJobsOnboarding: Bool = false
+    @State private var didSeeJobsOnboarding: Bool = false
     @State private var showJobsOnboarding: Bool = false
+    @State private var didLoadScopedState: Bool = false
     
     // Stats for dashboard
     @State private var newTodayCount: Int = 0
     @State private var appliedCount: Int = 0
     
     // Persisted preferences
-    @AppStorage("jobs.lastKeyword") private var lastKeyword: String = ""
-    @AppStorage("jobs.lastCanton") private var lastCanton: String = ""
-    @AppStorage("jobs.lastEmployment") private var lastEmploymentRaw: String = EmploymentFilter.all.rawValue
-    @AppStorage("jobs.appliedJobIds") private var appliedJobIdsRaw: String = ""
+    @State private var appliedJobIds: Set<String> = []
     
     // AI Match Profile (persisted)
-    @AppStorage("aiMatch.desiredPosition") private var aiDesiredPosition: String = ""
-    @AppStorage("aiMatch.skills") private var aiSkills: String = ""
-    @AppStorage("aiMatch.preferredCanton") private var aiPreferredCanton: String = ""
-    @AppStorage("aiMatch.employmentType") private var aiEmploymentType: String = ""
-    @AppStorage("aiMatch.remotePreference") private var aiRemotePreference: Bool = false
-    @AppStorage("aiMatch.experienceLevel") private var aiExperienceLevel: String = ""
+    @State private var aiDesiredPosition: String = ""
+    @State private var aiSkills: String = ""
+    @State private var aiPreferredCanton: String = ""
+    @State private var aiEmploymentType: String = ""
+    @State private var aiRemotePreference: Bool = false
+    @State private var aiExperienceLevel: String = ""
     
     private let perPage: Int = 20
     private let cantons = ["", "AG", "AI", "AR", "BE", "BL", "BS", "FR", "GE", "GL", "GR", "JU", "LU", "NE", "NW", "OW", "SG", "SH", "SO", "SZ", "TG", "TI", "UR", "VD", "VS", "ZG", "ZH"]
     private let quickTags = ["Java", "Driver", "Nurse", "QA", "Warehouse", "React", "Manager", "Sales"]
+    private let defaults = UserDefaults.standard
     
     private enum EmploymentFilter: String, CaseIterable {
         case all = "Всі"
@@ -69,6 +68,19 @@ struct JobsView: View {
         case contract = "Contract"
         case remote = "Remote"
     }
+    
+    private var favoriteIdsKey: String { AccountScopedStorage.jobsKey("favoriteIds") }
+    private var didSeeJobsOnboardingKey: String { AccountScopedStorage.jobsKey("didSeeOnboarding") }
+    private var lastKeywordKey: String { AccountScopedStorage.jobsKey("lastKeyword") }
+    private var lastCantonKey: String { AccountScopedStorage.jobsKey("lastCanton") }
+    private var lastEmploymentKey: String { AccountScopedStorage.jobsKey("lastEmployment") }
+    private var appliedJobIdsKey: String { AccountScopedStorage.jobsKey("appliedJobIds") }
+    private var aiDesiredPositionKey: String { AccountScopedStorage.aiMatchKey("desiredPosition") }
+    private var aiSkillsKey: String { AccountScopedStorage.aiMatchKey("skills") }
+    private var aiPreferredCantonKey: String { AccountScopedStorage.aiMatchKey("preferredCanton") }
+    private var aiEmploymentTypeKey: String { AccountScopedStorage.aiMatchKey("employmentType") }
+    private var aiRemotePreferenceKey: String { AccountScopedStorage.aiMatchKey("remotePreference") }
+    private var aiExperienceLevelKey: String { AccountScopedStorage.aiMatchKey("experienceLevel") }
     
     // Check if AI profile is configured
     private var hasAIProfile: Bool {
@@ -171,7 +183,9 @@ struct JobsView: View {
         .sheet(isPresented: $showDraftSheet) {
             DraftSheet(text: draftedText, isDrafting: isDrafting)
         }
-        .sheet(isPresented: $showAIMatchProfile) {
+        .sheet(isPresented: $showAIMatchProfile, onDismiss: {
+            persistAIMatchProfile()
+        }) {
             AIMatchProfileSheet(
                 desiredPosition: $aiDesiredPosition,
                 skills: $aiSkills,
@@ -181,6 +195,7 @@ struct JobsView: View {
                 experienceLevel: $aiExperienceLevel,
                 cantons: cantons,
                 onSearch: {
+                    persistAIMatchProfile()
                     showAIMatchProfile = false
                     Task { await performAIMatch() }
                 }
@@ -190,10 +205,12 @@ struct JobsView: View {
             JobsOnboardingSheet(
                 onClose: {
                     didSeeJobsOnboarding = true
+                    persistJobsScopedState()
                     showJobsOnboarding = false
                 },
                 onSetupProfile: {
                     didSeeJobsOnboarding = true
+                    persistJobsScopedState()
                     showJobsOnboarding = false
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
                         showAIMatchProfile = true
@@ -202,11 +219,11 @@ struct JobsView: View {
             )
         }
         .task {
+            if !didLoadScopedState {
+                loadScopedState()
+                didLoadScopedState = true
+            }
             if !didSearchOnce {
-                keyword = lastKeyword
-                canton = lastCanton
-                selectedEmployment = EmploymentFilter(rawValue: lastEmploymentRaw) ?? .all
-                appliedCount = appliedJobIdsRaw.split(separator: ",").count
                 await performSearch()
                 await refreshFavoritesCount()
                 if !didSeeJobsOnboarding {
@@ -216,6 +233,18 @@ struct JobsView: View {
                         appContainer.telemetry.info("onboarding_show", source: "jobs", message: "Jobs onboarding displayed")
                     }
                 }
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .accountScopeDidChange)) { _ in
+            loadScopedState()
+            showMatchResults = false
+            selectedJob = nil
+            draftedText = nil
+            matchedItems = []
+            didSearchOnce = false
+            Task {
+                await performSearch()
+                await refreshFavoritesCount()
             }
         }
     }
@@ -615,6 +644,41 @@ struct JobsView: View {
         return min(score, 100)
     }
     
+    private func loadScopedState() {
+        favoriteIds = Set(defaults.stringArray(forKey: favoriteIdsKey) ?? [])
+        didSeeJobsOnboarding = defaults.bool(forKey: didSeeJobsOnboardingKey)
+        keyword = defaults.string(forKey: lastKeywordKey) ?? ""
+        canton = defaults.string(forKey: lastCantonKey) ?? ""
+        selectedEmployment = EmploymentFilter(rawValue: defaults.string(forKey: lastEmploymentKey) ?? "") ?? .all
+        appliedJobIds = Set((defaults.string(forKey: appliedJobIdsKey) ?? "").split(separator: ",").map(String.init))
+        appliedCount = appliedJobIds.count
+        aiDesiredPosition = defaults.string(forKey: aiDesiredPositionKey) ?? ""
+        aiSkills = defaults.string(forKey: aiSkillsKey) ?? ""
+        aiPreferredCanton = defaults.string(forKey: aiPreferredCantonKey) ?? ""
+        aiEmploymentType = defaults.string(forKey: aiEmploymentTypeKey) ?? ""
+        aiRemotePreference = defaults.bool(forKey: aiRemotePreferenceKey)
+        aiExperienceLevel = defaults.string(forKey: aiExperienceLevelKey) ?? ""
+        favoritesCount = favoriteIds.count
+    }
+    
+    private func persistJobsScopedState() {
+        defaults.set(Array(favoriteIds), forKey: favoriteIdsKey)
+        defaults.set(didSeeJobsOnboarding, forKey: didSeeJobsOnboardingKey)
+        defaults.set(keyword, forKey: lastKeywordKey)
+        defaults.set(canton, forKey: lastCantonKey)
+        defaults.set(selectedEmployment.rawValue, forKey: lastEmploymentKey)
+        defaults.set(appliedJobIds.sorted().joined(separator: ","), forKey: appliedJobIdsKey)
+    }
+    
+    private func persistAIMatchProfile() {
+        defaults.set(aiDesiredPosition, forKey: aiDesiredPositionKey)
+        defaults.set(aiSkills, forKey: aiSkillsKey)
+        defaults.set(aiPreferredCanton, forKey: aiPreferredCantonKey)
+        defaults.set(aiEmploymentType, forKey: aiEmploymentTypeKey)
+        defaults.set(aiRemotePreference, forKey: aiRemotePreferenceKey)
+        defaults.set(aiExperienceLevel, forKey: aiExperienceLevelKey)
+    }
+    
     // MARK: - Actions
     private func performSearch() async {
         isLoading = true
@@ -641,9 +705,7 @@ struct JobsView: View {
             }.count
             
             // Persist preferences
-            lastKeyword = keyword
-            lastCanton = canton
-            lastEmploymentRaw = selectedEmployment.rawValue
+            persistJobsScopedState()
             
             appContainer.telemetry.info("jobs_search", source: "jobs", meta: [
                 "q": keyword, "canton": canton, "results": String(items.count)
@@ -693,7 +755,7 @@ struct JobsView: View {
             favoriteIds.insert(job.id)
             favoritesCount += 1
         }
-        UserDefaults.standard.set(Array(favoriteIds), forKey: "job_favorite_ids")
+        defaults.set(Array(favoriteIds), forKey: favoriteIdsKey)
     }
     
     private func shareJob(_ job: APIClient.JobItem) {
@@ -722,10 +784,9 @@ struct JobsView: View {
         isDrafting = false
         
         // Track applied
-        var applied = Set(appliedJobIdsRaw.split(separator: ",").map(String.init))
-        applied.insert(job.id)
-        appliedJobIdsRaw = applied.joined(separator: ",")
-        appliedCount = applied.count
+        appliedJobIds.insert(job.id)
+        appliedCount = appliedJobIds.count
+        persistJobsScopedState()
     }
     
     private func parseDate(_ s: String?) -> Date? {

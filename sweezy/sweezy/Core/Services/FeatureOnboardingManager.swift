@@ -27,10 +27,10 @@ enum OnboardingFeature: String, CaseIterable {
     case cvBuilder = "feature.cv_builder"
     
     /// UserDefaults key for tracking if this onboarding was shown
-    var seenKey: String { "onboarding.seen.\(rawValue)" }
+    var seenKey: String { AccountScopedStorage.namespaced("onboarding.seen.\(rawValue)") }
     
     /// Version key - increment to re-show onboarding after major updates
-    var versionKey: String { "onboarding.version.\(rawValue)" }
+    var versionKey: String { AccountScopedStorage.namespaced("onboarding.version.\(rawValue)") }
     
     /// Current onboarding version (increment to trigger "What's New")
     var currentVersion: Int {

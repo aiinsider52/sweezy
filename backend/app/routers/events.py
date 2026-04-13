@@ -117,7 +117,7 @@ def create_event(
     payload: EventListingCreate,
     bg: BackgroundTasks,
     db: DBSession,
-    user_id: str | None = Depends(_get_optional_user_id),
+    user: CurrentUser,
 ) -> EventListingResponse:
     event = EventListing(
         title=payload.title,
@@ -134,7 +134,7 @@ def create_event(
         contact_type=payload.contact_type.value,
         contact_value=payload.contact_value,
         organizer_name=payload.organizer_name,
-        author_id=user_id,
+        author_id=user.id,
         status="pending",
     )
     db.add(event)

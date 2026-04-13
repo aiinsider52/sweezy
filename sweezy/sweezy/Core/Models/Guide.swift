@@ -187,6 +187,7 @@ enum GuideCategory: String, CaseIterable, Codable, Hashable {
     case integration = "integration"
     case transport = "transport"
     case banking = "banking"
+    case lifestyle = "lifestyle"
     
     var localizedName: String {
         switch self {
@@ -202,23 +203,25 @@ enum GuideCategory: String, CaseIterable, Codable, Hashable {
         case .integration: return "guide.category.integration".localized
         case .transport: return "guide.category.transport".localized
         case .banking: return "guide.category.banking".localized
+        case .lifestyle: return "guide.category.lifestyle".localized
         }
     }
     
     var iconName: String {
         switch self {
-        case .documents: return "doc.text" // iOS 13+
-        case .housing: return "house" // iOS 13+
-        case .insurance: return "shield.fill" // iOS 13+
-        case .work: return "briefcase" // iOS 13+
-        case .finance: return "creditcard" // iOS 13+
-        case .education: return "graduationcap" // iOS 13+
-        case .healthcare: return "cross.case" // iOS 14+
-        case .legal: return "hammer" // safer fallback
-        case .emergency: return "exclamationmark.triangle" // iOS 13+
-        case .integration: return "person.2" // iOS 13+
-        case .transport: return "bus" // iOS 13+
-        case .banking: return "building.columns" // iOS 13+
+        case .documents: return "doc.text"
+        case .housing: return "house"
+        case .insurance: return "shield.fill"
+        case .work: return "briefcase"
+        case .finance: return "creditcard"
+        case .education: return "graduationcap"
+        case .healthcare: return "cross.case"
+        case .legal: return "hammer"
+        case .emergency: return "exclamationmark.triangle"
+        case .integration: return "person.2"
+        case .transport: return "bus"
+        case .banking: return "building.columns"
+        case .lifestyle: return "sun.horizon.fill"
         }
     }
     
@@ -236,6 +239,7 @@ enum GuideCategory: String, CaseIterable, Codable, Hashable {
         case .integration: return .cyan
         case .transport: return .mint
         case .banking: return .yellow
+        case .lifestyle: return .teal
         }
     }
 }

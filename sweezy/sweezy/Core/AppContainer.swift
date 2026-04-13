@@ -148,10 +148,7 @@ class AppContainer: ObservableObject {
         self.localizationService.setLocale(self.currentLocale)
         
         // Load user profile (fast - just UserDefaults read)
-        if let profileData = UserDefaults.standard.data(forKey: "user_profile"),
-           let profile = try? JSONDecoder().decode(UserProfile.self, from: profileData) {
-            self.userProfile = profile
-        }
+        loadUserProfileForCurrentScope()
         
         setupBindings()
         
@@ -186,11 +183,20 @@ class AppContainer: ObservableObject {
         
         // Save profile changes
         $userProfile
-            .compactMap { $0 }
             .sink { profile in
-                if let data = try? JSONEncoder().encode(profile) {
-                    UserDefaults.standard.set(data, forKey: "user_profile")
+                if let profile,
+                   let data = try? JSONEncoder().encode(profile) {
+                    UserDefaults.standard.set(data, forKey: AccountScopedStorage.userProfileKey)
+                } else {
+                    UserDefaults.standard.removeObject(forKey: AccountScopedStorage.userProfileKey)
                 }
+            }
+            .store(in: &cancellables)
+
+        NotificationCenter.default.publisher(for: .accountScopeDidChange)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.loadUserProfileForCurrentScope()
             }
             .store(in: &cancellables)
     }
@@ -212,5 +218,14 @@ class AppContainer: ObservableObject {
     func updateLocale(_ locale: Locale) {
         currentLocale = locale
         localizationService.setLocale(locale)
+    }
+
+    private func loadUserProfileForCurrentScope() {
+        if let profileData = UserDefaults.standard.data(forKey: AccountScopedStorage.userProfileKey),
+           let profile = try? JSONDecoder().decode(UserProfile.self, from: profileData) {
+            userProfile = profile
+        } else {
+            userProfile = nil
+        }
     }
 }

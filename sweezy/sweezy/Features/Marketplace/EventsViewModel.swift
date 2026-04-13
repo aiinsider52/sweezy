@@ -6,6 +6,7 @@ final class EventsViewModel: ObservableObject {
     @Published var events: [EventListing] = []
     @Published var isLoading = false
     @Published var hasMore = true
+    @Published var isShowingStaleData = false
     @Published var selectedCategory: EventCategory?
     @Published var selectedCanton: String?
     @Published var searchText = ""
@@ -52,11 +53,17 @@ final class EventsViewModel: ObservableObject {
                 events.append(contentsOf: page.items)
             }
             hasMore = currentPage < page.pages
-            saveCache(page.items)
+            isShowingStaleData = false
+            saveCache(events)
         } catch {
             self.error = error
-            if events.isEmpty {
-                loadCache()
+            if refresh || currentPage == 1 {
+                isShowingStaleData = true
+                if events.isEmpty {
+                    loadCache()
+                }
+            } else {
+                currentPage = max(1, currentPage - 1)
             }
         }
 

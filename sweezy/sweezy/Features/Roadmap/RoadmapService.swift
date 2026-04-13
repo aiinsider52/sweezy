@@ -13,17 +13,27 @@ class RoadmapService: ObservableObject {
     @Published var progress: RoadmapProgress
     @Published var levels: [RoadmapLevel] = RoadmapLevel.allLevels
     
-    private let storageKey = "roadmap.progress.v1"
     private let defaults = UserDefaults.standard
+    private var cancellables = Set<AnyCancellable>()
+    
+    private var storageKey: String { AccountScopedStorage.roadmapProgressKey }
     
     init() {
         // Load saved progress or create new
-        if let data = defaults.data(forKey: storageKey),
+        let initialStorageKey = AccountScopedStorage.roadmapProgressKey
+        if let data = defaults.data(forKey: initialStorageKey),
            let saved = try? JSONDecoder().decode(RoadmapProgress.self, from: data) {
             self.progress = saved
         } else {
             self.progress = .empty
         }
+        
+        NotificationCenter.default.publisher(for: .accountScopeDidChange)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.reloadForCurrentScope()
+            }
+            .store(in: &cancellables)
     }
     
     /// Reloads progress from persistent storage if it changed externally.
@@ -157,6 +167,15 @@ class RoadmapService: ObservableObject {
     private func save() {
         if let data = try? JSONEncoder().encode(progress) {
             defaults.set(data, forKey: storageKey)
+        }
+    }
+
+    private func reloadForCurrentScope() {
+        if let data = defaults.data(forKey: storageKey),
+           let saved = try? JSONDecoder().decode(RoadmapProgress.self, from: data) {
+            progress = saved
+        } else {
+            progress = .empty
         }
     }
     

@@ -383,17 +383,17 @@
 // MARK: - What's New
 "whats_new.title" = "What's New";
 "whats_new.version" = "Version %@";
-"whats_new.subtitle" = "Thank you for using Sweezy! Here's what's new:";
-"whats_new.feature1.title" = "First Release!";
-"whats_new.feature1.description" = "Sweezy is now available! 50+ guides, checklists and templates for life in Switzerland.";
-"whats_new.feature2.title" = "Interactive Map";
-"whats_new.feature2.description" = "200+ places: government offices, medical centers, Ukrainian hubs and more.";
-"whats_new.feature3.title" = "Document Templates";
-"whats_new.feature3.description" = "Ready-made forms with PDF export for all official procedures.";
-"whats_new.feature4.title" = "3 Languages";
-"whats_new.feature4.description" = "Ukrainian, English and German with instant switching.";
-"whats_new.feature5.title" = "Privacy";
-"whats_new.feature5.description" = "No ads or marketing trackers, minimal analytics and crash reports only to improve Sweezy, full accessibility support.";
+"whats_new.subtitle" = "This update adds new tools and fixes the most painful flows in the app.";
+"whats_new.feature1.title" = "Services marketplace";
+"whats_new.feature1.description" = "You can now create your own listings, offer services, and manage them directly inside the app.";
+"whats_new.feature2.title" = "Photos in listings";
+"whats_new.feature2.description" = "Add multiple photos to each listing so your offer stands out and feels more trustworthy.";
+"whats_new.feature3.title" = "Email verification";
+"whats_new.feature3.description" = "Registration and password reset now work with verification codes for a safer sign-in flow.";
+"whats_new.feature4.title" = "Your listings cabinet";
+"whats_new.feature4.description" = "My Listings now makes it easier to track pending, active, and rejected statuses and get back to your offers.";
+"whats_new.feature5.title" = "More stability";
+"whats_new.feature5.description" = "We fixed issues around account switching, local progress, marketplace cache, and overall reliability.";
 "settings.default_user_name" = "User";
 "settings.privacy.placeholder" = "Privacy settings will be here";
 
@@ -447,17 +447,17 @@
 // MARK: - What's New
 "whats_new.title" = "What's New";
 "whats_new.version" = "Version %@";
-"whats_new.subtitle" = "Thank you for using Sweezy! Here's what's new:";
-"whats_new.feature1.title" = "First Release!";
-"whats_new.feature1.description" = "Sweezy is now available! 50+ guides, checklists and templates for life in Switzerland.";
-"whats_new.feature2.title" = "Interactive Map";
-"whats_new.feature2.description" = "200+ places: government offices, medical centers, Ukrainian hubs and more.";
-"whats_new.feature3.title" = "Document Templates";
-"whats_new.feature3.description" = "Ready-made forms with PDF export for all official procedures.";
-"whats_new.feature4.title" = "3 Languages";
-"whats_new.feature4.description" = "Ukrainian, English and German with instant switching.";
-"whats_new.feature5.title" = "Privacy";
-"whats_new.feature5.description" = "No ads or marketing trackers, minimal analytics and crash reports only to improve Sweezy, full accessibility support.";
+"whats_new.subtitle" = "This update adds new tools and fixes the most painful flows in the app.";
+"whats_new.feature1.title" = "Services marketplace";
+"whats_new.feature1.description" = "You can now create your own listings, offer services, and manage them directly inside the app.";
+"whats_new.feature2.title" = "Photos in listings";
+"whats_new.feature2.description" = "Add multiple photos to each listing so your offer stands out and feels more trustworthy.";
+"whats_new.feature3.title" = "Email verification";
+"whats_new.feature3.description" = "Registration and password reset now work with verification codes for a safer sign-in flow.";
+"whats_new.feature4.title" = "Your listings cabinet";
+"whats_new.feature4.description" = "My Listings now makes it easier to track pending, active, and rejected statuses and get back to your offers.";
+"whats_new.feature5.title" = "More stability";
+"whats_new.feature5.description" = "We fixed issues around account switching, local progress, marketplace cache, and overall reliability.";
 
 // MARK: - Errors
 
@@ -509,6 +509,7 @@
 "guide.category.integration" = "Integration";
 "guide.category.transport" = "Transport";
 "guide.category.banking" = "Banking";
+"guide.category.lifestyle" = "Life in Switzerland";
 
 // MARK: - Difficulty Levels
 "difficulty.easy" = "Easy";

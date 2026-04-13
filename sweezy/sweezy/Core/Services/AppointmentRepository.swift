@@ -6,13 +6,24 @@ final class AppointmentRepository: ObservableObject {
     @Published private(set) var appointments: [Appointment] = []
 
     private let notificationService: any NotificationServiceProtocol
-    private let localURL: URL
     private let iCloudStore: NSUbiquitousKeyValueStore
-    private let iCloudKey: String
     private let fileManager: FileManager
+    private let appGroupIdentifier: String?
     private let encoder: JSONEncoder
     private let decoder: JSONDecoder
     private var cancellables = Set<AnyCancellable>()
+    
+    private var localURL: URL {
+        Self.makeLocalURL(
+            fileManager: fileManager,
+            appGroupIdentifier: appGroupIdentifier,
+            fileName: AccountScopedStorage.appointmentsFileName()
+        )
+    }
+    
+    private var iCloudKey: String {
+        AccountScopedStorage.appointmentsICloudKey
+    }
 
     init(
         notificationService: any NotificationServiceProtocol,
@@ -24,8 +35,7 @@ final class AppointmentRepository: ObservableObject {
         self.notificationService = notificationService
         self.fileManager = fileManager
         self.iCloudStore = iCloudStore
-        self.iCloudKey = iCloudKey
-        self.localURL = Self.makeLocalURL(fileManager: fileManager, appGroupIdentifier: appGroupIdentifier)
+        self.appGroupIdentifier = appGroupIdentifier
 
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
@@ -39,6 +49,7 @@ final class AppointmentRepository: ObservableObject {
         loadFromLocal()
         syncFromiCloud()
         observeiCloudChanges()
+        observeAccountScopeChanges()
     }
 
     func add(_ appointment: Appointment) {
@@ -153,11 +164,31 @@ final class AppointmentRepository: ObservableObject {
         }
         .store(in: &cancellables)
     }
+    
+    private func observeAccountScopeChanges() {
+        NotificationCenter.default.publisher(for: .accountScopeDidChange)
+            .sink { [weak self] _ in
+                guard let self else { return }
+                Task { @MainActor in
+                    self.handleAccountScopeChange()
+                }
+            }
+            .store(in: &cancellables)
+    }
 
     private func persistAppointments() {
         appointments = sortedAppointments(appointments)
         saveToLocal()
         saveToiCloud()
+    }
+    
+    private func handleAccountScopeChange() {
+        let previousAppointments = appointments
+        appointments = []
+        previousAppointments.forEach { notificationService.cancelAppointmentNotifications(for: $0.id) }
+        loadFromLocal()
+        syncFromiCloud()
+        appointments.forEach { rescheduleNotifications(for: $0) }
     }
 
     private func scheduleNotifications(for appointment: Appointment) {
@@ -208,14 +239,14 @@ final class AppointmentRepository: ObservableObject {
         return sortedAppointments(decoded)
     }
 
-    private static func makeLocalURL(fileManager: FileManager, appGroupIdentifier: String?) -> URL {
+    private static func makeLocalURL(fileManager: FileManager, appGroupIdentifier: String?, fileName: String) -> URL {
         if let appGroupIdentifier,
            let groupURL = fileManager.containerURL(forSecurityApplicationGroupIdentifier: appGroupIdentifier) {
-            return groupURL.appendingPathComponent("appointments.json")
+            return groupURL.appendingPathComponent(fileName)
         }
 
         let documentsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first
             ?? fileManager.temporaryDirectory
-        return documentsURL.appendingPathComponent("appointments.json")
+        return documentsURL.appendingPathComponent(fileName)
     }
 }

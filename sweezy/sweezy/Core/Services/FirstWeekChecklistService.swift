@@ -30,17 +30,25 @@ final class FirstWeekChecklistService: ObservableObject {
     
     @Published private(set) var tasks: [TaskItem] = []
     
-    private let storageURL: URL
     private var cancellables = Set<AnyCancellable>()
     
+    private var storageURL: URL {
+        AccountScopedStorage.firstWeekTasksURL()
+    }
+    
     init() {
-        let dir = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
-        storageURL = dir.appendingPathComponent("first_week_tasks.json")
         load()
         
         $tasks
             .debounce(for: .milliseconds(300), scheduler: DispatchQueue.main)
             .sink { [weak self] _ in self?.persist() }
+            .store(in: &cancellables)
+        
+        NotificationCenter.default.publisher(for: .accountScopeDidChange)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.load()
+            }
             .store(in: &cancellables)
     }
     
@@ -116,9 +124,14 @@ final class FirstWeekChecklistService: ObservableObject {
     }
     
     private func load() {
-        guard let data = try? Data(contentsOf: storageURL) else { return }
+        guard let data = try? Data(contentsOf: storageURL) else {
+            tasks = []
+            return
+        }
         if let decoded = try? JSONDecoder().decode([TaskItem].self, from: data) {
             tasks = decoded
+        } else {
+            tasks = []
         }
     }
     

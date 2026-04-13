@@ -22,7 +22,7 @@ final class RoadmapSyncService: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
     
     // Persist a small set of completed checklist slugs
-    private let completedChecklistSlugsKey = "roadmap.completedChecklistSlugs"
+    private var completedChecklistSlugsKey: String { AccountScopedStorage.roadmapCompletedChecklistSlugsKey }
     private var completedChecklistSlugs: Set<String> {
         get { Set(defaults.array(forKey: completedChecklistSlugsKey) as? [String] ?? []) }
         set { defaults.set(Array(newValue), forKey: completedChecklistSlugsKey) }
@@ -159,7 +159,7 @@ final class RoadmapSyncService: ObservableObject {
         }
         // Scan stored checklist progress from UserDefaults and infer slugs
         for cl in app.contentService.checklists {
-            let key = "checklist_\(cl.id.uuidString)_completed"
+            let key = AccountScopedStorage.checklistCompletedKey(for: cl.id)
             let saved = (defaults.array(forKey: key) as? [String]) ?? []
             if !cl.steps.isEmpty && saved.count >= cl.steps.count {
                 if let slug = inferRoadmapSlug(for: cl) {

@@ -407,17 +407,17 @@
 // MARK: - What's New
 "whats_new.title" = "Що нового";
 "whats_new.version" = "Версія %@";
-"whats_new.subtitle" = "Дякуємо, що використовуєте Sweezy! Ось що нового:";
-"whats_new.feature1.title" = "Перший реліз!";
-"whats_new.feature1.description" = "Sweezy тепер доступний! 50+ гайдів, чек-листи та шаблони для життя у Швейцарії.";
-"whats_new.feature2.title" = "Інтерактивна карта";
-"whats_new.feature2.description" = "200+ місць: державні установи, медичні центри, українські хаби та більше.";
-"whats_new.feature3.title" = "Шаблони документів";
-"whats_new.feature3.description" = "Готові форми з експортом у PDF для всіх офіційних процедур.";
-"whats_new.feature4.title" = "3 мови";
-"whats_new.feature4.description" = "Українська, англійська та німецька з миттєвим перемиканням.";
-"whats_new.feature5.title" = "Приватність";
-"whats_new.feature5.description" = "Без реклами та маркетингових трекерів, мінімальна аналітика й crash‑репорти лише для покращення Sweezy, повна підтримка accessibility.";
+"whats_new.subtitle" = "У цьому оновленні ми додали нові інструменти та виправили найболючіші сценарії.";
+"whats_new.feature1.title" = "Маркетплейс послуг";
+"whats_new.feature1.description" = "Тепер можна створювати власні оголошення, публікувати послуги та керувати ними прямо в додатку.";
+"whats_new.feature2.title" = "Фото в оголошеннях";
+"whats_new.feature2.description" = "Додавайте кілька фото до лістингу, щоб пропозиція виглядала помітніше й викликала більше довіри.";
+"whats_new.feature3.title" = "Підтвердження email";
+"whats_new.feature3.description" = "Реєстрація та відновлення пароля тепер проходять через код підтвердження для безпечнішого входу.";
+"whats_new.feature4.title" = "Кабінет ваших оголошень";
+"whats_new.feature4.description" = "У My Listings стало простіше відстежувати статуси pending, active та rejected і повертатися до своїх заявок.";
+"whats_new.feature5.title" = "Більше стабільності";
+"whats_new.feature5.description" = "Ми виправили проблеми зі зміною акаунтів, локальним прогресом, кешем маркетплейсу та загальною надійністю.";
 
 "privacy.title" = "Політика конфіденційності";
 
@@ -471,17 +471,17 @@
 // MARK: - What's New
 "whats_new.title" = "Що нового";
 "whats_new.version" = "Версія %@";
-"whats_new.subtitle" = "Дякуємо, що використовуєте Sweezy! Ось що нового:";
-"whats_new.feature1.title" = "Перший реліз!";
-"whats_new.feature1.description" = "Sweezy тепер доступний! 50+ гайдів, чек-листи та шаблони для життя у Швейцарії.";
-"whats_new.feature2.title" = "Інтерактивна карта";
-"whats_new.feature2.description" = "200+ місць: державні установи, медичні центри, українські хаби та більше.";
-"whats_new.feature3.title" = "Шаблони документів";
-"whats_new.feature3.description" = "Готові форми з експортом у PDF для всіх офіційних процедур.";
-"whats_new.feature4.title" = "3 мови";
-"whats_new.feature4.description" = "Українська, англійська та німецька з миттєвим перемиканням.";
-"whats_new.feature5.title" = "Приватність";
-"whats_new.feature5.description" = "Без реклами та маркетингових трекерів, мінімальна аналітика й crash‑репорти лише для покращення Sweezy, повна підтримка accessibility.";
+"whats_new.subtitle" = "У цьому оновленні ми додали нові інструменти та виправили найболючіші сценарії.";
+"whats_new.feature1.title" = "Маркетплейс послуг";
+"whats_new.feature1.description" = "Тепер можна створювати власні оголошення, публікувати послуги та керувати ними прямо в додатку.";
+"whats_new.feature2.title" = "Фото в оголошеннях";
+"whats_new.feature2.description" = "Додавайте кілька фото до лістингу, щоб пропозиція виглядала помітніше й викликала більше довіри.";
+"whats_new.feature3.title" = "Підтвердження email";
+"whats_new.feature3.description" = "Реєстрація та відновлення пароля тепер проходять через код підтвердження для безпечнішого входу.";
+"whats_new.feature4.title" = "Кабінет ваших оголошень";
+"whats_new.feature4.description" = "У My Listings стало простіше відстежувати статуси pending, active та rejected і повертатися до своїх заявок.";
+"whats_new.feature5.title" = "Більше стабільності";
+"whats_new.feature5.description" = "Ми виправили проблеми зі зміною акаунтів, локальним прогресом, кешем маркетплейсу та загальною надійністю.";
 
 // MARK: - Errors
 
@@ -533,6 +533,7 @@
 "guide.category.integration" = "Інтеграція";
 "guide.category.transport" = "Транспорт";
 "guide.category.banking" = "Банківські послуги";
+"guide.category.lifestyle" = "Життя в Швейцарії";
 
 // MARK: - Difficulty Levels
 "difficulty.easy" = "Легко";

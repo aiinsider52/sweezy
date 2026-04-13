@@ -14,14 +14,16 @@ final class RoadmapProgressService: ObservableObject {
     @Published private(set) var totalXPEarned: Int = 0
     
     private let defaults = UserDefaults.standard
-    private let completedKey = "roadmap.completedStageIds"
-    private let xpKey = "roadmap.totalXPEarned"
+    private var cancellables = Set<AnyCancellable>()
     
     init() {
-        if let arr = defaults.array(forKey: completedKey) as? [String] {
-            completedStageIds = Set(arr)
-        }
-        totalXPEarned = defaults.integer(forKey: xpKey)
+        loadFromCurrentScope()
+        NotificationCenter.default.publisher(for: .accountScopeDidChange)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.loadFromCurrentScope()
+            }
+            .store(in: &cancellables)
     }
     
     func isCompleted(_ id: String) -> Bool {
@@ -42,8 +44,17 @@ final class RoadmapProgressService: ObservableObject {
     }
     
     private func persist() {
-        defaults.set(Array(completedStageIds), forKey: completedKey)
-        defaults.set(totalXPEarned, forKey: xpKey)
+        defaults.set(Array(completedStageIds), forKey: AccountScopedStorage.roadmapCompletedStageIdsKey)
+        defaults.set(totalXPEarned, forKey: AccountScopedStorage.roadmapTotalXPKey)
+    }
+
+    private func loadFromCurrentScope() {
+        if let arr = defaults.array(forKey: AccountScopedStorage.roadmapCompletedStageIdsKey) as? [String] {
+            completedStageIds = Set(arr)
+        } else {
+            completedStageIds = []
+        }
+        totalXPEarned = defaults.integer(forKey: AccountScopedStorage.roadmapTotalXPKey)
     }
 }
 

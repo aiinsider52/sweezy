@@ -565,7 +565,7 @@ struct LevelDetailSheet: View {
             }
         case .action:
             // Check UserDefaults for action completion
-            return UserDefaults.standard.bool(forKey: "task_\(task.id)_completed")
+            return UserDefaults.standard.bool(forKey: AccountScopedStorage.roadmapTaskCompletedKey(for: task.id))
         }
         return completedTaskIds.contains(task.id)
     }
@@ -606,7 +606,7 @@ struct LevelDetailSheet: View {
     
     private func loadCompletedTasks() {
         // Load from UserDefaults
-        let key = "level_\(level.id)_completed_tasks"
+        let key = AccountScopedStorage.namespaced("roadmap.level.\(level.id).completed_tasks")
         if let saved = UserDefaults.standard.array(forKey: key) as? [String] {
             completedTaskIds = Set(saved)
         }
@@ -654,11 +654,30 @@ struct LevelDetailSheet: View {
     }
     
     private func checklistInfo(for slug: String) -> (title: String, completed: Int, total: Int) {
-        if let cl = appContainer.contentService.checklists.first(where: { slugify($0.title) == slug || slugify($0.title).contains(slug) }) {
-            let key = "checklist_\(cl.id.uuidString)_completed"
+        let checklists = appContainer.contentService.checklists
+
+        // 1) Exact or partial title slug match
+        if let cl = checklists.first(where: { slugify($0.title) == slug || slugify($0.title).contains(slug) }) {
+            let key = AccountScopedStorage.checklistCompletedKey(for: cl.id)
             let saved = (UserDefaults.standard.array(forKey: key) as? [String]) ?? []
             return (cl.title, saved.count, cl.steps.count)
         }
+
+        // 2) Match by ChecklistCategory rawValue (e.g. "housing", "insurance", "work")
+        //    Prefer the user's locale (Ukrainian) first, then any available checklist
+        if let category = ChecklistCategory(rawValue: slug) {
+            let currentLang = Locale.current.language.languageCode?.identifier ?? "uk"
+            let langTag = "lang:\(currentLang)"
+            // Try to find a checklist tagged for current language first
+            let candidates = checklists.filter { $0.category == category }
+            let cl = candidates.first(where: { $0.tags.contains(langTag) }) ?? candidates.first
+            if let cl {
+                let key = AccountScopedStorage.checklistCompletedKey(for: cl.id)
+                let saved = (UserDefaults.standard.array(forKey: key) as? [String]) ?? []
+                return (cl.title, saved.count, cl.steps.count)
+            }
+        }
+
         return (slug, 0, 0)
     }
     

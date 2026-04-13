@@ -6,6 +6,7 @@ struct CreateListingView: View {
     var onCreated: (() -> Void)?
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var colorScheme
+    @EnvironmentObject private var sessionManager: SessionManager
 
     @State private var title = ""
     @State private var description = ""
@@ -756,7 +757,12 @@ struct CreateListingView: View {
             onCreated?()
             showSuccess = true
         } catch {
-            errorMessage = error.localizedDescription
+            if (error as NSError).code == 401 {
+                sessionManager.signOut()
+                errorMessage = "auth.session_expired".localized
+            } else {
+                errorMessage = error.localizedDescription
+            }
         }
 
         isSubmitting = false

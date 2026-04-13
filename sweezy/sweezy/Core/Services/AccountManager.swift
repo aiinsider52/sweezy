@@ -10,7 +10,7 @@ import SwiftUI
 final class AccountManager: ObservableObject {
     @AppStorage("userName") var userName: String = ""
     @AppStorage("userEmail") var userEmail: String = ""
-    @AppStorage("userPassword") var userPassword: String = "" // local only
+    @Published var userPassword: String = ""
     @AppStorage("isRegistered") var isRegistered: Bool = false {
         didSet { objectWillChange.send() }
     }

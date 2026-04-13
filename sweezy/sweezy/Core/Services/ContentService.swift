@@ -492,7 +492,11 @@ class ContentService: ContentServiceProtocol {
             "guides_de.json",
             // Extended/extra content
             "guides_expanded_uk.json",
-            "guides_extra.json"
+            "guides_extra.json",
+            // Life in Switzerland section (for settled residents)
+            "guides_lifestyle_uk.json",
+            "guides_lifestyle_de.json",
+            "guides_lifestyle_en.json"
         ]
         
         for filename in languageFiles {
@@ -802,7 +806,11 @@ class ContentService: ContentServiceProtocol {
                 // 4) Legacy/base content
                 "guides.json",
                 "guides_expanded_uk.json",
-                "guides_extra.json"
+                "guides_extra.json",
+                // Life in Switzerland section
+                "guides_lifestyle_uk.json",
+                "guides_lifestyle_de.json",
+                "guides_lifestyle_en.json"
             ]
             
             for filename in languageFiles {

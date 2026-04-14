@@ -34,6 +34,9 @@ struct AuthEntryView: View {
                 Theme.Colors.darkBackground
                     .ignoresSafeArea()
 
+                Color.black.opacity(0.18)
+                    .ignoresSafeArea()
+
                 AuthAuroraBackground()
 
                 ScrollView(showsIndicators: false) {
@@ -180,12 +183,21 @@ struct AuthEntryView: View {
         .padding(22)
         .background(
             RoundedRectangle(cornerRadius: 24)
-                .fill(.ultraThinMaterial.opacity(0.55))
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            Theme.Colors.darkBackground.opacity(0.96),
+                            Color(red: 0.13, green: 0.17, blue: 0.12).opacity(0.94)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
                 .overlay(
                     RoundedRectangle(cornerRadius: 24)
                         .stroke(
                             LinearGradient(
-                                colors: [Theme.Colors.primary.opacity(0.35), .white.opacity(0.08)],
+                                colors: [Theme.Colors.primary.opacity(0.24), .white.opacity(0.06)],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             ),
@@ -226,10 +238,10 @@ struct AuthEntryView: View {
                     .padding(.vertical, 16)
                     .background(
                         RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .fill(Color.white.opacity(0.08))
+                            .fill(Color.black.opacity(0.14))
                             .overlay(
                                 RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                    .stroke(Color.white.opacity(0.16), lineWidth: 1)
+                                    .stroke(Color.white.opacity(0.10), lineWidth: 1)
                             )
                     )
                     .foregroundColor(.white)

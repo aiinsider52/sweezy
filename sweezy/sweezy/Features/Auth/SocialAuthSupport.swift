@@ -135,10 +135,10 @@ struct SocialAuthPanel: View {
                 .padding(.vertical, 15)
                 .background(
                     RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .fill(Color.white.opacity(0.92))
+                        .fill(Color(red: 0.965, green: 0.972, blue: 0.965))
                         .overlay(
                             RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                .stroke(Color.white.opacity(0.35), lineWidth: 1)
+                                .stroke(Color.white.opacity(0.24), lineWidth: 1)
                         )
                 )
             }
@@ -344,10 +344,19 @@ struct SocialLinkConfirmationSheet: View {
                         .padding(20)
                         .background(
                             RoundedRectangle(cornerRadius: 20)
-                                .fill(.ultraThinMaterial.opacity(0.5))
+                        .fill(
+                            LinearGradient(
+                                colors: [
+                                    Theme.Colors.darkBackground.opacity(0.96),
+                                    Color(red: 0.13, green: 0.17, blue: 0.12).opacity(0.94)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 20)
-                                        .stroke(Color.white.opacity(0.14), lineWidth: 1)
+                                .stroke(Color.white.opacity(0.08), lineWidth: 1)
                                 )
                         )
 

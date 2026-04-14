@@ -24,6 +24,9 @@ struct RegistrationView: View {
             ZStack {
                 Theme.Colors.darkBackground
                     .ignoresSafeArea()
+
+                Color.black.opacity(0.18)
+                    .ignoresSafeArea()
                 
                 // Aurora background
                 AuthAuroraBackground()
@@ -285,19 +288,28 @@ struct RegistrationView: View {
         .padding(24)
         .background(
             RoundedRectangle(cornerRadius: 24)
-                .fill(.ultraThinMaterial.opacity(0.6))
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            Theme.Colors.darkBackground.opacity(0.96),
+                            Color(red: 0.13, green: 0.17, blue: 0.12).opacity(0.94)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
                 .overlay(
                     RoundedRectangle(cornerRadius: 24)
                         .stroke(
                             LinearGradient(
-                                colors: [Theme.Colors.primary.opacity(0.4), .white.opacity(0.1), Theme.Colors.primaryLight.opacity(0.3)],
+                                colors: [Theme.Colors.primary.opacity(0.28), .white.opacity(0.08), Theme.Colors.primaryLight.opacity(0.18)],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             ),
                             lineWidth: 1
                         )
                 )
-                .shadow(color: .black.opacity(0.3), radius: 20, y: 10)
+                .shadow(color: .black.opacity(0.42), radius: 24, y: 12)
         )
     }
     
@@ -316,7 +328,11 @@ struct RegistrationView: View {
             .padding(.horizontal, 16)
             .background(
                 RoundedRectangle(cornerRadius: 12)
-                    .fill(.white.opacity(0.05))
+                    .fill(Color.black.opacity(0.14))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.white.opacity(0.06), lineWidth: 1)
+                    )
             )
         }
     }
@@ -345,13 +361,13 @@ struct RegistrationView: View {
         .padding(.vertical, 16)
         .background(
             RoundedRectangle(cornerRadius: 14)
-                .fill(Color.white.opacity(0.08))
+                .fill(Color.black.opacity(0.16))
                 .overlay(
                     RoundedRectangle(cornerRadius: 14)
                         .stroke(
                             !text.wrappedValue.isEmpty
-                                ? LinearGradient(colors: [Theme.Colors.primary.opacity(0.5), Theme.Colors.primaryLight.opacity(0.3)], startPoint: .topLeading, endPoint: .bottomTrailing)
-                                : LinearGradient(colors: [.white.opacity(0.15), .white.opacity(0.1)], startPoint: .topLeading, endPoint: .bottomTrailing),
+                                ? LinearGradient(colors: [Theme.Colors.primary.opacity(0.42), Theme.Colors.primaryLight.opacity(0.22)], startPoint: .topLeading, endPoint: .bottomTrailing)
+                                : LinearGradient(colors: [.white.opacity(0.10), .white.opacity(0.06)], startPoint: .topLeading, endPoint: .bottomTrailing),
                             lineWidth: 1
                         )
                 )
@@ -395,13 +411,13 @@ struct RegistrationView: View {
         .padding(.vertical, 16)
         .background(
             RoundedRectangle(cornerRadius: 14)
-                .fill(Color.white.opacity(0.08))
+                .fill(Color.black.opacity(0.16))
                 .overlay(
                     RoundedRectangle(cornerRadius: 14)
                         .stroke(
                             !text.wrappedValue.isEmpty
-                                ? LinearGradient(colors: [Theme.Colors.primary.opacity(0.5), Theme.Colors.primaryLight.opacity(0.3)], startPoint: .topLeading, endPoint: .bottomTrailing)
-                                : LinearGradient(colors: [.white.opacity(0.15), .white.opacity(0.1)], startPoint: .topLeading, endPoint: .bottomTrailing),
+                                ? LinearGradient(colors: [Theme.Colors.primary.opacity(0.42), Theme.Colors.primaryLight.opacity(0.22)], startPoint: .topLeading, endPoint: .bottomTrailing)
+                                : LinearGradient(colors: [.white.opacity(0.10), .white.opacity(0.06)], startPoint: .topLeading, endPoint: .bottomTrailing),
                             lineWidth: 1
                         )
                 )

@@ -475,7 +475,7 @@
 				GOOGLE_CLIENT_ID = "";
 				"GOOGLE_CLIENT_ID[arch=*]" = "795204255745-fgjlja5gud9g9tdfbcegfe8k3ubflqe5.apps.googleusercontent.com";
 				GOOGLE_REVERSED_CLIENT_ID = "";
-				"GOOGLE_REVERSED_CLIENT_ID[arch=*]" = "";
+				"GOOGLE_REVERSED_CLIENT_ID[arch=*]" = "com.googleusercontent.apps.795204255745-fgjlja5gud9g9tdfbcegfe8k3ubflqe5";
 				INFOPLIST_FILE = sweezy/Info.plist;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Камера може знадобитися для сканування документів або QR‑кодів.";

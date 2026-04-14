@@ -257,6 +257,13 @@ struct RegistrationView: View {
             }
             .disabled(disabled || isRegistering)
             .animation(.easeInOut(duration: 0.2), value: disabled)
+
+            SocialAuthPanel(
+                errorMessage: $errorMessage,
+                onAuthenticated: {
+                    dismiss()
+                }
+            )
             
             // Login link
             Button {

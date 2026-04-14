@@ -71,6 +71,10 @@ struct HomeViewRedesigned: View {
 
                             quickActionsSection
 
+                            if shouldShowRoadmapEntrySection {
+                                roadmapEntrySection
+                            }
+
                             if shouldShowCuratedContentSection {
                                 curatedContentSection
                             }
@@ -2060,6 +2064,7 @@ private struct RecommendationCard: View {
     private var categoryColor: Color {
         switch card.guide.category {
         case .integration: return Color(red: 0.2, green: 0.7, blue: 0.6)
+        case .lifestyle: return Color(red: 0.2, green: 0.72, blue: 0.7)
         case .education: return Color(red: 0.3, green: 0.5, blue: 0.9)
         case .transport: return Color(red: 0.9, green: 0.6, blue: 0.2)
         case .legal: return Color(red: 0.7, green: 0.4, blue: 0.9)
@@ -2190,6 +2195,7 @@ private struct RecommendationCard: View {
     private var categoryIcon: String {
         switch card.guide.category {
         case .integration: return "person.badge.plus"
+        case .lifestyle: return "sun.horizon.fill"
         case .education: return "graduationcap.fill"
         case .transport: return "tram.fill"
         case .legal: return "building.columns.fill"
@@ -4475,6 +4481,7 @@ private struct KnowledgeMindMapView: View {
         case .housing: return Color(red: 0.2, green: 0.6, blue: 0.9)
         case .work: return Color(red: 0.3, green: 0.8, blue: 0.5)
         case .integration: return Color(red: 0.9, green: 0.5, blue: 0.3)
+        case .lifestyle: return Color(red: 0.2, green: 0.72, blue: 0.7)
         case .documents: return Color(red: 0.6, green: 0.4, blue: 0.9)
         case .healthcare: return Color(red: 0.9, green: 0.3, blue: 0.4)
         case .education: return Color(red: 0.3, green: 0.7, blue: 0.8)
@@ -4492,6 +4499,7 @@ private struct KnowledgeMindMapView: View {
         case .housing: return "house.fill"
         case .work: return "briefcase.fill"
         case .integration: return "person.3.fill"
+        case .lifestyle: return "sun.horizon.fill"
         case .documents: return "doc.text.fill"
         case .healthcare: return "cross.case.fill"
         case .education: return "graduationcap.fill"

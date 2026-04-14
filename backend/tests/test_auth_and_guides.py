@@ -9,6 +9,7 @@ from backend.app.core.security import create_access_token
 from backend.app.core.database import SessionLocal
 from backend.app.models.user import User
 from backend.app.services.auth_email_codes import AuthEmailCodeService
+from backend.app.services.oauth_id_tokens import VerifiedOAuthIdentity
 
 
 client = TestClient(app)
@@ -148,6 +149,96 @@ def test_password_reset_with_invalid_code_fails():
         json={"email": _unique_email(), "code": "123456", "password": "AnotherPass1!"},
     )
     assert res.status_code == 400
+
+
+def test_google_oauth_creates_user_and_can_sign_in_again(monkeypatch):
+    email = _unique_email()
+
+    def fake_verify(_: str) -> VerifiedOAuthIdentity:
+        return VerifiedOAuthIdentity(
+            provider="google",
+            subject="google-sub-1",
+            email=email,
+            email_verified=True,
+            name="OAuth User",
+            claims={},
+        )
+
+    monkeypatch.setattr(
+        "backend.app.routers.auth.OAuthIDTokenService.verify_google_id_token",
+        fake_verify,
+    )
+
+    res = client.post("/api/v1/auth/oauth/google", json={"id_token": "fake-google-token", "full_name": "OAuth User"})
+    assert res.status_code == 200
+    data = res.json()
+    assert data["status"] == "authenticated"
+    assert data["email"] == email
+    assert data["access_token"]
+    assert data["refresh_token"]
+
+    with SessionLocal() as db:
+        user = db.query(User).filter(User.email == email.lower()).one()
+        assert user.google_sub == "google-sub-1"
+        assert user.password_login_enabled is False
+        assert user.email_verified is True
+
+    res_repeat = client.post("/api/v1/auth/oauth/google", json={"id_token": "fake-google-token"})
+    assert res_repeat.status_code == 200
+    repeat_data = res_repeat.json()
+    assert repeat_data["status"] == "authenticated"
+    assert repeat_data["email"] == email
+
+
+def test_google_oauth_existing_password_user_requires_link_and_can_confirm(monkeypatch):
+    email = _unique_email()
+    password = "StrongPass1!"
+
+    res = client.post("/api/v1/auth/register", json={"email": email, "password": password})
+    assert res.status_code == 201
+    code = _issue_code(email, AuthEmailCodeService.VERIFY_EMAIL)
+    verify_res = client.post("/api/v1/auth/verify-email/confirm", json={"email": email, "code": code})
+    assert verify_res.status_code == 200
+
+    def fake_verify(_: str) -> VerifiedOAuthIdentity:
+        return VerifiedOAuthIdentity(
+            provider="google",
+            subject="google-link-sub",
+            email=email,
+            email_verified=True,
+            name="Linked User",
+            claims={},
+        )
+
+    monkeypatch.setattr(
+        "backend.app.routers.auth.OAuthIDTokenService.verify_google_id_token",
+        fake_verify,
+    )
+
+    link_required = client.post("/api/v1/auth/oauth/google", json={"id_token": "fake-google-token"})
+    assert link_required.status_code == 200
+    link_data = link_required.json()
+    assert link_data["status"] == "link_required"
+    assert link_data["link_token"]
+
+    confirm = client.post(
+        "/api/v1/auth/oauth/link/confirm",
+        json={
+            "email": email,
+            "password": password,
+            "link_token": link_data["link_token"],
+        },
+    )
+    assert confirm.status_code == 200
+    confirm_data = confirm.json()
+    assert confirm_data["status"] == "authenticated"
+    assert confirm_data["email"] == email
+    assert confirm_data["access_token"]
+    assert confirm_data["refresh_token"]
+
+    with SessionLocal() as db:
+        user = db.query(User).filter(User.email == email.lower()).one()
+        assert user.google_sub == "google-link-sub"
 
 
 # --- Guides CRUD + pagination tests -----------------------------------------

@@ -201,7 +201,7 @@ struct ListingCardView: View {
             if !listing.resolvedImageURLs.isEmpty {
                 MarketplaceRemoteImageView(url: listing.primaryImageURL, height: 168, cornerRadius: 0)
                     .clipShape(
-                        RoundedCornerShape(corners: [.topLeft, .topRight], radius: 16)
+                        MarketplaceRoundedCornerShape(corners: [.topLeft, .topRight], radius: 16)
                     )
             } else {
                 ZStack(alignment: .trailing) {
@@ -287,7 +287,7 @@ struct ListingCardView: View {
 
 // MARK: - Rounded corner helper
 
-private struct RoundedCornerShape: Shape {
+private struct MarketplaceRoundedCornerShape: Shape {
     var corners: UIRectCorner
     var radius: CGFloat
 

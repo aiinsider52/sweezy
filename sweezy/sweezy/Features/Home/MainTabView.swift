@@ -586,14 +586,17 @@ struct OptimizedMapView: View {
             )
             .shadow(color: Color.cyan.opacity(0.18), radius: 14, y: 6)
             
-            VStack(alignment: .leading, spacing: 14) {
+            VStack(alignment: .leading, spacing: 10) {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("map.hero_title".localized)
-                        .font(.system(size: 24, weight: .bold, design: .rounded))
+                        .font(.system(size: 22, weight: .bold, design: .rounded))
                         .foregroundColor(.white)
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.9)
                     Text("map.hero_subtitle".localized)
-                        .font(.system(size: 13, weight: .medium))
+                        .font(.system(size: 12, weight: .medium))
                         .foregroundColor(.white.opacity(0.84))
+                        .lineLimit(2)
                         .fixedSize(horizontal: false, vertical: true)
                 }
 
@@ -604,6 +607,9 @@ struct OptimizedMapView: View {
                         mapHeroChip(icon: "clock.fill", text: "\(openNowCount)")
                     }
                 }
+                .scrollDisabled(true)
+
+                Spacer(minLength: 8)
 
                 if let featuredPlace {
                     Button {
@@ -976,11 +982,13 @@ private struct MapHeroFeaturedCard: View {
             }
             
             VStack(alignment: .leading, spacing: 4) {
-                HStack(spacing: 6) {
+                HStack(alignment: .top, spacing: 6) {
                     Text(place.name)
                         .font(.system(size: 15, weight: .semibold))
                         .foregroundColor(.white)
-                        .lineLimit(1)
+                        .lineLimit(2)
+                        .multilineTextAlignment(.leading)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                     if let badge {
                         Text(badge)
                             .font(.system(size: 9, weight: .bold))
@@ -988,6 +996,7 @@ private struct MapHeroFeaturedCard: View {
                             .padding(.horizontal, 6)
                             .padding(.vertical, 3)
                             .background(Capsule().fill(Color.orange.opacity(0.9)))
+                            .fixedSize()
                     }
                 }
                 
@@ -1002,10 +1011,11 @@ private struct MapHeroFeaturedCard: View {
                     }
                     mapMeta(text: place.isOpen() ? "map.open".localized : "map.closed".localized, color: place.isOpen() ? .green : .red)
                 }
+                .lineLimit(1)
             }
             Spacer(minLength: 0)
         }
-        .padding(14)
+        .padding(12)
         .background(.ultraThinMaterial)
         .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
     }

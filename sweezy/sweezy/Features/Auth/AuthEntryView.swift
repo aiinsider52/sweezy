@@ -18,6 +18,7 @@ struct AuthEntryView: View {
 
     @State private var activeDestination: AuthDestination?
     @State private var animateIcon = false
+    @State private var socialErrorMessage: String?
 
     init(
         showsCloseButton: Bool = true,
@@ -234,6 +235,18 @@ struct AuthEntryView: View {
                     .foregroundColor(.white)
             }
             .buttonStyle(.plain)
+
+            SocialAuthPanel(
+                errorMessage: $socialErrorMessage,
+                showsDivider: true
+            )
+
+            if let socialErrorMessage {
+                Text(socialErrorMessage)
+                    .font(.caption)
+                    .foregroundColor(.orange)
+                    .multilineTextAlignment(.center)
+            }
 
             Button {
                 sessionManager.continueAsGuest()

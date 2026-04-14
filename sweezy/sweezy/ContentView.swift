@@ -7,6 +7,9 @@
 
 import SwiftUI
 import UserNotifications
+#if canImport(GoogleSignIn)
+import GoogleSignIn
+#endif
 
 @main
 struct SweezyApp: App {
@@ -105,6 +108,11 @@ struct MainAppContent: View {
             handleScenePhaseChange(phase)
         }
         .onOpenURL { url in
+            #if canImport(GoogleSignIn)
+            if GIDSignIn.sharedInstance.handle(url) {
+                return
+            }
+            #endif
             DeepLinkService.shared.handle(url: url)
         }
         .handleDeepLinks { link in

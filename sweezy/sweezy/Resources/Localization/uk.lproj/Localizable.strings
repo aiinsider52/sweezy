@@ -1,3 +1,14 @@
+"auth.social.or_continue_with" = "або продовжити через";
+"auth.social.google" = "Продовжити через Google";
+"auth.social.link.title" = "Прив'язати спосіб входу";
+"auth.social.link.subtitle" = "Для цієї пошти вже існує акаунт. Введіть пароль, щоб прив'язати вхід через %1$@ до %2$@.";
+"auth.social.link.confirm" = "Прив'язати акаунт";
+"auth.social.error.apple_failed" = "Не вдалося виконати вхід через Apple.";
+"auth.social.error.missing_identity_token" = "Провайдер входу не повернув identity token.";
+"auth.social.error.google_config" = "Google Sign-In не налаштований у цій збірці.";
+"auth.social.error.google_presenter" = "Зараз не вдається відкрити Google Sign-In.";
+"auth.social.error.google_unavailable" = "Google Sign-In недоступний у цій збірці.";
+"auth.social.error.generic" = "Зараз не вдається виконати вхід.";
 /*
   Localizable.strings (Ukrainian)
   sweezy

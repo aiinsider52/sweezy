@@ -5,6 +5,7 @@ from datetime import datetime, timedelta, timezone
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, Response, status
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel, Field
+from jose import jwt
 from sqlalchemy.orm import Session
 
 from ..core.config import get_settings
@@ -14,11 +15,21 @@ from ..core.security import create_access_token, create_refresh_token, decode_to
 from ..dependencies import get_current_user
 from ..models.user import User
 from ..schemas import Token, TokenPair
-from ..schemas.auth import AuthStatus, EmailCodeConfirm, EmailCodeRequest, PasswordResetConfirm
+from ..schemas.auth import (
+    AppleOAuthRequest,
+    AuthStatus,
+    EmailCodeConfirm,
+    EmailCodeRequest,
+    GoogleOAuthRequest,
+    PasswordResetConfirm,
+    SocialAuthResponse,
+    SocialLinkConfirmRequest,
+)
 from ..schemas.user import UserCreate, UserLogin
 from ..services import AuthService
 from ..services.auth_email_codes import AuthEmailCodeService
 from ..services.email import send_password_reset_code_email, send_verification_code_email
+from ..services.oauth_id_tokens import OAuthIDTokenService, OAuthIdentityError, VerifiedOAuthIdentity
 from ..services.users import UserService, seed_admin_user
 
 
@@ -41,6 +52,99 @@ def _issue_token_pair(user: User) -> TokenPair:
     )
     refresh = create_refresh_token(subject=user.email, expires_delta=timedelta(days=7))
     return TokenPair(access_token=access, refresh_token=refresh, expires_in=access_minutes * 60)
+
+
+def _social_auth_response(user: User, *, name: str | None = None) -> SocialAuthResponse:
+    tokens = _issue_token_pair(user)
+    return SocialAuthResponse(
+        status="authenticated",
+        email=user.email,
+        name=name,
+        access_token=tokens.access_token,
+        refresh_token=tokens.refresh_token,
+        token_type=tokens.token_type,
+        expires_in=tokens.expires_in,
+    )
+
+
+def _issue_oauth_link_token(*, provider: str, identity: VerifiedOAuthIdentity, name: str | None = None) -> str:
+    settings = get_settings()
+    payload = {
+        "sub": (identity.email or "").lower(),
+        "type": "oauth_link",
+        "provider": provider,
+        "provider_sub": identity.subject,
+        "name": name,
+        "exp": datetime.now(timezone.utc) + timedelta(minutes=15),
+    }
+    return jwt.encode(payload, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
+
+
+def _complete_oauth_sign_in(
+    *,
+    db: Session,
+    provider: str,
+    identity: VerifiedOAuthIdentity,
+    requested_name: str | None = None,
+) -> SocialAuthResponse:
+    provider_user = UserService.get_by_provider(db, provider, identity.subject)
+    resolved_name = (requested_name or identity.name or "").strip() or None
+    if provider_user:
+        if not provider_user.is_active:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Account is inactive")
+        return _social_auth_response(provider_user, name=resolved_name)
+
+    normalized_email = (identity.email or "").strip().lower()
+    if not normalized_email:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No verified email was provided by the sign-in provider",
+        )
+
+    existing_user = UserService.get_by_email(db, normalized_email)
+    if existing_user:
+        if not existing_user.is_active:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Account is inactive")
+
+        if existing_user.password_login_enabled:
+            return SocialAuthResponse(
+                status="link_required",
+                email=normalized_email,
+                provider=provider,
+                name=resolved_name,
+                message="Account already exists. Confirm your password to link this sign-in method.",
+                link_token=_issue_oauth_link_token(provider=provider, identity=identity, name=resolved_name),
+            )
+
+        try:
+            linked_user = UserService.link_provider(db, user=existing_user, provider=provider, provider_sub=identity.subject)
+        except ValueError as exc:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+        return _social_auth_response(linked_user, name=resolved_name)
+
+    created_user = UserService.create_social(
+        db,
+        email=normalized_email,
+        provider=provider,
+        provider_sub=identity.subject,
+        email_verified=identity.email_verified or True,
+    )
+    return _social_auth_response(created_user, name=resolved_name)
+
+
+def _decode_oauth_link_token(link_token: str) -> dict:
+    try:
+        payload = decode_token(link_token)
+    except Exception as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid link token") from exc
+
+    if payload.get("type") != "oauth_link":
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid link token")
+    if payload.get("provider") not in {"apple", "google"}:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid link token")
+    if not payload.get("provider_sub") or not payload.get("sub"):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid link token")
+    return payload
 
 
 @router.post("/token", response_model=Token)
@@ -97,6 +201,74 @@ def login_user(
             detail={"code": "EMAIL_NOT_VERIFIED", "message": "Email not verified"},
         )
     return _issue_token_pair(user)
+
+
+@router.post("/oauth/apple", response_model=SocialAuthResponse)
+@limiter.limit("10/minute")
+def oauth_apple_sign_in(
+    request: Request,
+    payload: AppleOAuthRequest,
+    db: Session = Depends(get_db),
+) -> SocialAuthResponse:
+    try:
+        identity = OAuthIDTokenService.verify_apple_id_token(payload.id_token, raw_nonce=payload.nonce)
+    except OAuthIdentityError as exc:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(exc)) from exc
+
+    return _complete_oauth_sign_in(
+        db=db,
+        provider="apple",
+        identity=identity,
+        requested_name=payload.full_name,
+    )
+
+
+@router.post("/oauth/google", response_model=SocialAuthResponse)
+@limiter.limit("10/minute")
+def oauth_google_sign_in(
+    request: Request,
+    payload: GoogleOAuthRequest,
+    db: Session = Depends(get_db),
+) -> SocialAuthResponse:
+    try:
+        identity = OAuthIDTokenService.verify_google_id_token(payload.id_token)
+    except OAuthIdentityError as exc:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(exc)) from exc
+
+    return _complete_oauth_sign_in(
+        db=db,
+        provider="google",
+        identity=identity,
+        requested_name=payload.full_name,
+    )
+
+
+@router.post("/oauth/link/confirm", response_model=SocialAuthResponse)
+@limiter.limit("10/15minute")
+def confirm_social_link(
+    request: Request,
+    payload: SocialLinkConfirmRequest,
+    db: Session = Depends(get_db),
+) -> SocialAuthResponse:
+    link_payload = _decode_oauth_link_token(payload.link_token)
+    token_email = str(link_payload.get("sub") or "").strip().lower()
+    provider = str(link_payload.get("provider") or "").strip()
+    provider_sub = str(link_payload.get("provider_sub") or "").strip()
+    requested_name = str(link_payload.get("name") or "").strip() or None
+
+    if payload.email.lower() != token_email:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email does not match link request")
+
+    user = UserService.authenticate(db, email=payload.email, password=payload.password)
+    if not user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+
+    try:
+        linked_user = UserService.link_provider(db, user=user, provider=provider, provider_sub=provider_sub)
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+
+    return _social_auth_response(linked_user, name=requested_name)
 
 
 @router.post("/refresh", response_model=TokenPair)
@@ -185,7 +357,7 @@ def forgot_password(
     enumerate accounts.
     """
     user = UserService.get_by_email(db, payload.email)
-    if not user or not user.is_active or not user.email_verified:
+    if not user or not user.is_active or not user.email_verified or not user.password_login_enabled:
         return AuthStatus(status="ok")
 
     code = AuthEmailCodeService.issue_code(

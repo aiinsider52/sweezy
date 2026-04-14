@@ -240,6 +240,13 @@ struct LoginView: View {
             }
             .disabled(email.isEmpty || password.isEmpty || isLoading)
             .animation(.easeInOut(duration: 0.2), value: email.isEmpty || password.isEmpty)
+
+            SocialAuthPanel(
+                errorMessage: $errorMessage,
+                onAuthenticated: {
+                    dismiss()
+                }
+            )
         }
         .padding(24)
         .background(

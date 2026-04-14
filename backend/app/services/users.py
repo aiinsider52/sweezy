@@ -16,6 +16,22 @@ class UserService:
         return db.query(User).filter(User.email == email.lower()).one_or_none()
 
     @staticmethod
+    def get_by_apple_sub(db: Session, apple_sub: str) -> User | None:
+        return db.query(User).filter(User.apple_sub == apple_sub).one_or_none()
+
+    @staticmethod
+    def get_by_google_sub(db: Session, google_sub: str) -> User | None:
+        return db.query(User).filter(User.google_sub == google_sub).one_or_none()
+
+    @staticmethod
+    def get_by_provider(db: Session, provider: str, provider_sub: str) -> User | None:
+        if provider == "apple":
+            return UserService.get_by_apple_sub(db, provider_sub)
+        if provider == "google":
+            return UserService.get_by_google_sub(db, provider_sub)
+        return None
+
+    @staticmethod
     def create(
         db: Session,
         *,
@@ -28,6 +44,7 @@ class UserService:
         user = User(
             email=email.lower(),
             hashed_password=get_password_hash(password),
+            password_login_enabled=True,
             email_verified=email_verified,
             email_verified_at=datetime.now(timezone.utc) if email_verified else None,
             is_superuser=is_superuser,
@@ -42,10 +59,58 @@ class UserService:
     @staticmethod
     def authenticate(db: Session, *, email: str, password: str) -> User | None:
         user = UserService.get_by_email(db, email)
-        if not user or not verify_password(password, user.hashed_password):
+        if not user or not user.password_login_enabled or not verify_password(password, user.hashed_password):
             return None
         if not user.is_active:
             return None
+        return user
+
+    @staticmethod
+    def create_social(
+        db: Session,
+        *,
+        email: str,
+        provider: str,
+        provider_sub: str,
+        email_verified: bool = True,
+    ) -> User:
+        user = User(
+            email=email.lower(),
+            hashed_password=get_password_hash(uuid.uuid4().hex + "!social"),
+            password_login_enabled=False,
+            email_verified=email_verified,
+            email_verified_at=datetime.now(timezone.utc) if email_verified else None,
+            is_superuser=False,
+            role="viewer",
+            subscription_status="free",
+            apple_sub=provider_sub if provider == "apple" else None,
+            google_sub=provider_sub if provider == "google" else None,
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+        return user
+
+    @staticmethod
+    def link_provider(db: Session, *, user: User, provider: str, provider_sub: str) -> User:
+        existing_user = UserService.get_by_provider(db, provider, provider_sub)
+        if existing_user and existing_user.id != user.id:
+            raise ValueError("Provider already linked to another account")
+
+        if provider == "apple":
+            user.apple_sub = provider_sub
+        elif provider == "google":
+            user.google_sub = provider_sub
+        else:
+            raise ValueError("Unsupported provider")
+
+        if not user.email_verified:
+            user.email_verified = True
+            user.email_verified_at = datetime.now(timezone.utc)
+
+        db.add(user)
+        db.commit()
+        db.refresh(user)
         return user
 
     @staticmethod
@@ -88,6 +153,9 @@ class UserService:
         user.subscription_expire_at = None
         user.stripe_customer_id = None
         user.stripe_subscription_id = None
+        user.apple_sub = None
+        user.google_sub = None
+        user.password_login_enabled = False
 
         # Change email to a unique, non-personal placeholder (revokes tokens that use email as subject)
         user.email = f"deleted+{uuid.uuid4().hex}@example.invalid"
@@ -111,6 +179,9 @@ def seed_admin_user(db: Session) -> None:
     updated = False
     if not user.is_superuser:
         user.is_superuser = True
+        updated = True
+    if not getattr(user, "password_login_enabled", True):
+        user.password_login_enabled = True
         updated = True
     if not user.email_verified:
         user.email_verified = True
@@ -149,6 +220,9 @@ def seed_demo_user(db: Session) -> None:
     updated = False
     if not user.is_active:
         user.is_active = True
+        updated = True
+    if not getattr(user, "password_login_enabled", True):
+        user.password_login_enabled = True
         updated = True
     if not user.email_verified:
         user.email_verified = True

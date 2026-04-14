@@ -71,6 +71,10 @@ class Settings(BaseSettings):
     BRAVE_REFRESH_INTERVAL_SEC: int = Field(default=60 * 60 * 24 * 7)
     BRAVE_MAX_RESULTS_PER_QUERY: int = Field(default=8)
 
+    # Social auth
+    GOOGLE_CLIENT_IDS: str | None = Field(default=None, description="Comma-separated Google OAuth client IDs")
+    APPLE_CLIENT_IDS: str | None = Field(default=None, description="Comma-separated Apple Sign-In audience values")
+
 
     def parsed_cors_origins(self) -> List[str]:
         raw = self.CORS_ORIGINS
@@ -98,6 +102,18 @@ class Settings(BaseSettings):
                 raise RuntimeError("CORS_ORIGINS cannot be '*' in production")
             if self.ADMIN_PASSWORD == "admin123":
                 raise RuntimeError("ADMIN_PASSWORD must be changed in production")
+
+    def parsed_google_client_ids(self) -> List[str]:
+        raw = (self.GOOGLE_CLIENT_IDS or "").strip()
+        if not raw:
+            return []
+        return [part.strip() for part in raw.split(",") if part.strip()]
+
+    def parsed_apple_client_ids(self) -> List[str]:
+        raw = (self.APPLE_CLIENT_IDS or "").strip()
+        if not raw:
+            return []
+        return [part.strip() for part in raw.split(",") if part.strip()]
 
 
 

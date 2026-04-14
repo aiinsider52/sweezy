@@ -39,6 +39,35 @@ enum APIClient {
         let message: String?
     }
 
+    struct SocialAuthResponse: Decodable, Identifiable {
+        let status: String
+        let email: String?
+        let message: String?
+        let provider: String?
+        let name: String?
+        let access_token: String?
+        let refresh_token: String?
+        let token_type: String?
+        let expires_in: Int?
+        let link_token: String?
+
+        var id: String {
+            if let linkToken = link_token, !linkToken.isEmpty { return linkToken }
+            if let accessToken = access_token, !accessToken.isEmpty { return accessToken }
+            return "\(provider ?? "social"):\(email ?? "unknown"):\(status)"
+        }
+
+        var tokenPair: TokenPair? {
+            guard let access_token, let refresh_token else { return nil }
+            return TokenPair(
+                access_token: access_token,
+                refresh_token: refresh_token,
+                token_type: token_type,
+                expires_in: expires_in
+            )
+        }
+    }
+
     static func register(email: String, password: String) async throws -> AuthStatusResponse {
         let url = url("auth/register")
         var req = URLRequest(url: url)
@@ -84,6 +113,78 @@ enum APIClient {
             throw makeAPIError(data: data, response: httpResp, fallback: "Verification request failed")
         }
         return try JSONDecoder().decode(AuthStatusResponse.self, from: data)
+    }
+
+    static func signInWithApple(
+        idToken: String,
+        authorizationCode: String?,
+        nonce: String?,
+        fullName: String?
+    ) async throws -> SocialAuthResponse {
+        let url = url("auth/oauth/apple")
+        var req = URLRequest(url: url)
+        req.httpMethod = "POST"
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.timeoutInterval = 20
+        req.httpBody = try JSONSerialization.data(withJSONObject: [
+            "id_token": idToken,
+            "authorization_code": authorizationCode as Any,
+            "nonce": nonce as Any,
+            "full_name": fullName as Any,
+        ].compactMapValues { $0 })
+
+        let (data, resp) = try await URLSession.shared.data(for: req)
+        guard let httpResp = resp as? HTTPURLResponse else { throw URLError(.badServerResponse) }
+        guard (200..<300).contains(httpResp.statusCode) else {
+            throw makeAPIError(data: data, response: httpResp, fallback: "Apple Sign-In failed")
+        }
+        return try JSONDecoder().decode(SocialAuthResponse.self, from: data)
+    }
+
+    static func signInWithGoogle(
+        idToken: String,
+        fullName: String?
+    ) async throws -> SocialAuthResponse {
+        let url = url("auth/oauth/google")
+        var req = URLRequest(url: url)
+        req.httpMethod = "POST"
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.timeoutInterval = 20
+        req.httpBody = try JSONSerialization.data(withJSONObject: [
+            "id_token": idToken,
+            "full_name": fullName as Any,
+        ].compactMapValues { $0 })
+
+        let (data, resp) = try await URLSession.shared.data(for: req)
+        guard let httpResp = resp as? HTTPURLResponse else { throw URLError(.badServerResponse) }
+        guard (200..<300).contains(httpResp.statusCode) else {
+            throw makeAPIError(data: data, response: httpResp, fallback: "Google Sign-In failed")
+        }
+        return try JSONDecoder().decode(SocialAuthResponse.self, from: data)
+    }
+
+    static func confirmSocialLink(
+        email: String,
+        password: String,
+        linkToken: String
+    ) async throws -> SocialAuthResponse {
+        let url = url("auth/oauth/link/confirm")
+        var req = URLRequest(url: url)
+        req.httpMethod = "POST"
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.timeoutInterval = 20
+        req.httpBody = try JSONSerialization.data(withJSONObject: [
+            "email": email,
+            "password": password,
+            "link_token": linkToken,
+        ])
+
+        let (data, resp) = try await URLSession.shared.data(for: req)
+        guard let httpResp = resp as? HTTPURLResponse else { throw URLError(.badServerResponse) }
+        guard (200..<300).contains(httpResp.statusCode) else {
+            throw makeAPIError(data: data, response: httpResp, fallback: "Account link confirmation failed")
+        }
+        return try JSONDecoder().decode(SocialAuthResponse.self, from: data)
     }
 
     static func confirmEmailVerification(email: String, code: String) async throws -> TokenPair {

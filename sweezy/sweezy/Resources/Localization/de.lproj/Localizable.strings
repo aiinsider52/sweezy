@@ -1,3 +1,14 @@
+"auth.social.or_continue_with" = "oder fortfahren mit";
+"auth.social.google" = "Mit Google fortfahren";
+"auth.social.link.title" = "Anmeldemethode verknuepfen";
+"auth.social.link.subtitle" = "Fuer diese E-Mail existiert bereits ein Konto. Gib dein Passwort ein, um die Anmeldung ueber %1$@ mit %2$@ zu verknuepfen.";
+"auth.social.link.confirm" = "Konto verknuepfen";
+"auth.social.error.apple_failed" = "Apple-Anmeldung ist fehlgeschlagen.";
+"auth.social.error.missing_identity_token" = "Der Anmeldeanbieter hat kein Identity-Token zurueckgegeben.";
+"auth.social.error.google_config" = "Google Sign-In ist in diesem Build nicht konfiguriert.";
+"auth.social.error.google_presenter" = "Google Sign-In kann derzeit nicht geoeffnet werden.";
+"auth.social.error.google_unavailable" = "Google Sign-In ist in diesem Build nicht verfuegbar.";
+"auth.social.error.generic" = "Anmeldung ist derzeit nicht moeglich.";
 /*
  Localizable.strings (German)
  sweezy

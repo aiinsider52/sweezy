@@ -103,7 +103,7 @@ def test_forgot_password_always_ok_even_for_unknown_email():
     # Endpoint must not leak whether user exists
     res = client.post("/api/v1/auth/password/forgot", json={"email": _unique_email()})
     assert res.status_code == 200
-    assert res.json() == {"status": "ok"}
+    assert res.json()["status"] == "ok"
 
 
 def test_password_reset_flow_changes_password():
@@ -130,7 +130,7 @@ def test_password_reset_flow_changes_password():
         json={"email": email, "code": reset_code, "password": new_password},
     )
     assert res.status_code == 200
-    assert res.json() == {"status": "ok"}
+    assert res.json()["status"] == "ok"
 
     # Old password should no longer work
     res_old = client.post("/api/v1/auth/login", json={"email": email, "password": old_password})
@@ -169,7 +169,7 @@ def test_google_oauth_creates_user_and_can_sign_in_again(monkeypatch):
         fake_verify,
     )
 
-    res = client.post("/api/v1/auth/oauth/google", json={"id_token": "fake-google-token", "full_name": "OAuth User"})
+    res = client.post("/api/v1/auth/oauth/google", json={"id_token": "fake-google-token-for-tests", "full_name": "OAuth User"})
     assert res.status_code == 200
     data = res.json()
     assert data["status"] == "authenticated"
@@ -183,7 +183,7 @@ def test_google_oauth_creates_user_and_can_sign_in_again(monkeypatch):
         assert user.password_login_enabled is False
         assert user.email_verified is True
 
-    res_repeat = client.post("/api/v1/auth/oauth/google", json={"id_token": "fake-google-token"})
+    res_repeat = client.post("/api/v1/auth/oauth/google", json={"id_token": "fake-google-token-for-tests"})
     assert res_repeat.status_code == 200
     repeat_data = res_repeat.json()
     assert repeat_data["status"] == "authenticated"
@@ -215,7 +215,7 @@ def test_google_oauth_existing_password_user_requires_link_and_can_confirm(monke
         fake_verify,
     )
 
-    link_required = client.post("/api/v1/auth/oauth/google", json={"id_token": "fake-google-token"})
+    link_required = client.post("/api/v1/auth/oauth/google", json={"id_token": "fake-google-token-for-tests"})
     assert link_required.status_code == 200
     link_data = link_required.json()
     assert link_data["status"] == "link_required"

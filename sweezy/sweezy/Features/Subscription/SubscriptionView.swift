@@ -17,7 +17,7 @@ struct SubscriptionView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                AdaptivePageBackground()
+                JourneyPhotoBackground(imageName: JourneyBackdrop.alpine.rawValue, blurRadius: 7, darkness: 0.64)
 
                 VStack(spacing: 14) {
                     Image(systemName: "info.circle.fill")
@@ -41,14 +41,7 @@ struct SubscriptionView: View {
                     .padding(.top, 6)
                 }
                 .padding(24)
-                .background(
-                    RoundedRectangle(cornerRadius: 20, style: .continuous)
-                        .fill(Theme.Colors.adaptiveCard)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                                .stroke(Color.white.opacity(0.14), lineWidth: 1)
-                        )
-                )
+                .journeyCard()
                 .padding(.horizontal, 20)
             }
             .navigationBarTitleDisplayMode(.inline)
@@ -62,6 +55,7 @@ struct SubscriptionView: View {
                 }
             }
         }
+        .journeyScreen(.alpine, darkness: 0.64)
     }
 }
 

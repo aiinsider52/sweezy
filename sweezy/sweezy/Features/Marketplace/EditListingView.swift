@@ -33,7 +33,7 @@ struct EditListingView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                AdaptivePageBackground()
+                JourneyPhotoBackground(imageName: JourneyBackdrop.market.rawValue, blurRadius: 7, darkness: 0.72)
 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 18) {
@@ -64,6 +64,7 @@ struct EditListingView: View {
                 Text(errorMessage ?? "")
             }
         }
+        .journeyScreen(.market, darkness: 0.72)
     }
 
     private var headerCard: some View {
@@ -71,17 +72,17 @@ struct EditListingView: View {
             HStack(spacing: 12) {
                 ZStack {
                     RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .fill(listing.category.color.opacity(0.18))
+                        .fill(listing.categoryColor.opacity(0.18))
                         .frame(width: 54, height: 54)
-                    Image(systemName: listing.category.icon)
+                    Image(systemName: listing.categoryIcon)
                         .font(.system(size: 22, weight: .semibold))
-                        .foregroundColor(listing.category.color)
+                        .foregroundColor(listing.categoryColor)
                 }
 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(listing.category.displayName)
+                    Text(listing.categoryDisplayName)
                         .font(.subheadline.weight(.semibold))
-                        .foregroundColor(listing.category.color)
+                        .foregroundColor(listing.categoryColor)
                     Text("marketplace.edit_hint".localized)
                         .font(.caption)
                         .foregroundColor(Theme.Colors.textSecondary)

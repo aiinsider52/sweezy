@@ -16,9 +16,21 @@
 				<string>$(GOOGLE_REVERSED_CLIENT_ID)</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>com.sweezy.mobile</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>sweezy</string>
+			</array>
+		</dict>
 	</array>
 	<key>GOOGLE_CLIENT_ID</key>
 	<string>$(GOOGLE_CLIENT_ID)</string>
+	<key>NSCalendarsFullAccessUsageDescription</key>
+	<string>Sweezy додає вибрані події до вашого календаря лише після підтвердження.</string>
 	<key>SENTRY_DSN</key>
 	<string>$(SENTRY_DSN)</string>
 	<key>SUPPORT_EMAIL</key>

@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct MountainRoadmapView: View {
+    @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var appContainer: AppContainer
     @StateObject private var roadmapService = RoadmapService()
     
@@ -20,28 +21,38 @@ struct MountainRoadmapView: View {
     
     var body: some View {
         ZStack {
-            AdaptivePageBackground()
+            JourneyPhotoBackground(
+                imageName: "swiss-moment-grindelwald",
+                blurRadius: 1.5,
+                darkness: 0.52
+            )
 
-            RoadmapAmbientBackdrop()
-                .ignoresSafeArea()
+            ScrollView(.vertical, showsIndicators: false) {
+                VStack(alignment: .leading, spacing: 20) {
+                    topBar
+                    headerSection
+                    progressOverview
+                    currentStageCard
 
-            // Main content
-            ScrollViewReader { proxy in
-                ScrollView(.vertical, showsIndicators: false) {
-                    VStack(spacing: 0) {
-                        // Header
-                        headerSection
-                        
-                        // Mountain path with levels
-                        mountainPath
-                            .padding(.top, 20)
-                        
-                        // Bottom padding
-                        Spacer(minLength: 100)
+                    HStack(alignment: .firstTextBaseline) {
+                        Text("Увесь маршрут")
+                            .font(.system(size: 23, weight: .bold, design: .rounded))
+                            .foregroundColor(.white)
+                        Spacer()
+                        Text("10 етапів")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(.white.opacity(0.52))
                     }
+
+                    mountainPath
                 }
+                .padding(.horizontal, 18)
+                .padding(.top, 8)
+                .padding(.bottom, 46)
             }
         }
+        .navigationBarBackButtonHidden(true)
+        .preferredColorScheme(.dark)
         .sheet(item: $selectedLevel) { level in
             LevelDetailSheet(
                 level: level,
@@ -70,73 +81,185 @@ struct MountainRoadmapView: View {
             Text("Ви впевнені? Ви зможете повернутися до цього рівня пізніше.")
         }
         .featureOnboarding(.roadmap)
+        .onAppear {
+            roadmapService.refreshFromStorage()
+            NotificationCenter.default.post(name: .setJourneyBottomBarHidden, object: true)
+        }
+        .onDisappear {
+            NotificationCenter.default.post(name: .setJourneyBottomBarHidden, object: false)
+        }
     }
-    
-    // MARK: - Header
-    
-    private var headerSection: some View {
-        VStack(spacing: 16) {
-            Text("Шлях інтеграції")
-                .font(.largeTitle.bold())
-                .foregroundColor(Theme.Colors.textPrimary)
 
-            VStack(spacing: 8) {
-                HStack {
-                    Text("Загальний прогрес")
-                        .font(.subheadline)
-                        .foregroundColor(Theme.Colors.textSecondary)
-                    Spacer()
+    private var topBar: some View {
+        HStack {
+            Button { dismiss() } label: {
+                Image(systemName: "chevron.left")
+                    .font(.system(size: 15, weight: .bold))
+                    .foregroundColor(.white)
+                    .frame(width: 40, height: 40)
+                    .background(.ultraThinMaterial.opacity(0.8))
+                    .background(Color.black.opacity(0.2))
+                    .clipShape(Circle())
+                    .overlay(Circle().stroke(Color.white.opacity(0.22), lineWidth: 1))
+            }
+            .buttonStyle(.plain)
+
+            Spacer()
+
+            Text("ТВІЙ ПЛАН")
+                .font(.system(size: 10, weight: .bold))
+                .tracking(1.3)
+                .foregroundColor(.white.opacity(0.62))
+
+            Spacer()
+
+            Image(systemName: "mountain.2.fill")
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundColor(.black)
+                .frame(width: 40, height: 40)
+                .background(JourneyVisual.lime)
+                .clipShape(Circle())
+        }
+    }
+
+    private var headerSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Не губись у\nшвейцарських справах")
+                .font(.system(size: 35, weight: .bold, design: .rounded))
+                .foregroundColor(.white)
+                .lineSpacing(-3)
+
+            Text("Один маршрут: від першого документа до впевненого життя.")
+                .font(.system(size: 14, weight: .medium))
+                .foregroundColor(.white.opacity(0.66))
+                .frame(maxWidth: 310, alignment: .leading)
+        }
+    }
+
+    private var progressOverview: some View {
+        JourneyGlassPanel(cornerRadius: 24) {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(alignment: .firstTextBaseline) {
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text("ЗАГАЛЬНИЙ ПРОГРЕС")
+                            .font(.system(size: 9, weight: .bold))
+                            .tracking(0.8)
+                            .foregroundColor(.white.opacity(0.5))
+                        Text(roadmapService.nextMilestone)
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(.white)
+                            .lineLimit(2)
+                    }
+
+                    Spacer(minLength: 10)
+
                     Text("\(Int(roadmapService.overallProgress * 100))%")
-                        .font(.headline.bold())
-                        .foregroundColor(Theme.Colors.primary)
+                        .font(.system(size: 31, weight: .bold, design: .rounded))
+                        .foregroundColor(JourneyVisual.lime)
+                        .monospacedDigit()
                 }
 
-                GeometryReader { geo in
+                GeometryReader { geometry in
                     ZStack(alignment: .leading) {
-                        RoundedRectangle(cornerRadius: 4)
-                            .fill(Theme.Colors.adaptiveSurface)
-
-                        RoundedRectangle(cornerRadius: 4)
-                            .fill(Theme.Colors.gradientPrimaryAdaptive)
-                            .frame(width: max(geo.size.width * roadmapService.overallProgress, roadmapService.overallProgress > 0 ? 12 : 0))
+                        Capsule().fill(Color.white.opacity(0.14))
+                        Capsule()
+                            .fill(JourneyVisual.lime)
+                            .frame(width: max(geometry.size.width * roadmapService.overallProgress, roadmapService.overallProgress > 0 ? 12 : 0))
                     }
                 }
-                .frame(height: 8)
+                .frame(height: 7)
 
-                Text(roadmapService.nextMilestone)
-                    .font(.caption)
-                    .foregroundColor(Theme.Colors.textSecondary)
+                HStack {
+                    Label("Рівень \(roadmapService.progress.currentLevel) з 10", systemImage: "flag.fill")
+                    Spacer()
+                    Label("\(roadmapService.currentLevel?.estimatedDays ?? "")", systemImage: "clock")
+                }
+                .font(.system(size: 11, weight: .medium))
+                .foregroundColor(.white.opacity(0.58))
             }
-            .padding()
-            .background(
-                RoundedRectangle(cornerRadius: 20, style: .continuous)
-                    .fill(Theme.Colors.adaptiveCard)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 20, style: .continuous)
-                            .stroke(Theme.Colors.adaptiveBorder, lineWidth: 1)
-                    )
-            )
-            .padding(.horizontal)
-
-            HStack {
-                Image(systemName: "mountain.2.fill")
-                    .foregroundColor(Theme.Colors.primary)
-                Text("Висота: \(roadmapService.currentLevel?.altitude ?? 0) м")
-                    .font(.caption)
-                    .foregroundColor(Theme.Colors.textSecondary)
-
-                Spacer()
-            }
-            .padding(.horizontal, 24)
+            .padding(16)
         }
-        .padding(.top, 60)
-        .padding(.bottom, 20)
     }
-    
-    // MARK: - Mountain Path
-    
+
+    @ViewBuilder
+    private var currentStageCard: some View {
+        if let level = roadmapService.currentLevel {
+            Button { selectedLevel = level } label: {
+                ZStack(alignment: .bottomLeading) {
+                    Image("cityhub-zurich-landesmuseum")
+                        .resizable()
+                        .scaledToFill()
+                        .frame(height: 254)
+                        .frame(maxWidth: .infinity)
+                        .clipped()
+
+                    LinearGradient(
+                        colors: [.black.opacity(0.04), .black.opacity(0.16), .black.opacity(0.92)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+
+                    VStack(alignment: .leading, spacing: 0) {
+                        HStack {
+                            Text("АКТИВНИЙ ЕТАП")
+                                .font(.system(size: 9, weight: .bold))
+                                .tracking(0.9)
+                                .foregroundColor(.black)
+                                .padding(.horizontal, 10)
+                                .frame(height: 28)
+                                .background(JourneyVisual.lime)
+                                .clipShape(Capsule())
+
+                            Spacer()
+
+                            Text("\(Int(roadmapService.levelProgress(for: level.id) * 100))%")
+                                .font(.system(size: 12, weight: .bold))
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 11)
+                                .frame(height: 28)
+                                .background(.ultraThinMaterial.opacity(0.82))
+                                .clipShape(Capsule())
+                        }
+
+                        Spacer()
+
+                        Text("Крок \(level.id)")
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundColor(JourneyVisual.lime)
+                            .textCase(.uppercase)
+
+                        Text(level.title)
+                            .font(.system(size: 27, weight: .bold, design: .rounded))
+                            .foregroundColor(.white)
+                            .lineLimit(2)
+                            .multilineTextAlignment(.leading)
+
+                        HStack(spacing: 10) {
+                            Label("\(level.tasks.count) завдань", systemImage: "checklist")
+                            Label(level.estimatedDays, systemImage: "clock")
+                            Spacer()
+                            Image(systemName: "arrow.right")
+                        }
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundColor(.white.opacity(0.68))
+                        .padding(.top, 10)
+                    }
+                    .padding(16)
+                }
+                .frame(height: 254)
+                .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 28, style: .continuous)
+                        .stroke(Color.white.opacity(0.34), lineWidth: 1)
+                )
+                .shadow(color: .black.opacity(0.34), radius: 20, y: 10)
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
     private var mountainPath: some View {
-        VStack(spacing: 0) {
+        VStack(spacing: 10) {
             ForEach(roadmapService.levels) { level in
                 LevelNode(
                     level: level,
@@ -150,7 +273,6 @@ struct MountainRoadmapView: View {
                 .id(level.id)
             }
         }
-        .padding(.horizontal)
     }
 }
 
@@ -164,168 +286,119 @@ struct LevelNode: View {
     let isFirst: Bool
     let onTap: () -> Void
 
-    @Environment(\.colorScheme) private var colorScheme
-    @State private var isAnimating = false
-    
     private var isLocked: Bool { status == .locked }
     private var isActive: Bool { status == .inProgress }
-    
+
     var body: some View {
-        VStack(spacing: 0) {
-            // Connection line to next level (above)
-            if !isFirst {
-                PathLine(isCompleted: status == .completed)
-            }
-            
-            // Level card
-            Button(action: onTap) {
-                HStack(spacing: 16) {
-                    // Level icon with progress ring
-                    ZStack {
-                        // Background circle
-                        Circle()
-                            .fill(isLocked ? MountainTheme.lockedColor : levelBackgroundColor)
-                            .frame(width: 70, height: 70)
-                        
-                        // Progress ring
-                        if !isLocked && status != .completed {
-                            Circle()
-                                .trim(from: 0, to: progress)
-                                .stroke(
-                                    MountainTheme.glowColor,
-                                    style: StrokeStyle(lineWidth: 4, lineCap: .round)
-                                )
-                                .frame(width: 70, height: 70)
-                                .rotationEffect(.degrees(-90))
-                        }
-                        
-                        // Completed checkmark or icon
-                        if status == .completed {
-                            Image(systemName: "checkmark.circle.fill")
-                                .font(.system(size: 30))
-                                .foregroundColor(Theme.Colors.success)
-                        } else if isLocked {
-                            Image(systemName: "lock.fill")
-                                .font(.system(size: 24))
-                                .foregroundColor(Theme.Colors.textTertiary)
-                        } else {
-                            Image(systemName: level.iconName)
-                                .font(.system(size: 24))
-                                .foregroundColor(iconForegroundColor)
-                        }
-                        
-                        // Level number badge
-                        Text("\(level.id)")
-                            .font(.caption2.bold())
-                            .foregroundColor(.white)
-                            .padding(4)
-                            .background(Circle().fill(status.color))
-                            .offset(x: 25, y: -25)
-                        
-                        // TEMPORARY (App Store review): no subscription badges.
+        Button(action: onTap) {
+            HStack(spacing: 13) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .fill(nodeFill)
+                        .frame(width: 58, height: 64)
+
+                    VStack(spacing: 4) {
+                        Image(systemName: nodeIcon)
+                            .font(.system(size: 17, weight: .semibold))
+                        Text(String(format: "%02d", level.id))
+                            .font(.system(size: 9, weight: .bold))
                     }
-                    .scaleEffect(isActive && isAnimating ? 1.05 : 1.0)
-                    .shadow(color: isActive ? Theme.Colors.primary.opacity(0.18) : .clear, radius: 10)
-                    
-                    // Level info
-                    VStack(alignment: .leading, spacing: 4) {
+                    .foregroundColor(nodeForeground)
+                }
+
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack(spacing: 7) {
                         Text(level.title)
-                            .font(.headline)
-                            .foregroundColor(isLocked ? Theme.Colors.textSecondary : Theme.Colors.textPrimary)
-                        
-                        Text(level.subtitle)
-                            .font(.subheadline)
-                            .foregroundColor(isLocked ? Theme.Colors.textTertiary : Theme.Colors.textSecondary)
-                        
-                        // Progress or status
-                        HStack(spacing: 8) {
-                            if status == .completed {
-                                Label("Завершено", systemImage: "checkmark")
-                                    .font(.caption)
-                                    .foregroundColor(Theme.Colors.success)
-                            } else if isLocked {
-                                Label("Заблоковано", systemImage: "lock")
-                                    .font(.caption)
-                                    .foregroundColor(Theme.Colors.textTertiary)
-                            } else {
-                                Text("\(Int(progress * 100))%")
-                                    .font(.caption.bold())
-                                    .foregroundColor(Theme.Colors.primary)
-                                
-                                Text("• \(level.estimatedDays)")
-                                    .font(.caption)
-                                    .foregroundColor(Theme.Colors.textSecondary)
-                            }
+                            .font(.system(size: 16, weight: .bold, design: .rounded))
+                            .foregroundColor(isLocked ? .white.opacity(0.44) : .white)
+                            .lineLimit(1)
+
+                        if isActive {
+                            Text("ЗАРАЗ")
+                                .font(.system(size: 8, weight: .bold))
+                                .foregroundColor(.black)
+                                .padding(.horizontal, 7)
+                                .frame(height: 19)
+                                .background(JourneyVisual.lime)
+                                .clipShape(Capsule())
                         }
                     }
-                    
-                    Spacer()
-                    
-                    // Arrow
-                    Image(systemName: "chevron.right")
-                        .foregroundColor(isLocked ? Theme.Colors.textTertiary : Theme.Colors.textSecondary)
+
+                    Text(level.subtitle)
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(.white.opacity(isLocked ? 0.32 : 0.52))
+                        .lineLimit(1)
+
+                    HStack(spacing: 8) {
+                        Text(statusText)
+                            .font(.system(size: 10, weight: .semibold))
+                            .foregroundColor(statusForeground)
+
+                        if !isLocked && status != .completed {
+                            GeometryReader { geometry in
+                                ZStack(alignment: .leading) {
+                                    Capsule().fill(Color.white.opacity(0.12))
+                                    Capsule()
+                                        .fill(JourneyVisual.lime)
+                                        .frame(width: max(geometry.size.width * progress, progress > 0 ? 6 : 0))
+                                }
+                            }
+                            .frame(width: 58, height: 4)
+                        }
+                    }
                 }
-                .padding()
-                .background(
-                    RoundedRectangle(cornerRadius: 18, style: .continuous)
-                        .fill(isLocked ? Theme.Colors.adaptiveSurface.opacity(0.7) : Theme.Colors.adaptiveCard)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                                .stroke(
-                                    isActive ? Theme.Colors.primary.opacity(0.32) : Theme.Colors.adaptiveBorder,
-                                    lineWidth: isActive ? 2 : 1
-                                )
-                        )
-                )
-                .shadow(color: isActive ? Theme.Colors.primary.opacity(0.12) : .clear, radius: 14, y: 6)
-            }
-            .buttonStyle(.plain)
-            .disabled(isLocked)
-        }
-        .onAppear {
-            if isActive {
-                withAnimation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true)) {
-                    isAnimating = true
-                }
-            }
-        }
-    }
-    
-    private var levelBackgroundColor: Color {
-        switch status {
-        case .completed:
-            return Theme.Colors.success.opacity(colorScheme == .dark ? 0.22 : 0.14)
-        case .inProgress:
-            return Theme.Colors.primary.opacity(colorScheme == .dark ? 0.28 : 0.16)
-        case .available:
-            return Theme.Colors.accent.opacity(colorScheme == .dark ? 0.24 : 0.14)
-        case .locked:
-            return Theme.Colors.adaptiveSurface
-        }
-    }
 
-    private var iconForegroundColor: Color {
-        isLocked ? Theme.Colors.textTertiary : Theme.Colors.textPrimary
-    }
-}
+                Spacer(minLength: 4)
 
-// MARK: - Path Line
-
-struct PathLine: View {
-    let isCompleted: Bool
-    
-    var body: some View {
-        ZStack {
-            Path { path in
-                path.move(to: CGPoint(x: 51, y: 0))
-                path.addLine(to: CGPoint(x: 51, y: 40))
+                Image(systemName: isLocked ? "lock.fill" : "chevron.right")
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundColor(.white.opacity(isLocked ? 0.24 : 0.58))
             }
-            .stroke(
-                isCompleted ? Theme.Colors.success.opacity(0.7) : Theme.Colors.adaptiveBorder,
-                style: StrokeStyle(lineWidth: 2, dash: [5, 5])
+            .padding(12)
+            .background(.ultraThinMaterial.opacity(isActive ? 0.88 : 0.7))
+            .background(Color.black.opacity(isActive ? 0.36 : 0.24))
+            .clipShape(RoundedRectangle(cornerRadius: 23, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 23, style: .continuous)
+                    .stroke(isActive ? JourneyVisual.lime.opacity(0.72) : Color.white.opacity(0.14), lineWidth: isActive ? 1.5 : 1)
             )
         }
-        .frame(height: 40)
+        .buttonStyle(.plain)
+        .disabled(isLocked)
+    }
+
+    private var nodeFill: Color {
+        switch status {
+        case .completed: return JourneyVisual.lime
+        case .inProgress: return Color.white
+        case .available: return Color.white.opacity(0.12)
+        case .locked: return Color.white.opacity(0.06)
+        }
+    }
+
+    private var nodeForeground: Color {
+        status == .completed || status == .inProgress ? .black : .white.opacity(isLocked ? 0.28 : 0.74)
+    }
+
+    private var nodeIcon: String {
+        switch status {
+        case .completed: return "checkmark"
+        case .locked: return "lock.fill"
+        case .inProgress, .available: return level.iconName
+        }
+    }
+
+    private var statusText: String {
+        switch status {
+        case .completed: return "Завершено"
+        case .locked: return "Відкриється пізніше"
+        case .inProgress: return "\(Int(progress * 100))% · \(level.estimatedDays)"
+        case .available: return "Можна почати · \(level.estimatedDays)"
+        }
+    }
+
+    private var statusForeground: Color {
+        status == .completed || isActive ? JourneyVisual.lime : .white.opacity(isLocked ? 0.28 : 0.5)
     }
 }
 
@@ -449,6 +522,7 @@ struct LevelDetailSheet: View {
     
     // Track completed tasks locally
     @State private var completedTaskIds: Set<String> = []
+    @StateObject private var roadmapService = RoadmapService()
     
     var body: some View {
         NavigationStack {
@@ -478,7 +552,7 @@ struct LevelDetailSheet: View {
                 }
                 .padding()
             }
-            .background(Color(.systemGroupedBackground).ignoresSafeArea())
+            .background(Color.clear)
             .navigationTitle(level.title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -487,10 +561,12 @@ struct LevelDetailSheet: View {
                 }
             }
         }
+        .journeyScreen(.alpine, darkness: 0.74)
         .presentationDetents([.large])
         .presentationDragIndicator(.visible)
         .onAppear {
             loadCompletedTasks()
+            recalculateAndPersistLevelProgress()
         }
     }
     
@@ -572,6 +648,11 @@ struct LevelDetailSheet: View {
     
     private func handleTaskTap(_ task: LevelTask) {
         dismiss()
+        appContainer.telemetry.retention(
+            .nextActionTapped,
+            source: "roadmap",
+            meta: ["task_id": task.id, "task_type": task.type.rawValue, "level": String(level.id)]
+        )
         
         // Small delay to let sheet dismiss
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
@@ -591,17 +672,30 @@ struct LevelDetailSheet: View {
         switch actionId {
         case "map-gemeinde":
             NotificationCenter.default.post(name: .switchTab, object: 2) // Map
+            markActionCompleted(actionId)
         case "save-contacts", "setup-twint", "register-rav", "apply-jobs",
              "compare-insurance", "check-pillar2", "setup-autopay", "learn-investing",
              "download-sbb", "calculate-ga", "apply-kinderzulagen", "find-activities",
              "language-exam", "civics-course", "join-verein", "volunteer", "vote",
              "become-mentor", "share-story", "learn-phrases", "find-tandem":
-            // Mark as completed in UserDefaults (user-triggered actions)
-            // These are "soft" tasks that user marks as done
-            break
+            markActionCompleted(actionId)
         default:
             break
         }
+    }
+
+    private func markActionCompleted(_ actionId: String) {
+        guard let task = availableTasks.first(where: { $0.targetId == actionId }) else { return }
+        UserDefaults.standard.set(true, forKey: AccountScopedStorage.roadmapTaskCompletedKey(for: task.id))
+        completedTaskIds.insert(task.id)
+        saveCompletedTasks()
+        EventBus.shared.emit(GamEvent(type: .roadmapStageCompleted, metadata: ["entityId": task.id]))
+        appContainer.telemetry.retention(
+            .roadmapTaskCompleted,
+            source: "roadmap",
+            meta: ["task_id": task.id, "action_id": actionId, "level": String(level.id)]
+        )
+        recalculateAndPersistLevelProgress()
     }
     
     private func loadCompletedTasks() {
@@ -610,6 +704,21 @@ struct LevelDetailSheet: View {
         if let saved = UserDefaults.standard.array(forKey: key) as? [String] {
             completedTaskIds = Set(saved)
         }
+    }
+
+    private func saveCompletedTasks() {
+        let key = AccountScopedStorage.namespaced("roadmap.level.\(level.id).completed_tasks")
+        UserDefaults.standard.set(Array(completedTaskIds), forKey: key)
+    }
+
+    private func recalculateAndPersistLevelProgress() {
+        let completed = Set(availableTasks.filter { isTaskCompleted($0) }.map(\.id))
+        completedTaskIds.formUnion(completed)
+        saveCompletedTasks()
+        let denominator = max(1, availableTasks.count)
+        let progress = Double(completedTaskIds.count) / Double(denominator)
+        roadmapService.updateProgress(for: level.id, progress: progress)
+        NotificationCenter.default.post(name: .roadmapProgressUpdated, object: nil)
     }
     
     // MARK: - Header
@@ -911,4 +1020,3 @@ struct TaskCard: View {
     MountainRoadmapView()
         .environmentObject(AppContainer())
 }
-

@@ -38,7 +38,7 @@ struct CreateEventView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                AdaptivePageBackground()
+                JourneyPhotoBackground(imageName: JourneyBackdrop.city.rawValue, blurRadius: 7, darkness: 0.72)
 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 18) {
@@ -77,6 +77,7 @@ struct CreateEventView: View {
                 Text(errorMessage ?? "")
             }
         }
+        .journeyScreen(.city, darkness: 0.72)
     }
 
     private var infoCard: some View {
@@ -267,7 +268,7 @@ struct CreateEventView: View {
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)
                     .background(Theme.Colors.primary)
-                    .foregroundColor(.white)
+                    .foregroundColor(Theme.Colors.textOnPrimary)
                     .cornerRadius(14)
             }
             .padding(.horizontal, 24)
@@ -379,6 +380,13 @@ struct CreateEventView: View {
                 organizerName: organizerName.trimmingCharacters(in: .whitespacesAndNewlines)
             )
             _ = try await APIClient.createEvent(payload)
+            EventBus.shared.emit(GamEvent(
+                type: .marketplaceContribution,
+                metadata: [
+                    "entityId": payload.title,
+                    "title": "Event submitted"
+                ]
+            ))
             onCreated?()
             showSuccess = true
         } catch {

@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from typing import List
 
 from fastapi import APIRouter, HTTPException, Query, Request
@@ -41,7 +39,10 @@ def get_guide_by_slug(slug: str, db: DBSession) -> GuideOut:
 
 @router.post("/", response_model=GuideOut)
 def create_guide(payload: GuideCreate, db: DBSession, req: Request, _: CurrentAdmin) -> GuideOut:
-    obj = GuideService.create(db, payload)
+    try:
+        obj = GuideService.create(db, payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
     try:
         from ..services.audit import log_audit
         user_email = req.headers.get("x-user-email") or "admin"
@@ -57,7 +58,10 @@ def update_guide(guide_id: str, payload: GuideUpdate, db: DBSession, req: Reques
     if not obj:
         raise HTTPException(status_code=404, detail="Guide not found")
     before = obj
-    obj = GuideService.update(db, obj, payload)
+    try:
+        obj = GuideService.update(db, obj, payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
     try:
         from ..services.audit import log_audit
         user_email = req.headers.get("x-user-email") or "admin"
@@ -81,5 +85,3 @@ def delete_guide(guide_id: str, db: DBSession, req: Request, _: CurrentAdmin) ->
     except Exception:
         pass
     return None
-
-

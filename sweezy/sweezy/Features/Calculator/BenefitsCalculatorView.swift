@@ -54,6 +54,7 @@ struct BenefitsCalculatorView: View {
             }
             .featureOnboarding(.calculator)
         }
+        .journeyScreen(.alpine, darkness: 0.68)
     }
     
     private var headerSection: some View {

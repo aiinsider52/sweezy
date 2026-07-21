@@ -25,6 +25,7 @@ enum AuthSessionBootstrapper {
 
         try KeychainStore.save(tokens.access_token, for: "access_token")
         try KeychainStore.save(tokens.refresh_token, for: "refresh_token")
+        try KeychainStore.save(tokens.user_id, for: "user_id")
 
         #if DEBUG
         if !UserDefaults.standard.bool(forKey: "didSyncToBackend") {
@@ -63,7 +64,7 @@ enum AuthSessionBootstrapper {
         profile.preferredLanguage = appContainer.currentLocale.identifier
         appContainer.userProfile = profile
 
-        sessionManager.activateAuthenticatedSession(email: trimmedEmail, name: resolvedName)
+        sessionManager.activateAuthenticatedSession(userID: tokens.user_id, email: trimmedEmail, name: resolvedName)
     }
 }
 
@@ -115,7 +116,7 @@ struct SocialAuthPanel: View {
                 HStack(spacing: 10) {
                     if isGoogleLoading {
                         ProgressView()
-                            .progressViewStyle(CircularProgressViewStyle(tint: Theme.Colors.textPrimary))
+                            .progressViewStyle(CircularProgressViewStyle(tint: Color.black.opacity(0.78)))
                     } else {
                         Text("G")
                             .font(.system(size: 18, weight: .bold))
@@ -129,7 +130,9 @@ struct SocialAuthPanel: View {
 
                     Text("auth.social.google".localized)
                         .font(.subheadline.weight(.semibold))
-                        .foregroundColor(Theme.Colors.textPrimary)
+                        .foregroundColor(Color.black.opacity(0.86))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.82)
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 15)
@@ -293,8 +296,7 @@ struct SocialLinkConfirmationSheet: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Theme.Colors.darkBackground.ignoresSafeArea()
-                AuthAuroraBackground()
+                JourneyPhotoBackground(imageName: JourneyBackdrop.city.rawValue, blurRadius: 7, darkness: 0.72)
 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 20) {
@@ -408,6 +410,7 @@ struct SocialLinkConfirmationSheet: View {
                 email = response.email ?? ""
             }
         }
+        .journeyScreen(.city, darkness: 0.72)
     }
 
     private func confirmLink() async {

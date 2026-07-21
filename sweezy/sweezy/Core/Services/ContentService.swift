@@ -203,6 +203,7 @@ class ContentService: ContentServiceProtocol {
                 if !remote.isEmpty {
                     self.guides = remote.map { g in
                         Guide(
+                            id: Guide.stableUUID(from: g.id),
                             title: g.title,
                             subtitle: g.description,
                             summary: nil,
@@ -218,8 +219,9 @@ class ContentService: ContentServiceProtocol {
                             // Коли з'являться інші мови, бекенд отримає окреме поле language,
                             // і меппінг тут можна буде оновити.
                             language: "uk",
-                            verifiedAt: nil,
-                            source: nil,
+                            verifiedAt: Self.parseBackendDate(g.verified_at),
+                            source: g.source_url,
+                            sourceTitle: g.source_title,
                             heroImage: g.image_url,
                             relatedChecklistId: nil,
                             relatedTemplateIds: [],
@@ -229,22 +231,10 @@ class ContentService: ContentServiceProtocol {
                     didLoadRemoteGuides = true
                     try? saveToCache(self.guides, filename: "guides.json")
                 } else {
-                    // 2) Якщо бекенд повернув пустий список — падаємо на локальний JSON / cache.
-                    if let bundleGuides = try loadFromBundle("guides.json", type: [Guide].self) {
-                        guides = bundleGuides
-                        try? saveToCache(guides, filename: "guides.json")
-                    } else if let cachedGuides = try loadFromCache("guides.json", type: [Guide].self) {
-                        guides = cachedGuides
-                    }
+                    guides = try loadCacheOrBundle("guides.json", type: [Guide].self) ?? []
                 }
             } catch {
-                // 3) На будь-яку помилку мережі — використовуємо локальний контент.
-                if let bundleGuides = try loadFromBundle("guides.json", type: [Guide].self) {
-                    guides = bundleGuides
-                    try? saveToCache(guides, filename: "guides.json")
-                } else if let cachedGuides = try loadFromCache("guides.json", type: [Guide].self) {
-                    guides = cachedGuides
-                }
+                guides = try loadCacheOrBundle("guides.json", type: [Guide].self) ?? []
             }
             await loadAdditionalGuides()
         } catch {
@@ -255,11 +245,10 @@ class ContentService: ContentServiceProtocol {
     
     private func loadChecklists() async {
         do {
-            if let token = KeychainStore.get("access_token"), !token.isEmpty {
-                do {
-                    let remote = try await APIClient.fetchChecklists()
-                    if !remote.isEmpty {
-                        self.checklists = remote.enumerated().map { idx, c in
+            do {
+                let remote = try await APIClient.fetchChecklists()
+                if !remote.isEmpty {
+                    self.checklists = remote.map { c in
                             let steps: [ChecklistStep] = c.items.enumerated().map { i, s in
                                 ChecklistStep(
                                     title: s,
@@ -273,6 +262,7 @@ class ContentService: ContentServiceProtocol {
                                 )
                             }
                             return Checklist(
+                                id: Checklist.stableUUID(from: c.id),
                                 title: c.title,
                                 description: c.description ?? "",
                                 category: .integration,
@@ -284,33 +274,18 @@ class ContentService: ContentServiceProtocol {
                                 priority: 0,
                                 isNew: false,
                                 language: nil,
-                                verifiedAt: nil,
-                                source: nil,
+                                verifiedAt: Self.parseBackendDate(c.verified_at),
+                                source: c.source_url,
+                                sourceTitle: c.source_title,
                                 heroImage: nil
                             )
-                        }
-                        try? saveToCache(self.checklists, filename: "checklists.json")
-                    } else if let bundleChecklists = try loadFromBundle("checklists.json", type: [Checklist].self) {
-                        checklists = bundleChecklists
-                        try? saveToCache(checklists, filename: "checklists.json")
-                    } else if let cachedChecklists = try loadFromCache("checklists.json", type: [Checklist].self) {
-                        checklists = cachedChecklists
                     }
-                } catch {
-                    if let bundleChecklists = try loadFromBundle("checklists.json", type: [Checklist].self) {
-                        checklists = bundleChecklists
-                        try? saveToCache(checklists, filename: "checklists.json")
-                    } else if let cachedChecklists = try loadFromCache("checklists.json", type: [Checklist].self) {
-                        checklists = cachedChecklists
-                    }
+                    try? saveToCache(self.checklists, filename: "checklists.json")
+                } else {
+                    checklists = try loadCacheOrBundle("checklists.json", type: [Checklist].self) ?? []
                 }
-            } else {
-                if let bundleChecklists = try loadFromBundle("checklists.json", type: [Checklist].self) {
-                    checklists = bundleChecklists
-                    try? saveToCache(checklists, filename: "checklists.json")
-                } else if let cachedChecklists = try loadFromCache("checklists.json", type: [Checklist].self) {
-                    checklists = cachedChecklists
-                }
+            } catch {
+                checklists = try loadCacheOrBundle("checklists.json", type: [Checklist].self) ?? []
             }
             await loadAdditionalChecklists()
         } catch {
@@ -321,12 +296,7 @@ class ContentService: ContentServiceProtocol {
     
     private func loadPlaces() async {
         do {
-            if let bundlePlaces = try loadFromBundle("places.json", type: [Place].self) {
-                places = bundlePlaces
-                try? saveToCache(places, filename: "places.json")
-            } else if let cachedPlaces = try loadFromCache("places.json", type: [Place].self) {
-                places = cachedPlaces
-            }
+            places = try loadCacheOrBundle("places.json", type: [Place].self) ?? []
             await loadAdditionalPlaces()
         } catch {
             AppLogger.content("Error loading places: \(error)", isError: true)
@@ -336,12 +306,12 @@ class ContentService: ContentServiceProtocol {
     
     private func loadTemplates() async {
         do {
-            if let token = KeychainStore.get("access_token"), !token.isEmpty {
-                do {
-                    let remote = try await APIClient.fetchTemplates()
-                    if !remote.isEmpty {
-                        self.templates = remote.map { t in
+            do {
+                let remote = try await APIClient.fetchTemplates()
+                if !remote.isEmpty {
+                    self.templates = remote.map { t in
                             DocumentTemplate(
+                                id: UUID(uuidString: t.id) ?? UUID(),
                                 title: t.name,
                                 description: "",
                                 category: .government,
@@ -349,29 +319,13 @@ class ContentService: ContentServiceProtocol {
                                 content: t.content,
                                 placeholders: []
                             )
-                        }
-                        try? saveToCache(self.templates, filename: "templates.json")
-                    } else if let bundleTemplates = try loadFromBundle("templates.json", type: [DocumentTemplate].self) {
-                        templates = bundleTemplates
-                        try? saveToCache(templates, filename: "templates.json")
-                    } else if let cachedTemplates = try loadFromCache("templates.json", type: [DocumentTemplate].self) {
-                        templates = cachedTemplates
                     }
-                } catch {
-                    if let bundleTemplates = try loadFromBundle("templates.json", type: [DocumentTemplate].self) {
-                        templates = bundleTemplates
-                        try? saveToCache(templates, filename: "templates.json")
-                    } else if let cachedTemplates = try loadFromCache("templates.json", type: [DocumentTemplate].self) {
-                        templates = cachedTemplates
-                    }
+                    try? saveToCache(self.templates, filename: "templates.json")
+                } else {
+                    templates = try loadCacheOrBundle("templates.json", type: [DocumentTemplate].self) ?? []
                 }
-            } else {
-                if let bundleTemplates = try loadFromBundle("templates.json", type: [DocumentTemplate].self) {
-                    templates = bundleTemplates
-                    try? saveToCache(templates, filename: "templates.json")
-                } else if let cachedTemplates = try loadFromCache("templates.json", type: [DocumentTemplate].self) {
-                    templates = cachedTemplates
-                }
+            } catch {
+                templates = try loadCacheOrBundle("templates.json", type: [DocumentTemplate].self) ?? []
             }
             await loadAdditionalTemplates()
         } catch {
@@ -382,12 +336,7 @@ class ContentService: ContentServiceProtocol {
     
     private func loadBenefitRules() async {
         do {
-            if let bundleRules = try loadFromBundle("benefit_rules.json", type: [BenefitRule].self) {
-                benefitRules = bundleRules
-                try? saveToCache(benefitRules, filename: "benefit_rules.json")
-            } else if let cachedRules = try loadFromCache("benefit_rules.json", type: [BenefitRule].self) {
-                benefitRules = cachedRules
-            }
+            benefitRules = try loadCacheOrBundle("benefit_rules.json", type: [BenefitRule].self) ?? []
             await loadAdditionalBenefitRules()
         } catch {
             AppLogger.content("Error loading benefit rules: \(error)", isError: true)
@@ -397,11 +346,10 @@ class ContentService: ContentServiceProtocol {
     
     private func loadNews() async {
         do {
-            if let token = KeychainStore.get("access_token"), !token.isEmpty {
-                do {
-                    let remote = try await APIClient.fetchNews(limit: 50, language: preferredLanguage)
-                    if !remote.isEmpty {
-                        self.news = remote.map { n in
+            do {
+                let remote = try await APIClient.fetchNews(limit: 50, language: preferredLanguage)
+                if !remote.isEmpty {
+                    self.news = remote.map { n in
                             let parsedDate: Date = {
                                 let iso = ISO8601DateFormatter()
                                 if let d = iso.date(from: n.published_at) { return d }
@@ -411,6 +359,7 @@ class ContentService: ContentServiceProtocol {
                                 return f.date(from: n.published_at) ?? Date()
                             }()
                             return NewsItem(
+                                id: UUID(uuidString: n.id) ?? UUID(),
                                 title: n.title,
                                 summary: n.summary,
                                 url: n.url,
@@ -421,29 +370,13 @@ class ContentService: ContentServiceProtocol {
                                 tags: [],
                                 imageURL: n.image_url
                             )
-                        }
-                        try? saveToCache(self.news, filename: "news.json")
-                    } else if let bundled = try loadFromBundle("news.json", type: [NewsItem].self) {
-                        news = bundled
-                        try? saveToCache(news, filename: "news.json")
-                    } else if let cached = try loadFromCache("news.json", type: [NewsItem].self) {
-                        news = cached
                     }
-                } catch {
-                    if let bundled = try loadFromBundle("news.json", type: [NewsItem].self) {
-                        news = bundled
-                        try? saveToCache(news, filename: "news.json")
-                    } else if let cached = try loadFromCache("news.json", type: [NewsItem].self) {
-                        news = cached
-                    }
+                    try? saveToCache(self.news, filename: "news.json")
+                } else {
+                    news = try loadCacheOrBundle("news.json", type: [NewsItem].self) ?? []
                 }
-            } else {
-                if let bundled = try loadFromBundle("news.json", type: [NewsItem].self) {
-                    news = bundled
-                    try? saveToCache(news, filename: "news.json")
-                } else if let cached = try loadFromCache("news.json", type: [NewsItem].self) {
-                    news = cached
-                }
+            } catch {
+                news = try loadCacheOrBundle("news.json", type: [NewsItem].self) ?? []
             }
             await loadAdditionalNews()
         } catch {
@@ -500,17 +433,17 @@ class ContentService: ContentServiceProtocol {
         ]
         
         for filename in languageFiles {
-            if let extra = try? loadFromBundle(filename, type: [Guide].self) {
+            if let extra = try? loadFromCache(filename, type: [Guide].self) {
                 // Avoid duplicates by checking ID
                 let existingIDs = Set(guides.map { $0.id })
                 let newGuides = extra.filter { !existingIDs.contains($0.id) }
                 guides.append(contentsOf: newGuides)
-                AppLogger.content("Loaded \(newGuides.count) guides from \(filename)")
-            } else if let cached = try? loadFromCache(filename, type: [Guide].self) {
-                let existingIDs = Set(guides.map { $0.id })
-                let newGuides = cached.filter { !existingIDs.contains($0.id) }
-                guides.append(contentsOf: newGuides)
                 AppLogger.content("Loaded \(newGuides.count) cached guides from \(filename)")
+            } else if let bundled = try? loadFromBundle(filename, type: [Guide].self) {
+                let existingIDs = Set(guides.map { $0.id })
+                let newGuides = bundled.filter { !existingIDs.contains($0.id) }
+                guides.append(contentsOf: newGuides)
+                AppLogger.content("Loaded \(newGuides.count) guides from \(filename)")
             }
         }
         
@@ -519,10 +452,10 @@ class ContentService: ContentServiceProtocol {
     private func loadAdditionalChecklists(language: String? = nil) async {
         _ = language // reserved for future language-specific extras
         for filename in ["checklists_extra.json"] {
-            if let extra = try? loadFromBundle(filename, type: [Checklist].self) {
+            if let extra = try? loadFromCache(filename, type: [Checklist].self) {
                 checklists.append(contentsOf: extra)
-            } else if let cached = try? loadFromCache(filename, type: [Checklist].self) {
-                checklists.append(contentsOf: cached)
+            } else if let bundled = try? loadFromBundle(filename, type: [Checklist].self) {
+                checklists.append(contentsOf: bundled)
             }
         }
     }
@@ -535,50 +468,61 @@ class ContentService: ContentServiceProtocol {
         ]
         
         for filename in placeFiles {
-            if let extra = try? loadFromBundle(filename, type: [Place].self) {
+            if let extra = try? loadFromCache(filename, type: [Place].self) {
                 // Avoid duplicates by ID
                 let existingIDs = Set(places.map { $0.id })
                 let newPlaces = extra.filter { !existingIDs.contains($0.id) }
                 places.append(contentsOf: newPlaces)
-            } else if let cached = try? loadFromCache(filename, type: [Place].self) {
+            } else if let bundled = try? loadFromBundle(filename, type: [Place].self) {
                 let existingIDs = Set(places.map { $0.id })
-                let newPlaces = cached.filter { !existingIDs.contains($0.id) }
+                let newPlaces = bundled.filter { !existingIDs.contains($0.id) }
                 places.append(contentsOf: newPlaces)
             }
         }
     }
     private func loadAdditionalTemplates() async {
         for filename in ["templates_extra.json", "templates_new.json", "templates_bilingual.json"] {
-            if let extra = try? loadFromBundle(filename, type: [DocumentTemplate].self) {
+            if let extra = try? loadFromCache(filename, type: [DocumentTemplate].self) {
                 // Avoid duplicates by ID
                 let existingIDs = Set(templates.map { $0.id })
                 let newTemplates = extra.filter { !existingIDs.contains($0.id) }
                 templates.append(contentsOf: newTemplates)
-            } else if let cached = try? loadFromCache(filename, type: [DocumentTemplate].self) {
+            } else if let bundled = try? loadFromBundle(filename, type: [DocumentTemplate].self) {
                 let existingIDs = Set(templates.map { $0.id })
-                let newTemplates = cached.filter { !existingIDs.contains($0.id) }
+                let newTemplates = bundled.filter { !existingIDs.contains($0.id) }
                 templates.append(contentsOf: newTemplates)
             }
         }
     }
     private func loadAdditionalNews() async {
-        if let extra = try? loadFromBundle("news_extra.json", type: [NewsItem].self) {
+        if let extra = try? loadFromCache("news_extra.json", type: [NewsItem].self) {
             news.append(contentsOf: extra)
-        } else if let cached = try? loadFromCache("news_extra.json", type: [NewsItem].self) {
-            news.append(contentsOf: cached)
+        } else if let bundled = try? loadFromBundle("news_extra.json", type: [NewsItem].self) {
+            news.append(contentsOf: bundled)
         }
     }
     private func loadAdditionalBenefitRules() async {
         for filename in ["benefit_rules_new.json"] {
-            if let extra = try? loadFromBundle(filename, type: [BenefitRule].self) {
+            if let extra = try? loadFromCache(filename, type: [BenefitRule].self) {
                 benefitRules.append(contentsOf: extra)
-            } else if let cached = try? loadFromCache(filename, type: [BenefitRule].self) {
-                benefitRules.append(contentsOf: cached)
+            } else if let bundled = try? loadFromBundle(filename, type: [BenefitRule].self) {
+                benefitRules.append(contentsOf: bundled)
             }
         }
     }
     
     // MARK: - File System Helpers
+
+    private func loadCacheOrBundle<T: Codable>(_ filename: String, type: T.Type) throws -> T? {
+        if let cached = try loadFromCache(filename, type: type) {
+            return cached
+        }
+        if let bundled = try loadFromBundle(filename, type: type) {
+            try? saveToCache(bundled, filename: filename)
+            return bundled
+        }
+        return nil
+    }
     
     private func loadFromCache<T: Codable>(_ filename: String, type: T.Type) throws -> T? {
         let url = cacheDirectory.appendingPathComponent(filename)
@@ -755,6 +699,15 @@ class ContentService: ContentServiceProtocol {
         }
         return locale.lowercased()
     }
+
+    private static func parseBackendDate(_ raw: String?) -> Date? {
+        guard let raw else { return nil }
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        if let date = formatter.date(from: raw) { return date }
+        formatter.formatOptions = [.withInternetDateTime]
+        return formatter.date(from: raw)
+    }
     
     /// Sort guides by priority and date
     private func sortedByPriority(_ guides: [Guide]) -> [Guide] {
@@ -814,13 +767,13 @@ class ContentService: ContentServiceProtocol {
             ]
             
             for filename in languageFiles {
-                if let arr = try? self.loadFromBundle(filename, type: [Guide].self) {
+                if let arr = try? self.loadFromCache(filename, type: [Guide].self) {
                     for guide in arr where !seenIDs.contains(guide.id) {
                         allGuides.append(guide)
                         seenIDs.insert(guide.id)
                     }
-                } else if let cached = try? self.loadFromCache(filename, type: [Guide].self) {
-                    for guide in cached where !seenIDs.contains(guide.id) {
+                } else if let bundled = try? self.loadFromBundle(filename, type: [Guide].self) {
+                    for guide in bundled where !seenIDs.contains(guide.id) {
                         allGuides.append(guide)
                         seenIDs.insert(guide.id)
                     }
@@ -833,15 +786,15 @@ class ContentService: ContentServiceProtocol {
 
         // Load locale-specific checklists
         do {
-            if let arr = try self.loadFromBundle("checklists_\(lang).json", type: [Checklist].self) {
+            if let arr = try self.loadFromCache("checklists_\(lang).json", type: [Checklist].self) {
                 self.checklists = arr
-            } else if let cached = try self.loadFromCache("checklists_\(lang).json", type: [Checklist].self) {
-                self.checklists = cached
+            } else if let bundled = try self.loadFromBundle("checklists_\(lang).json", type: [Checklist].self) {
+                self.checklists = bundled
+            } else if let cachedFallback = try self.loadFromCache("checklists.json", type: [Checklist].self) {
+                self.checklists = cachedFallback
             } else if let fallback = try self.loadFromBundle("checklists.json", type: [Checklist].self) {
                 // Fallback to base (Ukrainian) bundle content if locale-specific is missing
                 self.checklists = fallback
-            } else if let cachedFallback = try self.loadFromCache("checklists.json", type: [Checklist].self) {
-                self.checklists = cachedFallback
             } else {
                 // Keep existing content as last resort
                 // (prevents empty UI if localized files are absent)
@@ -852,12 +805,10 @@ class ContentService: ContentServiceProtocol {
         await self.loadAdditionalChecklists(language: lang)
 
         // Benefit rules (optional per language; missing file is not treated as error)
-        if let url = bundle.url(forResource: "benefit_rules_\(lang)", withExtension: "json"),
-           let data = try? Data(contentsOf: url),
-           let arr = try? decoder.decode([BenefitRule].self, from: data) {
-            self.benefitRules = arr
-        } else if let cached = try? self.loadFromCache("benefit_rules_\(lang).json", type: [BenefitRule].self) {
+        if let cached = try? self.loadFromCache("benefit_rules_\(lang).json", type: [BenefitRule].self) {
             self.benefitRules = cached
+        } else if let bundled = try? self.loadFromBundle("benefit_rules_\(lang).json", type: [BenefitRule].self) {
+            self.benefitRules = bundled
         } else {
             // Keep existing benefitRules loaded from base files to avoid empty state and noisy errors
         }

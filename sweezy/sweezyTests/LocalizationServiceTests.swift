@@ -25,13 +25,13 @@ final class LocalizationServiceTests: XCTestCase {
     
     func testAvailableLanguages() {
         // Given
-        let expectedLanguageCodes = ["uk", "ru", "en", "de"]
+        let expectedLanguageCodes = ["uk", "en", "de"]
         
         // When
         let availableLanguages = localizationService.availableLanguages
         
         // Then
-        XCTAssertEqual(availableLanguages.count, 4)
+        XCTAssertEqual(availableLanguages.count, 3)
         for lang in availableLanguages {
             XCTAssertTrue(expectedLanguageCodes.contains(lang.code))
         }
@@ -90,4 +90,3 @@ final class LocalizationServiceTests: XCTestCase {
         XCTAssertFalse(localizedOK.isEmpty)
     }
 }
-

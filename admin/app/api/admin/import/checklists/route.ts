@@ -3,7 +3,7 @@ import { cookies } from 'next/headers'
 import { API_URL } from '@/lib/api'
 
 export async function POST(req: NextRequest) {
-  const token = cookies().get('access_token')?.value
+  const token = (await cookies()).get('access_token')?.value
   const body = await req.text()
   const res = await fetch(`${API_URL}/admin/import/checklists`, { method: 'POST', headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) }, body })
   const text = await res.text()

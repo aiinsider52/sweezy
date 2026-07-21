@@ -5,16 +5,33 @@
     "subtitle": "Grundversicherung: обов'язкове базове страхування",
     "language": "uk",
     "bodyMarkdown": "# Медичне страхування у Швейцарії\n\nМедичне страхування обов'язкове для всіх у Швейцарії. Оформити потрібно протягом 3 місяців.\n\n## Grundversicherung (базове)\n\n### Що покриває\n- ✅ Візити до лікаря\n- ✅ Госпіталізація\n- ✅ Ліки зі списку\n- ✅ Аналізи та діагностика\n- ✅ Вагітність та пологи\n- ❌ Стоматологія (окремо)\n- ❌ Окуляри (частково)\n\n## Франшиза та частка\n\n### Franchise (франшиза)\n- 300-2500 CHF/рік\n- Вища франшиза = нижча премія\n\n### Selbstbehalt (частка участі)\n- 10% від витрат\n- Максимум 700 CHF/рік\n\n## Моделі страхування\n\n### Стандартна\n- Вільний вибір лікаря\n- Найдорожча\n\n### HMO\n- Через сімейного лікаря\n- Дешевше на 10-20%\n\n### Telmed\n- Спочатку телефонна консультація\n- Дешевше на 10-15%\n\n## Як обрати\n\n### Порівняння\n- comparis.ch — калькулятор\n- bonus.ch — порівняння\n- priminfo.admin.ch — офіційний\n\n> **Інсайд**: Якщо ви здорові — обирайте високу франшизу (2500 CHF) та HMO. Економія 200+ CHF/місяць!\n\n## Вартість\n\n### Середні премії\n- Цюрих: 350-450 CHF/міс\n- Берн: 300-400 CHF/міс\n- Женева: 400-500 CHF/міс\n\n## Subvention (субсидія)\n\nПри низькому доході — Prämienverbilligung до 100% покриття!",
-    "tags": ["insurance", "health", "grundversicherung", "krankenkasse", "lang:uk"],
+    "tags": [
+      "insurance",
+      "health",
+      "grundversicherung",
+      "krankenkasse",
+      "lang:uk"
+    ],
     "category": "insurance",
     "cantonCodes": [],
-    "links": [],
+    "links": [
+      {
+        "id": "official-source-insurance-uk-001",
+        "title": "ch.ch — Health insurance",
+        "url": "https://www.ch.ch/en/health/health-insurance/",
+        "type": "website",
+        "description": "Official Swiss source used to verify this material"
+      }
+    ],
     "priority": 10,
     "isNew": false,
     "isPremium": false,
     "estimatedReadingTime": 7,
     "lastUpdated": "2025-01-15T10:00:00Z",
-    "createdAt": "2025-01-15T10:00:00Z"
+    "createdAt": "2025-01-15T10:00:00Z",
+    "source": "https://www.ch.ch/en/health/health-insurance/",
+    "sourceTitle": "ch.ch — Health insurance",
+    "verifiedAt": "2026-07-15T00:00:00Z"
   },
   {
     "id": "insurance-uk-002",
@@ -22,16 +39,33 @@
     "subtitle": "Стоматологія, окуляри, альтернативна медицина",
     "language": "uk",
     "bodyMarkdown": "# Zusatzversicherung — Додаткове страхування\n\nБазове страхування не покриває все. Розгляньте додаткові опції.\n\n## Типи додаткового страхування\n\n### Стоматологія (Zahnversicherung)\n- Покриває лікування зубів\n- Вартість: 20-50 CHF/міс\n- Увага: період очікування 1-2 роки!\n\n### Окуляри (Brillenversicherung)\n- Контактні лінзи та окуляри\n- Зазвичай до 300 CHF/3 роки\n- Вартість: 5-15 CHF/міс\n\n### Альтернативна медицина\n- Акупунктура, гомеопатія\n- Масаж, остеопатія\n- Вартість: 10-30 CHF/міс\n\n### Приватна/напівприватна палата\n- Комфортніші умови госпіталізації\n- Вибір лікаря\n- Вартість: 50-200+ CHF/міс\n\n## Чи потрібно вам\n\n### Рекомендовано\n- ✅ Стоматологія (якщо проблеми з зубами)\n- ✅ Окуляри (якщо носите)\n- ✅ Для спортсменів — спортивне страхування\n\n### Можна без\n- Альтернативна медицина (якщо не користуєтесь)\n- Приватна палата (дорого)\n\n## Важливо знати\n\n### Період очікування\n- Стоматологія: 1-2 роки\n- Вагітність: 9-12 місяців\n\n### Медичний огляд\n- Деякі вимагають перевірку здоров'я\n- Можуть відмовити при хворобах\n\n> **Інсайд**: Оформляйте стоматологію ДО того, як знадобиться лікування — період очікування великий!\n\n## Порівняння\n\n- comparis.ch → Zusatzversicherung\n- bonus.ch → Додаткове страхування\n\n## Поради\n\n1. Почніть з базового\n2. Додавайте за потреби\n3. Порівнюйте ціни щорічно\n4. Перевіряйте період очікування",
-    "tags": ["insurance", "zusatz", "dental", "supplementary", "lang:uk"],
+    "tags": [
+      "insurance",
+      "zusatz",
+      "dental",
+      "supplementary",
+      "lang:uk"
+    ],
     "category": "insurance",
     "cantonCodes": [],
-    "links": [],
+    "links": [
+      {
+        "id": "official-source-insurance-uk-002",
+        "title": "ch.ch — Health insurance",
+        "url": "https://www.ch.ch/en/health/health-insurance/",
+        "type": "website",
+        "description": "Official Swiss source used to verify this material"
+      }
+    ],
     "priority": 7,
     "isNew": false,
     "isPremium": false,
     "estimatedReadingTime": 6,
     "lastUpdated": "2025-01-15T10:00:00Z",
-    "createdAt": "2025-01-15T10:00:00Z"
+    "createdAt": "2025-01-15T10:00:00Z",
+    "source": "https://www.ch.ch/en/health/health-insurance/",
+    "sourceTitle": "ch.ch — Health insurance",
+    "verifiedAt": "2026-07-15T00:00:00Z"
   },
   {
     "id": "insurance-uk-003",
@@ -39,16 +73,33 @@
     "subtitle": "Чому це обов'язково мати кожному",
     "language": "uk",
     "bodyMarkdown": "# Haftpflichtversicherung — Страхування відповідальності\n\nПриватне страхування відповідальності — must have у Швейцарії!\n\n## Що це\n\nПокриває збитки, які ви випадково завдали іншим:\n- Залили сусідів\n- Розбили вітрину магазину\n- Пошкодили чуже майно\n- Травмували когось (випадково)\n\n## Чому важливо\n\n### Без страхування\n- Ви платите з власної кишені\n- Збитки можуть бути величезні\n- Один інцидент може коштувати 10000+ CHF\n\n### Зі страхуванням\n- Страхова покриває збитки\n- Спокій та захист\n- Всього 5-10 CHF/місяць\n\n## Що покривається\n\n### Стандартне покриття\n- [ ] Пошкодження чужого майна\n- [ ] Травми третіх осіб\n- [ ] Орендоване житло (залиття, пожежа)\n- [ ] Спортивна діяльність\n\n### НЕ покривається\n- ❌ Умисні дії\n- ❌ Авто (окреме страхування)\n- ❌ Професійна діяльність\n\n## Вартість\n\n- Базове: 50-100 CHF/рік\n- Сім'я: 80-150 CHF/рік\n- Покриття: 3-5 млн CHF\n\n## Де оформити\n\n### Популярні компанії\n- Mobiliar\n- Helvetia\n- Zurich\n- AXA\n\n### Порівняння\n- comparis.ch → Haftpflicht\n- bonus.ch\n\n> **Інсайд**: Багато орендодавців ВИМАГАЮТЬ Haftpflichtversicherung! Оформіть одразу.\n\n## Поради\n\n1. Обирайте покриття мін. 3 млн CHF\n2. Перевірте, чи включено оренду\n3. Сімейний поліс — вигідніше\n4. Порівнюйте щорічно",
-    "tags": ["insurance", "haftpflicht", "liability", "rental", "lang:uk"],
+    "tags": [
+      "insurance",
+      "haftpflicht",
+      "liability",
+      "rental",
+      "lang:uk"
+    ],
     "category": "insurance",
     "cantonCodes": [],
-    "links": [],
+    "links": [
+      {
+        "id": "official-source-insurance-uk-003",
+        "title": "ch.ch — Health insurance",
+        "url": "https://www.ch.ch/en/health/health-insurance/",
+        "type": "website",
+        "description": "Official Swiss source used to verify this material"
+      }
+    ],
     "priority": 9,
     "isNew": false,
     "isPremium": false,
     "estimatedReadingTime": 6,
     "lastUpdated": "2025-01-15T10:00:00Z",
-    "createdAt": "2025-01-15T10:00:00Z"
+    "createdAt": "2025-01-15T10:00:00Z",
+    "source": "https://www.ch.ch/en/health/health-insurance/",
+    "sourceTitle": "ch.ch — Health insurance",
+    "verifiedAt": "2026-07-15T00:00:00Z"
   },
   {
     "id": "insurance-uk-004",
@@ -56,16 +107,33 @@
     "subtitle": "Покроковий гід по зміні Krankenkasse",
     "language": "uk",
     "bodyMarkdown": "# Зміна страхової компанії\n\nЩорічно можна змінити страхову та заощадити!\n\n## Коли можна змінити\n\n### Звичайна франшиза (300 CHF)\n- Дедлайн: 30 листопада\n- Нова страхова з 1 січня\n\n### Висока франшиза (500+ CHF)\n- Дедлайн: 30 листопада\n- Або 31 березня (для зміни з 1 липня)\n\n## Процес зміни\n\n### Крок 1: Порівняйте ціни\n- comparis.ch\n- priminfo.admin.ch\n- Нові премії публікуються у вересні\n\n### Крок 2: Оберіть нову страхову\n- Заповніть онлайн-заявку\n- Або зателефонуйте\n\n### Крок 3: Отримайте підтвердження\n- Нова страхова надсилає поліс\n- Перевірте умови\n\n### Крок 4: Скасуйте стару\n- Письмовий лист (Einschreiben)\n- До 30 листопада!\n- Або нова страхова зробить це за вас\n\n## Що зберігається\n\n### Завжди\n- Ваше покриття Grundversicherung\n- Франшиза (якщо хочете ту саму)\n\n### НЕ переноситься\n- Zusatzversicherung (додаткове)\n- Потрібно оформляти окремо\n\n## Помилки, яких уникати\n\n- ❌ Пропустити дедлайн\n- ❌ Не перевірити покриття\n- ❌ Забути скасувати стару\n- ❌ Змінювати під час лікування\n\n> **Інсайд**: Порівнюйте щорічно — різниця може бути 100-200 CHF/місяць за те саме покриття!\n\n## Шаблон листа\n\n```\nKündigung Krankenkasse\n\n[Ваше ім'я]\n[Адреса]\n[Дата]\n\n[Назва страхової]\n[Адреса страхової]\n\nBetreff: Kündigung meiner Grundversicherung\n\nHiermit kündige ich meine Grundversicherung\n(Policen-Nr: XXX) per 31. Dezember 202X.\n\nMit freundlichen Grüssen,\n[Підпис]\n```",
-    "tags": ["insurance", "change", "krankenkasse", "switch", "lang:uk"],
+    "tags": [
+      "insurance",
+      "change",
+      "krankenkasse",
+      "switch",
+      "lang:uk"
+    ],
     "category": "insurance",
     "cantonCodes": [],
-    "links": [],
+    "links": [
+      {
+        "id": "official-source-insurance-uk-004",
+        "title": "ch.ch — Health insurance",
+        "url": "https://www.ch.ch/en/health/health-insurance/",
+        "type": "website",
+        "description": "Official Swiss source used to verify this material"
+      }
+    ],
     "priority": 8,
     "isNew": false,
     "isPremium": false,
     "estimatedReadingTime": 7,
     "lastUpdated": "2025-01-15T10:00:00Z",
-    "createdAt": "2025-01-15T10:00:00Z"
+    "createdAt": "2025-01-15T10:00:00Z",
+    "source": "https://www.ch.ch/en/health/health-insurance/",
+    "sourceTitle": "ch.ch — Health insurance",
+    "verifiedAt": "2026-07-15T00:00:00Z"
   },
   {
     "id": "insurance-uk-005",
@@ -73,16 +141,33 @@
     "subtitle": "UVG, NBU та що покриває роботодавець",
     "language": "uk",
     "bodyMarkdown": "# Unfallversicherung — Страхування від нещасних випадків\n\nУ Швейцарії страхування від нещасних випадків — окрема система.\n\n## Два типи\n\n### BU (Berufsunfall)\n- Нещасні випадки на роботі\n- Платить роботодавець 100%\n- Обов'язково для всіх працівників\n\n### NBU (Nichtberufsunfall)\n- Поза роботою\n- При 8+ годинах/тиждень — роботодавець\n- Менше 8 годин — самі або через Krankenkasse\n\n## Що покриває\n\n### Включено\n- ✅ Лікування травм\n- ✅ Госпіталізація\n- ✅ Реабілітація\n- ✅ Втрата доходу (80%)\n- ✅ Інвалідність\n\n### НЕ включено\n- ❌ Хвороби (це Krankenkasse)\n- ❌ Самоушкодження\n- ❌ Екстремальні види спорту (частково)\n\n## Якщо ви не працюєте\n\n### Варіанти\n1. Включити NBU до Krankenkasse (+50-100 CHF/міс)\n2. Окрема Unfallversicherung\n\n> **Увага**: Якщо немає NBU і трапиться нещасний випадок — ви платите все самі!\n\n## Як працює\n\n### При нещасному випадку\n1. Зверніться до лікаря\n2. Повідомте страхову (через роботодавця)\n3. Заповніть Unfallmeldung\n4. Страхова покриває витрати\n\n### Термін повідомлення\n- Одразу або протягом кількох днів\n- Роботодавець передає інформацію до SUVA або страхової\n\n## SUVA\n\nДержавна страхова для:\n- Будівництва\n- Промисловості\n- Транспорту\n\n> **Інсайд**: Перевірте у своєму трудовому договорі, хто ваша Unfallversicherung — SUVA чи приватна компанія.\n\n## Вартість\n\n- BU: платить роботодавець\n- NBU: 1-2% від зарплати (якщо платите самі)",
-    "tags": ["insurance", "accident", "unfallversicherung", "suva", "lang:uk"],
+    "tags": [
+      "insurance",
+      "accident",
+      "unfallversicherung",
+      "suva",
+      "lang:uk"
+    ],
     "category": "insurance",
     "cantonCodes": [],
-    "links": [],
+    "links": [
+      {
+        "id": "official-source-insurance-uk-005",
+        "title": "ch.ch — Health insurance",
+        "url": "https://www.ch.ch/en/health/health-insurance/",
+        "type": "website",
+        "description": "Official Swiss source used to verify this material"
+      }
+    ],
     "priority": 7,
     "isNew": false,
     "isPremium": false,
     "estimatedReadingTime": 7,
     "lastUpdated": "2025-01-15T10:00:00Z",
-    "createdAt": "2025-01-15T10:00:00Z"
+    "createdAt": "2025-01-15T10:00:00Z",
+    "source": "https://www.ch.ch/en/health/health-insurance/",
+    "sourceTitle": "ch.ch — Health insurance",
+    "verifiedAt": "2026-07-15T00:00:00Z"
   },
   {
     "id": "insurance-uk-006",
@@ -90,16 +175,33 @@
     "subtitle": "Захист речей від крадіжки, пожежі та затоплення",
     "language": "uk",
     "bodyMarkdown": "# Hausratversicherung — Страхування домашнього майна\n\nЗахистіть свої речі від непередбачуваних подій.\n\n## Що покриває\n\n### Ризики\n- 🔥 Пожежа\n- 💧 Затоплення\n- 🌊 Повінь\n- 🔓 Крадіжка\n- 💨 Шторм\n- ⚡ Блискавка\n\n### Майно\n- Меблі\n- Електроніка\n- Одяг\n- Побутова техніка\n- Особисті речі\n\n## Вартість\n\n### Фактори\n- Площа квартири\n- Вартість майна\n- Регіон\n- Поверх (затоплення)\n\n### Орієнтовно\n- Студія: 100-150 CHF/рік\n- 2-кімнатна: 150-250 CHF/рік\n- Сім'я: 200-400 CHF/рік\n\n## Чи потрібно\n\n### Рекомендовано\n- Якщо маєте цінні речі\n- Якщо орендуєте (власник не покриває ваші речі)\n- Якщо живете на першому поверсі\n\n### Можна без\n- Мінімум майна\n- Тимчасове проживання\n- WG кімната\n\n## Як оформити\n\n### Компанії\n- Mobiliar\n- Helvetia\n- AXA\n- Zurich\n\n### Процес\n1. Порівняйте на comparis.ch\n2. Оцініть вартість майна\n3. Оберіть покриття\n4. Оформіть онлайн\n\n## Поради\n\n> **Інсайд**: Часто Hausrat + Haftpflicht пропонують в пакеті — дешевше на 20-30%!\n\n### Документуйте майно\n- Фото дорогих речей\n- Чеки та гарантії\n- Список майна з цінами\n\n### Покриття\n- Обирайте трохи більше реальної вартості\n- Враховуйте нові покупки",
-    "tags": ["insurance", "hausrat", "home", "property", "lang:uk"],
+    "tags": [
+      "insurance",
+      "hausrat",
+      "home",
+      "property",
+      "lang:uk"
+    ],
     "category": "insurance",
     "cantonCodes": [],
-    "links": [],
+    "links": [
+      {
+        "id": "official-source-insurance-uk-006",
+        "title": "ch.ch — Health insurance",
+        "url": "https://www.ch.ch/en/health/health-insurance/",
+        "type": "website",
+        "description": "Official Swiss source used to verify this material"
+      }
+    ],
     "priority": 6,
     "isNew": false,
     "isPremium": false,
     "estimatedReadingTime": 6,
     "lastUpdated": "2025-01-15T10:00:00Z",
-    "createdAt": "2025-01-15T10:00:00Z"
+    "createdAt": "2025-01-15T10:00:00Z",
+    "source": "https://www.ch.ch/en/health/health-insurance/",
+    "sourceTitle": "ch.ch — Health insurance",
+    "verifiedAt": "2026-07-15T00:00:00Z"
   },
   {
     "id": "healthcare-uk-001",
@@ -107,16 +209,33 @@
     "subtitle": "Hausarzt, спеціалісти та як записатися",
     "language": "uk",
     "bodyMarkdown": "# Як знайти лікаря у Швейцарії\n\nНавігація в швейцарській системі охорони здоров'я.\n\n## Hausarzt (сімейний лікар)\n\n### Що це\n- Перший контакт при хворобі\n- Направляє до спеціалістів\n- Веде вашу історію хвороби\n\n### Як знайти\n- docfinder.ch\n- Google Maps\n- Рекомендації знайомих\n- Страхова компанія\n\n### На що звертати увагу\n- Мови (німецька/англійська)\n- Близькість до дому\n- Години прийому\n- Чи приймає нових пацієнтів\n\n## Запис до лікаря\n\n### Способи\n- Телефоном\n- Онлайн (doctorlib.ch, medicosearch.ch)\n- Через додаток страхової\n\n### Терміни очікування\n- Hausarzt: 1-7 днів\n- Спеціаліст: 2-8 тижнів\n- Терміново: той же день\n\n## Спеціалісти\n\n### Як потрапити\n- Зазвичай потрібне направлення від Hausarzt\n- Деякі страхові дозволяють прямий запис\n- HMO модель — тільки через Hausarzt\n\n### Популярні спеціальності\n- Gynäkologe (гінеколог)\n- Dermatologe (дерматолог)\n- Augenarzt (офтальмолог)\n- Zahnarzt (стоматолог)\n- Psychologe/Psychiater\n\n## Невідкладна допомога\n\n### Куди звертатися\n- **144** — швидка допомога\n- **Notfall** — приймальне відділення лікарні\n- **Permanence** — цілодобові клініки\n\n### Коли в Notfall\n- Серйозна травма\n- Біль у грудях\n- Важке дихання\n- Втрата свідомості\n\n> **Інсайд**: Telmed страховки часто мають 24/7 гарячу лінію з лікарями — дешевше ніж Notfall!\n\n## Вартість візиту\n\n- Hausarzt: 80-150 CHF\n- Спеціаліст: 150-300 CHF\n- Ви платите до франшизи, потім страхова",
-    "tags": ["healthcare", "doctor", "hausarzt", "appointment", "lang:uk"],
+    "tags": [
+      "healthcare",
+      "doctor",
+      "hausarzt",
+      "appointment",
+      "lang:uk"
+    ],
     "category": "healthcare",
     "cantonCodes": [],
-    "links": [],
+    "links": [
+      {
+        "id": "official-source-healthcare-uk-001",
+        "title": "ch.ch — Health",
+        "url": "https://www.ch.ch/en/health/",
+        "type": "website",
+        "description": "Official Swiss source used to verify this material"
+      }
+    ],
     "priority": 10,
     "isNew": false,
     "isPremium": false,
     "estimatedReadingTime": 7,
     "lastUpdated": "2025-01-15T10:00:00Z",
-    "createdAt": "2025-01-15T10:00:00Z"
+    "createdAt": "2025-01-15T10:00:00Z",
+    "source": "https://www.ch.ch/en/health/",
+    "sourceTitle": "ch.ch — Health",
+    "verifiedAt": "2026-07-15T00:00:00Z"
   },
   {
     "id": "healthcare-uk-002",
@@ -124,16 +243,33 @@
     "subtitle": "Apotheke, рецепти та що можна купити без",
     "language": "uk",
     "bodyMarkdown": "# Аптеки та ліки у Швейцарії\n\nЯк купувати ліки та що потрібно знати.\n\n## Типи аптек\n\n### Apotheke (аптека)\n- Повний асортимент ліків\n- Консультації фармацевта\n- Рецептурні препарати\n\n### Drogerie (дрогерія)\n- Безрецептурні ліки\n- Косметика, вітаміни\n- Дешевше за аптеку\n\n## Рецептурні ліки\n\n### Що потрібно\n- Рецепт від лікаря\n- Може бути електронний\n- Дійсний 1-3 місяці\n\n### Як отримати\n1. Візит до лікаря\n2. Лікар виписує рецепт\n3. Йдете в аптеку\n4. Показуєте Krankenkassenkarte\n\n## Без рецепту\n\n### Доступно в Apotheke\n- Парацетамол, ібупрофен\n- Ліки від застуди\n- Антигістамінні\n- Мазі від болю\n\n### Доступно в Drogerie\n- Вітаміни\n- Гомеопатія\n- Засоби гігієни\n- Слабші знеболюючі\n\n## Вартість\n\n### Рецептурні\n- Страхова покриває (після франшизи)\n- Доплата: 10% + 2.50 CHF за упаковку\n- Generika (дженерики) дешевші\n\n### Безрецептурні\n- Повністю за свій рахунок\n- Парацетамол: 5-10 CHF\n- Ліки від застуди: 10-20 CHF\n\n## Поради\n\n> **Інсайд**: Попросіть дженерик замість оригіналу — та сама дія, вдвічі дешевше!\n\n### Економія\n- Купуйте в Drogerie безрецептурне\n- Порівнюйте ціни\n- Онлайн-аптеки (zurrose.ch)\n\n### Годинні роботи\n- Звичайні: 8:00-18:30\n- Суботи: 8:00-16:00\n- Чергові аптеки 24/7 (ротація)\n\n## Корисні терміни\n\n- **Rezept** — рецепт\n- **Medikament** — ліки\n- **Tabletten** — таблетки\n- **Salbe** — мазь\n- **Tropfen** — краплі",
-    "tags": ["healthcare", "pharmacy", "apotheke", "medicine", "lang:uk"],
+    "tags": [
+      "healthcare",
+      "pharmacy",
+      "apotheke",
+      "medicine",
+      "lang:uk"
+    ],
     "category": "healthcare",
     "cantonCodes": [],
-    "links": [],
+    "links": [
+      {
+        "id": "official-source-healthcare-uk-002",
+        "title": "ch.ch — Health",
+        "url": "https://www.ch.ch/en/health/",
+        "type": "website",
+        "description": "Official Swiss source used to verify this material"
+      }
+    ],
     "priority": 8,
     "isNew": false,
     "isPremium": false,
     "estimatedReadingTime": 6,
     "lastUpdated": "2025-01-15T10:00:00Z",
-    "createdAt": "2025-01-15T10:00:00Z"
+    "createdAt": "2025-01-15T10:00:00Z",
+    "source": "https://www.ch.ch/en/health/",
+    "sourceTitle": "ch.ch — Health",
+    "verifiedAt": "2026-07-15T00:00:00Z"
   },
   {
     "id": "healthcare-uk-003",
@@ -141,16 +277,33 @@
     "subtitle": "Психотерапія, кризові служби та підтримка",
     "language": "uk",
     "bodyMarkdown": "# Психологічна допомога у Швейцарії\n\nМентальне здоров'я важливе. У Швейцарії є багато ресурсів підтримки.\n\n## Типи допомоги\n\n### Psychologe (психолог)\n- Консультації та терапія\n- НЕ призначає ліки\n- Покривається страховкою (частково)\n\n### Psychiater (психіатр)\n- Лікар з медичною освітою\n- Може призначати ліки\n- Покривається Grundversicherung\n\n### Psychotherapeut\n- Психотерапія різних напрямків\n- Когнітивно-поведінкова терапія\n- Гештальт, психоаналіз тощо\n\n## Як знайти спеціаліста\n\n### Ресурси\n- psychologie.ch — реєстр психологів\n- docfinder.ch\n- Направлення від Hausarzt\n- Страхова компанія\n\n### На що звертати увагу\n- Мова (українська, російська, англійська)\n- Спеціалізація (травма, депресія)\n- Метод терапії\n- Терміни очікування\n\n## Покриття страховкою\n\n### Grundversicherung покриває\n- Психіатра (повністю, після франшизи)\n- Психотерапію за направленням психіатра\n\n### Zusatzversicherung\n- Більше сесій\n- Ширший вибір спеціалістів\n\n## Кризова допомога\n\n### Гарячі лінії\n- **143** — Die Dargebotene Hand (24/7, анонімно)\n- **147** — для молоді\n- Psychiatrische Notfall — невідкладна психіатрична\n\n### Для українців\n- Українські психологи онлайн\n- Церковні громади\n- Волонтерські організації\n\n## Безкоштовні ресурси\n\n- Самодопомога: ipw.ch\n- Групи підтримки: selbsthilfeschweiz.ch\n- Онлайн-консультації: onlineberatung.ch\n\n> **Інсайд**: Черги до психотерапевтів довгі (2-6 місяців). Записуйтесь заздалегідь, навіть якщо не впевнені.\n\n## Вартість\n\n- Психіатр: покриває страхова\n- Психолог без направлення: 150-200 CHF/год\n- З Zusatzversicherung: частково покривається",
-    "tags": ["healthcare", "mental-health", "psychology", "therapy", "lang:uk"],
+    "tags": [
+      "healthcare",
+      "mental-health",
+      "psychology",
+      "therapy",
+      "lang:uk"
+    ],
     "category": "healthcare",
     "cantonCodes": [],
-    "links": [],
+    "links": [
+      {
+        "id": "official-source-healthcare-uk-003",
+        "title": "ch.ch — Health",
+        "url": "https://www.ch.ch/en/health/",
+        "type": "website",
+        "description": "Official Swiss source used to verify this material"
+      }
+    ],
     "priority": 9,
     "isNew": false,
     "isPremium": false,
     "estimatedReadingTime": 7,
     "lastUpdated": "2025-01-15T10:00:00Z",
-    "createdAt": "2025-01-15T10:00:00Z"
+    "createdAt": "2025-01-15T10:00:00Z",
+    "source": "https://www.ch.ch/en/health/",
+    "sourceTitle": "ch.ch — Health",
+    "verifiedAt": "2026-07-15T00:00:00Z"
   },
   {
     "id": "healthcare-uk-004",
@@ -158,16 +311,33 @@
     "subtitle": "Zahnarzt: вартість, страхування та як заощадити",
     "language": "uk",
     "bodyMarkdown": "# Стоматологія у Швейцарії\n\nЛікування зубів у Швейцарії дороге. Плануйте бюджет!\n\n## Вартість\n\n### Орієнтовні ціни\n- Огляд: 100-150 CHF\n- Пломба: 150-400 CHF\n- Видалення: 200-500 CHF\n- Коронка: 1000-2500 CHF\n- Імплант: 3000-6000 CHF\n- Чистка: 150-250 CHF\n\n## Страхування\n\n### Grundversicherung\n- НЕ покриває стоматологію!\n- Виняток: нещасний випадок, деякі хвороби\n\n### Zahnversicherung (додаткове)\n- 50-80% покриття\n- Період очікування 1-2 роки\n- Ліміт: 1000-3000 CHF/рік\n- Вартість: 20-50 CHF/міс\n\n## Як заощадити\n\n### Варіант 1: Закордон\n- Угорщина, Польща — на 50-70% дешевше\n- Німеччина (Констанц) — дешевше\n- Для серйозного лікування\n\n### Варіант 2: Школи стоматології\n- Університетські клініки\n- Дешевше на 30-50%\n- Довше, але якісно\n\n### Варіант 3: Переговори\n- Попросіть детальний кошторис\n- Порівняйте з іншими лікарями\n- Запитайте про знижку\n\n## Як знайти стоматолога\n\n- zahninfo.ch\n- Google Maps\n- Рекомендації\n- sso.ch — офіційний реєстр\n\n## Профілактика\n\n### Регулярно\n- Чистка 2 рази на рік\n- Огляд щорічно\n- Правильна гігієна\n\n> **Інсайд**: Зробіть повний огляд та чистку в Україні перед виїздом — заощадите 200+ CHF!\n\n## Терміни\n\n- **Zahnarzt** — стоматолог\n- **Zahnreinigung** — чистка\n- **Füllung** — пломба\n- **Krone** — коронка\n- **Implantat** — імплант",
-    "tags": ["healthcare", "dental", "zahnarzt", "teeth", "lang:uk"],
+    "tags": [
+      "healthcare",
+      "dental",
+      "zahnarzt",
+      "teeth",
+      "lang:uk"
+    ],
     "category": "healthcare",
     "cantonCodes": [],
-    "links": [],
+    "links": [
+      {
+        "id": "official-source-healthcare-uk-004",
+        "title": "ch.ch — Health",
+        "url": "https://www.ch.ch/en/health/",
+        "type": "website",
+        "description": "Official Swiss source used to verify this material"
+      }
+    ],
     "priority": 8,
     "isNew": false,
     "isPremium": false,
     "estimatedReadingTime": 6,
     "lastUpdated": "2025-01-15T10:00:00Z",
-    "createdAt": "2025-01-15T10:00:00Z"
+    "createdAt": "2025-01-15T10:00:00Z",
+    "source": "https://www.ch.ch/en/health/",
+    "sourceTitle": "ch.ch — Health",
+    "verifiedAt": "2026-07-15T00:00:00Z"
   },
   {
     "id": "healthcare-uk-005",
@@ -175,16 +345,33 @@
     "subtitle": "Медичний супровід, страхування та права",
     "language": "uk",
     "bodyMarkdown": "# Вагітність та пологи у Швейцарії\n\nШвейцарія має відмінну систему догляду за вагітними.\n\n## Страхування\n\n### Grundversicherung покриває\n- ✅ Всі огляди у гінеколога\n- ✅ УЗД (3 обов'язкові)\n- ✅ Аналізи\n- ✅ Пологи\n- ✅ Госпіталізація\n- ✅ Акушерку (Hebamme)\n\n### Без франшизи!\n- Вагітність звільнена від франшизи\n- З 13 тижня до 8 тижнів після пологів\n\n## Медичний супровід\n\n### Лікар (Gynäkologe)\n- Регулярні огляди\n- 7-10 візитів за вагітність\n- УЗД: 12, 20, 32 тижні\n\n### Акушерка (Hebamme)\n- Підготовка до пологів\n- Допомога вдома після пологів\n- 16 візитів покриває страхова\n\n## Пологи\n\n### Де народжувати\n- Лікарня (Spital) — найпоширеніше\n- Geburtshaus — пологовий будинок\n- Вдома — з акушеркою\n\n### Вартість\n- Покривається страховою\n- Приватна палата — Zusatzversicherung\n\n## Права\n\n### Декретна відпустка\n- 14 тижнів оплачуваної відпустки\n- 80% зарплати (макс. 220 CHF/день)\n- Захист від звільнення\n\n### Батьківська відпустка\n- 2 тижні для батька\n- 80% зарплати\n\n## Допомога після пологів\n\n### Wochenbett (післяпологовий період)\n- Акушерка вдома\n- Допомога з годуванням\n- Психологічна підтримка\n\n> **Інсайд**: Знайдіть Hebamme заздалегідь (до 12 тижня) — популярні акушерки швидко зайняті!\n\n## Документи\n\n- Реєстрація дитини: протягом 3 днів\n- Geburtsurkunde — свідоцтво про народження\n- Anmeldung в Gemeinde\n- Страхування дитини: протягом 3 місяців",
-    "tags": ["healthcare", "pregnancy", "birth", "maternity", "lang:uk"],
+    "tags": [
+      "healthcare",
+      "pregnancy",
+      "birth",
+      "maternity",
+      "lang:uk"
+    ],
     "category": "healthcare",
     "cantonCodes": [],
-    "links": [],
+    "links": [
+      {
+        "id": "official-source-healthcare-uk-005",
+        "title": "ch.ch — Health",
+        "url": "https://www.ch.ch/en/health/",
+        "type": "website",
+        "description": "Official Swiss source used to verify this material"
+      }
+    ],
     "priority": 8,
     "isNew": false,
     "isPremium": false,
     "estimatedReadingTime": 7,
     "lastUpdated": "2025-01-15T10:00:00Z",
-    "createdAt": "2025-01-15T10:00:00Z"
+    "createdAt": "2025-01-15T10:00:00Z",
+    "source": "https://www.ch.ch/en/health/",
+    "sourceTitle": "ch.ch — Health",
+    "verifiedAt": "2026-07-15T00:00:00Z"
   },
   {
     "id": "healthcare-uk-006",
@@ -192,16 +379,32 @@
     "subtitle": "Impfungen: які рекомендовані та де зробити",
     "language": "uk",
     "bodyMarkdown": "# Щеплення у Швейцарії\n\nЩеплення у Швейцарії рекомендовані, але не обов'язкові.\n\n## Рекомендовані для дорослих\n\n### Базові\n- Правець (Tetanus) — кожні 10 років\n- Дифтерія — кожні 10 років\n- Кашлюк (Pertussis)\n- Кір, краснуха, паротит (MMR)\n\n### Додаткові\n- Гепатит A та B\n- Грип (щорічно)\n- COVID-19\n- Кліщовий енцефаліт (FSME) — у лісистих районах\n\n## Для дітей\n\n### Швейцарський календар\n- 2 місяці: DTPa, Hib, Polio, Hep B\n- 4 місяці: повтор\n- 12 місяців: MMR\n- 12-15 місяців: Varicella (вітряна віспа)\n- Далі за планом\n\n## Де зробити\n\n### Варіанти\n- Hausarzt (сімейний лікар)\n- Apotheke (деякі щеплення)\n- Impfzentrum (центри вакцинації)\n- Школа (для дітей)\n\n## Вартість\n\n### Покриває страхова\n- Базові щеплення за календарем\n- Для дітей — повністю\n\n### За свій рахунок\n- Деякі додаткові\n- Подорожні (жовта гарячка тощо)\n\n## Impfausweis (щеплювальна карта)\n\n### Що це\n- Офіційний документ зі щепленнями\n- Потрібен для школи\n- Може знадобитися для роботи\n\n### Як отримати\n- Видається при першому щепленні\n- Або в аптеці\n\n## Для українців\n\n> **Інсайд**: Українські щеплення визнаються. Принесіть свою карту до лікаря — він внесе дані в швейцарську систему.\n\n### Що перевірити\n- Кір (часто бракує бустера)\n- Правець (якщо більше 10 років)\n- COVID-19 бустер\n\n## Корисні посилання\n\n- bag.admin.ch — офіційні рекомендації\n- meineimpfungen.ch — електронна карта",
-    "tags": ["healthcare", "vaccination", "impfung", "children", "lang:uk"],
+    "tags": [
+      "healthcare",
+      "vaccination",
+      "impfung",
+      "children",
+      "lang:uk"
+    ],
     "category": "healthcare",
     "cantonCodes": [],
-    "links": [],
+    "links": [
+      {
+        "id": "official-source-healthcare-uk-006",
+        "title": "ch.ch — Health",
+        "url": "https://www.ch.ch/en/health/",
+        "type": "website",
+        "description": "Official Swiss source used to verify this material"
+      }
+    ],
     "priority": 6,
     "isNew": false,
     "isPremium": false,
     "estimatedReadingTime": 6,
     "lastUpdated": "2025-01-15T10:00:00Z",
-    "createdAt": "2025-01-15T10:00:00Z"
+    "createdAt": "2025-01-15T10:00:00Z",
+    "source": "https://www.ch.ch/en/health/",
+    "sourceTitle": "ch.ch — Health",
+    "verifiedAt": "2026-07-15T00:00:00Z"
   }
 ]
-

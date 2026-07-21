@@ -46,10 +46,11 @@ struct NewsDetailView: View, Identifiable {
             }
             .padding(Theme.Spacing.lg)
         }
-        .background(Theme.Colors.primaryBackground.ignoresSafeArea())
+        .background(Color.clear)
         .navigationTitle("Новина")
         .navigationBarTitleDisplayMode(.inline)
         .featureOnboarding(.news)
+        .journeyScreen(.city, darkness: 0.72)
     }
     
     private func formattedDate(_ date: Date) -> String {
@@ -59,5 +60,4 @@ struct NewsDetailView: View, Identifiable {
         return df.string(from: date)
     }
 }
-
 

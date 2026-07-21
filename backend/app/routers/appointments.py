@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from typing import List
 
 from fastapi import APIRouter, HTTPException, Query
@@ -45,5 +43,4 @@ def delete_appointment(appointment_id: str, db: DBSession, _: CurrentAdmin) -> N
         raise HTTPException(status_code=404, detail="Appointment not found")
     AppointmentService.delete(db, obj)
     return None
-
 

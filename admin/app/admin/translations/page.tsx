@@ -3,7 +3,8 @@ import { serverFetch } from '@/lib/server'
 import TranslationEditorDialog from '@/components/admin/TranslationEditorDialog'
 import UIButton from '@/components/ui/button'
 
-export default async function TranslationsPage({ searchParams }: any) {
+export default async function TranslationsPage(props: any) {
+  const searchParams = await props.searchParams;
   const qs = new URLSearchParams(searchParams as any).toString()
   const res = await serverFetch(`/translations${qs ? `?${qs}` : ''}`).catch(()=>null)
   const data = res && res.ok ? await res.json().catch(()=>[]) : []

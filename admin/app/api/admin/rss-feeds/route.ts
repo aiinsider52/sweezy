@@ -3,7 +3,7 @@ import { cookies } from 'next/headers'
 import { API_URL } from '@/lib/api'
 
 export async function GET() {
-  const token = cookies().get('access_token')?.value
+  const token = (await cookies()).get('access_token')?.value
   const res = await fetch(`${API_URL}/admin/rss-feeds`, {
     headers: token ? { Authorization: `Bearer ${token}` } : undefined,
     cache: 'no-store'
@@ -13,7 +13,7 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const token = cookies().get('access_token')?.value
+  const token = (await cookies()).get('access_token')?.value
   const body = await req.text()
   const res = await fetch(`${API_URL}/admin/rss-feeds`, {
     method: 'POST',

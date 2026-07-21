@@ -174,7 +174,6 @@ struct Place: Codable, Identifiable, Hashable {
 
         let localeIdentifier = locale.identifier.replacingOccurrences(of: "_", with: "-").lowercased()
         let languageCode = locale.language.languageCode?.identifier.lowercased()
-            ?? locale.languageCode?.lowercased()
             ?? localeIdentifier.split(separator: "-").first.map(String.init)
 
         let candidateKeys = [
@@ -278,7 +277,7 @@ enum PlaceType: String, CaseIterable, Codable, Hashable {
         case .legal: return .purple
         case .social: return .orange
         case .employment: return .brown
-        case .housing: return .cyan
+        case .housing: return Theme.Colors.primaryLight
         case .transport: return .mint
         case .banking: return .yellow
         case .shopping: return .pink

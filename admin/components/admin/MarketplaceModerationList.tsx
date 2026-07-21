@@ -4,11 +4,16 @@ import { useEffect, useMemo, useState } from "react"
 
 type Listing = {
   id: string
+  listing_type?: "service" | "item" | string
   title: string
   description: string
   category: string
   canton: string
   price_info?: string | null
+  price_chf?: number | null
+  is_free?: boolean
+  condition?: string | null
+  negotiable?: boolean
   contact_type: string
   contact_value?: string | null
   image_urls?: string[] | null
@@ -18,14 +23,27 @@ type Listing = {
   rejection_reason?: string | null
   ai_score?: number | null
   ai_score_reason?: string | null
+  is_verified?: boolean
+  is_featured?: boolean
+  trust_level?: "community" | "verified" | "partner" | string
+  partner_label?: string | null
+  moderation_notes?: string | null
+  is_expert?: boolean
+  expert_specialty?: string | null
+  expert_languages?: string[] | null
+  response_time_hours?: number | null
+  expert_bio?: string | null
   view_count: number
   created_at?: string
 }
 
 type StatusFilter = "pending" | "approved" | "rejected" | "all"
 
+type TypeFilter = "all" | "service" | "item"
+
 export default function MarketplaceModerationList() {
   const [status, setStatus] = useState<StatusFilter>("all")
+  const [typeFilter, setTypeFilter] = useState<TypeFilter>("all")
   const [items, setItems] = useState<Listing[]>([])
   const [loading, setLoading] = useState(true)
   const [busyId, setBusyId] = useState<string | null>(null)
@@ -54,12 +72,17 @@ export default function MarketplaceModerationList() {
     pending: items.filter(i => i.status === "pending").length,
     approved: items.filter(i => i.status === "approved").length,
     rejected: items.filter(i => i.status === "rejected").length,
+    verified: items.filter(i => i.is_verified).length,
+    featured: items.filter(i => i.is_featured).length,
   }), [items])
 
   const filteredItems = useMemo(() => {
     const query = search.trim().toLowerCase()
     return items.filter(item => {
       const matchesStatus = status === "all" ? true : item.status === status
+      const itemType = item.listing_type || "service"
+      const matchesType = typeFilter === "all" ? true : itemType === typeFilter
+      if (!matchesType) return false
       const haystack = [
         item.title,
         item.description,
@@ -75,12 +98,44 @@ export default function MarketplaceModerationList() {
       const matchesSearch = query.length === 0 || haystack.includes(query)
       return matchesStatus && matchesSearch
     })
-  }, [items, search, status])
+  }, [items, search, status, typeFilter])
 
   async function approve(id: string) {
+    const isVerified = window.confirm("Mark this listing as verified?")
+    const isFeatured = window.confirm("Feature this as a partner listing?")
+    const partnerLabel = isFeatured ? window.prompt("Partner label (optional):") : null
+    const isExpert = window.confirm("Promote to verified expert profile (visible in /experts)?")
+    let expertSpecialty: string | null = null
+    let expertLanguages: string[] | null = null
+    let responseTime: number | null = null
+    let expertBio: string | null = null
+    if (isExpert) {
+      expertSpecialty = window.prompt("Expert specialty (tax / legal / insurance / relocation / career / family):", "tax")
+      const langsRaw = window.prompt("Expert languages (comma, e.g. de,en,uk):", "de,en")
+      expertLanguages = (langsRaw || "").split(",").map(s => s.trim().toLowerCase()).filter(Boolean)
+      const rt = window.prompt("Typical response time in hours (optional):", "24")
+      const parsed = rt ? Number(rt) : NaN
+      responseTime = Number.isFinite(parsed) && parsed > 0 ? parsed : null
+      expertBio = window.prompt("Expert short bio (optional):") || null
+    }
+    const moderationNotes = window.prompt("Moderation notes (optional):")
     setBusyId(id)
     try {
-      await fetch(`/api/admin/marketplace/${id}/approve`, { method: "PATCH" })
+      await fetch(`/api/admin/marketplace/${id}/approve`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          is_verified: isVerified,
+          is_featured: isFeatured,
+          partner_label: partnerLabel || null,
+          moderation_notes: moderationNotes || null,
+          is_expert: isExpert,
+          expert_specialty: expertSpecialty,
+          expert_languages: expertLanguages,
+          response_time_hours: responseTime,
+          expert_bio: expertBio,
+        }),
+      })
       await load()
     } finally {
       setBusyId(null)
@@ -140,6 +195,20 @@ export default function MarketplaceModerationList() {
           ))}
         </div>
 
+        <div className="flex flex-wrap items-center gap-2">
+          {(["all", "service", "item"] as TypeFilter[]).map(value => (
+            <button
+              key={value}
+              onClick={() => setTypeFilter(value)}
+              className={`rounded-lg px-3 py-2 text-sm transition ${
+                typeFilter === value ? "bg-white/20" : "bg-white/5 hover:bg-white/10"
+              }`}
+            >
+              {value === "all" ? "All types" : value === "service" ? "Services" : "Items"}
+            </button>
+          ))}
+        </div>
+
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -148,12 +217,13 @@ export default function MarketplaceModerationList() {
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-6">
         <StatCard label="All" value={counts.total} />
         <StatCard label="Pending" value={counts.pending} highlight={counts.pending > 0} />
         <StatCard label="Approved" value={counts.approved} />
         <StatCard label="Rejected" value={counts.rejected} />
-        <StatCard label="Visible" value={filteredItems.length} />
+        <StatCard label="Verified" value={counts.verified} />
+        <StatCard label="Featured" value={counts.featured} />
       </div>
 
       {counts.pending > 0 && (
@@ -210,6 +280,26 @@ export default function MarketplaceModerationList() {
                     <div className="flex flex-wrap items-center gap-2">
                       <h3 className="text-lg font-semibold">{item.title}</h3>
                       <span className="rounded-full bg-white/10 px-2 py-1 text-xs uppercase">{item.status}</span>
+                      {(item.listing_type || "service") === "item" && (
+                        <span className="rounded-full border border-teal-400/30 bg-teal-500/20 px-2 py-1 text-xs font-medium text-teal-200">
+                          Item{item.condition ? ` · ${item.condition}` : ""}
+                        </span>
+                      )}
+                      {item.is_verified && (
+                        <span className="rounded-full border border-sky-400/30 bg-sky-500/20 px-2 py-1 text-xs font-medium text-sky-200">
+                          Verified
+                        </span>
+                      )}
+                      {item.is_featured && (
+                        <span className="rounded-full border border-amber-400/30 bg-amber-500/20 px-2 py-1 text-xs font-medium text-amber-200">
+                          Featured partner
+                        </span>
+                      )}
+                      {item.is_expert && (
+                        <span className="rounded-full border border-purple-400/30 bg-purple-500/20 px-2 py-1 text-xs font-medium text-purple-200">
+                          Expert{item.expert_specialty ? ` · ${item.expert_specialty}` : ""}
+                        </span>
+                      )}
                       <span className={`rounded-full px-2 py-1 text-xs font-medium ${scoreTone}`}>
                         AI score: {score ?? "n/a"}/10
                       </span>
@@ -247,10 +337,18 @@ export default function MarketplaceModerationList() {
 
                 <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
                   <InfoBlock label="Contact" value={`${item.contact_type}: ${item.contact_value ?? "hidden"}`} />
-                  <InfoBlock label="Price" value={item.price_info || "Not specified"} />
+                  <InfoBlock label="Price" value={formatPrice(item)} />
+                  <InfoBlock label="Trust" value={item.partner_label || item.trust_level || "community"} />
                   <InfoBlock label="Views" value={String(item.view_count ?? 0)} />
                   <InfoBlock label="Created" value={formatCreatedAt(item.created_at)} />
                 </div>
+
+                {item.moderation_notes && (
+                  <div className="rounded-xl bg-sky-500/10 p-3 text-sm text-sky-100">
+                    <div className="mb-1 text-xs uppercase tracking-wide opacity-70">Moderation notes</div>
+                    <div className="whitespace-pre-wrap">{item.moderation_notes}</div>
+                  </div>
+                )}
 
                 {item.ai_score_reason && (
                   <div className="rounded-xl bg-white/5 p-3 text-sm">
@@ -297,6 +395,15 @@ function resolveMediaUrl(rawUrl: string) {
   const apiBase = process.env.NEXT_PUBLIC_API_URL || "https://sweezy-9xyk.onrender.com/api/v1"
   const origin = apiBase.replace(/\/api\/v1\/?$/, "")
   return rawUrl.startsWith("/") ? `${origin}${rawUrl}` : `${origin}/${rawUrl}`
+}
+
+function formatPrice(item: Listing) {
+  if ((item.listing_type || "service") === "item") {
+    if (item.is_free) return "Free (give away)"
+    if (item.price_chf != null) return `CHF ${item.price_chf}${item.negotiable ? " (negotiable)" : ""}`
+    return "Not specified"
+  }
+  return item.price_info || "Not specified"
 }
 
 function formatCreatedAt(value?: string) {

@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 """
 Shared password strength validation used across the API.
 
@@ -11,6 +9,8 @@ Rules are intentionally aligned with the iOS client:
   - At least one punctuation / symbol
   - No whitespace characters
 """
+
+from __future__ import annotations
 
 import re
 from typing import Tuple
@@ -42,6 +42,5 @@ def validate_password_strength(password: str) -> Tuple[bool, str | None]:
     if not any(ch for ch in password if not ch.isalnum()):
         return False, "Password must contain at least one special character."
     return True, None
-
 
 

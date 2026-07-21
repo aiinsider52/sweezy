@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from typing import List
 
 from fastapi import APIRouter, HTTPException, Query, Request
@@ -58,5 +56,4 @@ def delete_template(template_id: str, db: DBSession, req: Request, _: CurrentAdm
     TemplateService.delete(db, obj)
     log_audit(db, user_email=req.headers.get("x-user-email") or "admin", action="delete", entity="templates", entity_id=template_id, before=obj, after=None)
     return None
-
 

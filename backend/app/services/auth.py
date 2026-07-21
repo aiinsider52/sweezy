@@ -2,27 +2,25 @@ from __future__ import annotations
 
 from datetime import timedelta
 
+from sqlalchemy.orm import Session
+
 from ..core.config import get_settings
-from ..core.security import create_access_token, get_password_hash, verify_password
+from ..core.security import create_access_token
 
 
 class AuthService:
     @staticmethod
-    def authenticate_admin(email: str, password: str) -> str | None:
-        settings = get_settings()
+    def authenticate_admin(db: Session, email: str, password: str) -> str | None:
+        from .users import UserService
 
-        # Hash on first use to avoid storing plain admin password anywhere else
-        hashed = get_password_hash(settings.ADMIN_PASSWORD)
-        if email.lower() != settings.ADMIN_EMAIL.lower():
-            return None
-        if not verify_password(password, hashed):
+        user = UserService.authenticate(db, email=email, password=password)
+        if not user or not user.is_superuser:
             return None
 
         token = create_access_token(
-            subject=email,
+            subject=user.id,
             is_admin=True,
-            expires_delta=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES),
+            role=user.role,
+            expires_delta=timedelta(minutes=get_settings().ACCESS_TOKEN_EXPIRE_MINUTES),
         )
         return token
-
-

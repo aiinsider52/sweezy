@@ -42,6 +42,13 @@ from .routers.marketplace import router as marketplace_router
 from .routers.marketplace import admin_router as marketplace_admin_router
 from .routers.events import router as events_router
 from .routers.events import admin_router as events_admin_router
+from .routers.moments import router as moments_router
+from .routers.moments import admin_router as moments_admin_router
+from .routers.experts import router as experts_router
+from .routers.experts import admin_router as experts_admin_router
+from .routers.chat import router as chat_router
+from .routers.chat import admin_router as chat_admin_router
+from .routers.chat import devices_router
 
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
@@ -140,14 +147,44 @@ async def lifespan(app: FastAPI):
         # Demo seeding is optional; log and continue.
         log.warning("seed_demo_failed", error=str(exc))
 
+    def _seed_moments() -> int:
+        from .services.moments_seed import seed_swiss_moments
+
+        with SessionLocal() as db:
+            return seed_swiss_moments(db)
+
+    try:
+        inserted = await asyncio.to_thread(_seed_moments)
+        if inserted:
+            log.info("seed_moments_ok", inserted=inserted)
+    except Exception as exc:
+        log.warning("seed_moments_failed", error=str(exc))
+
+    from .services.chat_realtime import chat_realtime
+    from .services.push_notifications import notification_worker
+
+    if settings.CHAT_ENABLED:
+        await chat_realtime.start()
     task = asyncio.create_task(_background_tick())
+    push_task = (
+        asyncio.create_task(notification_worker())
+        if settings.CHAT_ENABLED and settings.PUSH_NOTIFICATIONS_ENABLED
+        else None
+    )
     try:
         yield
     finally:
         task.cancel()
+        if push_task:
+            push_task.cancel()
         # Suppress task cancellation on shutdown to avoid noisy tracebacks
         with contextlib.suppress(asyncio.CancelledError):
             await task
+        if push_task:
+            with contextlib.suppress(asyncio.CancelledError):
+                await push_task
+        if settings.CHAT_ENABLED:
+            await chat_realtime.stop()
 
 
 app = FastAPI(
@@ -231,12 +268,13 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.add_middleware(SlowAPIMiddleware)
 
 # Prometheus metrics must be registered BEFORE startup (instrumentator adds middleware).
-try:
-    instrumentator.instrument(app).expose(app, endpoint="/metrics", include_in_schema=False)
-    log.info("metrics_enabled", endpoint="/metrics")
-except Exception as exc:
-    # Metrics are helpful but non‑critical; log and continue
-    log.warning("metrics_init_failed", error=str(exc))
+if settings.APP_ENV.lower() != "test":
+    try:
+        instrumentator.instrument(app).expose(app, endpoint="/metrics", include_in_schema=False)
+        log.info("metrics_enabled", endpoint="/metrics")
+    except Exception as exc:
+        # Metrics are helpful but non‑critical; log and continue
+        log.warning("metrics_init_failed", error=str(exc))
 
 
 def _run_migrations() -> bool:
@@ -247,13 +285,24 @@ def _run_migrations() -> bool:
     - We must NOT rely on the `alembic` shell entrypoint being on PATH in hosted envs.
     - In production, we want to fail fast if migrations cannot be applied.
     """
-    if not Path("backend/alembic").exists():
-        log.warning("alembic_missing", path="backend/alembic")
+    backend_root = Path(__file__).resolve().parents[1]
+    repository_root = backend_root.parent
+    alembic_dir = backend_root / "alembic"
+    alembic_config = backend_root / "alembic.ini"
+    if not alembic_dir.exists() or not alembic_config.exists():
+        log.warning("alembic_missing", path=str(alembic_dir))
         return False
 
-    cmd = [sys.executable, "-m", "alembic", "-c", "backend/alembic.ini", "upgrade", "head"]
+    cmd = [sys.executable, "-m", "alembic", "-c", str(alembic_config), "upgrade", "head"]
     try:
-        subprocess.run(cmd, check=True, capture_output=True, text=True, timeout=120)
+        subprocess.run(
+            cmd,
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=120,
+            cwd=repository_root,
+        )
         log.info("alembic_ok")
         return True
     except subprocess.TimeoutExpired:
@@ -269,25 +318,32 @@ def _run_migrations() -> bool:
         return False
 
 
-@app.api_route("/health", methods=["GET", "HEAD"])
+@app.get("/health", operation_id="health")
 def health() -> dict:
     # Liveness
     return {"status": "ok"}
 
 
-@app.api_route("/ready", methods=["GET", "HEAD"])
+@app.head("/health", include_in_schema=False)
+def health_head() -> None:
+    return None
+
+
+@app.get("/ready", operation_id="ready")
 def ready() -> dict:
-    # Readiness (DB connectivity + schema/migrations)
-    from sqlalchemy import text
-    from .core.database import SessionLocal
+    from .core.readiness import run_readiness_checks
 
     try:
-        with SessionLocal() as db:
-            db.execute(text("SELECT 1"))
-            db.execute(text("SELECT 1 FROM alembic_version LIMIT 1"))
-        return {"status": "ready"}
+        return {"status": "ready", "checks": run_readiness_checks()}
     except Exception as exc:
+        log.warning("readiness_failed", error=str(exc))
         raise HTTPException(status_code=503, detail="not ready") from exc
+
+
+@app.head("/ready", include_in_schema=False)
+def ready_head() -> None:
+    ready()
+    return None
 
 
 # Routers (versioned)
@@ -312,6 +368,13 @@ app.include_router(marketplace_router, prefix=f"{API_PREFIX}/marketplace", tags=
 app.include_router(marketplace_admin_router, prefix=f"{API_PREFIX}/admin", tags=["admin", "marketplace"])
 app.include_router(events_router, prefix=f"{API_PREFIX}/events", tags=["events"])
 app.include_router(events_admin_router, prefix=f"{API_PREFIX}/admin", tags=["admin", "events"])
+app.include_router(moments_router, prefix=f"{API_PREFIX}/moments", tags=["moments"])
+app.include_router(moments_admin_router, prefix=f"{API_PREFIX}/admin", tags=["admin", "moments"])
+app.include_router(experts_router, prefix=f"{API_PREFIX}/experts", tags=["experts"])
+app.include_router(experts_admin_router, prefix=f"{API_PREFIX}/admin", tags=["admin", "experts"])
+app.include_router(chat_router, prefix=f"{API_PREFIX}/chat", tags=["chat"])
+app.include_router(chat_admin_router, prefix=f"{API_PREFIX}/admin", tags=["admin", "chat"])
+app.include_router(devices_router, prefix=f"{API_PREFIX}/devices", tags=["devices"])
 
 # Public pages (App Store / legal)
 app.include_router(legal_router, tags=["legal"])
@@ -340,4 +403,3 @@ def debug_openapi() -> dict:
             "error": str(exc),
             "traceback": traceback.format_exc(),
         }
-

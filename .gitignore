@@ -22,3 +22,10 @@ admin/test-results/
 backend/.env
 backend/.env
 backend/.env
+artifacts/
+landing-app-frames/
+backend/uploads/
+test.db
+*.db
+admin/tsconfig.tsbuildinfo
+**/*.tsbuildinfo

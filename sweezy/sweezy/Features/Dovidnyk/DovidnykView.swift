@@ -42,6 +42,8 @@ struct DovidnykView: View {
                 self = .guides
             case .checklists:
                 self = .checklists
+            case .tools:
+                self = .guides
             }
         }
     }
@@ -57,27 +59,33 @@ struct DovidnykView: View {
     
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {
-                // Tab switcher
-                tabSwitcher
-                
-                // Content based on selected tab
+            InkPageScaffold {
+                VStack(alignment: .leading, spacing: Theme.Spacing.md) {
+                    InkHeaderTitle(title: "guides.title".localized)
+
+                    InkSearchField(text: $searchText, prompt: "guides.search_placeholder".localized)
+
+                    PillSegmentedControl(
+                        items: DovidnykTab.allCases.map(\.title),
+                        selection: Binding(
+                            get: { DovidnykTab.allCases.firstIndex(of: selectedTab) ?? 0 },
+                            set: { selectedTab = DovidnykTab.allCases[$0] }
+                        )
+                    )
+                }
+            } content: {
                 TabView(selection: $selectedTab) {
-                    // Guides tab
                     GuidesContentView(searchText: $searchText)
                         .tag(DovidnykTab.guides)
-                    
-                    // Checklists tab
+
                     ChecklistsContentView()
                         .tag(DovidnykTab.checklists)
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
                 .animation(.easeInOut(duration: 0.25), value: selectedTab)
+                .padding(.top, Theme.Spacing.sm)
             }
-            .background(AdaptivePageBackground())
-            .navigationTitle("guides.title".localized)
-            .navigationBarTitleDisplayMode(.large)
-            .searchable(text: $searchText, prompt: "guides.search_placeholder".localized)
+            .navigationBarHidden(true)
             .refreshable {
                 await appContainer.contentService.refreshContent()
                 haptic(.light)
@@ -99,51 +107,6 @@ struct DovidnykView: View {
         }
     }
     
-    // MARK: - Tab Switcher
-    private var tabSwitcher: some View {
-        HStack(spacing: 6) {
-            ForEach(DovidnykTab.allCases, id: \.self) { tab in
-                Button {
-                    withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
-                        selectedTab = tab
-                    }
-                    haptic(.light)
-                } label: {
-                    HStack(spacing: 7) {
-                        Image(systemName: tab.icon)
-                            .font(.system(size: 13, weight: .semibold))
-                        Text(tab.title)
-                            .font(.system(size: 14, weight: selectedTab == tab ? .semibold : .medium))
-                    }
-                    .foregroundColor(selectedTab == tab ? .white : Theme.Colors.textSecondary)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 10)
-                    .background(
-                        Group {
-                            if selectedTab == tab {
-                                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                    .fill(Theme.Colors.primary)
-                                    .shadow(color: Theme.Colors.primary.opacity(0.3), radius: 6, x: 0, y: 3)
-                            }
-                        }
-                    )
-                }
-                .buttonStyle(.plain)
-                .animation(.spring(response: 0.35, dampingFraction: 0.8), value: selectedTab)
-            }
-        }
-        .padding(5)
-        .background(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .fill(Theme.Colors.adaptiveCard)
-        )
-        .padding(.horizontal, Theme.Spacing.md)
-        .padding(.vertical, 8)
-        .background(
-            Theme.Colors.primaryBackground
-                .shadow(.drop(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2))
-        )
-    }
 }
 
 // MARK: - Guides Content View (reuses existing GuidesView logic)
@@ -963,4 +926,3 @@ struct DovidnykLiteView: View {
         .environmentObject(AppLockManager())
         .environmentObject(ThemeManager())
 }
-

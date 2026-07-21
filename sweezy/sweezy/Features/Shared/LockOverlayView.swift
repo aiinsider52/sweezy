@@ -21,9 +21,8 @@ struct LockOverlayView: View {
                 .multilineTextAlignment(.center)
         }
         .padding(16)
-        .background(.ultraThinMaterial)
-        .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.05), radius: 8, y: 4)
+        .journeyCard(cornerRadius: 18)
+        .shadow(color: Color.black.opacity(0.28), radius: 14, y: 6)
     }
 }
 
@@ -32,13 +31,7 @@ struct LockScreenOverlay: View {
     
     var body: some View {
         ZStack {
-            Theme.Colors.primaryBackground
-                .ignoresSafeArea()
-                .overlay {
-                    Rectangle()
-                        .fill(.black.opacity(0.28))
-                        .ignoresSafeArea()
-                }
+            JourneyPhotoBackground(imageName: JourneyBackdrop.alpine.rawValue, blurRadius: 8, darkness: 0.76)
             
             VStack(spacing: Theme.Spacing.lg) {
                 Spacer()
@@ -68,6 +61,7 @@ struct LockScreenOverlay: View {
             }
             .padding()
         }
+        .journeyScreen(.alpine, darkness: 0.76)
         .transition(.opacity)
         .zIndex(1)
     }
@@ -76,5 +70,4 @@ struct LockScreenOverlay: View {
         lockManager.biometryDisplayName == "Face ID" ? "faceid" : "touchid"
     }
 }
-
 

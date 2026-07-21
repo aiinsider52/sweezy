@@ -19,10 +19,12 @@ struct TermsOfUseView: View {
                 .foregroundColor(.secondary)
             }
             .padding()
+            .journeyCard()
+            .padding()
         }
         .navigationTitle("Умови використання")
         .navigationBarTitleDisplayMode(.inline)
+        .journeyScreen(.city, darkness: 0.7)
     }
 }
-
 

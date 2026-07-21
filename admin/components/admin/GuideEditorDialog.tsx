@@ -14,6 +14,9 @@ type Guide = {
   category?: string
   is_published?: boolean
   image_url?: string
+  source_url?: string
+  source_title?: string
+  verified_at?: string
 }
 
 export default function GuideEditorDialog({ guide, onSaved }: { guide?: Guide; onSaved?: () => void }) {
@@ -75,6 +78,14 @@ export default function GuideEditorDialog({ guide, onSaved }: { guide?: Guide; o
             {categories.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
           <UIInput placeholder="Description" value={form.description} onChange={e=>setForm({ ...form, description: e.target.value })} />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <UIInput placeholder="Official source URL" value={form.source_url ?? ''} onChange={e=>setForm({ ...form, source_url: e.target.value })} />
+            <UIInput placeholder="Source title (e.g. ch.ch)" value={form.source_title ?? ''} onChange={e=>setForm({ ...form, source_title: e.target.value })} />
+          </div>
+          <label className="text-sm opacity-80">
+            Last verified
+            <UIInput type="date" value={form.verified_at?.slice(0, 10) ?? ''} onChange={e=>setForm({ ...form, verified_at: e.target.value ? `${e.target.value}T00:00:00Z` : undefined })} />
+          </label>
           <MarkdownEditor value={form.content ?? ''} onChange={(v)=>setForm({...form, content: v})} />
           <div className="space-y-2">
             {form.image_url && (<img src={form.image_url} alt="preview" className="w-full h-40 object-cover rounded-lg" />)}
@@ -98,5 +109,4 @@ export default function GuideEditorDialog({ guide, onSaved }: { guide?: Guide; o
     </div>
   )
 }
-
 

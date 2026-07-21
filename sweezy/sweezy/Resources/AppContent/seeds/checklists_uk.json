@@ -13,10 +13,24 @@
         "description": "Протягом 14 днів після прибуття. Візьміть паспорт/ID, договір оренди або підтвердження проживання, фото, та (за наявності) договір страхування.",
         "estimatedTime": "30 хв",
         "isOptional": false,
-        "requiredDocuments": ["Паспорт/ID", "Договір оренди", "Фото 3x4", "Дозвіл на проживання"],
-        "tips": ["Перевірте години прийому та чи потрібен термін", "Запитайте про субсидію на медстрахування", "Візьміть з собою друга‑перекладача, якщо не знаєте мови"],
+        "requiredDocuments": [
+          "Паспорт/ID",
+          "Договір оренди",
+          "Фото 3x4",
+          "Дозвіл на проживання"
+        ],
+        "tips": [
+          "Перевірте години прийому та чи потрібен термін",
+          "Запитайте про субсидію на медстрахування",
+          "Візьміть з собою друга‑перекладача, якщо не знаєте мови"
+        ],
         "links": [
-          {"id":"uk1","title":"CH.CH — Реєстрація при прибутті","url":"https://www.ch.ch/en/registration-arrival","type":"website"}
+          {
+            "id": "uk1",
+            "title": "CH.CH — Реєстрація при прибутті",
+            "url": "https://www.ch.ch/en/registration-arrival",
+            "type": "website"
+          }
         ],
         "order": 1
       },
@@ -26,10 +40,23 @@
         "description": "Для отримання зарплати або допомог. Оберіть банк (PostFinance, UBS, Raiffeisen), підготуйте паспорт, підтвердження адреси та, за необхідності, довідку про статус.",
         "estimatedTime": "1–2 год",
         "isOptional": false,
-        "requiredDocuments": ["Паспорт", "Anmeldebestätigung (підтвердження реєстрації)", "Дозвіл на проживання"],
-        "tips": ["Запитайте про рахунки без комісії для біженців", "Зробіть мобільний e‑банкінг одразу", "Для PostFinance можна відкрити в будь‑якому поштовому відділенні"],
+        "requiredDocuments": [
+          "Паспорт",
+          "Anmeldebestätigung (підтвердження реєстрації)",
+          "Дозвіл на проживання"
+        ],
+        "tips": [
+          "Запитайте про рахунки без комісії для біженців",
+          "Зробіть мобільний e‑банкінг одразу",
+          "Для PostFinance можна відкрити в будь‑якому поштовому відділенні"
+        ],
         "links": [
-          {"id":"uk2","title":"PostFinance","url":"https://www.postfinance.ch/","type":"website"}
+          {
+            "id": "uk2",
+            "title": "PostFinance",
+            "url": "https://www.postfinance.ch/",
+            "type": "website"
+          }
         ],
         "order": 2
       },
@@ -39,10 +66,23 @@
         "description": "Обов'язково протягом 3 місяців. Оберіть модель (HMO/Telmed/Standard), підходящу франшизу та перевірте субсидії (Prämienverbilligung).",
         "estimatedTime": "1–2 год",
         "isOptional": false,
-        "requiredDocuments": ["Паспорт", "Anmeldebestätigung", "Довідка про доходи (для субсидії)"],
-        "tips": ["Порівняйте ціни на comparis.ch", "Франшиза 300 CHF — найдешевший місячний внесок, але дорожчі візити", "HMO на 10–20% дешевше стандартної моделі"],
+        "requiredDocuments": [
+          "Паспорт",
+          "Anmeldebestätigung",
+          "Довідка про доходи (для субсидії)"
+        ],
+        "tips": [
+          "Порівняйте ціни на comparis.ch",
+          "Франшиза 300 CHF — найдешевший місячний внесок, але дорожчі візити",
+          "HMO на 10–20% дешевше стандартної моделі"
+        ],
         "links": [
-          {"id":"uk3","title":"Comparis — Krankenkassen","url":"https://www.comparis.ch/krankenkassen/","type":"website"}
+          {
+            "id": "uk3",
+            "title": "Comparis — Krankenkassen",
+            "url": "https://www.comparis.ch/krankenkassen/",
+            "type": "website"
+          }
         ],
         "order": 3
       },
@@ -52,10 +92,23 @@
         "description": "Якщо ваш дохід нижчий за поріг, ви маєте право на Prämienverbilligung (знижку на премії). Подайте заявку через портал вашого кантону або Sozialamt.",
         "estimatedTime": "30–60 хв",
         "isOptional": true,
-        "requiredDocuments": ["Довідка про доходи", "Копія полісу медстрахування", "Дозвіл на проживання"],
-        "tips": ["Терміни різні для кожного кантону — перевірте заздалегідь", "Субсидія не діє ретроактивно", "У Цюріху подавайте через svazurich.ch"],
+        "requiredDocuments": [
+          "Довідка про доходи",
+          "Копія полісу медстрахування",
+          "Дозвіл на проживання"
+        ],
+        "tips": [
+          "Терміни різні для кожного кантону — перевірте заздалегідь",
+          "Субсидія не діє ретроактивно",
+          "У Цюріху подавайте через svazurich.ch"
+        ],
         "links": [
-          {"id":"uk4","title":"Інфо про субсидії","url":"https://www.ch.ch/en/health-insurance-premium-reduction","type":"website"}
+          {
+            "id": "uk4",
+            "title": "Інфо про субсидії",
+            "url": "https://www.ch.ch/en/health-insurance-premium-reduction",
+            "type": "website"
+          }
         ],
         "order": 4
       },
@@ -65,18 +118,38 @@
         "description": "Якщо у вас є діти, зареєструйте їх у Schulamt (шкільне управління) вашої Gemeinde. Освіта обов'язкова з 4–6 років і безкоштовна.",
         "estimatedTime": "45 хв",
         "isOptional": true,
-        "requiredDocuments": ["Свідоцтво про народження", "Паспорт дитини", "Anmeldebestätigung", "Щеплення (рекомендовано)"],
-        "tips": ["Зверніться до Schulamt протягом перших тижнів", "Багато міст пропонують безкоштовні мовні курси для дітей", "Дитсадки (Kita) платні, але можливі субсидії"],
+        "requiredDocuments": [
+          "Свідоцтво про народження",
+          "Паспорт дитини",
+          "Anmeldebestätigung",
+          "Щеплення (рекомендовано)"
+        ],
+        "tips": [
+          "Зверніться до Schulamt протягом перших тижнів",
+          "Багато міст пропонують безкоштовні мовні курси для дітей",
+          "Дитсадки (Kita) платні, але можливі субсидії"
+        ],
         "links": [],
         "order": 5
       }
     ],
-    "tags": ["registration", "gemeinde", "banking", "insurance", "school", "lang:uk"],
+    "tags": [
+      "registration",
+      "gemeinde",
+      "banking",
+      "insurance",
+      "school",
+      "lang:uk"
+    ],
     "cantonCodes": [],
     "priority": 10,
     "isNew": true,
     "createdAt": "2025-01-15T10:00:00Z",
-    "lastUpdated": "2025-10-15T10:00:00Z"
+    "lastUpdated": "2025-10-15T10:00:00Z",
+    "source": "https://www.ch.ch/en/foreign-nationals-in-switzerland/",
+    "sourceTitle": "ch.ch — Foreign nationals in Switzerland",
+    "verifiedAt": "2026-07-15T00:00:00Z",
+    "language": "uk"
   },
   {
     "id": "a1b2c3d4-e5f6-7890-abcd-ef1234560001",
@@ -93,10 +166,24 @@
         "estimatedTime": "1 год",
         "isOptional": false,
         "requiredDocuments": [],
-        "tips": ["Порівняйте ціни за кантонами на Comparis або Homegate", "Квартири за містом дешевші, але враховуйте вартість GA/Halbtax на транспорт", "Kanton Zug — найдорожчий, Solothurn, Aargau — значно дешевше"],
+        "tips": [
+          "Порівняйте ціни за кантонами на Comparis або Homegate",
+          "Квартири за містом дешевші, але враховуйте вартість GA/Halbtax на транспорт",
+          "Kanton Zug — найдорожчий, Solothurn, Aargau — значно дешевше"
+        ],
         "links": [
-          {"id":"hs1","title":"Homegate.ch — пошук квартир","url":"https://www.homegate.ch/","type":"website"},
-          {"id":"hs2","title":"ImmoScout24","url":"https://www.immoscout24.ch/","type":"website"}
+          {
+            "id": "hs1",
+            "title": "Homegate.ch — пошук квартир",
+            "url": "https://www.homegate.ch/",
+            "type": "website"
+          },
+          {
+            "id": "hs2",
+            "title": "ImmoScout24",
+            "url": "https://www.immoscout24.ch/",
+            "type": "website"
+          }
         ],
         "order": 1
       },
@@ -120,7 +207,12 @@
           "Напишіть мотиваційний лист — орендодавці цінують особисте звернення"
         ],
         "links": [
-          {"id":"hs3","title":"Betreibungsamt — знайти свій офіс","url":"https://www.betreibungsregister.ch/","type":"website"}
+          {
+            "id": "hs3",
+            "title": "Betreibungsamt — знайти свій офіс",
+            "url": "https://www.betreibungsregister.ch/",
+            "type": "website"
+          }
         ],
         "order": 2
       },
@@ -138,8 +230,18 @@
           "Ніколи не переказуйте депозит до підписання договору і огляду квартири"
         ],
         "links": [
-          {"id":"hs4","title":"Comparis — оренда житла","url":"https://www.comparis.ch/immobilien/","type":"website"},
-          {"id":"hs5","title":"Tutti.ch","url":"https://www.tutti.ch/","type":"website"}
+          {
+            "id": "hs4",
+            "title": "Comparis — оренда житла",
+            "url": "https://www.comparis.ch/immobilien/",
+            "type": "website"
+          },
+          {
+            "id": "hs5",
+            "title": "Tutti.ch",
+            "url": "https://www.tutti.ch/",
+            "type": "website"
+          }
         ],
         "order": 3
       },
@@ -149,7 +251,9 @@
         "description": "На огляді (Wohnungsbesichtigung) уважно перевірте стан квартири. Ваше враження та поведінка також оцінюються. Приходьте вчасно, будьте охайні, задавайте конкретні питання.",
         "estimatedTime": "1–2 год",
         "isOptional": false,
-        "requiredDocuments": ["Повне досьє орендаря (мати з собою)"],
+        "requiredDocuments": [
+          "Повне досьє орендаря (мати з собою)"
+        ],
         "tips": [
           "Перевірте: цвіль, нагрів батарей, натиск води, стан вікон",
           "Запитайте про Nebenkosten: що включено і що ні",
@@ -176,7 +280,12 @@
           "Отримайте підписаний протокол прийому-передачі від орендодавця"
         ],
         "links": [
-          {"id":"hs6","title":"Права орендаря — Mieterverband","url":"https://www.mieterverband.ch/","type":"website"}
+          {
+            "id": "hs6",
+            "title": "Права орендаря — Mieterverband",
+            "url": "https://www.mieterverband.ch/",
+            "type": "website"
+          }
         ],
         "order": 5
       },
@@ -186,7 +295,10 @@
         "description": "Після заїзду потрібно перереєструватися в Gemeinde, підключити інтернет, повідомити Krankenkasse про нову адресу та зареєструватися в Serafe (медіаліцензія).",
         "estimatedTime": "2–3 год",
         "isOptional": false,
-        "requiredDocuments": ["Договір оренди", "Паспорт"],
+        "requiredDocuments": [
+          "Договір оренди",
+          "Паспорт"
+        ],
         "tips": [
           "Зміну адреси — до Gemeinde протягом 14 днів",
           "Serafe (ТВ-ліцензія) — 335 CHF/рік, обов'язково для всіх домогосподарств",
@@ -194,17 +306,32 @@
           "Поштове перенаправлення (Nachsendeauftrag) — 35 CHF на 3 місяці"
         ],
         "links": [
-          {"id":"hs7","title":"Serafe — медіаліцензія","url":"https://www.serafe.ch/","type":"website"}
+          {
+            "id": "hs7",
+            "title": "Serafe — медіаліцензія",
+            "url": "https://www.serafe.ch/",
+            "type": "website"
+          }
         ],
         "order": 6
       }
     ],
-    "tags": ["housing", "rental", "apartment", "mietvertrag", "lang:uk"],
+    "tags": [
+      "housing",
+      "rental",
+      "apartment",
+      "mietvertrag",
+      "lang:uk"
+    ],
     "cantonCodes": [],
     "priority": 9,
     "isNew": true,
     "createdAt": "2025-01-15T10:00:00Z",
-    "lastUpdated": "2025-10-15T10:00:00Z"
+    "lastUpdated": "2025-10-15T10:00:00Z",
+    "source": "https://www.ch.ch/en/housing/",
+    "sourceTitle": "ch.ch — Housing",
+    "verifiedAt": "2026-07-15T00:00:00Z",
+    "language": "uk"
   },
   {
     "id": "a1b2c3d4-e5f6-7890-abcd-ef1234560002",
@@ -227,7 +354,12 @@
           "Модель HMO або Telmed на 10–25% дешевше стандартної"
         ],
         "links": [
-          {"id":"ins1","title":"BAG — офіційна інформація","url":"https://www.bag.admin.ch/","type":"website"}
+          {
+            "id": "ins1",
+            "title": "BAG — офіційна інформація",
+            "url": "https://www.bag.admin.ch/",
+            "type": "website"
+          }
         ],
         "order": 1
       },
@@ -237,15 +369,28 @@
         "description": "Базове покриття однакове у всіх страховиків — різниця лише у ціні та сервісі. Щороку до 30 листопада ви можете змінити страховика. Нові жителі мають 3 місяці після приїзду для першого вибору.",
         "estimatedTime": "1–2 год",
         "isOptional": false,
-        "requiredDocuments": ["Дозвіл на проживання", "Паспорт"],
+        "requiredDocuments": [
+          "Дозвіл на проживання",
+          "Паспорт"
+        ],
         "tips": [
           "Порівнюйте на Priminfo (офіційний урядовий портал) або Comparis",
           "Зверніть увагу на рейтинг сервісу та швидкість виплат",
           "Запитайте у роботодавця — деякі мають колективні знижки"
         ],
         "links": [
-          {"id":"ins2","title":"Priminfo — офіційне порівняння премій","url":"https://www.priminfo.admin.ch/","type":"website"},
-          {"id":"ins3","title":"Comparis — Krankenkassen","url":"https://www.comparis.ch/krankenkassen/","type":"website"}
+          {
+            "id": "ins2",
+            "title": "Priminfo — офіційне порівняння премій",
+            "url": "https://www.priminfo.admin.ch/",
+            "type": "website"
+          },
+          {
+            "id": "ins3",
+            "title": "Comparis — Krankenkassen",
+            "url": "https://www.comparis.ch/krankenkassen/",
+            "type": "website"
+          }
         ],
         "order": 2
       },
@@ -266,7 +411,12 @@
           "При зміні страховика повідомте Ausgleichskasse — субсидія прив'язана до полісу"
         ],
         "links": [
-          {"id":"ins4","title":"Субсидії — CH.CH","url":"https://www.ch.ch/en/health-insurance-premium-reduction","type":"website"}
+          {
+            "id": "ins4",
+            "title": "Субсидії — CH.CH",
+            "url": "https://www.ch.ch/en/health-insurance-premium-reduction",
+            "type": "website"
+          }
         ],
         "order": 3
       },
@@ -276,14 +426,22 @@
         "description": "При HMO або Telmed-моделі обов'язково потрібен Hausarzt як перша точка контакту. При стандартній моделі ви можете йти до будь-якого лікаря. Шукайте лікаря, що говорить вашою або англійською мовою.",
         "estimatedTime": "1–2 год",
         "isOptional": false,
-        "requiredDocuments": ["Страхова картка (Krankenkassenkarte)", "Дозвіл на проживання"],
+        "requiredDocuments": [
+          "Страхова картка (Krankenkassenkarte)",
+          "Дозвіл на проживання"
+        ],
         "tips": [
           "Шукайте на doctorfmh.ch за мовою прийому",
           "Деякі праксиси мають чергу 2–4 тижні — плануйте наперед",
           "У невідкладних випадках: 144 (швидка) або 0800 33 66 55 (медична гаряча лінія)"
         ],
         "links": [
-          {"id":"ins5","title":"DoctorFMH — пошук лікаря","url":"https://www.doctorfmh.ch/","type":"website"}
+          {
+            "id": "ins5",
+            "title": "DoctorFMH — пошук лікаря",
+            "url": "https://www.doctorfmh.ch/",
+            "type": "website"
+          }
         ],
         "order": 4
       },
@@ -303,12 +461,22 @@
         "order": 5
       }
     ],
-    "tags": ["insurance", "krankenkasse", "health", "subsidies", "lang:uk"],
+    "tags": [
+      "insurance",
+      "krankenkasse",
+      "health",
+      "subsidies",
+      "lang:uk"
+    ],
     "cantonCodes": [],
     "priority": 9,
     "isNew": true,
     "createdAt": "2025-01-15T10:00:00Z",
-    "lastUpdated": "2025-10-15T10:00:00Z"
+    "lastUpdated": "2025-10-15T10:00:00Z",
+    "source": "https://www.ch.ch/en/health/health-insurance/",
+    "sourceTitle": "ch.ch — Health insurance",
+    "verifiedAt": "2026-07-15T00:00:00Z",
+    "language": "uk"
   },
   {
     "id": "a1b2c3d4-e5f6-7890-abcd-ef1234560003",
@@ -324,15 +492,28 @@
         "description": "Швейцарське CV: фото обов'язкове, хронологія зворотня (від останнього місця), обсяг 2 сторінки. LinkedIn у Швейцарії — основний інструмент рекрутингу, особливо в IT та великих компаніях. Також поширений Xing у Німецькомовній Швейцарії.",
         "estimatedTime": "3–4 год",
         "isOptional": false,
-        "requiredDocuments": ["Дипломи та сертифікати", "Трудові характеристики (Arbeitszeugnis)"],
+        "requiredDocuments": [
+          "Дипломи та сертифікати",
+          "Трудові характеристики (Arbeitszeugnis)"
+        ],
         "tips": [
           "Вкажіть рівні мов за шкалою A1–C2, не просто 'базовий/просунутий'",
           "Швейцарці цінують точність: вказуйте конкретні досягнення з цифрами",
           "Фото — ділове, нейтральний фон, усмішка прийнятна"
         ],
         "links": [
-          {"id":"work1","title":"Jobs.ch — вакансії","url":"https://www.jobs.ch/","type":"website"},
-          {"id":"work2","title":"Indeed Швейцарія","url":"https://ch.indeed.com/","type":"website"}
+          {
+            "id": "work1",
+            "title": "Jobs.ch — вакансії",
+            "url": "https://www.jobs.ch/",
+            "type": "website"
+          },
+          {
+            "id": "work2",
+            "title": "Indeed Швейцарія",
+            "url": "https://ch.indeed.com/",
+            "type": "website"
+          }
         ],
         "order": 1
       },
@@ -353,7 +534,12 @@
           "Деякі роботодавці наймають без формального визнання при відповідності вимогам"
         ],
         "links": [
-          {"id":"work3","title":"SERI — визнання дипломів","url":"https://www.sbfi.admin.ch/sbfi/en/home/education/recognition-of-foreign-qualifications.html","type":"website"}
+          {
+            "id": "work3",
+            "title": "SERI — визнання дипломів",
+            "url": "https://www.sbfi.admin.ch/sbfi/en/home/education/recognition-of-foreign-qualifications.html",
+            "type": "website"
+          }
         ],
         "order": 2
       },
@@ -363,15 +549,28 @@
         "description": "У Швейцарії цінується точна відповідність вимогам і персоналізований супровідний лист. 80% вакансій заповнюється через networking — LinkedIn і особисті зв'язки важливіші, ніж масова розсилка CV.",
         "estimatedTime": "Постійно",
         "isOptional": false,
-        "requiredDocuments": ["CV", "Мотиваційний лист для кожної заявки"],
+        "requiredDocuments": [
+          "CV",
+          "Мотиваційний лист для кожної заявки"
+        ],
         "tips": [
           "Пишіть мотиваційний лист мовою вакансії (DE/FR/IT/EN)",
           "RAV (служба зайнятості) допомагає з пошуком і надає доступ до курсів перекваліфікації",
           "Перевіряйте: LinkedIn, Jobs.ch, Jobscout24, Indeed, Xing"
         ],
         "links": [
-          {"id":"work4","title":"RAV — служба зайнятості","url":"https://www.arbeit.swiss/","type":"website"},
-          {"id":"work5","title":"Jobscout24","url":"https://www.jobscout24.ch/","type":"website"}
+          {
+            "id": "work4",
+            "title": "RAV — служба зайнятості",
+            "url": "https://www.arbeit.swiss/",
+            "type": "website"
+          },
+          {
+            "id": "work5",
+            "title": "Jobscout24",
+            "url": "https://www.jobscout24.ch/",
+            "type": "website"
+          }
         ],
         "order": 3
       },
@@ -381,7 +580,10 @@
         "description": "Швейцарські інтерв'ю структуровані і формальні. Часто кілька раундів: HR-скринінг, технічна співбесіда, зустріч з командою. Запізнення навіть на хвилину — погана ознака.",
         "estimatedTime": "2–3 год підготовки",
         "isOptional": false,
-        "requiredDocuments": ["Портфоліо або приклади робіт (за потреби)", "Список рекомендацій (Referenzen)"],
+        "requiredDocuments": [
+          "Портфоліо або приклади робіт (за потреби)",
+          "Список рекомендацій (Referenzen)"
+        ],
         "tips": [
           "Готуйте STAR-приклади (Situation, Task, Action, Result) — конкретні і з цифрами",
           "Запитуйте про команду та очікування — свідчить про серйозність",
@@ -389,7 +591,12 @@
           "Уникайте надмірної самопрезентації — скромність цінується"
         ],
         "links": [
-          {"id":"work6","title":"Salarium — середні зарплати","url":"https://www.salarium.ch/","type":"website"}
+          {
+            "id": "work6",
+            "title": "Salarium — середні зарплати",
+            "url": "https://www.salarium.ch/",
+            "type": "website"
+          }
         ],
         "order": 4
       },
@@ -399,7 +606,9 @@
         "description": "Ключові пункти Arbeitsvertrag: Probezeit (зазвичай 3 місяці), Kündigungsfrist (термін попередження про звільнення), надгодини, відпустка (мінімум 20 днів/рік + свята), 13-й місяць.",
         "estimatedTime": "1 год",
         "isOptional": false,
-        "requiredDocuments": ["Договір для підписання"],
+        "requiredDocuments": [
+          "Договір для підписання"
+        ],
         "tips": [
           "Швейцарський 13-й місяць (13. Monatslohn) — стандарт у більшості компаній",
           "Перевірте Non-Compete clause (заборона конкуренції) — важливо для IT",
@@ -421,17 +630,33 @@
           "Після отримання дозволу C або громадянства — переходьте на звичайну декларацію"
         ],
         "links": [
-          {"id":"work7","title":"AHV — пенсійна система","url":"https://www.ahv-iv.ch/","type":"website"}
+          {
+            "id": "work7",
+            "title": "AHV — пенсійна система",
+            "url": "https://www.ahv-iv.ch/",
+            "type": "website"
+          }
         ],
         "order": 6
       }
     ],
-    "tags": ["work", "employment", "job-search", "CV", "salary", "lang:uk"],
+    "tags": [
+      "work",
+      "employment",
+      "job-search",
+      "CV",
+      "salary",
+      "lang:uk"
+    ],
     "cantonCodes": [],
     "priority": 8,
     "isNew": true,
     "createdAt": "2025-01-15T10:00:00Z",
-    "lastUpdated": "2025-10-15T10:00:00Z"
+    "lastUpdated": "2025-10-15T10:00:00Z",
+    "source": "https://www.ch.ch/en/work/",
+    "sourceTitle": "ch.ch — Work",
+    "verifiedAt": "2026-07-15T00:00:00Z",
+    "language": "uk"
   },
   {
     "id": "a1b2c3d4-e5f6-7890-abcd-ef1234560004",
@@ -458,7 +683,12 @@
           "Зверніться до SEM або безкоштовної юридичної консультації"
         ],
         "links": [
-          {"id":"fam1","title":"SEM — сімейне возз'єднання","url":"https://www.sem.admin.ch/sem/de/home/themen/aufenthalt/familiennachzug.html","type":"website"}
+          {
+            "id": "fam1",
+            "title": "SEM — сімейне возз'єднання",
+            "url": "https://www.sem.admin.ch/sem/de/home/themen/aufenthalt/familiennachzug.html",
+            "type": "website"
+          }
         ],
         "order": 1
       },
@@ -480,7 +710,12 @@
           "Для дітей без другого з батьків потрібна нотаріальна згода або рішення суду"
         ],
         "links": [
-          {"id":"fam2","title":"Migrationsamt ZH","url":"https://www.zh.ch/de/migration-integration.html","type":"website"}
+          {
+            "id": "fam2",
+            "title": "Migrationsamt ZH",
+            "url": "https://www.zh.ch/de/migration-integration.html",
+            "type": "website"
+          }
         ],
         "order": 2
       },
@@ -521,7 +756,12 @@
           "Подайте до Ausgleichskasse якомога раніше — виплата не є ретроактивною"
         ],
         "links": [
-          {"id":"fam3","title":"Familienzulagen — AHV","url":"https://www.ahv-iv.ch/de/Sozialversicherungen/Familienzulagen","type":"website"}
+          {
+            "id": "fam3",
+            "title": "Familienzulagen — AHV",
+            "url": "https://www.ahv-iv.ch/de/Sozialversicherungen/Familienzulagen",
+            "type": "website"
+          }
         ],
         "order": 4
       },
@@ -538,17 +778,33 @@
           "Безкоштовні консультації: FamOS, Pro Familia та кантональні організації"
         ],
         "links": [
-          {"id":"fam4","title":"Pro Familia Switzerland","url":"https://www.profamilia.ch/","type":"website"}
+          {
+            "id": "fam4",
+            "title": "Pro Familia Switzerland",
+            "url": "https://www.profamilia.ch/",
+            "type": "website"
+          }
         ],
         "order": 5
       }
     ],
-    "tags": ["family", "reunification", "children", "school", "kinderzulagen", "lang:uk"],
+    "tags": [
+      "family",
+      "reunification",
+      "children",
+      "school",
+      "kinderzulagen",
+      "lang:uk"
+    ],
     "cantonCodes": [],
     "priority": 8,
     "isNew": true,
     "createdAt": "2025-01-15T10:00:00Z",
-    "lastUpdated": "2025-10-15T10:00:00Z"
+    "lastUpdated": "2025-10-15T10:00:00Z",
+    "source": "https://www.ch.ch/en/family-and-partnership/",
+    "sourceTitle": "ch.ch — Family and partnership",
+    "verifiedAt": "2026-07-15T00:00:00Z",
+    "language": "uk"
   },
   {
     "id": "a1b2c3d4-e5f6-7890-abcd-ef1234560005",
@@ -564,14 +820,22 @@
         "description": "Hausarzt — перша точка контакту з медичною системою. При HMO або Telmed-моделі це обов'язково. Навіть при стандартній моделі рекомендується для ведення медичної картки. Черги — до 2–6 тижнів.",
         "estimatedTime": "1–2 год",
         "isOptional": false,
-        "requiredDocuments": ["Страхова картка (Krankenkassenkarte)", "Дозвіл на проживання"],
+        "requiredDocuments": [
+          "Страхова картка (Krankenkassenkarte)",
+          "Дозвіл на проживання"
+        ],
         "tips": [
           "Шукайте на doctorfmh.ch за мовою прийому — багато лікарів говорять англійською",
           "Деякі клініки у великих містах мають медіаторів для мігрантів",
           "При відмові — просіть до листа очікування або шукайте далі"
         ],
         "links": [
-          {"id":"health1","title":"DoctorFMH — пошук лікарів","url":"https://www.doctorfmh.ch/","type":"website"}
+          {
+            "id": "health1",
+            "title": "DoctorFMH — пошук лікарів",
+            "url": "https://www.doctorfmh.ch/",
+            "type": "website"
+          }
         ],
         "order": 1
       },
@@ -612,7 +876,10 @@
         "description": "Стрес переїзду і мовний бар'єр — поширені проблеми. Психолог покривається страхуванням за направленням від Hausarzt (до 30–40 сесій). Є безкоштовні служби підтримки.",
         "estimatedTime": "1 год",
         "isOptional": true,
-        "requiredDocuments": ["Направлення від Hausarzt", "Страхова картка"],
+        "requiredDocuments": [
+          "Направлення від Hausarzt",
+          "Страхова картка"
+        ],
         "tips": [
           "Шукайте психологів, що практикують українською або англійською мовою",
           "HEKS, Caritas та інші НКО — безкоштовні консультації для мігрантів",
@@ -620,7 +887,12 @@
           "Шкільний психолог (Schulpsychologischer Dienst) — безкоштовно в кожному Gemeinde"
         ],
         "links": [
-          {"id":"health3","title":"Die Dargebotene Hand — 143","url":"https://www.143.ch/","type":"website"}
+          {
+            "id": "health3",
+            "title": "Die Dargebotene Hand — 143",
+            "url": "https://www.143.ch/",
+            "type": "website"
+          }
         ],
         "order": 4
       },
@@ -630,7 +902,9 @@
         "description": "Перевірте рекомендовані швейцарські щеплення (Impfplan) та оновіть картку. Особливо важливо для дітей — школи перевіряють статус щеплень. Деякі покриваються страхуванням повністю.",
         "estimatedTime": "45 хв",
         "isOptional": true,
-        "requiredDocuments": ["Наявна карта щеплень (Impfausweis)"],
+        "requiredDocuments": [
+          "Наявна карта щеплень (Impfausweis)"
+        ],
         "tips": [
           "Принесіть наявну картку до Hausarzt — він доповнить за потреби",
           "Сезонний грип — рекомендований всім; покривається страхуванням",
@@ -638,17 +912,33 @@
           "Актуальний Impfplan для дітей на babyinfo.ch"
         ],
         "links": [
-          {"id":"health4","title":"BAG — Impfplan","url":"https://www.bag.admin.ch/bag/de/home/gesund-leben/gesundheitsfoerderung-und-praevention/impfungen-prophylaxe/impfplan.html","type":"website"}
+          {
+            "id": "health4",
+            "title": "BAG — Impfplan",
+            "url": "https://www.bag.admin.ch/bag/de/home/gesund-leben/gesundheitsfoerderung-und-praevention/impfungen-prophylaxe/impfplan.html",
+            "type": "website"
+          }
         ],
         "order": 5
       }
     ],
-    "tags": ["healthcare", "doctor", "pharmacy", "emergency", "mental-health", "lang:uk"],
+    "tags": [
+      "healthcare",
+      "doctor",
+      "pharmacy",
+      "emergency",
+      "mental-health",
+      "lang:uk"
+    ],
     "cantonCodes": [],
     "priority": 8,
     "isNew": true,
     "createdAt": "2025-01-15T10:00:00Z",
-    "lastUpdated": "2025-10-15T10:00:00Z"
+    "lastUpdated": "2025-10-15T10:00:00Z",
+    "source": "https://www.ch.ch/en/health/",
+    "sourceTitle": "ch.ch — Health",
+    "verifiedAt": "2026-07-15T00:00:00Z",
+    "language": "uk"
   },
   {
     "id": "a1b2c3d4-e5f6-7890-abcd-ef1234560006",
@@ -671,7 +961,12 @@
           "Права орендаря: ніхто не може вас виселити без судового рішення"
         ],
         "links": [
-          {"id":"legal1","title":"CH.CH — права та обов'язки","url":"https://www.ch.ch/en/rights-and-obligations/","type":"website"}
+          {
+            "id": "legal1",
+            "title": "CH.CH — права та обов'язки",
+            "url": "https://www.ch.ch/en/rights-and-obligations/",
+            "type": "website"
+          }
         ],
         "order": 1
       },
@@ -689,8 +984,18 @@
           "Rechtsschutzversicherung (страхування правового захисту) — варто мати"
         ],
         "links": [
-          {"id":"legal2","title":"HEKS — юридична допомога","url":"https://www.heks.ch/","type":"website"},
-          {"id":"legal3","title":"SFH — правова інформація","url":"https://www.fluechtlingshilfe.ch/","type":"website"}
+          {
+            "id": "legal2",
+            "title": "HEKS — юридична допомога",
+            "url": "https://www.heks.ch/",
+            "type": "website"
+          },
+          {
+            "id": "legal3",
+            "title": "SFH — правова інформація",
+            "url": "https://www.fluechtlingshilfe.ch/",
+            "type": "website"
+          }
         ],
         "order": 2
       },
@@ -707,7 +1012,12 @@
           "Arbeitszeugnis — ваше право отримати при звільненні"
         ],
         "links": [
-          {"id":"legal4","title":"SECO — трудові права","url":"https://www.seco.admin.ch/","type":"website"}
+          {
+            "id": "legal4",
+            "title": "SECO — трудові права",
+            "url": "https://www.seco.admin.ch/",
+            "type": "website"
+          }
         ],
         "order": 3
       },
@@ -724,7 +1034,12 @@
           "При дискримінації: Fachstelle für Rassismusbekämpfung або Ombudsman"
         ],
         "links": [
-          {"id":"legal5","title":"Mieterverband — права орендарів","url":"https://www.mieterverband.ch/","type":"website"}
+          {
+            "id": "legal5",
+            "title": "Mieterverband — права орендарів",
+            "url": "https://www.mieterverband.ch/",
+            "type": "website"
+          }
         ],
         "order": 4
       },
@@ -747,16 +1062,32 @@
           "Для громадянства: 10 років проживання, рівень B1/B2, інтеграція"
         ],
         "links": [
-          {"id":"legal6","title":"SEM — продовження дозволів","url":"https://www.sem.admin.ch/","type":"website"}
+          {
+            "id": "legal6",
+            "title": "SEM — продовження дозволів",
+            "url": "https://www.sem.admin.ch/",
+            "type": "website"
+          }
         ],
         "order": 5
       }
     ],
-    "tags": ["legal", "rights", "work-rights", "rental-rights", "migration", "lang:uk"],
+    "tags": [
+      "legal",
+      "rights",
+      "work-rights",
+      "rental-rights",
+      "migration",
+      "lang:uk"
+    ],
     "cantonCodes": [],
     "priority": 7,
     "isNew": true,
     "createdAt": "2025-01-15T10:00:00Z",
-    "lastUpdated": "2025-10-15T10:00:00Z"
+    "lastUpdated": "2025-10-15T10:00:00Z",
+    "source": "https://www.ch.ch/en/safety-and-justice/",
+    "sourceTitle": "ch.ch — Safety and justice",
+    "verifiedAt": "2026-07-15T00:00:00Z",
+    "language": "uk"
   }
 ]

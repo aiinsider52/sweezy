@@ -23,6 +23,7 @@ enum DeepLink: Equatable {
     case appointments
     case news
     case cvBuilder
+    case chat(id: String)
     
     // Settings
     case settings
@@ -133,6 +134,9 @@ class DeepLinkService: ObservableObject {
             
         case "news":
             return .news
+
+        case "chat":
+            if let id = path.first { return .chat(id: id) }
             
         case "settings":
             if path.contains("profile") {
@@ -197,6 +201,8 @@ class DeepLinkService: ObservableObject {
             return URL(string: "\(baseURL)/news")
         case .cvBuilder:
             return URL(string: "\(baseURL)/cv")
+        case .chat(let id):
+            return URL(string: "\(baseURL)/chat/\(id)")
         
         case .settings:
             return URL(string: "\(baseURL)/settings")
@@ -316,6 +322,5 @@ struct DeepLinkShareSheet: UIViewControllerRepresentable {
     
     func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
 }
-
 
 

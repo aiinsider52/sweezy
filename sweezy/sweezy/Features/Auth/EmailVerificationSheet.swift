@@ -33,10 +33,7 @@ struct EmailVerificationSheet: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Theme.Colors.darkBackground
-                    .ignoresSafeArea()
-
-                AuthAuroraBackground()
+                JourneyPhotoBackground(imageName: JourneyBackdrop.city.rawValue, blurRadius: 6, darkness: 0.66)
 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 24) {
@@ -67,6 +64,7 @@ struct EmailVerificationSheet: View {
                 }
             }
         }
+        .journeyScreen(.city, darkness: 0.66)
         .onChange(of: code) { _, newValue in
             let filtered = String(newValue.filter(\.isNumber).prefix(6))
             if filtered != newValue {
@@ -284,6 +282,7 @@ struct EmailVerificationSheet: View {
             let tokens = try await APIClient.confirmEmailVerification(email: trimmedEmail, code: sanitizedCode)
             try KeychainStore.save(tokens.access_token, for: "access_token")
             try KeychainStore.save(tokens.refresh_token, for: "refresh_token")
+            try KeychainStore.save(tokens.user_id, for: "user_id")
 
             let previousEmail = lockManager.userEmail
             let resolvedName = resolvedDisplayName(for: trimmedEmail)
@@ -304,7 +303,11 @@ struct EmailVerificationSheet: View {
             profile.email = trimmedEmail
             profile.preferredLanguage = appContainer.currentLocale.identifier
             appContainer.userProfile = profile
-            sessionManager.activateAuthenticatedSession(email: trimmedEmail, name: profile.fullName.isEmpty ? nil : profile.fullName)
+            sessionManager.activateAuthenticatedSession(
+                userID: tokens.user_id,
+                email: trimmedEmail,
+                name: profile.fullName.isEmpty ? nil : profile.fullName
+            )
 
             await MainActor.run {
                 isLoading = false

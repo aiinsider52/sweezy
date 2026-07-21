@@ -75,7 +75,11 @@ struct EventListing: Codable, Identifiable, Equatable {
     let status: EventListingStatus
     let rejectionReason: String?
     let viewCount: Int
+    let isVerified: Bool
+    let reportCount: Int
+    let lastModeratedAt: Date?
     let createdAt: Date?
+    let updatedAt: Date?
 
     private enum CodingKeys: String, CodingKey {
         case id, title, description, category, canton, city, address, status
@@ -89,7 +93,11 @@ struct EventListing: Codable, Identifiable, Equatable {
         case organizerName = "organizer_name"
         case rejectionReason = "rejection_reason"
         case viewCount = "view_count"
+        case isVerified = "is_verified"
+        case reportCount = "report_count"
+        case lastModeratedAt = "last_moderated_at"
         case createdAt = "created_at"
+        case updatedAt = "updated_at"
     }
 
     init(from decoder: Decoder) throws {
@@ -110,6 +118,8 @@ struct EventListing: Codable, Identifiable, Equatable {
         status = (try? c.decode(EventListingStatus.self, forKey: .status)) ?? .pending
         rejectionReason = try? c.decode(String.self, forKey: .rejectionReason)
         viewCount = (try? c.decode(Int.self, forKey: .viewCount)) ?? 0
+        isVerified = (try? c.decode(Bool.self, forKey: .isVerified)) ?? false
+        reportCount = (try? c.decode(Int.self, forKey: .reportCount)) ?? 0
 
         if let raw = try? c.decode(String.self, forKey: .startsAt) {
             startsAt = Self.parseDate(raw)
@@ -128,6 +138,16 @@ struct EventListing: Codable, Identifiable, Equatable {
         } else {
             createdAt = nil
         }
+        if let raw = try? c.decode(String.self, forKey: .updatedAt) {
+            updatedAt = Self.parseDate(raw)
+        } else {
+            updatedAt = nil
+        }
+        if let raw = try? c.decode(String.self, forKey: .lastModeratedAt) {
+            lastModeratedAt = Self.parseDate(raw)
+        } else {
+            lastModeratedAt = nil
+        }
     }
 
     private static func parseDate(_ raw: String) -> Date? {
@@ -136,6 +156,18 @@ struct EventListing: Codable, Identifiable, Equatable {
         if let d = iso.date(from: raw) { return d }
         iso.formatOptions = [.withInternetDateTime]
         return iso.date(from: raw)
+    }
+}
+
+extension EventListing {
+    var freshnessDate: Date? { lastModeratedAt ?? updatedAt ?? createdAt }
+
+    var freshnessText: String {
+        guard let date = freshnessDate else { return "Дата актуальності не вказана" }
+        let days = max(0, Calendar.current.dateComponents([.day], from: date, to: Date()).day ?? 0)
+        if days == 0 { return "Перевірено сьогодні" }
+        if days == 1 { return "Перевірено вчора" }
+        return "Перевірено \(days) дн. тому"
     }
 }
 

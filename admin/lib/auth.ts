@@ -2,7 +2,7 @@
 import { cookies } from 'next/headers'
 
 export async function saveToken(access: string) {
-  cookies().set('access_token', access, {
+  (await cookies()).set('access_token', access, {
     httpOnly: true,
     sameSite: 'lax',
     secure: process.env.NODE_ENV === 'production',
@@ -12,11 +12,11 @@ export async function saveToken(access: string) {
 }
 
 export async function logout() {
-  cookies().delete('access_token')
+  (await cookies()).delete('access_token')
 }
 
 export async function getToken() {
-  return cookies().get('access_token')?.value || ''
+  return (await cookies()).get('access_token')?.value || '';
 }
 
 

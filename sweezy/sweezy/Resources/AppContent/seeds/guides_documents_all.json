@@ -5,16 +5,33 @@
     "subtitle": "Все про Anmeldung — від документів до підводних каменів",
     "language": "uk",
     "bodyMarkdown": "# Реєстрація в Gemeinde (Anmeldung)\n\nПісля прибуття до Швейцарії ви маєте зареєструватися в місцевій адміністрації (Gemeinde) за місцем проживання протягом **14 днів**.\n\n## Чому це важливо\n\n- Без реєстрації ви не зможете відкрити банківський рахунок\n- Страхова компанія вимагає підтвердження адреси\n- Дитину не запишуть до школи\n- Можливі штрафи за несвоєчасну реєстрацію (50-200 CHF)\n\n## Необхідні документи\n\n### Обов'язкові\n- [ ] Паспорт або ID всіх членів сім'ї\n- [ ] Договір оренди (Mietvertrag)\n- [ ] Дозвіл на проживання (Ausweis S)\n- [ ] Біометричне фото 35x45 мм\n\n### Додаткові (за потреби)\n- Свідоцтво про народження дітей\n- Свідоцтво про шлюб\n- Довідка з попереднього місця проживання\n\n## Покрокова інструкція\n\n### Крок 1: Знайдіть свою Gemeinde\nКожне місто має власну адміністрацію. Знайти можна:\n- Google: \"Gemeinde + [назва міста]\"\n- На сайті кантону\n\n### Крок 2: Запишіться на прийом\nБільшість Gemeinde працюють за записом (Termin). Запис:\n- Онлайн на сайті Gemeinde\n- Телефоном\n\n### Крок 3: Візит\n1. Заповніть анкету Anmeldung\n2. Здайте копії документів\n3. Отримайте Anmeldebestätigung\n\n## Лайфхаки\n\n> **Інсайд**: Якщо не встигаєте за 14 днів — телефонуйте в Gemeinde і попередьте. Зазвичай продовжують термін без штрафу.\n\n> **Порада**: Зробіть 5 копій Anmeldebestätigung — він потрібен скрізь!\n\n## Вартість\n- Зазвичай безкоштовно\n- Деякі Gemeinde беруть 10-20 CHF\n\n## Після реєстрації\n- Через 2-4 тижні отримаєте офіційний Ausweis поштою\n- Можете відкривати банк, страхування, записувати дітей до школи",
-    "tags": ["documents", "registration", "gemeinde", "anmeldung", "lang:uk"],
+    "tags": [
+      "documents",
+      "registration",
+      "gemeinde",
+      "anmeldung",
+      "lang:uk"
+    ],
     "category": "documents",
     "cantonCodes": [],
-    "links": [],
+    "links": [
+      {
+        "id": "official-source-doc-uk-001",
+        "title": "ch.ch — Foreign nationals in Switzerland",
+        "url": "https://www.ch.ch/en/foreign-nationals-in-switzerland/",
+        "type": "website",
+        "description": "Official Swiss source used to verify this material"
+      }
+    ],
     "priority": 10,
     "isNew": false,
     "isPremium": false,
     "estimatedReadingTime": 8,
     "lastUpdated": "2025-01-15T10:00:00Z",
-    "createdAt": "2025-01-15T10:00:00Z"
+    "createdAt": "2025-01-15T10:00:00Z",
+    "source": "https://www.ch.ch/en/foreign-nationals-in-switzerland/",
+    "sourceTitle": "ch.ch — Foreign nationals in Switzerland",
+    "verifiedAt": "2026-07-15T00:00:00Z"
   },
   {
     "id": "doc-uk-002",
@@ -22,16 +39,33 @@
     "subtitle": "Права, обмеження та продовження дозволу",
     "language": "uk",
     "bodyMarkdown": "# Ausweis S — Статус захисту у Швейцарії\n\nAusweis S (Schutzstatus) — це тимчасовий дозвіл на проживання для громадян України, який надає широкі права.\n\n## Що дає Ausweis S\n\n### Права\n- ✅ Право на проживання у Швейцарії\n- ✅ Право на роботу без обмежень\n- ✅ Доступ до медичного страхування\n- ✅ Право на соціальну допомогу\n- ✅ Безкоштовна освіта для дітей\n- ✅ Право на возз'єднання сім'ї\n\n### Обмеження\n- ❌ Не можна виїжджати з Швейцарії більше ніж на 15 днів без повідомлення\n- ❌ Не дає права на постійне проживання\n- ❌ Потрібно продовжувати щорічно\n\n## Продовження Ausweis S\n\n### Коли подавати\n- За 2-3 місяці до закінчення терміну\n- Migrationsamt надішле нагадування поштою\n\n### Документи для продовження\n- [ ] Поточний Ausweis S\n- [ ] Паспорт\n- [ ] Підтвердження адреси\n- [ ] Фото (іноді)\n\n### Вартість\n- Зазвичай безкоштовно для українців\n\n## Перехід на інший статус\n\n### Ausweis B (ВНЖ)\n- Можливий після 5 років з Ausweis S\n- Потрібно підтвердити інтеграцію (мова B1, робота)\n\n### Ausweis C (ПМЖ)\n- Після 10 років проживання\n- Вимоги: мова, інтеграція, фінансова незалежність\n\n## Важливі нюанси\n\n> **Інсайд**: Якщо ви знайшли роботу — попросіть роботодавця написати рекомендаційний лист. Це допоможе при переході на B.\n\n> **Увага**: Виїзд в Україну більше ніж на 15 днів може призвести до втрати статусу!",
-    "tags": ["documents", "ausweis", "permit", "status-s", "lang:uk"],
+    "tags": [
+      "documents",
+      "ausweis",
+      "permit",
+      "status-s",
+      "lang:uk"
+    ],
     "category": "documents",
     "cantonCodes": [],
-    "links": [],
+    "links": [
+      {
+        "id": "official-source-doc-uk-002",
+        "title": "ch.ch — Foreign nationals in Switzerland",
+        "url": "https://www.ch.ch/en/foreign-nationals-in-switzerland/",
+        "type": "website",
+        "description": "Official Swiss source used to verify this material"
+      }
+    ],
     "priority": 10,
     "isNew": false,
     "isPremium": false,
     "estimatedReadingTime": 7,
     "lastUpdated": "2025-01-15T10:00:00Z",
-    "createdAt": "2025-01-15T10:00:00Z"
+    "createdAt": "2025-01-15T10:00:00Z",
+    "source": "https://www.ch.ch/en/foreign-nationals-in-switzerland/",
+    "sourceTitle": "ch.ch — Foreign nationals in Switzerland",
+    "verifiedAt": "2026-07-15T00:00:00Z"
   },
   {
     "id": "doc-uk-003",
@@ -39,16 +73,33 @@
     "subtitle": "Як підтвердити українські документи у Швейцарії",
     "language": "uk",
     "bodyMarkdown": "# Apostille та легалізація документів\n\nДля використання українських документів у Швейцарії часто потрібен Apostille — міжнародне підтвердження справжності.\n\n## Що таке Apostille\n\nApostille — це спеціальний штамп, який підтверджує справжність документа для використання в іншій країні.\n\n## Які документи потребують Apostille\n\n- Свідоцтво про народження\n- Свідоцтво про шлюб/розлучення\n- Диплом про освіту\n- Довідка про несудимість\n- Медичні довідки\n\n## Як отримати Apostille\n\n### В Україні (до виїзду)\n1. Звернутися до Міністерства юстиції\n2. Або в ЦНАП (Центр надання адмінпослуг)\n3. Термін: 1-5 робочих днів\n4. Вартість: близько 300-500 грн\n\n### З-за кордону\n1. Через консульство України\n2. Через довірену особу в Україні\n3. Онлайн-сервіси (Дія — для деяких документів)\n\n## Переклад документів\n\n### Вимоги Швейцарії\n- Переклад має бути **сертифікованим**\n- Перекладач повинен мати офіційний статус\n\n### Де замовити переклад\n- Sworn translators (присяжні перекладачі)\n- Перекладацькі бюро зі сертифікацією\n- Вартість: 50-150 CHF за документ\n\n## Лайфхаки\n\n> **Інсайд**: Багато документів можна отримати через Дію з QR-кодом. Швейцарські установи все частіше їх приймають!\n\n> **Порада**: Зробіть Apostille на ВСІ важливі документи до виїзду — потім буде складніше.\n\n## Термін дії\n\n- Apostille не має терміну дії\n- Але сам документ може застаріти (наприклад, довідка про несудимість — 6 місяців)",
-    "tags": ["documents", "apostille", "legalization", "translation", "lang:uk"],
+    "tags": [
+      "documents",
+      "apostille",
+      "legalization",
+      "translation",
+      "lang:uk"
+    ],
     "category": "documents",
     "cantonCodes": [],
-    "links": [],
+    "links": [
+      {
+        "id": "official-source-doc-uk-003",
+        "title": "ch.ch — Foreign nationals in Switzerland",
+        "url": "https://www.ch.ch/en/foreign-nationals-in-switzerland/",
+        "type": "website",
+        "description": "Official Swiss source used to verify this material"
+      }
+    ],
     "priority": 8,
     "isNew": false,
     "isPremium": false,
     "estimatedReadingTime": 6,
     "lastUpdated": "2025-01-15T10:00:00Z",
-    "createdAt": "2025-01-15T10:00:00Z"
+    "createdAt": "2025-01-15T10:00:00Z",
+    "source": "https://www.ch.ch/en/foreign-nationals-in-switzerland/",
+    "sourceTitle": "ch.ch — Foreign nationals in Switzerland",
+    "verifiedAt": "2026-07-15T00:00:00Z"
   },
   {
     "id": "doc-uk-004",
@@ -56,16 +107,33 @@
     "subtitle": "Обмін українських прав та отримання швейцарських",
     "language": "uk",
     "bodyMarkdown": "# Водійське посвідчення у Швейцарії\n\nЯкщо у вас є українські права, ви можете керувати авто в Швейцарії протягом 12 місяців. Після цього потрібно обміняти на швейцарські.\n\n## Перші 12 місяців\n\n### Що дозволено\n- Керувати авто з українськими правами\n- Потрібен міжнародний переклад або МВП\n\n### Що потрібно мати\n- Українське посвідчення водія\n- Міжнародне посвідчення водія (МВП) або переклад\n- Паспорт\n- Ausweis S\n\n## Обмін на швейцарські права\n\n### Процедура\n1. Звернутися до Strassenverkehrsamt (дорожня служба)\n2. Пройти тест на зір (Sehtest) — 15-20 CHF\n3. Подати документи\n4. Отримати тимчасові права\n\n### Документи\n- [ ] Українське посвідчення водія\n- [ ] Переклад прав (сертифікований)\n- [ ] Паспорт + Ausweis\n- [ ] Фото\n- [ ] Sehtest (тест зору)\n\n### Вартість\n- 50-150 CHF (залежить від кантону)\n\n## Важливі нюанси\n\n### Категорії\n- Категорія B (легкові авто) обмінюється без іспитів\n- Для мотоциклів може знадобитися додатковий тест\n\n### Терміни\n- Обробка: 2-4 тижні\n- Права приходять поштою\n\n## Якщо пропустили 12 місяців\n\n> **Увага**: Якщо не обміняли вчасно — потрібно здавати іспити!\n\n### Що робити\n1. Теоретичний іспит (можна українською/англійською)\n2. Практичний іспит\n3. Вартість: 500-1500 CHF загалом\n\n## Лайфхаки\n\n> **Інсайд**: Деякі кантони приймають додаток Дія як підтвердження прав. Уточніть у Strassenverkehrsamt!\n\n> **Порада**: Зробіть обмін одразу після приїзду — черги бувають довгі.",
-    "tags": ["documents", "driving", "license", "strassenverkehrsamt", "lang:uk"],
+    "tags": [
+      "documents",
+      "driving",
+      "license",
+      "strassenverkehrsamt",
+      "lang:uk"
+    ],
     "category": "documents",
     "cantonCodes": [],
-    "links": [],
+    "links": [
+      {
+        "id": "official-source-doc-uk-004",
+        "title": "ch.ch — Foreign nationals in Switzerland",
+        "url": "https://www.ch.ch/en/foreign-nationals-in-switzerland/",
+        "type": "website",
+        "description": "Official Swiss source used to verify this material"
+      }
+    ],
     "priority": 7,
     "isNew": false,
     "isPremium": false,
     "estimatedReadingTime": 7,
     "lastUpdated": "2025-01-15T10:00:00Z",
-    "createdAt": "2025-01-15T10:00:00Z"
+    "createdAt": "2025-01-15T10:00:00Z",
+    "source": "https://www.ch.ch/en/foreign-nationals-in-switzerland/",
+    "sourceTitle": "ch.ch — Foreign nationals in Switzerland",
+    "verifiedAt": "2026-07-15T00:00:00Z"
   },
   {
     "id": "doc-uk-005",
@@ -73,16 +141,33 @@
     "subtitle": "Що це таке і навіщо потрібна",
     "language": "uk",
     "bodyMarkdown": "# Betreibungsregisterauszug — Довідка про борги\n\nЦе один з найважливіших документів у Швейцарії. Його вимагають майже скрізь: при оренді житла, працевлаштуванні, відкритті бізнесу.\n\n## Що це таке\n\nBetreibungsregisterauszug — офіційна довідка з реєстру стягнень, яка показує:\n- Чи є у вас борги\n- Чи були судові стягнення\n- Історію фінансових проблем\n\n## Де потрібна\n\n- 🏠 Оренда квартири (обов'язково!)\n- 💼 Працевлаштування (часто)\n- 🏦 Відкриття банківського рахунку\n- 📱 Мобільний контракт\n- 🚗 Лізинг авто\n\n## Як отримати\n\n### Онлайн (найшвидше)\n1. Зайдіть на сайт вашого Betreibungsamt\n2. Заповніть форму\n3. Оплатіть 17-22 CHF\n4. Отримайте PDF на email\n\n### Особисто\n1. Візит до Betreibungsamt\n2. Паспорт + Ausweis\n3. Оплата на місці\n4. Видача одразу або поштою\n\n## Важливо знати\n\n### Термін дії\n- Офіційно: без терміну\n- На практиці: орендодавці хочуть довідку не старішу 3 місяців\n\n### Що показує\n- Записи за останні 5 років\n- Погашені борги теж видно!\n\n## Якщо у вас є записи\n\n> **Не панікуйте!** Багато хто має записи. Важливо:\n\n1. Мати пояснення (наприклад, помилка страхової)\n2. Показати, що борг погашено\n3. Написати супровідний лист\n\n## Лайфхаки\n\n> **Інсайд**: Якщо ви щойно приїхали — у вас буде \"чиста\" довідка. Це великий плюс при пошуку житла!\n\n> **Порада**: Замовте 3-5 копій одразу — вони потрібні часто.",
-    "tags": ["documents", "betreibung", "debt", "rental", "lang:uk"],
+    "tags": [
+      "documents",
+      "betreibung",
+      "debt",
+      "rental",
+      "lang:uk"
+    ],
     "category": "documents",
     "cantonCodes": [],
-    "links": [],
+    "links": [
+      {
+        "id": "official-source-doc-uk-005",
+        "title": "ch.ch — Foreign nationals in Switzerland",
+        "url": "https://www.ch.ch/en/foreign-nationals-in-switzerland/",
+        "type": "website",
+        "description": "Official Swiss source used to verify this material"
+      }
+    ],
     "priority": 9,
     "isNew": false,
     "isPremium": false,
     "estimatedReadingTime": 6,
     "lastUpdated": "2025-01-15T10:00:00Z",
-    "createdAt": "2025-01-15T10:00:00Z"
+    "createdAt": "2025-01-15T10:00:00Z",
+    "source": "https://www.ch.ch/en/foreign-nationals-in-switzerland/",
+    "sourceTitle": "ch.ch — Foreign nationals in Switzerland",
+    "verifiedAt": "2026-07-15T00:00:00Z"
   },
   {
     "id": "doc-uk-006",
@@ -90,16 +175,33 @@
     "subtitle": "Як отримати та де використовувати",
     "language": "uk",
     "bodyMarkdown": "# AHV-Nummer — Соціальний страховий номер\n\nAHV-Nummer (або AVS у франкомовних кантонах) — це ваш унікальний ідентифікаційний номер у швейцарській системі соціального страхування.\n\n## Що це таке\n\nФормат: 756.XXXX.XXXX.XX\n- 756 — код Швейцарії\n- Далі — унікальний номер\n\n## Навіщо потрібен\n\n- Працевлаштування\n- Пенсійне страхування\n- Медичне страхування\n- Податкова декларація\n- Соціальна допомога\n\n## Як отримати\n\n### Автоматично\nПри реєстрації в Gemeinde вам автоматично присвоюється AHV-номер.\n\n### Якщо не отримали\n1. Зверніться до AHV-Ausgleichskasse вашого кантону\n2. Або до роботодавця — вони можуть запросити\n\n## Де знайти свій номер\n\n- На картці медичного страхування (Krankenkassenkarte)\n- У листі від AHV-Kasse\n- У трудовому договорі\n- На Ausweis (іноді)\n\n## Важливо знати\n\n### Конфіденційність\n- Не повідомляйте номер стороннім\n- Це як код РНОКПП в Україні\n\n### Один на все життя\n- Номер не змінюється\n- Навіть при зміні імені чи статусу\n\n## AHV внески\n\n### Хто платить\n- Працівники: 50% (віднімається із зарплати)\n- Роботодавець: 50%\n\n### Ставка\n- 10.6% від зарплати (5.3% + 5.3%)\n\n## Лайфхаки\n\n> **Інсайд**: Збережіть номер у телефоні — його питають часто!\n\n> **Порада**: Якщо працюєте неофіційно — ви не накопичуєте пенсію. Це важливо для майбутнього!",
-    "tags": ["documents", "ahv", "avs", "social-security", "lang:uk"],
+    "tags": [
+      "documents",
+      "ahv",
+      "avs",
+      "social-security",
+      "lang:uk"
+    ],
     "category": "documents",
     "cantonCodes": [],
-    "links": [],
+    "links": [
+      {
+        "id": "official-source-doc-uk-006",
+        "title": "ch.ch — Foreign nationals in Switzerland",
+        "url": "https://www.ch.ch/en/foreign-nationals-in-switzerland/",
+        "type": "website",
+        "description": "Official Swiss source used to verify this material"
+      }
+    ],
     "priority": 8,
     "isNew": false,
     "isPremium": false,
     "estimatedReadingTime": 6,
     "lastUpdated": "2025-01-15T10:00:00Z",
-    "createdAt": "2025-01-15T10:00:00Z"
+    "createdAt": "2025-01-15T10:00:00Z",
+    "source": "https://www.ch.ch/en/foreign-nationals-in-switzerland/",
+    "sourceTitle": "ch.ch — Foreign nationals in Switzerland",
+    "verifiedAt": "2026-07-15T00:00:00Z"
   },
   {
     "id": "doc-en-001",
@@ -107,16 +209,33 @@
     "subtitle": "Everything about Anmeldung — from documents to pitfalls",
     "language": "en",
     "bodyMarkdown": "# Registration at Gemeinde (Anmeldung)\n\nAfter arriving in Switzerland, you must register at your local municipality (Gemeinde) within **14 days**.\n\n## Why It's Important\n\n- Without registration, you cannot open a bank account\n- Insurance companies require address confirmation\n- Children cannot be enrolled in school\n- Possible fines for late registration (50-200 CHF)\n\n## Required Documents\n\n### Mandatory\n- [ ] Passport or ID of all family members\n- [ ] Rental contract (Mietvertrag)\n- [ ] Residence permit (Ausweis S)\n- [ ] Biometric photo 35x45 mm\n\n### Additional (if needed)\n- Children's birth certificates\n- Marriage certificate\n- Certificate from previous residence\n\n## Step-by-Step Instructions\n\n### Step 1: Find Your Gemeinde\nEach city has its own administration. You can find it:\n- Google: \"Gemeinde + [city name]\"\n- On the canton website\n\n### Step 2: Book an Appointment\nMost Gemeinden work by appointment (Termin). Booking:\n- Online on Gemeinde website\n- By phone\n\n### Step 3: Visit\n1. Fill out Anmeldung form\n2. Submit document copies\n3. Receive Anmeldebestätigung\n\n## Tips & Tricks\n\n> **Insider tip**: If you can't make the 14-day deadline — call the Gemeinde and let them know. They usually extend without fines.\n\n> **Advice**: Make 5 copies of Anmeldebestätigung — you'll need it everywhere!\n\n## Cost\n- Usually free\n- Some Gemeinden charge 10-20 CHF\n\n## After Registration\n- Within 2-4 weeks you'll receive your official Ausweis by mail\n- You can then open bank accounts, get insurance, enroll children in school",
-    "tags": ["documents", "registration", "gemeinde", "anmeldung", "lang:en"],
+    "tags": [
+      "documents",
+      "registration",
+      "gemeinde",
+      "anmeldung",
+      "lang:en"
+    ],
     "category": "documents",
     "cantonCodes": [],
-    "links": [],
+    "links": [
+      {
+        "id": "official-source-doc-en-001",
+        "title": "ch.ch — Foreign nationals in Switzerland",
+        "url": "https://www.ch.ch/en/foreign-nationals-in-switzerland/",
+        "type": "website",
+        "description": "Official Swiss source used to verify this material"
+      }
+    ],
     "priority": 10,
     "isNew": false,
     "isPremium": false,
     "estimatedReadingTime": 8,
     "lastUpdated": "2025-01-15T10:00:00Z",
-    "createdAt": "2025-01-15T10:00:00Z"
+    "createdAt": "2025-01-15T10:00:00Z",
+    "source": "https://www.ch.ch/en/foreign-nationals-in-switzerland/",
+    "sourceTitle": "ch.ch — Foreign nationals in Switzerland",
+    "verifiedAt": "2026-07-15T00:00:00Z"
   },
   {
     "id": "doc-en-002",
@@ -124,16 +243,33 @@
     "subtitle": "Rights, limitations and permit renewal",
     "language": "en",
     "bodyMarkdown": "# Ausweis S — Protection Status in Switzerland\n\nAusweis S (Schutzstatus) is a temporary residence permit for Ukrainian citizens that provides extensive rights.\n\n## What Ausweis S Provides\n\n### Rights\n- ✅ Right to reside in Switzerland\n- ✅ Right to work without restrictions\n- ✅ Access to health insurance\n- ✅ Right to social assistance\n- ✅ Free education for children\n- ✅ Right to family reunification\n\n### Limitations\n- ❌ Cannot leave Switzerland for more than 15 days without notification\n- ❌ Does not grant permanent residence rights\n- ❌ Must be renewed annually\n\n## Renewing Ausweis S\n\n### When to Apply\n- 2-3 months before expiration\n- Migrationsamt will send a reminder by mail\n\n### Documents for Renewal\n- [ ] Current Ausweis S\n- [ ] Passport\n- [ ] Address confirmation\n- [ ] Photo (sometimes)\n\n### Cost\n- Usually free for Ukrainians\n\n## Transitioning to Another Status\n\n### Ausweis B (Residence Permit)\n- Possible after 5 years with Ausweis S\n- Must demonstrate integration (B1 language, employment)\n\n### Ausweis C (Permanent Residence)\n- After 10 years of residence\n- Requirements: language, integration, financial independence\n\n## Important Nuances\n\n> **Insider tip**: If you've found a job — ask your employer for a recommendation letter. This helps when transitioning to B.\n\n> **Warning**: Leaving for Ukraine for more than 15 days may result in loss of status!",
-    "tags": ["documents", "ausweis", "permit", "status-s", "lang:en"],
+    "tags": [
+      "documents",
+      "ausweis",
+      "permit",
+      "status-s",
+      "lang:en"
+    ],
     "category": "documents",
     "cantonCodes": [],
-    "links": [],
+    "links": [
+      {
+        "id": "official-source-doc-en-002",
+        "title": "ch.ch — Foreign nationals in Switzerland",
+        "url": "https://www.ch.ch/en/foreign-nationals-in-switzerland/",
+        "type": "website",
+        "description": "Official Swiss source used to verify this material"
+      }
+    ],
     "priority": 10,
     "isNew": false,
     "isPremium": false,
     "estimatedReadingTime": 7,
     "lastUpdated": "2025-01-15T10:00:00Z",
-    "createdAt": "2025-01-15T10:00:00Z"
+    "createdAt": "2025-01-15T10:00:00Z",
+    "source": "https://www.ch.ch/en/foreign-nationals-in-switzerland/",
+    "sourceTitle": "ch.ch — Foreign nationals in Switzerland",
+    "verifiedAt": "2026-07-15T00:00:00Z"
   },
   {
     "id": "doc-en-003",
@@ -141,16 +277,33 @@
     "subtitle": "How to validate Ukrainian documents in Switzerland",
     "language": "en",
     "bodyMarkdown": "# Apostille and Document Legalization\n\nTo use Ukrainian documents in Switzerland, you often need an Apostille — international authentication of document validity.\n\n## What is an Apostille\n\nAn Apostille is a special stamp that confirms document authenticity for use in another country.\n\n## Which Documents Need Apostille\n\n- Birth certificate\n- Marriage/divorce certificate\n- Educational diploma\n- Criminal background check\n- Medical certificates\n\n## How to Get an Apostille\n\n### In Ukraine (before departure)\n1. Contact the Ministry of Justice\n2. Or visit CNAP (Administrative Services Center)\n3. Timeline: 1-5 business days\n4. Cost: approximately 300-500 UAH\n\n### From abroad\n1. Through Ukrainian consulate\n2. Through a trusted person in Ukraine\n3. Online services (Diia — for some documents)\n\n## Document Translation\n\n### Swiss Requirements\n- Translation must be **certified**\n- Translator must have official status\n\n### Where to Order Translation\n- Sworn translators\n- Certified translation agencies\n- Cost: 50-150 CHF per document\n\n## Tips & Tricks\n\n> **Insider tip**: Many documents can be obtained through Diia with QR code. Swiss institutions are increasingly accepting them!\n\n> **Advice**: Get Apostille on ALL important documents before leaving — it's harder to do later.\n\n## Validity Period\n\n- Apostille has no expiration\n- But the document itself may expire (e.g., criminal background check — 6 months)",
-    "tags": ["documents", "apostille", "legalization", "translation", "lang:en"],
+    "tags": [
+      "documents",
+      "apostille",
+      "legalization",
+      "translation",
+      "lang:en"
+    ],
     "category": "documents",
     "cantonCodes": [],
-    "links": [],
+    "links": [
+      {
+        "id": "official-source-doc-en-003",
+        "title": "ch.ch — Foreign nationals in Switzerland",
+        "url": "https://www.ch.ch/en/foreign-nationals-in-switzerland/",
+        "type": "website",
+        "description": "Official Swiss source used to verify this material"
+      }
+    ],
     "priority": 8,
     "isNew": false,
     "isPremium": false,
     "estimatedReadingTime": 6,
     "lastUpdated": "2025-01-15T10:00:00Z",
-    "createdAt": "2025-01-15T10:00:00Z"
+    "createdAt": "2025-01-15T10:00:00Z",
+    "source": "https://www.ch.ch/en/foreign-nationals-in-switzerland/",
+    "sourceTitle": "ch.ch — Foreign nationals in Switzerland",
+    "verifiedAt": "2026-07-15T00:00:00Z"
   },
   {
     "id": "doc-en-004",
@@ -158,16 +311,33 @@
     "subtitle": "Exchanging Ukrainian license and obtaining Swiss one",
     "language": "en",
     "bodyMarkdown": "# Driver's License in Switzerland\n\nIf you have a Ukrainian license, you can drive in Switzerland for 12 months. After that, you need to exchange it for a Swiss license.\n\n## First 12 Months\n\n### What's Allowed\n- Drive with Ukrainian license\n- Need international translation or IDP\n\n### What You Need\n- Ukrainian driver's license\n- International Driving Permit (IDP) or translation\n- Passport\n- Ausweis S\n\n## Exchanging for Swiss License\n\n### Procedure\n1. Contact Strassenverkehrsamt (road traffic office)\n2. Pass eye test (Sehtest) — 15-20 CHF\n3. Submit documents\n4. Receive temporary license\n\n### Documents\n- [ ] Ukrainian driver's license\n- [ ] Certified translation\n- [ ] Passport + Ausweis\n- [ ] Photo\n- [ ] Sehtest (eye test)\n\n### Cost\n- 50-150 CHF (varies by canton)\n\n## Important Details\n\n### Categories\n- Category B (passenger cars) exchanges without exams\n- Motorcycles may require additional testing\n\n### Timeline\n- Processing: 2-4 weeks\n- License arrives by mail\n\n## If You Missed the 12-Month Deadline\n\n> **Warning**: If not exchanged in time — you must take exams!\n\n### What to Do\n1. Theory exam (available in Ukrainian/English)\n2. Practical exam\n3. Total cost: 500-1500 CHF\n\n## Tips & Tricks\n\n> **Insider tip**: Some cantons accept the Diia app as license confirmation. Check with Strassenverkehrsamt!\n\n> **Advice**: Exchange right after arrival — queues can be long.",
-    "tags": ["documents", "driving", "license", "strassenverkehrsamt", "lang:en"],
+    "tags": [
+      "documents",
+      "driving",
+      "license",
+      "strassenverkehrsamt",
+      "lang:en"
+    ],
     "category": "documents",
     "cantonCodes": [],
-    "links": [],
+    "links": [
+      {
+        "id": "official-source-doc-en-004",
+        "title": "ch.ch — Foreign nationals in Switzerland",
+        "url": "https://www.ch.ch/en/foreign-nationals-in-switzerland/",
+        "type": "website",
+        "description": "Official Swiss source used to verify this material"
+      }
+    ],
     "priority": 7,
     "isNew": false,
     "isPremium": false,
     "estimatedReadingTime": 7,
     "lastUpdated": "2025-01-15T10:00:00Z",
-    "createdAt": "2025-01-15T10:00:00Z"
+    "createdAt": "2025-01-15T10:00:00Z",
+    "source": "https://www.ch.ch/en/foreign-nationals-in-switzerland/",
+    "sourceTitle": "ch.ch — Foreign nationals in Switzerland",
+    "verifiedAt": "2026-07-15T00:00:00Z"
   },
   {
     "id": "doc-en-005",
@@ -175,16 +345,33 @@
     "subtitle": "What it is and why you need it",
     "language": "en",
     "bodyMarkdown": "# Betreibungsregisterauszug — Debt Extract\n\nThis is one of the most important documents in Switzerland. It's required almost everywhere: renting apartments, employment, starting a business.\n\n## What It Is\n\nBetreibungsregisterauszug is an official extract from the debt collection register showing:\n- Whether you have debts\n- Court collections history\n- Financial problems history\n\n## Where It's Needed\n\n- 🏠 Apartment rental (mandatory!)\n- 💼 Employment (often)\n- 🏦 Opening bank account\n- 📱 Mobile phone contract\n- 🚗 Car leasing\n\n## How to Obtain\n\n### Online (fastest)\n1. Visit your Betreibungsamt website\n2. Fill out the form\n3. Pay 17-22 CHF\n4. Receive PDF by email\n\n### In Person\n1. Visit Betreibungsamt\n2. Passport + Ausweis\n3. Pay on site\n4. Receive immediately or by mail\n\n## Important to Know\n\n### Validity Period\n- Officially: no expiration\n- In practice: landlords want certificates no older than 3 months\n\n### What It Shows\n- Records from the last 5 years\n- Paid debts are also visible!\n\n## If You Have Records\n\n> **Don't panic!** Many people have records. What's important:\n\n1. Have an explanation (e.g., insurance error)\n2. Show that debt is paid\n3. Write a cover letter\n\n## Tips & Tricks\n\n> **Insider tip**: If you just arrived — you'll have a \"clean\" certificate. This is a big plus when apartment hunting!\n\n> **Advice**: Order 3-5 copies at once — they're needed often.",
-    "tags": ["documents", "betreibung", "debt", "rental", "lang:en"],
+    "tags": [
+      "documents",
+      "betreibung",
+      "debt",
+      "rental",
+      "lang:en"
+    ],
     "category": "documents",
     "cantonCodes": [],
-    "links": [],
+    "links": [
+      {
+        "id": "official-source-doc-en-005",
+        "title": "ch.ch — Foreign nationals in Switzerland",
+        "url": "https://www.ch.ch/en/foreign-nationals-in-switzerland/",
+        "type": "website",
+        "description": "Official Swiss source used to verify this material"
+      }
+    ],
     "priority": 9,
     "isNew": false,
     "isPremium": false,
     "estimatedReadingTime": 6,
     "lastUpdated": "2025-01-15T10:00:00Z",
-    "createdAt": "2025-01-15T10:00:00Z"
+    "createdAt": "2025-01-15T10:00:00Z",
+    "source": "https://www.ch.ch/en/foreign-nationals-in-switzerland/",
+    "sourceTitle": "ch.ch — Foreign nationals in Switzerland",
+    "verifiedAt": "2026-07-15T00:00:00Z"
   },
   {
     "id": "doc-en-006",
@@ -192,16 +379,33 @@
     "subtitle": "How to get it and where to use it",
     "language": "en",
     "bodyMarkdown": "# AHV-Nummer — Social Insurance Number\n\nAHV-Nummer (or AVS in French-speaking cantons) is your unique identification number in the Swiss social insurance system.\n\n## What It Is\n\nFormat: 756.XXXX.XXXX.XX\n- 756 — Switzerland code\n- Following — unique number\n\n## What It's Needed For\n\n- Employment\n- Pension insurance\n- Health insurance\n- Tax declaration\n- Social assistance\n\n## How to Get It\n\n### Automatically\nWhen registering at Gemeinde, you're automatically assigned an AHV number.\n\n### If You Didn't Receive It\n1. Contact the AHV-Ausgleichskasse of your canton\n2. Or ask your employer — they can request it\n\n## Where to Find Your Number\n\n- On health insurance card (Krankenkassenkarte)\n- In letter from AHV-Kasse\n- In employment contract\n- On Ausweis (sometimes)\n\n## Important to Know\n\n### Confidentiality\n- Don't share the number with strangers\n- It's like a national ID number\n\n### One for Life\n- Number never changes\n- Even when changing name or status\n\n## AHV Contributions\n\n### Who Pays\n- Employees: 50% (deducted from salary)\n- Employer: 50%\n\n### Rate\n- 10.6% of salary (5.3% + 5.3%)\n\n## Tips & Tricks\n\n> **Insider tip**: Save the number in your phone — it's asked for often!\n\n> **Advice**: If working unofficially — you're not accumulating pension. This matters for your future!",
-    "tags": ["documents", "ahv", "avs", "social-security", "lang:en"],
+    "tags": [
+      "documents",
+      "ahv",
+      "avs",
+      "social-security",
+      "lang:en"
+    ],
     "category": "documents",
     "cantonCodes": [],
-    "links": [],
+    "links": [
+      {
+        "id": "official-source-doc-en-006",
+        "title": "ch.ch — Foreign nationals in Switzerland",
+        "url": "https://www.ch.ch/en/foreign-nationals-in-switzerland/",
+        "type": "website",
+        "description": "Official Swiss source used to verify this material"
+      }
+    ],
     "priority": 8,
     "isNew": false,
     "isPremium": false,
     "estimatedReadingTime": 6,
     "lastUpdated": "2025-01-15T10:00:00Z",
-    "createdAt": "2025-01-15T10:00:00Z"
+    "createdAt": "2025-01-15T10:00:00Z",
+    "source": "https://www.ch.ch/en/foreign-nationals-in-switzerland/",
+    "sourceTitle": "ch.ch — Foreign nationals in Switzerland",
+    "verifiedAt": "2026-07-15T00:00:00Z"
   },
   {
     "id": "doc-de-001",
@@ -209,16 +413,33 @@
     "subtitle": "Alles über die Anmeldung — von Dokumenten bis zu Fallstricken",
     "language": "de",
     "bodyMarkdown": "# Anmeldung bei der Gemeinde\n\nNach der Ankunft in der Schweiz müssen Sie sich innerhalb von **14 Tagen** bei Ihrer Wohngemeinde anmelden.\n\n## Warum es wichtig ist\n\n- Ohne Anmeldung können Sie kein Bankkonto eröffnen\n- Versicherungen verlangen Adressbestätigung\n- Kinder können nicht in der Schule eingeschrieben werden\n- Mögliche Bussen bei verspäteter Anmeldung (50-200 CHF)\n\n## Erforderliche Dokumente\n\n### Obligatorisch\n- [ ] Pass oder ID aller Familienmitglieder\n- [ ] Mietvertrag\n- [ ] Aufenthaltsbewilligung (Ausweis S)\n- [ ] Biometrisches Foto 35x45 mm\n\n### Zusätzlich (bei Bedarf)\n- Geburtsurkunden der Kinder\n- Heiratsurkunde\n- Bescheinigung vom vorherigen Wohnort\n\n## Schritt-für-Schritt-Anleitung\n\n### Schritt 1: Finden Sie Ihre Gemeinde\nJede Stadt hat ihre eigene Verwaltung. Finden Sie:\n- Google: \"Gemeinde + [Stadtname]\"\n- Auf der Kantonswebsite\n\n### Schritt 2: Termin buchen\nDie meisten Gemeinden arbeiten nach Terminvereinbarung. Buchung:\n- Online auf der Gemeindewebsite\n- Telefonisch\n\n### Schritt 3: Besuch\n1. Anmeldeformular ausfüllen\n2. Dokumentenkopien einreichen\n3. Anmeldebestätigung erhalten\n\n## Tipps und Tricks\n\n> **Insider-Tipp**: Wenn Sie die 14-Tage-Frist nicht einhalten können — rufen Sie die Gemeinde an. Meist wird verlängert ohne Busse.\n\n> **Rat**: Machen Sie 5 Kopien der Anmeldebestätigung — sie wird überall benötigt!\n\n## Kosten\n- Meist kostenlos\n- Einige Gemeinden verlangen 10-20 CHF\n\n## Nach der Anmeldung\n- Innerhalb von 2-4 Wochen erhalten Sie Ihren offiziellen Ausweis per Post\n- Sie können dann Bankkonten eröffnen, Versicherungen abschliessen, Kinder einschulen",
-    "tags": ["documents", "registration", "gemeinde", "anmeldung", "lang:de"],
+    "tags": [
+      "documents",
+      "registration",
+      "gemeinde",
+      "anmeldung",
+      "lang:de"
+    ],
     "category": "documents",
     "cantonCodes": [],
-    "links": [],
+    "links": [
+      {
+        "id": "official-source-doc-de-001",
+        "title": "ch.ch — Foreign nationals in Switzerland",
+        "url": "https://www.ch.ch/en/foreign-nationals-in-switzerland/",
+        "type": "website",
+        "description": "Official Swiss source used to verify this material"
+      }
+    ],
     "priority": 10,
     "isNew": false,
     "isPremium": false,
     "estimatedReadingTime": 8,
     "lastUpdated": "2025-01-15T10:00:00Z",
-    "createdAt": "2025-01-15T10:00:00Z"
+    "createdAt": "2025-01-15T10:00:00Z",
+    "source": "https://www.ch.ch/en/foreign-nationals-in-switzerland/",
+    "sourceTitle": "ch.ch — Foreign nationals in Switzerland",
+    "verifiedAt": "2026-07-15T00:00:00Z"
   },
   {
     "id": "doc-de-002",
@@ -226,16 +447,33 @@
     "subtitle": "Rechte, Einschränkungen und Verlängerung",
     "language": "de",
     "bodyMarkdown": "# Ausweis S — Schutzstatus in der Schweiz\n\nDer Ausweis S (Schutzstatus) ist eine vorübergehende Aufenthaltsbewilligung für ukrainische Staatsangehörige mit umfassenden Rechten.\n\n## Was der Ausweis S bietet\n\n### Rechte\n- ✅ Recht auf Aufenthalt in der Schweiz\n- ✅ Uneingeschränktes Arbeitsrecht\n- ✅ Zugang zur Krankenversicherung\n- ✅ Recht auf Sozialhilfe\n- ✅ Kostenlose Bildung für Kinder\n- ✅ Recht auf Familiennachzug\n\n### Einschränkungen\n- ❌ Ausreise über 15 Tage ohne Meldung nicht erlaubt\n- ❌ Kein dauerhaftes Aufenthaltsrecht\n- ❌ Jährliche Verlängerung erforderlich\n\n## Verlängerung des Ausweis S\n\n### Wann beantragen\n- 2-3 Monate vor Ablauf\n- Das Migrationsamt sendet Erinnerung per Post\n\n### Dokumente zur Verlängerung\n- [ ] Aktueller Ausweis S\n- [ ] Pass\n- [ ] Adressbestätigung\n- [ ] Foto (manchmal)\n\n### Kosten\n- Meist kostenlos für Ukrainer\n\n## Übergang zu anderem Status\n\n### Ausweis B (Aufenthaltsbewilligung)\n- Möglich nach 5 Jahren mit Ausweis S\n- Integration nachweisen (Sprache B1, Arbeit)\n\n### Ausweis C (Niederlassungsbewilligung)\n- Nach 10 Jahren Aufenthalt\n- Anforderungen: Sprache, Integration, finanzielle Unabhängigkeit\n\n## Wichtige Hinweise\n\n> **Insider-Tipp**: Wenn Sie Arbeit gefunden haben — bitten Sie den Arbeitgeber um ein Empfehlungsschreiben. Das hilft beim Übergang zu B.\n\n> **Achtung**: Ausreise in die Ukraine über 15 Tage kann zum Statusverlust führen!",
-    "tags": ["documents", "ausweis", "permit", "status-s", "lang:de"],
+    "tags": [
+      "documents",
+      "ausweis",
+      "permit",
+      "status-s",
+      "lang:de"
+    ],
     "category": "documents",
     "cantonCodes": [],
-    "links": [],
+    "links": [
+      {
+        "id": "official-source-doc-de-002",
+        "title": "ch.ch — Foreign nationals in Switzerland",
+        "url": "https://www.ch.ch/en/foreign-nationals-in-switzerland/",
+        "type": "website",
+        "description": "Official Swiss source used to verify this material"
+      }
+    ],
     "priority": 10,
     "isNew": false,
     "isPremium": false,
     "estimatedReadingTime": 7,
     "lastUpdated": "2025-01-15T10:00:00Z",
-    "createdAt": "2025-01-15T10:00:00Z"
+    "createdAt": "2025-01-15T10:00:00Z",
+    "source": "https://www.ch.ch/en/foreign-nationals-in-switzerland/",
+    "sourceTitle": "ch.ch — Foreign nationals in Switzerland",
+    "verifiedAt": "2026-07-15T00:00:00Z"
   },
   {
     "id": "doc-de-003",
@@ -243,16 +481,33 @@
     "subtitle": "Wie man ukrainische Dokumente in der Schweiz beglaubigt",
     "language": "de",
     "bodyMarkdown": "# Apostille und Dokumentenlegalisierung\n\nFür die Verwendung ukrainischer Dokumente in der Schweiz ist oft eine Apostille erforderlich — eine internationale Beglaubigung.\n\n## Was ist eine Apostille\n\nEine Apostille ist ein spezieller Stempel, der die Echtheit eines Dokuments für die Verwendung im Ausland bestätigt.\n\n## Welche Dokumente brauchen eine Apostille\n\n- Geburtsurkunde\n- Heirats-/Scheidungsurkunde\n- Bildungsdiplom\n- Strafregisterauszug\n- Ärztliche Bescheinigungen\n\n## Wie man eine Apostille erhält\n\n### In der Ukraine (vor der Abreise)\n1. Beim Justizministerium\n2. Oder im CNAP (Verwaltungsdienstzentrum)\n3. Dauer: 1-5 Arbeitstage\n4. Kosten: ca. 300-500 UAH\n\n### Aus dem Ausland\n1. Über das ukrainische Konsulat\n2. Über eine Vertrauensperson in der Ukraine\n3. Online-Dienste (Diia — für einige Dokumente)\n\n## Dokumentenübersetzung\n\n### Schweizer Anforderungen\n- Übersetzung muss **beglaubigt** sein\n- Übersetzer muss offiziellen Status haben\n\n### Wo Übersetzung bestellen\n- Beeidigte Übersetzer\n- Zertifizierte Übersetzungsbüros\n- Kosten: 50-150 CHF pro Dokument\n\n## Tipps und Tricks\n\n> **Insider-Tipp**: Viele Dokumente können über Diia mit QR-Code bezogen werden. Schweizer Behörden akzeptieren sie immer häufiger!\n\n> **Rat**: Holen Sie die Apostille für ALLE wichtigen Dokumente vor der Abreise — danach wird es schwieriger.\n\n## Gültigkeitsdauer\n\n- Apostille hat kein Ablaufdatum\n- Aber das Dokument selbst kann veralten (z.B. Strafregisterauszug — 6 Monate)",
-    "tags": ["documents", "apostille", "legalization", "translation", "lang:de"],
+    "tags": [
+      "documents",
+      "apostille",
+      "legalization",
+      "translation",
+      "lang:de"
+    ],
     "category": "documents",
     "cantonCodes": [],
-    "links": [],
+    "links": [
+      {
+        "id": "official-source-doc-de-003",
+        "title": "ch.ch — Foreign nationals in Switzerland",
+        "url": "https://www.ch.ch/en/foreign-nationals-in-switzerland/",
+        "type": "website",
+        "description": "Official Swiss source used to verify this material"
+      }
+    ],
     "priority": 8,
     "isNew": false,
     "isPremium": false,
     "estimatedReadingTime": 6,
     "lastUpdated": "2025-01-15T10:00:00Z",
-    "createdAt": "2025-01-15T10:00:00Z"
+    "createdAt": "2025-01-15T10:00:00Z",
+    "source": "https://www.ch.ch/en/foreign-nationals-in-switzerland/",
+    "sourceTitle": "ch.ch — Foreign nationals in Switzerland",
+    "verifiedAt": "2026-07-15T00:00:00Z"
   },
   {
     "id": "doc-de-004",
@@ -260,16 +515,33 @@
     "subtitle": "Umtausch des ukrainischen Führerscheins",
     "language": "de",
     "bodyMarkdown": "# Führerschein in der Schweiz\n\nMit einem ukrainischen Führerschein dürfen Sie 12 Monate in der Schweiz fahren. Danach ist ein Umtausch erforderlich.\n\n## Erste 12 Monate\n\n### Was erlaubt ist\n- Fahren mit ukrainischem Führerschein\n- Internationale Übersetzung oder IDP erforderlich\n\n### Was Sie brauchen\n- Ukrainischer Führerschein\n- Internationaler Führerschein (IDP) oder Übersetzung\n- Pass\n- Ausweis S\n\n## Umtausch in Schweizer Führerschein\n\n### Verfahren\n1. Strassenverkehrsamt kontaktieren\n2. Sehtest bestehen — 15-20 CHF\n3. Dokumente einreichen\n4. Provisorischen Führerschein erhalten\n\n### Dokumente\n- [ ] Ukrainischer Führerschein\n- [ ] Beglaubigte Übersetzung\n- [ ] Pass + Ausweis\n- [ ] Foto\n- [ ] Sehtest\n\n### Kosten\n- 50-150 CHF (je nach Kanton)\n\n## Wichtige Details\n\n### Kategorien\n- Kategorie B (Personenwagen) wird ohne Prüfung umgetauscht\n- Für Motorräder evtl. zusätzliche Prüfung\n\n### Zeitrahmen\n- Bearbeitung: 2-4 Wochen\n- Führerschein kommt per Post\n\n## Bei Fristversäumnis\n\n> **Achtung**: Bei nicht rechtzeitigem Umtausch — Prüfungen erforderlich!\n\n### Was zu tun ist\n1. Theorieprüfung (auf Ukrainisch/Englisch möglich)\n2. Praktische Prüfung\n3. Gesamtkosten: 500-1500 CHF\n\n## Tipps und Tricks\n\n> **Insider-Tipp**: Einige Kantone akzeptieren die Diia-App als Führerscheinnachweis. Beim Strassenverkehrsamt nachfragen!\n\n> **Rat**: Tauschen Sie direkt nach Ankunft um — Warteschlangen können lang sein.",
-    "tags": ["documents", "driving", "license", "strassenverkehrsamt", "lang:de"],
+    "tags": [
+      "documents",
+      "driving",
+      "license",
+      "strassenverkehrsamt",
+      "lang:de"
+    ],
     "category": "documents",
     "cantonCodes": [],
-    "links": [],
+    "links": [
+      {
+        "id": "official-source-doc-de-004",
+        "title": "ch.ch — Foreign nationals in Switzerland",
+        "url": "https://www.ch.ch/en/foreign-nationals-in-switzerland/",
+        "type": "website",
+        "description": "Official Swiss source used to verify this material"
+      }
+    ],
     "priority": 7,
     "isNew": false,
     "isPremium": false,
     "estimatedReadingTime": 7,
     "lastUpdated": "2025-01-15T10:00:00Z",
-    "createdAt": "2025-01-15T10:00:00Z"
+    "createdAt": "2025-01-15T10:00:00Z",
+    "source": "https://www.ch.ch/en/foreign-nationals-in-switzerland/",
+    "sourceTitle": "ch.ch — Foreign nationals in Switzerland",
+    "verifiedAt": "2026-07-15T00:00:00Z"
   },
   {
     "id": "doc-de-005",
@@ -277,16 +549,33 @@
     "subtitle": "Was es ist und warum Sie es brauchen",
     "language": "de",
     "bodyMarkdown": "# Betreibungsregisterauszug\n\nDies ist eines der wichtigsten Dokumente in der Schweiz. Es wird fast überall verlangt: bei Wohnungsmiete, Anstellung, Firmengründung.\n\n## Was es ist\n\nDer Betreibungsregisterauszug ist ein offizieller Auszug aus dem Betreibungsregister und zeigt:\n- Ob Sie Schulden haben\n- Gerichtliche Betreibungen\n- Geschichte finanzieller Probleme\n\n## Wo er gebraucht wird\n\n- 🏠 Wohnungsmiete (obligatorisch!)\n- 💼 Anstellung (häufig)\n- 🏦 Bankkontoeröffnung\n- 📱 Handyvertrag\n- 🚗 Autoleasing\n\n## Wie erhält man ihn\n\n### Online (am schnellsten)\n1. Besuchen Sie die Website Ihres Betreibungsamts\n2. Formular ausfüllen\n3. 17-22 CHF bezahlen\n4. PDF per E-Mail erhalten\n\n### Persönlich\n1. Betreibungsamt besuchen\n2. Pass + Ausweis\n3. Vor Ort bezahlen\n4. Sofort oder per Post erhalten\n\n## Wichtig zu wissen\n\n### Gültigkeitsdauer\n- Offiziell: unbegrenzt\n- Praktisch: Vermieter wollen Auszüge nicht älter als 3 Monate\n\n### Was er zeigt\n- Einträge der letzten 5 Jahre\n- Auch bezahlte Schulden sind sichtbar!\n\n## Bei vorhandenen Einträgen\n\n> **Keine Panik!** Viele Menschen haben Einträge. Wichtig ist:\n\n1. Eine Erklärung haben (z.B. Versicherungsfehler)\n2. Zeigen, dass Schuld bezahlt ist\n3. Begleitschreiben verfassen\n\n## Tipps und Tricks\n\n> **Insider-Tipp**: Als Neuankömmling haben Sie einen \"sauberen\" Auszug. Das ist ein grosser Vorteil bei der Wohnungssuche!\n\n> **Rat**: Bestellen Sie 3-5 Kopien auf einmal — sie werden oft benötigt.",
-    "tags": ["documents", "betreibung", "debt", "rental", "lang:de"],
+    "tags": [
+      "documents",
+      "betreibung",
+      "debt",
+      "rental",
+      "lang:de"
+    ],
     "category": "documents",
     "cantonCodes": [],
-    "links": [],
+    "links": [
+      {
+        "id": "official-source-doc-de-005",
+        "title": "ch.ch — Foreign nationals in Switzerland",
+        "url": "https://www.ch.ch/en/foreign-nationals-in-switzerland/",
+        "type": "website",
+        "description": "Official Swiss source used to verify this material"
+      }
+    ],
     "priority": 9,
     "isNew": false,
     "isPremium": false,
     "estimatedReadingTime": 6,
     "lastUpdated": "2025-01-15T10:00:00Z",
-    "createdAt": "2025-01-15T10:00:00Z"
+    "createdAt": "2025-01-15T10:00:00Z",
+    "source": "https://www.ch.ch/en/foreign-nationals-in-switzerland/",
+    "sourceTitle": "ch.ch — Foreign nationals in Switzerland",
+    "verifiedAt": "2026-07-15T00:00:00Z"
   },
   {
     "id": "doc-de-006",
@@ -294,16 +583,32 @@
     "subtitle": "Wie man sie erhält und wo sie verwendet wird",
     "language": "de",
     "bodyMarkdown": "# AHV-Nummer — Sozialversicherungsnummer\n\nDie AHV-Nummer (oder AVS in französischsprachigen Kantonen) ist Ihre eindeutige Identifikationsnummer im Schweizer Sozialversicherungssystem.\n\n## Was es ist\n\nFormat: 756.XXXX.XXXX.XX\n- 756 — Schweiz-Code\n- Danach — eindeutige Nummer\n\n## Wofür sie gebraucht wird\n\n- Anstellung\n- Rentenversicherung\n- Krankenversicherung\n- Steuererklärung\n- Sozialhilfe\n\n## Wie man sie erhält\n\n### Automatisch\nBei der Gemeindeanmeldung wird Ihnen automatisch eine AHV-Nummer zugewiesen.\n\n### Falls nicht erhalten\n1. AHV-Ausgleichskasse Ihres Kantons kontaktieren\n2. Oder Arbeitgeber fragen — sie können sie anfordern\n\n## Wo Sie Ihre Nummer finden\n\n- Auf der Krankenkassenkarte\n- Im Brief der AHV-Kasse\n- Im Arbeitsvertrag\n- Auf dem Ausweis (manchmal)\n\n## Wichtig zu wissen\n\n### Vertraulichkeit\n- Nummer nicht an Fremde weitergeben\n- Sie ist wie eine nationale ID-Nummer\n\n### Eine fürs Leben\n- Nummer ändert sich nie\n- Auch nicht bei Namens- oder Statusänderung\n\n## AHV-Beiträge\n\n### Wer zahlt\n- Arbeitnehmer: 50% (vom Lohn abgezogen)\n- Arbeitgeber: 50%\n\n### Satz\n- 10.6% vom Lohn (5.3% + 5.3%)\n\n## Tipps und Tricks\n\n> **Insider-Tipp**: Speichern Sie die Nummer im Handy — sie wird oft abgefragt!\n\n> **Rat**: Bei inoffizieller Arbeit sammeln Sie keine Rente an. Das ist wichtig für Ihre Zukunft!",
-    "tags": ["documents", "ahv", "avs", "social-security", "lang:de"],
+    "tags": [
+      "documents",
+      "ahv",
+      "avs",
+      "social-security",
+      "lang:de"
+    ],
     "category": "documents",
     "cantonCodes": [],
-    "links": [],
+    "links": [
+      {
+        "id": "official-source-doc-de-006",
+        "title": "ch.ch — Foreign nationals in Switzerland",
+        "url": "https://www.ch.ch/en/foreign-nationals-in-switzerland/",
+        "type": "website",
+        "description": "Official Swiss source used to verify this material"
+      }
+    ],
     "priority": 8,
     "isNew": false,
     "isPremium": false,
     "estimatedReadingTime": 6,
     "lastUpdated": "2025-01-15T10:00:00Z",
-    "createdAt": "2025-01-15T10:00:00Z"
+    "createdAt": "2025-01-15T10:00:00Z",
+    "source": "https://www.ch.ch/en/foreign-nationals-in-switzerland/",
+    "sourceTitle": "ch.ch — Foreign nationals in Switzerland",
+    "verifiedAt": "2026-07-15T00:00:00Z"
   }
 ]
-

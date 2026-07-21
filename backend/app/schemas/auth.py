@@ -31,6 +31,7 @@ class SocialLinkConfirmRequest(BaseModel):
 
 class SocialAuthResponse(BaseModel):
     status: str
+    user_id: str | None = None
     email: EmailStr | None = None
     message: str | None = None
     provider: str | None = None

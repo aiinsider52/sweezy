@@ -5,16 +5,33 @@
     "subtitle": "Де шукати, як подаватись та що очікувати",
     "language": "uk",
     "bodyMarkdown": "# Пошук роботи у Швейцарії\n\nШвейцарія пропонує високі зарплати та гарні умови праці. З Ausweis S ви можете працювати без обмежень.\n\n## Де шукати роботу\n\n### Топ-5 сайтів\n1. **jobs.ch** — найбільший портал\n2. **jobup.ch** — франкомовні кантони\n3. **indeed.ch** — агрегатор\n4. **linkedin.com** — для професіоналів\n5. **job-room.ch** — офіційний RAV\n\n### Спеціалізовані\n- **hotel-jobs.ch** — готелі\n- **gastrojobs.com** — ресторани\n- **bau-stellen.ch** — будівництво\n\n## CV по-швейцарськи\n\n### Структура\n1. Особисті дані + фото\n2. Досвід роботи (з останнього)\n3. Освіта\n4. Навички та мови\n5. Хобі (у Швейцарії це важливо!)\n\n### Формат\n- 1-2 сторінки PDF\n- Мова: німецька/французька/англійська\n- Професійне фото обов'язково\n\n## Motivationsschreiben\n\nМотиваційний лист — дуже важливий у Швейцарії!\n\n### Структура\n1. Чому ця компанія?\n2. Ваш досвід під вимоги\n3. Коли можете почати\n\n> **Інсайд**: Пишіть окремий лист для кожної вакансії — шаблони видно одразу!\n\n## Зарплати\n\n### Середні (brutto/місяць)\n- Загальний: 6000-8000 CHF\n- IT: 8000-15000 CHF\n- Медицина: 7000-12000 CHF\n- Гастрономія: 4000-5500 CHF\n- Прибирання: 3500-4500 CHF\n\n## RAV — державна допомога\n\nЯкщо не знайшли роботу:\n- Консультації\n- Курси перекваліфікації\n- Допомога з CV",
-    "tags": ["work", "job-search", "cv", "salary", "lang:uk"],
+    "tags": [
+      "work",
+      "job-search",
+      "cv",
+      "salary",
+      "lang:uk"
+    ],
     "category": "work",
     "cantonCodes": [],
-    "links": [],
+    "links": [
+      {
+        "id": "official-source-work-uk-001",
+        "title": "ch.ch — Work",
+        "url": "https://www.ch.ch/en/work/",
+        "type": "website",
+        "description": "Official Swiss source used to verify this material"
+      }
+    ],
     "priority": 10,
     "isNew": false,
     "isPremium": false,
     "estimatedReadingTime": 8,
     "lastUpdated": "2025-01-15T10:00:00Z",
-    "createdAt": "2025-01-15T10:00:00Z"
+    "createdAt": "2025-01-15T10:00:00Z",
+    "source": "https://www.ch.ch/en/work/",
+    "sourceTitle": "ch.ch — Work",
+    "verifiedAt": "2026-07-15T00:00:00Z"
   },
   {
     "id": "work-uk-002",
@@ -22,16 +39,33 @@
     "subtitle": "Що перевірити перед підписанням",
     "language": "uk",
     "bodyMarkdown": "# Arbeitsvertrag — Трудовий договір\n\nПеред підписанням трудового договору уважно перевірте всі пункти!\n\n## Обов'язкові пункти\n\n### Базова інформація\n- [ ] Дата початку роботи\n- [ ] Посада (Stellenbezeichnung)\n- [ ] Місце роботи\n- [ ] Робочий час (40-42 год/тиждень)\n\n### Зарплата\n- [ ] Bruttolohn (до вирахувань)\n- [ ] 13-та зарплата (є чи ні?)\n- [ ] Бонуси\n- [ ] Дата виплати\n\n### Відпустка\n- [ ] Кількість днів (мінімум 4 тижні)\n- [ ] Як узгоджувати\n\n### Випробувальний термін\n- Зазвичай 1-3 місяці\n- Коротший термін звільнення\n\n## Вирахування із зарплати\n\n### Обов'язкові\n- AHV/IV/EO: ~5.3%\n- ALV (страхування безробіття): 1.1%\n- NBU (нещасні випадки поза роботою): 1-2%\n- Pensionskasse (пенсія): 5-10%\n\n### Приклад\nBrutto 6000 CHF → Netto ~5000-5200 CHF\n\n## Kündigungsfrist (термін звільнення)\n\n- Випробувальний: 7 днів\n- 1-й рік: 1 місяць\n- 2-9 років: 2 місяці\n- 10+ років: 3 місяці\n\n## Червоні прапорці\n\n- 🚩 Немає письмового договору\n- 🚩 Зарплата \"чорним\"\n- 🚩 Надто довгий випробувальний термін\n- 🚩 Заборона працювати на іншого роботодавця\n\n> **Інсайд**: Завжди просіть договір німецькою/французькою + переклад. Якщо є сумніви — покажіть юристу!",
-    "tags": ["work", "contract", "salary", "arbeitsvertrag", "lang:uk"],
+    "tags": [
+      "work",
+      "contract",
+      "salary",
+      "arbeitsvertrag",
+      "lang:uk"
+    ],
     "category": "work",
     "cantonCodes": [],
-    "links": [],
+    "links": [
+      {
+        "id": "official-source-work-uk-002",
+        "title": "ch.ch — Work",
+        "url": "https://www.ch.ch/en/work/",
+        "type": "website",
+        "description": "Official Swiss source used to verify this material"
+      }
+    ],
     "priority": 9,
     "isNew": false,
     "isPremium": false,
     "estimatedReadingTime": 7,
     "lastUpdated": "2025-01-15T10:00:00Z",
-    "createdAt": "2025-01-15T10:00:00Z"
+    "createdAt": "2025-01-15T10:00:00Z",
+    "source": "https://www.ch.ch/en/work/",
+    "sourceTitle": "ch.ch — Work",
+    "verifiedAt": "2026-07-15T00:00:00Z"
   },
   {
     "id": "work-uk-003",
@@ -39,16 +73,33 @@
     "subtitle": "Як підтвердити українську освіту у Швейцарії",
     "language": "uk",
     "bodyMarkdown": "# Визнання дипломів у Швейцарії\n\nДля деяких професій потрібно офіційне визнання українського диплому.\n\n## Регульовані професії\n\n### Потрібне обов'язкове визнання\n- Лікарі, медсестри\n- Вчителі\n- Юристи\n- Архітектори\n- Інженери (деякі)\n\n### Куди звертатися\n**SBFI** (Державний секретаріат з освіти):\n- sbfi.admin.ch\n- Термін: 2-6 місяців\n- Вартість: 100-500 CHF\n\n## Нерегульовані професії\n\n### Визнання не обов'язкове\n- IT-спеціалісти\n- Маркетологи\n- Дизайнери\n- Менеджери\n\n### Але корисно\n- Допомагає роботодавцю зрозуміти рівень\n- Може збільшити зарплату\n\n## Процес визнання\n\n### Крок 1: Зібрати документи\n- [ ] Диплом з Apostille\n- [ ] Додаток до диплому\n- [ ] Переклад (сертифікований)\n- [ ] CV\n\n### Крок 2: Подати заявку\n- Онлайн на sbfi.admin.ch\n- Або особисто\n\n### Крок 3: Чекати рішення\n- Можуть запросити додаткові документи\n- Можуть вимагати іспити\n\n## Альтернативи\n\n### Курси та сертифікати\n- Швейцарські сертифікати іноді цінніші\n- IT: AWS, Google, Microsoft\n- Мови: TELC, Goethe-Institut\n\n> **Інсайд**: Для IT-спеціалістів портфоліо та GitHub важливіші за диплом!",
-    "tags": ["work", "diploma", "recognition", "sbfi", "lang:uk"],
+    "tags": [
+      "work",
+      "diploma",
+      "recognition",
+      "sbfi",
+      "lang:uk"
+    ],
     "category": "work",
     "cantonCodes": [],
-    "links": [],
+    "links": [
+      {
+        "id": "official-source-work-uk-003",
+        "title": "ch.ch — Work",
+        "url": "https://www.ch.ch/en/work/",
+        "type": "website",
+        "description": "Official Swiss source used to verify this material"
+      }
+    ],
     "priority": 8,
     "isNew": false,
     "isPremium": false,
     "estimatedReadingTime": 7,
     "lastUpdated": "2025-01-15T10:00:00Z",
-    "createdAt": "2025-01-15T10:00:00Z"
+    "createdAt": "2025-01-15T10:00:00Z",
+    "source": "https://www.ch.ch/en/work/",
+    "sourceTitle": "ch.ch — Work",
+    "verifiedAt": "2026-07-15T00:00:00Z"
   },
   {
     "id": "work-uk-004",
@@ -56,16 +107,33 @@
     "subtitle": "Найпопулярніша сфера для новачків",
     "language": "uk",
     "bodyMarkdown": "# Робота в гастрономії у Швейцарії\n\nГастрономія — один з найдоступніших способів почати працювати у Швейцарії.\n\n## Типи вакансій\n\n### Без досвіду\n- Посудомийник (Abwäscher): 3500-4200 CHF\n- Прибиральник: 3500-4000 CHF\n- Помічник кухаря: 3800-4500 CHF\n\n### З досвідом\n- Кухар (Koch): 4500-6000 CHF\n- Офіціант (Serviceangestellte): 4000-5500 CHF\n- Бариста: 4000-5000 CHF\n\n## Де шукати\n\n- gastrojobs.com\n- hotel-jobs.ch\n- jobs.ch → Gastronomie\n- Особисто — з CV по ресторанах\n\n## Умови праці\n\n### Графік\n- Часто вечірні та вихідні зміни\n- Ненормований робочий день\n- Сезонність (курорти)\n\n### Чайові\n- Включені в рахунок (15%)\n- Додаткові — особисто вам\n- Зазвичай 100-500 CHF/місяць\n\n## Переваги\n\n- ✅ Швидкий старт\n- ✅ Практика мови\n- ✅ Харчування на роботі\n- ✅ Чайові\n\n## Недоліки\n\n- ❌ Важка фізична робота\n- ❌ Нестабільний графік\n- ❌ Нижчі зарплати\n\n> **Інсайд**: Курортні готелі (Zermatt, St. Moritz) часто надають житло — економія 1000+ CHF/місяць!\n\n## Кар'єрний ріст\n\n1. Помічник → Кухар → Шеф-кухар\n2. Стажування → Свій бізнес\n3. Досвід Швейцарії = перевага для роботи по світу",
-    "tags": ["work", "gastronomy", "restaurant", "hotel", "lang:uk"],
+    "tags": [
+      "work",
+      "gastronomy",
+      "restaurant",
+      "hotel",
+      "lang:uk"
+    ],
     "category": "work",
     "cantonCodes": [],
-    "links": [],
+    "links": [
+      {
+        "id": "official-source-work-uk-004",
+        "title": "ch.ch — Work",
+        "url": "https://www.ch.ch/en/work/",
+        "type": "website",
+        "description": "Official Swiss source used to verify this material"
+      }
+    ],
     "priority": 7,
     "isNew": false,
     "isPremium": false,
     "estimatedReadingTime": 6,
     "lastUpdated": "2025-01-15T10:00:00Z",
-    "createdAt": "2025-01-15T10:00:00Z"
+    "createdAt": "2025-01-15T10:00:00Z",
+    "source": "https://www.ch.ch/en/work/",
+    "sourceTitle": "ch.ch — Work",
+    "verifiedAt": "2026-07-15T00:00:00Z"
   },
   {
     "id": "work-uk-005",
@@ -73,16 +141,33 @@
     "subtitle": "Як працювати на себе легально",
     "language": "uk",
     "bodyMarkdown": "# Freelance у Швейцарії\n\nСамозайнятість можлива, але є правила та обмеження.\n\n## Ausweis S та Freelance\n\n### Можливо\n- Працювати як найманий працівник\n- Мати кількох роботодавців\n\n### Складно\n- Зареєструвати ФОП (Einzelfirma)\n- Потрібен дозвіл кантону\n\n## Як працювати легально\n\n### Варіант 1: Портаж (Portage Salarial)\n- Компанія-посередник\n- Ви — їхній працівник\n- Вони виставляють рахунки клієнтам\n- Компанії: quitt.ch, Addeco\n\n### Варіант 2: GmbH (ТОВ)\n- Складніше, дорожче\n- Капітал 20000 CHF\n- Для серйозного бізнесу\n\n## Податки для Freelance\n\n### Оподаткування\n- Дохід декларуєте самі\n- AHV платите повністю (10.6%)\n- ПДВ при доході 100000+ CHF/рік\n\n### Витрати\n- Можна списувати бізнес-витрати\n- Оренда офісу, обладнання, транспорт\n\n## Популярні напрямки\n\n- IT/програмування\n- Дизайн\n- Переклади\n- Маркетинг\n- Консалтинг\n\n> **Інсайд**: Почніть з Portage Salarial — це легально і просто. Пізніше можете перейти на ФОП.\n\n## Корисні ресурси\n\n- quitt.ch — для дрібних підробітків\n- easygov.swiss — реєстрація бізнесу\n- kmu.admin.ch — інформація для підприємців",
-    "tags": ["work", "freelance", "self-employed", "business", "lang:uk"],
+    "tags": [
+      "work",
+      "freelance",
+      "self-employed",
+      "business",
+      "lang:uk"
+    ],
     "category": "work",
     "cantonCodes": [],
-    "links": [],
+    "links": [
+      {
+        "id": "official-source-work-uk-005",
+        "title": "ch.ch — Work",
+        "url": "https://www.ch.ch/en/work/",
+        "type": "website",
+        "description": "Official Swiss source used to verify this material"
+      }
+    ],
     "priority": 6,
     "isNew": false,
     "isPremium": false,
     "estimatedReadingTime": 7,
     "lastUpdated": "2025-01-15T10:00:00Z",
-    "createdAt": "2025-01-15T10:00:00Z"
+    "createdAt": "2025-01-15T10:00:00Z",
+    "source": "https://www.ch.ch/en/work/",
+    "sourceTitle": "ch.ch — Work",
+    "verifiedAt": "2026-07-15T00:00:00Z"
   },
   {
     "id": "work-uk-006",
@@ -90,16 +175,33 @@
     "subtitle": "Що вам гарантує закон",
     "language": "uk",
     "bodyMarkdown": "# Права працівника у Швейцарії\n\nШвейцарське трудове право захищає працівників. Знайте свої права!\n\n## Основні права\n\n### Робочий час\n- Максимум 45-50 годин/тиждень\n- Понаднормові — оплата +25% або відгул\n- Перерва: 15 хв при 5.5 год, 30 хв при 7 год\n\n### Відпустка\n- Мінімум 4 тижні/рік\n- До 20 років — 5 тижнів\n- Оплачується повністю\n\n### Лікарняний\n- Оплата 80% зарплати\n- Через страховку роботодавця\n- Довідка від лікаря з 3-го дня\n\n### Материнство\n- 14 тижнів оплачуваної відпустки\n- 80% зарплати\n- Захист від звільнення\n\n## Звільнення\n\n### Ваші права\n- Письмове повідомлення\n- Дотримання термінів\n- Виплата всіх належних коштів\n\n### Незаконне звільнення\n- Під час хвороби\n- Під час вагітності\n- За дискримінацією\n\n## Куди звертатися\n\n### Unia (профспілка)\n- Консультації\n- Захист прав\n- Членство: 1% від зарплати\n\n### Arbeitsgericht\n- Трудовий суд\n- Безкоштовно до 30000 CHF\n\n> **Інсайд**: Вступіть до профспілки одразу — вони допоможуть у конфліктах!\n\n## Важливі терміни\n\n- **Überstunden** — понаднормові\n- **Ferien** — відпустка\n- **Krankheit** — хвороба\n- **Mutterschaft** — материнство",
-    "tags": ["work", "rights", "employee", "vacation", "lang:uk"],
+    "tags": [
+      "work",
+      "rights",
+      "employee",
+      "vacation",
+      "lang:uk"
+    ],
     "category": "work",
     "cantonCodes": [],
-    "links": [],
+    "links": [
+      {
+        "id": "official-source-work-uk-006",
+        "title": "ch.ch — Work",
+        "url": "https://www.ch.ch/en/work/",
+        "type": "website",
+        "description": "Official Swiss source used to verify this material"
+      }
+    ],
     "priority": 8,
     "isNew": false,
     "isPremium": false,
     "estimatedReadingTime": 7,
     "lastUpdated": "2025-01-15T10:00:00Z",
-    "createdAt": "2025-01-15T10:00:00Z"
+    "createdAt": "2025-01-15T10:00:00Z",
+    "source": "https://www.ch.ch/en/work/",
+    "sourceTitle": "ch.ch — Work",
+    "verifiedAt": "2026-07-15T00:00:00Z"
   },
   {
     "id": "finance-uk-001",
@@ -107,16 +209,33 @@
     "subtitle": "Як заповнювати декларацію та економити",
     "language": "uk",
     "bodyMarkdown": "# Податки у Швейцарії\n\nПодаткова система Швейцарії складається з федеральних, кантональних та муніципальних податків.\n\n## Хто платить\n\n### З Ausweis S\n- Quellensteuer (податок біля джерела)\n- Віднімається з зарплати автоматично\n- Роботодавець перераховує\n\n### Після переходу на B/C\n- Steuererklärung (податкова декларація)\n- Заповнюєте самостійно\n\n## Ставки податків\n\n### Загальні ставки (приблизно)\n- Федеральний: 0.77-11.5%\n- Кантональний: 5-30%\n- Муніципальний: 5-20%\n\n### Найдешевші кантони\n1. Zug\n2. Schwyz\n3. Nidwalden\n4. Obwalden\n\n### Найдорожчі\n1. Genève\n2. Vaud\n3. Basel-Stadt\n\n## Що можна списати\n\n### Професійні витрати\n- Дорога на роботу\n- Харчування (якщо немає їдальні)\n- Робочий одяг\n- Курси підвищення кваліфікації\n\n### Особисті витрати\n- Медичні витрати (понад франшизу)\n- Внески в 3-й стовп (до 7056 CHF/рік)\n- Освіта дітей\n\n## Третій стовп (3a)\n\n### Що це\nДобровільне пенсійне страхування з податковими пільгами.\n\n### Переваги\n- Зменшує оподаткований дохід\n- Максимум: 7056 CHF/рік (2024)\n- Гроші недоступні до пенсії (є винятки)\n\n> **Інсайд**: Відкрийте 3a рахунок у січні та вносіть максимум — економія 1500-3000 CHF на податках!\n\n## Терміни\n\n- **Steuererklärung** — декларація\n- **Quellensteuer** — податок біля джерела\n- **Abzüge** — списання\n- **Steueramt** — податкова служба",
-    "tags": ["finance", "taxes", "steuern", "declaration", "lang:uk"],
+    "tags": [
+      "finance",
+      "taxes",
+      "steuern",
+      "declaration",
+      "lang:uk"
+    ],
     "category": "finance",
     "cantonCodes": [],
-    "links": [],
+    "links": [
+      {
+        "id": "official-source-finance-uk-001",
+        "title": "ch.ch — Taxes and finances",
+        "url": "https://www.ch.ch/en/taxes-and-finances/",
+        "type": "website",
+        "description": "Official Swiss source used to verify this material"
+      }
+    ],
     "priority": 10,
     "isNew": false,
     "isPremium": false,
     "estimatedReadingTime": 8,
     "lastUpdated": "2025-01-15T10:00:00Z",
-    "createdAt": "2025-01-15T10:00:00Z"
+    "createdAt": "2025-01-15T10:00:00Z",
+    "source": "https://www.ch.ch/en/taxes-and-finances/",
+    "sourceTitle": "ch.ch — Taxes and finances",
+    "verifiedAt": "2026-07-15T00:00:00Z"
   },
   {
     "id": "finance-uk-002",
@@ -124,16 +243,33 @@
     "subtitle": "Sozialhilfe: хто має право та як отримати",
     "language": "uk",
     "bodyMarkdown": "# Sozialhilfe — Соціальна допомога\n\nЯкщо ваших доходів недостатньо для життя, ви можете отримати соціальну допомогу.\n\n## Хто має право\n\n### З Ausweis S\n- Маєте право на соціальну допомогу\n- Спеціальні виплати для біженців\n\n### Умови\n- Недостатній дохід\n- Немає заощаджень понад ліміт\n- Активний пошук роботи\n\n## Розмір допомоги\n\n### Grundbedarf (базові потреби)\n- 1 особа: ~986 CHF/місяць\n- Сім'я 4 особи: ~2110 CHF/місяць\n\n### Додатково покривається\n- Оренда житла\n- Медичне страхування\n- Комунальні послуги\n\n## Як подати заявку\n\n### Крок 1: Звернутися до Sozialamt\n- Особисто або онлайн\n- За місцем реєстрації\n\n### Крок 2: Надати документи\n- [ ] Паспорт та Ausweis\n- [ ] Підтвердження доходів\n- [ ] Виписки з банку\n- [ ] Договір оренди\n- [ ] Квитанції про витрати\n\n### Крок 3: Співбесіда\n- Обговорення вашої ситуації\n- План інтеграції\n\n## Обов'язки отримувача\n\n- [ ] Активно шукати роботу\n- [ ] Відвідувати курси мови\n- [ ] Повідомляти про зміни\n- [ ] Зберігати квитанції\n\n## Важливо знати\n\n> **Увага**: Соціальна допомога може вплинути на отримання Ausweis B/C у майбутньому!\n\n> **Інсайд**: Шукайте роботу активно — це головна вимога. Документуйте кожну заявку!\n\n## Терміни\n\n- **Sozialhilfe** — соціальна допомога\n- **Grundbedarf** — базові потреби\n- **Sozialamt** — соціальна служба\n- **Integrationszulage** — надбавка за інтеграцію",
-    "tags": ["finance", "sozialhilfe", "welfare", "support", "lang:uk"],
+    "tags": [
+      "finance",
+      "sozialhilfe",
+      "welfare",
+      "support",
+      "lang:uk"
+    ],
     "category": "finance",
     "cantonCodes": [],
-    "links": [],
+    "links": [
+      {
+        "id": "official-source-finance-uk-002",
+        "title": "ch.ch — Taxes and finances",
+        "url": "https://www.ch.ch/en/taxes-and-finances/",
+        "type": "website",
+        "description": "Official Swiss source used to verify this material"
+      }
+    ],
     "priority": 9,
     "isNew": false,
     "isPremium": false,
     "estimatedReadingTime": 7,
     "lastUpdated": "2025-01-15T10:00:00Z",
-    "createdAt": "2025-01-15T10:00:00Z"
+    "createdAt": "2025-01-15T10:00:00Z",
+    "source": "https://www.ch.ch/en/taxes-and-finances/",
+    "sourceTitle": "ch.ch — Taxes and finances",
+    "verifiedAt": "2026-07-15T00:00:00Z"
   },
   {
     "id": "finance-uk-003",
@@ -141,16 +277,33 @@
     "subtitle": "Скільки потрібно грошей на місяць",
     "language": "uk",
     "bodyMarkdown": "# Вартість життя у Швейцарії\n\nШвейцарія — одна з найдорожчих країн світу. Плануйте бюджет заздалегідь!\n\n## Місячні витрати (1 особа)\n\n### Оренда\n- Цюрих: 1200-1800 CHF\n- Берн: 900-1400 CHF\n- WG кімната: 600-1000 CHF\n\n### Страхування\n- Медичне: 300-450 CHF\n- Haftpflicht: 10-20 CHF\n\n### Харчування\n- Супермаркет: 400-600 CHF\n- Їдальня на роботі: 200-400 CHF\n\n### Транспорт\n- Halbtax: 185 CHF/рік\n- ZVV (Цюрих): 85-180 CHF/місяць\n\n### Телефон/Інтернет\n- Мобільний: 20-50 CHF\n- Інтернет: 40-60 CHF\n\n## Загальний бюджет\n\n### Мінімум (виживання)\n- 2500-3000 CHF/місяць\n\n### Комфортно\n- 4000-5000 CHF/місяць\n\n### Сім'я з дітьми\n- 6000-8000 CHF/місяць\n\n## Як економити\n\n### Харчування\n- Lidl, Aldi, Denner замість Coop, Migros\n- Готувати вдома\n- Акції (50% ввечері)\n\n### Транспорт\n- Halbtax окупається за 2 поїздки\n- Велосипед у місті\n- Blablacar для далеких поїздок\n\n### Одяг\n- Outlet магазини\n- Tutti.ch (б/в)\n- Brockenhaus (секонд-хенд)\n\n> **Інсайд**: Закупи в Німеччині (Konstanz) економлять 30-50% на продуктах!\n\n## Порівняння з Україною\n\n| Продукт | Україна | Швейцарія |\n|---------|---------|------------|\n| Молоко 1л | 30 грн | 1.80 CHF |\n| Хліб | 25 грн | 2.50 CHF |\n| Обід | 150 грн | 20 CHF |",
-    "tags": ["finance", "cost-of-living", "budget", "savings", "lang:uk"],
+    "tags": [
+      "finance",
+      "cost-of-living",
+      "budget",
+      "savings",
+      "lang:uk"
+    ],
     "category": "finance",
     "cantonCodes": [],
-    "links": [],
+    "links": [
+      {
+        "id": "official-source-finance-uk-003",
+        "title": "ch.ch — Taxes and finances",
+        "url": "https://www.ch.ch/en/taxes-and-finances/",
+        "type": "website",
+        "description": "Official Swiss source used to verify this material"
+      }
+    ],
     "priority": 9,
     "isNew": false,
     "isPremium": false,
     "estimatedReadingTime": 7,
     "lastUpdated": "2025-01-15T10:00:00Z",
-    "createdAt": "2025-01-15T10:00:00Z"
+    "createdAt": "2025-01-15T10:00:00Z",
+    "source": "https://www.ch.ch/en/taxes-and-finances/",
+    "sourceTitle": "ch.ch — Taxes and finances",
+    "verifiedAt": "2026-07-15T00:00:00Z"
   },
   {
     "id": "finance-uk-004",
@@ -158,16 +311,33 @@
     "subtitle": "Як зменшити витрати на медичне страхування",
     "language": "uk",
     "bodyMarkdown": "# Prämienverbilligung — Субсидія на страхування\n\nЯкщо ваш дохід низький, держава може частково оплачувати ваше медичне страхування.\n\n## Хто має право\n\n### Критерії\n- Низький дохід (поріг залежить від кантону)\n- Зареєстровані в кантоні\n- Маєте медичне страхування\n\n### Приклад порогів\n- Цюрих: до ~55000 CHF/рік (1 особа)\n- Берн: до ~50000 CHF/рік\n- Кожен кантон має свої правила!\n\n## Розмір субсидії\n\n- Часткова оплата страхування\n- Може покривати до 100% премії\n- Залежить від доходу та сім'ї\n\n## Як подати заявку\n\n### Автоматично (деякі кантони)\n- Якщо ви на соціальній допомозі\n- Дані передаються автоматично\n\n### Вручну (більшість)\n1. Знайдіть форму на сайті кантону\n2. Заповніть заявку\n3. Додайте документи про доходи\n4. Надішліть до Sozialversicherungsamt\n\n### Документи\n- [ ] Податкова декларація\n- [ ] Зарплатні листки\n- [ ] Поліс страхування\n- [ ] Ausweis\n\n## Терміни\n\n### Коли подавати\n- Кожен кантон має свій термін\n- Зазвичай: до 31 березня\n- Деякі: протягом року\n\n> **Увага**: Запізнена заявка = втрата субсидії за минулий період!\n\n## Лайфхаки\n\n> **Інсайд**: Подавайте одразу після реєстрації — субсидія може діяти ретроактивно на кілька місяців!\n\n> **Порада**: Зателефонуйте в Sozialamt — вони допоможуть з заповненням.\n\n## Корисні посилання\n\n- priminfo.admin.ch — калькулятор субсидії\n- Сайт вашого кантону → Prämienverbilligung",
-    "tags": ["finance", "insurance", "subsidy", "praemienverbilligung", "lang:uk"],
+    "tags": [
+      "finance",
+      "insurance",
+      "subsidy",
+      "praemienverbilligung",
+      "lang:uk"
+    ],
     "category": "finance",
     "cantonCodes": [],
-    "links": [],
+    "links": [
+      {
+        "id": "official-source-finance-uk-004",
+        "title": "ch.ch — Taxes and finances",
+        "url": "https://www.ch.ch/en/taxes-and-finances/",
+        "type": "website",
+        "description": "Official Swiss source used to verify this material"
+      }
+    ],
     "priority": 9,
     "isNew": false,
     "isPremium": false,
     "estimatedReadingTime": 6,
     "lastUpdated": "2025-01-15T10:00:00Z",
-    "createdAt": "2025-01-15T10:00:00Z"
+    "createdAt": "2025-01-15T10:00:00Z",
+    "source": "https://www.ch.ch/en/taxes-and-finances/",
+    "sourceTitle": "ch.ch — Taxes and finances",
+    "verifiedAt": "2026-07-15T00:00:00Z"
   },
   {
     "id": "finance-uk-005",
@@ -175,16 +345,33 @@
     "subtitle": "3 стовпи: як забезпечити старість",
     "language": "uk",
     "bodyMarkdown": "# Пенсійна система Швейцарії\n\nШвейцарська пенсійна система базується на 3 стовпах.\n\n## 1-й стовп: AHV (державна пенсія)\n\n### Що це\n- Базова державна пенсія\n- Платять всі працюючі\n- Внесок: 10.6% (50/50 працівник/роботодавець)\n\n### Розмір пенсії\n- Мінімум: ~1225 CHF/місяць\n- Максимум: ~2450 CHF/місяць\n- Залежить від років внесків\n\n## 2-й стовп: BVG (професійна пенсія)\n\n### Що це\n- Обов'язкова при зарплаті 22050+ CHF/рік\n- Роботодавець обирає фонд\n- Внесок: 5-10% (50/50)\n\n### Розмір\n- Залежить від накопичень\n- Зазвичай 20-40% від останньої зарплати\n\n### При виїзді з Швейцарії\n- Можна забрати накопичення!\n- Або залишити до пенсії\n\n## 3-й стовп: Приватні заощадження\n\n### 3a (зв'язаний)\n- Податкові пільги\n- Максимум: 7056 CHF/рік\n- Блоковані до пенсії (є винятки)\n\n### 3b (вільний)\n- Без податкових пільг\n- Вільний доступ\n- Будь-яка сума\n\n## Для біженців з Ausweis S\n\n### Що важливо знати\n- AHV накопичується при офіційній роботі\n- BVG — теж\n- 3a можете відкрити\n\n> **Інсайд**: Відкрийте 3a рахунок одразу — навіть маленькі внески дають великі податкові пільги!\n\n## Пенсійний вік\n\n- Чоловіки: 65 років\n- Жінки: 64 роки (поступово до 65)\n\n## Калькулятори\n\n- ahv-iv.ch — розрахунок AHV\n- swisscanto.ch — калькулятор 3a",
-    "tags": ["finance", "pension", "ahv", "retirement", "lang:uk"],
+    "tags": [
+      "finance",
+      "pension",
+      "ahv",
+      "retirement",
+      "lang:uk"
+    ],
     "category": "finance",
     "cantonCodes": [],
-    "links": [],
+    "links": [
+      {
+        "id": "official-source-finance-uk-005",
+        "title": "ch.ch — Taxes and finances",
+        "url": "https://www.ch.ch/en/taxes-and-finances/",
+        "type": "website",
+        "description": "Official Swiss source used to verify this material"
+      }
+    ],
     "priority": 7,
     "isNew": false,
     "isPremium": false,
     "estimatedReadingTime": 8,
     "lastUpdated": "2025-01-15T10:00:00Z",
-    "createdAt": "2025-01-15T10:00:00Z"
+    "createdAt": "2025-01-15T10:00:00Z",
+    "source": "https://www.ch.ch/en/taxes-and-finances/",
+    "sourceTitle": "ch.ch — Taxes and finances",
+    "verifiedAt": "2026-07-15T00:00:00Z"
   },
   {
     "id": "finance-uk-006",
@@ -192,16 +379,33 @@
     "subtitle": "Найдешевші способи надіслати гроші",
     "language": "uk",
     "bodyMarkdown": "# Грошові перекази в Україну\n\nПорівняння способів переказу грошей з Швейцарії в Україну.\n\n## Сервіси переказів\n\n### Wise (TransferWise)\n- Комісія: 0.5-1%\n- Курс: ринковий\n- Час: 1-2 дні\n- ✅ Найвигідніший курс\n\n### Remitly\n- Комісія: 0-2%\n- Час: миттєво\n- ✅ Швидко на картку\n\n### Western Union\n- Комісія: 3-7%\n- Час: миттєво\n- ✅ Готівка в Україні\n\n### Банківський переказ\n- Комісія: 20-50 CHF\n- Курс: банківський (гірший)\n- Час: 2-5 днів\n- ❌ Найдорожчий варіант\n\n## Порівняння на 1000 CHF\n\n| Сервіс | Отримано в UAH |\n|--------|----------------|\n| Wise | ~39500 UAH |\n| Remitly | ~38800 UAH |\n| WU | ~37000 UAH |\n| Банк | ~35000 UAH |\n\n## Лайфхаки\n\n### Економія\n- Надсилайте більші суми рідше\n- Використовуйте Wise для великих сум\n- Порівнюйте курси перед переказом\n\n### Безпека\n- Тільки офіційні сервіси\n- Перевіряйте реквізити\n- Зберігайте квитанції\n\n> **Інсайд**: MoneyGram часто має акції з 0% комісією — слідкуйте!\n\n## Ліміти\n\n- Wise: до 1 млн CHF/переказ\n- Remitly: до 8000 CHF/переказ\n- WU: залежить від верифікації\n\n## Для регулярних переказів\n\nВідкрийте мультивалютний рахунок:\n- Wise — безкоштовний\n- Revolut — безкоштовний\n- N26 — безкоштовний",
-    "tags": ["finance", "transfer", "ukraine", "money", "lang:uk"],
+    "tags": [
+      "finance",
+      "transfer",
+      "ukraine",
+      "money",
+      "lang:uk"
+    ],
     "category": "finance",
     "cantonCodes": [],
-    "links": [],
+    "links": [
+      {
+        "id": "official-source-finance-uk-006",
+        "title": "ch.ch — Taxes and finances",
+        "url": "https://www.ch.ch/en/taxes-and-finances/",
+        "type": "website",
+        "description": "Official Swiss source used to verify this material"
+      }
+    ],
     "priority": 8,
     "isNew": false,
     "isPremium": false,
     "estimatedReadingTime": 6,
     "lastUpdated": "2025-01-15T10:00:00Z",
-    "createdAt": "2025-01-15T10:00:00Z"
+    "createdAt": "2025-01-15T10:00:00Z",
+    "source": "https://www.ch.ch/en/taxes-and-finances/",
+    "sourceTitle": "ch.ch — Taxes and finances",
+    "verifiedAt": "2026-07-15T00:00:00Z"
   },
   {
     "id": "work-en-001",
@@ -209,16 +413,33 @@
     "subtitle": "Where to search, how to apply, and what to expect",
     "language": "en",
     "bodyMarkdown": "# Job Search in Switzerland\n\nSwitzerland offers high salaries and good working conditions. With Ausweis S, you can work without restrictions.\n\n## Where to Search\n\n### Top 5 Sites\n1. **jobs.ch** — largest portal\n2. **jobup.ch** — French-speaking cantons\n3. **indeed.ch** — aggregator\n4. **linkedin.com** — for professionals\n5. **job-room.ch** — official RAV\n\n### Specialized\n- **hotel-jobs.ch** — hotels\n- **gastrojobs.com** — restaurants\n- **bau-stellen.ch** — construction\n\n## Swiss-style CV\n\n### Structure\n1. Personal data + photo\n2. Work experience (reverse chronological)\n3. Education\n4. Skills and languages\n5. Hobbies (important in Switzerland!)\n\n### Format\n- 1-2 pages PDF\n- Language: German/French/English\n- Professional photo mandatory\n\n## Motivationsschreiben\n\nThe motivation letter is very important in Switzerland!\n\n### Structure\n1. Why this company?\n2. Your experience matching requirements\n3. When you can start\n\n> **Insider tip**: Write a separate letter for each job — templates are immediately obvious!\n\n## Salaries\n\n### Average (gross/month)\n- General: 6000-8000 CHF\n- IT: 8000-15000 CHF\n- Medicine: 7000-12000 CHF\n- Gastronomy: 4000-5500 CHF\n- Cleaning: 3500-4500 CHF\n\n## RAV — Government Support\n\nIf you haven't found work:\n- Consultations\n- Retraining courses\n- CV assistance",
-    "tags": ["work", "job-search", "cv", "salary", "lang:en"],
+    "tags": [
+      "work",
+      "job-search",
+      "cv",
+      "salary",
+      "lang:en"
+    ],
     "category": "work",
     "cantonCodes": [],
-    "links": [],
+    "links": [
+      {
+        "id": "official-source-work-en-001",
+        "title": "ch.ch — Work",
+        "url": "https://www.ch.ch/en/work/",
+        "type": "website",
+        "description": "Official Swiss source used to verify this material"
+      }
+    ],
     "priority": 10,
     "isNew": false,
     "isPremium": false,
     "estimatedReadingTime": 8,
     "lastUpdated": "2025-01-15T10:00:00Z",
-    "createdAt": "2025-01-15T10:00:00Z"
+    "createdAt": "2025-01-15T10:00:00Z",
+    "source": "https://www.ch.ch/en/work/",
+    "sourceTitle": "ch.ch — Work",
+    "verifiedAt": "2026-07-15T00:00:00Z"
   },
   {
     "id": "work-de-001",
@@ -226,16 +447,33 @@
     "subtitle": "Wo suchen, wie bewerben und was erwarten",
     "language": "de",
     "bodyMarkdown": "# Jobsuche in der Schweiz\n\nDie Schweiz bietet hohe Löhne und gute Arbeitsbedingungen. Mit Ausweis S können Sie ohne Einschränkungen arbeiten.\n\n## Wo suchen\n\n### Top-5-Seiten\n1. **jobs.ch** — grösstes Portal\n2. **jobup.ch** — Romandie\n3. **indeed.ch** — Aggregator\n4. **linkedin.com** — für Professionals\n5. **job-room.ch** — offizielles RAV-Portal\n\n### Spezialisiert\n- **hotel-jobs.ch** — Hotels\n- **gastrojobs.com** — Gastronomie\n- **bau-stellen.ch** — Bau\n\n## Schweizer CV\n\n### Struktur\n1. Persönliche Daten + Foto\n2. Berufserfahrung (neueste zuerst)\n3. Ausbildung\n4. Kenntnisse und Sprachen\n5. Hobbys (wichtig in der Schweiz!)\n\n### Format\n- 1-2 Seiten PDF\n- Sprache: Deutsch/Französisch/Englisch\n- Professionelles Foto obligatorisch\n\n## Motivationsschreiben\n\nDas Motivationsschreiben ist in der Schweiz sehr wichtig!\n\n### Struktur\n1. Warum diese Firma?\n2. Ihre Erfahrung passend zu den Anforderungen\n3. Wann Sie beginnen können\n\n> **Insider-Tipp**: Schreiben Sie für jede Stelle einen eigenen Brief — Vorlagen sind sofort erkennbar!\n\n## Löhne\n\n### Durchschnitt (brutto/Monat)\n- Allgemein: 6000-8000 CHF\n- IT: 8000-15000 CHF\n- Medizin: 7000-12000 CHF\n- Gastronomie: 4000-5500 CHF\n- Reinigung: 3500-4500 CHF\n\n## RAV — Staatliche Hilfe\n\nFalls Sie keine Arbeit finden:\n- Beratung\n- Umschulungskurse\n- CV-Hilfe",
-    "tags": ["work", "job-search", "cv", "salary", "lang:de"],
+    "tags": [
+      "work",
+      "job-search",
+      "cv",
+      "salary",
+      "lang:de"
+    ],
     "category": "work",
     "cantonCodes": [],
-    "links": [],
+    "links": [
+      {
+        "id": "official-source-work-de-001",
+        "title": "ch.ch — Work",
+        "url": "https://www.ch.ch/en/work/",
+        "type": "website",
+        "description": "Official Swiss source used to verify this material"
+      }
+    ],
     "priority": 10,
     "isNew": false,
     "isPremium": false,
     "estimatedReadingTime": 8,
     "lastUpdated": "2025-01-15T10:00:00Z",
-    "createdAt": "2025-01-15T10:00:00Z"
+    "createdAt": "2025-01-15T10:00:00Z",
+    "source": "https://www.ch.ch/en/work/",
+    "sourceTitle": "ch.ch — Work",
+    "verifiedAt": "2026-07-15T00:00:00Z"
   },
   {
     "id": "finance-en-001",
@@ -243,16 +481,33 @@
     "subtitle": "How to file declarations and save money",
     "language": "en",
     "bodyMarkdown": "# Taxes in Switzerland\n\nThe Swiss tax system consists of federal, cantonal, and municipal taxes.\n\n## Who Pays\n\n### With Ausweis S\n- Quellensteuer (withholding tax)\n- Deducted from salary automatically\n- Employer transfers it\n\n### After transitioning to B/C\n- Steuererklärung (tax declaration)\n- You file yourself\n\n## Tax Rates\n\n### General Rates (approximate)\n- Federal: 0.77-11.5%\n- Cantonal: 5-30%\n- Municipal: 5-20%\n\n### Cheapest Cantons\n1. Zug\n2. Schwyz\n3. Nidwalden\n4. Obwalden\n\n### Most Expensive\n1. Genève\n2. Vaud\n3. Basel-Stadt\n\n## What You Can Deduct\n\n### Professional Expenses\n- Commute to work\n- Meals (if no canteen)\n- Work clothes\n- Professional development courses\n\n### Personal Expenses\n- Medical costs (above franchise)\n- 3rd pillar contributions (up to 7056 CHF/year)\n- Children's education\n\n## Third Pillar (3a)\n\n### What It Is\nVoluntary pension savings with tax benefits.\n\n### Advantages\n- Reduces taxable income\n- Maximum: 7056 CHF/year (2024)\n- Funds locked until retirement (with exceptions)\n\n> **Insider tip**: Open a 3a account in January and contribute the maximum — save 1500-3000 CHF on taxes!\n\n## Key Terms\n\n- **Steuererklärung** — tax declaration\n- **Quellensteuer** — withholding tax\n- **Abzüge** — deductions\n- **Steueramt** — tax office",
-    "tags": ["finance", "taxes", "steuern", "declaration", "lang:en"],
+    "tags": [
+      "finance",
+      "taxes",
+      "steuern",
+      "declaration",
+      "lang:en"
+    ],
     "category": "finance",
     "cantonCodes": [],
-    "links": [],
+    "links": [
+      {
+        "id": "official-source-finance-en-001",
+        "title": "ch.ch — Taxes and finances",
+        "url": "https://www.ch.ch/en/taxes-and-finances/",
+        "type": "website",
+        "description": "Official Swiss source used to verify this material"
+      }
+    ],
     "priority": 10,
     "isNew": false,
     "isPremium": false,
     "estimatedReadingTime": 8,
     "lastUpdated": "2025-01-15T10:00:00Z",
-    "createdAt": "2025-01-15T10:00:00Z"
+    "createdAt": "2025-01-15T10:00:00Z",
+    "source": "https://www.ch.ch/en/taxes-and-finances/",
+    "sourceTitle": "ch.ch — Taxes and finances",
+    "verifiedAt": "2026-07-15T00:00:00Z"
   },
   {
     "id": "finance-de-001",
@@ -260,16 +515,32 @@
     "subtitle": "Steuererklärung ausfüllen und sparen",
     "language": "de",
     "bodyMarkdown": "# Steuern in der Schweiz\n\nDas Schweizer Steuersystem besteht aus Bundes-, Kantons- und Gemeindesteuern.\n\n## Wer zahlt\n\n### Mit Ausweis S\n- Quellensteuer\n- Wird automatisch vom Lohn abgezogen\n- Arbeitgeber überweist\n\n### Nach Wechsel zu B/C\n- Steuererklärung\n- Selbst ausfüllen\n\n## Steuersätze\n\n### Allgemeine Sätze (ungefähr)\n- Bund: 0.77-11.5%\n- Kanton: 5-30%\n- Gemeinde: 5-20%\n\n### Günstigste Kantone\n1. Zug\n2. Schwyz\n3. Nidwalden\n4. Obwalden\n\n### Teuerste\n1. Genf\n2. Waadt\n3. Basel-Stadt\n\n## Was abziehbar ist\n\n### Berufskosten\n- Arbeitsweg\n- Verpflegung (wenn keine Kantine)\n- Berufskleidung\n- Weiterbildungskurse\n\n### Persönliche Kosten\n- Arztkosten (über Franchise)\n- Säule 3a Einzahlungen (bis 7056 CHF/Jahr)\n- Kinderausbildung\n\n## Dritte Säule (3a)\n\n### Was es ist\nFreiwillige Altersvorsorge mit Steuervorteilen.\n\n### Vorteile\n- Reduziert steuerbares Einkommen\n- Maximum: 7056 CHF/Jahr (2024)\n- Gesperrt bis Pension (mit Ausnahmen)\n\n> **Insider-Tipp**: Eröffnen Sie ein 3a-Konto im Januar und zahlen Sie das Maximum ein — sparen Sie 1500-3000 CHF Steuern!\n\n## Wichtige Begriffe\n\n- **Steuererklärung** — Steuererklärung\n- **Quellensteuer** — Quellensteuer\n- **Abzüge** — Abzüge\n- **Steueramt** — Steueramt",
-    "tags": ["finance", "taxes", "steuern", "declaration", "lang:de"],
+    "tags": [
+      "finance",
+      "taxes",
+      "steuern",
+      "declaration",
+      "lang:de"
+    ],
     "category": "finance",
     "cantonCodes": [],
-    "links": [],
+    "links": [
+      {
+        "id": "official-source-finance-de-001",
+        "title": "ch.ch — Taxes and finances",
+        "url": "https://www.ch.ch/en/taxes-and-finances/",
+        "type": "website",
+        "description": "Official Swiss source used to verify this material"
+      }
+    ],
     "priority": 10,
     "isNew": false,
     "isPremium": false,
     "estimatedReadingTime": 8,
     "lastUpdated": "2025-01-15T10:00:00Z",
-    "createdAt": "2025-01-15T10:00:00Z"
+    "createdAt": "2025-01-15T10:00:00Z",
+    "source": "https://www.ch.ch/en/taxes-and-finances/",
+    "sourceTitle": "ch.ch — Taxes and finances",
+    "verifiedAt": "2026-07-15T00:00:00Z"
   }
 ]
-

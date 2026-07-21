@@ -22,14 +22,7 @@ struct RegistrationView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Theme.Colors.darkBackground
-                    .ignoresSafeArea()
-
-                Color.black.opacity(0.18)
-                    .ignoresSafeArea()
-                
-                // Aurora background
-                AuthAuroraBackground()
+                JourneyPhotoBackground(imageName: JourneyBackdrop.zurich.rawValue, blurRadius: 6, darkness: 0.64)
                 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 24) {
@@ -61,6 +54,7 @@ struct RegistrationView: View {
                 }
             }
         }
+        .journeyScreen(.zurich, darkness: 0.64)
         .overlay(alignment: .top) {
             if showConfetti { ConfettiView().allowsHitTesting(false) }
         }

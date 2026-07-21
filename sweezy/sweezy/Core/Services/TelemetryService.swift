@@ -10,6 +10,27 @@ import SwiftUI
 
 @MainActor
 final class TelemetryService {
+    enum RetentionEvent: String {
+        case onboardingProfileSaved = "retention_onboarding_profile_saved"
+        case roadmapSeeded = "retention_roadmap_seeded"
+        case nextActionViewed = "retention_next_action_viewed"
+        case nextActionTapped = "retention_next_action_tapped"
+        case roadmapTaskCompleted = "retention_roadmap_task_completed"
+        case contentOpened = "retention_content_opened"
+        case firstWeekReminderScheduled = "retention_first_week_reminder_scheduled"
+        case marketplaceListingViewed = "retention_marketplace_listing_viewed"
+        case marketplaceContactTapped = "retention_marketplace_contact_tapped"
+        case jobSearchPerformed = "retention_job_search_performed"
+        case notificationPermissionUpdated = "retention_notification_permission_updated"
+        case lifeEventLogged = "retention_life_event_logged"
+        case settledBranchActivated = "retention_settled_branch_activated"
+        case momentSeen = "retention_moment_seen"
+        case momentActionTaken = "retention_moment_action_taken"
+        case deadlineReminderScheduled = "retention_deadline_reminder_scheduled"
+        case expertViewed = "retention_expert_viewed"
+        case expertQuestionAsked = "retention_expert_question_asked"
+    }
+
     struct Event: Codable {
         let id: String
         let ts: String
@@ -32,6 +53,10 @@ final class TelemetryService {
     func info(_ type: String, source: String, message: String? = nil, meta: [String: String] = [:]) {
         log(level: "info", type: type, source: source, message: message, meta: meta)
     }
+
+    func retention(_ event: RetentionEvent, source: String, message: String? = nil, meta: [String: String] = [:]) {
+        info(event.rawValue, source: source, message: message, meta: meta)
+    }
     
     func warn(_ type: String, source: String, message: String? = nil, meta: [String: String] = [:]) {
         log(level: "warn", type: type, source: source, message: message, meta: meta)
@@ -42,6 +67,7 @@ final class TelemetryService {
     }
     
     private func log(level: String, type: String, source: String, message: String?, meta: [String: String]) {
+        guard AnalyticsConsentStore.isGranted else { return }
         let event = Event(
             id: UUID().uuidString,
             ts: iso.string(from: Date()),
@@ -72,6 +98,10 @@ final class TelemetryService {
     
     func flush() async {
         isFlushScheduled = false
+        guard AnalyticsConsentStore.isGranted else {
+            buffer.removeAll(keepingCapacity: false)
+            return
+        }
         guard !buffer.isEmpty else { return }
         let events = buffer
         buffer.removeAll(keepingCapacity: true)
@@ -89,7 +119,15 @@ final class TelemetryService {
             }
         }
     }
-}
 
+    func consentDidChange() {
+        if AnalyticsConsentStore.isGranted {
+            scheduleFlush()
+        } else {
+            buffer.removeAll(keepingCapacity: false)
+            isFlushScheduled = false
+        }
+    }
+}
 
 

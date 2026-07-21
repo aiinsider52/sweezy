@@ -31,10 +31,13 @@ enum APIClient {
         let refresh_token: String
         let token_type: String?
         let expires_in: Int?
+        let user_id: String
+        let email: String
     }
 
     struct AuthStatusResponse: Decodable {
         let status: String
+        let user_id: String?
         let email: String?
         let message: String?
     }
@@ -50,6 +53,7 @@ enum APIClient {
         let token_type: String?
         let expires_in: Int?
         let link_token: String?
+        let user_id: String?
 
         var id: String {
             if let linkToken = link_token, !linkToken.isEmpty { return linkToken }
@@ -63,7 +67,9 @@ enum APIClient {
                 access_token: access_token,
                 refresh_token: refresh_token,
                 token_type: token_type,
-                expires_in: expires_in
+                expires_in: expires_in,
+                user_id: user_id ?? "",
+                email: email ?? ""
             )
         }
     }
@@ -232,6 +238,7 @@ enum APIClient {
         let tokens = try JSONDecoder().decode(TokenPair.self, from: data)
         try KeychainStore.save(tokens.access_token, for: "access_token")
         try KeychainStore.save(tokens.refresh_token, for: "refresh_token")
+        try KeychainStore.save(tokens.user_id, for: "user_id")
         return tokens
     }
 
@@ -255,7 +262,7 @@ enum APIClient {
     }
 
     static func authorizedData(from url: URL) async throws -> (Data, URLResponse) {
-        var req = URLRequest(url: url)
+        let req = URLRequest(url: url)
         return try await authorizedData(for: req, context: "authorized:\(url.lastPathComponent)")
     }
 
@@ -284,9 +291,9 @@ enum APIClient {
     }
 
     // MARK: - Content
-    struct BackendGuide: Decodable { let id: String; let title: String; let slug: String; let description: String?; let content: String?; let category: String?; let image_url: String?; let is_published: Bool? }
+    struct BackendGuide: Decodable { let id: String; let title: String; let slug: String; let description: String?; let content: String?; let category: String?; let image_url: String?; let source_url: String?; let source_title: String?; let verified_at: String?; let is_published: Bool? }
     struct BackendTemplate: Decodable { let id: String; let name: String; let category: String?; let content: String }
-    struct BackendChecklist: Decodable { let id: String; let title: String; let description: String?; let items: [String]; let is_published: Bool? }
+    struct BackendChecklist: Decodable { let id: String; let title: String; let description: String?; let items: [String]; let source_url: String?; let source_title: String?; let verified_at: String?; let is_published: Bool? }
     struct BackendNewsItem: Decodable { let id: String; let title: String; let summary: String; let content: String?; let url: String; let source: String; let language: String; let published_at: String; let image_url: String? }
 
     static func fetchGuides(limit: Int = 1000) async throws -> [BackendGuide] {
@@ -749,16 +756,18 @@ extension APIClient {
         return try JSONDecoder().decode(MediaUploadResponse.self, from: responseData).url
     }
 
-    static func fetchListings(category: ServiceCategory? = nil,
+    static func fetchListings(category: String? = nil,
                               canton: String? = nil,
+                              listingType: ListingType? = nil,
                               page: Int = 1) async throws -> ServiceListingPage {
         var comps = URLComponents(url: url("marketplace"), resolvingAgainstBaseURL: false)
         var items: [URLQueryItem] = [URLQueryItem(name: "page", value: String(page))]
-        if let category { items.append(URLQueryItem(name: "category", value: category.rawValue)) }
+        if let category { items.append(URLQueryItem(name: "category", value: category)) }
+        if let listingType { items.append(URLQueryItem(name: "listing_type", value: listingType.rawValue)) }
         if let canton, canton != "all" { items.append(URLQueryItem(name: "canton", value: canton)) }
         comps?.queryItems = items
         guard let finalURL = comps?.url else { throw URLError(.badURL) }
-        let (data, resp) = try await timedData(from: finalURL, context: "marketplace_list")
+        let (data, resp) = try await authorizedData(from: finalURL)
         guard let http = resp as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
             throw URLError(.badServerResponse)
         }
@@ -818,6 +827,31 @@ extension APIClient {
             throw URLError(.badServerResponse)
         }
         return try JSONDecoder().decode(ServiceListing.self, from: data)
+    }
+
+    private struct MarketplaceReportPayload: Encodable {
+        let reason: String
+        let details: String?
+    }
+
+    static func reportListing(id: String, reason: String, details: String? = nil) async throws {
+        var req = URLRequest(url: url("marketplace/\(id)/report"))
+        req.httpMethod = "POST"
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.httpBody = try JSONEncoder().encode(MarketplaceReportPayload(reason: reason, details: details))
+        let (data, resp) = try await authorizedData(for: req, context: "marketplace_report")
+        guard let http = resp as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+            throw httpError(data: data, response: resp)
+        }
+    }
+
+    static func blockListingAuthor(listingID: String) async throws {
+        var req = URLRequest(url: url("marketplace/\(listingID)/block"))
+        req.httpMethod = "POST"
+        let (data, resp) = try await authorizedData(for: req, context: "marketplace_block")
+        guard let http = resp as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+            throw httpError(data: data, response: resp)
+        }
     }
 
     static func fetchEvents(category: EventCategory? = nil,
@@ -942,11 +976,13 @@ extension APIClient {
     }
     
     static func sendTelemetryBatch(events: [TelemetryEventPayload]) async throws {
-        guard !events.isEmpty else { return }
+        guard AnalyticsConsentStore.isGranted, !events.isEmpty else { return }
+        guard let token = KeychainStore.get("access_token"), !token.isEmpty else { return }
         let url = url("telemetry/batch")
         var req = URLRequest(url: url)
         req.httpMethod = "POST"
         req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.setValue("granted", forHTTPHeaderField: "X-Analytics-Consent")
         attachAuth(&req)
         let body = ["events": events.map { e -> [String: Any] in
             var dict: [String: Any] = [
@@ -970,10 +1006,87 @@ extension APIClient {
     }
     
     static func quickTelemetry(level: String = "info", source: String, type: String, message: String? = nil, meta: [String:String]? = nil) {
+        guard AnalyticsConsentStore.isGranted else { return }
         Task.detached {
             let payload = TelemetryEventPayload(id: UUID().uuidString, ts: isoNow(), level: level, source: source, type: type, message: message, meta: meta)
             try? await sendTelemetryBatch(events: [payload])
         }
+    }
+
+    // MARK: - Swiss Moments
+
+    static func fetchMoments(
+        canton: String? = nil,
+        permit: String? = nil,
+        tenureMonths: Int? = nil,
+        hasChildren: Bool? = nil,
+        lifeEvents: [String] = [],
+        horizonDays: Int = 60
+    ) async throws -> [SwissMoment] {
+        var comps = URLComponents(url: url("moments"), resolvingAgainstBaseURL: false)
+        var items: [URLQueryItem] = [URLQueryItem(name: "horizon_days", value: String(horizonDays))]
+        if let canton, !canton.isEmpty { items.append(URLQueryItem(name: "canton", value: canton)) }
+        if let permit, !permit.isEmpty { items.append(URLQueryItem(name: "permit", value: permit)) }
+        if let tenureMonths { items.append(URLQueryItem(name: "tenure_months", value: String(tenureMonths))) }
+        if let hasChildren { items.append(URLQueryItem(name: "has_children", value: hasChildren ? "true" : "false")) }
+        if !lifeEvents.isEmpty { items.append(URLQueryItem(name: "life_events", value: lifeEvents.joined(separator: ","))) }
+        comps?.queryItems = items
+        guard let finalURL = comps?.url else { throw URLError(.badURL) }
+        let (data, resp) = try await timedData(from: finalURL, context: "moments_list")
+        guard let http = resp as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+            throw URLError(.badServerResponse)
+        }
+        return try JSONDecoder().decode([SwissMoment].self, from: data)
+    }
+
+    // MARK: - Experts
+
+    static func fetchExperts(
+        specialty: String? = nil,
+        language: String? = nil,
+        canton: String? = nil
+    ) async throws -> [ServiceListing] {
+        var comps = URLComponents(url: url("experts"), resolvingAgainstBaseURL: false)
+        var items: [URLQueryItem] = []
+        if let specialty, !specialty.isEmpty { items.append(URLQueryItem(name: "specialty", value: specialty)) }
+        if let language, !language.isEmpty { items.append(URLQueryItem(name: "language", value: language)) }
+        if let canton, !canton.isEmpty, canton != "all" { items.append(URLQueryItem(name: "canton", value: canton)) }
+        comps?.queryItems = items
+        guard let finalURL = comps?.url else { throw URLError(.badURL) }
+        let (data, resp) = try await timedData(from: finalURL, context: "experts_list")
+        guard let http = resp as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+            throw URLError(.badServerResponse)
+        }
+        return try JSONDecoder().decode([ServiceListing].self, from: data)
+    }
+
+    static func fetchExpertQuestions(listingId: String) async throws -> [ExpertQuestion] {
+        let endpoint = url("experts/\(listingId)/questions")
+        let (data, resp) = try await timedData(from: endpoint, context: "experts_questions")
+        guard let http = resp as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+            throw URLError(.badServerResponse)
+        }
+        return try JSONDecoder().decode([ExpertQuestion].self, from: data)
+    }
+
+    static func askExpert(
+        listingId: String,
+        questionText: String,
+        askerName: String? = nil,
+        askerLanguage: String? = nil
+    ) async throws -> ExpertQuestion {
+        var req = URLRequest(url: url("experts/questions"))
+        req.httpMethod = "POST"
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        var body: [String: Any] = ["listing_id": listingId, "question_text": questionText]
+        if let askerName { body["asker_name"] = askerName }
+        if let askerLanguage { body["asker_language"] = askerLanguage }
+        req.httpBody = try JSONSerialization.data(withJSONObject: body)
+        let (data, resp) = try await authorizedData(for: req, context: "experts_ask")
+        guard let http = resp as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+            throw httpError(data: data, response: resp)
+        }
+        return try JSONDecoder().decode(ExpertQuestion.self, from: data)
     }
 }
 
@@ -1053,9 +1166,7 @@ extension APIClient {
     }
     
     static func timedData(from url: URL, context: String) async throws -> (Data, URLResponse) {
-        var req = URLRequest(url: url)
+        let req = URLRequest(url: url)
         return try await timedData(for: req, context: context)
     }
 }
-
-

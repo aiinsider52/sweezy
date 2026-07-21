@@ -15,7 +15,7 @@ struct MyEventsView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                AdaptivePageBackground()
+                JourneyPhotoBackground(imageName: JourneyBackdrop.city.rawValue, blurRadius: 7, darkness: 0.72)
 
                 if isLoading {
                     ProgressView("common.loading".localized)
@@ -85,6 +85,7 @@ struct MyEventsView: View {
                 Text(errorMessage ?? "")
             }
         }
+        .journeyScreen(.city, darkness: 0.72)
     }
 
     private var summaryHero: some View {

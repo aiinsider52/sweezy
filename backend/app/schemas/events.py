@@ -76,6 +76,9 @@ class EventListingResponse(BaseModel):
     status: str
     rejection_reason: Optional[str] = None
     view_count: int
+    is_verified: bool = False
+    report_count: int = 0
+    last_moderated_at: Optional[datetime] = None
     created_at: datetime
     updated_at: datetime
 
@@ -90,3 +93,13 @@ class EventListingPage(BaseModel):
     page: int
     per_page: int
     pages: int
+
+
+class EventReportCreate(BaseModel):
+    reason: str = Field(..., min_length=2, max_length=40)
+    details: Optional[str] = Field(None, max_length=500)
+
+
+class EventSafetyResponse(BaseModel):
+    ok: bool = True
+    message: str

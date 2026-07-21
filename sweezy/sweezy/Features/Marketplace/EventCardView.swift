@@ -1,107 +1,118 @@
 import SwiftUI
 
 struct EventCardView: View {
+    @Environment(\.locale) private var locale
+
     let event: EventListing
 
-    private var urgencyBadge: (text: String, color: Color)? {
-        guard let date = event.startsAt else { return nil }
-        let days = Calendar.current.dateComponents([.day], from: .init(), to: date).day ?? 999
-        if days == 0 { return ("Сьогодні", Theme.Colors.accent) }
-        if days == 1 { return ("Завтра", .orange) }
-        if days <= 3 { return ("Через \(days) дні", .purple) }
-        return nil
-    }
-
     var body: some View {
-        HStack(alignment: .top, spacing: 0) {
-            // Left: colored date block
-            VStack(spacing: 4) {
-                Text(dayText)
-                    .font(.system(size: 24, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
-                Text(monthText)
-                    .font(.system(size: 10, weight: .bold))
-                    .foregroundColor(.white.opacity(0.82))
+        HStack(spacing: 0) {
+            cover
+
+            VStack(alignment: .leading, spacing: 9) {
+                Text(scheduleText)
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundColor(JourneyVisual.lime)
                     .textCase(.uppercase)
-            }
-            .frame(width: 62)
-            .frame(maxHeight: .infinity)
-            .background(
-                LinearGradient(
-                    colors: [event.category.color, event.category.color.opacity(0.6)],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-            )
 
-            // Right: content
-            VStack(alignment: .leading, spacing: 10) {
-                // Title + urgency
-                VStack(alignment: .leading, spacing: 5) {
-                    if let badge = urgencyBadge {
-                        HStack(spacing: 5) {
-                            Circle()
-                                .fill(badge.color)
-                                .frame(width: 6, height: 6)
-                            Text(badge.text)
-                                .font(.system(size: 11, weight: .bold))
-                                .foregroundColor(badge.color)
-                        }
+                Text(event.title)
+                    .font(.system(size: 17, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                Label(locationText, systemImage: "mappin")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(.white.opacity(0.62))
+                    .lineLimit(1)
+
+                Spacer(minLength: 0)
+
+                HStack(spacing: 8) {
+                    organizerAvatar
+
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text(event.organizerName)
+                            .font(.system(size: 11, weight: .semibold))
+                            .foregroundColor(.white.opacity(0.88))
+                            .lineLimit(1)
+                        Text("\(event.viewCount) переглядів")
+                            .font(.system(size: 10, weight: .medium))
+                            .foregroundColor(.white.opacity(0.48))
                     }
 
-                    Text(event.title)
-                        .font(.system(size: 15, weight: .semibold))
-                        .foregroundColor(Theme.Colors.textPrimary)
-                        .lineLimit(2)
+                    Spacer(minLength: 4)
 
-                    HStack(spacing: 5) {
-                        ListingBadgePill(text: event.category.displayName, color: event.category.color)
-                        ListingBadgePill(text: event.canton == "all" ? "🇨🇭" : event.canton, color: .orange)
-                    }
-                }
-
-                // Meta
-                VStack(alignment: .leading, spacing: 5) {
-                    EventMetaRow(icon: "clock.fill", text: timeRangeText)
-                    EventMetaRow(icon: "mappin.circle.fill", text: locationText)
-                }
-
-                // Price row
-                HStack {
-                    if event.isFree {
-                        HStack(spacing: 4) {
-                            Image(systemName: "ticket.fill")
-                                .font(.system(size: 11))
-                            Text("events.free".localized)
-                                .font(.system(size: 12, weight: .semibold))
-                        }
-                        .foregroundColor(Theme.Colors.primary)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Capsule().fill(Theme.Colors.primary.opacity(0.1)))
-                    } else if let price = event.priceInfo, !price.isEmpty {
-                        Text(price)
-                            .font(.system(size: 13, weight: .bold))
-                            .foregroundColor(Theme.Colors.primary)
-                    }
-
-                    Spacer()
-
-                    Label("\(event.viewCount)", systemImage: "eye.fill")
-                        .font(.system(size: 11))
-                        .foregroundColor(Theme.Colors.textTertiary)
+                    Text(priceText)
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundColor(event.isFree ? .black : .white)
+                        .padding(.horizontal, 9)
+                        .frame(height: 27)
+                        .background(event.isFree ? JourneyVisual.lime : Color.white.opacity(0.12))
+                        .clipShape(Capsule())
                 }
             }
             .padding(14)
         }
-        .background(Theme.Colors.adaptiveCard)
-        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .frame(minHeight: 154)
+        .background(JourneyVisual.black.opacity(0.96))
+        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .stroke(event.category.color.opacity(0.2), lineWidth: 1)
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .stroke(Color.white.opacity(0.11), lineWidth: 1)
         )
-        .shadow(color: event.category.color.opacity(0.1), radius: 10, y: 4)
-        .shadow(color: .black.opacity(0.05), radius: 6, y: 2)
+        .shadow(color: .black.opacity(0.16), radius: 16, y: 8)
+    }
+
+    private var cover: some View {
+        ZStack(alignment: .topLeading) {
+            Image(eventCoverImageName)
+                .resizable()
+                .scaledToFill()
+                .frame(width: 116, height: 154)
+                .clipped()
+
+            LinearGradient(
+                colors: [.clear, .black.opacity(0.46)],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+
+            VStack(spacing: 0) {
+                Text(dayText)
+                    .font(.system(size: 20, weight: .bold, design: .rounded))
+                Text(monthText)
+                    .font(.system(size: 9, weight: .bold))
+                    .textCase(.uppercase)
+            }
+            .foregroundColor(.black)
+            .frame(width: 45, height: 48)
+            .background(.white.opacity(0.94))
+            .clipShape(RoundedRectangle(cornerRadius: 13, style: .continuous))
+            .padding(10)
+        }
+        .frame(width: 116, height: 154)
+        .clipShape(
+            UnevenRoundedRectangle(
+                topLeadingRadius: 24,
+                bottomLeadingRadius: 24,
+                bottomTrailingRadius: 0,
+                topTrailingRadius: 0,
+                style: .continuous
+            )
+        )
+    }
+
+    private var organizerAvatar: some View {
+        ZStack {
+            Circle()
+                .fill(Color.white.opacity(0.12))
+            Text(String(event.organizerName.prefix(1)).uppercased())
+                .font(.system(size: 11, weight: .bold))
+                .foregroundColor(JourneyVisual.lime)
+        }
+        .frame(width: 28, height: 28)
+        .overlay(Circle().stroke(Color.white.opacity(0.18), lineWidth: 1))
     }
 
     private var startDate: Date {
@@ -109,42 +120,38 @@ struct EventCardView: View {
     }
 
     private var dayText: String {
-        startDate.formatted(.dateTime.day())
+        startDate.formatted(.dateTime.day().locale(locale))
     }
 
     private var monthText: String {
-        startDate.formatted(.dateTime.month(.abbreviated))
+        startDate.formatted(.dateTime.month(.abbreviated).locale(locale))
     }
 
-    private var timeRangeText: String {
-        let start = startDate.formatted(date: .omitted, time: .shortened)
-        if let end = event.endsAt {
-            return "\(start) - \(end.formatted(date: .omitted, time: .shortened))"
-        }
-        return start
+    private var scheduleText: String {
+        let day = startDate.formatted(.dateTime.weekday(.abbreviated).locale(locale))
+        let time = startDate.formatted(.dateTime.hour().minute().locale(locale))
+        return "\(day), \(time)"
     }
 
     private var locationText: String {
         if let venue = event.venueName, !venue.isEmpty {
             return "\(venue), \(event.city)"
         }
-        return "\(event.city), \(event.canton)"
+        return event.city.isEmpty ? event.canton : event.city
     }
-}
 
-private struct EventMetaRow: View {
-    let icon: String
-    let text: String
+    private var priceText: String {
+        event.isFree ? "Безкоштовно" : (event.priceInfo ?? "Квиток")
+    }
 
-    var body: some View {
-        HStack(spacing: 8) {
-            Image(systemName: icon)
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundColor(Theme.Colors.textTertiary)
-            Text(text)
-                .font(.system(size: 13))
-                .foregroundColor(Theme.Colors.textSecondary)
-                .lineLimit(1)
+    private var eventCoverImageName: String {
+        switch event.category {
+        case .community, .career: return "cityhub-zurich-viadukt"
+        case .kids, .sports: return "cityhub-zurich-lake"
+        case .education, .language: return "cityhub-zurich-landesmuseum"
+        case .legal, .health: return "cityhub-zurich-oldtown"
+        case .culture: return "cityhub-zurich-opernhaus"
+        case .other: return "cityhub-zurich-sechselaeutenplatz"
         }
     }
 }

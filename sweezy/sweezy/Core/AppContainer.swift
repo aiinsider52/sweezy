@@ -19,6 +19,9 @@ class AppContainer: ObservableObject {
     let localizationService: any LocalizationServiceProtocol
     let gamification: GamificationService
     let analytics: AnalyticsService
+    let lifeAdmin: LifeAdminService
+    let savedItems: SavedItemsService
+    let chatStore: ChatStore
     lazy var roadmapSync: RoadmapSyncService = RoadmapSyncService(app: self)
     let telemetry: TelemetryService
     lazy var performanceMonitor: PerformanceMonitorService = PerformanceMonitorService(telemetry: telemetry)
@@ -123,6 +126,9 @@ class AppContainer: ObservableObject {
         self.localizationService = LocalizationService()
         self.gamification = GamificationService()
         self.analytics = AnalyticsService()
+        self.lifeAdmin = LifeAdminService()
+        self.savedItems = SavedItemsService()
+        self.chatStore = ChatStore()
         self.telemetry = TelemetryService()
         
         // Configure a modest URLCache to improve offline behavior
@@ -149,6 +155,7 @@ class AppContainer: ObservableObject {
         
         // Load user profile (fast - just UserDefaults read)
         loadUserProfileForCurrentScope()
+        lifeAdmin.prepareDocuments(for: userProfile)
         
         setupBindings()
         
@@ -168,6 +175,15 @@ class AppContainer: ObservableObject {
     }
     
     private func setupBindings() {
+        // Forward nested store changes so screens observing AppContainer refresh immediately.
+        lifeAdmin.objectWillChange
+            .sink { [weak self] _ in self?.objectWillChange.send() }
+            .store(in: &cancellables)
+
+        savedItems.objectWillChange
+            .sink { [weak self] _ in self?.objectWillChange.send() }
+            .store(in: &cancellables)
+
         // Save locale changes
         $currentLocale
             .dropFirst() // Skip initial value
@@ -190,6 +206,7 @@ class AppContainer: ObservableObject {
                 } else {
                     UserDefaults.standard.removeObject(forKey: AccountScopedStorage.userProfileKey)
                 }
+                self.lifeAdmin.prepareDocuments(for: profile)
             }
             .store(in: &cancellables)
 

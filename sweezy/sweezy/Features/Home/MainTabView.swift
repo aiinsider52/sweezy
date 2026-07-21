@@ -9,82 +9,64 @@ import SwiftUI
 import MapKit
 
 struct MainTabView: View {
-    @State private var selectedTab = 0
-    @State private var requestedDovidnykSection: DovidnykRouteSection? = nil
-    @State private var requestedDovidnykRouteID = UUID()
+    @StateObject private var router = MainTabRouter()
     
     var body: some View {
-        TabView(selection: $selectedTab) {
-            // Tab 0 - Home
-            HomeViewRedesigned()
-                .tabItem {
-                    Label {
-                        Text("tab.home".localized)
-                    } icon: {
-                        NewYearTabIcon(baseSystemName: "house.fill", isSelected: selectedTab == 0)
+        GeometryReader { geometry in
+            ZStack(alignment: .bottom) {
+                Group {
+                    switch router.selectedTab {
+                    case 1:
+                        JourneyDirectoryView(
+                            requestedSection: router.requestedDirectorySection,
+                            routeID: router.requestedDirectoryRouteID
+                        )
+                        .featureOnboarding(.dovidnyk)
+                    case 2:
+                        JourneyMapView()
+                            .featureOnboarding(.map)
+                    case 3:
+                        JourneyMarketplaceView()
+                    case 4:
+                        SettingsView()
+                    default:
+                        JourneyHomeView()
                     }
                 }
-                .tag(0)
-            
-            // Tab 1 - Довідник (Guides + Checklists unified)
-            LazyDovidnykWrapper(
-                requestedSection: requestedDovidnykSection,
-                routeID: requestedDovidnykRouteID
-            )
-                .tabItem {
-                    Label {
-                        Text("guides.title".localized)
-                    } icon: {
-                        NewYearTabIcon(baseSystemName: "book.fill", isSelected: selectedTab == 1)
-                    }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+                if !router.isBottomBarHidden {
+                    JourneyBottomBar(selection: Binding(
+                        get: { router.selectedTab },
+                        set: { router.select(tab: $0) }
+                    ))
+                        .padding(.horizontal, 14)
+                        .padding(.bottom, max(6, geometry.safeAreaInsets.bottom - 2))
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
-                .tag(1)
-            
-            // Tab 2 - Map
-            LazyMapWrapper(isSelected: selectedTab == 2)
-                .tabItem {
-                    Label {
-                        Text("map.title".localized)
-                    } icon: {
-                        NewYearTabIcon(baseSystemName: "map.fill", isSelected: selectedTab == 2)
-                    }
-                }
-                .tag(2)
-            
-            // Tab 3 - Marketplace
-            MarketplaceView()
-                .tabItem {
-                    Label {
-                        Text("marketplace.tab".localized)
-                    } icon: {
-                        NewYearTabIcon(baseSystemName: "bag.fill", isSelected: selectedTab == 3)
-                    }
-                }
-                .tag(3)
-            
-            // Tab 4 - Settings
-            SettingsView()
-                .tabItem {
-                    Label {
-                        Text("settings.title".localized)
-                    } icon: {
-                        NewYearTabIcon(baseSystemName: "gearshape.fill", isSelected: selectedTab == 4)
-                    }
-                }
-                .tag(4)
+            }
+            .ignoresSafeArea(edges: .bottom)
         }
+        .preferredColorScheme(.dark)
         .onAppear {
             AppLogger.ui("MainTabView appeared")
+            #if DEBUG
+            // Screenshot automation: pass "-screenshotTab N" as a launch argument
+            if let idx = UserDefaults.standard.string(forKey: "screenshotTab").flatMap(Int.init) {
+                router.select(tab: idx)
+            }
+            #endif
         }
         .onReceive(NotificationCenter.default.publisher(for: .switchTab)) { output in
             if let payload = output.object as? SwitchTabPayload {
-                selectedTab = payload.tab
-                if payload.tab == 1 {
-                    requestedDovidnykSection = payload.section
-                    requestedDovidnykRouteID = payload.routeID
-                }
+                router.open(payload)
             } else if let index = output.object as? Int {
-                selectedTab = index
+                router.select(tab: index)
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .setJourneyBottomBarHidden)) { output in
+            withAnimation(.easeInOut(duration: 0.2)) {
+                router.setBottomBarHidden(output.object as? Bool ?? false)
             }
         }
     }
@@ -93,6 +75,7 @@ struct MainTabView: View {
 enum DovidnykRouteSection: String {
     case guides
     case checklists
+    case tools
 }
 
 struct SwitchTabPayload {
@@ -107,6 +90,20 @@ struct SwitchTabPayload {
     }
 }
 
+// MARK: - Map focus routing (Home city cards → Map tab)
+
+struct MapFocusTarget {
+    let latitude: Double
+    let longitude: Double
+    let spanDelta: Double
+}
+
+/// Pending "center map on city" request. Set before switching to the Map tab;
+/// `OptimizedMapView` consumes it on appear (survives lazy map loading).
+enum MapFocusRouter {
+    static var pending: MapFocusTarget?
+}
+
 // MARK: - Tab Icon
 private struct NewYearTabIcon: View {
     let baseSystemName: String
@@ -115,7 +112,7 @@ private struct NewYearTabIcon: View {
     private var iconColor: Color {
         isSelected ? Theme.Colors.primary : Theme.Colors.textTertiary
     }
-    
+
     var body: some View {
         Image(systemName: baseSystemName)
             .font(.system(size: 21, weight: .semibold))
@@ -144,6 +141,7 @@ struct PlaceholderTab: View {
             }
             .navigationTitle(title)
         }
+        .journeyScreen(.city, darkness: 0.72)
     }
 }
 
@@ -293,18 +291,10 @@ struct MapPlaceholderView: View {
                     .foregroundColor(.secondary)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(
-                LinearGradient(
-                    colors: [
-                        Theme.Colors.primaryDark,
-                        Theme.Colors.primary.opacity(0.7)
-                    ],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-            )
+            .background(Color.clear)
             .navigationTitle("map.title_short".localized)
         }
+        .journeyScreen(.city, darkness: 0.72)
     }
 }
 
@@ -316,7 +306,7 @@ struct OptimizedMapView: View {
         case nearby
         case all
     }
-    
+
     @State private var places: [Place] = []
     @State private var selectedType: PlaceType?
     @State private var selectedPlace: Place?
@@ -329,9 +319,26 @@ struct OptimizedMapView: View {
     )
     @State private var rangeMode: RangeMode = .nearby
     @State private var hasAutoCenteredOnUser = false
-    
+    @State private var mapScrollOffset: CGFloat = 0
+
     private let nearbyRadiusMeters: Double = 10_000
-    
+    private let embeddedMapExpandedHeight: CGFloat = 340
+    private let embeddedMapCollapsedHeight: CGFloat = 150
+
+    private var embeddedMapHeight: CGFloat {
+        let delta = min(max(mapScrollOffset * 0.72, 0), embeddedMapExpandedHeight - embeddedMapCollapsedHeight)
+        return embeddedMapExpandedHeight - delta
+    }
+
+    private var embeddedMapCollapseProgress: CGFloat {
+        let range = max(1, embeddedMapExpandedHeight - embeddedMapCollapsedHeight)
+        return min(max((embeddedMapExpandedHeight - embeddedMapHeight) / range, 0), 1)
+    }
+
+    private var embeddedMapOverlayOpacity: CGFloat {
+        max(0, 1 - embeddedMapCollapseProgress * 1.65)
+    }
+
     private var currentLanguageCode: String {
         String(appContainer.currentLocale.identifier.prefix(2)).lowercased()
     }
@@ -422,9 +429,18 @@ struct OptimizedMapView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                AdaptivePageBackground()
+                JourneyPhotoBackground(imageName: JourneyBackdrop.city.rawValue, blurRadius: 8, darkness: 0.7)
                 
                 ScrollView(showsIndicators: false) {
+                    GeometryReader { proxy in
+                        Color.clear
+                            .preference(
+                                key: OptimizedMapScrollOffsetPreferenceKey.self,
+                                value: proxy.frame(in: .named("optimizedMapScroll")).minY
+                            )
+                    }
+                    .frame(height: 0)
+
                     VStack(spacing: 16) {
                         filtersSection
                         
@@ -437,11 +453,16 @@ struct OptimizedMapView: View {
                     }
                     .padding(.bottom, 100)
                 }
+                .coordinateSpace(name: "optimizedMapScroll")
+                .onPreferenceChange(OptimizedMapScrollOffsetPreferenceKey.self) { minY in
+                    mapScrollOffset = max(0, -minY)
+                }
             }
             .navigationTitle("map.title".localized)
             .navigationBarTitleDisplayMode(.large)
             .toolbarBackground(.hidden, for: .navigationBar)
         }
+        .journeyScreen(.city, darkness: 0.7)
         .sheet(item: $selectedPlace) { place in
             PlaceDetailSheet(place: place)
                 .presentationDetents([.medium, .large])
@@ -451,6 +472,7 @@ struct OptimizedMapView: View {
         .onAppear {
             loadPlacesOnce()
             ensureLocationFlow()
+            applyPendingMapFocus()
         }
         .onChange(of: userLocation?.coordinate.latitude) { _, _ in
             autoCenterIfNeeded()
@@ -484,7 +506,7 @@ struct OptimizedMapView: View {
                 MapFilterChip(
                     title: "map.range.nearby_10km".localized,
                     isSelected: rangeMode == .nearby,
-                    color: .cyan
+                    color: Theme.Colors.primary
                 ) {
                     UIImpactFeedbackGenerator(style: .light).impactOccurred()
                     withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
@@ -507,7 +529,7 @@ struct OptimizedMapView: View {
                 MapFilterChip(
                     title: "common.all".localized,
                     isSelected: selectedType == nil,
-                    color: .blue
+                    color: Theme.Colors.primaryLight
                 ) {
                     UIImpactFeedbackGenerator(style: .light).impactOccurred()
                     withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
@@ -571,34 +593,42 @@ struct OptimizedMapView: View {
                 }
             }
             .mapStyle(.standard(elevation: .flat)) // Flat style is faster
-            .frame(height: 220)
+            .frame(height: embeddedMapHeight)
             .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: 20, style: .continuous)
                     .stroke(
                         LinearGradient(
-                            colors: [Color.cyan.opacity(0.45), Color.white.opacity(0.12)],
+                            colors: [Theme.Colors.primary.opacity(0.4), Color.white.opacity(0.12)],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         ),
                         lineWidth: 1.5
                     )
             )
-            .shadow(color: Color.cyan.opacity(0.18), radius: 14, y: 6)
+            .shadow(color: Theme.Colors.primary.opacity(0.16), radius: 14, y: 6)
             
             VStack(alignment: .leading, spacing: 10) {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("map.hero_title".localized)
-                        .font(.system(size: 22, weight: .bold, design: .rounded))
+                        .font(.system(size: 24, weight: .bold, design: .rounded))
                         .foregroundColor(.white)
                         .lineLimit(2)
-                        .minimumScaleFactor(0.9)
+                        .minimumScaleFactor(0.82)
                     Text("map.hero_subtitle".localized)
                         .font(.system(size: 12, weight: .medium))
                         .foregroundColor(.white.opacity(0.84))
                         .lineLimit(2)
+                        .minimumScaleFactor(0.82)
                         .fixedSize(horizontal: false, vertical: true)
                 }
+                .padding(12)
+                .frame(maxWidth: 310, alignment: .leading)
+                .background(
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .fill(Color.black.opacity(0.24))
+                        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                )
 
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 8) {
@@ -622,10 +652,13 @@ struct OptimizedMapView: View {
                         )
                     }
                     .buttonStyle(.plain)
+                    .opacity(embeddedMapCollapseProgress > 0.35 ? 0 : 1)
+                    .scaleEffect(embeddedMapCollapseProgress > 0.35 ? 0.96 : 1)
                 }
             }
             .padding(18)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .opacity(embeddedMapOverlayOpacity)
 
             Button {
                 centerOnUserLocation()
@@ -636,7 +669,7 @@ struct OptimizedMapView: View {
                     .frame(width: 36, height: 36)
                     .background(
                         LinearGradient(
-                            colors: [Color.cyan, Color.blue.opacity(0.85)],
+                            colors: [Theme.Colors.primaryLight, Theme.Colors.primary],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )
@@ -649,6 +682,7 @@ struct OptimizedMapView: View {
             .padding(12)
         }
         .padding(.horizontal)
+        .animation(.spring(response: 0.36, dampingFraction: 0.88), value: embeddedMapHeight)
     }
     
     private func mapHeroChip(icon: String, text: String) -> some View {
@@ -950,6 +984,21 @@ struct OptimizedMapView: View {
         }
     }
     
+    private func applyPendingMapFocus() {
+        guard let target = MapFocusRouter.pending else { return }
+        MapFocusRouter.pending = nil
+        hasAutoCenteredOnUser = true
+        rangeMode = .all
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) {
+            cameraPosition = .region(
+                MKCoordinateRegion(
+                    center: CLLocationCoordinate2D(latitude: target.latitude, longitude: target.longitude),
+                    span: MKCoordinateSpan(latitudeDelta: target.spanDelta, longitudeDelta: target.spanDelta)
+                )
+            )
+        }
+    }
+
     private func autoCenterIfNeeded(force: Bool = false) {
         guard let location = appContainer.locationService.currentLocation else { return }
         guard force || !hasAutoCenteredOnUser else { return }
@@ -965,6 +1014,13 @@ struct OptimizedMapView: View {
     }
 }
 
+private struct OptimizedMapScrollOffsetPreferenceKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = nextValue()
+    }
+}
+
 private struct MapHeroFeaturedCard: View {
     let place: Place
     let distanceText: String?
@@ -975,18 +1031,19 @@ private struct MapHeroFeaturedCard: View {
             ZStack {
                 RoundedRectangle(cornerRadius: 14, style: .continuous)
                     .fill(place.type.swiftUIColor.opacity(0.22))
-                    .frame(width: 48, height: 48)
+                    .frame(width: 46, height: 46)
                 Image(systemName: place.type.iconName)
                     .font(.system(size: 18, weight: .semibold))
                     .foregroundColor(place.type.swiftUIColor)
             }
             
             VStack(alignment: .leading, spacing: 4) {
-                HStack(alignment: .top, spacing: 6) {
+                HStack(alignment: .firstTextBaseline, spacing: 6) {
                     Text(place.name)
                         .font(.system(size: 15, weight: .semibold))
                         .foregroundColor(.white)
-                        .lineLimit(2)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
                         .multilineTextAlignment(.leading)
                         .frame(maxWidth: .infinity, alignment: .leading)
                     if let badge {
@@ -1007,12 +1064,13 @@ private struct MapHeroFeaturedCard: View {
                 
                 HStack(spacing: 8) {
                     if let distanceText {
-                        mapMeta(text: distanceText, color: .cyan)
+                        mapMeta(text: distanceText, color: Theme.Colors.primaryLight)
                     }
                     mapMeta(text: place.isOpen() ? "map.open".localized : "map.closed".localized, color: place.isOpen() ? .green : .red)
                 }
                 .lineLimit(1)
             }
+            .layoutPriority(1)
             Spacer(minLength: 0)
         }
         .padding(12)
@@ -1028,6 +1086,8 @@ private struct MapHeroFeaturedCard: View {
             Text(text)
                 .font(.system(size: 11, weight: .semibold))
                 .foregroundColor(.white.opacity(0.9))
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
         }
     }
 }
@@ -1082,10 +1142,10 @@ private struct MapDiscoveryPlaceCard: View {
                 HStack(spacing: 8) {
                     statusCapsule(text: place.isOpen() ? "map.open".localized : "map.closed".localized, color: place.isOpen() ? .green : .red)
                     if let distanceText {
-                        statusCapsule(text: distanceText, color: .cyan)
+                        statusCapsule(text: distanceText, color: Theme.Colors.primaryLight)
                     }
                     if place.verifiedAt != nil {
-                        statusCapsule(text: "map.verified".localized, color: .blue)
+                        statusCapsule(text: "map.verified".localized, color: Theme.Colors.primary)
                     }
                 }
                 
@@ -1167,7 +1227,7 @@ private struct MapLocationPermissionCard: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 10) {
                 Image(systemName: "location.slash.fill")
-                    .foregroundColor(.cyan)
+                    .foregroundColor(Theme.Colors.primary)
                 Text(title)
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(Theme.Colors.textPrimary)
@@ -1186,7 +1246,7 @@ private struct MapLocationPermissionCard: View {
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 12)
                 .background(Theme.Colors.primary)
-                .foregroundColor(.white)
+                .foregroundColor(Theme.Colors.textOnPrimary)
                 .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
             }
             .buttonStyle(.plain)
@@ -1260,16 +1320,7 @@ struct PlaceDetailSheet: View {
     
     var body: some View {
         ZStack {
-            // Winter gradient background
-            LinearGradient(
-                colors: [
-                    Theme.Colors.darkBackground,
-                    Theme.Colors.primaryDark.opacity(0.9)
-                ],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .ignoresSafeArea()
+            JourneyPhotoBackground(imageName: JourneyBackdrop.city.rawValue, blurRadius: 8, darkness: 0.74)
             
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 20) {
@@ -1297,6 +1348,7 @@ struct PlaceDetailSheet: View {
                 .padding(.bottom, 24)
             }
         }
+        .journeyScreen(.city, darkness: 0.74)
         .onAppear {
             calculateDistance()
         }
@@ -1363,7 +1415,7 @@ struct PlaceDetailSheet: View {
             HStack(spacing: 10) {
                 // Distance
                 if let dist = distanceText {
-                    infoChip(icon: "location.fill", text: dist, color: .cyan)
+                    infoChip(icon: "location.fill", text: dist, color: Theme.Colors.primaryLight)
                 }
                 
                 // Today's hours
@@ -1376,7 +1428,7 @@ struct PlaceDetailSheet: View {
                 
                 // Accessible
                 if place.isAccessible {
-                    infoChip(icon: "figure.roll", text: "map.accessible".localized, color: .blue)
+                    infoChip(icon: "figure.roll", text: "map.accessible".localized, color: Theme.Colors.primary)
                 }
             }
         }
@@ -1410,7 +1462,7 @@ struct PlaceDetailSheet: View {
         VStack(alignment: .leading, spacing: 8) {
             Label("map.description".localized, systemImage: "text.alignleft")
                 .font(.caption.bold())
-                .foregroundColor(.cyan)
+                .foregroundColor(Theme.Colors.primaryLight)
             
             Text(text)
                 .font(.subheadline)
@@ -1434,7 +1486,7 @@ struct PlaceDetailSheet: View {
         VStack(alignment: .leading, spacing: 10) {
             Label("map.services_label".localized, systemImage: "checkmark.seal.fill")
                 .font(.caption.bold())
-                .foregroundColor(.cyan)
+                .foregroundColor(Theme.Colors.primaryLight)
             
             FlowLayout(spacing: 8) {
                 ForEach(place.services.prefix(6), id: \.self) { service in
@@ -1445,7 +1497,7 @@ struct PlaceDetailSheet: View {
                         .padding(.vertical, 6)
                         .background(
                             Capsule()
-                                .fill(Color.cyan.opacity(0.15))
+                                .fill(Theme.Colors.primary.opacity(0.15))
                         )
                 }
             }
@@ -1478,14 +1530,14 @@ struct PlaceDetailSheet: View {
                 .padding(.vertical, 14)
                 .background(
                     LinearGradient(
-                        colors: [Color.cyan, Color.blue],
+                        colors: [Theme.Colors.primaryLight, Theme.Colors.primary],
                         startPoint: .leading,
                         endPoint: .trailing
                     )
                 )
                 .foregroundColor(.white)
                 .cornerRadius(14)
-                .shadow(color: .cyan.opacity(0.3), radius: 8, y: 4)
+                .shadow(color: Theme.Colors.primary.opacity(0.3), radius: 8, y: 4)
             }
             
             // Secondary actions
@@ -1588,6 +1640,8 @@ struct MapFilterChip: View {
         Button(action: action) {
             Text(title)
                 .font(.system(size: 13, weight: .semibold))
+                .lineLimit(1)
+                .minimumScaleFactor(0.82)
                 .padding(.horizontal, 13)
                 .padding(.vertical, 9)
                 .background(
@@ -1670,10 +1724,10 @@ struct PlaceLiteRow: View {
                 
                 HStack(spacing: 6) {
                     if let distanceText {
-                        rowBadge(text: distanceText, color: .cyan)
+                        rowBadge(text: distanceText, color: Theme.Colors.primaryLight)
                     }
                     if place.verifiedAt != nil {
-                        rowBadge(text: "map.verified".localized, color: .blue)
+                        rowBadge(text: "map.verified".localized, color: Theme.Colors.primary)
                     }
                 }
             }
@@ -1685,7 +1739,7 @@ struct PlaceLiteRow: View {
             } label: {
                 Image(systemName: "arrow.triangle.turn.up.right.diamond.fill")
                     .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(.cyan)
+                    .foregroundColor(Theme.Colors.primary)
             }
             .buttonStyle(.plain)
         }
@@ -1744,7 +1798,7 @@ struct HomeSimplifiedView: View {
                 }
                 .padding()
             }
-            .background(AdaptivePageBackground())
+            .background(Color.clear)
             .navigationTitle("Sweezy")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -1758,6 +1812,7 @@ struct HomeSimplifiedView: View {
                 }
             }
         }
+        .journeyScreen(.lake, darkness: 0.68)
         .onAppear { loadData() }
     }
     
@@ -1950,11 +2005,13 @@ struct GuidesLiteView: View {
                         }
                     }
                     .listStyle(.plain)
+                    .journeyForm()
                 }
             }
             .navigationTitle("guides.title".localized)
             .searchable(text: $searchText, prompt: Text("guides.search_placeholder".localized))
         }
+        .journeyScreen(.alpine, darkness: 0.7)
         .onAppear {
             AppLogger.ui("GuidesLiteView appeared")
             loadGuides()
@@ -2091,10 +2148,12 @@ struct ChecklistsLiteView: View {
                         }
                     }
                     .listStyle(.plain)
+                    .journeyForm()
                 }
             }
             .navigationTitle("checklists.title".localized)
         }
+        .journeyScreen(.alpine, darkness: 0.7)
         .onAppear {
             AppLogger.ui("ChecklistsLiteView appeared")
             loadChecklists()
@@ -2209,7 +2268,9 @@ struct ChecklistDetailLiteView: View {
             }
         }
         .listStyle(.plain)
+        .journeyForm()
         .navigationTitle(checklist.title)
+        .journeyScreen(.alpine, darkness: 0.72)
     }
 }
 
@@ -2411,11 +2472,13 @@ struct SettingsLiteView: View {
                     }
                 }
             }
+            .journeyForm()
             .navigationTitle("settings.title".localized)
             .refreshable {
                 loadData()
             }
         }
+        .journeyScreen(.city, darkness: 0.72)
         .onAppear {
             AppLogger.ui("SettingsLiteView appeared")
             loadData()
@@ -2447,7 +2510,9 @@ struct LanguageSettingsView: View {
             Text("English")
             Text("Deutsch")
         }
+        .journeyForm()
         .navigationTitle("settings.language".localized)
+        .journeyScreen(.city, darkness: 0.72)
     }
 }
 
@@ -2458,7 +2523,9 @@ struct NotificationSettingsView: View {
         List {
             Toggle("settings.notifications".localized, isOn: $notificationsEnabled)
         }
+        .journeyForm()
         .navigationTitle("settings.notifications".localized)
+        .journeyScreen(.city, darkness: 0.72)
     }
 }
 
@@ -2482,13 +2549,16 @@ struct ThemeSettingsView: View {
                 }
             }
         }
+        .journeyForm()
         .navigationTitle("settings.theme.title".localized)
+        .journeyScreen(.city, darkness: 0.72)
     }
 }
 
 // MARK: - Tab switching notification
 extension Notification.Name {
     static let switchTab = Notification.Name("SwitchTab")
+    static let setJourneyBottomBarHidden = Notification.Name("SetJourneyBottomBarHidden")
 }
 
 #Preview {

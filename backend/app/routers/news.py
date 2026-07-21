@@ -7,19 +7,23 @@ from ..schemas.news import NewsOut, NewsCreate, NewsUpdate
 from ..services.news_service import NewsService
 from ..dependencies import get_db, CurrentAdmin
 from ..core.security import decode_token
+from ..services.users import UserService
 
 router = APIRouter()
 _optional_bearer = HTTPBearer(auto_error=False)
 
 
 def _is_admin_request(
+  db: Session = Depends(get_db),
   credentials: Optional[HTTPAuthorizationCredentials] = Depends(_optional_bearer),
 ) -> bool:
   if credentials is None:
     return False
   try:
     payload = decode_token(credentials.credentials)
-    return bool(payload.get("is_admin"))
+    user_id = payload.get("sub")
+    user = UserService.get_by_id(db, user_id) if user_id else None
+    return bool(user and user.is_active and user.is_superuser and payload.get("is_admin"))
   except Exception:
     return False
 

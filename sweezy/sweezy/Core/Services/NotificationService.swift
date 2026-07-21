@@ -18,6 +18,7 @@ protocol NotificationServiceProtocol: ObservableObject {
     func requestPermission() async -> Bool
     func scheduleAppointmentReminder(for appointment: Appointment) async -> Bool
     func scheduleReminder(id: String, title: String, body: String, at date: Date) async -> Bool
+    func scheduleWeeklyReminder(id: String, title: String, body: String, weekday: Int, hour: Int) async -> Bool
     func scheduleTrialEndReminder(endDate: Date) async -> Bool
     func scheduleReengageReminder(afterDays days: Int) async -> Bool
     func cancelNotification(with identifier: String)
@@ -60,6 +61,28 @@ class NotificationService: NotificationServiceProtocol {
             return true
         } catch {
             AppLogger.notification("Failed to schedule generic reminder: \(error)", isError: true)
+            return false
+        }
+    }
+
+    func scheduleWeeklyReminder(id: String, title: String, body: String, weekday: Int, hour: Int) async -> Bool {
+        guard isAuthorized else { return false }
+        let content = UNMutableNotificationContent()
+        content.title = title
+        content.body = body
+        content.sound = .default
+        content.userInfo = ["type": "weekly_digest"]
+
+        var components = DateComponents()
+        components.weekday = min(max(weekday, 1), 7)
+        components.hour = min(max(hour, 0), 23)
+        let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: true)
+        let request = UNNotificationRequest(identifier: id, content: content, trigger: trigger)
+        do {
+            try await notificationCenter.add(request)
+            return true
+        } catch {
+            AppLogger.notification("Failed to schedule weekly reminder: \(error)", isError: true)
             return false
         }
     }
@@ -344,4 +367,3 @@ extension NotificationService {
         ]
     }
 }
-

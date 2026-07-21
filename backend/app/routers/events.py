@@ -1,16 +1,15 @@
-from __future__ import annotations
-
 import math
 from datetime import datetime
 from typing import Any, Dict, Optional
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from sqlalchemy import func, or_, select
+from sqlalchemy import func, select
 
 from ..core.security import decode_token
 from ..dependencies import CurrentAdmin, CurrentUser, DBSession
-from ..models.event_listing import EventListing
+from ..models.event_listing import EventListing, EventReport
+from ..models.marketplace import MarketplaceBlock
 from ..schemas.events import (
     EventCategory,
     EventListingCreate,
@@ -18,6 +17,8 @@ from ..schemas.events import (
     EventListingPage,
     EventListingResponse,
     EventListingUpdate,
+    EventReportCreate,
+    EventSafetyResponse,
 )
 from ..services.events_moderation import moderate_event_listing
 from ..services.users import UserService
@@ -37,11 +38,11 @@ def _get_optional_user_id(
         return None
     try:
         payload = decode_token(credentials.credentials)
-        email = payload.get("sub")
-        if not email:
+        user_id = payload.get("sub")
+        if not user_id:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication")
-        user = UserService.get_by_email(db, email)
-        if not user:
+        user = UserService.get_by_id(db, user_id)
+        if not user or not user.is_active:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication")
         return user.id
     except Exception:
@@ -56,6 +57,7 @@ def list_events(
     page: int = Query(1, ge=1),
     per_page: int = Query(20, ge=1, le=100),
     upcoming_only: bool = Query(True),
+    user_id: str | None = Depends(_get_optional_user_id),
 ) -> EventListingPage:
     stmt = select(EventListing).where(EventListing.status == "approved")
     count_stmt = select(func.count()).select_from(EventListing).where(EventListing.status == "approved")
@@ -70,6 +72,10 @@ def list_events(
         now = datetime.utcnow()
         stmt = stmt.where(EventListing.starts_at >= now)
         count_stmt = count_stmt.where(EventListing.starts_at >= now)
+    if user_id:
+        blocked_authors = select(MarketplaceBlock.blocked_author_id).where(MarketplaceBlock.user_id == user_id)
+        stmt = stmt.where((EventListing.author_id.is_(None)) | (~EventListing.author_id.in_(blocked_authors)))
+        count_stmt = count_stmt.where((EventListing.author_id.is_(None)) | (~EventListing.author_id.in_(blocked_authors)))
 
     total: int = db.scalar(count_stmt) or 0
     pages = max(1, math.ceil(total / per_page))
@@ -92,11 +98,47 @@ def list_events(
 def my_events(db: DBSession, user: CurrentUser) -> list[EventListingDetail]:
     rows = (
         db.query(EventListing)
-        .filter(or_(EventListing.author_id == user.id, EventListing.author_id == user.email))
+        .filter(EventListing.author_id == user.id)
         .order_by(EventListing.starts_at.asc(), EventListing.created_at.desc())
         .all()
     )
     return [EventListingDetail.model_validate(r) for r in rows]
+
+
+@router.post("/{event_id}/report", response_model=EventSafetyResponse)
+def report_event(
+    event_id: str,
+    payload: EventReportCreate,
+    db: DBSession,
+    user: CurrentUser,
+) -> EventSafetyResponse:
+    event = db.get(EventListing, event_id)
+    if not event or event.status != "approved":
+        raise HTTPException(status_code=404, detail="Event not found")
+    if event.author_id == user.id:
+        raise HTTPException(status_code=400, detail="You cannot report your own event")
+
+    existing = db.execute(
+        select(EventReport).where(EventReport.event_id == event_id, EventReport.reporter_id == user.id)
+    ).scalar_one_or_none()
+    if existing:
+        return EventSafetyResponse(message="Report already received")
+
+    db.add(
+        EventReport(
+            event_id=event_id,
+            reporter_id=user.id,
+            reason=payload.reason.strip().lower(),
+            details=payload.details.strip() if payload.details else None,
+        )
+    )
+    event.report_count += 1
+    if event.report_count >= 3:
+        event.status = "pending"
+        event.is_verified = False
+    db.add(event)
+    db.commit()
+    return EventSafetyResponse(message="Report received for moderation")
 
 
 @router.get("/{event_id}", response_model=EventListingDetail)
@@ -156,7 +198,7 @@ def update_event(
     if not event:
         raise HTTPException(status_code=404, detail="Event not found")
 
-    is_owner = event.author_id in {user.id, getattr(user, "email", None)}
+    is_owner = event.author_id == user.id
     if not is_owner:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized")
 
@@ -185,7 +227,7 @@ def delete_event(event_id: str, db: DBSession, user: CurrentUser) -> None:
         raise HTTPException(status_code=404, detail="Event not found")
 
     is_admin = getattr(user, "is_superuser", False) or getattr(user, "role", "") == "admin"
-    is_owner = event.author_id in {user.id, getattr(user, "email", None)}
+    is_owner = event.author_id == user.id
     if not is_owner and not is_admin:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized")
 
@@ -214,6 +256,10 @@ def admin_approve_event(event_id: str, _: CurrentAdmin, db: DBSession) -> EventL
 
     event.status = "approved"
     event.rejection_reason = None
+    event.last_moderated_at = datetime.utcnow()
+    # Curated Sweezy events have no community author. Community organizers are
+    # moderated, but are not represented as identity-verified.
+    event.is_verified = event.author_id is None
     db.add(event)
     db.commit()
     db.refresh(event)

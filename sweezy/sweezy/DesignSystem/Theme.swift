@@ -14,21 +14,41 @@ struct Theme {
     // MARK: - Colors
     struct Colors {
         // MARK: Brand Colors — Spring/Summer 2025 (Swiss Alpine Spring)
-        static let primary = Color(red: 0.180, green: 0.490, blue: 0.196) // #2E7D32 Forest Green
-        static let primaryLight = Color(red: 0.400, green: 0.733, blue: 0.416) // #66BB6A Light Green
-        static let primaryDark = Color(red: 0.106, green: 0.369, blue: 0.125) // #1B5E20 Dark Green
-        static let accent = Color(red: 0.976, green: 0.659, blue: 0.145) // #F9A825 Warm Solar Yellow
+        static let primary = JourneyVisual.lime
+        static let primaryLight = Color(red: 0.88, green: 1.0, blue: 0.32)
+        static let primaryDark = Color(red: 0.48, green: 0.68, blue: 0.02)
+        static let accent = JourneyVisual.lime
 
         // MARK: Spring Accents
-        static let accentTurquoise = Color(red: 0.400, green: 0.733, blue: 0.416) // #66BB6A Light Green
+        static let accentTurquoise = JourneyVisual.lime
         static let accentYellowSoft = Color(red: 1.0, green: 0.945, blue: 0.463) // #FFF176 Pastel Yellow
-        static let accentWarmGreen = Color(red: 0.400, green: 0.733, blue: 0.416) // #66BB6A Light Green
+        static let accentWarmGreen = JourneyVisual.lime
         static let accentCoral = Color(red: 1.0, green: 0.439, blue: 0.263) // #FF7043 Warm Orange
 
         // MARK: Surface Colors (Light)
         static let surface = Color(red: 0.980, green: 0.992, blue: 0.969) // #FAFDF7 spring white-green
         static let card = Color(red: 1.0, green: 1.0, blue: 1.0).opacity(0.85)
         static let divider = Color.black.opacity(0.06)
+
+        // MARK: Ink & Paper (layered surfaces: dark pine header + light sheet)
+        /// Deep pine green used for dark header blocks. Same in both schemes —
+        /// it's the "ink" layer the paper sheet overlaps.
+        static let ink = Color(red: 0.086, green: 0.149, blue: 0.106) // #16261B
+        /// Elevated element on top of ink (chips, avatar rings, pill track).
+        static let inkElevated = Color.white.opacity(0.10)
+        static let inkBorder = Color.white.opacity(0.14)
+        /// Sheet background: spring off-white in light, ink in dark.
+        static let paper = Color(UIColor { tc in
+            tc.userInterfaceStyle == .dark
+                ? UIColor(white: 0.02, alpha: 0.38)
+                : UIColor(red: 0.980, green: 0.992, blue: 0.969, alpha: 1.0) // #FAFDF7
+        })
+        /// Opaque card on paper: solid white in light, elevated green-tinted in dark.
+        static let paperCard = Color(UIColor { tc in
+            tc.userInterfaceStyle == .dark
+                ? UIColor(white: 1.0, alpha: 0.12)
+                : UIColor.white
+        })
 
         // MARK: Spring Backgrounds
         static let backgroundIvory = Color(red: 0.980, green: 0.992, blue: 0.969) // #FAFDF7
@@ -59,7 +79,7 @@ struct Theme {
             })
         }
         
-        static let textOnPrimary = Color.white
+        static let textOnPrimary = Color.black
         
         // MARK: Semantic Colors
         static let success = Color(red: 0.220, green: 0.557, blue: 0.235) // #388E3C
@@ -76,19 +96,19 @@ struct Theme {
         // MARK: Adaptive Card / Surface / Border
         static let adaptiveCard = Color(UIColor { tc in
             tc.userInterfaceStyle == .dark
-                ? UIColor(white: 1.0, alpha: 0.09)
+                ? UIColor(white: 0.02, alpha: 0.42)
                 : UIColor(white: 1.0, alpha: 0.85)
         })
         
         static let adaptiveSurface = Color(UIColor { tc in
             tc.userInterfaceStyle == .dark
-                ? UIColor(white: 1.0, alpha: 0.11)
+                ? UIColor(white: 0.02, alpha: 0.34)
                 : UIColor(red: 0.945, green: 0.973, blue: 0.914, alpha: 1.0) // #F1F8E9
         })
         
         static let adaptiveBorder = Color(UIColor { tc in
             tc.userInterfaceStyle == .dark
-                ? UIColor(white: 1.0, alpha: 0.18)
+                ? UIColor(white: 1.0, alpha: 0.22)
                 : UIColor(red: 0.0, green: 0.0, blue: 0.0, alpha: 0.08)
         })
         
@@ -96,17 +116,25 @@ struct Theme {
         static var primaryBackground: Color {
             Color(UIColor { traitCollection in
                 traitCollection.userInterfaceStyle == .dark
-                    ? UIColor(red: 0.102, green: 0.137, blue: 0.094, alpha: 1.0) // #1A2318
+                    ? UIColor(white: 0.015, alpha: 0.24)
                     : UIColor(red: 0.980, green: 0.992, blue: 0.969, alpha: 1.0) // #FAFDF7
             })
         }
         
         static var secondaryBackground: Color {
-            Color(UIColor.secondarySystemBackground)
+            Color(UIColor { traits in
+                traits.userInterfaceStyle == .dark
+                    ? UIColor(white: 0.02, alpha: 0.42)
+                    : UIColor.secondarySystemBackground
+            })
         }
         
         static var tertiaryBackground: Color {
-            Color(UIColor.tertiarySystemBackground)
+            Color(UIColor { traits in
+                traits.userInterfaceStyle == .dark
+                    ? UIColor(white: 0.03, alpha: 0.32)
+                    : UIColor.tertiarySystemBackground
+            })
         }
         
         // MARK: Legacy Compatibility
@@ -120,7 +148,7 @@ struct Theme {
         static var glassBackground: Color {
             Color(UIColor { tc in
                 tc.userInterfaceStyle == .dark
-                    ? UIColor(white: 1.0, alpha: 0.1)
+                    ? UIColor(white: 0.02, alpha: 0.38)
                     : UIColor(white: 0.0, alpha: 0.04)
             })
         }
@@ -397,6 +425,21 @@ extension View {
         )
     }
     
+    /// Paper card style: opaque card with soft shadow (no glass), per ink+paper design language
+    func paperCard(cornerRadius: CGFloat = Theme.CornerRadius.xl) -> some View {
+        self
+            .background(
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .fill(Theme.Colors.paperCard)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .stroke(Theme.Colors.adaptiveBorder, lineWidth: 1)
+                    .allowsHitTesting(false)
+            )
+            .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 4)
+    }
+
     /// Floating card style
     func floatingCard() -> some View {
         self

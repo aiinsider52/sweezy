@@ -24,9 +24,10 @@ struct UserProfile: Codable, Identifiable {
     var phoneNumber: String?
     var email: String?
     var emergencyContact: EmergencyContact?
+    var lifeEvents: [LifeEvent]
     var createdAt: Date
     var updatedAt: Date
-    
+
     init(
         fullName: String = "",
         canton: Canton = .zurich,
@@ -37,7 +38,8 @@ struct UserProfile: Codable, Identifiable {
         familySize: Int = 1,
         hasChildren: Bool = false,
         familyStatus: FamilyStatus? = nil,
-        preferredLanguage: String = "uk"
+        preferredLanguage: String = "uk",
+        lifeEvents: [LifeEvent] = []
     ) {
         self.id = UUID()
         self.fullName = fullName
@@ -50,8 +52,81 @@ struct UserProfile: Codable, Identifiable {
         self.hasChildren = hasChildren
         self.familyStatus = familyStatus
         self.preferredLanguage = preferredLanguage
+        self.lifeEvents = lifeEvents
         self.createdAt = Date()
         self.updatedAt = Date()
+    }
+
+    /// Months since arrival in Switzerland. Nil if `arrivalDate` is unknown.
+    var tenureMonths: Int? {
+        guard let arrival = arrivalDate else { return nil }
+        let comps = Calendar.current.dateComponents([.month], from: arrival, to: Date())
+        return max(0, comps.month ?? 0)
+    }
+
+    /// True if user has been in Switzerland for 12+ months — switches roadmap to "settled" branch.
+    var isSettledResident: Bool {
+        (tenureMonths ?? 0) >= 12
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case id, fullName, canton, permitType, arrivalDate, permitExpiryDate
+        case goals, familySize, hasChildren, familyStatus, preferredLanguage
+        case address, phoneNumber, email, emergencyContact, lifeEvents
+        case createdAt, updatedAt
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        self.id = try c.decode(UUID.self, forKey: .id)
+        self.fullName = try c.decode(String.self, forKey: .fullName)
+        self.canton = try c.decode(Canton.self, forKey: .canton)
+        self.permitType = try c.decode(PermitType.self, forKey: .permitType)
+        self.arrivalDate = try c.decodeIfPresent(Date.self, forKey: .arrivalDate)
+        self.permitExpiryDate = try c.decodeIfPresent(Date.self, forKey: .permitExpiryDate)
+        self.goals = try c.decode([UserGoal].self, forKey: .goals)
+        self.familySize = try c.decode(Int.self, forKey: .familySize)
+        self.hasChildren = try c.decode(Bool.self, forKey: .hasChildren)
+        self.familyStatus = try c.decodeIfPresent(FamilyStatus.self, forKey: .familyStatus)
+        self.preferredLanguage = try c.decode(String.self, forKey: .preferredLanguage)
+        self.address = try c.decodeIfPresent(Address.self, forKey: .address)
+        self.phoneNumber = try c.decodeIfPresent(String.self, forKey: .phoneNumber)
+        self.email = try c.decodeIfPresent(String.self, forKey: .email)
+        self.emergencyContact = try c.decodeIfPresent(EmergencyContact.self, forKey: .emergencyContact)
+        self.lifeEvents = (try? c.decodeIfPresent([LifeEvent].self, forKey: .lifeEvents)) ?? []
+        self.createdAt = try c.decode(Date.self, forKey: .createdAt)
+        self.updatedAt = try c.decode(Date.self, forKey: .updatedAt)
+    }
+}
+
+/// Life events that long-term residents can log to switch roadmap focus and unlock relevant moments.
+enum LifeEvent: String, CaseIterable, Codable, Hashable, Identifiable {
+    case newJob = "new_job"
+    case baby = "baby"
+    case movedCanton = "moved_canton"
+    case gotCPermit = "got_c_permit"
+    case planningCitizenship = "planning_citizenship"
+    case kidsToSchool = "kids_to_school"
+    case freelancing = "freelancing"
+    case retiring = "retiring"
+
+    var id: String { rawValue }
+
+    var localizedName: String {
+        "user.life_event.\(rawValue)".localized
+    }
+
+    var emoji: String {
+        switch self {
+        case .newJob: return "💼"
+        case .baby: return "👶"
+        case .movedCanton: return "📦"
+        case .gotCPermit: return "🪪"
+        case .planningCitizenship: return "🇨🇭"
+        case .kidsToSchool: return "🎒"
+        case .freelancing: return "🧑‍💻"
+        case .retiring: return "🌅"
+        }
     }
 }
 

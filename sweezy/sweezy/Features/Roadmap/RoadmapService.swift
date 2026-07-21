@@ -109,6 +109,34 @@ class RoadmapService: ObservableObject {
         }
         save()
     }
+
+    func seedFromOnboardingProfile(_ profile: UserProfile, firstWeekProgress: Double) -> Int {
+        guard !defaults.bool(forKey: AccountScopedStorage.roadmapOnboardingSeededKey) else {
+            return progress.currentLevel
+        }
+
+        let focusLevel = recommendedStartingLevel(for: profile)
+        let hasMeaningfulProgress = !progress.completedLevels.isEmpty || overallProgress > 0.05
+
+        if !hasMeaningfulProgress, focusLevel > 1 {
+            for levelId in 1..<focusLevel {
+                progress.completedLevels.insert(levelId)
+                progress.completedAt[levelId] = Date()
+                progress.levelProgress[levelId] = 1.0
+            }
+            progress.currentLevel = focusLevel
+            progress.unlockedAt[focusLevel] = Date()
+            progress.levelProgress[focusLevel] = max(progress.levelProgress[focusLevel] ?? 0, 0)
+        } else {
+            let onboardingProgress = min(0.35, max(0, firstWeekProgress) * 0.35)
+            progress.levelProgress[1] = max(progress.levelProgress[1] ?? 0, onboardingProgress)
+        }
+
+        defaults.set(true, forKey: AccountScopedStorage.roadmapOnboardingSeededKey)
+        save()
+        NotificationCenter.default.post(name: .roadmapProgressUpdated, object: nil)
+        return progress.currentLevel
+    }
     
     func resetProgress() {
         progress = .empty
@@ -168,6 +196,51 @@ class RoadmapService: ObservableObject {
         if let data = try? JSONEncoder().encode(progress) {
             defaults.set(data, forKey: storageKey)
         }
+    }
+
+    private func recommendedStartingLevel(for profile: UserProfile) -> Int {
+        var level = 1
+
+        if let arrivalDate = profile.arrivalDate {
+            let days = Calendar.current.dateComponents([.day], from: arrivalDate, to: Date()).day ?? 0
+            switch days {
+            case 120...:
+                level = max(level, 4)
+            case 45...:
+                level = max(level, 3)
+            case 14...:
+                level = max(level, 2)
+            default:
+                break
+            }
+        }
+
+        if profile.hasChildren {
+            level = max(level, 3)
+        }
+        if profile.goals.contains(.work) {
+            level = max(level, 4)
+        }
+
+        // Settled residents (1+ year) start near the top of the base roadmap so
+        // that the settled branch (taxes/career/family/permit) becomes primary.
+        if profile.isSettledResident {
+            level = max(level, max(1, levels.count - 1))
+        }
+
+        return min(level, levels.count)
+    }
+
+    /// Branch hint used by Home / Roadmap UI to choose between the "newcomer" base
+    /// flow and the "settled" branch focused on recurring Swiss moments.
+    enum Branch: String { case newcomer, settled }
+
+    func activeBranch(for profile: UserProfile?) -> Branch {
+        guard let profile else { return .newcomer }
+        if profile.isSettledResident { return .settled }
+        if !profile.lifeEvents.isEmpty { return .settled }
+        if profile.permitType == .c { return .settled }
+        return .newcomer
     }
 
     private func reloadForCurrentScope() {

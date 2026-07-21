@@ -17,8 +17,10 @@ struct QuestsView: View {
                 }
             }
             .listStyle(.insetGrouped)
+            .journeyForm()
         }
         .featureOnboarding(.gamification)
+        .journeyScreen(.alpine, darkness: 0.68)
     }
 }
 
@@ -44,5 +46,4 @@ private struct QuestRow: View {
         .padding(.vertical, 6)
     }
 }
-
 

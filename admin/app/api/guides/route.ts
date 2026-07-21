@@ -3,7 +3,7 @@ import { cookies } from 'next/headers'
 import { API_URL } from '@/lib/api'
 
 export async function GET(req: NextRequest) {
-  const token = cookies().get('access_token')?.value
+  const token = (await cookies()).get('access_token')?.value
   const url = new URL(req.url)
   const qs = url.search ? url.search : ''
   const res = await fetch(`${API_URL}/guides${qs}`, {
@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const token = cookies().get('access_token')?.value
+  const token = (await cookies()).get('access_token')?.value
   const body = await req.text()
   const res = await fetch(`${API_URL}/guides`, {
     method: 'POST',

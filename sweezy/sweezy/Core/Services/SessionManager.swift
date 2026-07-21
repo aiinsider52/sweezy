@@ -20,13 +20,17 @@ enum AccountScopedStorage {
 
     static func currentAccountKey() -> String {
         let isRegistered = defaults.bool(forKey: "isRegistered")
+        let backendID = (KeychainStore.get("user_id") ?? "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
         let email = (defaults.string(forKey: "userEmail") ?? "")
             .trimmingCharacters(in: .whitespacesAndNewlines)
             .lowercased()
 
-        guard isRegistered, !email.isEmpty else { return "guest" }
+        guard isRegistered else { return "guest" }
+        let identity = backendID.isEmpty ? email : backendID
+        guard !identity.isEmpty else { return "guest" }
 
-        let sanitized = email.map { char -> Character in
+        let sanitized = identity.map { char -> Character in
             if char.isLetter || char.isNumber { return char }
             return "_"
         }
@@ -73,6 +77,10 @@ enum AccountScopedStorage {
         namespaced("roadmap.totalXPEarned")
     }
 
+    static var roadmapOnboardingSeededKey: String {
+        namespaced("roadmap.onboardingSeeded.v1")
+    }
+
     static var statsGuidesReadIdsKey: String {
         namespaced("stats.guidesReadIds")
     }
@@ -110,8 +118,7 @@ enum AccountScopedStorage {
 /// Lightweight representation of an authenticated user for app-wide session state.
 /// We intentionally keep it minimal so it can be created from local persisted data (offline-safe).
 struct User: Codable, Equatable, Hashable, Identifiable {
-    /// Stable identifier for UI lists; we use email because backend "me" endpoint is not guaranteed here.
-    var id: String { email.lowercased() }
+    let id: String
     let email: String
     let name: String?
 }
@@ -186,8 +193,16 @@ final class SessionManager: ObservableObject {
     /// Call this instead of manually toggling `isRegistered` + clearing Keychain in multiple places.
     func signOut() {
         let previousScope = AccountScopedStorage.currentAccountKey()
+        let accessToken = KeychainStore.get("access_token")
+        let pushToken = UserDefaults.standard.string(forKey: "apns_device_token")
+        if let accessToken, !accessToken.isEmpty, let pushToken, !pushToken.isEmpty {
+            Task {
+                try? await ChatAPI.unregisterPush(token: pushToken, accessToken: accessToken)
+            }
+        }
         KeychainStore.delete("access_token")
         KeychainStore.delete("refresh_token")
+        KeychainStore.delete("user_id")
 
         // Clear local identity fields
         lockManager.userName = ""
@@ -202,12 +217,13 @@ final class SessionManager: ObservableObject {
 
     /// Force an immediate authenticated state update after login/registration.
     /// This avoids waiting for downstream storage propagation before the whole app reacts.
-    func activateAuthenticatedSession(email: String, name: String?) {
+    func activateAuthenticatedSession(userID: String, email: String, name: String?) {
         let previousScope = AccountScopedStorage.currentAccountKey()
         let trimmedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedName = name?.trimmingCharacters(in: .whitespacesAndNewlines)
         state = .authenticated(
             User(
+                id: userID,
                 email: trimmedEmail.isEmpty ? "user@local" : trimmedEmail,
                 name: (trimmedName?.isEmpty == false) ? trimmedName : nil
             )
@@ -224,7 +240,18 @@ final class SessionManager: ObservableObject {
         if lockManager.isRegistered && hasToken {
             let email = lockManager.userEmail.trimmingCharacters(in: .whitespacesAndNewlines)
             let name = lockManager.userName.trimmingCharacters(in: .whitespacesAndNewlines)
-            let user = User(email: email.isEmpty ? "user@local" : email, name: name.isEmpty ? nil : name)
+            let backendID = (KeychainStore.get("user_id") ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !backendID.isEmpty else {
+                state = .guest
+                currentScope = AccountScopedStorage.currentAccountKey()
+                AccountScopedStorage.notifyScopeChange(from: previousScope)
+                return
+            }
+            let user = User(
+                id: backendID,
+                email: email.isEmpty ? "user@local" : email,
+                name: name.isEmpty ? nil : name
+            )
             state = .authenticated(user)
         } else {
             // IMPORTANT: default to guest so general content is accessible without an account.
@@ -234,4 +261,3 @@ final class SessionManager: ObservableObject {
         AccountScopedStorage.notifyScopeChange(from: previousScope)
     }
 }
-

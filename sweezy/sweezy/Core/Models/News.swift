@@ -20,6 +20,7 @@ struct NewsItem: Codable, Identifiable, Hashable {
     let imageURL: String?
     
     init(
+        id: UUID = UUID(),
         title: String,
         summary: String,
         url: String,
@@ -30,7 +31,7 @@ struct NewsItem: Codable, Identifiable, Hashable {
         tags: [String] = [],
         imageURL: String? = nil
     ) {
-        self.id = UUID()
+        self.id = id
         self.title = title
         self.summary = summary
         self.content = content

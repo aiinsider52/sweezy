@@ -5,7 +5,7 @@ import UISelect from '@/components/ui/select'
 import UIInput from '@/components/ui/input'
 import GuideEditorDialog from './GuideEditorDialog'
 
-type Guide = { id: string; title: string; slug: string; category?: string; description?: string; is_published?: boolean; status?: string }
+type Guide = { id: string; title: string; slug: string; category?: string; description?: string; is_published?: boolean; status?: string; source_url?: string; source_title?: string; verified_at?: string }
 
 export default function GuidesList() {
   const [items, setItems] = useState<Guide[]>([])
@@ -85,5 +85,4 @@ export default function GuidesList() {
     </div>
   )
 }
-
 

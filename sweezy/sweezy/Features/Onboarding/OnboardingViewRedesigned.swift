@@ -53,6 +53,7 @@ struct OnboardingViewRedesigned: View {
     
     var body: some View {
         ZStack {
+                JourneyPhotoBackground(imageName: JourneyBackdrop.alpine.rawValue, blurRadius: 2, darkness: 0.5)
                 // Full-screen paged content
                 TabView(selection: $currentPage) {
                     OnboardingV2PageView(page: introPages[0])
@@ -232,6 +233,7 @@ struct OnboardingViewRedesigned: View {
         withAnimation(Theme.Animation.smooth) {
             appContainer.completeOnboarding()
         }
+        scheduleRetentionReminders()
         triggerHapticFeedback(style: .medium)
     }
     
@@ -312,6 +314,48 @@ struct OnboardingViewRedesigned: View {
         
         appContainer.userProfile = profile
         appContainer.firstWeekService.generateTasks(for: profile)
+        let seededLevel = RoadmapService().seedFromOnboardingProfile(
+            profile,
+            firstWeekProgress: appContainer.firstWeekService.progress
+        )
+        appContainer.telemetry.retention(
+            .roadmapSeeded,
+            source: "onboarding",
+            meta: ["level": String(seededLevel)]
+        )
+        appContainer.telemetry.retention(
+            .onboardingProfileSaved,
+            source: "onboarding",
+            meta: [
+                "canton": profile.canton.rawValue,
+                "permit": profile.permitType.rawValue,
+                "has_children": String(profile.hasChildren),
+                "roadmap_level": String(seededLevel)
+            ]
+        )
+        EventBus.shared.emit(GamEvent(
+            type: .profileCompleted,
+            metadata: [
+                "entityId": "onboarding_profile",
+                "title": "Profile completed"
+            ]
+        ))
+    }
+
+    private func scheduleRetentionReminders() {
+        Task { @MainActor in
+            let scheduledFirstWeek = await appContainer.firstWeekService.scheduleReminders(using: appContainer.notificationService)
+            let scheduledReengage = await appContainer.notificationService.scheduleReengageReminder(afterDays: 3)
+            appContainer.telemetry.retention(
+                .firstWeekReminderScheduled,
+                source: "onboarding",
+                meta: [
+                    "first_week": String(scheduledFirstWeek),
+                    "reengage": String(scheduledReengage),
+                    "tasks": String(appContainer.firstWeekService.tasks.count)
+                ]
+            )
+        }
     }
     
     private var resolvedArrivalDate: Date? {
@@ -340,6 +384,7 @@ struct OnboardingViewRedesigned: View {
 // MARK: - Notification Permission Page
 
 private struct NotificationPermissionPage: View {
+    @EnvironmentObject private var appContainer: AppContainer
     let onNext: () -> Void
     @State private var titleAppeared = false
     @State private var permissionGranted = false
@@ -428,11 +473,15 @@ private struct NotificationPermissionPage: View {
     }
     
     private func requestNotificationPermission() {
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, _ in
-            DispatchQueue.main.async {
-                permissionGranted = granted
-                onNext()
-            }
+        Task { @MainActor in
+            let granted = await appContainer.notificationService.requestPermission()
+            permissionGranted = granted
+            appContainer.telemetry.retention(
+                .notificationPermissionUpdated,
+                source: "onboarding",
+                meta: ["granted": String(granted)]
+            )
+            onNext()
         }
     }
 }
@@ -448,6 +497,7 @@ private struct ThemePickerPage: View {
     
     var body: some View {
         ZStack {
+            JourneyPhotoBackground(imageName: JourneyBackdrop.alpine.rawValue, blurRadius: 3, darkness: 0.48)
             Group {
                 if selectedTheme == .dark {
                     LinearGradient(
@@ -459,6 +509,7 @@ private struct ThemePickerPage: View {
                     Theme.Colors.gradientSoft
                 }
             }
+            .opacity(0.46)
             .ignoresSafeArea()
             .overlay(FloatingParticlesOverlayV2().opacity(0.15))
             
@@ -798,6 +849,7 @@ private struct OnboardingDetailsBackground<Content: View>: View {
     
     var body: some View {
         ZStack {
+            JourneyPhotoBackground(imageName: JourneyBackdrop.alpine.rawValue, blurRadius: 3, darkness: 0.52)
             LinearGradient(
                 colors: [
                     Theme.Colors.primaryDark,
@@ -807,6 +859,7 @@ private struct OnboardingDetailsBackground<Content: View>: View {
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
+            .opacity(0.44)
             .ignoresSafeArea()
             
             // Radial glow accent
@@ -982,7 +1035,9 @@ private struct OnboardingV2PageView: View {
     
     var body: some View {
         ZStack {
+            JourneyPhotoBackground(imageName: JourneyBackdrop.alpine.rawValue, blurRadius: 3, darkness: 0.5)
             page.gradient
+                .opacity(0.44)
                 .ignoresSafeArea()
             
             FloatingParticlesOverlayV2()
@@ -1058,7 +1113,7 @@ private struct LanguageSelectionSheetV2: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Theme.Colors.primaryBackground.ignoresSafeArea()
+                JourneyPhotoBackground(imageName: JourneyBackdrop.city.rawValue, blurRadius: 6, darkness: 0.68)
                 
                 VStack(spacing: Theme.Spacing.lg) {
                     // Header
@@ -1102,6 +1157,7 @@ private struct LanguageSelectionSheetV2: View {
                 }
             }
         }
+        .journeyScreen(.city, darkness: 0.68)
     }
 }
 
@@ -1119,11 +1175,13 @@ private struct LanguagePickerPage: View {
     
     var body: some View {
         ZStack {
+            JourneyPhotoBackground(imageName: JourneyBackdrop.alpine.rawValue, blurRadius: 3, darkness: 0.5)
             LinearGradient(
                 colors: [Theme.Colors.primary, Theme.Colors.accentTurquoise],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
+            .opacity(0.44)
             .ignoresSafeArea()
             .overlay(FloatingParticlesOverlayV2().opacity(0.15))
             
@@ -1193,12 +1251,13 @@ private struct SuccessPageView: View {
 
     var body: some View {
         ZStack {
-            // App-style green gradient background
+            JourneyPhotoBackground(imageName: JourneyBackdrop.zurich.rawValue, blurRadius: 3, darkness: 0.5)
             LinearGradient(
                 colors: [Theme.Colors.primaryDark, Theme.Colors.primary, Theme.Colors.accentTurquoise.opacity(0.75)],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
+            .opacity(0.44)
             .ignoresSafeArea()
 
             // Decorative background blobs
@@ -1429,4 +1488,3 @@ private struct FloatingParticlesOverlayV2: View {
         .environmentObject(ThemeManager())
         .preferredColorScheme(.dark)
 }
-

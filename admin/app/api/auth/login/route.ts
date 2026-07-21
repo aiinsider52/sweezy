@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
   let payload: any = {}
   try { payload = JSON.parse(text) } catch {}
   if (payload?.access_token) {
-    cookies().set('access_token', payload.access_token, {
+    (await cookies()).set('access_token', payload.access_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',

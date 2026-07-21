@@ -27,9 +27,11 @@ struct Checklist: Codable, Identifiable, Hashable {
     let language: String? // ISO 639-1 code (uk, ru, en, de)
     let verifiedAt: Date? // When content was last verified
     let source: String? // URL or authority reference
+    let sourceTitle: String? // Human-readable official authority/title
     let heroImage: String? // Hero image path
     
     init(
+        id: UUID = UUID(),
         title: String,
         description: String,
         category: ChecklistCategory,
@@ -43,9 +45,10 @@ struct Checklist: Codable, Identifiable, Hashable {
         language: String? = nil,
         verifiedAt: Date? = nil,
         source: String? = nil,
+        sourceTitle: String? = nil,
         heroImage: String? = nil
     ) {
-        self.id = UUID()
+        self.id = id
         self.title = title
         self.description = description
         self.category = category
@@ -61,6 +64,7 @@ struct Checklist: Codable, Identifiable, Hashable {
         self.language = language
         self.verifiedAt = verifiedAt
         self.source = source
+        self.sourceTitle = sourceTitle
         self.heroImage = heroImage
     }
     
@@ -92,16 +96,17 @@ struct Checklist: Codable, Identifiable, Hashable {
         self.language = try? container.decodeIfPresent(String.self, forKey: .language)
         self.verifiedAt = try? container.decodeIfPresent(Date.self, forKey: .verifiedAt)
         self.source = try? container.decodeIfPresent(String.self, forKey: .source)
+        self.sourceTitle = try? container.decodeIfPresent(String.self, forKey: .sourceTitle)
         self.heroImage = try? container.decodeIfPresent(String.self, forKey: .heroImage)
     }
     
     private enum CodingKeys: String, CodingKey {
         case id, title, description, category, estimatedDuration, difficulty, steps
         case tags, cantonCodes, priority, isNew, createdAt, lastUpdated
-        case language, verifiedAt, source, heroImage
+        case language, verifiedAt, source, sourceTitle, heroImage
     }
 
-    private static func stableUUID(from raw: String) -> UUID {
+    static func stableUUID(from raw: String) -> UUID {
         if let uuid = UUID(uuidString: raw) {
             return uuid
         }
@@ -342,4 +347,3 @@ struct ChecklistProgress: Codable {
         return completedSteps.isEmpty ? 0.0 : 0.5
     }
 }
-

@@ -3,14 +3,14 @@ import { cookies } from 'next/headers'
 import { API_URL } from '@/lib/api'
 
 export async function GET(_: NextRequest) {
-  const token = cookies().get('access_token')?.value
+  const token = (await cookies()).get('access_token')?.value
   const res = await fetch(`${API_URL}/checklists`, { headers: token ? { Authorization: `Bearer ${token}` } : undefined, cache: 'no-store' })
   const text = await res.text()
   return new NextResponse(text, { status: res.status, headers: { 'content-type': res.headers.get('content-type') || 'application/json' } })
 }
 
 export async function POST(req: NextRequest) {
-  const token = cookies().get('access_token')?.value
+  const token = (await cookies()).get('access_token')?.value
   const body = await req.text()
   const res = await fetch(`${API_URL}/checklists`, { method: 'POST', headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) }, body })
   const text = await res.text()

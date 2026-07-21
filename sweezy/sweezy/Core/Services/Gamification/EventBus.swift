@@ -16,6 +16,11 @@ enum GamEventType: String {
     case checklistCompleted = "checklist.completed"
     case roadmapStageCompleted = "roadmap.stage.completed"
     case notificationEnabled = "system.notifications.enabled"
+    case deadlineTracked = "passport.deadline.tracked"
+    case expertQuestionAsked = "passport.expert.question.asked"
+    case marketplaceContribution = "passport.marketplace.contribution"
+    case profileCompleted = "passport.profile.completed"
+    case dailyGermanCompleted = "passport.daily_german.completed"
 }
 
 struct GamEvent {

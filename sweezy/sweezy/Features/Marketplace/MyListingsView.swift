@@ -15,7 +15,7 @@ struct MyListingsView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                AdaptivePageBackground()
+                JourneyPhotoBackground(imageName: JourneyBackdrop.market.rawValue, blurRadius: 7, darkness: 0.72)
 
                 if isLoading {
                     ProgressView("common.loading".localized)
@@ -54,10 +54,8 @@ struct MyListingsView: View {
                 }
             }
             .task { await loadListings() }
-            .sheet(item: $selectedListing) { listing in
-                ListingDetailView(listingId: listing.id)
-                    .presentationDetents([.large])
-                    .presentationDragIndicator(.visible)
+            .fullScreenCover(item: $selectedListing) { listing in
+                ListingDetailView(listingId: listing.id, initialListing: listing)
             }
             .sheet(item: $listingToEdit) { listing in
                 EditListingView(listing: listing) { updated in
@@ -88,6 +86,7 @@ struct MyListingsView: View {
                 Text(errorMessage ?? "")
             }
         }
+        .journeyScreen(.market, darkness: 0.72)
     }
 
     private var summaryHero: some View {
@@ -241,11 +240,11 @@ private struct MyListingCard: View {
             HStack(alignment: .top, spacing: 12) {
                 ZStack {
                     RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .fill(listing.category.color.opacity(0.16))
+                        .fill(listing.categoryColor.opacity(0.16))
                         .frame(width: 48, height: 48)
-                    Image(systemName: listing.category.icon)
+                    Image(systemName: listing.categoryIcon)
                         .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(listing.category.color)
+                        .foregroundColor(listing.categoryColor)
                 }
 
                 VStack(alignment: .leading, spacing: 6) {
@@ -256,7 +255,7 @@ private struct MyListingCard: View {
 
                     HStack(spacing: 6) {
                         StatusBadge(status: listing.status)
-                        ListingBadgePill(text: listing.category.displayName, color: listing.category.color)
+                        ListingBadgePill(text: listing.categoryDisplayName, color: listing.categoryColor)
                     }
                 }
 
@@ -273,7 +272,7 @@ private struct MyListingCard: View {
             .font(.caption)
             .foregroundColor(Theme.Colors.textSecondary)
 
-            if let price = listing.priceInfo, !price.isEmpty {
+            if let price = listing.priceDisplay, !price.isEmpty {
                 HStack(spacing: 6) {
                     Image(systemName: "banknote.fill")
                         .foregroundColor(Theme.Colors.primary)
@@ -306,7 +305,7 @@ private struct MyListingCard: View {
 
             HStack(spacing: 10) {
                 actionButton(title: "marketplace.open".localized, icon: "arrow.up.right.square", fill: Theme.Colors.adaptiveSurface, tint: Theme.Colors.textPrimary, action: onOpen)
-                actionButton(title: "marketplace.edit".localized, icon: "pencil", fill: listing.category.color.opacity(0.14), tint: listing.category.color, action: onEdit)
+                actionButton(title: "marketplace.edit".localized, icon: "pencil", fill: listing.categoryColor.opacity(0.14), tint: listing.categoryColor, action: onEdit)
                 actionButton(title: "common.delete".localized, icon: "trash", fill: Theme.Colors.error.opacity(0.12), tint: Theme.Colors.error, action: onDelete)
             }
         }

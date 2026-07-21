@@ -1,11 +1,11 @@
-from __future__ import annotations
-
 """
 Transactional email helper backed by Resend.
 
 If Resend is not configured, emails degrade gracefully to stdout logging so
 local development and tests keep working without a real email provider.
 """
+
+from __future__ import annotations
 
 import html
 
@@ -114,5 +114,4 @@ def send_password_reset_code_email(to_email: str, code: str, expires_minutes: in
         footer="Якщо ви не запитували зміну пароля, просто проігноруйте цей лист.",
     )
     _send_email(to_email, subject=subject, text_body=text_body, html_body=html_body)
-
 

@@ -3,7 +3,7 @@ import { cookies } from 'next/headers'
 import { API_URL } from '@/lib/api'
 
 export async function POST(req: NextRequest) {
-  const token = cookies().get('access_token')?.value
+  const token = (await cookies()).get('access_token')?.value
   const form = await req.formData()
   const res = await fetch(`${API_URL}/media/upload`, {
     method: 'POST',

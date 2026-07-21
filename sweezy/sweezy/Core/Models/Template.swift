@@ -29,6 +29,7 @@ struct DocumentTemplate: Codable, Identifiable, Hashable {
     let heroImage: String? // Hero image path
     
     init(
+        id: UUID = UUID(),
         title: String,
         description: String,
         category: TemplateCategory,
@@ -44,7 +45,7 @@ struct DocumentTemplate: Codable, Identifiable, Hashable {
         source: String? = nil,
         heroImage: String? = nil
     ) {
-        self.id = UUID()
+        self.id = id
         self.title = title
         self.description = description
         self.category = category

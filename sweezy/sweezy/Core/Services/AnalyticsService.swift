@@ -7,6 +7,24 @@
 
 import Foundation
 
+enum AnalyticsConsentStore {
+    private static let decisionKey = "privacy.analytics.consent.decided"
+    private static let grantedKey = "privacy.analytics.consent.granted"
+
+    static var hasDecision: Bool {
+        UserDefaults.standard.bool(forKey: decisionKey)
+    }
+
+    static var isGranted: Bool {
+        hasDecision && UserDefaults.standard.bool(forKey: grantedKey)
+    }
+
+    static func setGranted(_ granted: Bool) {
+        UserDefaults.standard.set(true, forKey: decisionKey)
+        UserDefaults.standard.set(granted, forKey: grantedKey)
+    }
+}
+
 @MainActor
 protocol AnalyticsServiceProtocol {
     var isEnabled: Bool { get }
@@ -18,12 +36,11 @@ protocol AnalyticsServiceProtocol {
 @MainActor
 final class AnalyticsService: AnalyticsServiceProtocol {
     private let defaults = UserDefaults.standard
-    private let keyEnabled = "analytics.enabled"
     private let session = URLSession(configuration: .ephemeral)
     private let apiKey: String?
     
     var isEnabled: Bool {
-        defaults.bool(forKey: keyEnabled)
+        AnalyticsConsentStore.isGranted
     }
     
     init(apiKey: String? = Bundle.main.object(forInfoDictionaryKey: "AMPLITUDE_API_KEY") as? String) {
@@ -31,7 +48,7 @@ final class AnalyticsService: AnalyticsServiceProtocol {
     }
     
     func setEnabled(_ enabled: Bool) {
-        defaults.set(enabled, forKey: keyEnabled)
+        AnalyticsConsentStore.setGranted(enabled)
     }
     
     func identify(userId: String?, properties: [String: Any]? = nil) {
@@ -86,5 +103,4 @@ final class AnalyticsService: AnalyticsServiceProtocol {
         return trimmed
     }
 }
-
 

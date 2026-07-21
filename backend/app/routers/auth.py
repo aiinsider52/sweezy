@@ -5,13 +5,18 @@ from datetime import datetime, timedelta, timezone
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, Response, status
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel, Field
-from jose import jwt
 from sqlalchemy.orm import Session
 
 from ..core.config import get_settings
 from ..core.database import get_db
 from ..core.rate_limit import limiter
-from ..core.security import create_access_token, create_refresh_token, decode_token, get_password_hash
+from ..core.security import (
+    create_access_token,
+    create_oauth_link_token,
+    create_refresh_token,
+    decode_token,
+    get_password_hash,
+)
 from ..dependencies import get_current_user
 from ..models.user import User
 from ..schemas import Token, TokenPair
@@ -25,7 +30,7 @@ from ..schemas.auth import (
     SocialAuthResponse,
     SocialLinkConfirmRequest,
 )
-from ..schemas.user import UserCreate, UserLogin
+from ..schemas.user import UserCreate, UserLogin, UserOut
 from ..services import AuthService
 from ..services.auth_email_codes import AuthEmailCodeService
 from ..services.email import send_password_reset_code_email, send_verification_code_email
@@ -45,19 +50,26 @@ def _issue_token_pair(user: User) -> TokenPair:
     settings = get_settings()
     access_minutes = settings.ACCESS_TOKEN_EXPIRE_MINUTES
     access = create_access_token(
-        subject=user.email,
+        subject=user.id,
         is_admin=user.is_superuser,
         role=getattr(user, "role", None),
         expires_delta=timedelta(minutes=access_minutes),
     )
-    refresh = create_refresh_token(subject=user.email, expires_delta=timedelta(days=7))
-    return TokenPair(access_token=access, refresh_token=refresh, expires_in=access_minutes * 60)
+    refresh = create_refresh_token(subject=user.id)
+    return TokenPair(
+        access_token=access,
+        refresh_token=refresh,
+        expires_in=access_minutes * 60,
+        user_id=user.id,
+        email=user.email,
+    )
 
 
 def _social_auth_response(user: User, *, name: str | None = None) -> SocialAuthResponse:
     tokens = _issue_token_pair(user)
     return SocialAuthResponse(
         status="authenticated",
+        user_id=user.id,
         email=user.email,
         name=name,
         access_token=tokens.access_token,
@@ -68,16 +80,15 @@ def _social_auth_response(user: User, *, name: str | None = None) -> SocialAuthR
 
 
 def _issue_oauth_link_token(*, provider: str, identity: VerifiedOAuthIdentity, name: str | None = None) -> str:
-    settings = get_settings()
-    payload = {
-        "sub": (identity.email or "").lower(),
-        "type": "oauth_link",
+    return create_oauth_link_token(
+        (identity.email or "").lower(),
+        claims={
         "provider": provider,
         "provider_sub": identity.subject,
         "name": name,
-        "exp": datetime.now(timezone.utc) + timedelta(minutes=15),
-    }
-    return jwt.encode(payload, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
+        },
+        expires_delta=timedelta(minutes=15),
+    )
 
 
 def _complete_oauth_sign_in(
@@ -134,7 +145,7 @@ def _complete_oauth_sign_in(
 
 def _decode_oauth_link_token(link_token: str) -> dict:
     try:
-        payload = decode_token(link_token)
+        payload = decode_token(link_token, expected_type="oauth_link")
     except Exception as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid link token") from exc
 
@@ -148,8 +159,8 @@ def _decode_oauth_link_token(link_token: str) -> dict:
 
 
 @router.post("/token", response_model=Token)
-def login(form_data: OAuth2PasswordRequestForm = Depends()) -> Token:
-    token = AuthService.authenticate_admin(form_data.username, form_data.password)
+def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)) -> Token:
+    token = AuthService.authenticate_admin(db, form_data.username, form_data.password)
     if not token:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect username or password")
     return Token(access_token=token)
@@ -274,18 +285,18 @@ def confirm_social_link(
 @router.post("/refresh", response_model=TokenPair)
 def refresh_access_token(payload: RefreshTokenRequest, db: Session = Depends(get_db)) -> TokenPair:
     try:
-        token_data = decode_token(payload.refresh_token)
+        token_data = decode_token(payload.refresh_token, expected_type="refresh")
     except Exception:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token")
 
     if token_data.get("type") != "refresh":
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token")
 
-    email = token_data.get("sub")
-    if not email:
+    user_id = token_data.get("sub")
+    if not user_id:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token")
 
-    user = UserService.get_by_email(db, email)
+    user = UserService.get_by_id(db, user_id)
     if not user or not user.is_active:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid user")
 
@@ -418,3 +429,7 @@ def delete_my_account(
     UserService.delete_account(db, user=current_user)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
+
+@router.get("/me", response_model=UserOut)
+def get_my_account(current_user: User = Depends(get_current_user)) -> User:
+    return current_user

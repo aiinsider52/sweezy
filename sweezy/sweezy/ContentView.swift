@@ -6,13 +6,13 @@
 //
 
 import SwiftUI
-import UserNotifications
 #if canImport(GoogleSignIn)
 import GoogleSignIn
 #endif
 
 @main
 struct SweezyApp: App {
+    @UIApplicationDelegateAdaptor(SweezyAppDelegate.self) private var appDelegate
     @StateObject private var appContainer: AppContainer
     @StateObject private var themeManager: ThemeManager
     @StateObject private var lockManager: AppLockManager
@@ -43,9 +43,6 @@ struct SweezyApp: App {
                 .environmentObject(sessionManager)
                 .onAppear {
                     AppLogger.ui("App UI appeared")
-                    if ProcessInfo.processInfo.environment["UITESTS"] != "1" {
-                        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { _, _ in }
-                    }
                     lockManager.loadBiometryType()
                     
                     AppReviewManager.recordFirstLaunchIfNeeded()
@@ -78,6 +75,7 @@ struct MainAppContent: View {
     @State private var showGlobalReset: Bool = false
     @State private var resetToken: String? = nil
     @State private var showPostOnboardingAuthEntry: Bool = false
+    @State private var deepLinkedConversation: ChatConversation?
     
     var body: some View {
         ZStack {
@@ -131,10 +129,15 @@ struct MainAppContent: View {
             )
             .environment(\.locale, appContainer.currentLocale)
         }
+        .fullScreenCover(item: $deepLinkedConversation) { conversation in
+            ChatConversationView(conversation: conversation)
+                .environmentObject(appContainer)
+        }
         .onAppear {
             updatePostOnboardingAuthPresentation()
             Task {
                 await refreshRetentionLoopsOnActive()
+                await startAccountServicesIfNeeded()
             }
         }
         .onChange(of: appContainer.isOnboardingCompleted) { _, _ in
@@ -152,8 +155,12 @@ struct MainAppContent: View {
         .onChange(of: lockManager.isRegistered) { _, _ in
             updatePostOnboardingAuthPresentation()
         }
-        .onChange(of: sessionManager.isAuthenticated) { _, _ in
+        .onChange(of: sessionManager.isAuthenticated) { _, authenticated in
             updatePostOnboardingAuthPresentation()
+            Task {
+                if authenticated { await startAccountServicesIfNeeded() }
+                else { appContainer.chatStore.stop() }
+            }
         }
     }
     
@@ -174,6 +181,8 @@ struct MainAppContent: View {
             lockManager.appDidBecomeActive()
             Task {
                 await refreshRetentionLoopsOnActive()
+                await startAccountServicesIfNeeded()
+                appContainer.chatStore.reconnect()
             }
         @unknown default:
             break
@@ -185,9 +194,21 @@ struct MainAppContent: View {
         case .passwordReset(let token):
             resetToken = token
             showGlobalReset = true
+        case .chat(let id):
+            guard sessionManager.isAuthenticated else { return }
+            Task {
+                await appContainer.chatStore.start()
+                deepLinkedConversation = await appContainer.chatStore.conversation(id: id)
+            }
         default:
             break
         }
+    }
+
+    private func startAccountServicesIfNeeded() async {
+        guard sessionManager.isAuthenticated else { return }
+        await appContainer.chatStore.start()
+        await SweezyAppDelegate.registerForChatPush()
     }
 
     private func updatePostOnboardingAuthPresentation() {
@@ -206,7 +227,7 @@ struct MainAppContent: View {
         await cancelReengagementNotifications(using: notificationService)
 
         guard notificationService.isAuthorized else { return }
-        await appContainer.firstWeekService.scheduleReminders(using: notificationService)
+        _ = await appContainer.firstWeekService.scheduleReminders(using: notificationService)
     }
 
     private func scheduleRetentionLoopsOnBackground() async {

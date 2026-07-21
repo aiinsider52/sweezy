@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from typing import List
 
 from fastapi import APIRouter, HTTPException, Query, Request
@@ -33,7 +31,10 @@ def get_checklist(checklist_id: str, db: DBSession) -> ChecklistOut:
 
 @router.post("/", response_model=ChecklistOut)
 def create_checklist(payload: ChecklistCreate, db: DBSession, req: Request, _: CurrentAdmin) -> ChecklistOut:
-    obj = ChecklistService.create(db, payload)
+    try:
+        obj = ChecklistService.create(db, payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
     try:
         from ..services.audit import log_audit
         log_audit(db, user_email=req.headers.get("x-user-email") or "admin", action="create", entity="checklists", entity_id=obj.id, before=None, after=obj)
@@ -48,7 +49,10 @@ def update_checklist(checklist_id: str, payload: ChecklistUpdate, db: DBSession,
     if not obj:
         raise HTTPException(status_code=404, detail="Checklist not found")
     before = obj
-    obj = ChecklistService.update(db, obj, payload)
+    try:
+        obj = ChecklistService.update(db, obj, payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
     try:
         from ..services.audit import log_audit
         log_audit(db, user_email=req.headers.get("x-user-email") or "admin", action="update", entity="checklists", entity_id=obj.id, before=before, after=obj)
@@ -69,5 +73,3 @@ def delete_checklist(checklist_id: str, db: DBSession, req: Request, _: CurrentA
     except Exception:
         pass
     return None
-
-

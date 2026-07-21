@@ -22,8 +22,15 @@
             "description": "Find hotels and short-term rentals"
           }
         ],
-        "requiredDocuments": ["Passport", "Credit card or cash"],
-        "tips": ["Book in advance", "Consider hostels for budget options", "Look for extended stay hotels"],
+        "requiredDocuments": [
+          "Passport",
+          "Credit card or cash"
+        ],
+        "tips": [
+          "Book in advance",
+          "Consider hostels for budget options",
+          "Look for extended stay hotels"
+        ],
         "order": 1
       },
       {
@@ -41,8 +48,16 @@
             "description": "Official Swiss government portal"
           }
         ],
-        "requiredDocuments": ["Passport", "S permit", "Proof of accommodation"],
-        "tips": ["Make an appointment in advance", "Bring all original documents", "Ask for information in your language"],
+        "requiredDocuments": [
+          "Passport",
+          "S permit",
+          "Proof of accommodation"
+        ],
+        "tips": [
+          "Make an appointment in advance",
+          "Bring all original documents",
+          "Ask for information in your language"
+        ],
         "order": 2
       },
       {
@@ -60,8 +75,15 @@
             "description": "Largest Swiss telecom provider"
           }
         ],
-        "requiredDocuments": ["Passport", "Proof of address"],
-        "tips": ["Compare prepaid vs. contract plans", "Consider data needs", "Ask about international calling"],
+        "requiredDocuments": [
+          "Passport",
+          "Proof of address"
+        ],
+        "tips": [
+          "Compare prepaid vs. contract plans",
+          "Consider data needs",
+          "Ask about international calling"
+        ],
         "order": 3
       },
       {
@@ -79,8 +101,17 @@
             "description": "Compare Swiss banks and fees"
           }
         ],
-        "requiredDocuments": ["Passport", "S permit", "Proof of address", "Initial deposit"],
-        "tips": ["Research different banks", "Ask about fees", "Consider online banks for lower costs"],
+        "requiredDocuments": [
+          "Passport",
+          "S permit",
+          "Proof of address",
+          "Initial deposit"
+        ],
+        "tips": [
+          "Research different banks",
+          "Ask about fees",
+          "Consider online banks for lower costs"
+        ],
         "order": 4
       },
       {
@@ -99,7 +130,11 @@
           }
         ],
         "requiredDocuments": [],
-        "tips": ["Compare premiums and deductibles", "Check if you qualify for subsidies", "Consider your health needs"],
+        "tips": [
+          "Compare premiums and deductibles",
+          "Check if you qualify for subsidies",
+          "Consider your health needs"
+        ],
         "order": 5
       },
       {
@@ -118,7 +153,11 @@
           }
         ],
         "requiredDocuments": [],
-        "tips": ["Focus on practical phrases first", "Practice with locals", "Use language learning apps"],
+        "tips": [
+          "Focus on practical phrases first",
+          "Practice with locals",
+          "Use language learning apps"
+        ],
         "order": 6
       },
       {
@@ -129,16 +168,27 @@
         "isOptional": true,
         "links": [],
         "requiredDocuments": [],
-        "tips": ["Find the nearest supermarket", "Locate public transport stops", "Identify important services"],
+        "tips": [
+          "Find the nearest supermarket",
+          "Locate public transport stops",
+          "Identify important services"
+        ],
         "order": 7
       }
     ],
-    "tags": ["arrival", "registration", "essentials"],
+    "tags": [
+      "arrival",
+      "registration",
+      "essentials"
+    ],
     "cantonCodes": [],
     "priority": 10,
     "isNew": true,
     "createdAt": "2023-10-14T10:00:00Z",
-    "lastUpdated": "2023-10-14T10:00:00Z"
+    "lastUpdated": "2023-10-14T10:00:00Z",
+    "source": "https://www.ch.ch/en/foreign-nationals-in-switzerland/",
+    "sourceTitle": "ch.ch — Foreign nationals in Switzerland",
+    "verifiedAt": "2026-07-15T00:00:00Z"
   },
   {
     "id": "660e8400-e29b-41d4-a716-446655440002",
@@ -164,7 +214,10 @@
           }
         ],
         "requiredDocuments": [],
-        "tips": ["Understand deductibles and co-payments", "Learn about basic vs. supplementary insurance"],
+        "tips": [
+          "Understand deductibles and co-payments",
+          "Learn about basic vs. supplementary insurance"
+        ],
         "order": 1
       },
       {
@@ -183,7 +236,11 @@
           }
         ],
         "requiredDocuments": [],
-        "tips": ["Compare premiums for your age and canton", "Consider deductible options", "Check provider networks"],
+        "tips": [
+          "Compare premiums for your age and canton",
+          "Consider deductible options",
+          "Check provider networks"
+        ],
         "order": 2
       },
       {
@@ -201,8 +258,15 @@
             "description": "Information about premium reductions by canton"
           }
         ],
-        "requiredDocuments": ["Income statements", "Tax documents"],
-        "tips": ["Each canton has different income limits", "Apply as soon as possible", "Subsidies are paid directly to insurers"],
+        "requiredDocuments": [
+          "Income statements",
+          "Tax documents"
+        ],
+        "tips": [
+          "Each canton has different income limits",
+          "Apply as soon as possible",
+          "Subsidies are paid directly to insurers"
+        ],
         "order": 3
       },
       {
@@ -213,7 +277,11 @@
         "isOptional": false,
         "links": [],
         "requiredDocuments": [],
-        "tips": ["Consider your health needs", "Balance premium vs. deductible", "Check if your preferred doctors are covered"],
+        "tips": [
+          "Consider your health needs",
+          "Balance premium vs. deductible",
+          "Check if your preferred doctors are covered"
+        ],
         "order": 4
       },
       {
@@ -223,8 +291,16 @@
         "estimatedTime": "30 minutes",
         "isOptional": false,
         "links": [],
-        "requiredDocuments": ["Passport copy", "Residence permit", "Proof of address"],
-        "tips": ["Apply online for faster processing", "Keep copies of all documents", "Confirm receipt of application"],
+        "requiredDocuments": [
+          "Passport copy",
+          "Residence permit",
+          "Proof of address"
+        ],
+        "tips": [
+          "Apply online for faster processing",
+          "Keep copies of all documents",
+          "Confirm receipt of application"
+        ],
         "order": 5
       },
       {
@@ -235,7 +311,11 @@
         "isOptional": false,
         "links": [],
         "requiredDocuments": [],
-        "tips": ["Check all personal details are correct", "Understand your policy number", "Keep insurance card with you always"],
+        "tips": [
+          "Check all personal details are correct",
+          "Understand your policy number",
+          "Keep insurance card with you always"
+        ],
         "order": 6
       },
       {
@@ -253,17 +333,31 @@
             "description": "Find doctors in Switzerland"
           }
         ],
-        "requiredDocuments": ["Insurance card", "Previous medical records"],
-        "tips": ["Choose a doctor near your home", "Check if they speak your language", "Some plans require GP referrals"],
+        "requiredDocuments": [
+          "Insurance card",
+          "Previous medical records"
+        ],
+        "tips": [
+          "Choose a doctor near your home",
+          "Check if they speak your language",
+          "Some plans require GP referrals"
+        ],
         "order": 7
       }
     ],
-    "tags": ["health-insurance", "mandatory", "subsidies"],
+    "tags": [
+      "health-insurance",
+      "mandatory",
+      "subsidies"
+    ],
     "cantonCodes": [],
     "priority": 9,
     "isNew": false,
     "createdAt": "2023-09-20T14:30:00Z",
-    "lastUpdated": "2023-10-10T11:15:00Z"
+    "lastUpdated": "2023-10-10T11:15:00Z",
+    "source": "https://www.ch.ch/en/health/health-insurance/",
+    "sourceTitle": "ch.ch — Health insurance",
+    "verifiedAt": "2026-07-15T00:00:00Z"
   },
   {
     "id": "660e8400-e29b-41d4-a716-446655440003",
@@ -280,8 +374,15 @@
         "estimatedTime": "30 minutes",
         "isOptional": false,
         "links": [],
-        "requiredDocuments": ["Income statements", "Bank statements"],
-        "tips": ["Budget max 30% of income for rent", "Include utilities and insurance", "Consider transportation costs"],
+        "requiredDocuments": [
+          "Income statements",
+          "Bank statements"
+        ],
+        "tips": [
+          "Budget max 30% of income for rent",
+          "Include utilities and insurance",
+          "Consider transportation costs"
+        ],
         "order": 1
       },
       {
@@ -300,7 +401,11 @@
           }
         ],
         "requiredDocuments": [],
-        "tips": ["Consider commute times", "Check local amenities", "Visit areas at different times"],
+        "tips": [
+          "Consider commute times",
+          "Check local amenities",
+          "Visit areas at different times"
+        ],
         "order": 2
       },
       {
@@ -327,7 +432,11 @@
           "Debt collection certificate",
           "Previous landlord reference"
         ],
-        "tips": ["Get documents translated if needed", "Make multiple copies", "Keep originals safe"],
+        "tips": [
+          "Get documents translated if needed",
+          "Make multiple copies",
+          "Keep originals safe"
+        ],
         "order": 3
       },
       {
@@ -346,7 +455,11 @@
           }
         ],
         "requiredDocuments": [],
-        "tips": ["Set up search alerts", "Check multiple platforms daily", "Be ready to apply quickly"],
+        "tips": [
+          "Set up search alerts",
+          "Check multiple platforms daily",
+          "Be ready to apply quickly"
+        ],
         "order": 4
       },
       {
@@ -356,8 +469,16 @@
         "estimatedTime": "1-2 hours per viewing",
         "isOptional": false,
         "links": [],
-        "requiredDocuments": ["All application documents", "Checkbook for deposit"],
-        "tips": ["Arrive on time", "Bring all documents", "Ask about utilities and rules", "Take photos/notes"],
+        "requiredDocuments": [
+          "All application documents",
+          "Checkbook for deposit"
+        ],
+        "tips": [
+          "Arrive on time",
+          "Bring all documents",
+          "Ask about utilities and rules",
+          "Take photos/notes"
+        ],
         "order": 5
       },
       {
@@ -367,8 +488,14 @@
         "estimatedTime": "30 minutes per application",
         "isOptional": false,
         "links": [],
-        "requiredDocuments": ["Complete application dossier"],
-        "tips": ["Write a personal cover letter", "Submit applications immediately", "Follow up politely"],
+        "requiredDocuments": [
+          "Complete application dossier"
+        ],
+        "tips": [
+          "Write a personal cover letter",
+          "Submit applications immediately",
+          "Follow up politely"
+        ],
         "order": 6
       },
       {
@@ -378,8 +505,15 @@
         "estimatedTime": "1 hour",
         "isOptional": false,
         "links": [],
-        "requiredDocuments": ["Deposit payment", "Insurance proof"],
-        "tips": ["Read contract carefully", "Understand notice periods", "Document apartment condition"],
+        "requiredDocuments": [
+          "Deposit payment",
+          "Insurance proof"
+        ],
+        "tips": [
+          "Read contract carefully",
+          "Understand notice periods",
+          "Document apartment condition"
+        ],
         "order": 7
       },
       {
@@ -389,17 +523,32 @@
         "estimatedTime": "2-3 hours",
         "isOptional": false,
         "links": [],
-        "requiredDocuments": ["Lease agreement", "Passport"],
-        "tips": ["Compare internet providers", "Set up automatic payments", "Keep all service contracts"],
+        "requiredDocuments": [
+          "Lease agreement",
+          "Passport"
+        ],
+        "tips": [
+          "Compare internet providers",
+          "Set up automatic payments",
+          "Keep all service contracts"
+        ],
         "order": 8
       }
     ],
-    "tags": ["housing", "rental", "apartment", "lease"],
+    "tags": [
+      "housing",
+      "rental",
+      "apartment",
+      "lease"
+    ],
     "cantonCodes": [],
     "priority": 8,
     "isNew": false,
     "createdAt": "2023-09-15T16:45:00Z",
-    "lastUpdated": "2023-10-05T09:30:00Z"
+    "lastUpdated": "2023-10-05T09:30:00Z",
+    "source": "https://www.ch.ch/en/housing/",
+    "sourceTitle": "ch.ch — Housing",
+    "verifiedAt": "2026-07-15T00:00:00Z"
   },
   {
     "id": "660e8400-e29b-41d4-a716-446655440004",
@@ -424,8 +573,15 @@
             "description": "Swiss career guidance portal"
           }
         ],
-        "requiredDocuments": ["Educational certificates", "Work experience records"],
-        "tips": ["Consider Swiss market needs", "Identify skill gaps", "Plan additional training if needed"],
+        "requiredDocuments": [
+          "Educational certificates",
+          "Work experience records"
+        ],
+        "tips": [
+          "Consider Swiss market needs",
+          "Identify skill gaps",
+          "Plan additional training if needed"
+        ],
         "order": 1
       },
       {
@@ -443,8 +599,16 @@
             "description": "State Secretariat for Education, Research and Innovation"
           }
         ],
-        "requiredDocuments": ["Original diplomas", "Transcripts", "Work certificates"],
-        "tips": ["Start process early", "Get documents translated", "Some professions require additional exams"],
+        "requiredDocuments": [
+          "Original diplomas",
+          "Transcripts",
+          "Work certificates"
+        ],
+        "tips": [
+          "Start process early",
+          "Get documents translated",
+          "Some professions require additional exams"
+        ],
         "order": 2
       },
       {
@@ -454,8 +618,15 @@
         "estimatedTime": "3-4 hours",
         "isOptional": false,
         "links": [],
-        "requiredDocuments": ["Professional photo", "All certificates"],
-        "tips": ["Include professional photo", "List languages with proficiency levels", "Keep to 2-3 pages maximum"],
+        "requiredDocuments": [
+          "Professional photo",
+          "All certificates"
+        ],
+        "tips": [
+          "Include professional photo",
+          "List languages with proficiency levels",
+          "Keep to 2-3 pages maximum"
+        ],
         "order": 3
       },
       {
@@ -474,7 +645,11 @@
           }
         ],
         "requiredDocuments": [],
-        "tips": ["Focus on business language", "Get certified proficiency levels", "Practice with native speakers"],
+        "tips": [
+          "Focus on business language",
+          "Get certified proficiency levels",
+          "Practice with native speakers"
+        ],
         "order": 4
       },
       {
@@ -493,7 +668,11 @@
           }
         ],
         "requiredDocuments": [],
-        "tips": ["Join professional associations", "Attend industry events", "Connect with expat communities"],
+        "tips": [
+          "Join professional associations",
+          "Attend industry events",
+          "Connect with expat communities"
+        ],
         "order": 5
       },
       {
@@ -511,8 +690,16 @@
             "description": "Leading Swiss job portal"
           }
         ],
-        "requiredDocuments": ["CV", "Cover letters", "Certificates"],
-        "tips": ["Customize each application", "Follow up appropriately", "Apply quickly to new postings"],
+        "requiredDocuments": [
+          "CV",
+          "Cover letters",
+          "Certificates"
+        ],
+        "tips": [
+          "Customize each application",
+          "Follow up appropriately",
+          "Apply quickly to new postings"
+        ],
         "order": 6
       },
       {
@@ -522,8 +709,16 @@
         "estimatedTime": "2-3 hours per interview",
         "isOptional": false,
         "links": [],
-        "requiredDocuments": ["Portfolio", "References", "Questions for employer"],
-        "tips": ["Research the company thoroughly", "Prepare specific examples", "Practice in the local language"],
+        "requiredDocuments": [
+          "Portfolio",
+          "References",
+          "Questions for employer"
+        ],
+        "tips": [
+          "Research the company thoroughly",
+          "Prepare specific examples",
+          "Practice in the local language"
+        ],
         "order": 7
       },
       {
@@ -533,17 +728,32 @@
         "estimatedTime": "1-2 hours",
         "isOptional": true,
         "links": [],
-        "requiredDocuments": ["Salary research", "Contract draft"],
-        "tips": ["Research market salaries", "Consider total compensation", "Negotiate respectfully"],
+        "requiredDocuments": [
+          "Salary research",
+          "Contract draft"
+        ],
+        "tips": [
+          "Research market salaries",
+          "Consider total compensation",
+          "Negotiate respectfully"
+        ],
         "order": 8
       }
     ],
-    "tags": ["employment", "job-search", "CV", "interview"],
+    "tags": [
+      "employment",
+      "job-search",
+      "CV",
+      "interview"
+    ],
     "cantonCodes": [],
     "priority": 7,
     "isNew": false,
     "createdAt": "2023-09-10T12:00:00Z",
-    "lastUpdated": "2023-09-28T15:45:00Z"
+    "lastUpdated": "2023-09-28T15:45:00Z",
+    "source": "https://www.ch.ch/en/work/",
+    "sourceTitle": "ch.ch — Work",
+    "verifiedAt": "2026-07-15T00:00:00Z"
   },
   {
     "id": "660e8400-e29b-41d4-a716-446655440005",
@@ -560,8 +770,14 @@
         "estimatedTime": "30 minutes",
         "isOptional": false,
         "links": [],
-        "requiredDocuments": ["Child's passport", "Proof of address"],
-        "tips": ["Call ahead to make an appointment", "Ask about language support programs"],
+        "requiredDocuments": [
+          "Child's passport",
+          "Proof of address"
+        ],
+        "tips": [
+          "Call ahead to make an appointment",
+          "Ask about language support programs"
+        ],
         "order": 1
       },
       {
@@ -571,8 +787,16 @@
         "estimatedTime": "2-3 hours",
         "isOptional": false,
         "links": [],
-        "requiredDocuments": ["Birth certificate", "Vaccination records", "Previous school records", "Passport copies"],
-        "tips": ["Get documents translated if needed", "Ask about vaccination requirements"],
+        "requiredDocuments": [
+          "Birth certificate",
+          "Vaccination records",
+          "Previous school records",
+          "Passport copies"
+        ],
+        "tips": [
+          "Get documents translated if needed",
+          "Ask about vaccination requirements"
+        ],
         "order": 2
       },
       {
@@ -583,7 +807,10 @@
         "isOptional": false,
         "links": [],
         "requiredDocuments": [],
-        "tips": ["Ask for help if German/French is difficult", "Double-check all information"],
+        "tips": [
+          "Ask for help if German/French is difficult",
+          "Double-check all information"
+        ],
         "order": 3
       },
       {
@@ -594,16 +821,26 @@
         "isOptional": false,
         "links": [],
         "requiredDocuments": [],
-        "tips": ["Bring a translator if needed", "Ask about after-school programs"],
+        "tips": [
+          "Bring a translator if needed",
+          "Ask about after-school programs"
+        ],
         "order": 4
       }
     ],
-    "tags": ["education", "school", "children"],
+    "tags": [
+      "education",
+      "school",
+      "children"
+    ],
     "cantonCodes": [],
     "priority": 8,
     "isNew": true,
     "createdAt": "2023-10-14T10:00:00Z",
-    "lastUpdated": "2023-10-14T10:00:00Z"
+    "lastUpdated": "2023-10-14T10:00:00Z",
+    "source": "https://www.ch.ch/en/school-and-education/",
+    "sourceTitle": "ch.ch — School and education",
+    "verifiedAt": "2026-07-15T00:00:00Z"
   },
   {
     "id": "660e8400-e29b-41d4-a716-446655440006",
@@ -620,8 +857,15 @@
         "estimatedTime": "1 hour",
         "isOptional": false,
         "links": [],
-        "requiredDocuments": ["Valid residence permit", "Proof of income", "Adequate housing proof"],
-        "tips": ["Requirements vary by permit type", "Consult migration office"],
+        "requiredDocuments": [
+          "Valid residence permit",
+          "Proof of income",
+          "Adequate housing proof"
+        ],
+        "tips": [
+          "Requirements vary by permit type",
+          "Consult migration office"
+        ],
         "order": 1
       },
       {
@@ -631,8 +875,16 @@
         "estimatedTime": "1-2 weeks",
         "isOptional": false,
         "links": [],
-        "requiredDocuments": ["Marriage certificate", "Birth certificates", "Police clearance certificates", "Medical certificates"],
-        "tips": ["Get all documents officially translated", "Apostille may be required"],
+        "requiredDocuments": [
+          "Marriage certificate",
+          "Birth certificates",
+          "Police clearance certificates",
+          "Medical certificates"
+        ],
+        "tips": [
+          "Get all documents officially translated",
+          "Apostille may be required"
+        ],
         "order": 2
       },
       {
@@ -643,7 +895,10 @@
         "isOptional": false,
         "links": [],
         "requiredDocuments": [],
-        "tips": ["Keep copies of everything", "Get a receipt confirmation"],
+        "tips": [
+          "Keep copies of everything",
+          "Get a receipt confirmation"
+        ],
         "order": 3
       },
       {
@@ -654,16 +909,26 @@
         "isOptional": false,
         "links": [],
         "requiredDocuments": [],
-        "tips": ["Prepare accommodation", "Research schools if bringing children"],
+        "tips": [
+          "Prepare accommodation",
+          "Research schools if bringing children"
+        ],
         "order": 4
       }
     ],
-    "tags": ["family", "reunification", "migration"],
+    "tags": [
+      "family",
+      "reunification",
+      "migration"
+    ],
     "cantonCodes": [],
     "priority": 7,
     "isNew": false,
     "createdAt": "2023-09-25T10:00:00Z",
-    "lastUpdated": "2023-10-12T10:00:00Z"
+    "lastUpdated": "2023-10-12T10:00:00Z",
+    "source": "https://www.ch.ch/en/family-and-partnership/",
+    "sourceTitle": "ch.ch — Family and partnership",
+    "verifiedAt": "2026-07-15T00:00:00Z"
   },
   {
     "id": "660e8400-e29b-41d4-a716-446655440007",
@@ -681,7 +946,10 @@
         "isOptional": false,
         "links": [],
         "requiredDocuments": [],
-        "tips": ["Consider therapy, counseling, or psychiatric support", "Think about language preferences"],
+        "tips": [
+          "Consider therapy, counseling, or psychiatric support",
+          "Think about language preferences"
+        ],
         "order": 1
       },
       {
@@ -691,8 +959,13 @@
         "estimatedTime": "1 hour",
         "isOptional": true,
         "links": [],
-        "requiredDocuments": ["Insurance card"],
-        "tips": ["Some therapists don't require referrals", "Ask for recommendations"],
+        "requiredDocuments": [
+          "Insurance card"
+        ],
+        "tips": [
+          "Some therapists don't require referrals",
+          "Ask for recommendations"
+        ],
         "order": 2
       },
       {
@@ -703,7 +976,10 @@
         "isOptional": false,
         "links": [],
         "requiredDocuments": [],
-        "tips": ["Check if covered by insurance", "Look for trauma-specialized therapists if needed"],
+        "tips": [
+          "Check if covered by insurance",
+          "Look for trauma-specialized therapists if needed"
+        ],
         "order": 3
       },
       {
@@ -713,17 +989,30 @@
         "estimatedTime": "1 hour",
         "isOptional": false,
         "links": [],
-        "requiredDocuments": ["Insurance card", "Referral (if required)"],
-        "tips": ["Prepare questions about treatment approach", "Don't hesitate to try different therapists"],
+        "requiredDocuments": [
+          "Insurance card",
+          "Referral (if required)"
+        ],
+        "tips": [
+          "Prepare questions about treatment approach",
+          "Don't hesitate to try different therapists"
+        ],
         "order": 4
       }
     ],
-    "tags": ["healthcare", "mental-health", "therapy"],
+    "tags": [
+      "healthcare",
+      "mental-health",
+      "therapy"
+    ],
     "cantonCodes": [],
     "priority": 6,
     "isNew": true,
     "createdAt": "2023-10-14T10:00:00Z",
-    "lastUpdated": "2023-10-14T10:00:00Z"
+    "lastUpdated": "2023-10-14T10:00:00Z",
+    "source": "https://www.ch.ch/en/health/",
+    "sourceTitle": "ch.ch — Health",
+    "verifiedAt": "2026-07-15T00:00:00Z"
   },
   {
     "id": "660e8400-e29b-41d4-a716-446655440008",
@@ -741,7 +1030,10 @@
         "isOptional": false,
         "links": [],
         "requiredDocuments": [],
-        "tips": ["Read official government resources", "Attend information sessions"],
+        "tips": [
+          "Read official government resources",
+          "Attend information sessions"
+        ],
         "order": 1
       },
       {
@@ -752,7 +1044,10 @@
         "isOptional": false,
         "links": [],
         "requiredDocuments": [],
-        "tips": ["Many organizations offer free consultations", "Check cantonal legal aid services"],
+        "tips": [
+          "Many organizations offer free consultations",
+          "Check cantonal legal aid services"
+        ],
         "order": 2
       },
       {
@@ -763,16 +1058,26 @@
         "isOptional": false,
         "links": [],
         "requiredDocuments": [],
-        "tips": ["Save all official letters", "Take notes of verbal communications"],
+        "tips": [
+          "Save all official letters",
+          "Take notes of verbal communications"
+        ],
         "order": 3
       }
     ],
-    "tags": ["legal", "rights", "protection"],
+    "tags": [
+      "legal",
+      "rights",
+      "protection"
+    ],
     "cantonCodes": [],
     "priority": 6,
     "isNew": false,
     "createdAt": "2023-09-20T10:00:00Z",
-    "lastUpdated": "2023-10-08T10:00:00Z"
+    "lastUpdated": "2023-10-08T10:00:00Z",
+    "source": "https://www.ch.ch/en/safety-and-justice/",
+    "sourceTitle": "ch.ch — Safety and justice",
+    "verifiedAt": "2026-07-15T00:00:00Z"
   },
   {
     "id": "660e8400-e29b-41d4-a716-446655440009",
@@ -790,7 +1095,10 @@
         "isOptional": false,
         "links": [],
         "requiredDocuments": [],
-        "tips": ["Taxes vary significantly by canton", "Deductions can reduce tax burden"],
+        "tips": [
+          "Taxes vary significantly by canton",
+          "Deductions can reduce tax burden"
+        ],
         "order": 1
       },
       {
@@ -800,8 +1108,16 @@
         "estimatedTime": "3-4 hours",
         "isOptional": false,
         "links": [],
-        "requiredDocuments": ["Salary certificates", "Bank statements", "Insurance premium receipts", "Rental agreement"],
-        "tips": ["Keep organized records throughout the year", "Don't forget deduction receipts"],
+        "requiredDocuments": [
+          "Salary certificates",
+          "Bank statements",
+          "Insurance premium receipts",
+          "Rental agreement"
+        ],
+        "tips": [
+          "Keep organized records throughout the year",
+          "Don't forget deduction receipts"
+        ],
         "order": 2
       },
       {
@@ -812,7 +1128,10 @@
         "isOptional": false,
         "links": [],
         "requiredDocuments": [],
-        "tips": ["Use cantonal online tax software", "Consider hiring tax advisor for first year"],
+        "tips": [
+          "Use cantonal online tax software",
+          "Consider hiring tax advisor for first year"
+        ],
         "order": 3
       },
       {
@@ -823,15 +1142,25 @@
         "isOptional": false,
         "links": [],
         "requiredDocuments": [],
-        "tips": ["Request payment plan if needed", "Keep confirmation of submission"],
+        "tips": [
+          "Request payment plan if needed",
+          "Keep confirmation of submission"
+        ],
         "order": 4
       }
     ],
-    "tags": ["finance", "tax", "declaration"],
+    "tags": [
+      "finance",
+      "tax",
+      "declaration"
+    ],
     "cantonCodes": [],
     "priority": 5,
     "isNew": false,
     "createdAt": "2023-09-15T10:00:00Z",
-    "lastUpdated": "2023-10-01T10:00:00Z"
+    "lastUpdated": "2023-10-01T10:00:00Z",
+    "source": "https://www.ch.ch/en/taxes-and-finances/",
+    "sourceTitle": "ch.ch — Taxes and finances",
+    "verifiedAt": "2026-07-15T00:00:00Z"
   }
 ]

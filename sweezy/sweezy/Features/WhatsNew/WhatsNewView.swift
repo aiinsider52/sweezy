@@ -49,7 +49,7 @@ struct WhatsNewView: View {
                 }
                 .padding(.vertical, Theme.Spacing.xl)
             }
-            .background(Theme.Colors.primaryBackground)
+            .background(Color.clear)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -63,6 +63,7 @@ struct WhatsNewView: View {
                 }
             }
         }
+        .journeyScreen(.lake, darkness: 0.64)
     }
     
     private var headerSection: some View {
@@ -130,12 +131,7 @@ struct WhatsNewFeatureRow: View {
             Spacer(minLength: 0)
         }
         .padding(Theme.Spacing.md)
-        .background(Theme.Colors.adaptiveCard)
-        .overlay(
-            RoundedRectangle(cornerRadius: Theme.CornerRadius.md, style: .continuous)
-                .stroke(Theme.Colors.adaptiveBorder, lineWidth: 1)
-        )
-        .cornerRadius(Theme.CornerRadius.md)
+        .journeyCard(cornerRadius: Theme.CornerRadius.md)
     }
 }
 
@@ -223,6 +219,5 @@ extension View {
 #Preview {
     WhatsNewView()
 }
-
 
 

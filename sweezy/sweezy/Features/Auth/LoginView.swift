@@ -21,14 +21,7 @@ struct LoginView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Theme.Colors.darkBackground
-                    .ignoresSafeArea()
-
-                Color.black.opacity(0.18)
-                    .ignoresSafeArea()
-                
-                // Aurora background
-                AuthAuroraBackground()
+                JourneyPhotoBackground(imageName: JourneyBackdrop.alpine.rawValue, blurRadius: 6, darkness: 0.64)
                 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 28) {
@@ -60,6 +53,7 @@ struct LoginView: View {
                 }
             }
         }
+        .journeyScreen(.alpine, darkness: 0.64)
         .sheet(isPresented: $showReset) {
             PasswordResetSheet(initialEmail: email)
         }
@@ -445,6 +439,7 @@ struct LoginView: View {
             let tokens = try await APIClient.login(email: email, password: password)
             try KeychainStore.save(tokens.access_token, for: "access_token")
             try KeychainStore.save(tokens.refresh_token, for: "refresh_token")
+            try KeychainStore.save(tokens.user_id, for: "user_id")
             #if DEBUG
             if !UserDefaults.standard.bool(forKey: "didSyncToBackend") {
                 Task {
@@ -467,6 +462,7 @@ struct LoginView: View {
                 profile.email = email
                 appContainer.userProfile = profile
                 sessionManager.activateAuthenticatedSession(
+                    userID: tokens.user_id,
                     email: email,
                     name: profile.fullName.isEmpty ? nil : profile.fullName
                 )
@@ -479,6 +475,7 @@ struct LoginView: View {
                 profile.preferredLanguage = appContainer.currentLocale.identifier
                 appContainer.userProfile = profile
                 sessionManager.activateAuthenticatedSession(
+                    userID: tokens.user_id,
                     email: email,
                     name: profile.fullName
                 )
@@ -609,11 +606,7 @@ struct PasswordResetSheet: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Theme.Colors.darkBackground
-                    .ignoresSafeArea()
-                
-                // Animated aurora effect
-                AuthAuroraBackground()
+                JourneyPhotoBackground(imageName: JourneyBackdrop.lake.rawValue, blurRadius: 6, darkness: 0.66)
                 
                 VStack(spacing: 0) {
                     // Progress indicator
@@ -671,6 +664,7 @@ struct PasswordResetSheet: View {
                 }
             }
         }
+        .journeyScreen(.lake, darkness: 0.66)
     }
     
     // MARK: - Progress Indicator

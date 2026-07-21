@@ -24,7 +24,7 @@ struct ChipView: View {
                     .font(Theme.Typography.subheadline)
                     .fontWeight(.medium)
             }
-            .foregroundColor(isSelected ? .white : Theme.Colors.textPrimary)
+            .foregroundColor(isSelected ? Theme.Colors.textOnPrimary : Theme.Colors.textPrimary)
             .padding(.horizontal, Theme.Spacing.md)
             .padding(.vertical, Theme.Spacing.sm)
             .background(

@@ -31,13 +31,7 @@ struct AuthEntryView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Theme.Colors.darkBackground
-                    .ignoresSafeArea()
-
-                Color.black.opacity(0.18)
-                    .ignoresSafeArea()
-
-                AuthAuroraBackground()
+                JourneyPhotoBackground(imageName: JourneyBackdrop.city.rawValue, blurRadius: 5, darkness: 0.62)
 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 28) {
@@ -68,6 +62,7 @@ struct AuthEntryView: View {
                 }
             }
         }
+        .journeyScreen(.city, darkness: 0.62)
         .environment(\.locale, appContainer.currentLocale)
         .sheet(item: $activeDestination) { destination in
             switch destination {

@@ -10,6 +10,7 @@ from backend.app.core.database import SessionLocal
 from backend.app.models.user import User
 from backend.app.services.auth_email_codes import AuthEmailCodeService
 from backend.app.services.oauth_id_tokens import VerifiedOAuthIdentity
+from backend.app.services.users import UserService
 
 
 client = TestClient(app)
@@ -20,12 +21,16 @@ def _unique_email() -> str:
 
 
 def _admin_headers() -> dict[str, str]:
-    """
-    Create a short‑lived admin JWT for calling protected CRUD endpoints.
-    `get_current_admin` only checks the `is_admin` flag on the token, so we
-    don't need a persisted admin user for these tests.
-    """
-    token = create_access_token(subject="admin@test.local", is_admin=True, role="admin")
+    with SessionLocal() as db:
+        admin = UserService.create(
+            db,
+            email=_unique_email(),
+            password="StrongPass1!",
+            is_superuser=True,
+            role="admin",
+            email_verified=True,
+        )
+        token = create_access_token(subject=admin.id, is_admin=True, role="admin")
     return {"Authorization": f"Bearer {token}"}
 
 
@@ -256,12 +261,17 @@ def test_guides_crud_and_pagination():
         "content": "Longer markdown content",
         "category": "testing",
         "is_published": True,
+        "source_url": "https://www.ch.ch/en/",
+        "source_title": "ch.ch",
+        "verified_at": "2026-07-14T00:00:00Z",
     }
     res = client.post("/api/v1/guides/", json=payload, headers=headers)
     assert res.status_code == 200
     guide = res.json()
     guide_id = guide["id"]
     assert guide["slug"] == slug
+    assert guide["source_url"] == "https://www.ch.ch/en/"
+    assert guide["verified_at"].startswith("2026-07-14")
 
     # Fetch by id
     res = client.get(f"/api/v1/guides/{guide_id}")
@@ -297,5 +307,3 @@ def test_guides_crud_and_pagination():
     # Subsequent fetch should 404
     res = client.get(f"/api/v1/guides/{guide_id}")
     assert res.status_code == 404
-
-

@@ -128,8 +128,7 @@ struct JobsView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Theme.Colors.darkBackground
-                    .ignoresSafeArea()
+                JourneyPhotoBackground(imageName: JourneyBackdrop.city.rawValue, blurRadius: 7, darkness: 0.68)
                 
                 ScrollView(.vertical, showsIndicators: false) {
                     LazyVStack(spacing: 20) {
@@ -173,6 +172,7 @@ struct JobsView: View {
                 }
             }
         }
+        .journeyScreen(.city, darkness: 0.68)
         .onAppear {
             appContainer.telemetry.info("view_open", source: "jobs", message: "JobsView opened")
         }
@@ -221,6 +221,7 @@ struct JobsView: View {
         .task {
             if !didLoadScopedState {
                 loadScopedState()
+                applyJobsPresetIfNeeded()
                 didLoadScopedState = true
             }
             if !didSearchOnce {
@@ -467,7 +468,7 @@ struct JobsView: View {
                             .foregroundColor(Theme.Colors.primary)
                         Text("AI Результати")
                             .font(.headline)
-                            .foregroundColor(.white)
+                            .foregroundColor(Theme.Colors.textOnPrimary)
                     }
                 } else {
                     Text("Результати")
@@ -644,6 +645,17 @@ struct JobsView: View {
         return min(score, 100)
     }
     
+    private func applyJobsPresetIfNeeded() {
+        if let presetCanton = JobsSearchPreset.pendingCanton {
+            canton = presetCanton
+            JobsSearchPreset.pendingCanton = nil
+        }
+        if let presetCity = JobsSearchPreset.pendingCity {
+            selectedCity = presetCity
+            JobsSearchPreset.pendingCity = nil
+        }
+    }
+
     private func loadScopedState() {
         favoriteIds = Set(defaults.stringArray(forKey: favoriteIdsKey) ?? [])
         didSeeJobsOnboarding = defaults.bool(forKey: didSeeJobsOnboardingKey)
@@ -707,7 +719,7 @@ struct JobsView: View {
             // Persist preferences
             persistJobsScopedState()
             
-            appContainer.telemetry.info("jobs_search", source: "jobs", meta: [
+            appContainer.telemetry.retention(.jobSearchPerformed, source: "jobs", meta: [
                 "q": keyword, "canton": canton, "results": String(items.count)
             ])
         } catch {
@@ -999,6 +1011,7 @@ private struct AIMatchProfileSheet: View {
                 }
             }
         }
+        .journeyScreen(.city, darkness: 0.72)
     }
 }
 
@@ -1061,8 +1074,7 @@ private struct JobsOnboardingSheet: View {
     
     var body: some View {
         ZStack {
-            Theme.Colors.darkBackground
-                .ignoresSafeArea()
+            JourneyPhotoBackground(imageName: JourneyBackdrop.alpine.rawValue, blurRadius: 7, darkness: 0.7)
             
             VStack(spacing: 0) {
                 // Close button
@@ -1179,6 +1191,7 @@ private struct JobsOnboardingSheet: View {
                 .padding(.bottom, 32)
             }
         }
+        .journeyScreen(.alpine, darkness: 0.7)
         .onAppear {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                 withAnimation(.easeOut(duration: 0.5)) {
@@ -1654,7 +1667,7 @@ private struct JobDetailSheet: View {
                             .frame(maxWidth: .infinity)
                             .padding()
                             .background(Theme.Colors.primary)
-                            .foregroundColor(.white)
+                            .foregroundColor(Theme.Colors.textOnPrimary)
                             .cornerRadius(12)
                         }
                         
@@ -1683,6 +1696,7 @@ private struct JobDetailSheet: View {
                 }
             }
         }
+        .journeyScreen(.city, darkness: 0.72)
     }
 }
 
@@ -1723,6 +1737,7 @@ private struct DraftSheet: View {
                 }
             }
         }
+        .journeyScreen(.city, darkness: 0.74)
     }
 }
 

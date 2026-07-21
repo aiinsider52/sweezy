@@ -5,6 +5,7 @@
 //  Created by Vladyslav Katash on 14.10.2025.
 //
 
+import CryptoKit
 import Foundation
 import SwiftUI
 
@@ -28,6 +29,7 @@ struct Guide: Codable, Identifiable, Hashable {
     let language: String? // ISO 639-1 code (uk, ru, en, de)
     let verifiedAt: Date? // When content was last verified
     let source: String? // URL or authority reference
+    let sourceTitle: String? // Human-readable official authority/title
     let heroImage: String? // Hero image path
     let relatedChecklistId: String?
     let relatedTemplateIds: [String]
@@ -36,7 +38,7 @@ struct Guide: Codable, Identifiable, Hashable {
     private enum CodingKeys: String, CodingKey {
         case id, title, subtitle, summary, bodyMarkdown, tags, category, cantonCodes, links
         case priority, isNew, isPremium, estimatedReadingTime, lastUpdated, createdAt
-        case language, verifiedAt, source, heroImage
+        case language, verifiedAt, source, sourceTitle, heroImage
         case relatedChecklistId, relatedTemplateIds, relatedMarketplaceTags
     }
     
@@ -45,10 +47,11 @@ struct Guide: Codable, Identifiable, Hashable {
         // Lenient id decoding
         if let uuid = try? container.decode(UUID.self, forKey: .id) {
             self.id = uuid
-        } else if let idString = try? container.decode(String.self, forKey: .id), let uuid = UUID(uuidString: idString) {
-            self.id = uuid
+        } else if let idString = try? container.decode(String.self, forKey: .id) {
+            self.id = Self.stableUUID(from: idString)
         } else {
-            self.id = UUID()
+            let title = (try? container.decode(String.self, forKey: .title)) ?? "guide"
+            self.id = Self.stableUUID(from: title)
         }
         self.title = (try? container.decode(String.self, forKey: .title)) ?? ""
         self.subtitle = try? container.decode(String.self, forKey: .subtitle)
@@ -81,13 +84,25 @@ struct Guide: Codable, Identifiable, Hashable {
         }
         self.verifiedAt = try? container.decode(Date.self, forKey: .verifiedAt)
         self.source = try? container.decode(String.self, forKey: .source)
+        self.sourceTitle = try? container.decode(String.self, forKey: .sourceTitle)
         self.heroImage = try? container.decode(String.self, forKey: .heroImage)
         self.relatedChecklistId = try? container.decodeIfPresent(String.self, forKey: .relatedChecklistId)
         self.relatedTemplateIds = (try? container.decode([String].self, forKey: .relatedTemplateIds)) ?? []
         self.relatedMarketplaceTags = (try? container.decode([String].self, forKey: .relatedMarketplaceTags)) ?? []
     }
+
+    static func stableUUID(from raw: String) -> UUID {
+        if let uuid = UUID(uuidString: raw) { return uuid }
+        let bytes = Array(SHA256.hash(data: Data(raw.utf8)))
+        let tuple: uuid_t = (
+            bytes[0], bytes[1], bytes[2], bytes[3], bytes[4], bytes[5], bytes[6], bytes[7],
+            bytes[8], bytes[9], bytes[10], bytes[11], bytes[12], bytes[13], bytes[14], bytes[15]
+        )
+        return UUID(uuid: tuple)
+    }
     
     init(
+        id: UUID = UUID(),
         title: String,
         subtitle: String? = nil,
         summary: String? = nil,
@@ -103,12 +118,13 @@ struct Guide: Codable, Identifiable, Hashable {
         language: String? = nil,
         verifiedAt: Date? = nil,
         source: String? = nil,
+        sourceTitle: String? = nil,
         heroImage: String? = nil,
         relatedChecklistId: String? = nil,
         relatedTemplateIds: [String] = [],
         relatedMarketplaceTags: [String] = []
     ) {
-        self.id = UUID()
+        self.id = id
         self.title = title
         self.subtitle = subtitle
         self.summary = summary
@@ -126,6 +142,7 @@ struct Guide: Codable, Identifiable, Hashable {
         self.language = language
         self.verifiedAt = verifiedAt
         self.source = source
+        self.sourceTitle = sourceTitle
         self.heroImage = heroImage
         self.relatedChecklistId = relatedChecklistId
         self.relatedTemplateIds = relatedTemplateIds
@@ -326,4 +343,3 @@ struct GuideProgress: Codable {
         self.completedActions = []
     }
 }
-

@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from typing import Any, Dict, List
 import re
 import time
@@ -8,7 +6,6 @@ from urllib.parse import urlparse, urljoin
 
 from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import func, select
-from sqlalchemy.orm import Session
 
 from ..dependencies import DBSession, CurrentAdmin
 from ..models import User, Guide, Template, Checklist, Appointment
@@ -24,8 +21,7 @@ from ..services.brave_search_importer import BraveSearchImporter
 from ..models.subscription import Subscription, SubscriptionEvent
 from ..models.analytics import PaywallEvent
 from ..services import stripe_service
-from datetime import datetime, timedelta, timezone
-from sqlalchemy import func
+from datetime import timedelta, timezone
 import feedparser
 import httpx
 
@@ -389,10 +385,12 @@ def import_news_rss(payload: Dict[str, Any], db: DBSession, _: CurrentAdmin) -> 
             def meta(prop=None, name=None):
                 if prop:
                     m = _re.search(rf'<meta[^>]+property=["\']{_re.escape(prop)}["\'][^>]*content=["\']([^"\']+)["\']', html, flags=_re.I)
-                    if m: return m.group(1)
+                    if m:
+                        return m.group(1)
                 if name:
                     m = _re.search(rf'<meta[^>]+name=["\']{_re.escape(name)}["\'][^>]*content=["\']([^"\']+)["\']', html, flags=_re.I)
-                    if m: return m.group(1)
+                    if m:
+                        return m.group(1)
                 return None
             title = meta(prop="og:title") or meta(name="title")
             if not title:
@@ -435,9 +433,11 @@ def import_news_rss(payload: Dict[str, Any], db: DBSession, _: CurrentAdmin) -> 
             existing = db.query(News).filter(News.url == feed_url).first()
             from ..services.news_service import NewsService as _NS
             if existing:
-                _NS.update(db, existing, **data); updated += 1
+                _NS.update(db, existing, **data)
+                updated += 1
             else:
-                _NS.create(db, **data); created += 1
+                _NS.create(db, **data)
+                created += 1
         except Exception:
             skipped += 1
             client.close()
@@ -565,7 +565,8 @@ def create_rss_feed(payload: Dict[str, Any], db: DBSession, _: CurrentAdmin) -> 
         created_at=__import__("datetime").datetime.utcnow(),
         updated_at=__import__("datetime").datetime.utcnow(),
     )
-    db.add(r); db.commit()
+    db.add(r)
+    db.commit()
     return {"id": r.id}
 
 @router.delete("/rss-feeds/{feed_id}")
@@ -573,7 +574,8 @@ def delete_rss_feed(feed_id: str, db: DBSession, _: CurrentAdmin) -> Dict[str, A
     r = db.query(RSSFeed).filter(RSSFeed.id == feed_id).first()
     if not r:
         raise HTTPException(status_code=404, detail="Not found")
-    db.delete(r); db.commit()
+    db.delete(r)
+    db.commit()
     return {"ok": True}
 
 @router.post("/rss-feeds/{feed_id}/import")
@@ -591,11 +593,15 @@ def update_rss_feed(feed_id: str, payload: Dict[str, Any], db: DBSession, _: Cur
     for k in ["url","language","status"]:
         if k in payload and payload[k] is not None:
             setattr(r, k, payload[k])
-    if "enabled" in payload: r.enabled = bool(payload["enabled"])
-    if "max_items" in payload: r.max_items = int(payload["max_items"])
-    if "download_images" in payload: r.download_images = bool(payload["download_images"])
+    if "enabled" in payload:
+        r.enabled = bool(payload["enabled"])
+    if "max_items" in payload:
+        r.max_items = int(payload["max_items"])
+    if "download_images" in payload:
+        r.download_images = bool(payload["download_images"])
     r.updated_at = __import__("datetime").datetime.utcnow()
-    db.add(r); db.commit()
+    db.add(r)
+    db.commit()
     return {"ok": True}
 
 
@@ -746,5 +752,3 @@ def import_checklists(payload: Dict[str, Any], db: DBSession, _: CurrentAdmin) -
             continue
     db.commit()
     return {"created": created}
-
-

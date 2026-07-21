@@ -16,59 +16,55 @@ struct HeroListingCardView: View {
             ZStack(alignment: .bottomLeading) {
                 if !listing.resolvedImageURLs.isEmpty {
                     MarketplaceRemoteImageView(url: listing.primaryImageURL, height: 200, cornerRadius: 0)
-                } else {
+
+                    // Bottom-only scrim for text legibility
                     LinearGradient(
-                        colors: [
-                            listing.category.color.opacity(0.85),
-                            listing.category.color.opacity(0.45),
-                            Theme.Colors.adaptiveCard
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
+                        colors: [.clear, .clear, .black.opacity(0.62)],
+                        startPoint: .top,
+                        endPoint: .bottom
                     )
                     .frame(height: 200)
-                    .overlay(
-                        Image(systemName: listing.category.icon)
-                            .font(.system(size: 64, weight: .thin))
-                            .foregroundColor(.white.opacity(0.25))
-                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-                            .offset(x: 40)
-                    )
+                } else {
+                    // Calm pastel cover with a large translucent category icon
+                    ZStack {
+                        Rectangle()
+                            .fill(listing.categoryColor.opacity(0.12))
+                        Image(systemName: listing.categoryIcon)
+                            .font(.system(size: 64, weight: .light))
+                            .foregroundColor(listing.categoryColor.opacity(0.40))
+                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .trailing)
+                            .padding(.trailing, 28)
+                    }
+                    .frame(height: 200)
                 }
 
-                // Gradient overlay for text legibility
-                LinearGradient(
-                    colors: [.clear, .black.opacity(0.55)],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-                .frame(height: 200)
-
+                let hasPhoto = !listing.resolvedImageURLs.isEmpty
                 HStack(alignment: .bottom) {
                     VStack(alignment: .leading, spacing: 6) {
                         HStack(spacing: 6) {
-                            ListingBadgePill(text: listing.category.displayName, color: .white)
+                            HeroCoverBadge(text: listing.categoryDisplayName, onPhoto: hasPhoto)
+                            ForEach(Array(listing.trustBadges.enumerated()), id: \.offset) { _, badge in
+                                HeroCoverBadge(text: badge.text, onPhoto: hasPhoto)
+                            }
                             if isNew {
-                                ListingBadgePill(text: "Нове", color: Color.green)
+                                HeroCoverBadge(text: "Нове", onPhoto: hasPhoto)
                             }
                         }
                         Text(listing.title)
-                            .font(.system(size: 18, weight: .bold))
-                            .foregroundColor(.white)
+                            .font(.system(size: 18, weight: .bold, design: .rounded))
+                            .foregroundColor(hasPhoto ? .white : Theme.Colors.textPrimary)
                             .lineLimit(2)
-                            .shadow(color: .black.opacity(0.3), radius: 4)
                     }
                     Spacer()
-                    if let price = listing.priceInfo, !price.isEmpty {
+                    if let price = listing.priceDisplay, !price.isEmpty {
                         Text(price)
-                            .font(.system(size: 15, weight: .bold))
-                            .foregroundColor(.white)
+                            .font(.system(size: 14, weight: .bold, design: .rounded))
+                            .monospacedDigit()
+                            .foregroundColor(Theme.Colors.ink)
                             .padding(.horizontal, 12)
-                            .padding(.vertical, 6)
-                            .background(
-                                Capsule()
-                                    .fill(Theme.Colors.primary.opacity(0.9))
-                            )
+                            .padding(.vertical, 7)
+                            .background(Capsule().fill(.white))
+                            .shadow(color: .black.opacity(0.15), radius: 6, y: 2)
                     }
                 }
                 .padding(16)
@@ -78,17 +74,24 @@ struct HeroListingCardView: View {
             HStack(spacing: 12) {
                 ZStack {
                     Circle()
-                        .fill(listing.category.color.opacity(0.15))
+                        .fill(listing.categoryColor.opacity(0.14))
                         .frame(width: 36, height: 36)
-                    Image(systemName: listing.category.icon)
+                    Image(systemName: listing.categoryIcon)
                         .font(.system(size: 15, weight: .semibold))
-                        .foregroundColor(listing.category.color)
+                        .foregroundColor(listing.categoryColor)
                 }
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(listing.authorName)
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundColor(Theme.Colors.textPrimary)
+                    HStack(spacing: 5) {
+                        Text(listing.authorName)
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundColor(Theme.Colors.textPrimary)
+                        if listing.isVerified {
+                            Image(systemName: "checkmark.seal.fill")
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundColor(Theme.Colors.primary)
+                        }
+                    }
                     Text(listing.canton == "all" ? "Вся Швейцарія" : listing.canton)
                         .font(.system(size: 12))
                         .foregroundColor(Theme.Colors.textSecondary)
@@ -103,14 +106,34 @@ struct HeroListingCardView: View {
             .padding(.horizontal, 16)
             .padding(.vertical, 14)
         }
-        .background(Theme.Colors.adaptiveCard)
+        .background(.ultraThinMaterial.opacity(0.78))
+        .background(Color.black.opacity(0.34))
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .stroke(Theme.Colors.adaptiveBorder.opacity(0.4), lineWidth: 1)
+                .stroke(Color.white.opacity(0.22), lineWidth: 1)
         )
-        .shadow(color: listing.category.color.opacity(0.15), radius: 16, y: 6)
-        .shadow(color: .black.opacity(0.08), radius: 8, y: 4)
+        .shadow(color: .black.opacity(0.28), radius: 16, y: 7)
+    }
+}
+
+/// Small badge for hero covers: white pill on photos, tinted pill on pastel covers.
+private struct HeroCoverBadge: View {
+    let text: String
+    let onPhoto: Bool
+
+    var body: some View {
+        Text(text)
+            .font(.system(size: 11, weight: .semibold))
+            .foregroundColor(onPhoto ? Theme.Colors.ink : Theme.Colors.textPrimary)
+            .padding(.horizontal, 9)
+            .padding(.vertical, 4)
+            .background(
+                Capsule().fill(onPhoto ? Color.white.opacity(0.92) : Theme.Colors.paperCard)
+            )
+            .overlay(
+                Capsule().stroke(Theme.Colors.adaptiveBorder.opacity(onPhoto ? 0 : 1), lineWidth: 1)
+            )
     }
 }
 
@@ -126,62 +149,69 @@ struct CompactListingCardView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            // Colored top stripe
+            // Calm pastel header with a large translucent category icon
             ZStack(alignment: .topTrailing) {
-                LinearGradient(
-                    colors: [listing.category.color.opacity(0.7), listing.category.color.opacity(0.25)],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .frame(height: 72)
+                Rectangle()
+                    .fill(listing.categoryColor.opacity(0.12))
+                    .frame(height: 76)
 
-                Image(systemName: listing.category.icon)
-                    .font(.system(size: 32, weight: .thin))
-                    .foregroundColor(.white.opacity(0.35))
-                    .padding(10)
+                Image(systemName: listing.categoryIcon)
+                    .font(.system(size: 30, weight: .light))
+                    .foregroundColor(listing.categoryColor.opacity(0.50))
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
 
                 if isNew {
-                    Text("New")
+                    Text("Нове")
                         .font(.system(size: 9, weight: .bold))
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 6)
+                        .foregroundColor(Theme.Colors.primary)
+                        .padding(.horizontal, 7)
                         .padding(.vertical, 3)
-                        .background(Capsule().fill(Color.green))
+                        .background(Capsule().fill(Theme.Colors.primary.opacity(0.14)))
                         .padding(8)
                 }
             }
-            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .frame(height: 76)
 
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: 5) {
                 Text(listing.title)
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundColor(Theme.Colors.textPrimary)
                     .lineLimit(2)
 
-                if let price = listing.priceInfo, !price.isEmpty {
-                    Text(price)
-                        .font(.system(size: 13, weight: .bold))
-                        .foregroundColor(Theme.Colors.primary)
-                } else {
-                    Text(listing.category.displayName)
-                        .font(.system(size: 11))
-                        .foregroundColor(listing.category.color)
+                ForEach(Array(listing.trustBadges.prefix(1).enumerated()), id: \.offset) { _, badge in
+                    ListingBadgePill(text: badge.text, color: badge.color)
                 }
 
-                Text(listing.canton == "all" ? "🇨🇭" : listing.canton)
-                    .font(.system(size: 11))
-                    .foregroundColor(Theme.Colors.textTertiary)
+                if let price = listing.priceDisplay, !price.isEmpty {
+                    Text(price)
+                        .font(.system(size: 13, weight: .bold, design: .rounded))
+                        .monospacedDigit()
+                        .foregroundColor(Theme.Colors.primary)
+                } else {
+                    Text(listing.categoryDisplayName)
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundColor(listing.categoryColor.opacity(0.85))
+                }
+
+                HStack(spacing: 3) {
+                    Image(systemName: "mappin")
+                        .font(.system(size: 9))
+                    Text(listing.canton == "all" ? "CH" : listing.canton)
+                        .font(.system(size: 11, weight: .medium))
+                }
+                .foregroundColor(Theme.Colors.textTertiary)
             }
             .padding(.horizontal, 10)
             .padding(.bottom, 12)
         }
-        .background(Theme.Colors.adaptiveCard)
+        .background(.ultraThinMaterial.opacity(0.78))
+        .background(Color.black.opacity(0.34))
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .stroke(Theme.Colors.adaptiveBorder.opacity(0.45), lineWidth: 1)
+                .stroke(Color.white.opacity(0.22), lineWidth: 1)
         )
-        .shadow(color: .black.opacity(0.05), radius: 6, y: 3)
+        .shadow(color: .black.opacity(0.26), radius: 14, y: 6)
     }
 }
 
@@ -204,25 +234,20 @@ struct ListingCardView: View {
                         MarketplaceRoundedCornerShape(corners: [.topLeft, .topRight], radius: 16)
                     )
             } else {
-                ZStack(alignment: .trailing) {
-                    LinearGradient(
-                        colors: [listing.category.color.opacity(0.6), listing.category.color.opacity(0.18)],
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    )
-                    .frame(height: 6)
-                }
+                Rectangle()
+                    .fill(listing.categoryColor.opacity(0.30))
+                    .frame(height: 4)
             }
 
             VStack(alignment: .leading, spacing: 10) {
                 HStack(alignment: .top, spacing: 10) {
                     ZStack {
                         RoundedRectangle(cornerRadius: 12, style: .continuous)
-                            .fill(listing.category.color.opacity(0.14))
+                            .fill(listing.categoryColor.opacity(0.14))
                             .frame(width: 42, height: 42)
-                        Image(systemName: listing.category.icon)
+                        Image(systemName: listing.categoryIcon)
                             .font(.system(size: 17, weight: .semibold))
-                            .foregroundColor(listing.category.color)
+                            .foregroundColor(listing.categoryColor)
                     }
 
                     VStack(alignment: .leading, spacing: 4) {
@@ -232,7 +257,10 @@ struct ListingCardView: View {
                             .lineLimit(2)
 
                         HStack(spacing: 5) {
-                            ListingBadgePill(text: listing.category.displayName, color: listing.category.color)
+                            ForEach(Array(listing.trustBadges.enumerated()), id: \.offset) { _, badge in
+                                ListingBadgePill(text: badge.text, color: badge.color)
+                            }
+                            ListingBadgePill(text: listing.categoryDisplayName, color: listing.categoryColor)
                             ListingBadgePill(text: listing.canton == "all" ? "🇨🇭" : listing.canton, color: .orange)
                             if isNew {
                                 ListingBadgePill(text: "Нове", color: .green)
@@ -243,7 +271,7 @@ struct ListingCardView: View {
                 }
 
                 HStack {
-                    if let price = listing.priceInfo, !price.isEmpty {
+                    if let price = listing.priceDisplay, !price.isEmpty {
                         Text(price)
                             .font(.system(size: 15, weight: .bold))
                             .foregroundColor(Theme.Colors.primary)
@@ -270,18 +298,14 @@ struct ListingCardView: View {
             }
             .padding(14)
         }
-        .background(Theme.Colors.adaptiveCard)
+        .background(.ultraThinMaterial.opacity(0.78))
+        .background(Color.black.opacity(0.34))
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .stroke(
-                    listing.resolvedImageURLs.isEmpty
-                        ? listing.category.color.opacity(0.25)
-                        : Theme.Colors.adaptiveBorder.opacity(0.5),
-                    lineWidth: 1
-                )
+                .stroke(Color.white.opacity(0.22), lineWidth: 1)
         )
-        .shadow(color: .black.opacity(0.06), radius: 8, y: 4)
+        .shadow(color: .black.opacity(0.26), radius: 14, y: 6)
     }
 }
 

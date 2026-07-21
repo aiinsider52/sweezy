@@ -63,7 +63,7 @@ struct GuidesView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                AdaptivePageBackground()
+                JourneyPhotoBackground(imageName: JourneyBackdrop.alpine.rawValue, blurRadius: 7, darkness: 0.66)
                 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: Theme.Spacing.xl) {
@@ -101,6 +101,7 @@ struct GuidesView: View {
                 haptic(.light)
             }
         }
+        .journeyScreen(.alpine, darkness: 0.66)
     }
     
     // MARK: - Search Bar
@@ -622,6 +623,10 @@ struct GuideDetailView: View {
     }
     
     var body: some View {
+        JourneyGuideArticleView(guide: guide)
+    }
+
+    private var legacyBody: some View {
         ZStack(alignment: .top) {
             // Reading progress bar
             GeometryReader { geo in
@@ -701,10 +706,8 @@ struct GuideDetailView: View {
                 }
             }
         }
-        .background(
-            Theme.Colors.primaryBackground
-                .ignoresSafeArea()
-        )
+        .background(Color.clear)
+        .journeyScreen(.alpine, darkness: 0.7)
         .sheet(isPresented: $showShareSheet) {
             GuidesShareSheet(items: [guide.title, guide.bodyMarkdown])
         }
@@ -871,14 +874,42 @@ struct GuideDetailView: View {
     }
 
     private var trustSignalRow: some View {
-        HStack(spacing: 6) {
-            Image(systemName: "checkmark.circle.fill")
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundColor(Theme.Colors.primary)
+        Group {
+            if let sourceURL = trustSourceURL {
+                Link(destination: sourceURL) {
+                    HStack(spacing: 7) {
+                        trustSignalContent
+                        Spacer()
+                        Image(systemName: "arrow.up.right")
+                            .font(.system(size: 10, weight: .bold))
+                            .foregroundColor(Theme.Colors.primary)
+                    }
+                }
+                .buttonStyle(.plain)
+            } else {
+                HStack(spacing: 7) {
+                    trustSignalContent
+                    Spacer()
+                    Text("Джерело потребує перевірки")
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundColor(.orange)
+                }
+            }
+        }
+        .padding(12)
+        .background(Theme.Colors.adaptiveCard.opacity(0.72))
+        .clipShape(RoundedRectangle(cornerRadius: 13, style: .continuous))
+    }
 
+    private var trustSignalContent: some View {
+        HStack(spacing: 6) {
+            Image(systemName: trustSourceURL == nil ? "exclamationmark.shield.fill" : "checkmark.seal.fill")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundColor(trustSourceURL == nil ? .orange : Theme.Colors.primary)
             Text(trustSignalText)
                 .font(.system(size: 12, weight: .medium))
                 .foregroundColor(Theme.Colors.textTertiary)
+                .lineLimit(2)
         }
     }
 
@@ -888,6 +919,18 @@ struct GuideDetailView: View {
             return verified
         }
         return "\(verified) · \(source)"
+    }
+
+    private var trustSourceURL: URL? {
+        if let source = guide.source?.trimmingCharacters(in: .whitespacesAndNewlines),
+           let url = URL(string: source),
+           ["http", "https"].contains(url.scheme?.lowercased() ?? "") {
+            return url
+        }
+        return guide.links.compactMap(\.asURL).first { url in
+            guard let host = url.host?.lowercased() else { return false }
+            return host.hasSuffix("admin.ch") || host.hasSuffix("ch.ch") || host.hasSuffix("zh.ch") || host.hasSuffix("vd.ch") || host.hasSuffix("ge.ch")
+        }
     }
 
     private var nextStepsSection: some View {
@@ -1644,4 +1687,3 @@ struct GuidesShareSheet: UIViewControllerRepresentable {
         .environmentObject(AppContainer())
         .environmentObject(AppLockManager())
 }
-

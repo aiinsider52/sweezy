@@ -92,8 +92,7 @@ struct CVBuilderView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Theme.Colors.darkBackground
-                    .ignoresSafeArea()
+                JourneyPhotoBackground(imageName: JourneyBackdrop.alpine.rawValue, blurRadius: 7, darkness: 0.68)
                 
                 VStack(spacing: 0) {
                     // Progress indicator
@@ -139,6 +138,7 @@ struct CVBuilderView: View {
                 // TEMPORARY: no subscription/entitlement refresh in this build.
             }
         }
+        .journeyScreen(.alpine, darkness: 0.68)
     }
     
     // MARK: - Progress Bar
@@ -353,7 +353,7 @@ struct CVBuilderView: View {
                             set: { cv.skills = $0.components(separatedBy: ", ").map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty } }
                         ))
                         .font(.subheadline)
-                        .foregroundColor(.white)
+                        .foregroundColor(Theme.Colors.textOnPrimary)
                         .padding(12)
                         .background(Color.white.opacity(0.05))
                         .cornerRadius(12)
@@ -455,7 +455,7 @@ struct CVBuilderView: View {
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 14)
                         .background(Theme.Colors.primary)
-                        .foregroundColor(.white)
+                        .foregroundColor(Theme.Colors.textOnPrimary)
                         .cornerRadius(14)
                     }
                     
@@ -828,7 +828,7 @@ struct CVBuilderView: View {
                 }
                 .padding(20)
             }
-            .background(Theme.Colors.darkBackground.ignoresSafeArea())
+            .background(Color.clear)
             .navigationTitle("Швейцарські стандарти CV")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -838,6 +838,7 @@ struct CVBuilderView: View {
                 }
             }
         }
+        .journeyScreen(.alpine, darkness: 0.72)
     }
     
     private func tipItem(icon: String, title: String, text: String) -> some View {
@@ -869,37 +870,29 @@ struct CVBuilderView: View {
         isTranslating = true
         translationError = nil
         
-        do {
-            // Use backend AI / deterministic translation via API
-            // For now we generate a DE-style version of the summary and experience text using the same CV payload.
-            // If backend translation is not available, we gracefully fall back to original content.
-            var translated = cv
-            
-            // Translate summary by asking backend to re-generate it in German (if possible)
-            if !cv.personal.summary.isEmpty {
-                if let deSummary = try? await APIClient.generateCVText(resume: cv, target: .summary) {
-                    translated.personal.summary = deSummary
-                }
+        // Use backend AI / deterministic translation via API.
+        // If backend translation is not available, we gracefully fall back to original content.
+        var translated = cv
+
+        // Translate summary by asking backend to re-generate it in German (if possible)
+        if !cv.personal.summary.isEmpty {
+            if let deSummary = try? await APIClient.generateCVText(resume: cv, target: .summary) {
+                translated.personal.summary = deSummary
             }
-            
-            // Experience: reuse backend generator per experience entry when possible
-            for i in cv.experience.indices {
-                let exp = cv.experience[i]
-                guard !exp.achievements.isEmpty else { continue }
-                if let text = try? await APIClient.generateCVText(resume: cv, target: .experience(id: exp.id)) {
-                    translated.experience[i].achievements = text
-                }
+        }
+
+        // Experience: reuse backend generator per experience entry when possible
+        for i in cv.experience.indices {
+            let exp = cv.experience[i]
+            guard !exp.achievements.isEmpty else { continue }
+            if let text = try? await APIClient.generateCVText(resume: cv, target: .experience(id: exp.id)) {
+                translated.experience[i].achievements = text
             }
-            
-            await MainActor.run {
-                germanCV = translated
-                isTranslating = false
-            }
-        } catch {
-            await MainActor.run {
-                translationError = "Помилка перекладу. Спробуйте пізніше."
-                isTranslating = false
-            }
+        }
+
+        await MainActor.run {
+            germanCV = translated
+            isTranslating = false
         }
     }
     

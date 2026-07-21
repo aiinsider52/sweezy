@@ -35,6 +35,7 @@ struct SettingsView: View {
     @State private var deleteAccountError: String? = nil
     @State private var biometricsMessage: String? = nil
     @State private var exportDocument = SweezyBackupDocument(data: Data())
+    @State private var analyticsEnabled = AnalyticsConsentStore.isGranted
     
     // Lightweight live gamification mirrors
     @State private var liveXP: Int = 0
@@ -43,14 +44,19 @@ struct SettingsView: View {
     
     var body: some View {
         NavigationStack {
-            ScrollView {
+            ZStack {
+                JourneyPhotoBackground(imageName: "cityhub-zurich-oldtown", blurRadius: 3, darkness: 0.66)
+
+                ScrollView(showsIndicators: false) {
                 VStack(spacing: Theme.Spacing.xl) {
+                    settingsHero
+
                     // Profile card
                     profileCard
                     
                     // Gamification panel
                     gamificationPanel
-                    
+
                     // Language & Privacy - Winter styled
                     VStack(alignment: .leading, spacing: Theme.Spacing.md) {
                         WinterSectionHeader(title: "Налаштування")
@@ -61,13 +67,37 @@ struct SettingsView: View {
                         winterSettingsRow(icon: "hand.raised.fill", title: "privacy.title".localized) {
                             showingPrivacy = true
                         }
+                        WinterSettingsCard {
+                            HStack(spacing: Theme.Spacing.md) {
+                                Image(systemName: "chart.bar.xaxis")
+                                    .font(.system(size: 20, weight: .semibold))
+                                    .foregroundColor(Theme.Colors.primary)
+                                    .frame(width: 24)
+                                VStack(alignment: .leading, spacing: 3) {
+                                    Text("Допомагати покращувати Sweezy")
+                                        .font(Theme.Typography.body)
+                                        .foregroundColor(Theme.Colors.textPrimary)
+                                    Text("Анонімні події активації та повернення")
+                                        .font(Theme.Typography.caption)
+                                        .foregroundColor(Theme.Colors.textSecondary)
+                                }
+                                Spacer()
+                                Toggle("", isOn: $analyticsEnabled)
+                                    .labelsHidden()
+                                    .tint(Theme.Colors.primary)
+                                    .onChange(of: analyticsEnabled) { _, enabled in
+                                        appContainer.analytics.setEnabled(enabled)
+                                        appContainer.telemetry.consentDidChange()
+                                    }
+                            }
+                        }
                         // Biometrics - Winter styled
                         WinterSettingsCard {
                             VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
                                 HStack(spacing: Theme.Spacing.md) {
                                     Image(systemName: lockManager.biometryDisplayName == "Face ID" ? "faceid" : "touchid")
                                         .font(.system(size: 20, weight: .semibold))
-                                        .foregroundColor(lockManager.isBiometryAvailable ? .cyan : .gray)
+                                        .foregroundColor(lockManager.isBiometryAvailable ? Theme.Colors.primary : .gray)
                                         .frame(width: 24)
                                     Toggle("Use \(lockManager.biometryDisplayName)", isOn: Binding(
                                         get: { lockManager.biometricsEnabled },
@@ -82,7 +112,7 @@ struct SettingsView: View {
                                             }
                                         }
                                     ))
-                                    .tint(.cyan)
+                                    .tint(Theme.Colors.primary)
                                     .disabled(!lockManager.isBiometryAvailable)
                                 }
                                 
@@ -135,9 +165,8 @@ struct SettingsView: View {
                 }
                 .padding(Theme.Spacing.lg)
             }
-            .background(AdaptivePageBackground())
-            .navigationTitle("settings.title".localized)
-            .navigationBarTitleDisplayMode(.large)
+            }
+            .navigationBarHidden(true)
             .featureOnboarding(.settings)
         }
         .onAppear {
@@ -299,6 +328,54 @@ struct SettingsView: View {
 // MARK: - Sections
 
 private extension SettingsView {
+    var settingsHero: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text("НАЛАШТУВАННЯ")
+                .font(.system(size: 10, weight: .bold, design: .rounded))
+                .tracking(1.4)
+                .foregroundColor(.white.opacity(0.62))
+
+            HStack(alignment: .bottom) {
+                VStack(alignment: .leading, spacing: -2) {
+                    Text("Привіт, \(profileName)")
+                    Text("твоя ситуація\nу Швейцарії")
+                }
+                .font(.system(size: 31, weight: .bold, design: .rounded))
+                .foregroundColor(.white)
+
+                Spacer()
+
+                Text("\(profileCompletion)%")
+                    .font(.system(size: 28, weight: .bold, design: .rounded))
+                    .foregroundColor(JourneyVisual.lime)
+            }
+
+            GeometryReader { geometry in
+                ZStack(alignment: .leading) {
+                    Capsule().fill(Color.white.opacity(0.18))
+                    Capsule()
+                        .fill(JourneyVisual.lime)
+                        .frame(width: geometry.size.width * CGFloat(profileCompletion) / 100)
+                }
+            }
+            .frame(height: 7)
+        }
+        .padding(.top, 12)
+        .shadow(color: .black.opacity(0.28), radius: 9, y: 4)
+    }
+
+    var profileCompletion: Int {
+        guard let profile = appContainer.userProfile else { return 20 }
+        var completed = 4
+        if !profile.fullName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { completed += 1 }
+        if profile.arrivalDate != nil { completed += 1 }
+        if !profile.goals.isEmpty { completed += 1 }
+        if profile.address != nil { completed += 1 }
+        if !(profile.phoneNumber?.isEmpty ?? true) { completed += 1 }
+        if !(profile.email?.isEmpty ?? true) { completed += 1 }
+        return min(100, completed * 10)
+    }
+
     var gamificationPanel: some View {
         let baseXP = appContainer.gamification.totalXP
         let currentXPValue = (liveXP == 0 ? baseXP : liveXP)
@@ -324,7 +401,7 @@ private extension SettingsView {
         HStack(spacing: 8) {
             Image(systemName: icon)
                 .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(.cyan)
+                .foregroundColor(Theme.Colors.primary)
             Text(text)
                 .font(Theme.Typography.caption)
                 .foregroundColor(Theme.Colors.textSecondary)
@@ -351,13 +428,12 @@ private extension SettingsView {
             }
         } label: {
             HStack(spacing: 16) {
-                // Avatar with gradient ring - always winter styled
+                // Avatar with summer-green gradient ring
                 ZStack {
-                    // Outer glow - cyan
                     Circle()
                         .fill(
                             RadialGradient(
-                                colors: [Color.cyan.opacity(0.5), Color.clear],
+                                colors: [Theme.Colors.primaryLight.opacity(0.45), Color.clear],
                                 center: .center,
                                 startRadius: 25,
                                 endRadius: 45
@@ -365,11 +441,10 @@ private extension SettingsView {
                         )
                         .frame(width: 80, height: 80)
                     
-                    // Gradient border ring
                     Circle()
                         .stroke(
                             LinearGradient(
-                                colors: [Color.cyan, Color.white.opacity(0.8), Color.cyan],
+                                colors: [Theme.Colors.primaryLight, Color.white.opacity(0.85), Theme.Colors.primary],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             ),
@@ -377,26 +452,19 @@ private extension SettingsView {
                         )
                         .frame(width: 68, height: 68)
                     
-                    // Avatar background
                     Circle()
                         .fill(
                             LinearGradient(
-                                colors: [Color.cyan, Color.blue.opacity(0.8)],
+                                colors: [Theme.Colors.primaryLight, Theme.Colors.primary],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             )
                         )
                         .frame(width: 60, height: 60)
                     
-                    // Initials
                     Text(profileInitials)
                         .font(.system(size: 22, weight: .bold, design: .rounded))
                         .foregroundColor(.white)
-                    
-                    // Winter snowflake decoration
-                    Text("❄️")
-                        .font(.system(size: 14))
-                        .offset(x: 25, y: -25)
                 }
                 
                 // Info
@@ -433,7 +501,7 @@ private extension SettingsView {
                         .fill(Theme.Colors.adaptiveSurface)
                         .frame(width: 36, height: 36)
                     Circle()
-                        .stroke(Color.cyan.opacity(0.3), lineWidth: 1)
+                        .stroke(Theme.Colors.primary.opacity(0.3), lineWidth: 1)
                         .frame(width: 36, height: 36)
                     Image(systemName: "chevron.right")
                         .font(.system(size: 14, weight: .semibold))
@@ -447,7 +515,7 @@ private extension SettingsView {
                 RoundedRectangle(cornerRadius: 20, style: .continuous)
                     .stroke(
                         LinearGradient(
-                            colors: [Color.cyan.opacity(0.4), Theme.Colors.adaptiveSurface],
+                            colors: [Theme.Colors.primary.opacity(0.35), Theme.Colors.adaptiveSurface],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         ),
@@ -477,7 +545,7 @@ private extension SettingsView {
                 HStack(spacing: Theme.Spacing.md) {
                     Image(systemName: "paintbrush.pointed.fill")
                         .font(.system(size: 20, weight: .semibold))
-                        .foregroundColor(.cyan)
+                        .foregroundColor(Theme.Colors.primary)
                         .frame(width: 24)
                     VStack(alignment: .leading, spacing: 3) {
                         Text("settings.theme.title".localized)
@@ -539,7 +607,7 @@ private extension SettingsView {
                 HStack(spacing: Theme.Spacing.md) {
                     Image(systemName: icon)
                         .font(.system(size: 20, weight: .semibold))
-                        .foregroundColor(tinted ?? .cyan)
+                        .foregroundColor(tinted ?? Theme.Colors.primary)
                         .frame(width: 24)
                     Text(title)
                         .font(Theme.Typography.body)
@@ -564,7 +632,7 @@ private extension SettingsView {
                 HStack(spacing: Theme.Spacing.md) {
                     Image(systemName: icon)
                         .font(.system(size: 20, weight: .semibold))
-                        .foregroundColor(tinted ?? .cyan)
+                        .foregroundColor(tinted ?? Theme.Colors.primary)
                         .frame(width: 24)
                     Text(title)
                         .font(Theme.Typography.body)
@@ -900,6 +968,7 @@ struct LanguageSelectionSheet: View {
                     .buttonStyle(PlainButtonStyle())
                 }
             }
+            .journeyForm()
             .navigationTitle("settings.language".localized)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -908,6 +977,7 @@ struct LanguageSelectionSheet: View {
                 }
             }
         }
+        .journeyScreen(.city, darkness: 0.7)
     }
 }
 
@@ -1010,8 +1080,7 @@ struct ProfileEditView: View {
             if sessionManager.isAuthenticated {
                 NavigationStack {
                     ZStack {
-                        winterScreenBackground
-                        .ignoresSafeArea()
+                        JourneyPhotoBackground(imageName: JourneyBackdrop.zurich.rawValue, blurRadius: 7, darkness: 0.7)
                         
                         ScrollView(showsIndicators: false) {
                             VStack(spacing: 20) {
@@ -1046,6 +1115,7 @@ struct ProfileEditView: View {
                     }
                     .safeAreaInset(edge: .bottom) { winterSaveButton }
                 }
+                .journeyScreen(.zurich, darkness: 0.7)
                 .onAppear { loadCurrentProfile() }
                 .onChange(of: fullName) { _, _ in hasChanges = true }
                 .onChange(of: email) { _, _ in hasChanges = true }
@@ -1075,7 +1145,7 @@ struct ProfileEditView: View {
     private var guestGateContent: some View {
         NavigationStack {
             ZStack {
-                AdaptivePageBackground()
+                JourneyPhotoBackground(imageName: JourneyBackdrop.zurich.rawValue, blurRadius: 7, darkness: 0.72)
                 
                 VStack(spacing: 12) {
                     Image(systemName: "lock.fill")
@@ -1125,6 +1195,7 @@ struct ProfileEditView: View {
                 )
                 .padding(.horizontal, 20)
             }
+            .journeyScreen(.zurich, darkness: 0.72)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
@@ -1771,7 +1842,7 @@ private struct WinterQuickStat: View {
         HStack(spacing: 4) {
             Image(systemName: icon)
                 .font(.system(size: 10, weight: .semibold))
-                .foregroundColor(.cyan)
+                .foregroundColor(Theme.Colors.primary)
             Text(value)
                 .font(.system(size: 12, weight: .bold))
                 .foregroundColor(colorScheme == .dark ? .white : Theme.Colors.textPrimary)
@@ -1785,7 +1856,7 @@ private struct WinterQuickStat: View {
         .cornerRadius(8)
         .overlay(
             RoundedRectangle(cornerRadius: 8)
-                .stroke(Color.cyan.opacity(0.2), lineWidth: 1)
+                .stroke(Theme.Colors.primary.opacity(0.2), lineWidth: 1)
         )
     }
 }
@@ -2155,8 +2226,7 @@ private extension Canton {
 struct AboutView: View {
     var body: some View {
         ZStack {
-            Theme.Colors.primaryBackground
-                .ignoresSafeArea()
+            JourneyPhotoBackground(imageName: JourneyBackdrop.city.rawValue, blurRadius: 7, darkness: 0.72)
             
             ScrollView {
                 VStack(alignment: .leading, spacing: Theme.Spacing.lg) {
@@ -2255,6 +2325,7 @@ struct AboutView: View {
         }
         .navigationTitle("settings.about".localized)
         .navigationBarTitleDisplayMode(.inline)
+        .journeyScreen(.city, darkness: 0.72)
     }
 }
 
@@ -2467,7 +2538,7 @@ private struct ThemeSelectionButton: View {
                         isSelected
                             ? AnyShapeStyle(
                                 LinearGradient(
-                                    colors: [Color.cyan, Theme.Colors.primary],
+                                    colors: [Theme.Colors.primaryLight, Theme.Colors.primary],
                                     startPoint: .topLeading,
                                     endPoint: .bottomTrailing
                                 )
@@ -2478,11 +2549,11 @@ private struct ThemeSelectionButton: View {
             .overlay(
                 RoundedRectangle(cornerRadius: 14, style: .continuous)
                     .stroke(
-                        isSelected ? Color.cyan.opacity(0.45) : Theme.Colors.adaptiveBorder.opacity(0.55),
+                        isSelected ? Theme.Colors.primary.opacity(0.45) : Theme.Colors.adaptiveBorder.opacity(0.55),
                         lineWidth: 1
                     )
             )
-            .shadow(color: isSelected ? Color.cyan.opacity(0.18) : .clear, radius: 10, y: 4)
+            .shadow(color: isSelected ? Theme.Colors.primary.opacity(0.18) : .clear, radius: 10, y: 4)
         }
         .buttonStyle(.plain)
     }
@@ -2505,7 +2576,7 @@ private struct WinterSettingsCard<Content: View>: View {
                 RoundedRectangle(cornerRadius: 16)
                     .stroke(
                         LinearGradient(
-                            colors: [Color.cyan.opacity(0.3), Theme.Colors.adaptiveSurface],
+                            colors: [Theme.Colors.primary.opacity(0.3), Theme.Colors.adaptiveSurface],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         ),
@@ -2527,11 +2598,10 @@ private struct WinterSectionHeader: View {
             
             Spacer()
             
-            // Winter decoration line
             Rectangle()
                 .fill(
                     LinearGradient(
-                        colors: [Color.cyan, Color.cyan.opacity(0.3)],
+                        colors: [Theme.Colors.primary, Theme.Colors.primary.opacity(0.3)],
                         startPoint: .leading,
                         endPoint: .trailing
                     )
@@ -2542,4 +2612,3 @@ private struct WinterSectionHeader: View {
         .padding(.top, 8)
     }
 }
-

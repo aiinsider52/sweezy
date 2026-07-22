@@ -61,4 +61,5 @@ def run_readiness_checks() -> dict[str, str]:
         "migrations": database_readiness(),
         "redis": redis_readiness(),
         "apns": "configured" if settings.PUSH_NOTIFICATIONS_ENABLED else "disabled",
+        "email": "configured" if settings.RESEND_API_KEY and settings.RESEND_FROM_EMAIL else "disabled",
     }

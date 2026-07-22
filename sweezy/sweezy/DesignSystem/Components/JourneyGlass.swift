@@ -186,6 +186,10 @@ struct JourneyBottomBar: View {
                     .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel(item.1)
+                .accessibilityValue(selection == index ? "Вибрано" : "")
+                .accessibilityAddTraits(selection == index ? [.isSelected] : [])
+                .accessibilityIdentifier("tab.\(tabIdentifier(for: index))")
             }
         }
         .padding(.horizontal, 8)
@@ -203,6 +207,10 @@ struct JourneyBottomBar: View {
     private func iconName(for index: Int, baseName: String) -> String {
         guard selection == index else { return baseName }
         return index == 2 ? "mappin.and.ellipse" : "\(baseName).fill"
+    }
+
+    private func tabIdentifier(for index: Int) -> String {
+        ["home", "directory", "map", "marketplace", "settings"][index]
     }
 }
 

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
@@ -33,7 +33,7 @@ from ..schemas.auth import (
 from ..schemas.user import UserCreate, UserLogin, UserOut
 from ..services import AuthService
 from ..services.auth_email_codes import AuthEmailCodeService
-from ..services.email import send_password_reset_code_email, send_verification_code_email
+from ..services.email import EmailDeliveryError, send_password_reset_code_email, send_verification_code_email
 from ..services.oauth_id_tokens import OAuthIDTokenService, OAuthIdentityError, VerifiedOAuthIdentity
 from ..services.users import UserService, seed_admin_user
 
@@ -44,6 +44,16 @@ OTP_TTL_MINUTES = 15
 
 class RefreshTokenRequest(BaseModel):
     refresh_token: str = Field(..., min_length=10)
+
+
+def _send_verification_email(email: str, code: str) -> None:
+    try:
+        send_verification_code_email(email, code, OTP_TTL_MINUTES)
+    except EmailDeliveryError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Verification email is temporarily unavailable",
+        ) from exc
 
 
 def _issue_token_pair(user: User) -> TokenPair:
@@ -169,7 +179,6 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
 @router.post("/register", response_model=AuthStatus, status_code=status.HTTP_201_CREATED)
 def register(
     user_in: UserCreate,
-    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
 ) -> AuthStatus:
     existing_user = UserService.get_by_email(db, user_in.email)
@@ -182,7 +191,7 @@ def register(
             purpose=AuthEmailCodeService.VERIFY_EMAIL,
             ttl_minutes=OTP_TTL_MINUTES,
         )
-        background_tasks.add_task(send_verification_code_email, existing_user.email, code, OTP_TTL_MINUTES)
+        _send_verification_email(existing_user.email, code)
         return AuthStatus(status="verification_required", email=existing_user.email, message="Verification code sent")
 
     user = UserService.create(db, email=user_in.email, password=user_in.password, email_verified=False)
@@ -192,7 +201,7 @@ def register(
         purpose=AuthEmailCodeService.VERIFY_EMAIL,
         ttl_minutes=OTP_TTL_MINUTES,
     )
-    background_tasks.add_task(send_verification_code_email, user.email, code, OTP_TTL_MINUTES)
+    _send_verification_email(user.email, code)
     return AuthStatus(status="verification_required", email=user.email, message="Verification code sent")
 
 
@@ -308,7 +317,6 @@ def refresh_access_token(payload: RefreshTokenRequest, db: Session = Depends(get
 def request_email_verification(
     request: Request,
     payload: EmailCodeRequest,
-    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
 ) -> AuthStatus:
     user = UserService.get_by_email(db, payload.email)
@@ -323,7 +331,7 @@ def request_email_verification(
         purpose=AuthEmailCodeService.VERIFY_EMAIL,
         ttl_minutes=OTP_TTL_MINUTES,
     )
-    background_tasks.add_task(send_verification_code_email, user.email, code, OTP_TTL_MINUTES)
+    _send_verification_email(user.email, code)
     return AuthStatus(status="verification_required", email=user.email, message="Verification code sent")
 
 
@@ -357,7 +365,6 @@ def confirm_email_verification(
 def forgot_password(
     request: Request,
     payload: EmailCodeRequest,
-    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
 ) -> AuthStatus:
     """
@@ -377,7 +384,11 @@ def forgot_password(
         purpose=AuthEmailCodeService.RESET_PASSWORD,
         ttl_minutes=OTP_TTL_MINUTES,
     )
-    background_tasks.add_task(send_password_reset_code_email, user.email, code, OTP_TTL_MINUTES)
+    try:
+        send_password_reset_code_email(user.email, code, OTP_TTL_MINUTES)
+    except EmailDeliveryError:
+        # Keep response indistinguishable from unknown-account flow.
+        pass
     return AuthStatus(status="ok")
 
 

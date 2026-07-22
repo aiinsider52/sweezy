@@ -137,6 +137,7 @@ struct JourneyMarketplaceView: View {
             #endif
         }
         .featureOnboarding(.marketplace)
+        .accessibilityIdentifier("marketplace.screen")
     }
 
     private var marketHero: some View {

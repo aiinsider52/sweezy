@@ -48,9 +48,15 @@ struct JourneyMapView: View {
             if appContainer.contentService.places.isEmpty {
                 await appContainer.contentService.refreshContent()
             }
-            appContainer.locationService.requestLocationPermission()
-            appContainer.locationService.startLocationUpdates()
+            if appContainer.locationService.isLocationEnabled {
+                appContainer.locationService.startLocationUpdates()
+            }
             selectFirstVisiblePlace()
+        }
+        .onChange(of: appContainer.locationService.authorizationStatus) { _, status in
+            if status == .authorizedWhenInUse || status == .authorizedAlways {
+                appContainer.locationService.startLocationUpdates()
+            }
         }
         .onChange(of: selectedPlace?.id) { _, _ in
             guard let selectedPlace else {
@@ -65,6 +71,7 @@ struct JourneyMapView: View {
         .sheet(isPresented: $showsPlaceList) {
             placeListSheet
         }
+        .accessibilityIdentifier("map.screen")
     }
 
     private var mapLayer: some View {
@@ -132,6 +139,21 @@ struct JourneyMapView: View {
             }
             .buttonStyle(.plain)
             .accessibilityLabel("Показати список місць")
+
+            Button {
+                activateUserLocation()
+            } label: {
+                Image(systemName: appContainer.locationService.isLocationEnabled ? "location.fill" : "location")
+                    .font(.system(size: 17, weight: .bold))
+                    .foregroundColor(appContainer.locationService.isLocationEnabled ? .black : .white)
+                    .frame(width: 48, height: 48)
+                    .background(appContainer.locationService.isLocationEnabled ? JourneyVisual.lime : Color.black.opacity(0.48))
+                    .clipShape(Circle())
+                    .overlay(Circle().stroke(Color.white.opacity(0.34), lineWidth: 1))
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Моє місцезнаходження")
+            .accessibilityHint("Запитує доступ до геолокації лише після натискання")
         }
     }
 
@@ -502,6 +524,30 @@ struct JourneyMapView: View {
                     pitch: 72
                 )
             )
+        }
+    }
+
+    private func activateUserLocation() {
+        switch appContainer.locationService.authorizationStatus {
+        case .notDetermined:
+            appContainer.locationService.requestLocationPermission()
+        case .denied, .restricted:
+            appContainer.locationService.openAppSettings()
+        case .authorizedWhenInUse, .authorizedAlways:
+            appContainer.locationService.startLocationUpdates()
+            guard let location = appContainer.locationService.currentLocation else { return }
+            withAnimation(.easeInOut(duration: 0.3)) {
+                cameraPosition = .camera(
+                    MapCamera(
+                        centerCoordinate: location.coordinate,
+                        distance: 3_600,
+                        heading: 18,
+                        pitch: 72
+                    )
+                )
+            }
+        @unknown default:
+            break
         }
     }
 

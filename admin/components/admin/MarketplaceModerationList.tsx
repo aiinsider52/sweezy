@@ -64,7 +64,6 @@ export default function MarketplaceModerationList() {
     load()
     const interval = window.setInterval(load, 30000)
     return () => window.clearInterval(interval)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const counts = useMemo(() => ({
@@ -260,7 +259,6 @@ export default function MarketplaceModerationList() {
                           rel="noreferrer"
                           className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5"
                         >
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
                             src={src}
                             alt={`${item.title} photo ${index + 1}`}

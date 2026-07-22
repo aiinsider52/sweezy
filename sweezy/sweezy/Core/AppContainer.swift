@@ -137,7 +137,19 @@ class AppContainer: ObservableObject {
         URLCache.shared = URLCache(memoryCapacity: mem, diskCapacity: disk)
         
         // Initialize state from UserDefaults (fast)
-        if ProcessInfo.processInfo.arguments.contains("--reset-onboarding") {
+        let launchArguments = ProcessInfo.processInfo.arguments
+        if launchArguments.contains("--reset-ui-test-state") {
+            [
+                "onboarding_completed",
+                "initial_auth_choice_completed",
+                "pending_initial_auth_entry",
+                "selected_locale",
+                "preferredLanguage"
+            ].forEach(UserDefaults.standard.removeObject(forKey:))
+            KeychainStore.delete("access_token")
+            KeychainStore.delete("refresh_token")
+            KeychainStore.delete("user_id")
+        } else if launchArguments.contains("--reset-onboarding") {
             UserDefaults.standard.removeObject(forKey: "onboarding_completed")
         }
         self.isOnboardingCompleted = UserDefaults.standard.bool(forKey: "onboarding_completed")

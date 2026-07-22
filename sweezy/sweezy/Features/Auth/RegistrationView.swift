@@ -162,7 +162,8 @@ struct RegistrationView: View {
             modernTextField(
                 placeholder: "Повне ім'я",
                 text: $name,
-                icon: "person.fill"
+                icon: "person.fill",
+                accessibilityIdentifier: "auth.registration.name"
             )
             
             // Email field
@@ -170,7 +171,8 @@ struct RegistrationView: View {
                 placeholder: "Електронна пошта",
                 text: $email,
                 icon: "envelope.fill",
-                keyboardType: .emailAddress
+                keyboardType: .emailAddress,
+                accessibilityIdentifier: "auth.registration.email"
             )
             
             // Email validation error
@@ -189,7 +191,8 @@ struct RegistrationView: View {
             modernSecureField(
                 placeholder: "Пароль",
                 text: $password,
-                icon: "lock.fill"
+                icon: "lock.fill",
+                accessibilityIdentifier: "auth.registration.password"
             )
             
             // Password checklist
@@ -254,6 +257,7 @@ struct RegistrationView: View {
             }
             .disabled(disabled || isRegistering)
             .animation(.easeInOut(duration: 0.2), value: disabled)
+            .accessibilityIdentifier("auth.registration.submit")
 
             SocialAuthPanel(
                 errorMessage: $errorMessage,
@@ -278,6 +282,7 @@ struct RegistrationView: View {
                     .foregroundColor(Theme.Colors.primary)
             }
             .padding(.top, 4)
+            .accessibilityIdentifier("auth.registration.openLogin")
         }
         .padding(24)
         .background(
@@ -314,7 +319,7 @@ struct RegistrationView: View {
             HStack(spacing: 8) {
                 Image(systemName: "lock.shield.fill")
                     .foregroundColor(Theme.Colors.primary.opacity(0.7))
-                Text("Дані зберігаються локально на пристрої")
+                Text("auth.registration.secure_storage".localized)
                     .font(.caption)
                     .foregroundColor(.white.opacity(0.5))
             }
@@ -336,7 +341,8 @@ struct RegistrationView: View {
         placeholder: String,
         text: Binding<String>,
         icon: String,
-        keyboardType: UIKeyboardType = .default
+        keyboardType: UIKeyboardType = .default,
+        accessibilityIdentifier: String
     ) -> some View {
         HStack(spacing: 14) {
             Image(systemName: icon)
@@ -367,13 +373,15 @@ struct RegistrationView: View {
                 )
         )
         .animation(.easeInOut(duration: 0.2), value: text.wrappedValue.isEmpty)
+        .accessibilityIdentifier(accessibilityIdentifier)
     }
     
     // MARK: - Modern Secure Field
     private func modernSecureField(
         placeholder: String,
         text: Binding<String>,
-        icon: String
+        icon: String,
+        accessibilityIdentifier: String
     ) -> some View {
         HStack(spacing: 14) {
             Image(systemName: icon)
@@ -417,6 +425,7 @@ struct RegistrationView: View {
                 )
         )
         .animation(.easeInOut(duration: 0.2), value: text.wrappedValue.isEmpty)
+        .accessibilityIdentifier(accessibilityIdentifier)
     }
     
     private var disabled: Bool { name.isEmpty || email.isEmpty || password.isEmpty || isEmailInvalid || !passwordIsStrong }

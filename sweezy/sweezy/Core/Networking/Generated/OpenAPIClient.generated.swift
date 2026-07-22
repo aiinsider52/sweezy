@@ -2,7 +2,7 @@
 import Foundation
 
 enum GeneratedOpenAPIContract {
-    static let sha256 = "22305f30d6234dbbe41fa90a1acb8a1011bfdaeddaf93c8c8616c990b83486ee"
+    static let sha256 = "64b8bb57e0828190195b6d2378b116585f2c9e369382fb3322b23c09546473f9"
 
     struct Operation: Sendable {
         let method: String
@@ -160,7 +160,6 @@ enum GeneratedOpenAPIContract {
         "create_glossary_term_api_v1_translations_glossary_post": Operation(method: "POST", path: "/api/v1/translations/glossary", requiresAuthentication: true),
         "delete_glossary_term_api_v1_translations_glossary__term_id__delete": Operation(method: "DELETE", path: "/api/v1/translations/glossary/{term_id}", requiresAuthentication: true),
         "approve_translation_api_v1_translations__translation_id__approve_post": Operation(method: "POST", path: "/api/v1/translations/{translation_id}/approve", requiresAuthentication: true),
-        "debug_openapi_debug_openapi_get": Operation(method: "GET", path: "/debug/openapi", requiresAuthentication: false),
         "health": Operation(method: "GET", path: "/health", requiresAuthentication: false),
         "ready": Operation(method: "GET", path: "/ready", requiresAuthentication: false),
     ]

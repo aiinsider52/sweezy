@@ -223,6 +223,7 @@ struct AuthEntryView: View {
                     .shadow(color: Theme.Colors.primary.opacity(0.35), radius: 12, y: 6)
             }
             .buttonStyle(.plain)
+            .accessibilityIdentifier("auth.entry.createAccount")
 
             Button {
                 activeDestination = .login
@@ -242,6 +243,7 @@ struct AuthEntryView: View {
                     .foregroundColor(.white)
             }
             .buttonStyle(.plain)
+            .accessibilityIdentifier("auth.entry.signIn")
 
             SocialAuthPanel(
                 errorMessage: $socialErrorMessage,
@@ -266,6 +268,7 @@ struct AuthEntryView: View {
             }
             .buttonStyle(.plain)
             .padding(.top, 4)
+            .accessibilityIdentifier("auth.entry.continueAsGuest")
         }
     }
 

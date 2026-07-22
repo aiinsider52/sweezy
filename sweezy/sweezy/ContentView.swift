@@ -208,7 +208,9 @@ struct MainAppContent: View {
     private func startAccountServicesIfNeeded() async {
         guard sessionManager.isAuthenticated else { return }
         await appContainer.chatStore.start()
-        await SweezyAppDelegate.registerForChatPush()
+        if NotificationPreference.isEnabled {
+            await SweezyAppDelegate.registerForChatPush()
+        }
     }
 
     private func updatePostOnboardingAuthPresentation() {

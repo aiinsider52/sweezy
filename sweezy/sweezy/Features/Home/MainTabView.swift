@@ -7,6 +7,7 @@
 
 import SwiftUI
 import MapKit
+import UserNotifications
 
 struct MainTabView: View {
     @StateObject private var router = MainTabRouter()
@@ -2433,12 +2434,6 @@ struct SettingsLiteView: View {
                             Label("settings.email_support".localized, systemImage: "envelope")
                         }
                     }
-                    
-                    if let emailURL = URL(string: "mailto:support@sweezy.world") {
-                        Link(destination: emailURL) {
-                            Label("settings.email_support".localized, systemImage: "envelope")
-                        }
-                    }
                 }
                 
                 // About
@@ -2517,15 +2512,255 @@ struct LanguageSettingsView: View {
 }
 
 struct NotificationSettingsView: View {
-    @AppStorage("notificationsEnabled") private var notificationsEnabled = true
-    
+    @EnvironmentObject private var appContainer: AppContainer
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.openURL) private var openURL
+
+    @State private var notificationsEnabled = NotificationPreference.isEnabled
+    @State private var authorizationStatus: UNAuthorizationStatus = .notDetermined
+    @State private var pendingCount = 0
+    @State private var isWorking = false
+    @State private var showSettingsPrompt = false
+
     var body: some View {
-        List {
-            Toggle("settings.notifications".localized, isOn: $notificationsEnabled)
+        ScrollView(showsIndicators: false) {
+            VStack(alignment: .leading, spacing: 16) {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("settings.notifications.eyebrow".localized)
+                        .font(.system(size: 12, weight: .bold))
+                        .tracking(1.5)
+                        .foregroundColor(JourneyVisual.lime)
+
+                    Text("settings.notifications.title".localized)
+                        .font(.system(size: 34, weight: .bold, design: .rounded))
+                        .foregroundColor(.white)
+
+                    Text("settings.notifications.subtitle".localized)
+                        .font(.system(size: 15, weight: .medium))
+                        .foregroundColor(.white.opacity(0.68))
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                notificationMasterCard
+                notificationStatusCard
+
+                Text("settings.notifications.privacy".localized)
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(.white.opacity(0.5))
+                    .padding(.horizontal, 4)
+            }
+            .padding(.horizontal, 18)
+            .padding(.top, 18)
+            .padding(.bottom, 36)
         }
-        .journeyForm()
-        .navigationTitle("settings.notifications".localized)
+        .navigationTitle("")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button("common.done".localized) { dismiss() }
+                    .foregroundColor(JourneyVisual.lime)
+            }
+        }
         .journeyScreen(.city, darkness: 0.72)
+        .task { await refreshState() }
+        .alert("settings.notifications.disabled_title".localized, isPresented: $showSettingsPrompt) {
+            Button("common.cancel".localized, role: .cancel) { }
+            Button("settings.notifications.open_settings".localized) {
+                guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
+                openURL(url)
+            }
+        } message: {
+            Text("settings.notifications.disabled_message".localized)
+        }
+    }
+
+    private var notificationMasterCard: some View {
+        JourneyGlassPanel(cornerRadius: 26) {
+            VStack(spacing: 15) {
+                HStack(spacing: 14) {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            .fill(notificationsEnabled ? JourneyVisual.lime : Color.white.opacity(0.08))
+                            .frame(width: 54, height: 54)
+                        Image(systemName: notificationsEnabled ? "bell.badge.fill" : "bell.slash.fill")
+                            .font(.system(size: 22, weight: .bold))
+                            .foregroundColor(notificationsEnabled ? .black : .white.opacity(0.7))
+                    }
+
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("settings.notifications.master".localized)
+                            .font(.system(size: 17, weight: .bold))
+                            .foregroundColor(.white)
+                        Text(notificationsEnabled
+                             ? "settings.notifications.master_on".localized
+                             : "settings.notifications.master_off".localized)
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(.white.opacity(0.58))
+                    }
+
+                    Spacer()
+
+                    if isWorking {
+                        ProgressView().tint(JourneyVisual.lime)
+                    } else {
+                        Toggle("", isOn: Binding(
+                            get: { notificationsEnabled },
+                            set: { newValue in Task { await setNotificationsEnabled(newValue) } }
+                        ))
+                        .labelsHidden()
+                        .tint(JourneyVisual.lime)
+                        .accessibilityLabel("settings.notifications.master".localized)
+                        .accessibilityIdentifier("settings.notifications.masterToggle")
+                    }
+                }
+
+                Divider().overlay(Color.white.opacity(0.12))
+
+                HStack(spacing: 8) {
+                    notificationBenefit(icon: "calendar.badge.clock", title: "settings.notifications.deadlines".localized)
+                    notificationBenefit(icon: "bubble.left.and.bubble.right.fill", title: "settings.notifications.chat".localized)
+                    notificationBenefit(icon: "person.crop.circle.badge.clock", title: "settings.notifications.appointments".localized)
+                }
+            }
+            .padding(18)
+        }
+    }
+
+    private var notificationStatusCard: some View {
+        JourneyGlassPanel(cornerRadius: 24) {
+            VStack(spacing: 0) {
+                HStack(spacing: 12) {
+                    Circle()
+                        .fill(statusColor.opacity(0.16))
+                        .frame(width: 42, height: 42)
+                        .overlay(
+                            Image(systemName: statusIcon)
+                                .font(.system(size: 17, weight: .bold))
+                                .foregroundColor(statusColor)
+                        )
+
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text("settings.notifications.system_status".localized)
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundColor(.white)
+                        Text(statusTitle)
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(statusColor)
+                    }
+                    Spacer()
+                    Text("\(pendingCount)")
+                        .font(.system(size: 19, weight: .bold, design: .rounded))
+                        .foregroundColor(.white)
+                    Text("settings.notifications.pending".localized)
+                        .font(.system(size: 10, weight: .medium))
+                        .foregroundColor(.white.opacity(0.48))
+                }
+                .padding(17)
+
+                if authorizationStatus == .denied {
+                    Divider().overlay(Color.white.opacity(0.12))
+                    Button {
+                        showSettingsPrompt = true
+                    } label: {
+                        HStack {
+                            Text("settings.notifications.open_settings".localized)
+                                .font(.system(size: 14, weight: .bold))
+                            Spacer()
+                            Image(systemName: "arrow.up.right")
+                        }
+                        .foregroundColor(JourneyVisual.lime)
+                        .padding(17)
+                    }
+                    .accessibilityIdentifier("settings.notifications.openSystemSettings")
+                }
+            }
+        }
+    }
+
+    private func notificationBenefit(icon: String, title: String) -> some View {
+        VStack(spacing: 7) {
+            Image(systemName: icon)
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundColor(JourneyVisual.lime)
+            Text(title)
+                .font(.system(size: 10, weight: .semibold))
+                .foregroundColor(.white.opacity(0.66))
+                .lineLimit(2)
+                .multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity)
+        .frame(minHeight: 58)
+    }
+
+    private var statusColor: Color {
+        switch authorizationStatus {
+        case .authorized, .provisional, .ephemeral: return JourneyVisual.lime
+        case .denied: return .orange
+        default: return .white.opacity(0.66)
+        }
+    }
+
+    private var statusIcon: String {
+        switch authorizationStatus {
+        case .authorized, .provisional, .ephemeral: return "checkmark.circle.fill"
+        case .denied: return "exclamationmark.triangle.fill"
+        default: return "questionmark.circle.fill"
+        }
+    }
+
+    private var statusTitle: String {
+        switch authorizationStatus {
+        case .authorized: return "settings.notifications.status_allowed".localized
+        case .provisional, .ephemeral: return "settings.notifications.status_quiet".localized
+        case .denied: return "settings.notifications.status_denied".localized
+        case .notDetermined: return "settings.notifications.status_not_asked".localized
+        @unknown default: return "settings.notifications.status_unknown".localized
+        }
+    }
+
+    @MainActor
+    private func refreshState() async {
+        await appContainer.notificationService.refreshAuthorizationStatus()
+        authorizationStatus = appContainer.notificationService.authorizationStatus
+        if UserDefaults.standard.object(forKey: NotificationPreference.enabledKey) == nil,
+           appContainer.notificationService.isAuthorized {
+            NotificationPreference.isEnabled = true
+        }
+        notificationsEnabled = NotificationPreference.isEnabled && appContainer.notificationService.isAuthorized
+        pendingCount = await appContainer.notificationService.getPendingNotifications().count
+    }
+
+    @MainActor
+    private func setNotificationsEnabled(_ enabled: Bool) async {
+        guard !isWorking else { return }
+        isWorking = true
+        defer { isWorking = false }
+
+        if enabled {
+            await appContainer.notificationService.refreshAuthorizationStatus()
+            authorizationStatus = appContainer.notificationService.authorizationStatus
+            if authorizationStatus == .denied {
+                notificationsEnabled = false
+                NotificationPreference.isEnabled = false
+                showSettingsPrompt = true
+                return
+            }
+            var granted = appContainer.notificationService.isAuthorized
+            if !granted {
+                granted = await appContainer.notificationService.requestPermission()
+            }
+            NotificationPreference.isEnabled = granted
+            notificationsEnabled = granted
+            if granted {
+                await SweezyAppDelegate.registerForChatPush()
+            }
+        } else {
+            NotificationPreference.isEnabled = false
+            notificationsEnabled = false
+            appContainer.notificationService.cancelAllNotifications()
+            await SweezyAppDelegate.disableChatPush()
+        }
+        await refreshState()
     }
 }
 

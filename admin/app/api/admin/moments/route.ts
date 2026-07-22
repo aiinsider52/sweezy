@@ -1,18 +1,18 @@
 "use server"
 import { NextRequest, NextResponse } from "next/server"
-import { cookies, type UnsafeUnwrappedCookies } from "next/headers";
+import { cookies } from "next/headers";
 
 const BASE = process.env.NEXT_PUBLIC_API_URL || "https://sweezy-9xyk.onrender.com/api/v1"
 
-function token() {
-  return (cookies() as unknown as UnsafeUnwrappedCookies).get("access_token")?.value || "";
+async function token() {
+  return (await cookies()).get("access_token")?.value || "";
 }
 
 export async function GET(req: NextRequest) {
   const qs = req.nextUrl.searchParams.toString()
   const suffix = qs ? `?${qs}` : ""
   const res = await fetch(`${BASE}/admin/moments${suffix}`, {
-    headers: { Authorization: `Bearer ${token()}` },
+    headers: { Authorization: `Bearer ${await token()}` },
     cache: "no-store",
   })
   const text = await res.text()
@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
   const res = await fetch(`${BASE}/admin/moments`, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${token()}`,
+      Authorization: `Bearer ${await token()}`,
       "Content-Type": "application/json",
     },
     body,

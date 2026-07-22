@@ -1,119 +1,58 @@
-//
-//  OnboardingUITests.swift
-//  sweezyUITests
-//
-//  Created by Vladyslav Katash on 14.10.2025.
-//
-
 import XCTest
 
 final class OnboardingUITests: XCTestCase {
-    
-    var app: XCUIApplication!
-    
+    private var app: XCUIApplication!
+
     override func setUpWithError() throws {
         continueAfterFailure = false
         app = XCUIApplication()
-        
-        // Reset onboarding state for testing
-        app.launchArguments.append("--reset-onboarding")
+        app.launchArguments = ["--reset-ui-test-state"]
+        app.launchEnvironment["UITESTS"] = "1"
         app.launch()
     }
-    
-    func testOnboardingFlow() throws {
-        // Test that onboarding screens appear via accessibility IDs
-        XCTAssertTrue(app.staticTexts["onboarding.page.title.1"].waitForExistence(timeout: 10))
-        
-        // Navigate through onboarding pages
-        let nextButton = app.buttons["onboarding.nextButton"]
-        if nextButton.exists {
-            nextButton.tap()
-            
-            // Check second page
-            XCTAssertTrue(app.staticTexts["onboarding.page.title.2"].waitForExistence(timeout: 10))
-            
-            nextButton.tap()
-            
-            // Check third page
-            XCTAssertTrue(app.staticTexts["onboarding.page.title.3"].waitForExistence(timeout: 10))
-            
-            // Tap Get Started to go to language selection
-            let getStartedButton = app.buttons["onboarding.getStartedButton"]
-            XCTAssertTrue(getStartedButton.exists)
-            getStartedButton.tap()
-        }
-        
-        // Test language selection
-        XCTAssertTrue(app.otherElements["onboarding.language.container"].waitForExistence(timeout: 10))
-        
-        // Select Ukrainian language (should be pre-selected)
-        let ukrainianOption = app.buttons["onboarding.language.option.uk"]
-        if ukrainianOption.exists {
-            ukrainianOption.tap()
-        }
-        
-        // Complete onboarding
-        let finalGetStartedButton = app.buttons["onboarding.getStartedButton"]
-        XCTAssertTrue(finalGetStartedButton.exists)
-        finalGetStartedButton.tap()
-        
-        // Verify we reach the main app
-        XCTAssertTrue(app.tabBars.buttons.element(boundBy: 0).waitForExistence(timeout: 10))
+
+    @MainActor
+    func testCompleteOnboardingWithoutRequestingNotificationPermission() throws {
+        XCTAssertTrue(app.staticTexts["onboarding.page.title.1"].waitForExistence(timeout: 15))
+        tapNext()
+
+        let ukrainian = app.buttons["onboarding.language.option.uk"]
+        XCTAssertTrue(ukrainian.waitForExistence(timeout: 10))
+        ukrainian.tap()
+        tapNext()
+
+        XCTAssertTrue(app.staticTexts["onboarding.page.title.2"].waitForExistence(timeout: 10))
+        tapNext()
+        XCTAssertTrue(app.descendants(matching: .any)["onboarding.profileDetailsPage"].waitForExistence(timeout: 10))
+        tapNext()
+        XCTAssertTrue(app.descendants(matching: .any)["onboarding.familyDetailsPage"].waitForExistence(timeout: 10))
+        tapNext() // theme
+        tapNext() // notification permission
+
+        XCTAssertTrue(app.descendants(matching: .any)["onboarding.notificationPermissionPage"].waitForExistence(timeout: 10))
+        let later = app.buttons["onboarding.notifications.laterButton"]
+        XCTAssertTrue(later.isHittable)
+        later.tap()
+
+        let getStarted = app.buttons["onboarding.getStartedButton"]
+        XCTAssertTrue(getStarted.waitForExistence(timeout: 10))
+        getStarted.tap()
+        XCTAssertTrue(app.buttons["auth.entry.continueAsGuest"].waitForExistence(timeout: 10))
     }
-    
-    func testSkipOnboarding() throws {
-        // Test skip functionality
-        let skipButton = app.buttons["onboarding.skipButton"]
-        if skipButton.exists {
-            skipButton.tap()
-            
-            // Should go directly to main app
-            XCTAssertTrue(app.tabBars.buttons.element(boundBy: 0).waitForExistence(timeout: 10))
-        }
+
+    @MainActor
+    func testSkipOnboardingStillRequiresExplicitAuthChoice() throws {
+        let skip = app.buttons["onboarding.skipButton"]
+        XCTAssertTrue(skip.waitForExistence(timeout: 15))
+        XCTAssertTrue(skip.isHittable)
+        skip.tap()
+        XCTAssertTrue(app.buttons["auth.entry.continueAsGuest"].waitForExistence(timeout: 10))
     }
-    
-    func testLanguageSelection() throws {
-        // Navigate to language selection
-        let getStartedButton = app.buttons["onboarding.getStartedButton"]
-        if getStartedButton.exists {
-            // Navigate through onboarding pages quickly
-            let nextButton = app.buttons["onboarding.nextButton"]
-            if nextButton.exists {
-                nextButton.tap()
-                nextButton.tap()
-            }
-            getStartedButton.tap()
-        }
-        
-        // Test different language selections
-        let languages = ["onboarding.language.option.uk", "onboarding.language.option.ru", "onboarding.language.option.en", "onboarding.language.option.de"]
-        
-        for language in languages {
-            let languageButton = app.buttons[language]
-            if languageButton.exists {
-                languageButton.tap()
-                
-                // Verify selection (checkmark should appear)
-                XCTAssertTrue(app.images["onboarding.language.selectedIcon"].waitForExistence(timeout: 5))
-                break
-            }
-        }
-    }
-    
-    func testOnboardingAccessibility() throws {
-        // Test VoiceOver accessibility
-        XCTAssertTrue(app.staticTexts["onboarding.page.title.1"].isHittable)
-        
-        let nextButton = app.buttons["onboarding.nextButton"]
-        if nextButton.exists {
-            XCTAssertTrue(nextButton.isHittable)
-            XCTAssertNotNil(nextButton.label)
-        }
-        
-        let skipButton = app.buttons["onboarding.skipButton"]
-        if skipButton.exists {
-            XCTAssertTrue(skipButton.isHittable)
-            XCTAssertNotNil(skipButton.label)
-        }
+
+    @MainActor
+    private func tapNext() {
+        let next = app.buttons["onboarding.nextButton"]
+        XCTAssertTrue(next.waitForExistence(timeout: 10))
+        next.tap()
     }
 }

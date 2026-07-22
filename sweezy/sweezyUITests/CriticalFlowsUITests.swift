@@ -1,121 +1,75 @@
-//
-//  CriticalFlowsUITests.swift
-//  sweezyUITests
-//
-//  UI‑тести ключових сценаріїв: реєстрація → логін → читання гіда.
-//
-
 import XCTest
 
+/// Network-independent coverage for the routes every user must be able to reach.
 final class CriticalFlowsUITests: XCTestCase {
+    override func setUpWithError() throws {
+        continueAfterFailure = false
+    }
 
-    private func launchApp(resetOnboarding: Bool = true) -> XCUIApplication {
+    @MainActor
+    func testGuestCanReachEveryPrimaryTabAndStatePersists() throws {
+        let app = launchCleanApp()
+        finishOnboardingAsGuest(app)
+
+        assertScreen(app, tab: "tab.home", screen: "home.screen")
+        assertScreen(app, tab: "tab.directory", screen: "directory.screen")
+        assertScreen(app, tab: "tab.map", screen: "map.screen")
+        assertScreen(app, tab: "tab.marketplace", screen: "marketplace.screen")
+        assertScreen(app, tab: "tab.settings", screen: "settings.screen")
+
+        app.terminate()
+        app.launchArguments = []
+        app.launch()
+
+        XCTAssertFalse(app.buttons["onboarding.skipButton"].waitForExistence(timeout: 3))
+        XCTAssertFalse(app.buttons["auth.entry.continueAsGuest"].waitForExistence(timeout: 2))
+        XCTAssertTrue(app.buttons["tab.home"].waitForExistence(timeout: 10))
+    }
+
+    @MainActor
+    func testRegistrationRejectsIncompleteCredentialsWithoutNetworkRequest() throws {
+        let app = launchCleanApp()
+        let skip = app.buttons["onboarding.skipButton"]
+        XCTAssertTrue(skip.waitForExistence(timeout: 15))
+        skip.tap()
+
+        let createAccount = app.buttons["auth.entry.createAccount"]
+        XCTAssertTrue(createAccount.waitForExistence(timeout: 10))
+        createAccount.tap()
+
+        XCTAssertTrue(app.textFields["auth.registration.name"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.textFields["auth.registration.email"].exists)
+        XCTAssertTrue(app.secureTextFields["auth.registration.password"].exists)
+        XCTAssertTrue(app.buttons["auth.registration.submit"].exists)
+        XCTAssertFalse(app.buttons["auth.registration.submit"].isEnabled)
+    }
+
+    @MainActor
+    private func launchCleanApp() -> XCUIApplication {
         let app = XCUIApplication()
-        if resetOnboarding {
-            app.launchArguments.append("--reset-onboarding")
-        }
+        app.launchArguments = ["--reset-ui-test-state"]
         app.launchEnvironment["UITESTS"] = "1"
         app.launch()
         return app
     }
 
-    private func skipOnboardingIfNeeded(_ app: XCUIApplication) {
-        let skipButton = app.buttons["onboarding.skipButton"]
-        if skipButton.waitForExistence(timeout: 5) {
-            skipButton.tap()
-            return
-        }
-        let getStarted = app.buttons["onboarding.getStartedButton"]
-        if getStarted.waitForExistence(timeout: 5) {
-            getStarted.tap()
-        }
+    @MainActor
+    private func finishOnboardingAsGuest(_ app: XCUIApplication) {
+        let skip = app.buttons["onboarding.skipButton"]
+        XCTAssertTrue(skip.waitForExistence(timeout: 15))
+        skip.tap()
+
+        let guest = app.buttons["auth.entry.continueAsGuest"]
+        XCTAssertTrue(guest.waitForExistence(timeout: 10))
+        guest.tap()
+        XCTAssertTrue(app.buttons["tab.home"].waitForExistence(timeout: 15))
     }
 
-    // MARK: - Registration → Guides → Logout → Login
-
-    func testRegistrationLoginAndReadGuide() {
-        let app = launchApp()
-        skipOnboardingIfNeeded(app)
-
-        // На экране регистрации
-        let nameField = app.textFields["Повне ім'я"]
-        XCTAssertTrue(nameField.waitForExistence(timeout: 10), "Поле имени должно быть видно на экране регистрации")
-        nameField.tap()
-        nameField.typeText("UITest User")
-
-        let emailField = app.textFields["Електронна пошта"]
-        XCTAssertTrue(emailField.exists)
-        let email = "uitest+\(UUID().uuidString.prefix(8))@example.com"
-        emailField.tap()
-        emailField.typeText(email)
-
-        let passwordField = app.secureTextFields["Пароль"]
-        XCTAssertTrue(passwordField.exists)
-        passwordField.tap()
-        passwordField.typeText("StrongPass1!")
-
-        let registerButton = app.buttons["Зареєструватись"]
-        XCTAssertTrue(registerButton.exists)
-        registerButton.tap()
-
-        // Ожидаем появления главного таба Home
-        let homeTab = app.buttons["Home"]
-        XCTAssertTrue(homeTab.waitForExistence(timeout: 15), "После регистрации должен открыться главный экран")
-
-        // Переход в Довідник и открытие первого гида
-        let guidesTab = app.buttons["Довідник"]
-        XCTAssertTrue(guidesTab.exists)
-        guidesTab.tap()
-
-        // Ищем любую ячейку списка гайдов
-        let firstGuideCell = app.scrollViews.firstMatch.descendants(matching: .button).firstMatch
-        XCTAssertTrue(firstGuideCell.waitForExistence(timeout: 10), "Должен существовать хотя бы один гайд")
-        firstGuideCell.tap()
-
-        // Проверяем, что контент гайда отобразился (есть scrollView или текст)
-        XCTAssertTrue(app.scrollViews.firstMatch.waitForExistence(timeout: 5), "Экран гайда должен содержать scrollView")
-
-        // Возвращаемся назад
-        if app.navigationBars.buttons.element(boundBy: 0).waitForExistence(timeout: 5) {
-            app.navigationBars.buttons.element(boundBy: 0).tap()
-        }
-
-        // Логаут через настройки
-        let settingsTab = app.buttons["Налаштування"]
-        XCTAssertTrue(settingsTab.exists)
-        settingsTab.tap()
-
-        let logoutButton = app.buttons["Вийти"]
-        XCTAssertTrue(logoutButton.waitForExistence(timeout: 5))
-        logoutButton.tap()
-
-        // Перезапуск приложения → логин существующим пользователем
-        app.terminate()
-        let app2 = launchApp(resetOnboarding: false)
-        skipOnboardingIfNeeded(app2)
-
-        // Экран регистрации, нажимаем "Уже есть аккаунт? Войти"
-        let alreadyHaveAccountButton = app2.buttons.containing(NSPredicate(format: "label CONTAINS[c] %@", "Уже есть аккаунт")).firstMatch
-        XCTAssertTrue(alreadyHaveAccountButton.waitForExistence(timeout: 8))
-        alreadyHaveAccountButton.tap()
-
-        let loginEmailField = app2.textFields.element(boundBy: 0)
-        XCTAssertTrue(loginEmailField.waitForExistence(timeout: 8))
-        loginEmailField.tap()
-        loginEmailField.typeText(email)
-
-        let loginPasswordField = app2.secureTextFields.element(boundBy: 0)
-        XCTAssertTrue(loginPasswordField.exists)
-        loginPasswordField.tap()
-        loginPasswordField.typeText("StrongPass1!")
-
-        let loginButton = app2.buttons["Увійти"]
-        XCTAssertTrue(loginButton.exists)
-        loginButton.tap()
-
-        // Убедимся, что снова на главном экране
-        XCTAssertTrue(app2.buttons["Home"].waitForExistence(timeout: 15))
+    @MainActor
+    private func assertScreen(_ app: XCUIApplication, tab: String, screen: String) {
+        let tabButton = app.buttons[tab]
+        XCTAssertTrue(tabButton.waitForExistence(timeout: 10), "Missing tab: \(tab)")
+        tabButton.tap()
+        XCTAssertTrue(app.descendants(matching: .any)[screen].waitForExistence(timeout: 10), "Missing screen: \(screen)")
     }
 }
-
-

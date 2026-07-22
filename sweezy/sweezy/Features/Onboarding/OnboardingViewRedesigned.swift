@@ -475,6 +475,7 @@ private struct NotificationPermissionPage: View {
     private func requestNotificationPermission() {
         Task { @MainActor in
             let granted = await appContainer.notificationService.requestPermission()
+            NotificationPreference.isEnabled = granted
             permissionGranted = granted
             appContainer.telemetry.retention(
                 .notificationPermissionUpdated,

@@ -136,18 +136,21 @@ class Settings(BaseSettings):
                 raise RuntimeError("CORS_ORIGINS cannot be '*' in production")
             if self.ADMIN_PASSWORD == "admin123":
                 raise RuntimeError("ADMIN_PASSWORD must be changed in production")
+            if not self.RESEND_API_KEY or not self.RESEND_FROM_EMAIL:
+                raise RuntimeError("RESEND_API_KEY and RESEND_FROM_EMAIL are required in production")
             if self.CHAT_ENABLED:
                 if not self.REDIS_URL:
                     raise RuntimeError("REDIS_URL must be set in production for chat realtime")
                 if not self.REDIS_URL.startswith(("redis://", "rediss://")):
                     raise RuntimeError("REDIS_URL must use redis:// or rediss://")
             apns_values = [self.APNS_KEY_ID, self.APNS_TEAM_ID, self.APNS_PRIVATE_KEY, self.APNS_BUNDLE_ID]
+            apns_credentials = [self.APNS_KEY_ID, self.APNS_TEAM_ID, self.APNS_PRIVATE_KEY]
             if self.PUSH_NOTIFICATIONS_ENABLED:
                 if not self.CHAT_ENABLED:
                     raise RuntimeError("CHAT_ENABLED must be true when push notifications are enabled")
                 if not all(apns_values):
                     raise RuntimeError("APNS_KEY_ID, APNS_TEAM_ID, APNS_PRIVATE_KEY and APNS_BUNDLE_ID are required")
-            if any(apns_values):
+            if any(apns_credentials):
                 if not all(apns_values):
                     raise RuntimeError("APNs configuration must be complete when any APNs value is set")
                 if not re.fullmatch(r"[A-Z0-9]{10}", self.APNS_KEY_ID or ""):

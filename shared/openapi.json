@@ -13140,27 +13140,6 @@
         ]
       }
     },
-    "/debug/openapi": {
-      "get": {
-        "description": "Helper endpoint to debug OpenAPI generation issues in hosted environments.\nIt attempts to call `app.openapi()` and, if that fails, returns the error\nand traceback instead of letting FastAPI swallow it into a generic 500.",
-        "operationId": "debug_openapi_debug_openapi_get",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Debug Openapi Debug Openapi Get",
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Successful Response"
-          }
-        },
-        "summary": "Debug Openapi"
-      }
-    },
     "/health": {
       "get": {
         "operationId": "health",

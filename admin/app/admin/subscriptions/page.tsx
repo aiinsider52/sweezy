@@ -1,5 +1,5 @@
 "use client"
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 
 type Row = {
   user_id: string
@@ -25,7 +25,7 @@ export default function SubscriptionsPage() {
   const [funnel, setFunnel] = useState<{ by_type?: Record<string, number>, top_contexts?: { context: string, count: number }[] } | null>(null)
   const [loading, setLoading] = useState(false)
 
-  async function load() {
+  const load = useCallback(async () => {
     setLoading(true)
     try {
       const listRes = await fetch(`/api/admin/subscriptions`, { cache: "no-store" })
@@ -47,9 +47,9 @@ export default function SubscriptionsPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [months])
 
-  useEffect(() => { load() }, [])
+  useEffect(() => { void load() }, [load])
 
   async function setStatus(userId: string, status: string) {
     await fetch(`/api/admin/users/${userId}/subscription`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status }) })
@@ -210,5 +210,4 @@ function MiniStack({ totals }: { totals: { monthly: number, yearly: number, prem
     </div>
   )
 }
-
 

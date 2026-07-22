@@ -17,6 +17,10 @@ from ..core.config import get_settings
 RESEND_API_URL = "https://api.resend.com/emails"
 
 
+class EmailDeliveryError(RuntimeError):
+    """Transactional email could not be accepted by provider."""
+
+
 def _from_address() -> str:
     settings = get_settings()
     from_email = settings.RESEND_FROM_EMAIL or settings.SMTP_FROM or settings.SMTP_USERNAME or "no-reply@sweezy.app"
@@ -30,6 +34,8 @@ def _send_email(to_email: str, *, subject: str, text_body: str, html_body: str |
     settings = get_settings()
     api_key = settings.RESEND_API_KEY
     if not api_key or not settings.RESEND_FROM_EMAIL:
+        if settings.APP_ENV.lower() == "production":
+            raise EmailDeliveryError("Transactional email provider is not configured")
         print(f"📧 [DEV] Email to {to_email}")
         print(f"📧 [DEV] Subject: {subject}")
         print(f"📧 [DEV] Body:\n{text_body}")
@@ -53,7 +59,7 @@ def _send_email(to_email: str, *, subject: str, text_body: str, html_body: str |
             response = client.post(RESEND_API_URL, headers=headers, json=payload)
             response.raise_for_status()
     except Exception as exc:
-        print(f"⚠️ Failed to send email to {to_email}: {exc}")
+        raise EmailDeliveryError("Transactional email provider rejected the request") from exc
 
 
 def _code_email_html(*, heading: str, intro: str, code: str, expires_minutes: int, footer: str) -> str:
@@ -114,4 +120,3 @@ def send_password_reset_code_email(to_email: str, code: str, expires_minutes: in
         footer="Якщо ви не запитували зміну пароля, просто проігноруйте цей лист.",
     )
     _send_email(to_email, subject=subject, text_body=text_body, html_body=html_body)
-

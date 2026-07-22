@@ -14,6 +14,11 @@ def test_openapi_contract_has_unique_operation_ids() -> None:
     assert len(operation_ids) == len(set(operation_ids))
 
 
+def test_debug_openapi_endpoint_is_not_public() -> None:
+    paths = app.openapi()["paths"]
+    assert "/debug/openapi" not in paths
+
+
 def test_auth_contract_exposes_backend_identity() -> None:
     spec = app.openapi()
     token_pair = spec["components"]["schemas"]["TokenPair"]

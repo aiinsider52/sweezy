@@ -67,6 +67,7 @@ struct JourneyHomeView: View {
                 #endif
             }
         }
+        .accessibilityIdentifier("home.screen")
     }
 
     private var profileHeader: some View {
@@ -144,11 +145,12 @@ struct JourneyHomeView: View {
             }
         }
         .buttonStyle(.plain)
+        .accessibilityIdentifier("home.myPlan")
     }
 
     private var quickActions: some View {
         HStack(spacing: 10) {
-            ForEach(Array(actions.enumerated()), id: \.offset) { _, action in
+            ForEach(Array(actions.enumerated()), id: \.offset) { index, action in
                 Button {
                     NotificationCenter.default.post(
                         name: .switchTab,
@@ -175,6 +177,8 @@ struct JourneyHomeView: View {
                     .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel(action.1)
+                .accessibilityIdentifier("home.quickAction.\(["documents", "jobs", "housing", "health"][index])")
             }
         }
     }

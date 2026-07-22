@@ -122,6 +122,7 @@ struct JourneyDirectoryView: View {
                 applyRequestedSection()
             }
         }
+        .accessibilityIdentifier("directory.screen")
     }
 
     @ViewBuilder

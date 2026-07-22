@@ -16,6 +16,7 @@ protocol NotificationServiceProtocol: ObservableObject {
     var isAuthorized: Bool { get }
     
     func requestPermission() async -> Bool
+    func refreshAuthorizationStatus() async
     func scheduleAppointmentReminder(for appointment: Appointment) async -> Bool
     func scheduleReminder(id: String, title: String, body: String, at date: Date) async -> Bool
     func scheduleWeeklyReminder(id: String, title: String, body: String, weekday: Int, hour: Int) async -> Bool
@@ -43,7 +44,7 @@ class NotificationService: NotificationServiceProtocol {
     }
     
     func scheduleReminder(id: String, title: String, body: String, at date: Date) async -> Bool {
-        guard isAuthorized else { return false }
+        guard NotificationPreference.isEnabled && isAuthorized else { return false }
         // Skip past
         guard date > Date() else { return false }
         
@@ -66,7 +67,7 @@ class NotificationService: NotificationServiceProtocol {
     }
 
     func scheduleWeeklyReminder(id: String, title: String, body: String, weekday: Int, hour: Int) async -> Bool {
-        guard isAuthorized else { return false }
+        guard NotificationPreference.isEnabled && isAuthorized else { return false }
         let content = UNMutableNotificationContent()
         content.title = title
         content.body = body
@@ -89,7 +90,7 @@ class NotificationService: NotificationServiceProtocol {
     
     func scheduleTrialEndReminder(endDate: Date) async -> Bool {
         // Disabled: no active subscriptions in this build.
-        guard isAuthorized else { return false }
+        guard NotificationPreference.isEnabled && isAuthorized else { return false }
         let content = UNMutableNotificationContent()
         content.title = "Нагадування від Sweezy"
         content.body = "Відкрийте застосунок, щоб перевірити останні оновлення"
@@ -113,7 +114,7 @@ class NotificationService: NotificationServiceProtocol {
     }
     
     func scheduleReengageReminder(afterDays days: Int) async -> Bool {
-        guard isAuthorized else { return false }
+        guard NotificationPreference.isEnabled && isAuthorized else { return false }
         let content = UNMutableNotificationContent()
         content.title = "Повернімося до інтеграції"
         content.body = "Нові кроки та поради вже чекають на вас"
@@ -136,6 +137,7 @@ class NotificationService: NotificationServiceProtocol {
         do {
             let granted = try await notificationCenter.requestAuthorization(options: [.alert, .badge, .sound])
             await updateAuthorizationStatus()
+            NotificationPreference.isEnabled = granted
             return granted
         } catch {
             AppLogger.notification("Permission request failed: \(error)", isError: true)
@@ -144,7 +146,7 @@ class NotificationService: NotificationServiceProtocol {
     }
     
     func scheduleAppointmentReminder(for appointment: Appointment) async -> Bool {
-        guard isAuthorized else {
+        guard NotificationPreference.isEnabled && isAuthorized else {
             AppLogger.notification("Not authorized")
             return false
         }
@@ -202,6 +204,7 @@ class NotificationService: NotificationServiceProtocol {
     
     func cancelAllNotifications() {
         notificationCenter.removeAllPendingNotificationRequests()
+        notificationCenter.removeAllDeliveredNotifications()
         AppLogger.notification("Cancelled all pending notifications")
     }
     
@@ -236,7 +239,7 @@ class NotificationService: NotificationServiceProtocol {
     // MARK: - Content update notifications
     
     func scheduleContentUpdateNotification(title: String, body: String, delay: TimeInterval = 0) async -> Bool {
-        guard isAuthorized else { return false }
+        guard NotificationPreference.isEnabled && isAuthorized else { return false }
         
         let content = UNMutableNotificationContent()
         content.title = title
@@ -259,10 +262,16 @@ class NotificationService: NotificationServiceProtocol {
     
     // MARK: - Private methods
     
+    func refreshAuthorizationStatus() async {
+        await updateAuthorizationStatus()
+    }
+
     private func updateAuthorizationStatus() async {
         let settings = await notificationCenter.notificationSettings()
         authorizationStatus = settings.authorizationStatus
         isAuthorized = settings.authorizationStatus == .authorized
+            || settings.authorizationStatus == .provisional
+            || settings.authorizationStatus == .ephemeral
     }
 }
 

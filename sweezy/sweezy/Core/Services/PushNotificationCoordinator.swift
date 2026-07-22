@@ -1,6 +1,15 @@
 import UIKit
 import UserNotifications
 
+enum NotificationPreference {
+    static let enabledKey = "notificationsEnabled"
+
+    static var isEnabled: Bool {
+        get { UserDefaults.standard.bool(forKey: enabledKey) }
+        set { UserDefaults.standard.set(newValue, forKey: enabledKey) }
+    }
+}
+
 final class SweezyAppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
     func application(
         _ application: UIApplication,
@@ -13,6 +22,7 @@ final class SweezyAppDelegate: NSObject, UIApplicationDelegate, UNUserNotificati
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         let token = deviceToken.map { String(format: "%02x", $0) }.joined()
         UserDefaults.standard.set(token, forKey: "apns_device_token")
+        guard NotificationPreference.isEnabled else { return }
         guard KeychainStore.get("access_token")?.isEmpty == false else { return }
         Task {
             #if DEBUG
@@ -46,6 +56,7 @@ final class SweezyAppDelegate: NSObject, UIApplicationDelegate, UNUserNotificati
 
     @MainActor
     static func registerForChatPush() async {
+        guard NotificationPreference.isEnabled else { return }
         let center = UNUserNotificationCenter.current()
         let settings = await center.notificationSettings()
         var allowed = settings.authorizationStatus == .authorized || settings.authorizationStatus == .provisional
@@ -62,5 +73,14 @@ final class SweezyAppDelegate: NSObject, UIApplicationDelegate, UNUserNotificati
             #endif
             try? await ChatAPI.registerPush(token: token, environment: environment)
         }
+    }
+
+    @MainActor
+    static func disableChatPush() async {
+        if let token = UserDefaults.standard.string(forKey: "apns_device_token"),
+           KeychainStore.get("access_token")?.isEmpty == false {
+            try? await ChatAPI.unregisterPush(token: token)
+        }
+        UIApplication.shared.unregisterForRemoteNotifications()
     }
 }

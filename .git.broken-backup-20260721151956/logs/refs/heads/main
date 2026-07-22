@@ -1,0 +1,152 @@
+c026c02f697fc8cdd98bf2a1e157aacf10c552da fa6e5a0d551bca499733ddbf6eee490a2601c865 Vlad <vladyslav.katash@kaboom.ch> 1762437746 +0100	commit: feat: admin stats/monitoring, seed-admin endpoint, fixes
+fa6e5a0d551bca499733ddbf6eee490a2601c865 3ee293c1eccf9bac0a50562f03033801981cc2ee Vlad <vladyslav.katash@kaboom.ch> 1762504058 +0100	commit: feat(admin): CMS CRUD + media upload + markdown + categories
+3ee293c1eccf9bac0a50562f03033801981cc2ee 3f8901c940960c9dfa100872b945366c2a7b4217 Vlad <vladyslav.katash@kaboom.ch> 1762506910 +0100	commit: feat(admin): CMS CRUD + media upload + markdown + categories
+3f8901c940960c9dfa100872b945366c2a7b4217 02e0084e2ae4840b899bbd3bf2281602ffeeb915 Vlad <vladyslav.katash@kaboom.ch> 1762508578 +0100	commit: feat(admin): CMS CRUD + media upload + markdown + categories
+02e0084e2ae4840b899bbd3bf2281602ffeeb915 6576afb986b2a6e3b37b860385fc539f1bd0d4ec Vlad <vladyslav.katash@kaboom.ch> 1762508715 +0100	commit: feat(admin): CMS CRUD + media upload + markdown + categories
+6576afb986b2a6e3b37b860385fc539f1bd0d4ec b09693d640c362cc114e2526db8fb071fbfd80fe Vlad <vladyslav.katash@kaboom.ch> 1762508929 +0100	commit: feat(admin): CMS CRUD + media upload + markdown + categories
+b09693d640c362cc114e2526db8fb071fbfd80fe e2fc923a26945fbe19a16cd5e8608a4240964371 Vlad <vladyslav.katash@kaboom.ch> 1762509651 +0100	commit: feat(admin): CMS CRUD + media upload + markdown + categories
+e2fc923a26945fbe19a16cd5e8608a4240964371 ebfe313e6faba30e624bd6542f5e969375e8fcf6 Vlad <vladyslav.katash@kaboom.ch> 1762510506 +0100	commit: feat(admin): CMS CRUD + media upload + markdown + categories
+ebfe313e6faba30e624bd6542f5e969375e8fcf6 14984e76e1bda5fd40de4e7dc98357492d12c627 Vlad <vladyslav.katash@kaboom.ch> 1762511736 +0100	commit: feat(admin): CMS CRUD + media upload + markdown + categories
+14984e76e1bda5fd40de4e7dc98357492d12c627 239fa430a77b3e7b7a57d602da2f5d60cb479c0c Vlad <vladyslav.katash@kaboom.ch> 1762758429 +0100	commit: feat(admin): CMS CRUD + media upload + markdown + categories
+239fa430a77b3e7b7a57d602da2f5d60cb479c0c f5df3e483f8f828c9d030fb2643c69853d7a5ca1 Vlad <vladyslav.katash@kaboom.ch> 1762761405 +0100	commit: feat(admin): CMS CRUD + media upload + markdown + categories
+f5df3e483f8f828c9d030fb2643c69853d7a5ca1 3c103a6e83aab68db0f72f7382a3a31957e90349 Vlad <vladyslav.katash@kaboom.ch> 1762761971 +0100	commit: feat(admin): CMS CRUD + media upload + markdown + categories
+3c103a6e83aab68db0f72f7382a3a31957e90349 17a953fe35c28792675eb8ea331dc06af224903f Vlad <vladyslav.katash@kaboom.ch> 1762762554 +0100	commit: feat(admin): CMS CRUD + media upload + markdown + categories
+17a953fe35c28792675eb8ea331dc06af224903f ba62e8e8908d2f1d834c1596381e66b60712d9bc Vlad <vladyslav.katash@kaboom.ch> 1762763638 +0100	commit: feat(admin): CMS CRUD + media upload + markdown + categories
+ba62e8e8908d2f1d834c1596381e66b60712d9bc 9b3e1279fda29b736a2f3a7cdd64b85f096e71d4 Vlad <vladyslav.katash@kaboom.ch> 1762765560 +0100	commit: feat(admin): CMS CRUD + media upload + markdown + categories
+9b3e1279fda29b736a2f3a7cdd64b85f096e71d4 f1e2f87bdd240b4308c1642286d1eeb774163521 Vlad <vladyslav.katash@kaboom.ch> 1762765931 +0100	commit: feat(admin): CMS CRUD + media upload + markdown + categories
+f1e2f87bdd240b4308c1642286d1eeb774163521 606e94ee4987859cbe335269cab630736d9de544 Vlad <vladyslav.katash@kaboom.ch> 1762767623 +0100	commit: feat(admin): CMS CRUD + media upload + markdown + categories
+606e94ee4987859cbe335269cab630736d9de544 e2709cfbe213597eceea07cc7a190d357879e6e9 Vlad <vladyslav.katash@kaboom.ch> 1762770000 +0100	commit: fix(backend): clean news router (remove \n literals)
+e2709cfbe213597eceea07cc7a190d357879e6e9 76fa8a66899b46ae52944c29e8bcb477b8fb974e Vlad <vladyslav.katash@kaboom.ch> 1762770647 +0100	commit: fix(backend): clean news router/service (remove \n literals)
+76fa8a66899b46ae52944c29e8bcb477b8fb974e 66bfd6cc6b9da36cc0224ed004f9fc0ed68fc6e7 Vlad <vladyslav.katash@kaboom.ch> 1762771116 +0100	commit: chore: use news_service to bypass stale import
+66bfd6cc6b9da36cc0224ed004f9fc0ed68fc6e7 266d84ae54025f007c81a0f60c955b33c8149bdd Vlad <vladyslav.katash@kaboom.ch> 1762771524 +0100	commit: fix(models): import Base from core.database; use news_service
+266d84ae54025f007c81a0f60c955b33c8149bdd ffe38232c85e5c8d0832cd5d76d959fa03e773ed Vlad <vladyslav.katash@kaboom.ch> 1762771946 +0100	commit: fix(news): use uuid4; fix Base import; use news_service
+ffe38232c85e5c8d0832cd5d76d959fa03e773ed 70a3b9d4efba15f385eefb27580f57c2ce414fe6 Vlad <vladyslav.katash@kaboom.ch> 1762773391 +0100	commit: fix(news): use uuid4; fix Base import; use news_service
+70a3b9d4efba15f385eefb27580f57c2ce414fe6 57dc335f33af0b7a9a8754a3b489dfab8724aa1e Vlad <vladyslav.katash@kaboom.ch> 1762777609 +0100	commit: feat(admin): news preview UI; fix news API routes; backend news
+57dc335f33af0b7a9a8754a3b489dfab8724aa1e 544a8c20992570190caead678570e5e273918f90 Vlad <vladyslav.katash@kaboom.ch> 1762778914 +0100	commit: feat(admin/news): custom dropdown + drag&drop image upload + live preview
+544a8c20992570190caead678570e5e273918f90 7f0f5d5e2eaf2c64898ee97f18db214904906b16 Vlad <vladyslav.katash@kaboom.ch> 1762779493 +0100	commit: feat(news): internal articles (content), admin markdown editor, iOS reader
+7f0f5d5e2eaf2c64898ee97f18db214904906b16 f1ce7ce1dd51eed152b4d68b3102fed1042ce3b2 Vlad <vladyslav.katash@kaboom.ch> 1762780780 +0100	commit: feat(news): internal articles (content), admin markdown editor, iOS reader
+f1ce7ce1dd51eed152b4d68b3102fed1042ce3b2 9bb94eadac3f920b234abb92edd8cce2611da59a Vlad <vladyslav.katash@kaboom.ch> 1762781122 +0100	commit: chore: bump sweezy submodule
+9bb94eadac3f920b234abb92edd8cce2611da59a 6b36497280b0e0f60ab84057d4b0756c4d8cc89d Vlad <vladyslav.katash@kaboom.ch> 1762782977 +0100	commit: feat: RSS import endpoint+UI, news
+6b36497280b0e0f60ab84057d4b0756c4d8cc89d 1d4b779dba23ad2c0b0868ca08e97e00065f9fa2 Vlad <vladyslav.katash@kaboom.ch> 1762784088 +0100	commit: feat(admin): allow single-article import via OpenGraph
+1d4b779dba23ad2c0b0868ca08e97e00065f9fa2 4b290844e4e516332ac643327103d7c5a0fb9909 Vlad <vladyslav.katash@kaboom.ch> 1762785645 +0100	commit: feat(rss): feeds scheduler + CRUD endpoints + admin page
+4b290844e4e516332ac643327103d7c5a0fb9909 a4712cd4179f1ffcb21a6dbe829a6aef1fbfe50a Vlad <vladyslav.katash@kaboom.ch> 1762804403 +0100	commit: fix(news): relax URL validation
+a4712cd4179f1ffcb21a6dbe829a6aef1fbfe50a 2b81610e620505c4446476e79fdd98c7a5909d93 Vlad <vladyslav.katash@kaboom.ch> 1762851577 +0100	commit: fix(news): relax URL validation
+2b81610e620505c4446476e79fdd98c7a5909d93 3119688c2421924aec2b1e2153b2aed3719dca40 Vlad <vladyslav.katash@kaboom.ch> 1762853338 +0100	commit: fix(ai): proper CurrentAdmin dependency
+3119688c2421924aec2b1e2153b2aed3719dca40 f04936f7eebf6b93117e6bf5eb257f8150321463 Vlad <vladyslav.katash@kaboom.ch> 1762854766 +0100	commit: fix(ai): make cv-suggest public (no admin required)
+f04936f7eebf6b93117e6bf5eb257f8150321463 d96fb2ba03c5263ca25b1280049253694eab809b Vlad <vladyslav.katash@kaboom.ch> 1762944913 +0100	commit: fix(ai): make cv-suggest public (no admin required)
+d96fb2ba03c5263ca25b1280049253694eab809b f04c7e68f2c88001b0a077400d0ba1eaf429538e Vlad <vladyslav.katash@kaboom.ch> 1762945037 +0100	commit: feat(jobs): Job Finder (Indeed+RAV), favorites, alerts, AI
+f04c7e68f2c88001b0a077400d0ba1eaf429538e 2d8e48e115027bae222aa20df8f7bd3673e15e34 Vlad <vladyslav.katash@kaboom.ch> 1762948694 +0100	commit: feat(jobs): aggregator + API + iOS UI; fixes
+2d8e48e115027bae222aa20df8f7bd3673e15e34 47993bb89e82c6a2ee32a60891e8b25a9e379fba Vlad <vladyslav.katash@kaboom.ch> 1762949136 +0100	commit: feat(jobs): aggregator + API + iOS UI; fixes
+47993bb89e82c6a2ee32a60891e8b25a9e379fba 8fcdc0a473b341520223a4097a2b77d9f73bf477 Vlad <vladyslav.katash@kaboom.ch> 1762949896 +0100	commit: feat(jobs): aggregator + API + iOS UI; fixes
+8fcdc0a473b341520223a4097a2b77d9f73bf477 28573c5cb35e317d1b0e353b586ebc149cfd07ce Vlad <vladyslav.katash@kaboom.ch> 1762951618 +0100	commit: feat(jobs): aggregator + API + iOS UI; fixes
+28573c5cb35e317d1b0e353b586ebc149cfd07ce 054b33a73e119cd3b1e8eb1740400dc22d356c60 Vlad <vladyslav.katash@kaboom.ch> 1762952908 +0100	commit: feat(jobs): aggregator + API + iOS UI; fixes
+054b33a73e119cd3b1e8eb1740400dc22d356c60 1b82ac994c91a3f559ef550ec25153c9dea219d4 Vlad <vladyslav.katash@kaboom.ch> 1762953073 +0100	commit: bump iOS pointer
+1b82ac994c91a3f559ef550ec25153c9dea219d4 b73bc21ce3b9da6d0d9211b92bed7e9e2ba5153a Vlad <vladyslav.katash@kaboom.ch> 1762953625 +0100	commit: bump iOS pointer
+b73bc21ce3b9da6d0d9211b92bed7e9e2ba5153a 5130b44cbd6369849b53b09b32c604c4918a4627 Vlad <vladyslav.katash@kaboom.ch> 1762953632 +0100	commit: feat(jobs): aggregator + API + iOS UI; fixes
+5130b44cbd6369849b53b09b32c604c4918a4627 783f5cabbd69d6c27b160aca06d8cc613670599f Vlad <vladyslav.katash@kaboom.ch> 1762954472 +0100	commit: feat(jobs): aggregator + API + iOS UI; fixes
+783f5cabbd69d6c27b160aca06d8cc613670599f 8909a6061c3aaf897bf17c540bbff4b439afa14c Vlad <vladyslav.katash@kaboom.ch> 1762955834 +0100	commit: feat(jobs): aggregator + API + iOS UI; fixes
+8909a6061c3aaf897bf17c540bbff4b439afa14c 1de586ce496b4a30cdf8d30b6ff55d505d5bd478 Vlad <vladyslav.katash@kaboom.ch> 1762956918 +0100	commit: feat(jobs): aggregator + API + iOS UI; fixes
+1de586ce496b4a30cdf8d30b6ff55d505d5bd478 63585279d0059f09d903fc2c958ab7972a262bb5 Vlad <vladyslav.katash@kaboom.ch> 1762957766 +0100	commit: feat(jobs): aggregator + API + iOS UI; fixes
+63585279d0059f09d903fc2c958ab7972a262bb5 ec65f0ff6ffb399844411551077f2bb802fd559e Vlad <vladyslav.katash@kaboom.ch> 1762959131 +0100	commit: feat(jobs): aggregator + API + iOS UI; fixes
+ec65f0ff6ffb399844411551077f2bb802fd559e 9c66c808b1e297be023424e92f70a43085cb59e5 Vlad <vladyslav.katash@kaboom.ch> 1762960064 +0100	commit: feat(jobs): aggregator + API + iOS UI; fixes
+9c66c808b1e297be023424e92f70a43085cb59e5 993283747b9a9887c05f2b1f43521d6522023ec9 Vlad <vladyslav.katash@kaboom.ch> 1762960763 +0100	revert: Revert "feat(jobs): aggregator + API + iOS UI; fixes"
+993283747b9a9887c05f2b1f43521d6522023ec9 da1a452b408e632294417cd99a2b63e8bec848a2 Vlad <vladyslav.katash@kaboom.ch> 1762961134 +0100	commit: feat(jobs): aggregator + API + iOS UI; fixes
+da1a452b408e632294417cd99a2b63e8bec848a2 cd466c0fd79fbb059ed723164ef69e7cabfcabf2 Vlad <vladyslav.katash@kaboom.ch> 1762963048 +0100	commit: feat(jobs): aggregator + API + iOS UI; fixes
+cd466c0fd79fbb059ed723164ef69e7cabfcabf2 d7d5680ce08efaf30339f611ab67729f7b366066 Vlad <vladyslav.katash@kaboom.ch> 1763023345 +0100	commit: feat(jobs): aggregator + API + iOS UI; fixes
+d7d5680ce08efaf30339f611ab67729f7b366066 254929e278eae18e1abc915c307a09e6a2fa3fd5 Vlad <vladyslav.katash@kaboom.ch> 1763028332 +0100	commit: feat(jobs): aggregator + API + iOS UI; fixes
+254929e278eae18e1abc915c307a09e6a2fa3fd5 70aebb06a50264b4394eedfdc2e0975417cd79f9 Vlad <vladyslav.katash@kaboom.ch> 1763037466 +0100	commit: chore: bump sweezy submodule to latest
+70aebb06a50264b4394eedfdc2e0975417cd79f9 5fd76d3429ab76d9fe145e7db5591a3c77856767 Vlad <vladyslav.katash@kaboom.ch> 1763040767 +0100	commit: chore: bump iOS submodule to latest (premium paywall)
+5fd76d3429ab76d9fe145e7db5591a3c77856767 ee0646a08492527bfdb8a594e4c429629199d0a1 Vlad <vladyslav.katash@kaboom.ch> 1763052129 +0100	commit: feat(admin): subscriptions manual grant + analytics; backend endpoints
+ee0646a08492527bfdb8a594e4c429629199d0a1 bd43fd60d8c143a6d02e6a9030d4ea6eeebf95af Vlad <vladyslav.katash@kaboom.ch> 1763106669 +0100	commit: feat(subscriptions): backend entitlements + free favorites limit; wire iOS gating
+bd43fd60d8c143a6d02e6a9030d4ea6eeebf95af c0d9cb6a0a677d50c16bf2074f03c0b93d941137 Vlad <vladyslav.katash@kaboom.ch> 1763114109 +0100	commit: feat(subscriptions): backend entitlements + free favorites limit; wire iOS gating
+c0d9cb6a0a677d50c16bf2074f03c0b93d941137 95a2cf4d12ebf4a09afe80c08ec2450a5054ffcb Vlad <vladyslav.katash@kaboom.ch> 1763116499 +0100	commit: feat(subscriptions): backend entitlements + free favorites limit; wire iOS gating
+95a2cf4d12ebf4a09afe80c08ec2450a5054ffcb 51dd539e6a02b5c7db6f528214b6b419197f254c Vlad <vladyslav.katash@kaboom.ch> 1764259540 +0100	commit: chore: ignore playwright artifacts
+51dd539e6a02b5c7db6f528214b6b419197f254c 4525526ff8b8377dd911376cdc221a01e7dd2470 Vlad <vladyslav.katash@kaboom.ch> 1764321170 +0100	commit: chore: ignore playwright artifacts
+4525526ff8b8377dd911376cdc221a01e7dd2470 61b9a86e9ceacad51d57372bd4fd9c0a5903fc0b Vlad <vladyslav.katash@kaboom.ch> 1764327769 +0100	commit: chore: ignore playwright artifacts
+61b9a86e9ceacad51d57372bd4fd9c0a5903fc0b fb484d1814cc850ecbff07b655f426e9aef3d493 Vlad <vladyslav.katash@kaboom.ch> 1764328410 +0100	commit: chore: ignore playwright artifacts
+fb484d1814cc850ecbff07b655f426e9aef3d493 4513324d82c99293fa50347c9cce45d80030ec53 Vlad <vladyslav.katash@kaboom.ch> 1764329721 +0100	commit: chore: ignore playwright artifacts
+4513324d82c99293fa50347c9cce45d80030ec53 f03f59b69346e307e6589f8ca07d397a36b5228b Vlad <vladyslav.katash@kaboom.ch> 1764348496 +0100	commit: your message
+f03f59b69346e307e6589f8ca07d397a36b5228b 2a9d55e1a91dedf112e0c7fc3324606859929551 Vlad <vladyslav.katash@kaboom.ch> 1764348501 +0100	commit: chore: ignore playwright artifacts
+2a9d55e1a91dedf112e0c7fc3324606859929551 6f91c2b3b5e55f87d44ae9b7408ccb24098e205e Vlad <vladyslav.katash@kaboom.ch> 1764351235 +0100	commit: chore: ignore playwright artifacts
+6f91c2b3b5e55f87d44ae9b7408ccb24098e205e 0455c6070f3979ccafb555113f61257f3cb1f5fa Vlad <vladyslav.katash@kaboom.ch> 1764520961 +0100	commit: chore: ignore playwright artifacts
+0455c6070f3979ccafb555113f61257f3cb1f5fa 0455c6070f3979ccafb555113f61257f3cb1f5fa Vlad <vladyslav.katash@kaboom.ch> 1764758643 +0100	Branch: renamed refs/heads/main to refs/heads/main
+0455c6070f3979ccafb555113f61257f3cb1f5fa 0455c6070f3979ccafb555113f61257f3cb1f5fa Vlad <vladyslav.katash@kaboom.ch> 1764758655 +0100	Branch: renamed refs/heads/main to refs/heads/main
+0455c6070f3979ccafb555113f61257f3cb1f5fa 0455c6070f3979ccafb555113f61257f3cb1f5fa Vlad <vladyslav.katash@kaboom.ch> 1765976412 +0100	Branch: renamed refs/heads/main to refs/heads/main
+0455c6070f3979ccafb555113f61257f3cb1f5fa 677e099bcf2d8b4356b78fff7b2abab2abeeb708 Vlad <vladyslav.katash@kaboom.ch> 1765976428 +0100	commit: your message
+677e099bcf2d8b4356b78fff7b2abab2abeeb708 87753e2f56125952a9bfec81eb2e57422bc0f330 Vlad <vladyslav.katash@kaboom.ch> 1767086706 +0100	commit: your message
+87753e2f56125952a9bfec81eb2e57422bc0f330 677e099bcf2d8b4356b78fff7b2abab2abeeb708 Vlad <vladyslav.katash@kaboom.ch> 1767088045 +0100	reset: moving to origin/main
+677e099bcf2d8b4356b78fff7b2abab2abeeb708 529e6979843f87246382af0f09734af41e5172f5 Vlad <vladyslav.katash@kaboom.ch> 1767088082 +0100	commit: Implement password reset and guides updates
+529e6979843f87246382af0f09734af41e5172f5 3632827d3f85cad8bcce138624ee97a443eb4515 Vlad <vladyslav.katash@kaboom.ch> 1767088108 +0100	commit: Implement password reset and guides updates
+3632827d3f85cad8bcce138624ee97a443eb4515 677e099bcf2d8b4356b78fff7b2abab2abeeb708 Vlad <vladyslav.katash@kaboom.ch> 1767088224 +0100	reset: moving to origin/main
+677e099bcf2d8b4356b78fff7b2abab2abeeb708 728df5ff0f2358c01c58abbc418ea4b4d58a58c7 Vlad <vladyslav.katash@kaboom.ch> 1767088252 +0100	commit: Implement password reset and guides updates
+728df5ff0f2358c01c58abbc418ea4b4d58a58c7 c7d9c2cac6513d4b040b0b1a2dc9d7e7982dec9b Vlad <vladyslav.katash@kaboom.ch> 1767090618 +0100	commit: Implement password reset and guides updates
+c7d9c2cac6513d4b040b0b1a2dc9d7e7982dec9b 728df5ff0f2358c01c58abbc418ea4b4d58a58c7 Vlad <vladyslav.katash@kaboom.ch> 1767090714 +0100	reset: moving to HEAD~
+728df5ff0f2358c01c58abbc418ea4b4d58a58c7 3aab2a14eef0aee6a265f023103724457d7b586e Vlad <vladyslav.katash@kaboom.ch> 1767090736 +0100	commit: Implement password reset and guides updates (no secrets)
+3aab2a14eef0aee6a265f023103724457d7b586e 3aab2a14eef0aee6a265f023103724457d7b586e Vlad <vladyslav.katash@kaboom.ch> 1767711888 +0100	Branch: renamed refs/heads/main to refs/heads/main
+3aab2a14eef0aee6a265f023103724457d7b586e 3aab2a14eef0aee6a265f023103724457d7b586e Vlad <vladyslav.katash@kaboom.ch> 1767711951 +0100	Branch: renamed refs/heads/main to refs/heads/main
+3aab2a14eef0aee6a265f023103724457d7b586e ea917eb1729a2ea8a8004a0aface3aaed9fae235 Vlad <vladyslav.katash@kaboom.ch> 1767785918 +0100	commit: Deploy admin & backend
+ea917eb1729a2ea8a8004a0aface3aaed9fae235 6c1bd1f130e2a048be0a6d289d5e334439c0e006 Vlad <vladyslav.katash@kaboom.ch> 1768386692 +0100	commit: Fix Render migrations + auth validator import
+6c1bd1f130e2a048be0a6d289d5e334439c0e006 f937dafb631bec7e9939f72b529457aee7aa9394 Vlad <vladyslav.katash@kaboom.ch> 1768390671 +0100	commit: Run migrations/seed/metrics in lifespan (Render startup fix)
+f937dafb631bec7e9939f72b529457aee7aa9394 de3d99cc907b83223e383888ecbbde85b571de53 Vlad <vladyslav.katash@kaboom.ch> 1768391099 +0100	commit: Fix Prometheus metrics init (register before startup)
+de3d99cc907b83223e383888ecbbde85b571de53 2e8db2938ef04a15e00b971b0faf51b4427e893a Vlad <vladyslav.katash@kaboom.ch> 1768393551 +0100	commit: App Store: account deletion + legal pages + update base URLs
+2e8db2938ef04a15e00b971b0faf51b4427e893a 91ca6fc9080e9cbdce7078d52a56ef9155e86b69 Vlad <vladyslav.katash@kaboom.ch> 1768396626 +0100	commit: Track iOS app in repo (remove submodule gitlink)
+91ca6fc9080e9cbdce7078d52a56ef9155e86b69 c6655408a8d4f0bfdc3c53af7b0da6e3cc99fd2c Vlad <vladyslav.katash@kaboom.ch> 1768396874 +0100	commit: Fix empty PrivacyInfo.xcprivacy
+c6655408a8d4f0bfdc3c53af7b0da6e3cc99fd2c 99e7bf3cca1a032d375b4d364bebaa0bf66ac924 Vlad <vladyslav.katash@kaboom.ch> 1768397060 +0100	commit: Ignore Info.plist placeholder values for Sentry/Amplitude
+99e7bf3cca1a032d375b4d364bebaa0bf66ac924 0e56fa6eae60a068a67d2a5531663320edf15670 Vlad <vladyslav.katash@kaboom.ch> 1768489736 +0100	commit: App Store: account deletion + legal pages + update base URLs
+0e56fa6eae60a068a67d2a5531663320edf15670 6a1827b7d286123eca2872f6501b40f52652d928 Vlad <vladyslav.katash@kaboom.ch> 1768832031 +0100	commit: iOS: add Dovidnyk page tour (coach marks)
+6a1827b7d286123eca2872f6501b40f52652d928 543e543959aea31bf344d664ab3a7ef343c6ba9c Vlad <vladyslav.katash@kaboom.ch> 1768835183 +0100	commit: App Store: account deletion + legal pages + update base URLs
+543e543959aea31bf344d664ab3a7ef343c6ba9c 4c5178e48a010a37c386283b14e53ab963e614c1 Vlad <vladyslav.katash@kaboom.ch> 1768901353 +0100	commit: iOS: improve coach marks design (glassmorphism, smart positioning, arrow pointer)
+4c5178e48a010a37c386283b14e53ab963e614c1 d7bd206dd3d6b140701007b4ca3c1e7a5b879da6 Vlad <vladyslav.katash@kaboom.ch> 1768904236 +0100	commit: Feature: contextual onboarding (modal sheets + carousel) for Довідник, Calculator, Roadmap, Map, Templates
+d7bd206dd3d6b140701007b4ca3c1e7a5b879da6 2dbe6b5577686e5675a78b3a4e3df00c4e75016a Vlad <vladyslav.katash@kaboom.ch> 1768905723 +0100	commit: App Store: account deletion + legal pages + update base URLs
+2dbe6b5577686e5675a78b3a4e3df00c4e75016a 41bbea78c10ed1b1a2d50c799e3081d5f94dac7e Vlad <vladyslav.katash@kaboom.ch> 1768905942 +0100	commit: Feature onboarding: add Settings, Appointments, Subscription, News, Gamification, CV
+41bbea78c10ed1b1a2d50c799e3081d5f94dac7e ecb514b174f84b715c25d3d77b31e47fbc56638b Vlad <vladyslav.katash@kaboom.ch> 1768907040 +0100	commit: App Store: account deletion + legal pages + update base URLs
+ecb514b174f84b715c25d3d77b31e47fbc56638b 04c6e62779a3ce0968f450df91cba25d10171457 Vlad <vladyslav.katash@kaboom.ch> 1768909913 +0100	commit: App Store: account deletion + legal pages + update base URLs
+04c6e62779a3ce0968f450df91cba25d10171457 5fd7dd54545e8d248b9e5b1f96c57ad23d1c739d Vlad <vladyslav.katash@kaboom.ch> 1768983393 +0100	commit: Redesign FeatureOnboardingView: winter theme + lightweight snowfall
+5fd7dd54545e8d248b9e5b1f96c57ad23d1c739d c1f7a629b3e352bbbe0bb42afbea73ae371cc71f Vlad <vladyslav.katash@kaboom.ch> 1768985573 +0100	commit: Fix: remove duplicate ScaleButtonStyle in FeatureOnboardingView
+c1f7a629b3e352bbbe0bb42afbea73ae371cc71f d6acaa85a8cb4bc00fc97d9f4cb5e8acbc242993 Vlad <vladyslav.katash@kaboom.ch> 1768991655 +0100	commit: Onboarding UX: present full-screen + reduce motion + top close
+d6acaa85a8cb4bc00fc97d9f4cb5e8acbc242993 7a91acfee76260f62eae3c621b7686f4a3a8c844 Vlad <vladyslav.katash@kaboom.ch> 1768996586 +0100	commit: Home hero: extend to status bar (safe-area aware)
+7a91acfee76260f62eae3c621b7686f4a3a8c844 6805764f6f92b3dfd365b49c86d8e1a81c3d8f41 Vlad <vladyslav.katash@kaboom.ch> 1771339728 +0100	commit: App Store: account deletion + legal pages + update base URLs
+6805764f6f92b3dfd365b49c86d8e1a81c3d8f41 dbe2e49dded26e7f4b04b72bdfeed02730ac8ffd Vlad <vladyslav.katash@kaboom.ch> 1771411193 +0100	commit: feat: full adaptive light/dark theme — all pages now respect system color scheme
+dbe2e49dded26e7f4b04b72bdfeed02730ac8ffd ebea2ff8e018122d6e7073b197b28e64631bd9fb Vlad <vladyslav.katash@kaboom.ch> 1771417179 +0100	commit: Restore beautiful dark winter aesthetic + fix light mode readability
+ebea2ff8e018122d6e7073b197b28e64631bd9fb 766f74e3c09c0cd2cdcbd0791a303fb12cc2ffd6 Vlad <vladyslav.katash@kaboom.ch> 1771419323 +0100	commit: Redesign MapView: compact place rows, grouped card list, adaptive colors, transparent nav bar, polished filter chips & bottom sheet
+766f74e3c09c0cd2cdcbd0791a303fb12cc2ffd6 e0c2cf52e205f21f471853af0dee88ea30fc7d89 Vlad <vladyslav.katash@kaboom.ch> 1771420741 +0100	commit: Fix MapFilterChip redeclaration by renaming MapView chip
+e0c2cf52e205f21f471853af0dee88ea30fc7d89 b42a08372879eee602940144d914b42a1cab711f Vlad <vladyslav.katash@kaboom.ch> 1771421730 +0100	commit: Redesign OptimizedMapView UI (chips, map frame, list rows) while keeping performance optimizations
+b42a08372879eee602940144d914b42a1cab711f 1d8de370da00996c8fd2fbdac341f58f3c1d86fd Vlad <vladyslav.katash@kaboom.ch> 1771422487 +0100	commit: Add optional demo user seeding for App Store review
+1d8de370da00996c8fd2fbdac341f58f3c1d86fd 75097990e99f4743adb785ddd0df930fd657c4a2 Vlad <vladyslav.katash@kaboom.ch> 1771425540 +0100	commit: Redesign GamificationLevelCard: clean adaptive UI, level-accent colors, slim progress ring
+75097990e99f4743adb785ddd0df930fd657c4a2 9c0a9c419ebe79f027f649864f568c1142a92e56 Vlad <vladyslav.katash@kaboom.ch> 1771426814 +0100	commit: App Store: account deletion + legal pages + update base URLs
+9c0a9c419ebe79f027f649864f568c1142a92e56 a5a8d9908c92f3a803a035c61df8857dd1e59ebb Vlad <vladyslav.katash@kaboom.ch> 1771427792 +0100	commit: Fix localization: remove hardcoded UA strings in Home/Map/Dovidnyk/Gamification + add en/de keys
+a5a8d9908c92f3a803a035c61df8857dd1e59ebb f2452f24717ed34e431a6d29de6644b379623d39 Vlad <vladyslav.katash@kaboom.ch> 1771428849 +0100	commit: Render: make seed_demo_user import optional (avoid startup crash)
+f2452f24717ed34e431a6d29de6644b379623d39 a46a61ca986840ccc0bbe6dca4e03f5e50ca6c00 Vlad <vladyslav.katash@kaboom.ch> 1771517554 +0100	commit: App Store: account deletion + legal pages + update base URLs
+a46a61ca986840ccc0bbe6dca4e03f5e50ca6c00 46af57710799cb604eed8ec5f7213955a05faed5 Vlad <vladyslav.katash@kaboom.ch> 1771518256 +0100	commit: App Store: account deletion + legal pages + update base URLs
+46af57710799cb604eed8ec5f7213955a05faed5 91d74b6b9f9f47df98ac67bd2961bd0b733d228d Vlad <vladyslav.katash@kaboom.ch> 1771838471 +0100	commit: App Store: account deletion + legal pages + update base URLs
+91d74b6b9f9f47df98ac67bd2961bd0b733d228d 08ca2dd236923bdafacfd8c672349ca42ff83e8a Vlad <vladyslav.katash@kaboom.ch> 1772195111 +0100	commit: App Store: account deletion + legal pages + update base URLs
+08ca2dd236923bdafacfd8c672349ca42ff83e8a a8a623dccd38141296a26047e32e7464cf68d339 Vlad <vladyslav.katash@kaboom.ch> 1773912856 +0100	commit: feat: Phase 4 - spring/summer design refresh
+a8a623dccd38141296a26047e32e7464cf68d339 c78e1ac065db3e02b0667efc201348e5e9ce9138 Vlad <vladyslav.katash@kaboom.ch> 1773918392 +0100	commit: feat: v1.1 release — polish, localization, UX improvements
+c78e1ac065db3e02b0667efc201348e5e9ce9138 cdf895786d80e68875d815be756c0411c8f1ed0a Vlad <vladyslav.katash@kaboom.ch> 1773924806 +0100	commit: feat: marketplace (backend + iOS)
+cdf895786d80e68875d815be756c0411c8f1ed0a f013b3cfd1c998441e63f01d269cef71cbc5d74e Vlad <vladyslav.katash@kaboom.ch> 1773963864 +0100	commit: feat: marketplace (backend + iOS)
+f013b3cfd1c998441e63f01d269cef71cbc5d74e 55f468cdfa1c3da6dec93532060b3605a7250269 Vlad <vladyslav.katash@kaboom.ch> 1773964856 +0100	commit: update design
+55f468cdfa1c3da6dec93532060b3605a7250269 416f50ae6c3114a3f2608f3ed232d15aa703fe4a Vlad <vladyslav.katash@kaboom.ch> 1774012432 +0100	commit: update design
+416f50ae6c3114a3f2608f3ed232d15aa703fe4a db28f569099a2a87dccecb80964a601ecf8f5022 Vlad <vladyslav.katash@kaboom.ch> 1774015205 +0100	commit: update design
+db28f569099a2a87dccecb80964a601ecf8f5022 09d0816b9666acda80daf78883f753e1ffa45bad Vlad <vladyslav.katash@kaboom.ch> 1774017348 +0100	commit: update design
+09d0816b9666acda80daf78883f753e1ffa45bad 6c10d480712541357e20b263f46055c386000fbe Vlad <vladyslav.katash@kaboom.ch> 1774018859 +0100	commit: update design
+6c10d480712541357e20b263f46055c386000fbe cd4c65acfdd5db58a1dd44cade3415b8fb922570 Vlad <vladyslav.katash@kaboom.ch> 1774023872 +0100	commit: update design
+cd4c65acfdd5db58a1dd44cade3415b8fb922570 31233a6ff5ae9749723b80c7bca072f71f06e40b Vlad <vladyslav.katash@kaboom.ch> 1774280216 +0100	commit: update design
+31233a6ff5ae9749723b80c7bca072f71f06e40b 8e68b48948f686ba2686805eeb20667c7273619c Vlad <vladyslav.katash@kaboom.ch> 1774284159 +0100	commit: update design
+8e68b48948f686ba2686805eeb20667c7273619c d016e45de5b730db32ceea2f745cec3fcfed1de8 Vlad <vladyslav.katash@kaboom.ch> 1774285120 +0100	commit: update design
+d016e45de5b730db32ceea2f745cec3fcfed1de8 a81ea6123786e4c06175c40b5cb8084de9e3be1e Vlad <vladyslav.katash@kaboom.ch> 1774289734 +0100	commit: update design
+a81ea6123786e4c06175c40b5cb8084de9e3be1e a42d9119fab9f77e0643218f8ec72a30c72d671e Vlad <vladyslav.katash@kaboom.ch> 1774305381 +0100	commit: update design
+a42d9119fab9f77e0643218f8ec72a30c72d671e ea198cfe4658c8b272b8c8fec6c0df071887884a Vlad <vladyslav.katash@kaboom.ch> 1774363637 +0100	commit: update design
+ea198cfe4658c8b272b8c8fec6c0df071887884a 303b0a7ed52e0c699e7ed6ae27dfd4548bf6446d Vlad <vladyslav.katash@kaboom.ch> 1774367169 +0100	commit: update design
+303b0a7ed52e0c699e7ed6ae27dfd4548bf6446d 1656173cce428a22cd28535ba1902b1aab94fe94 Vlad <vladyslav.katash@kaboom.ch> 1774368849 +0100	commit: update design
+1656173cce428a22cd28535ba1902b1aab94fe94 ed5b7aea9ea427b32f7583d740bec8c7b702d483 Vlad <vladyslav.katash@kaboom.ch> 1774396043 +0100	commit: update design
+ed5b7aea9ea427b32f7583d740bec8c7b702d483 c14e4714214518db771885388228d6aad8f58274 Vlad <vladyslav.katash@kaboom.ch> 1774396677 +0100	commit: update design
+c14e4714214518db771885388228d6aad8f58274 470f8c1b5d1c1b15625e555511fef6c0a7bb3b62 Vlad <vladyslav.katash@kaboom.ch> 1774879289 +0200	commit: update
+470f8c1b5d1c1b15625e555511fef6c0a7bb3b62 8a784710ab029aa7d7f663dfc375ac5766138ea1 Vlad <vladyslav.katash@kaboom.ch> 1774963146 +0200	commit: update
+8a784710ab029aa7d7f663dfc375ac5766138ea1 0fb69cf3f119cd77760990f4336a6aff0bef864e Vlad <vladyslav.katash@kaboom.ch> 1774965074 +0200	commit: fix migration revision id length
+0fb69cf3f119cd77760990f4336a6aff0bef864e ce85d0a764c742c0a8c35591c6c8c831eb2695ba Vlad <vladyslav.katash@kaboom.ch> 1774969393 +0200	commit: add marketplace listing photos and moderation visibility
+ce85d0a764c742c0a8c35591c6c8c831eb2695ba 9d9869c0ec762b98976b2d1e7feb061cbdcad00f Vlad <vladyslav.katash@kaboom.ch> 1776114466 +0200	commit: update fix
+9d9869c0ec762b98976b2d1e7feb061cbdcad00f 7186e89414c4d9148a7d09a8ea2a4916049c1173 Vlad <vladyslav.katash@kaboom.ch> 1776177105 +0200	commit: update fix
+7186e89414c4d9148a7d09a8ea2a4916049c1173 81cebef0db9bfc0aef53d52d661cdeb97af6163c Vlad <vladyslav.katash@kaboom.ch> 1776177808 +0200	commit: update fix
+81cebef0db9bfc0aef53d52d661cdeb97af6163c 3b5a4106f147700f32af113a5161dc33e0ba5dc0 Vlad <vladyslav.katash@kaboom.ch> 1777447543 +0200	commit: Pin backend Python runtime for Render
+3b5a4106f147700f32af113a5161dc33e0ba5dc0 b0c43eff348990f69aaf512321b769f32615d44b Vlad <vladyslav.katash@kaboom.ch> 1777447838 +0200	commit: social auth для iOS + backend.
+b0c43eff348990f69aaf512321b769f32615d44b eb86c81ba37fe52a3940ff2d6d62b6b4b3ba4cf9 Vlad <vladyslav.katash@kaboom.ch> 1777447848 +0200	commit: social auth для iOS + backend.

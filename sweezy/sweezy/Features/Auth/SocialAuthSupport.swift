@@ -185,7 +185,7 @@ struct SocialAuthPanel: View {
             try await handleSocialResponse(response)
         } catch {
             await MainActor.run {
-                errorMessage = (error as NSError).localizedDescription
+                errorMessage = socialAuthErrorMessage(error)
             }
         }
     }
@@ -205,7 +205,7 @@ struct SocialAuthPanel: View {
             try await handleSocialResponse(response)
         } catch {
             await MainActor.run {
-                errorMessage = (error as NSError).localizedDescription
+                errorMessage = socialAuthErrorMessage(error)
             }
         }
 
@@ -457,6 +457,23 @@ private extension APIClient.SocialAuthResponse {
         default: return "social sign-in"
         }
     }
+}
+
+private func socialAuthErrorMessage(_ error: Error) -> String? {
+    let nsError = error as NSError
+    let description = nsError.localizedDescription.lowercased()
+    let isAppleCancellation = nsError.domain == ASAuthorizationError.errorDomain
+        && nsError.code == ASAuthorizationError.canceled.rawValue
+    let isGoogleCancellation = nsError.domain.lowercased().contains("google")
+        && (description.contains("cancel") || description.contains("abgebrochen"))
+
+    if isAppleCancellation || isGoogleCancellation {
+        return nil
+    }
+    if nsError.domain == "Auth" {
+        return nsError.localizedDescription
+    }
+    return "auth.social.error.generic".localized
 }
 
 private func randomNonceString(length: Int = 32) -> String {

@@ -223,6 +223,7 @@ class RequestIDMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         request_id = str(uuid.uuid4())
         start = time.perf_counter()
+        response = None
         # Attach request identifier to structlog context
         import structlog
 
@@ -249,7 +250,7 @@ class RequestIDMiddleware(BaseHTTPMiddleware):
                 request_id=request_id,
                 method=request.method,
                 path=str(request.url.path),
-                query=str(request.url.query),
+                query_keys=sorted(request.query_params.keys()),
                 status_code=status_code,
                 duration_ms=duration_ms,
                 client_ip=client_host,
@@ -385,21 +386,3 @@ try:
 except Exception:
     # directory may not exist at build time
     pass
-
-
-@app.get("/debug/openapi")
-def debug_openapi() -> dict:
-    """
-    Helper endpoint to debug OpenAPI generation issues in hosted environments.
-    It attempts to call `app.openapi()` and, if that fails, returns the error
-    and traceback instead of letting FastAPI swallow it into a generic 500.
-    """
-    import traceback
-
-    try:
-        return app.openapi()
-    except Exception as exc:  # pragma: no cover - only used in prod debugging
-        return {
-            "error": str(exc),
-            "traceback": traceback.format_exc(),
-        }

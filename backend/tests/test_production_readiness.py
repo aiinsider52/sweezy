@@ -24,6 +24,8 @@ def _production_settings(**overrides) -> Settings:
         "JWT_SECRET_KEY": "x" * 48,
         "CORS_ORIGINS": '["https://sweezy-admin.onrender.com"]',
         "ADMIN_PASSWORD": "not-the-default-password",
+        "RESEND_API_KEY": "re_test_key",
+        "RESEND_FROM_EMAIL": "verified@sweezy.app",
         "CHAT_ENABLED": True,
         "REDIS_URL": "rediss://example.invalid:6379/0",
         "PUSH_NOTIFICATIONS_ENABLED": True,
@@ -47,6 +49,16 @@ def test_valid_production_chat_without_push_configuration() -> None:
         APNS_TEAM_ID=None,
         APNS_PRIVATE_KEY=None,
         APNS_BUNDLE_ID=None,
+    ).assert_valid()
+
+
+def test_disabled_push_allows_bundle_identifier_placeholder() -> None:
+    _production_settings(
+        PUSH_NOTIFICATIONS_ENABLED=False,
+        APNS_KEY_ID=None,
+        APNS_TEAM_ID=None,
+        APNS_PRIVATE_KEY=None,
+        APNS_BUNDLE_ID="com.sweezy.mobile",
     ).assert_valid()
 
 
@@ -82,7 +94,16 @@ def test_readiness_aggregates_critical_dependencies(monkeypatch: pytest.MonkeyPa
     monkeypatch.setattr(
         readiness,
         "get_settings",
-        lambda: type("S", (), {"CHAT_ENABLED": True, "PUSH_NOTIFICATIONS_ENABLED": True})(),
+        lambda: type(
+            "S",
+            (),
+            {
+                "CHAT_ENABLED": True,
+                "PUSH_NOTIFICATIONS_ENABLED": True,
+                "RESEND_API_KEY": "re_test_key",
+                "RESEND_FROM_EMAIL": "verified@sweezy.app",
+            },
+        )(),
     )
 
     assert readiness.run_readiness_checks() == {
@@ -90,4 +111,5 @@ def test_readiness_aggregates_critical_dependencies(monkeypatch: pytest.MonkeyPa
         "migrations": "0025_production_chat",
         "redis": "ok",
         "apns": "configured",
+        "email": "configured",
     }

@@ -63,6 +63,7 @@ struct SettingsView: View {
             .navigationBarHidden(true)
             .featureOnboarding(.settings)
         }
+        .accessibilityIdentifier("settings.screen")
         .onAppear {
             AppLogger.ui("SettingsView onAppear")
             lockManager.loadBiometryType()
@@ -401,7 +402,11 @@ private extension SettingsView {
                     )
                 }
                 editorialSettingsDivider
-                editorialSettingsRow(icon: "bell", title: "settings.notifications".localized) {
+                editorialSettingsRow(
+                    icon: "bell",
+                    title: "settings.notifications".localized,
+                    accessibilityIdentifier: "settings.notifications.open"
+                ) {
                     showingNotificationSettings = true
                 }
                 editorialSettingsDivider
@@ -528,12 +533,14 @@ private extension SettingsView {
         title: String,
         value: String? = nil,
         showsChevron: Bool = true,
+        accessibilityIdentifier: String? = nil,
         action: @escaping () -> Void
     ) -> some View {
         Button(action: action) {
             editorialSettingsRowLabel(icon: icon, title: title, value: value, showsChevron: showsChevron)
         }
         .buttonStyle(.plain)
+        .accessibilityIdentifier(accessibilityIdentifier ?? "")
     }
 
     func editorialSettingsRowLabel(

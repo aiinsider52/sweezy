@@ -528,6 +528,7 @@ private extension SettingsView {
             .padding(.horizontal, 2)
     }
 
+    @ViewBuilder
     func editorialSettingsRow(
         icon: String,
         title: String,
@@ -536,11 +537,16 @@ private extension SettingsView {
         accessibilityIdentifier: String? = nil,
         action: @escaping () -> Void
     ) -> some View {
-        Button(action: action) {
+        let row = Button(action: action) {
             editorialSettingsRowLabel(icon: icon, title: title, value: value, showsChevron: showsChevron)
         }
         .buttonStyle(.plain)
-        .accessibilityIdentifier(accessibilityIdentifier ?? "")
+
+        if let accessibilityIdentifier {
+            row.accessibilityIdentifier(accessibilityIdentifier)
+        } else {
+            row
+        }
     }
 
     func editorialSettingsRowLabel(

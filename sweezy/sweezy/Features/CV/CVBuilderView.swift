@@ -8,6 +8,7 @@
 
 import SwiftUI
 import UIKit
+import PhotosUI
 
 struct CVBuilderView: View {
     @Environment(\.dismiss) private var dismiss
@@ -33,6 +34,8 @@ struct CVBuilderView: View {
     // UI State
     @State private var showTips = false
     @State private var copiedFeedback = false
+    @State private var selectedPhotoItem: PhotosPickerItem?
+    @State private var selectedPhotoData: Data?
     
     // TEMPORARY (App Store review): IAP removed — everything is unlocked.
     
@@ -92,13 +95,13 @@ struct CVBuilderView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                JourneyPhotoBackground(imageName: JourneyBackdrop.alpine.rawValue, blurRadius: 7, darkness: 0.68)
-                
+                Color(red: 0.025, green: 0.03, blue: 0.028)
+                    .ignoresSafeArea()
+
                 VStack(spacing: 0) {
-                    // Progress indicator
-                    progressBar
-                    
-                    // Content
+                    cvTopBar
+                    cvHero
+
                     TabView(selection: $currentStep) {
                         personalStepView.tag(CVStep.personal)
                         summaryStepView.tag(CVStep.summary)
@@ -109,82 +112,180 @@ struct CVBuilderView: View {
                     }
                     .tabViewStyle(.page(indexDisplayMode: .never))
                     .animation(.easeInOut(duration: 0.3), value: currentStep)
-                    
-                    // Navigation buttons
+
                     navigationButtons
                 }
             }
-            .navigationTitle("CV Builder")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Закрити") { dismiss() }
-                        .foregroundColor(.white.opacity(0.7))
-                }
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button {
-                        showTips.toggle()
-                    } label: {
-                        Image(systemName: "lightbulb.fill")
-                            .foregroundColor(Theme.Colors.accent)
-                    }
-                }
-            }
+            .navigationBarHidden(true)
             .sheet(isPresented: $showTips) {
                 swissCVTipsSheet
             }
             .onAppear {
                 loadSavedCV()
-                // TEMPORARY: no subscription/entitlement refresh in this build.
+                loadSavedPhoto()
+                NotificationCenter.default.post(name: .setJourneyBottomBarHidden, object: true)
             }
-        }
-        .journeyScreen(.alpine, darkness: 0.68)
-    }
-    
-    // MARK: - Progress Bar
-    private var progressBar: some View {
-        HStack(spacing: 4) {
-            ForEach(CVStep.allCases, id: \.rawValue) { step in
-                    VStack(spacing: 6) {
-                    Circle()
-                        .fill(step.rawValue <= currentStep.rawValue ? Theme.Colors.primary : Color.white.opacity(0.2))
-                        .frame(width: step == currentStep ? 12 : 8, height: step == currentStep ? 12 : 8)
-                        .overlay(
-                            Circle()
-                                .stroke(Theme.Colors.primary.opacity(0.5), lineWidth: step == currentStep ? 2 : 0)
-                                .frame(width: 16, height: 16)
-                        )
-                    
-                    if step == currentStep {
-                        Text(step.title)
-                            .font(.caption2.bold())
-                            .foregroundColor(Theme.Colors.primary)
+            .onDisappear {
+                NotificationCenter.default.post(name: .setJourneyBottomBarHidden, object: false)
+            }
+            .onChange(of: selectedPhotoItem) { _, item in
+                guard let item else { return }
+                Task {
+                    if let data = try? await item.loadTransferable(type: Data.self) {
+                        await MainActor.run {
+                            selectedPhotoData = data
+                            saveSelectedPhoto(data)
+                        }
                     }
                 }
-                
-                if step != CVStep.allCases.last {
-                    Rectangle()
-                        .fill(step.rawValue < currentStep.rawValue ? Theme.Colors.primary : Color.white.opacity(0.15))
-                        .frame(height: 2)
+            }
+        }
+        .preferredColorScheme(.dark)
+        .featureOnboarding(.cvBuilder)
+    }
+
+    private var cvTopBar: some View {
+        HStack(spacing: 12) {
+            Button {
+                dismiss()
+            } label: {
+                Image(systemName: "chevron.left")
+                    .font(.system(size: 17, weight: .bold))
+                    .foregroundColor(.white)
+                    .frame(width: 44, height: 44)
+                    .background(Color.white.opacity(0.07))
+                    .clipShape(Circle())
+                    .overlay(Circle().stroke(Color.white.opacity(0.14), lineWidth: 1))
+            }
+            .accessibilityLabel("Назад")
+
+            Spacer()
+
+            VStack(spacing: 2) {
+                Text("CV Builder")
+                    .font(.system(size: 17, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
+                Text("Крок \(currentStep.rawValue + 1) із \(CVStep.allCases.count)")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundColor(.white.opacity(0.52))
+            }
+
+            Spacer()
+
+            Button {
+                showTips = true
+            } label: {
+                Image(systemName: "lightbulb.fill")
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundColor(JourneyVisual.lime)
+                    .frame(width: 44, height: 44)
+                    .background(Color.white.opacity(0.07))
+                    .clipShape(Circle())
+                    .overlay(Circle().stroke(Color.white.opacity(0.14), lineWidth: 1))
+            }
+            .accessibilityLabel("Поради для швейцарського CV")
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 8)
+        .background(Color.black.opacity(0.3))
+    }
+
+    private var cvHero: some View {
+        ZStack(alignment: .bottomLeading) {
+            Image("journey-market-consultant")
+                .resizable()
+                .scaledToFill()
+                .frame(maxWidth: .infinity)
+                .frame(height: 208)
+                .clipped()
+
+            LinearGradient(
+                colors: [
+                    Color.black.opacity(0.1),
+                    Color.black.opacity(0.44),
+                    Color(red: 0.025, green: 0.03, blue: 0.028)
+                ],
+                startPoint: .topTrailing,
+                endPoint: .bottomLeading
+            )
+
+            VStack(alignment: .leading, spacing: 10) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("CV, який\nпомітять")
+                        .font(.system(size: 29, weight: .bold, design: .rounded))
+                        .foregroundColor(.white)
+                        .lineSpacing(-2)
+                    Text("Заповни основні дані — ми допоможемо решту.")
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(.white.opacity(0.7))
+                }
+                progressBar
+            }
+            .padding(.horizontal, 18)
+            .padding(.bottom, 12)
+        }
+        .frame(height: 208)
+    }
+
+    // MARK: - Progress Bar
+    private var progressBar: some View {
+        HStack(spacing: 8) {
+            HStack(spacing: 6) {
+                Text("\(currentStep.rawValue + 1)")
+                    .font(.system(size: 12, weight: .black, design: .rounded))
+                    .foregroundColor(.black)
+                    .frame(width: 22, height: 22)
+                    .background(JourneyVisual.lime)
+                    .clipShape(Circle())
+                Text(currentStep.title)
+                    .font(.system(size: 11, weight: .bold, design: .rounded))
+                    .foregroundColor(.black)
+                    .lineLimit(1)
+            }
+            .padding(.leading, 4)
+            .padding(.trailing, 10)
+            .frame(height: 30)
+            .background(JourneyVisual.lime)
+            .clipShape(Capsule())
+
+            HStack(spacing: 8) {
+                ForEach(CVStep.allCases, id: \.rawValue) { step in
+                    Capsule()
+                        .fill(step.rawValue <= currentStep.rawValue ? JourneyVisual.lime : Color.white.opacity(0.22))
+                        .frame(maxWidth: .infinity)
+                        .frame(height: step == currentStep ? 4 : 3)
                 }
             }
         }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 16)
-        .background(Color.black.opacity(0.3))
+        .padding(6)
+        .background(Color.black.opacity(0.58))
+        .clipShape(Capsule())
+        .overlay(Capsule().stroke(Color.white.opacity(0.12), lineWidth: 1))
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Крок \(currentStep.rawValue + 1) з \(CVStep.allCases.count): \(currentStep.title)")
     }
     
     // MARK: - Step 1: Personal
     private var personalStepView: some View {
         ScrollView(showsIndicators: false) {
-            VStack(spacing: 20) {
-                stepHeader(
-                    icon: "person.crop.circle.fill",
-                    title: "Особисті дані",
-                    subtitle: "Базова інформація для зв'язку"
-                )
-                
+            VStack(spacing: 14) {
                 CVInputCard {
+                    HStack {
+                        Text("Про тебе")
+                            .font(.system(size: 17, weight: .bold, design: .rounded))
+                            .foregroundColor(.white)
+                        Spacer()
+                        Text("Основне")
+                            .font(.system(size: 10, weight: .bold, design: .rounded))
+                            .foregroundColor(JourneyVisual.lime)
+                            .padding(.horizontal, 9)
+                            .frame(height: 24)
+                            .background(JourneyVisual.lime.opacity(0.1))
+                            .clipShape(Capsule())
+                    }
+
+                    cvPhotoPicker
+
                     CVInputField(
                         icon: "person.fill",
                         title: "Повне ім'я",
@@ -205,7 +306,19 @@ struct CVBuilderView: View {
                         placeholder: "Zürich, ZH",
                         text: $cv.personal.location
                     )
-                    
+                }
+
+                CVInputCard {
+                    HStack {
+                        Text("Контакти")
+                            .font(.system(size: 17, weight: .bold, design: .rounded))
+                            .foregroundColor(.white)
+                        Spacer()
+                        Image(systemName: "lock.fill")
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundColor(JourneyVisual.lime)
+                    }
+
                     CVInputField(
                         icon: "envelope.fill",
                         title: "Email",
@@ -222,11 +335,60 @@ struct CVBuilderView: View {
                         keyboard: .phonePad
                     )
                 }
-                
+
                 swissTip("🇨🇭 У Швейцарії прийнято вказувати повну адресу та дату народження, але для приватності можна обмежитись містом.")
             }
-            .padding(20)
+            .padding(.horizontal, 16)
+            .padding(.top, 14)
+            .padding(.bottom, 10)
         }
+    }
+
+    private var cvPhotoPicker: some View {
+        PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
+            HStack(spacing: 12) {
+                Group {
+                    if let data = selectedPhotoData, let image = UIImage(data: data) {
+                        Image(uiImage: image)
+                            .resizable()
+                            .scaledToFill()
+                    } else {
+                        Image(systemName: "camera.fill")
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundColor(JourneyVisual.lime)
+                    }
+                }
+                .frame(width: 48, height: 48)
+                .background(JourneyVisual.lime.opacity(0.1))
+                .clipShape(Circle())
+                .overlay(Circle().stroke(JourneyVisual.lime.opacity(0.55), lineWidth: 1))
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(selectedPhotoData == nil ? "Додай фото профілю" : "Змінити фото")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(.white)
+                    Text("Необов’язково · JPG або PNG")
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundColor(.white.opacity(0.5))
+                }
+
+                Spacer()
+
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundColor(.white.opacity(0.34))
+            }
+            .padding(.horizontal, 12)
+            .frame(minHeight: 66)
+            .background(Color.white.opacity(0.035))
+            .clipShape(RoundedRectangle(cornerRadius: 15, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 15, style: .continuous)
+                    .stroke(Color.white.opacity(0.11), lineWidth: 1)
+            )
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(selectedPhotoData == nil ? "Додати фото профілю" : "Змінити фото профілю")
     }
     
     // MARK: - Step 2: Summary
@@ -690,58 +852,71 @@ struct CVBuilderView: View {
         HStack(spacing: 12) {
             if currentStep != .personal {
                 Button {
-                    withAnimation {
-                        if let idx = CVStep.allCases.firstIndex(of: currentStep), idx > 0 {
-                            currentStep = CVStep.allCases[idx - 1]
-                        }
-                    }
+                    moveToPreviousStep()
                 } label: {
-                    HStack {
-                        Image(systemName: "chevron.left")
-                        Text("Назад")
-                    }
-                    .font(.subheadline.bold())
-                    .foregroundColor(.white.opacity(0.8))
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 14)
-                    .background(Color.white.opacity(0.1))
-                    .cornerRadius(14)
-                }
-            }
-            
-            Spacer()
-            
-            if currentStep != .preview {
-                Button {
-                    withAnimation {
-                        if let idx = CVStep.allCases.firstIndex(of: currentStep), idx < CVStep.allCases.count - 1 {
-                            currentStep = CVStep.allCases[idx + 1]
-                        }
-                    }
-                } label: {
-                    HStack {
-                        Text("Далі")
-                        Image(systemName: "chevron.right")
-                    }
-                    .font(.subheadline.bold())
-                    .foregroundColor(.white)
-                    .padding(.horizontal, 24)
-                    .padding(.vertical, 14)
-                    .background(
-                        LinearGradient(
-                            colors: [Theme.Colors.primary, Theme.Colors.primaryDark],
-                            startPoint: .leading,
-                            endPoint: .trailing
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(.white)
+                        .frame(width: 54, height: 54)
+                        .background(Color.white.opacity(0.08))
+                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                .stroke(Color.white.opacity(0.14), lineWidth: 1)
                         )
-                    )
-                    .cornerRadius(14)
-                    .shadow(color: Theme.Colors.primary.opacity(0.4), radius: 8, y: 4)
                 }
+                .accessibilityLabel("Попередній крок")
+            }
+
+            Button {
+                if currentStep == .preview {
+                    saveCV()
+                    UINotificationFeedbackGenerator().notificationOccurred(.success)
+                } else {
+                    saveCV()
+                    moveToNextStep()
+                }
+            } label: {
+                HStack {
+                    Text(currentStep == .preview ? "Зберегти CV" : "Зберегти й продовжити")
+                    Spacer()
+                    Image(systemName: currentStep == .preview ? "checkmark" : "arrow.right")
+                }
+                .font(.system(size: 15, weight: .bold, design: .rounded))
+                .foregroundColor(.black)
+                .padding(.horizontal, 20)
+                .frame(maxWidth: .infinity)
+                .frame(height: 54)
+                .background(JourneyVisual.lime)
+                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .shadow(color: JourneyVisual.lime.opacity(0.18), radius: 12, y: 5)
             }
         }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 16)
-        .background(Color.black.opacity(0.4))
+        .padding(.horizontal, 16)
+        .padding(.top, 10)
+        .padding(.bottom, 12)
+        .background(Color.black.opacity(0.96))
+        .overlay(alignment: .top) {
+            Rectangle()
+                .fill(Color.white.opacity(0.08))
+                .frame(height: 1)
+        }
+    }
+
+    private func moveToPreviousStep() {
+        withAnimation(.easeInOut(duration: 0.24)) {
+            if let index = CVStep.allCases.firstIndex(of: currentStep), index > 0 {
+                currentStep = CVStep.allCases[index - 1]
+            }
+        }
+    }
+
+    private func moveToNextStep() {
+        withAnimation(.easeInOut(duration: 0.24)) {
+            if let index = CVStep.allCases.firstIndex(of: currentStep), index < CVStep.allCases.count - 1 {
+                currentStep = CVStep.allCases[index + 1]
+            }
+        }
     }
     
     // MARK: - Helper Views
@@ -999,6 +1174,31 @@ struct CVBuilderView: View {
             UserDefaults.standard.set(data, forKey: key)
         }
     }
+
+    private var cvPhotoURL: URL? {
+        let identity = lockManager.userEmail.isEmpty ? "guest" : lockManager.userEmail.lowercased()
+        let safeIdentity = identity.map { $0.isLetter || $0.isNumber ? String($0) : "_" }.joined()
+        guard let supportURL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else {
+            return nil
+        }
+        return supportURL
+            .appendingPathComponent("CVPhotos", isDirectory: true)
+            .appendingPathComponent("\(safeIdentity).jpg", isDirectory: false)
+    }
+
+    private func saveSelectedPhoto(_ data: Data) {
+        guard data.count <= 8_000_000, let url = cvPhotoURL else { return }
+        try? FileManager.default.createDirectory(
+            at: url.deletingLastPathComponent(),
+            withIntermediateDirectories: true
+        )
+        try? data.write(to: url, options: .atomic)
+    }
+
+    private func loadSavedPhoto() {
+        guard let url = cvPhotoURL else { return }
+        selectedPhotoData = try? Data(contentsOf: url)
+    }
     
     private func loadSavedCV() {
         var loaded = CVResume.empty
@@ -1028,16 +1228,24 @@ private struct CVInputCard<Content: View>: View {
     }
     
     var body: some View {
-        VStack(spacing: 12, content: content)
-            .padding(16)
+        VStack(alignment: .leading, spacing: 12, content: content)
+            .padding(14)
             .background(
-                RoundedRectangle(cornerRadius: 18)
-                    .fill(Color.white.opacity(0.04))
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .fill(Color(red: 0.075, green: 0.082, blue: 0.078).opacity(0.98))
                     .overlay(
-                        RoundedRectangle(cornerRadius: 18)
-                            .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                        RoundedRectangle(cornerRadius: 20, style: .continuous)
+                            .stroke(
+                                LinearGradient(
+                                    colors: [Color.white.opacity(0.18), Color.white.opacity(0.06)],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ),
+                                lineWidth: 1
+                            )
                     )
             )
+            .shadow(color: .black.opacity(0.2), radius: 12, y: 7)
     }
 }
 
@@ -1049,23 +1257,35 @@ private struct CVInputField: View {
     var keyboard: UIKeyboardType = .default
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Label(title, systemImage: icon)
-                .font(.caption.bold())
-                .foregroundColor(Theme.Colors.primary.opacity(0.9))
-            
-            TextField(placeholder, text: $text)
-                .font(.subheadline)
-                .foregroundColor(.white)
-                .keyboardType(keyboard)
-                .padding(12)
-                .background(Color.white.opacity(0.05))
-                .cornerRadius(12)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.white.opacity(0.1), lineWidth: 1)
-                )
+        HStack(spacing: 11) {
+            Image(systemName: icon)
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(.white.opacity(0.74))
+                .frame(width: 34, height: 34)
+                .background(Color.white.opacity(0.055))
+                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+
+            VStack(alignment: .leading, spacing: 1) {
+                Text(title)
+                    .font(.system(size: 10, weight: .semibold))
+                    .foregroundColor(.white.opacity(0.52))
+
+                TextField(placeholder, text: $text)
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(.white)
+                    .keyboardType(keyboard)
+                    .textInputAutocapitalization(keyboard == .emailAddress ? .never : .sentences)
+                    .autocorrectionDisabled(keyboard == .emailAddress)
+            }
         }
+        .padding(.horizontal, 10)
+        .frame(minHeight: 58)
+        .background(Color.white.opacity(0.035))
+        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .stroke(text.isEmpty ? Color.white.opacity(0.1) : JourneyVisual.lime.opacity(0.32), lineWidth: 1)
+        )
     }
 }
 

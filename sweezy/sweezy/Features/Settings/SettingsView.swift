@@ -45,126 +45,20 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                JourneyPhotoBackground(imageName: "cityhub-zurich-oldtown", blurRadius: 3, darkness: 0.66)
+                Color(red: 0.025, green: 0.03, blue: 0.028)
+                    .ignoresSafeArea()
 
                 ScrollView(showsIndicators: false) {
-                VStack(spacing: Theme.Spacing.xl) {
-                    settingsHero
-
-                    // Profile card
-                    profileCard
-                    
-                    // Gamification panel
-                    gamificationPanel
-
-                    // Language & Privacy - Winter styled
-                    VStack(alignment: .leading, spacing: Theme.Spacing.md) {
-                        WinterSectionHeader(title: "Налаштування")
-                        winterSettingsRow(icon: "globe", title: "settings.language".localized, value: currentLanguageName) {
-                            showingLanguageSelection = true
-                        }
-                        winterThemePickerCard
-                        winterSettingsRow(icon: "hand.raised.fill", title: "privacy.title".localized) {
-                            showingPrivacy = true
-                        }
-                        WinterSettingsCard {
-                            HStack(spacing: Theme.Spacing.md) {
-                                Image(systemName: "chart.bar.xaxis")
-                                    .font(.system(size: 20, weight: .semibold))
-                                    .foregroundColor(Theme.Colors.primary)
-                                    .frame(width: 24)
-                                VStack(alignment: .leading, spacing: 3) {
-                                    Text("Допомагати покращувати Sweezy")
-                                        .font(Theme.Typography.body)
-                                        .foregroundColor(Theme.Colors.textPrimary)
-                                    Text("Анонімні події активації та повернення")
-                                        .font(Theme.Typography.caption)
-                                        .foregroundColor(Theme.Colors.textSecondary)
-                                }
-                                Spacer()
-                                Toggle("", isOn: $analyticsEnabled)
-                                    .labelsHidden()
-                                    .tint(Theme.Colors.primary)
-                                    .onChange(of: analyticsEnabled) { _, enabled in
-                                        appContainer.analytics.setEnabled(enabled)
-                                        appContainer.telemetry.consentDidChange()
-                                    }
-                            }
-                        }
-                        // Biometrics - Winter styled
-                        WinterSettingsCard {
-                            VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
-                                HStack(spacing: Theme.Spacing.md) {
-                                    Image(systemName: lockManager.biometryDisplayName == "Face ID" ? "faceid" : "touchid")
-                                        .font(.system(size: 20, weight: .semibold))
-                                        .foregroundColor(lockManager.isBiometryAvailable ? Theme.Colors.primary : .gray)
-                                        .frame(width: 24)
-                                    Toggle("Use \(lockManager.biometryDisplayName)", isOn: Binding(
-                                        get: { lockManager.biometricsEnabled },
-                                        set: { newValue in
-                                            Task { @MainActor in
-                                                let ok = await lockManager.setBiometricsEnabled(newValue)
-                                                if !ok {
-                                                    biometricsMessage = lockManager.biometryUnavailableReason ?? lockManager.lastAuthErrorDescription
-                                                } else {
-                                                    biometricsMessage = nil
-                                                }
-                                            }
-                                        }
-                                    ))
-                                    .tint(Theme.Colors.primary)
-                                    .disabled(!lockManager.isBiometryAvailable)
-                                }
-                                
-                                if let biometricsMessage {
-                                    Text(biometricsMessage)
-                                        .font(Theme.Typography.caption)
-                                        .foregroundColor(Theme.Colors.textSecondary)
-                                } else if !lockManager.isBiometryAvailable, let reason = lockManager.biometryUnavailableReason {
-                                    Text(reason)
-                                        .font(Theme.Typography.caption)
-                                        .foregroundColor(Theme.Colors.textSecondary)
-                                }
-                            }
-                        }
+                    VStack(spacing: 14) {
+                        editorialSettingsHero
+                        editorialProfileCard
+                        editorialCompletionCard
+                        editorialActivityStrip
+                        editorialSettingsSections
                     }
-                    
-                    // Support & Feedback
-                    VStack(alignment: .leading, spacing: Theme.Spacing.md) {
-                        WinterSectionHeader(title: "settings.support".localized)
-                        winterSettingsRow(icon: "bell.badge", title: "settings.notifications".localized) {
-                            showingNotificationSettings = true
-                        }
-                        if let reviewURL = appStoreWriteReviewURL {
-                            winterSettingsLinkRow(icon: "square.and.pencil", title: "settings.send_feedback".localized, destination: reviewURL)
-                        } else {
-                            winterSettingsRow(icon: "square.and.pencil", title: "settings.send_feedback".localized) {
-                                requestAppReview()
-                            }
-                        }
-                        winterSettingsRow(icon: "star", title: "settings.rate_app".localized) {
-                            requestAppReview()
-                        }
-                        if let supportURL = supportEmailURL {
-                            winterSettingsLinkRow(icon: "envelope", title: "settings.email_support".localized, destination: supportURL)
-                        }
-                    }
-                    
-                    // About - Winter styled
-                    VStack(alignment: .leading, spacing: Theme.Spacing.md) {
-                        WinterSectionHeader(title: "settings.about".localized)
-                        winterSettingsRow(icon: "info.circle", title: "settings.version".localized(with: Bundle.main.appVersion)) {}
-                        winterSettingsRow(icon: "questionmark.circle", title: "settings.about".localized) {
-                            showingAbout = true
-                        }
-                        // Data management entry at the very end of the page
-                        winterSettingsRow(icon: "internaldrive", title: "settings.data_management".localized) {
-                            showingDataManagement = true
-                        }
-                    }
+                    .padding(.bottom, 126)
                 }
-                .padding(Theme.Spacing.lg)
-            }
+                .ignoresSafeArea(edges: .top)
             }
             .navigationBarHidden(true)
             .featureOnboarding(.settings)
@@ -328,6 +222,390 @@ struct SettingsView: View {
 // MARK: - Sections
 
 private extension SettingsView {
+    var editorialSettingsHero: some View {
+        ZStack(alignment: .bottomLeading) {
+            Image("cityhub-zurich-oldtown")
+                .resizable()
+                .scaledToFill()
+                .frame(maxWidth: .infinity)
+                .frame(height: 252)
+                .clipped()
+
+            LinearGradient(
+                colors: [
+                    Color.black.opacity(0.18),
+                    Color.black.opacity(0.3),
+                    Color(red: 0.025, green: 0.03, blue: 0.028)
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+
+            VStack(alignment: .leading, spacing: 7) {
+                Text("НАЛАШТУВАННЯ")
+                    .font(.system(size: 11, weight: .bold, design: .rounded))
+                    .tracking(2)
+                    .foregroundColor(.white.opacity(0.68))
+
+                Text("Привіт, \(editorialGreetingName)")
+                    .font(.system(size: 32, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
+
+                HStack(spacing: 5) {
+                    Text("Твій профіль готовий на")
+                        .foregroundColor(.white.opacity(0.72))
+                    Text("\(profileCompletion)%")
+                        .fontWeight(.bold)
+                        .foregroundColor(JourneyVisual.lime)
+                }
+                .font(.system(size: 14, weight: .medium, design: .rounded))
+            }
+            .padding(.horizontal, 20)
+            .padding(.bottom, 22)
+        }
+        .frame(height: 252)
+        .accessibilityElement(children: .combine)
+    }
+
+    var editorialProfileCard: some View {
+        Button {
+            openProfile()
+        } label: {
+            HStack(spacing: 14) {
+                ZStack {
+                    Circle()
+                        .fill(Color.white.opacity(0.08))
+                    Circle()
+                        .stroke(JourneyVisual.lime.opacity(0.7), lineWidth: 1)
+                    Text(profileInitials)
+                        .font(.system(size: 20, weight: .bold, design: .rounded))
+                        .foregroundColor(.white)
+                }
+                .frame(width: 58, height: 58)
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(profileName)
+                        .font(.system(size: 17, weight: .semibold, design: .rounded))
+                        .foregroundColor(.white)
+                        .lineLimit(1)
+                    Label(editorialProfileLocation, systemImage: "mappin")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(.white.opacity(0.58))
+                }
+
+                Spacer(minLength: 10)
+
+                Image(systemName: "pencil")
+                    .font(.system(size: 15, weight: .bold))
+                    .foregroundColor(JourneyVisual.lime)
+                    .frame(width: 42, height: 42)
+                    .background(Color.black.opacity(0.32))
+                    .clipShape(Circle())
+                    .overlay(Circle().stroke(JourneyVisual.lime.opacity(0.48), lineWidth: 1))
+            }
+            .padding(15)
+            .editorialSettingsPanel(cornerRadius: 22)
+        }
+        .buttonStyle(CardPressStyle())
+        .padding(.horizontal, 16)
+        .accessibilityHint("Відкрити редагування профілю")
+    }
+
+    var editorialCompletionCard: some View {
+        Button {
+            openProfile()
+        } label: {
+            VStack(alignment: .leading, spacing: 14) {
+                HStack(alignment: .top, spacing: 14) {
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text("Заверши профіль")
+                            .font(.system(size: 18, weight: .bold, design: .rounded))
+                            .foregroundColor(.white)
+                        Text("Отримуй точніші плани, дедлайни та рекомендації")
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundColor(.white.opacity(0.6))
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+
+                    Spacer()
+
+                    ZStack {
+                        Circle()
+                            .stroke(Color.white.opacity(0.12), lineWidth: 5)
+                        Circle()
+                            .trim(from: 0, to: CGFloat(profileCompletion) / 100)
+                            .stroke(JourneyVisual.lime, style: StrokeStyle(lineWidth: 5, lineCap: .round))
+                            .rotationEffect(.degrees(-90))
+                        Text("\(profileCompletion)%")
+                            .font(.system(size: 14, weight: .bold, design: .rounded))
+                            .foregroundColor(.white)
+                    }
+                    .frame(width: 58, height: 58)
+                }
+
+                HStack {
+                    Text("Продовжити заповнення")
+                    Spacer()
+                    Image(systemName: "arrow.right")
+                }
+                .font(.system(size: 14, weight: .bold, design: .rounded))
+                .foregroundColor(.black)
+                .padding(.horizontal, 16)
+                .frame(height: 48)
+                .background(JourneyVisual.lime)
+                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            }
+            .padding(16)
+            .editorialSettingsPanel(cornerRadius: 22)
+        }
+        .buttonStyle(CardPressStyle())
+        .padding(.horizontal, 16)
+    }
+
+    var editorialActivityStrip: some View {
+        HStack(spacing: 0) {
+            editorialActivityItem(icon: "book.closed", value: "\(appContainer.userStats.guidesReadCount)", label: "гайдів")
+            editorialActivityDivider
+            editorialActivityItem(icon: "checklist", value: "\(appContainer.userStats.activeChecklistsCount)", label: "чек-листів")
+            editorialActivityDivider
+            editorialActivityItem(icon: "target", value: "\(appContainer.userProfile?.goals.count ?? 0)", label: "цілей")
+        }
+        .padding(.vertical, 12)
+        .editorialSettingsPanel(cornerRadius: 18)
+        .padding(.horizontal, 16)
+    }
+
+    var editorialSettingsSections: some View {
+        VStack(alignment: .leading, spacing: 18) {
+            editorialSectionTitle("Акаунт")
+            VStack(spacing: 0) {
+                editorialSettingsRow(icon: "globe", title: "settings.language".localized, value: currentLanguageName) {
+                    showingLanguageSelection = true
+                }
+                editorialSettingsDivider
+                Menu {
+                    ForEach(AppTheme.allCases) { theme in
+                        Button {
+                            withAnimation(Theme.Animation.smooth) {
+                                themeManager.selectedTheme = theme
+                            }
+                        } label: {
+                            Label(theme.localizedName, systemImage: themeManager.selectedTheme == theme ? "checkmark" : "circle")
+                        }
+                    }
+                } label: {
+                    editorialSettingsRowLabel(
+                        icon: "moon.stars",
+                        title: "settings.theme.title".localized,
+                        value: themeManager.selectedTheme.localizedName
+                    )
+                }
+                editorialSettingsDivider
+                editorialSettingsRow(icon: "bell", title: "settings.notifications".localized) {
+                    showingNotificationSettings = true
+                }
+                editorialSettingsDivider
+                editorialSettingsRow(icon: "hand.raised", title: "privacy.title".localized) {
+                    showingPrivacy = true
+                }
+            }
+            .editorialSettingsPanel(cornerRadius: 20)
+
+            editorialSectionTitle("Безпека та дані")
+            VStack(spacing: 0) {
+                editorialToggleRow(
+                    icon: lockManager.biometryDisplayName == "Face ID" ? "faceid" : "touchid",
+                    title: lockManager.biometryDisplayName,
+                    subtitle: lockManager.isBiometryAvailable ? "Захист входу в застосунок" : (lockManager.biometryUnavailableReason ?? "Недоступно"),
+                    isOn: Binding(
+                        get: { lockManager.biometricsEnabled },
+                        set: { newValue in
+                            Task { @MainActor in
+                                let ok = await lockManager.setBiometricsEnabled(newValue)
+                                biometricsMessage = ok ? nil : (lockManager.biometryUnavailableReason ?? lockManager.lastAuthErrorDescription)
+                            }
+                        }
+                    ),
+                    isEnabled: lockManager.isBiometryAvailable
+                )
+                editorialSettingsDivider
+                editorialToggleRow(
+                    icon: "chart.bar.xaxis",
+                    title: "Аналітика",
+                    subtitle: "Анонімно допомагає покращувати Sweezy",
+                    isOn: $analyticsEnabled
+                )
+                .onChange(of: analyticsEnabled) { _, enabled in
+                    appContainer.analytics.setEnabled(enabled)
+                    appContainer.telemetry.consentDidChange()
+                }
+                editorialSettingsDivider
+                editorialSettingsRow(icon: "internaldrive", title: "settings.data_management".localized) {
+                    showingDataManagement = true
+                }
+            }
+            .editorialSettingsPanel(cornerRadius: 20)
+
+            editorialSectionTitle("Підтримка")
+            VStack(spacing: 0) {
+                if let supportURL = supportEmailURL {
+                    Link(destination: supportURL) {
+                        editorialSettingsRowLabel(icon: "envelope", title: "settings.email_support".localized)
+                    }
+                    editorialSettingsDivider
+                }
+                editorialSettingsRow(icon: "star", title: "settings.rate_app".localized) {
+                    requestAppReview()
+                }
+                editorialSettingsDivider
+                editorialSettingsRow(icon: "info.circle", title: "settings.about".localized) {
+                    showingAbout = true
+                }
+                editorialSettingsDivider
+                editorialSettingsRow(
+                    icon: "number",
+                    title: "Версія",
+                    value: Bundle.main.appVersion,
+                    showsChevron: false
+                ) {}
+            }
+            .editorialSettingsPanel(cornerRadius: 20)
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 8)
+    }
+
+    func openProfile() {
+        if sessionManager.isAuthenticated {
+            showingProfileEdit = true
+        } else {
+            showingAuthEntry = true
+        }
+    }
+
+    var editorialGreetingName: String {
+        profileName.split(separator: " ").first.map(String.init) ?? profileName
+    }
+
+    var editorialProfileLocation: String {
+        guard let profile = appContainer.userProfile else { return "Zürich, ZH" }
+        let city = profile.address?.city.trimmingCharacters(in: .whitespacesAndNewlines)
+        return "\((city?.isEmpty == false ? city : profile.canton.localizedName) ?? profile.canton.localizedName), \(profile.canton.rawValue)"
+    }
+
+    func editorialActivityItem(icon: String, value: String, label: String) -> some View {
+        VStack(spacing: 3) {
+            HStack(spacing: 6) {
+                Image(systemName: icon)
+                    .foregroundColor(JourneyVisual.lime)
+                Text(value)
+                    .foregroundColor(.white)
+            }
+            .font(.system(size: 14, weight: .bold, design: .rounded))
+            Text(label)
+                .font(.system(size: 10, weight: .medium))
+                .foregroundColor(.white.opacity(0.5))
+        }
+        .frame(maxWidth: .infinity)
+        .accessibilityElement(children: .combine)
+    }
+
+    var editorialActivityDivider: some View {
+        Rectangle()
+            .fill(Color.white.opacity(0.1))
+            .frame(width: 1, height: 34)
+    }
+
+    func editorialSectionTitle(_ title: String) -> some View {
+        Text(title)
+            .font(.system(size: 18, weight: .bold, design: .rounded))
+            .foregroundColor(.white)
+            .padding(.horizontal, 2)
+    }
+
+    func editorialSettingsRow(
+        icon: String,
+        title: String,
+        value: String? = nil,
+        showsChevron: Bool = true,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            editorialSettingsRowLabel(icon: icon, title: title, value: value, showsChevron: showsChevron)
+        }
+        .buttonStyle(.plain)
+    }
+
+    func editorialSettingsRowLabel(
+        icon: String,
+        title: String,
+        value: String? = nil,
+        showsChevron: Bool = true
+    ) -> some View {
+        HStack(spacing: 13) {
+            Image(systemName: icon)
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundColor(.white.opacity(0.86))
+                .frame(width: 22)
+            Text(title)
+                .font(.system(size: 15, weight: .medium))
+                .foregroundColor(.white)
+            Spacer()
+            if let value {
+                Text(value)
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(.white.opacity(0.54))
+                    .lineLimit(1)
+            }
+            if showsChevron {
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundColor(.white.opacity(0.36))
+            }
+        }
+        .padding(.horizontal, 16)
+        .frame(minHeight: 56)
+        .contentShape(Rectangle())
+    }
+
+    func editorialToggleRow(
+        icon: String,
+        title: String,
+        subtitle: String,
+        isOn: Binding<Bool>,
+        isEnabled: Bool = true
+    ) -> some View {
+        HStack(spacing: 13) {
+            Image(systemName: icon)
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundColor(isEnabled ? .white.opacity(0.86) : .white.opacity(0.32))
+                .frame(width: 22)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundColor(isEnabled ? .white : .white.opacity(0.44))
+                Text(subtitle)
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundColor(.white.opacity(0.45))
+                    .lineLimit(2)
+            }
+            Spacer(minLength: 8)
+            Toggle("", isOn: isOn)
+                .labelsHidden()
+                .tint(JourneyVisual.lime)
+                .disabled(!isEnabled)
+        }
+        .padding(.horizontal, 16)
+        .frame(minHeight: 64)
+    }
+
+    var editorialSettingsDivider: some View {
+        Rectangle()
+            .fill(Color.white.opacity(0.09))
+            .frame(height: 1)
+            .padding(.leading, 51)
+    }
+
     var settingsHero: some View {
         VStack(alignment: .leading, spacing: 14) {
             Text("НАЛАШТУВАННЯ")
@@ -2556,6 +2834,36 @@ private struct ThemeSelectionButton: View {
             .shadow(color: isSelected ? Theme.Colors.primary.opacity(0.18) : .clear, radius: 10, y: 4)
         }
         .buttonStyle(.plain)
+    }
+}
+
+private struct EditorialSettingsPanelModifier: ViewModifier {
+    let cornerRadius: CGFloat
+
+    func body(content: Content) -> some View {
+        content
+            .background(
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .fill(Color(red: 0.075, green: 0.082, blue: 0.078).opacity(0.96))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .stroke(
+                        LinearGradient(
+                            colors: [Color.white.opacity(0.19), Color.white.opacity(0.06)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 1
+                    )
+            )
+            .shadow(color: .black.opacity(0.24), radius: 14, y: 8)
+    }
+}
+
+private extension View {
+    func editorialSettingsPanel(cornerRadius: CGFloat) -> some View {
+        modifier(EditorialSettingsPanelModifier(cornerRadius: cornerRadius))
     }
 }
 

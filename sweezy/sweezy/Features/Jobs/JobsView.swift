@@ -26,6 +26,7 @@ struct JobsView: View {
     @State private var canLoadMore: Bool = false
     @State private var selectedEmployment: EmploymentFilter = .all
     @State private var selectedCity: String = ""
+    @State private var showAdvancedFilters: Bool = false
     @State private var showDraftSheet: Bool = false
     @State private var draftedText: String?
     @State private var isDrafting: Bool = false
@@ -86,6 +87,18 @@ struct JobsView: View {
     private var hasAIProfile: Bool {
         !aiDesiredPosition.isEmpty || !aiSkills.isEmpty
     }
+
+    private var aiProfileProgress: Double {
+        let completed = [
+            !aiDesiredPosition.isEmpty,
+            !aiSkills.isEmpty,
+            !aiPreferredCanton.isEmpty,
+            !aiEmploymentType.isEmpty,
+            aiRemotePreference,
+            !aiExperienceLevel.isEmpty
+        ].filter { $0 }.count
+        return Double(completed) / 6.0
+    }
     
     // MARK: - Computed
     private var displayedItems: [APIClient.JobItem] {
@@ -126,53 +139,54 @@ struct JobsView: View {
     
     // MARK: - Body
     var body: some View {
-        NavigationStack {
-            ZStack {
-                JourneyPhotoBackground(imageName: JourneyBackdrop.city.rawValue, blurRadius: 7, darkness: 0.68)
-                
-                ScrollView(.vertical, showsIndicators: false) {
-                    LazyVStack(spacing: 20) {
-                        // Dashboard metrics
-                        dashboardSection
-                        
-                        // Smart filters
+        ZStack(alignment: .top) {
+            Color.black.ignoresSafeArea()
+
+            Image("jobs-zurich-hero")
+                .resizable()
+                .scaledToFill()
+                .frame(maxWidth: .infinity)
+                .frame(height: 610)
+                .clipped()
+                .overlay(Color.black.opacity(0.24))
+                .overlay(
+                    LinearGradient(
+                        colors: [.clear, Color.black.opacity(0.22), .black],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+                .ignoresSafeArea(edges: .top)
+                .accessibilityHidden(true)
+
+            ScrollView(.vertical, showsIndicators: false) {
+                LazyVStack(spacing: 0) {
+                    heroSection
+
+                    VStack(spacing: 13) {
+                        aiMatchSection
                         smartFiltersSection
-                        
-                        // Quick tags
-                        quickTagsSection
-                        
-                        // City chips
-                        if !topCities.isEmpty {
-                            cityChipsSection
+                        dashboardSection
+
+                        if showAdvancedFilters {
+                            advancedFiltersSection
+                                .transition(.opacity.combined(with: .move(edge: .top)))
                         }
-                        
-                        // Results
+
                         resultsSection
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 12)
+                    .padding(.horizontal, 18)
                 }
-                .refreshable {
-                    showMatchResults = false
-                    await performSearch()
-                    haptic(.light)
-                }
+                .padding(.bottom, 112)
             }
-            .navigationTitle("Вакансії")
-            .navigationBarTitleDisplayMode(.large)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button { dismiss() } label: {
-                        HStack(spacing: 4) {
-                            Image(systemName: "chevron.left")
-                            Text("Назад")
-                        }
-                        .foregroundColor(.white)
-                    }
-                }
+            .refreshable {
+                showMatchResults = false
+                await performSearch()
+                haptic(.light)
             }
         }
-        .journeyScreen(.city, darkness: 0.68)
+        .toolbar(.hidden, for: .navigationBar)
+        .navigationBarBackButtonHidden(true)
         .onAppear {
             appContainer.telemetry.info("view_open", source: "jobs", message: "JobsView opened")
         }
@@ -250,41 +264,134 @@ struct JobsView: View {
         }
     }
     
-    // MARK: - Dashboard Section
-    private var dashboardSection: some View {
-        HStack(spacing: 12) {
-            DashboardMetricCard(
-                icon: "sparkles",
-                value: "\(newTodayCount)",
-                label: "Нових сьогодні",
-                color: Theme.Colors.primary
-            )
-            
-            DashboardMetricCard(
-                icon: "heart.fill",
-                value: "\(favoritesCount)",
-                label: "Збережено",
-                color: .pink
-            )
-            
-            DashboardMetricCard(
-                icon: "paperplane.fill",
-                value: "\(appliedCount)",
-                label: "Відгуків",
-                color: Theme.Colors.success
-            )
+    // MARK: - Hero
+    private var heroSection: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Button { dismiss() } label: {
+                Image(systemName: "chevron.left")
+                    .font(.system(size: 22, weight: .semibold))
+                    .foregroundColor(.white)
+                    .frame(width: 52, height: 52)
+                    .background(.ultraThinMaterial.opacity(0.78))
+                    .background(Color.black.opacity(0.34))
+                    .clipShape(Circle())
+                    .overlay(Circle().stroke(Color.white.opacity(0.24), lineWidth: 1))
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Назад")
+
+            Spacer(minLength: 12)
+
+            Text("РОБОТА У ШВЕЙЦАРІЇ")
+                .font(.system(size: 13, weight: .bold))
+                .tracking(2.2)
+                .foregroundColor(JourneyVisual.lime)
+
+            Text("Знайди роботу,\nяка підходить тобі")
+                .font(.system(size: 36, weight: .bold, design: .rounded))
+                .foregroundColor(.white)
+                .minimumScaleFactor(0.82)
+                .lineSpacing(-2)
+                .padding(.top, 13)
+        }
+        .frame(maxWidth: .infinity, minHeight: 225, alignment: .topLeading)
+        .padding(.horizontal, 22)
+        .padding(.top, 10)
+        .padding(.bottom, 16)
+    }
+
+    // MARK: - AI Match
+    private var aiMatchSection: some View {
+        JourneyGlassPanel(cornerRadius: 25) {
+            VStack(spacing: 14) {
+                HStack(spacing: 14) {
+                    Image(systemName: "sparkles")
+                        .font(.system(size: 20, weight: .bold))
+                        .foregroundColor(.black)
+                        .frame(width: 46, height: 46)
+                        .background(JourneyVisual.lime)
+                        .clipShape(RoundedRectangle(cornerRadius: 15, style: .continuous))
+
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("AI Match")
+                            .font(.system(size: 19, weight: .bold))
+                            .foregroundColor(.white)
+                        Text(hasAIProfile ? "За досвідом і твоїми цілями" : "Профіль для точного підбору")
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundColor(.white.opacity(0.62))
+                            .lineLimit(2)
+                    }
+
+                    Spacer(minLength: 6)
+                    AIProfileProgressRing(progress: aiProfileProgress)
+
+                    Button {
+                        showAIMatchProfile = true
+                        haptic(.light)
+                    } label: {
+                        Image(systemName: "gearshape")
+                            .font(.system(size: 17, weight: .semibold))
+                            .foregroundColor(.white)
+                            .frame(width: 38, height: 38)
+                            .background(Color.white.opacity(0.08))
+                            .clipShape(Circle())
+                            .overlay(Circle().stroke(Color.white.opacity(0.18), lineWidth: 1))
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Налаштувати AI профіль")
+                }
+
+                Button {
+                    haptic(.medium)
+                    if hasAIProfile {
+                        Task { await performAIMatch() }
+                    } else {
+                        showAIMatchProfile = true
+                    }
+                } label: {
+                    HStack(spacing: 9) {
+                        if isAIMatching { ProgressView().tint(.black) }
+                        Text(hasAIProfile ? "Знайти збіги" : "Налаштувати профіль")
+                            .font(.system(size: 17, weight: .bold))
+                        Spacer()
+                        Image(systemName: "sparkles")
+                            .font(.system(size: 17, weight: .bold))
+                    }
+                    .foregroundColor(.black)
+                    .padding(.horizontal, 22)
+                    .frame(maxWidth: .infinity, minHeight: 50)
+                    .background(JourneyVisual.lime)
+                    .clipShape(RoundedRectangle(cornerRadius: 17, style: .continuous))
+                }
+                .buttonStyle(.plain)
+                .disabled(isAIMatching)
+            }
+            .padding(15)
         }
     }
-    
-    // MARK: - Smart Filters Section
+
+    // MARK: - Dashboard
+    private var dashboardSection: some View {
+        HStack(spacing: 11) {
+            JobsInlineMetric(icon: "sparkles", value: newTodayCount, label: "нових")
+            Circle().fill(Color.white.opacity(0.34)).frame(width: 4, height: 4)
+            JobsInlineMetric(icon: "heart", value: favoritesCount, label: "збережено")
+            Circle().fill(Color.white.opacity(0.34)).frame(width: 4, height: 4)
+            JobsInlineMetric(icon: "paperplane", value: appliedCount, label: "відгуків")
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 4)
+    }
+
+    // MARK: - Smart Filters
     private var smartFiltersSection: some View {
         VStack(spacing: 12) {
-            // Search field
             HStack(spacing: 10) {
                 Image(systemName: "magnifyingglass")
-                    .foregroundColor(.white.opacity(0.5))
-                
-                TextField("Пошук вакансій...", text: $keyword)
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundColor(.white.opacity(0.62))
+
+                TextField("Посада, навичка або компанія", text: $keyword)
                     .foregroundColor(.white)
                     .autocorrectionDisabled()
                     .textInputAutocapitalization(.never)
@@ -293,25 +400,26 @@ struct JobsView: View {
                         showMatchResults = false
                         Task { await performSearch() }
                     }
-                
+
                 if !keyword.isEmpty {
                     Button {
                         keyword = ""
                         showMatchResults = false
                     } label: {
                         Image(systemName: "xmark.circle.fill")
-                            .foregroundColor(.white.opacity(0.4))
+                            .foregroundColor(.white.opacity(0.44))
                     }
                 }
             }
-            .padding(14)
-            .background(Color.white.opacity(0.08))
-            .cornerRadius(14)
-            
-            // Filter chips row
+            .padding(.horizontal, 17)
+            .frame(height: 54)
+            .background(.ultraThinMaterial.opacity(0.7))
+            .background(Color.black.opacity(0.32))
+            .clipShape(RoundedRectangle(cornerRadius: 19, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 19, style: .continuous).stroke(Color.white.opacity(0.18), lineWidth: 1))
+
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 10) {
-                    // Canton picker
                     Menu {
                         ForEach(cantons, id: \.self) { code in
                             Button(code.isEmpty ? "Всі кантони" : code) {
@@ -321,102 +429,81 @@ struct JobsView: View {
                             }
                         }
                     } label: {
-                        FilterChip(
-                            icon: "mappin",
-                            text: canton.isEmpty ? "Кантон" : canton,
-                            isActive: !canton.isEmpty
+                        JobsMenuPill(icon: "mappin", text: canton.isEmpty ? "Кантон" : canton, isActive: !canton.isEmpty)
+                    }
+
+                    Menu {
+                        ForEach(EmploymentFilter.allCases, id: \.self) { filter in
+                            Button(filter.rawValue) {
+                                selectedEmployment = filter
+                                haptic(.light)
+                            }
+                        }
+                    } label: {
+                        JobsMenuPill(
+                            icon: "briefcase",
+                            text: selectedEmployment == .all ? "Тип роботи" : selectedEmployment.rawValue,
+                            isActive: selectedEmployment != .all
                         )
                     }
-                    
-                    // Employment type
-                    ForEach(EmploymentFilter.allCases, id: \.self) { filter in
-                        FilterChip(
-                            icon: nil,
-                            text: filter.rawValue,
-                            isActive: selectedEmployment == filter
-                        ) {
-                            selectedEmployment = filter
-                            haptic(.light)
-                        }
+
+                    Button {
+                        selectedEmployment = selectedEmployment == .remote ? .all : .remote
+                        haptic(.light)
+                    } label: {
+                        JobsMenuPill(icon: "house", text: "Віддалено", isActive: selectedEmployment == .remote, showsChevron: false)
                     }
+                    .buttonStyle(.plain)
+
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.22)) { showAdvancedFilters.toggle() }
+                        haptic(.light)
+                    } label: {
+                        Image(systemName: "slider.horizontal.3")
+                            .font(.system(size: 17, weight: .semibold))
+                            .foregroundColor(showAdvancedFilters ? .black : .white)
+                            .frame(width: 44, height: 44)
+                            .background(showAdvancedFilters ? JourneyVisual.lime : Color.white.opacity(0.09))
+                            .clipShape(RoundedRectangle(cornerRadius: 15, style: .continuous))
+                            .overlay(RoundedRectangle(cornerRadius: 15, style: .continuous).stroke(Color.white.opacity(0.18), lineWidth: 1))
+                    }
+                    .buttonStyle(.plain)
                 }
             }
-            
-            // AI Match button
-            HStack(spacing: 12) {
-                // Show match results indicator
+        }
+    }
+
+    // MARK: - Advanced Filters
+    private var advancedFiltersSection: some View {
+        JourneyGlassPanel(cornerRadius: 20) {
+            VStack(alignment: .leading, spacing: 15) {
+                Text("Швидкий пошук")
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundColor(.white)
+                quickTagsSection
+
+                if !topCities.isEmpty {
+                    Divider().overlay(Color.white.opacity(0.12))
+                    Text("Міста")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundColor(.white)
+                    cityChipsSection
+                }
+
                 if showMatchResults {
                     Button {
                         showMatchResults = false
                         haptic(.light)
                     } label: {
-                        HStack(spacing: 6) {
-                            Image(systemName: "xmark.circle.fill")
-                            Text("Скинути AI")
-                        }
-                        .font(.system(size: 13, weight: .medium))
-                        .foregroundColor(.orange)
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 10)
-                        .background(Color.orange.opacity(0.15))
-                        .cornerRadius(10)
+                        Label("Скинути AI результати", systemImage: "xmark.circle.fill")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundColor(JourneyVisual.lime)
                     }
-                }
-                
-                Spacer()
-                
-                // AI Match main button
-                Button {
-                    haptic(.medium)
-                    if hasAIProfile {
-                        Task { await performAIMatch() }
-                    } else {
-                        showAIMatchProfile = true
-                    }
-                } label: {
-                    HStack(spacing: 8) {
-                        if isAIMatching {
-                            ProgressView()
-                                .progressViewStyle(CircularProgressViewStyle(tint: .black))
-                                .scaleEffect(0.8)
-                        } else {
-                            Image(systemName: "wand.and.stars")
-                        }
-                        Text(hasAIProfile ? "AI Match" : "Налаштувати AI")
-                            .fontWeight(.semibold)
-                    }
-                    .foregroundColor(.black)
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 12)
-                    .background(
-                        LinearGradient(
-                            colors: hasAIProfile ? [Theme.Colors.primary, Theme.Colors.primaryLight] : [Color.gray.opacity(0.6), Color.gray.opacity(0.8)],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
-                    )
-                    .cornerRadius(12)
-                }
-                .disabled(isAIMatching)
-                
-                // Settings button for AI profile
-                if hasAIProfile {
-                    Button {
-                        showAIMatchProfile = true
-                        haptic(.light)
-                    } label: {
-                        Image(systemName: "slider.horizontal.3")
-                            .foregroundColor(.white.opacity(0.7))
-                            .padding(12)
-                            .background(Color.white.opacity(0.1))
-                            .cornerRadius(10)
-                    }
+                    .buttonStyle(.plain)
                 }
             }
+            .padding(16)
         }
-        .padding(16)
-        .background(Color.white.opacity(0.05))
-        .cornerRadius(20)
     }
     
     // MARK: - Quick Tags Section
@@ -457,33 +544,32 @@ struct JobsView: View {
         }
     }
     
-    // MARK: - Results Section
+    // MARK: - Results
     private var resultsSection: some View {
         VStack(spacing: 12) {
-            // Results header
             HStack {
                 if showMatchResults {
                     HStack(spacing: 6) {
-                        Image(systemName: "wand.and.stars")
-                            .foregroundColor(Theme.Colors.primary)
-                        Text("AI Результати")
-                            .font(.headline)
-                            .foregroundColor(Theme.Colors.textOnPrimary)
+                        Image(systemName: "sparkles")
+                            .foregroundColor(JourneyVisual.lime)
+                        Text("AI результати")
+                            .foregroundColor(.white)
                     }
                 } else {
-                    Text("Результати")
-                        .font(.headline)
+                    Text("Рекомендовано для тебе")
                         .foregroundColor(.white)
                 }
-                
+
                 Spacer()
-                
+
                 if !displayedItems.isEmpty {
                     Text("\(displayedItems.count) вакансій")
-                        .font(.caption)
-                        .foregroundColor(.white.opacity(0.5))
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(JourneyVisual.lime)
                 }
             }
+            .font(.system(size: 21, weight: .bold, design: .rounded))
+            .padding(.top, 6)
             
             if isLoading || isAIMatching {
                 // Skeleton loading
@@ -1301,6 +1387,81 @@ private struct OnboardingSlideView: View {
     }
 }
 
+// MARK: - Jobs Premium Components
+private struct AIProfileProgressRing: View {
+    let progress: Double
+
+    private var percentage: Int {
+        Int((min(max(progress, 0), 1) * 100).rounded())
+    }
+
+    var body: some View {
+        ZStack {
+            Circle()
+                .stroke(Color.white.opacity(0.14), lineWidth: 5)
+            Circle()
+                .trim(from: 0, to: max(progress, 0.035))
+                .stroke(JourneyVisual.lime, style: StrokeStyle(lineWidth: 5, lineCap: .round))
+                .rotationEffect(.degrees(-90))
+            Text("\(percentage)%")
+                .font(.system(size: 13, weight: .bold, design: .rounded))
+                .foregroundColor(.white)
+        }
+        .frame(width: 46, height: 46)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Профіль заповнено на \(percentage) відсотків")
+    }
+}
+
+private struct JobsInlineMetric: View {
+    let icon: String
+    let value: Int
+    let label: String
+
+    var body: some View {
+        HStack(spacing: 6) {
+            Image(systemName: icon)
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(JourneyVisual.lime)
+            Text("\(value) \(label)")
+                .font(.system(size: 13, weight: .medium))
+                .foregroundColor(.white.opacity(0.68))
+        }
+        .lineLimit(1)
+        .minimumScaleFactor(0.76)
+    }
+}
+
+private struct JobsMenuPill: View {
+    let icon: String
+    let text: String
+    let isActive: Bool
+    var showsChevron: Bool = true
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: icon)
+                .font(.system(size: 14, weight: .semibold))
+            Text(text)
+                .font(.system(size: 14, weight: .semibold))
+                .lineLimit(1)
+            if showsChevron {
+                Image(systemName: "chevron.down")
+                    .font(.system(size: 11, weight: .bold))
+            }
+        }
+        .foregroundColor(isActive ? .black : .white.opacity(0.88))
+        .padding(.horizontal, 15)
+        .frame(height: 44)
+        .background(isActive ? JourneyVisual.lime : Color.white.opacity(0.09))
+        .clipShape(RoundedRectangle(cornerRadius: 15, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 15, style: .continuous)
+                .stroke(isActive ? JourneyVisual.lime : Color.white.opacity(0.18), lineWidth: 1)
+        )
+    }
+}
+
 // MARK: - Dashboard Metric Card
 private struct DashboardMetricCard: View {
     let icon: String
@@ -1396,8 +1557,6 @@ private struct JobCard: View {
     let onSave: () -> Void
     let onShare: () -> Void
     
-    @State private var isPressed = false
-    
     private var isNew: Bool {
         guard let dateStr = job.posted_at else { return false }
         let iso = ISO8601DateFormatter()
@@ -1409,109 +1568,134 @@ private struct JobCard: View {
         (job.employment_type ?? "").lowercased().contains("remote") ||
         (job.location ?? "").lowercased().contains("remote")
     }
+
+    private var companyInitial: String {
+        String((job.company ?? "S").prefix(1)).uppercased()
+    }
     
     var body: some View {
-        Button(action: onTap) {
-            VStack(alignment: .leading, spacing: 12) {
-                // Header
-                HStack(alignment: .top, spacing: 12) {
-                    // Company logo placeholder
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(Color.white.opacity(0.1))
-                            .frame(width: 48, height: 48)
-                        
-                        Text(String((job.company ?? "C").prefix(1)))
-                            .font(.system(size: 20, weight: .bold))
-                            .foregroundColor(Theme.Colors.primary)
-                    }
-                    
+        HStack(alignment: .top, spacing: 14) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 17, style: .continuous)
+                    .fill(Color.white)
+                Text(companyInitial)
+                    .font(.system(size: 25, weight: .black, design: .rounded))
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [JourneyVisual.lime, Color(red: 0.15, green: 0.36, blue: 0.25)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+            }
+            .frame(width: 64, height: 64)
+
+            VStack(alignment: .leading, spacing: 7) {
+                HStack(alignment: .top, spacing: 8) {
                     VStack(alignment: .leading, spacing: 4) {
                         Text(job.title)
-                            .font(.system(size: 16, weight: .semibold))
+                            .font(.system(size: 18, weight: .bold, design: .rounded))
                             .foregroundColor(.white)
                             .lineLimit(2)
                             .multilineTextAlignment(.leading)
-                        
-                        Text(job.company ?? "Company")
-                            .font(.system(size: 13))
-                            .foregroundColor(.white.opacity(0.6))
-                        
-                        HStack(spacing: 4) {
-                            Image(systemName: "mappin")
-                                .font(.system(size: 10))
-                            Text(job.location ?? "Switzerland")
+
+                        HStack(spacing: 5) {
+                            Text(job.company ?? "Компанія")
+                            if isNew {
+                                Image(systemName: "sparkles")
+                                    .font(.system(size: 10, weight: .bold))
+                                    .foregroundColor(JourneyVisual.lime)
+                            }
                         }
-                        .font(.system(size: 12))
-                        .foregroundColor(.white.opacity(0.5))
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(.white.opacity(0.78))
                     }
-                    
-                    Spacer()
-                    
-                    // Match score badge
-                    if let score = matchScore, score > 0 {
-                        MatchScoreBadge(score: score)
-                    }
-                }
-                
-                // Tags
-                HStack(spacing: 8) {
-                    if isNew {
-                        JobTag(text: "NEW", color: .green)
-                    }
-                    if isRemote {
-                        JobTag(text: "Remote", color: .purple)
-                    }
-                    JobTag(text: job.source.uppercased(), color: .blue)
-                    
-                    Spacer()
-                }
-                
-                // Actions
-                HStack(spacing: 12) {
+
+                    Spacer(minLength: 4)
+
                     Button(action: onSave) {
-                        HStack(spacing: 6) {
-                            Image(systemName: isSaved ? "heart.fill" : "heart")
-                                .foregroundColor(isSaved ? .pink : .white.opacity(0.6))
-                            Text(isSaved ? "Збережено" : "Зберегти")
-                                .font(.system(size: 13, weight: .medium))
-                                .foregroundColor(.white.opacity(0.7))
-                        }
+                        Image(systemName: isSaved ? "bookmark.fill" : "bookmark")
+                            .font(.system(size: 17, weight: .semibold))
+                            .foregroundColor(isSaved ? JourneyVisual.lime : .white)
+                            .frame(width: 42, height: 42)
+                            .background(Color.white.opacity(0.07))
+                            .clipShape(Circle())
+                            .overlay(Circle().stroke(Color.white.opacity(0.16), lineWidth: 1))
                     }
                     .buttonStyle(.plain)
-                    
-                    Button(action: onShare) {
-                        HStack(spacing: 6) {
-                            Image(systemName: "square.and.arrow.up")
-                            Text("Поділитись")
-                        }
-                        .font(.system(size: 13, weight: .medium))
-                        .foregroundColor(.white.opacity(0.6))
+                    .accessibilityLabel(isSaved ? "Видалити зі збережених" : "Зберегти вакансію")
+                }
+
+                HStack(spacing: 7) {
+                    Image(systemName: "mappin")
+                    Text(job.location ?? "Швейцарія")
+                    if let employment = job.employment_type, !employment.isEmpty {
+                        Text("·")
+                        Text(employment)
+                    } else if isRemote {
+                        Text("· Remote")
                     }
-                    .buttonStyle(.plain)
-                    
+                }
+                .font(.system(size: 13, weight: .medium))
+                .foregroundColor(.white.opacity(0.52))
+                .lineLimit(1)
+
+                HStack(spacing: 10) {
+                    if let salary = job.salary, !salary.isEmpty {
+                        Text(salary)
+                            .font(.system(size: 16, weight: .bold, design: .rounded))
+                            .foregroundColor(.white)
+                            .lineLimit(1)
+                    } else {
+                        Text(job.source.uppercased())
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundColor(.white.opacity(0.58))
+                    }
+
+                    if let score = matchScore, score > 0 {
+                        Text("\(score)% збіг")
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundColor(JourneyVisual.lime)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 6)
+                            .background(JourneyVisual.lime.opacity(0.11))
+                            .clipShape(Capsule())
+                            .overlay(Capsule().stroke(JourneyVisual.lime.opacity(0.32), lineWidth: 1))
+                    }
+
                     Spacer()
-                    
+
+                    Button(action: onShare) {
+                        Image(systemName: "square.and.arrow.up")
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundColor(.white.opacity(0.58))
+                            .frame(width: 34, height: 34)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Поділитися вакансією")
+
                     Image(systemName: "chevron.right")
-                        .font(.system(size: 14))
-                        .foregroundColor(.white.opacity(0.3))
+                        .font(.system(size: 15, weight: .bold))
+                        .foregroundColor(.white.opacity(0.62))
                 }
             }
-            .padding(16)
-            .background(Color.white.opacity(0.06))
-            .cornerRadius(20)
-            .overlay(
-                RoundedRectangle(cornerRadius: 20)
-                    .stroke(matchScore != nil ? Theme.Colors.primary.opacity(0.3) : Color.white.opacity(0.08), lineWidth: 1)
-            )
-            .scaleEffect(isPressed ? 0.98 : 1.0)
         }
-        .buttonStyle(.plain)
-        .simultaneousGesture(
-            DragGesture(minimumDistance: 0)
-                .onChanged { _ in withAnimation(.easeInOut(duration: 0.1)) { isPressed = true } }
-                .onEnded { _ in withAnimation(.easeInOut(duration: 0.1)) { isPressed = false } }
+        .padding(16)
+        .background(.ultraThinMaterial.opacity(0.72))
+        .background(Color.black.opacity(0.38))
+        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .stroke(
+                    matchScore != nil ? JourneyVisual.lime.opacity(0.32) : Color.white.opacity(0.16),
+                    lineWidth: 1
+                )
         )
+        .contentShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .onTapGesture(perform: onTap)
+        .accessibilityElement(children: .contain)
+        .accessibilityAddTraits(.isButton)
+        .accessibilityAction(named: "Відкрити вакансію", onTap)
     }
 }
 
@@ -1604,21 +1788,32 @@ private struct JobsEmptyState: View {
     var isAIMatch: Bool = false
     
     var body: some View {
-        VStack(spacing: 16) {
+        HStack(spacing: 14) {
             Image(systemName: isAIMatch ? "wand.and.stars" : (hasSearched ? "magnifyingglass" : "briefcase.fill"))
-                .font(.system(size: 48))
-                .foregroundColor(Theme.Colors.primary.opacity(0.5))
-            
-            Text(isAIMatch ? "Немає відповідних вакансій" : (hasSearched ? "Нічого не знайдено" : "Почніть пошук"))
-                .font(.headline)
-                .foregroundColor(.white)
-            
-            Text(isAIMatch ? "Спробуйте змінити параметри AI Match профілю" : (hasSearched ? "Спробуйте змінити фільтри або ключові слова" : "Введіть ключове слово або оберіть категорію"))
-                .font(.subheadline)
-                .foregroundColor(.white.opacity(0.5))
-                .multilineTextAlignment(.center)
+                .font(.system(size: 24, weight: .semibold))
+                .foregroundColor(JourneyVisual.lime)
+                .frame(width: 48, height: 48)
+                .background(JourneyVisual.lime.opacity(0.1))
+                .clipShape(RoundedRectangle(cornerRadius: 15, style: .continuous))
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(isAIMatch ? "Немає відповідних вакансій" : (hasSearched ? "Нічого не знайдено" : "Почніть пошук"))
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundColor(.white)
+
+                Text(isAIMatch ? "Зміни параметри AI Match" : (hasSearched ? "Зміни фільтри або ключові слова" : "Введи посаду або навичку"))
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundColor(.white.opacity(0.56))
+                    .lineLimit(2)
+            }
+
+            Spacer(minLength: 0)
         }
-        .padding(.vertical, 60)
+        .padding(14)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.white.opacity(0.055))
+        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(Color.white.opacity(0.12), lineWidth: 1))
     }
 }
 

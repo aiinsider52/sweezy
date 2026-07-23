@@ -87,6 +87,23 @@ def test_register_duplicate_email_fails():
     assert res.json()["status"] == "verification_required"
 
 
+def test_email_verification_returns_machine_readable_invalid_code():
+    email = _unique_email()
+    password = "StrongPass1!"
+
+    registered = client.post("/api/v1/auth/register", json={"email": email, "password": password})
+    assert registered.status_code == 201
+
+    invalid = client.post(
+        "/api/v1/auth/verify-email/confirm",
+        json={"email": email, "code": "000000"},
+    )
+
+    assert invalid.status_code == 400
+    assert invalid.json()["detail"]["code"] == "INVALID_CODE"
+    assert invalid.json()["detail"]["message"] == "Verification code is invalid"
+
+
 def test_login_invalid_credentials_returns_401():
     email = _unique_email()
     password = "StrongPass1!"

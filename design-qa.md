@@ -45,6 +45,54 @@ final result: passed
 
 ---
 
+**Authentication Registration And Email Verification — 2026-07-23**
+- Source visual truth: `/var/folders/h0/856jbdbx62dc4n9mfh_35k540000gn/T/codex-clipboard-8ac3af15-42c1-45a7-bf4a-865c90dda583.png`.
+- Implementation screenshots: `/private/tmp/sweezy-registration-attachments/049E164E-45F1-4629-8303-B02FBA398CA0.png` and `/private/tmp/sweezy-verification-attachments-3/DC814369-40C2-4EA4-BE36-9FC3D8F1CD0E.png`.
+- Combined comparison input: `/private/tmp/sweezy-auth-design-comparison-final.jpg`.
+- Viewport: iPhone 17 Pro Simulator, 402 × 874 points, 3× capture; each implementation screenshot is 1206 × 2622 pixels. The source board is 1536 × 1024 pixels and defines the visual system rather than an exact auth-screen composition, so no false pixel-perfect crop comparison was applied.
+- State: Ukrainian app locale, dark appearance, empty registration form, empty six-digit verification code, resend cooldown active.
+
+**Full-View Comparison Evidence**
+- The approved Settings/CV board and both rendered auth screens were placed into one combined comparison input and inspected together.
+- Registration and verification preserve the selected system: photographic Zürich background, near-black glass surfaces, compact keylines, rounded SF typography, neon-lime semantic actions, restrained metadata, and 44-point-or-larger controls.
+- The old oversized glowing auth icon, blue modal sheet, editable verification email, single monolithic code field, and raw English backend error are no longer present.
+
+**Focused Region Comparison Evidence**
+- No additional crop was required because form labels, field borders, six OTP cells, disabled CTA treatment, resend countdown, warning copy, and close controls are legible in the 3× full-view captures.
+- The registration form and verification code card were also exercised through dedicated XCUI element assertions, not judged from static screenshots alone.
+
+**Required Fidelity Surfaces**
+- Fonts and typography: SF Rounded/SF Pro native hierarchy matches the approved screens; display titles, form labels, metadata, and OTP numerals use distinct optical weights with no primary-copy truncation.
+- Spacing and layout rhythm: 20-point outer margins, 18–24 point card radii, 44–64 point controls, and a consistent vertical cadence match the compact editorial system while preserving accessible touch targets.
+- Colors and visual tokens: `JourneyVisual.lime`, pine-black glass, muted white secondary text, and white keylines map to the approved visual language; disabled actions remain visibly inactive without disappearing.
+- Image quality and asset fidelity: the existing Zürich old-town raster background is sharp, correctly darkened, and consistently cropped. SF Symbols are used for standard controls; there are no placeholder graphics, emoji, or handcrafted SVG substitutes.
+- Copy and content: Ukrainian registration and verification copy explains the task, locks the email to the address actually registered, states that only the latest code works, and warns that resend invalidates the previous code.
+
+**Comparison History**
+- Iteration 1 [P1]: the first verification capture was obscured by the post-onboarding auth cover, despite the underlying OTP elements existing. Fix: the DEBUG-only verification UI-test route now suppresses the competing cover. Post-fix evidence: `/private/tmp/sweezy-verification-attachments-3/DC814369-40C2-4EA4-BE36-9FC3D8F1CD0E.png`.
+- Iteration 1 [P2]: the legacy verification design exposed an editable email and one oversized text field, making email/code mismatches and resend confusion easy. Fix: read-only registered email card, six visual OTP cells, `.oneTimeCode`, resend cooldown, latest-code warning, and localized machine-readable errors. Post-fix evidence: final verification screenshot above.
+
+**Findings**
+- No actionable P0, P1, or P2 visual issues remain in the captured auth states.
+
+**Open Questions**
+- None blocking. The Apple sign-in button follows the Simulator system language by platform policy, so German button text alongside a Ukrainian app locale is expected native behavior.
+
+**Implementation Checklist**
+- [x] Registration visually matches the approved Sweezy system.
+- [x] Email is normalized and carried unchanged into verification.
+- [x] Verification accepts only six digits and supports iOS one-time-code autofill.
+- [x] Submit and resend states are finite, disabled correctly, and accessible.
+- [x] Backend errors are localized and differentiated by cause.
+- [x] Registration and verification XCUI tests pass on iPhone 17 Pro Simulator.
+
+**Follow-up Polish**
+- [P3] Add a dedicated UI snapshot for the successful verification state when the visual regression suite gains a deterministic network stub.
+
+final result: passed
+
+---
+
 **Marketplace Services, Detail And Feature Onboarding — 2026-07-20**
 - Source visual truth: `/Users/vladyslav.katash/Library/Containers/ru.keepcoder.Telegram/Data/tmp/IMAGE 2026-07-13 13:03:00.jpg`.
 - Implementation screenshots: `/Users/vladyslav.katash/Desktop/SWEEEZY/artifacts/marketplace-redesign/onboarding-v2.png`, `/Users/vladyslav.katash/Desktop/SWEEEZY/artifacts/marketplace-redesign/services-catalog.png`, `/Users/vladyslav.katash/Desktop/SWEEEZY/artifacts/marketplace-redesign/listing-detail-instant.png`.

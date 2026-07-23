@@ -79,21 +79,25 @@ struct MainAppContent: View {
     
     var body: some View {
         ZStack {
-            Group {
-                if appContainer.isOnboardingCompleted {
-                    // IMPORTANT (App Store 5.1.1):
-                    // Do NOT force account creation on launch.
-                    // Guest users can access all public (non-account-based) content from the main app.
-                    VStack(spacing: 0) {
-                        OfflineBanner()
-                        MainTabView()
+            if isEmailVerificationUITest {
+                EmailVerificationSheet(initialEmail: "olena.kovalenko@email.com")
+            } else {
+                Group {
+                    if appContainer.isOnboardingCompleted {
+                        // IMPORTANT (App Store 5.1.1):
+                        // Do NOT force account creation on launch.
+                        // Guest users can access all public (non-account-based) content from the main app.
+                        VStack(spacing: 0) {
+                            OfflineBanner()
+                            MainTabView()
+                        }
+                    } else {
+                        OnboardingViewRedesigned()
                     }
-                } else {
-                    OnboardingViewRedesigned()
                 }
+                .blur(radius: shouldShowLockOverlay ? 3 : 0)
+                .disabled(shouldShowLockOverlay)
             }
-            .blur(radius: shouldShowLockOverlay ? 3 : 0)
-            .disabled(shouldShowLockOverlay)
             
             if shouldShowLockOverlay {
                 LockScreenOverlay()
@@ -167,6 +171,15 @@ struct MainAppContent: View {
     private var shouldShowLockOverlay: Bool {
         lockManager.biometricsEnabled && lockManager.isLocked
     }
+
+    private var isEmailVerificationUITest: Bool {
+        #if DEBUG
+        ProcessInfo.processInfo.environment["UITESTS"] == "1" &&
+            ProcessInfo.processInfo.arguments.contains("--ui-test-email-verification")
+        #else
+        false
+        #endif
+    }
     
     private func handleScenePhaseChange(_ phase: ScenePhase) {
         switch phase {
@@ -214,6 +227,10 @@ struct MainAppContent: View {
     }
 
     private func updatePostOnboardingAuthPresentation() {
+        guard !isEmailVerificationUITest else {
+            showPostOnboardingAuthEntry = false
+            return
+        }
         showPostOnboardingAuthEntry =
             appContainer.shouldPresentInitialAuthEntry &&
             !lockManager.isRegistered &&

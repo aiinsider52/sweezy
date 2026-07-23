@@ -52,7 +52,10 @@ def _send_verification_email(email: str, code: str) -> None:
     except EmailDeliveryError as exc:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Verification email is temporarily unavailable",
+            detail={
+                "code": "EMAIL_DELIVERY_FAILED",
+                "message": "Verification email is temporarily unavailable",
+            },
         ) from exc
 
 
@@ -177,7 +180,9 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
 
 
 @router.post("/register", response_model=AuthStatus, status_code=status.HTTP_201_CREATED)
+@limiter.limit("10/15minute")
 def register(
+    request: Request,
     user_in: UserCreate,
     db: Session = Depends(get_db),
 ) -> AuthStatus:
@@ -349,7 +354,21 @@ def confirm_email_verification(
         code=payload.code,
     )
     if not result.ok or not result.user or not result.user.is_active:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid or expired code")
+        reason = result.reason or "INVALID_CODE"
+        messages = {
+            "CODE_NOT_FOUND": "Verification code was not found",
+            "CODE_EXPIRED": "Verification code has expired",
+            "TOO_MANY_ATTEMPTS": "Too many verification attempts",
+            "INVALID_CODE": "Verification code is invalid",
+            "INVALID_USER": "Verification code is invalid",
+        }
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={
+                "code": reason,
+                "message": messages.get(reason, "Verification code is invalid or expired"),
+            },
+        )
 
     if not result.user.email_verified:
         result.user.email_verified = True

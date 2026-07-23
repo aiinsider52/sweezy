@@ -42,6 +42,29 @@ final class CriticalFlowsUITests: XCTestCase {
         XCTAssertTrue(app.secureTextFields["auth.registration.password"].exists)
         XCTAssertTrue(app.buttons["auth.registration.submit"].exists)
         XCTAssertFalse(app.buttons["auth.registration.submit"].isEnabled)
+
+        let screenshot = XCTAttachment(screenshot: app.screenshot())
+        screenshot.name = "registration-redesign"
+        screenshot.lifetime = .keepAlways
+        add(screenshot)
+    }
+
+    @MainActor
+    func testEmailVerificationRedesignStartsInSafeState() throws {
+        let app = XCUIApplication()
+        app.launchArguments = ["--ui-test-email-verification"]
+        app.launchEnvironment["UITESTS"] = "1"
+        app.launch()
+
+        XCTAssertTrue(app.textFields["auth.verify.code"].waitForExistence(timeout: 15))
+        XCTAssertTrue(app.buttons["auth.verify.submit"].exists)
+        XCTAssertFalse(app.buttons["auth.verify.submit"].isEnabled)
+        XCTAssertTrue(app.buttons["auth.verify.resend"].exists)
+
+        let screenshot = XCTAttachment(screenshot: app.screenshot())
+        screenshot.name = "email-verification-redesign"
+        screenshot.lifetime = .keepAlways
+        add(screenshot)
     }
 
     @MainActor

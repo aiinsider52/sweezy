@@ -7,65 +7,50 @@ struct RegistrationView: View {
     @EnvironmentObject private var lockManager: AppLockManager
     @EnvironmentObject private var sessionManager: SessionManager
     @Environment(\.dismiss) private var dismiss
-    
-    @State private var name: String = ""
-    @State private var email: String = ""
-    @State private var password: String = ""
-    @State private var isRegistering: Bool = false
+
+    @State private var name = ""
+    @State private var email = ""
+    @State private var password = ""
+    @State private var verificationEmail = ""
+    @State private var isRegistering = false
     @State private var errorMessage: String?
-    @State private var showConfetti: Bool = false
-    @State private var showPassword: Bool = false
-    @State private var animateIcon: Bool = false
-    @State private var showLogin: Bool = false
-    @State private var showEmailVerification: Bool = false
-    
+    @State private var showPassword = false
+    @State private var showLogin = false
+    @State private var showEmailVerification = false
+    @FocusState private var focusedField: Field?
+
+    private enum Field: Hashable {
+        case name, email, password
+    }
+
     var body: some View {
         NavigationStack {
             ZStack {
-                JourneyPhotoBackground(imageName: JourneyBackdrop.zurich.rawValue, blurRadius: 6, darkness: 0.64)
-                
+                JourneyPhotoBackground(
+                    imageName: "cityhub-zurich-oldtown",
+                    blurRadius: 2,
+                    darkness: 0.72
+                )
+
                 ScrollView(showsIndicators: false) {
-                    VStack(spacing: 24) {
-                        // Top icon
-                        registrationHeader
-                            .padding(.top, 30)
-                        
-                        // Registration form
-                        registrationFormCard
-                        
-                        // Footer
-                        footerSection
-                        
-                        Spacer(minLength: 40)
+                    VStack(alignment: .leading, spacing: 20) {
+                        topBar
+                        hero
+                        formCard
+                        securityNote
                     }
                     .padding(.horizontal, 20)
+                    .padding(.top, 10)
+                    .padding(.bottom, 36)
                 }
+                .scrollDismissesKeyboard(.interactively)
             }
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.title3)
-                            .foregroundStyle(.white.opacity(0.6))
-                    }
-                }
-            }
+            .toolbar(.hidden, for: .navigationBar)
         }
-        .journeyScreen(.zurich, darkness: 0.64)
-        .overlay(alignment: .top) {
-            if showConfetti { ConfettiView().allowsHitTesting(false) }
-        }
+        .preferredColorScheme(.dark)
         .onAppear {
-            // Prefill from storage if any
             name = lockManager.userName
             email = lockManager.userEmail
-            
-            withAnimation(.easeOut(duration: 0.8).delay(0.2)) {
-                animateIcon = true
-            }
         }
         .sheet(isPresented: $showLogin) {
             LoginView()
@@ -74,7 +59,7 @@ struct RegistrationView: View {
                 .environmentObject(sessionManager)
         }
         .sheet(isPresented: $showEmailVerification) {
-            EmailVerificationSheet(initialEmail: email, initialName: name) {
+            EmailVerificationSheet(initialEmail: verificationEmail, initialName: name) {
                 dismiss()
             }
             .environmentObject(appContainer)
@@ -82,390 +67,382 @@ struct RegistrationView: View {
             .environmentObject(sessionManager)
         }
     }
-    
-    // MARK: - Header
-    private var registrationHeader: some View {
-        VStack(spacing: 16) {
-            // Animated icon
-            ZStack {
-                // Outer glow
-                Circle()
-                    .fill(
-                        RadialGradient(
-                            colors: [Theme.Colors.primary.opacity(0.25), .clear],
-                            center: .center,
-                            startRadius: 0,
-                            endRadius: 70
-                        )
-                    )
-                    .frame(width: 140, height: 140)
-                    .scaleEffect(animateIcon ? 1.1 : 0.9)
-                    .animation(.easeInOut(duration: 2).repeatForever(autoreverses: true), value: animateIcon)
-                
-                // Inner circle with gradient
-                Circle()
-                    .fill(
-                        LinearGradient(
-                            colors: [Theme.Colors.primary.opacity(0.3), Theme.Colors.primaryLight.opacity(0.2)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                    .frame(width: 90, height: 90)
-                    .overlay(
-                        Circle()
-                            .stroke(
-                                LinearGradient(
-                                    colors: [Theme.Colors.primary.opacity(0.6), Theme.Colors.primaryLight.opacity(0.3)],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                ),
-                                lineWidth: 2
-                            )
-                    )
-                    .scaleEffect(animateIcon ? 1 : 0.8)
-                    .opacity(animateIcon ? 1 : 0)
-                
-                // Icon
-                Image(systemName: "person.badge.plus")
-                    .font(.system(size: 40))
-                    .foregroundStyle(
-                        LinearGradient(
-                            colors: [Theme.Colors.primary, .white],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                    .scaleEffect(animateIcon ? 1 : 0.5)
-                    .opacity(animateIcon ? 1 : 0)
+
+    private var topBar: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 3) {
+                Text("SWEEZY")
+                    .font(.caption.weight(.black))
+                    .tracking(2.2)
+                    .foregroundStyle(JourneyVisual.lime)
+                Text("auth.registration.account_label".localized)
+                    .font(.caption)
+                    .foregroundStyle(.white.opacity(0.62))
             }
-            
-            VStack(spacing: 8) {
-                Text("Зареєструватись")
-                    .font(.system(size: 28, weight: .bold))
-                    .foregroundColor(.white)
-                
-                Text("Зареєструйтесь, щоб отримати повний доступ")
-                    .font(.subheadline)
-                    .foregroundColor(.white.opacity(0.7))
-                    .multilineTextAlignment(.center)
+
+            Spacer()
+
+            Button(action: dismiss.callAsFunction) {
+                Image(systemName: "xmark")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .frame(width: 44, height: 44)
+                    .background(Color.black.opacity(0.48), in: Circle())
+                    .overlay(Circle().stroke(.white.opacity(0.18), lineWidth: 1))
             }
-            .opacity(animateIcon ? 1 : 0)
-            .offset(y: animateIcon ? 0 : 20)
+            .accessibilityLabel("common.close".localized)
         }
     }
-    
-    // MARK: - Form Card
-    private var registrationFormCard: some View {
-        VStack(spacing: 18) {
-            // Name field
-            modernTextField(
-                placeholder: "Повне ім'я",
+
+    private var hero: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("auth.registration.hero_title".localized)
+                .font(.system(size: 36, weight: .bold, design: .rounded))
+                .foregroundStyle(.white)
+                .lineSpacing(-2)
+                .fixedSize(horizontal: false, vertical: true)
+
+            Text("auth.registration.hero_subtitle".localized)
+                .font(.subheadline)
+                .foregroundStyle(.white.opacity(0.72))
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private var formCard: some View {
+        VStack(spacing: 16) {
+            VStack(alignment: .leading, spacing: 6) {
+                Text("auth.registration.form_title".localized)
+                    .font(.title3.weight(.bold))
+                    .foregroundStyle(.white)
+                Text("auth.registration.form_subtitle".localized)
+                    .font(.caption)
+                    .foregroundStyle(.white.opacity(0.58))
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+
+            authTextField(
+                title: "auth.registration.name".localized,
+                placeholder: "auth.registration.name_placeholder".localized,
                 text: $name,
-                icon: "person.fill",
-                accessibilityIdentifier: "auth.registration.name"
+                icon: "person",
+                field: .name,
+                contentType: .name,
+                identifier: "auth.registration.name"
             )
-            
-            // Email field
-            modernTextField(
-                placeholder: "Електронна пошта",
+
+            authTextField(
+                title: "auth.registration.email".localized,
+                placeholder: "name@email.com",
                 text: $email,
-                icon: "envelope.fill",
+                icon: "envelope",
+                field: .email,
+                contentType: .emailAddress,
                 keyboardType: .emailAddress,
-                accessibilityIdentifier: "auth.registration.email"
+                identifier: "auth.registration.email"
             )
-            
-            // Email validation error
+
             if isEmailInvalid {
-                HStack(spacing: 6) {
-                    Image(systemName: "exclamationmark.triangle.fill")
-                        .foregroundColor(.orange)
-                    Text("validation.email_invalid".localized)
-                        .font(.caption)
-                        .foregroundColor(.orange)
-                }
-                .transition(.opacity.combined(with: .scale))
-            }
-            
-            // Password field
-            modernSecureField(
-                placeholder: "Пароль",
-                text: $password,
-                icon: "lock.fill",
-                accessibilityIdentifier: "auth.registration.password"
-            )
-            
-            // Password checklist
-            PasswordChecklist(password: password)
-                .padding(.top, 4)
-            
-            // Error message
-            if let error = errorMessage {
-                HStack(spacing: 8) {
-                    Image(systemName: "exclamationmark.triangle.fill")
-                        .foregroundColor(.red)
-                    Text(error)
-                        .font(.caption)
-                        .foregroundColor(.red)
-                }
-                .padding(.vertical, 8)
-                .padding(.horizontal, 12)
-                .background(
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(.red.opacity(0.15))
+                feedbackRow(
+                    icon: "exclamationmark.circle.fill",
+                    text: "validation.email_invalid".localized,
+                    color: .orange
                 )
-                .transition(.opacity.combined(with: .scale))
             }
-            
-            // Register button
+
+            passwordField
+
+            if !password.isEmpty {
+                passwordStrengthView
+            }
+
+            if let errorMessage {
+                feedbackRow(icon: "exclamationmark.triangle.fill", text: errorMessage, color: .orange)
+            }
+
             Button {
+                focusedField = nil
                 Task { await registerAsync() }
             } label: {
-                HStack(spacing: 12) {
+                HStack(spacing: 10) {
                     if isRegistering {
-                        ProgressView()
-                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        ProgressView().tint(.black)
                     } else {
-                        Image(systemName: "person.badge.plus")
-                            .font(.title3)
-                        Text("Зареєструватись")
-                            .fontWeight(.semibold)
+                        Text("auth.registration.submit".localized)
+                            .font(.headline)
+                        Image(systemName: "arrow.right")
+                            .font(.headline)
                     }
                 }
+                .foregroundStyle(.black)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 16)
-                .background(
-                    Group {
-                        if disabled {
-                            LinearGradient(
-                                colors: [.gray.opacity(0.4), .gray.opacity(0.3)],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
-                        } else {
-                            LinearGradient(
-                                colors: [Theme.Colors.primary, Theme.Colors.primaryLight],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
-                        }
-                    }
-                )
-                .foregroundColor(.white)
-                .cornerRadius(16)
-                .shadow(color: disabled ? .clear : Theme.Colors.primary.opacity(0.4), radius: 12, y: 6)
+                .frame(height: 56)
+                .background(JourneyVisual.lime, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
             }
+            .buttonStyle(.plain)
             .disabled(disabled || isRegistering)
-            .animation(.easeInOut(duration: 0.2), value: disabled)
+            .opacity(disabled ? 0.46 : 1)
             .accessibilityIdentifier("auth.registration.submit")
 
             SocialAuthPanel(
                 errorMessage: $errorMessage,
-                onAuthenticated: {
-                    dismiss()
-                }
+                onAuthenticated: dismiss.callAsFunction
             )
-            
-            // Login link
+
             Button {
-                if let onRequestLogin {
-                    dismiss()
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
-                        onRequestLogin()
-                    }
-                } else {
-                    showLogin = true
-                }
+                openLogin()
             } label: {
-                Text("Уже є акаунт? Увійти")
-                    .font(.subheadline.weight(.medium))
-                    .foregroundColor(Theme.Colors.primary)
+                HStack(spacing: 5) {
+                    Text("auth.registration.have_account".localized)
+                        .foregroundStyle(.white.opacity(0.62))
+                    Text("auth.registration.login".localized)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(JourneyVisual.lime)
+                }
+                .font(.subheadline)
+                .frame(maxWidth: .infinity)
             }
-            .padding(.top, 4)
+            .buttonStyle(.plain)
             .accessibilityIdentifier("auth.registration.openLogin")
         }
-        .padding(24)
-        .background(
-            RoundedRectangle(cornerRadius: 24)
-                .fill(
-                    LinearGradient(
-                        colors: [
-                            Theme.Colors.darkBackground.opacity(0.96),
-                            Color(red: 0.13, green: 0.17, blue: 0.12).opacity(0.94)
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 24)
-                        .stroke(
-                            LinearGradient(
-                                colors: [Theme.Colors.primary.opacity(0.28), .white.opacity(0.08), Theme.Colors.primaryLight.opacity(0.18)],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            ),
-                            lineWidth: 1
-                        )
-                )
-                .shadow(color: .black.opacity(0.42), radius: 24, y: 12)
+        .padding(18)
+        .background(Color.black.opacity(0.72), in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .stroke(.white.opacity(0.16), lineWidth: 1)
         )
+        .shadow(color: .black.opacity(0.36), radius: 22, y: 12)
     }
-    
-    // MARK: - Footer
-    private var footerSection: some View {
-        VStack(spacing: 16) {
-            // Security note
-            HStack(spacing: 8) {
-                Image(systemName: "lock.shield.fill")
-                    .foregroundColor(Theme.Colors.primary.opacity(0.7))
-                Text("auth.registration.secure_storage".localized)
-                    .font(.caption)
-                    .foregroundColor(.white.opacity(0.5))
+
+    private var passwordField: some View {
+        VStack(alignment: .leading, spacing: 7) {
+            Text("auth.registration.password".localized)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.white.opacity(0.68))
+
+            HStack(spacing: 12) {
+                Image(systemName: "lock")
+                    .foregroundStyle(JourneyVisual.lime)
+                    .frame(width: 22)
+
+                Group {
+                    if showPassword {
+                        TextField("auth.registration.password_placeholder".localized, text: $password)
+                    } else {
+                        SecureField("auth.registration.password_placeholder".localized, text: $password)
+                    }
+                }
+                .textContentType(.newPassword)
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
+                .focused($focusedField, equals: .password)
+                .submitLabel(.done)
+                .onSubmit {
+                    focusedField = nil
+                    if !disabled { Task { await registerAsync() } }
+                }
+                .accessibilityIdentifier("auth.registration.password")
+
+                Button {
+                    showPassword.toggle()
+                } label: {
+                    Image(systemName: showPassword ? "eye.slash" : "eye")
+                        .foregroundStyle(.white.opacity(0.52))
+                        .frame(width: 32, height: 32)
+                }
+                .accessibilityLabel(showPassword ? "auth.password.hide".localized : "auth.password.show".localized)
             }
-            .padding(.vertical, 12)
-            .padding(.horizontal, 16)
-            .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(Color.black.opacity(0.14))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color.white.opacity(0.06), lineWidth: 1)
-                    )
+            .foregroundStyle(.white)
+            .padding(.horizontal, 14)
+            .frame(height: 56)
+            .background(Color.white.opacity(0.07), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .stroke(focusedField == .password ? JourneyVisual.lime.opacity(0.78) : .white.opacity(0.12), lineWidth: 1)
             )
         }
     }
-    
-    // MARK: - Modern Text Field
-    private func modernTextField(
-        placeholder: String,
-        text: Binding<String>,
-        icon: String,
-        keyboardType: UIKeyboardType = .default,
-        accessibilityIdentifier: String
-    ) -> some View {
-        HStack(spacing: 14) {
-            Image(systemName: icon)
-                .font(.system(size: 18))
-                .foregroundColor(Theme.Colors.primary.opacity(0.8))
-                .frame(width: 24)
-            
-            TextField("", text: text, prompt: Text(placeholder).foregroundColor(.white.opacity(0.4)))
-                .font(.body)
-                .foregroundColor(.white)
-                .keyboardType(keyboardType)
-                .autocapitalization(keyboardType == .emailAddress ? .none : .words)
-                .autocorrectionDisabled()
-        }
-        .padding(.horizontal, 18)
-        .padding(.vertical, 16)
-        .background(
-            RoundedRectangle(cornerRadius: 14)
-                .fill(Color.black.opacity(0.16))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 14)
-                        .stroke(
-                            !text.wrappedValue.isEmpty
-                                ? LinearGradient(colors: [Theme.Colors.primary.opacity(0.42), Theme.Colors.primaryLight.opacity(0.22)], startPoint: .topLeading, endPoint: .bottomTrailing)
-                                : LinearGradient(colors: [.white.opacity(0.10), .white.opacity(0.06)], startPoint: .topLeading, endPoint: .bottomTrailing),
-                            lineWidth: 1
-                        )
-                )
-        )
-        .animation(.easeInOut(duration: 0.2), value: text.wrappedValue.isEmpty)
-        .accessibilityIdentifier(accessibilityIdentifier)
-    }
-    
-    // MARK: - Modern Secure Field
-    private func modernSecureField(
-        placeholder: String,
-        text: Binding<String>,
-        icon: String,
-        accessibilityIdentifier: String
-    ) -> some View {
-        HStack(spacing: 14) {
-            Image(systemName: icon)
-                .font(.system(size: 18))
-                .foregroundColor(Theme.Colors.primary.opacity(0.8))
-                .frame(width: 24)
-            
-            Group {
-                if showPassword {
-                    TextField("", text: text, prompt: Text(placeholder).foregroundColor(.white.opacity(0.4)))
-                } else {
-                    SecureField("", text: text, prompt: Text(placeholder).foregroundColor(.white.opacity(0.4)))
+
+    private var passwordStrengthView: some View {
+        VStack(alignment: .leading, spacing: 9) {
+            HStack {
+                Text(passwordIsStrong ? "auth.password.ready".localized : "auth.password.requirements".localized)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(passwordIsStrong ? JourneyVisual.lime : .white.opacity(0.7))
+                Spacer()
+                Text("\(passwordScore)/6")
+                    .font(.caption.monospacedDigit())
+                    .foregroundStyle(.white.opacity(0.55))
+            }
+
+            HStack(spacing: 5) {
+                ForEach(0..<6, id: \.self) { index in
+                    Capsule()
+                        .fill(index < passwordScore ? JourneyVisual.lime : Color.white.opacity(0.12))
+                        .frame(height: 4)
                 }
             }
-            .font(.body)
-            .foregroundColor(.white)
-            .autocapitalization(.none)
-            .autocorrectionDisabled()
-            
-            Button {
-                showPassword.toggle()
-            } label: {
-                Image(systemName: showPassword ? "eye.slash.fill" : "eye.fill")
-                    .font(.system(size: 16))
-                    .foregroundColor(.white.opacity(0.5))
-            }
+
+            Text("auth.password.compact_rules".localized)
+                .font(.caption2)
+                .foregroundStyle(.white.opacity(0.48))
+                .fixedSize(horizontal: false, vertical: true)
         }
-        .padding(.horizontal, 18)
-        .padding(.vertical, 16)
-        .background(
-            RoundedRectangle(cornerRadius: 14)
-                .fill(Color.black.opacity(0.16))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 14)
-                        .stroke(
-                            !text.wrappedValue.isEmpty
-                                ? LinearGradient(colors: [Theme.Colors.primary.opacity(0.42), Theme.Colors.primaryLight.opacity(0.22)], startPoint: .topLeading, endPoint: .bottomTrailing)
-                                : LinearGradient(colors: [.white.opacity(0.10), .white.opacity(0.06)], startPoint: .topLeading, endPoint: .bottomTrailing),
-                            lineWidth: 1
-                        )
-                )
-        )
-        .animation(.easeInOut(duration: 0.2), value: text.wrappedValue.isEmpty)
-        .accessibilityIdentifier(accessibilityIdentifier)
+        .padding(.horizontal, 2)
     }
-    
-    private var disabled: Bool { name.isEmpty || email.isEmpty || password.isEmpty || isEmailInvalid || !passwordIsStrong }
-    
+
+    private var securityNote: some View {
+        HStack(alignment: .top, spacing: 10) {
+            Image(systemName: "lock.shield.fill")
+                .foregroundStyle(JourneyVisual.lime)
+            Text("auth.registration.secure_storage".localized)
+                .font(.caption)
+                .foregroundStyle(.white.opacity(0.62))
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(.horizontal, 4)
+    }
+
+    private func authTextField(
+        title: String,
+        placeholder: String,
+        text: Binding<String>,
+        icon: String,
+        field: Field,
+        contentType: UITextContentType?,
+        keyboardType: UIKeyboardType = .default,
+        identifier: String
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 7) {
+            Text(title)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.white.opacity(0.68))
+
+            HStack(spacing: 12) {
+                Image(systemName: icon)
+                    .foregroundStyle(JourneyVisual.lime)
+                    .frame(width: 22)
+
+                TextField(placeholder, text: text)
+                    .textContentType(contentType)
+                    .keyboardType(keyboardType)
+                    .textInputAutocapitalization(keyboardType == .emailAddress ? .never : .words)
+                    .autocorrectionDisabled()
+                    .focused($focusedField, equals: field)
+                    .submitLabel(field == .name ? .next : field == .email ? .next : .done)
+                    .onSubmit {
+                        switch field {
+                        case .name: focusedField = .email
+                        case .email: focusedField = .password
+                        case .password: focusedField = nil
+                        }
+                    }
+                    .accessibilityIdentifier(identifier)
+            }
+            .foregroundStyle(.white)
+            .padding(.horizontal, 14)
+            .frame(height: 56)
+            .background(Color.white.opacity(0.07), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .stroke(focusedField == field ? JourneyVisual.lime.opacity(0.78) : .white.opacity(0.12), lineWidth: 1)
+            )
+        }
+    }
+
+    private func feedbackRow(icon: String, text: String, color: Color) -> some View {
+        HStack(alignment: .top, spacing: 9) {
+            Image(systemName: icon)
+                .foregroundStyle(color)
+            Text(text)
+                .font(.caption)
+                .foregroundStyle(.white.opacity(0.82))
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(12)
+        .background(color.opacity(0.12), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+    }
+
+    private var normalizedName: String {
+        name.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private var normalizedEmail: String {
+        email.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+    }
+
+    private var disabled: Bool {
+        normalizedName.isEmpty || normalizedEmail.isEmpty || isEmailInvalid || !passwordIsStrong
+    }
+
     private var isEmailInvalid: Bool {
+        if normalizedEmail.isEmpty { return false }
         let pattern = "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}$"
         let regex = try? NSRegularExpression(pattern: pattern, options: [.caseInsensitive])
-        let range = NSRange(location: 0, length: email.utf16.count)
-        if email.isEmpty { return false }
-        return regex?.firstMatch(in: email, options: [], range: range) == nil
+        let range = NSRange(location: 0, length: normalizedEmail.utf16.count)
+        return regex?.firstMatch(in: normalizedEmail, range: range) == nil
     }
-    
+
+    private var strengthModel: PasswordStrength {
+        PasswordStrength(password: password)
+    }
+
     private var passwordIsStrong: Bool {
-        PasswordStrength(password: password).isStrong
+        strengthModel.isStrong
     }
-    
+
+    private var passwordScore: Int {
+        [
+            strengthModel.hasMinLength,
+            strengthModel.hasUpper,
+            strengthModel.hasLower,
+            strengthModel.hasDigit,
+            strengthModel.hasSpecial,
+            strengthModel.noSpaces
+        ].filter { $0 }.count
+    }
+
+    private func openLogin() {
+        if let onRequestLogin {
+            dismiss()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                onRequestLogin()
+            }
+        } else {
+            showLogin = true
+        }
+    }
+
     private func registerAsync() async {
-        guard !disabled else { return }
+        guard !disabled, !isRegistering else { return }
         errorMessage = nil
         isRegistering = true
 
         do {
-            let response = try await APIClient.register(email: email, password: password)
+            let response = try await APIClient.register(email: normalizedEmail, password: password)
             await MainActor.run {
                 isRegistering = false
-                if response.status == "verification_required" {
-                    let generator = UINotificationFeedbackGenerator()
-                    generator.notificationOccurred(.success)
-                    showEmailVerification = true
-                } else {
-                    errorMessage = response.message ?? "Registration failed"
+                guard response.status == "verification_required" else {
+                    errorMessage = response.message ?? "auth.registration.error.generic".localized
+                    return
                 }
+
+                verificationEmail = (response.email ?? normalizedEmail)
+                    .trimmingCharacters(in: .whitespacesAndNewlines)
+                    .lowercased()
+                let generator = UINotificationFeedbackGenerator()
+                generator.notificationOccurred(.success)
+                showEmailVerification = true
             }
         } catch {
             await MainActor.run {
                 isRegistering = false
-                errorMessage = (error as NSError).localizedDescription
+                errorMessage = AuthErrorPresenter.message(
+                    for: error,
+                    fallbackKey: "auth.registration.error.generic"
+                )
             }
         }
     }
 }
-
-// Password strength helpers moved to PasswordStrength.swift (shared)

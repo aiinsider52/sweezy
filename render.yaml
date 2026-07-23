@@ -9,7 +9,7 @@ services:
     branch: main
     autoDeployTrigger: checksPass
     buildCommand: pip install --upgrade pip && pip install -r backend/requirements.txt
-    startCommand: uvicorn backend.app.main:app --host 0.0.0.0 --port $PORT --proxy-headers
+    startCommand: alembic -c backend/alembic.ini upgrade head && uvicorn backend.app.main:app --host 0.0.0.0 --port $PORT --proxy-headers
     healthCheckPath: /ready
     maxShutdownDelaySeconds: 30
     buildFilter:

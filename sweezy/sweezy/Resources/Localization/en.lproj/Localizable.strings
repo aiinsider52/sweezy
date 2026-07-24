@@ -64,6 +64,34 @@
 "onboarding.notifications_subtitle" = "Get reminders about important first-week tasks and appointments";
 "onboarding.notifications_allow" = "Allow Notifications";
 "onboarding.notifications_later" = "Later";
+"onboarding.notifications.eyebrow" = "STAY ON TRACK";
+"onboarding.style.eyebrow" = "PERSONAL STYLE";
+"onboarding.language.eyebrow" = "LANGUAGE · SPRACHE";
+"onboarding.hero.eyebrow" = "LIFE IN SWITZERLAND — SIMPLIFIED";
+"onboarding.page1.feature1" = "Your personal plan for today";
+"onboarding.page1.feature2" = "Information from official sources";
+"onboarding.page1.feature3" = "Help and people nearby";
+"onboarding.page2.feature1" = "Guides and checklists with progress";
+"onboarding.page2.feature2" = "Deadlines and reminders";
+"onboarding.page2.feature3" = "Map, services and events nearby";
+"onboarding.language.subtitle" = "Choose a language — change it anytime";
+"onboarding.notifications.preview.now" = "now";
+"onboarding.notifications.preview.title" = "Your next step is ready";
+"onboarding.notifications.preview.body" = "Apply for health insurance by 15 August.";
+"onboarding.notifications.preview.action" = "Open my plan";
+"onboarding.success.feature1" = "Guides and official sources";
+"onboarding.success.feature2" = "Checklists with progress";
+"onboarding.success.feature3" = "Services and events nearby";
+"onboarding.permit.b.title" = "Permit B";
+"onboarding.permit.b.description" = "Residence permit";
+"onboarding.permit.c.title" = "Permit C";
+"onboarding.permit.c.description" = "Permanent residence";
+"onboarding.permit.s.title" = "Protection status S";
+"onboarding.permit.s.description" = "Temporary protection for Ukrainians";
+"onboarding.permit.n.title" = "Permit N";
+"onboarding.permit.n.description" = "Asylum seeker status";
+"onboarding.permit.other.title" = "Other status";
+"onboarding.permit.other.description" = "Another permit or status";
 
 // MARK: - Feature Onboarding
 "onboarding.understood" = "Got it";
@@ -2134,4 +2162,3 @@
 "journey.roadmap.task.10-6.description" = "Apply at the Gemeinde";
 "journey.roadmap.task.10-7.title" = "Share your story";
 "journey.roadmap.task.10-7.description" = "Inspire those who are just starting";
-

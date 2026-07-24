@@ -496,6 +496,34 @@
 "onboarding.notifications_subtitle" = "Erhalten Sie Erinnerungen an wichtige Aufgaben der ersten Woche und Termine";
 "onboarding.notifications_allow" = "Benachrichtigungen erlauben";
 "onboarding.notifications_later" = "Später";
+"onboarding.notifications.eyebrow" = "AUF KURS";
+"onboarding.style.eyebrow" = "PERSÖNLICHER STIL";
+"onboarding.language.eyebrow" = "SPRACHE · LANGUAGE";
+"onboarding.hero.eyebrow" = "LEBEN IN DER SCHWEIZ — EINFACHER";
+"onboarding.page1.feature1" = "Dein persönlicher Plan für heute";
+"onboarding.page1.feature2" = "Informationen aus offiziellen Quellen";
+"onboarding.page1.feature3" = "Hilfe und Menschen in deiner Nähe";
+"onboarding.page2.feature1" = "Guides und Checklisten mit Fortschritt";
+"onboarding.page2.feature2" = "Fristen und Erinnerungen";
+"onboarding.page2.feature3" = "Karte, Dienste und Events in der Nähe";
+"onboarding.language.subtitle" = "Wähle eine Sprache — jederzeit änderbar";
+"onboarding.notifications.preview.now" = "jetzt";
+"onboarding.notifications.preview.title" = "Dein nächster Schritt ist bereit";
+"onboarding.notifications.preview.body" = "Krankenversicherung bis 15. August beantragen.";
+"onboarding.notifications.preview.action" = "Meinen Plan öffnen";
+"onboarding.success.feature1" = "Guides und offizielle Quellen";
+"onboarding.success.feature2" = "Checklisten mit Fortschritt";
+"onboarding.success.feature3" = "Dienste und Events in der Nähe";
+"onboarding.permit.b.title" = "Bewilligung B";
+"onboarding.permit.b.description" = "Aufenthaltsbewilligung";
+"onboarding.permit.c.title" = "Bewilligung C";
+"onboarding.permit.c.description" = "Niederlassungsbewilligung";
+"onboarding.permit.s.title" = "Schutzstatus S";
+"onboarding.permit.s.description" = "Vorübergehender Schutz für Ukrainer";
+"onboarding.permit.n.title" = "Bewilligung N";
+"onboarding.permit.n.description" = "Status als Asylsuchender";
+"onboarding.permit.other.title" = "Anderer Status";
+"onboarding.permit.other.description" = "Andere Bewilligung oder Status";
 
 // MARK: - What's New
 "whats_new.title" = "Neu in Sweezy";
@@ -1953,4 +1981,3 @@
 "journey.roadmap.task.10-6.description" = "Antrag bei der Gemeinde stellen";
 "journey.roadmap.task.10-7.title" = "Deine Geschichte teilen";
 "journey.roadmap.task.10-7.description" = "Inspiriere jene, die gerade starten";
-

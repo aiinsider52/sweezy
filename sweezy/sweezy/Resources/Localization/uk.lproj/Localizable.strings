@@ -64,6 +64,34 @@
 "onboarding.notifications_subtitle" = "Отримуйте нагадування про важливі завдання першого тижня та записи на прийом";
 "onboarding.notifications_allow" = "Дозволити сповіщення";
 "onboarding.notifications_later" = "Пізніше";
+"onboarding.notifications.eyebrow" = "НА КУРСІ";
+"onboarding.style.eyebrow" = "ОСОБИСТИЙ СТИЛЬ";
+"onboarding.language.eyebrow" = "МОВА · SPRACHE";
+"onboarding.hero.eyebrow" = "ЖИТТЯ У ШВЕЙЦАРІЇ — ПРОСТІШЕ";
+"onboarding.page1.feature1" = "Персональний план на сьогодні";
+"onboarding.page1.feature2" = "Інформація з офіційних джерел";
+"onboarding.page1.feature3" = "Допомога та люди поруч";
+"onboarding.page2.feature1" = "Гайди й чек-листи з прогресом";
+"onboarding.page2.feature2" = "Дедлайни та нагадування";
+"onboarding.page2.feature3" = "Карта, послуги й події поруч";
+"onboarding.language.subtitle" = "Оберіть мову — її можна змінити будь-коли";
+"onboarding.notifications.preview.now" = "зараз";
+"onboarding.notifications.preview.title" = "Наступний крок уже готовий";
+"onboarding.notifications.preview.body" = "Подати заяву на медичне страхування — до 15 серпня.";
+"onboarding.notifications.preview.action" = "Відкрити мій план";
+"onboarding.success.feature1" = "Гайди та офіційні джерела";
+"onboarding.success.feature2" = "Чек-листи з прогресом";
+"onboarding.success.feature3" = "Послуги й події поруч";
+"onboarding.permit.b.title" = "Дозвіл B";
+"onboarding.permit.b.description" = "Дозвіл на проживання";
+"onboarding.permit.c.title" = "Дозвіл C";
+"onboarding.permit.c.description" = "Постійне проживання";
+"onboarding.permit.s.title" = "Статус захисту S";
+"onboarding.permit.s.description" = "Тимчасовий захист для українців";
+"onboarding.permit.n.title" = "Дозвіл N";
+"onboarding.permit.n.description" = "Статус шукача притулку";
+"onboarding.permit.other.title" = "Інший статус";
+"onboarding.permit.other.description" = "Інший дозвіл або статус";
 
 // MARK: - Feature Onboarding
 "onboarding.understood" = "Зрозуміло";
@@ -2171,4 +2199,3 @@
 "journey.roadmap.task.10-6.description" = "Подайте заявку в Gemeinde";
 "journey.roadmap.task.10-7.title" = "Поділитись своєю історією";
 "journey.roadmap.task.10-7.description" = "Надихніть тих, хто тільки починає";
-

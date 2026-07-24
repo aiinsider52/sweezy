@@ -141,8 +141,9 @@ def report_event(
     return EventSafetyResponse(message="Report received for moderation")
 
 
-@router.get("/{event_id}", response_model=EventListingDetail)
-def get_event(event_id: str, db: DBSession) -> EventListingDetail:
+@router.get("/{event_id}", response_model=EventListingResponse)
+def get_event(event_id: str, db: DBSession) -> EventListingResponse:
+    """Public event detail omits contact_value; owners still get it via /events/my."""
     event = db.get(EventListing, event_id)
     if not event or event.status != "approved":
         raise HTTPException(status_code=404, detail="Event not found")
@@ -151,7 +152,7 @@ def get_event(event_id: str, db: DBSession) -> EventListingDetail:
     db.add(event)
     db.commit()
     db.refresh(event)
-    return EventListingDetail.model_validate(event)
+    return EventListingResponse.model_validate(event)
 
 
 @router.post("/", response_model=EventListingResponse, status_code=status.HTTP_201_CREATED)

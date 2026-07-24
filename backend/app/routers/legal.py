@@ -27,11 +27,11 @@ def privacy_policy() -> HTMLResponse:
   </head>
   <body>
     <h1>Sweezy – Privacy Policy</h1>
-    <p class="muted">Last updated: 2026‑01‑14</p>
+    <p class="muted">Last updated: 2026‑07‑24</p>
 
     <h2>What we collect</h2>
     <ul>
-      <li><strong>Account data</strong>: email (for login), subscription status (if applicable).</li>
+      <li><strong>Account data</strong>: email (for login and account recovery).</li>
       <li><strong>Diagnostics</strong>: crash reports and basic performance data to improve stability (e.g. Sentry).</li>
       <li><strong>Usage analytics</strong>: optional, privacy‑friendly product analytics to improve features (e.g. Amplitude).</li>
       <li><strong>Location</strong>: optional coarse location for nearby services (only when you grant permission).</li>
@@ -75,14 +75,14 @@ def terms_of_use() -> HTMLResponse:
   </head>
   <body>
     <h1>Sweezy – Terms of Use</h1>
-    <p class="muted">Last updated: 2026‑01‑14</p>
+    <p class="muted">Last updated: 2026‑07‑24</p>
     <p>
       By using Sweezy, you agree to use the app responsibly and comply with applicable laws.
       Content is provided for informational purposes and does not constitute legal advice.
     </p>
-    <h2>Subscriptions</h2>
+    <h2>Pricing</h2>
     <p>
-      If you purchase a subscription, it may auto‑renew unless cancelled in your Apple ID settings.
+      The current App Store build of Sweezy is free and does not offer in‑app purchases or auto‑renewing subscriptions.
     </p>
     <h2>Contact</h2>
     <p>Support: <a href="mailto:support@sweezy.app">support@sweezy.app</a>.</p>

@@ -294,13 +294,12 @@ private struct BookExpertAppointmentView: View {
                             .padding(16)
                         }
 
-                        JourneyPrimaryButton(title: didSave ? "Запит підготовлено" : "Записатися і зв'язатися") {
+                        JourneyPrimaryButton(title: didSave ? "Запит збережено" : "Зберегти зустріч") {
                             saveAppointment()
-                            openExpertContact()
                         }
                         .disabled(didSave)
 
-                        Text("Sweezy збереже зустріч, поставить нагадування й відкриє контакт експерта для підтвердження часу.")
+                        Text("Sweezy збереже зустріч і нагадування. Щоб підтвердити час з експертом, надішліть запит через «Запитати».")
                             .font(.system(size: 11, weight: .medium))
                             .foregroundColor(.white.opacity(0.58))
                     }
@@ -324,8 +323,8 @@ private struct BookExpertAppointmentView: View {
             contactInfo: ContactInfo(
                 name: expert.authorName,
                 title: "Sweezy Expert",
-                phoneNumber: expert.contactType == .phone || expert.contactType == .whatsapp ? expert.contactValue : nil,
-                email: expert.contactType == .email ? expert.contactValue : nil,
+                phoneNumber: nil,
+                email: nil,
                 website: nil,
                 department: nil
             )
@@ -333,25 +332,6 @@ private struct BookExpertAppointmentView: View {
         appContainer.appointmentRepository.add(appointment)
         didSave = true
         appContainer.telemetry.info("expert_appointment_created", source: "experts", message: nil, meta: ["expert_id": expert.id])
-    }
-
-    private func openExpertContact() {
-        guard let value = expert.contactValue, !value.isEmpty else { return }
-        let raw: String
-        switch expert.contactType {
-        case .telegram:
-            raw = "https://t.me/\(value.trimmingCharacters(in: CharacterSet(charactersIn: "@")))"
-        case .whatsapp:
-            let number = value.filter(\.isNumber)
-            raw = "https://wa.me/\(number)"
-        case .email:
-            let subject = "Консультація через Sweezy".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "Sweezy"
-            raw = "mailto:\(value)?subject=\(subject)"
-        case .phone:
-            raw = "tel:\(value.filter { $0.isNumber || $0 == "+" })"
-        }
-        guard let url = URL(string: raw) else { return }
-        UIApplication.shared.open(url)
     }
 }
 

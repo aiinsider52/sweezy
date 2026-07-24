@@ -2,7 +2,7 @@
 import Foundation
 
 enum GeneratedOpenAPIContract {
-    static let sha256 = "64b8bb57e0828190195b6d2378b116585f2c9e369382fb3322b23c09546473f9"
+    static let sha256 = "90f4754cea7bf1e90a80573f1ce6133806b96d06721a90c4b8f40bf6532c0931"
 
     struct Operation: Sendable {
         let method: String

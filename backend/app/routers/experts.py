@@ -13,7 +13,7 @@ from ..schemas.expert import (
     ExpertQuestionResponse,
     ExpertSpecialty,
 )
-from ..schemas.marketplace import ServiceListingDetail
+from ..schemas.marketplace import ServiceListingResponse
 
 
 router = APIRouter()
@@ -23,13 +23,14 @@ admin_router = APIRouter()
 # ── Public expert directory ─────────────────────────────────────────────────
 
 
-@router.get("/", response_model=list[ServiceListingDetail])
+@router.get("/", response_model=list[ServiceListingResponse])
 def list_experts(
     db: DBSession,
     specialty: Optional[ExpertSpecialty] = None,
     language: Optional[str] = Query(None, max_length=10),
     canton: Optional[str] = Query(None, max_length=10),
-) -> list[ServiceListingDetail]:
+) -> list[ServiceListingResponse]:
+    """Public expert cards omit contact_value (same privacy model as marketplace)."""
     stmt = (
         select(ServiceListing)
         .where(ServiceListing.is_expert.is_(True))
@@ -47,7 +48,7 @@ def list_experts(
         lang = language.lower()
         rows = [r for r in rows if lang in (r.expert_languages or [])]
 
-    return [ServiceListingDetail.model_validate(r) for r in rows]
+    return [ServiceListingResponse.model_validate(r) for r in rows]
 
 
 @router.get("/{listing_id}/questions", response_model=list[ExpertQuestionResponse])

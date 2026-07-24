@@ -816,9 +816,9 @@ private struct JourneyNextActionCard: View {
 
     private var statusText: String {
         switch route {
-        case .experts: return "124 перевірених"
-        case .appointments: return "2 заплановано"
-        case .moments: return "5 нових"
+        case .experts: return "Перевірені спеціалісти"
+        case .appointments: return "Календар зустрічей"
+        case .moments: return "Стрічка оновлень"
         default: return route.subtitle
         }
     }

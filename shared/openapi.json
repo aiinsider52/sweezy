@@ -10034,6 +10034,7 @@
         ]
       },
       "get": {
+        "description": "Public event detail omits contact_value; owners still get it via /events/my.",
         "operationId": "get_event_api_v1_events__event_id__get",
         "parameters": [
           {
@@ -10051,7 +10052,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EventListingDetail"
+                  "$ref": "#/components/schemas/EventListingResponse"
                 }
               }
             },
@@ -10188,6 +10189,7 @@
     },
     "/api/v1/experts/": {
       "get": {
+        "description": "Public expert cards omit contact_value (same privacy model as marketplace).",
         "operationId": "list_experts_api_v1_experts__get",
         "parameters": [
           {
@@ -10247,7 +10249,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/ServiceListingDetail"
+                    "$ref": "#/components/schemas/ServiceListingResponse"
                   },
                   "title": "Response List Experts Api V1 Experts  Get",
                   "type": "array"

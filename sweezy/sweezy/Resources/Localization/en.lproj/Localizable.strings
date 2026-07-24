@@ -403,7 +403,7 @@
 "privacy.data_usage.title" = "Data Usage";
 "privacy.data_usage.content" = "Your data is used exclusively for app functionality. We do not sell or share your data with third parties.";
 "privacy.data_storage.title" = "Data Storage";
-"privacy.data_storage.content" = "Most of your personal data is stored locally on your device. Account and subscription information is stored securely on Sweezy servers to provide sync and purchases.";
+"privacy.data_storage.content" = "Most of your personal data is stored locally on your device. Account information is stored securely on Sweezy servers for sync. The current build has no in-app purchases.";
 "privacy.data_storage.local" = "We only send data to our own backend and trusted providers (such as crash reporting and analytics) to improve the app.";
 "privacy.third_parties.title" = "Third Parties";
 "privacy.third_parties.content" = "Sweezy uses privacy-friendly crash reporting and usage analytics (for example Sentry and Amplitude) to improve stability and features. We do not use this data for advertising or to track you across other apps or websites.";
@@ -467,7 +467,7 @@
 "privacy.data_usage.title" = "Data Usage";
 "privacy.data_usage.content" = "Your data is used exclusively for app functionality. We do not sell or share your data with third parties.";
 "privacy.data_storage.title" = "Data Storage";
-"privacy.data_storage.content" = "Most of your personal data is stored locally on your device. Account and subscription information is stored securely on Sweezy servers to provide sync and purchases.";
+"privacy.data_storage.content" = "Most of your personal data is stored locally on your device. Account information is stored securely on Sweezy servers for sync. The current build has no in-app purchases.";
 "privacy.data_storage.local" = "We only send data to our own backend and trusted providers (such as crash reporting and analytics) to improve the app.";
 "privacy.third_parties.title" = "Third Parties";
 "privacy.third_parties.content" = "Sweezy uses privacy-friendly crash reporting and usage analytics (for example Sentry and Amplitude) to improve stability and features. We do not use this data for advertising or to track you across other apps or websites.";

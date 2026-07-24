@@ -168,8 +168,13 @@ def create_conversation(payload: ConversationCreate, db: DBSession, user: Curren
     if not user.email_verified:
         raise HTTPException(status_code=403, detail="Verify your email before messaging")
     listing = db.get(ServiceListing, payload.listing_id)
-    if not listing or listing.status != "approved" or not listing.author_id:
+    if not listing or listing.status != "approved":
         raise HTTPException(status_code=404, detail="Listing not found")
+    if not listing.author_id:
+        raise HTTPException(
+            status_code=409,
+            detail="This listing cannot receive messages yet because it has no seller account",
+        )
     if listing.author_id == user.id:
         raise HTTPException(status_code=400, detail="You cannot message your own listing")
     if _is_blocked(db, user.id, listing.author_id):

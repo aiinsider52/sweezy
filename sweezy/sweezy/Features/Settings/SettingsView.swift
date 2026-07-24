@@ -1387,21 +1387,20 @@ struct ProfileEditView: View {
                                 winterProfileFamilyCard
                                 // Goals
                                 winterProfileGoalsCard
-                                Spacer(minLength: 100)
+                                Spacer(minLength: 140)
                             }
                             .padding(.horizontal, 16)
                             .padding(.top, 16)
                         }
                     }
-                    .navigationTitle("settings.edit_profile.title".localized)
+                    .navigationTitle("settings.edit_profile.nav_title".localized)
                     .navigationBarTitleDisplayMode(.inline)
                     .toolbar {
                         ToolbarItem(placement: .navigationBarLeading) {
-                            Button { dismiss() } label: { Text("common.cancel".localized).foregroundColor(winterSecondaryText) }
-                        }
-                        ToolbarItem(placement: .navigationBarTrailing) {
-                            Button { saveProfile() } label: { Text("common.save".localized).fontWeight(.semibold).foregroundColor(.cyan) }
-                                .disabled(!hasChanges)
+                            Button { dismiss() } label: {
+                                Text("common.cancel".localized)
+                                    .foregroundColor(winterSecondaryText)
+                            }
                         }
                     }
                     .safeAreaInset(edge: .bottom) { winterSaveButton }

@@ -2199,3 +2199,6 @@
 "journey.roadmap.task.10-6.description" = "Подайте заявку в Gemeinde";
 "journey.roadmap.task.10-7.title" = "Поділитись своєю історією";
 "journey.roadmap.task.10-7.description" = "Надихніть тих, хто тільки починає";
+"chat.listing.no_seller" = "Чати для цього оголошення поки недоступні — у продавця немає акаунта.";
+"chat.listing.unavailable" = "Чат недоступний";
+"settings.edit_profile.nav_title" = "Профіль";

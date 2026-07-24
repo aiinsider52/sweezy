@@ -173,6 +173,19 @@ async def lifespan(app: FastAPI):
     except Exception as exc:
         log.warning("seed_content_failed", error=str(exc))
 
+    def _repair_listing_authors() -> dict:
+        from .services.marketplace_author_repair import repair_orphan_listing_authors
+
+        with SessionLocal() as db:
+            return repair_orphan_listing_authors(db)
+
+    try:
+        repaired = await asyncio.to_thread(_repair_listing_authors)
+        if repaired.get("repaired"):
+            log.info("repair_listing_authors_ok", **repaired)
+    except Exception as exc:
+        log.warning("repair_listing_authors_failed", error=str(exc))
+
     from .services.chat_realtime import chat_realtime
     from .services.push_notifications import notification_worker
 

@@ -71,11 +71,11 @@ struct ListingDetailView: View {
         } message: {
             Text("Його оголошення більше не з'являтимуться у вашій стрічці.")
         }
-        .alert("Marketplace", isPresented: Binding(
+        .alert("marketplace.error_title".localized, isPresented: Binding(
             get: { safetyMessage != nil },
             set: { if !$0 { safetyMessage = nil } }
         )) {
-            Button("OK", role: .cancel) { safetyMessage = nil }
+            Button("common.ok".localized, role: .cancel) { safetyMessage = nil }
         } message: {
             Text(safetyMessage ?? "")
         }
@@ -482,9 +482,15 @@ struct ListingDetailView: View {
     }
 
     private func bottomActionBar(listing: ServiceListing) -> some View {
+        let chatAvailable = listing.authorID != nil && !isOwnListing(listing)
         HStack(spacing: 12) {
             Button {
-                guard !isOwnListing(listing) else { return }
+                guard chatAvailable else {
+                    if listing.authorID == nil {
+                        safetyMessage = "chat.listing.no_seller".localized
+                    }
+                    return
+                }
                 guard sessionManager.isAuthenticated else {
                     pendingChatAfterAuth = true
                     showAuth = true
@@ -495,7 +501,11 @@ struct ListingDetailView: View {
                 HStack(spacing: 10) {
                     Image(systemName: isOwnListing(listing) ? "person.crop.circle.badge.checkmark" : "bubble.left.and.bubble.right.fill")
                         .font(.system(size: 19, weight: .bold))
-                    Text(isOwnListing(listing) ? "chat.listing.own".localized : "chat.listing.message".localized)
+                    Text(
+                        isOwnListing(listing)
+                            ? "chat.listing.own".localized
+                            : (listing.authorID == nil ? "chat.listing.unavailable".localized : "chat.listing.message".localized)
+                    )
                         .font(.system(size: 16, weight: .heavy, design: .rounded))
                         .lineLimit(1)
                         .minimumScaleFactor(0.78)
@@ -503,7 +513,7 @@ struct ListingDetailView: View {
                 .foregroundColor(.black)
                 .frame(maxWidth: .infinity)
                 .frame(height: 58)
-                .background(isOwnListing(listing) ? Color.gray : JourneyVisual.lime)
+                .background((isOwnListing(listing) || listing.authorID == nil) ? Color.gray : JourneyVisual.lime)
                 .clipShape(Capsule())
             }
             .buttonStyle(.plain)
@@ -546,7 +556,13 @@ struct ListingDetailView: View {
                 await appContainer.chatStore.start()
                 selectedConversation = try await appContainer.chatStore.openConversation(for: listingId)
             } catch {
-                safetyMessage = error.localizedDescription
+                let raw = error.localizedDescription
+                if raw.localizedCaseInsensitiveContains("Listing not found")
+                    || raw.localizedCaseInsensitiveContains("no seller") {
+                    safetyMessage = "chat.listing.no_seller".localized
+                } else {
+                    safetyMessage = raw
+                }
             }
         }
     }

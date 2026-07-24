@@ -2162,3 +2162,6 @@
 "journey.roadmap.task.10-6.description" = "Apply at the Gemeinde";
 "journey.roadmap.task.10-7.title" = "Share your story";
 "journey.roadmap.task.10-7.description" = "Inspire those who are just starting";
+"chat.listing.no_seller" = "Chat is unavailable for this listing — the seller has no account yet.";
+"chat.listing.unavailable" = "Chat unavailable";
+"settings.edit_profile.nav_title" = "Profile";

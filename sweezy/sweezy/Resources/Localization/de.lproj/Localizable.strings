@@ -1981,3 +1981,6 @@
 "journey.roadmap.task.10-6.description" = "Antrag bei der Gemeinde stellen";
 "journey.roadmap.task.10-7.title" = "Deine Geschichte teilen";
 "journey.roadmap.task.10-7.description" = "Inspiriere jene, die gerade starten";
+"chat.listing.no_seller" = "Chat für dieses Inserat ist noch nicht verfügbar — der Anbieter hat kein Konto.";
+"chat.listing.unavailable" = "Chat nicht verfügbar";
+"settings.edit_profile.nav_title" = "Profil";

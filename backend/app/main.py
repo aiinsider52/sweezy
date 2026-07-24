@@ -234,13 +234,14 @@ class RequestIDMiddleware(BaseHTTPMiddleware):
         )
         try:
             response = await call_next(request)
+            return response
         finally:
             duration_ms = int((time.perf_counter() - start) * 1000)
-            status_code = getattr(response, "status_code", 500)
+            status_code = getattr(response, "status_code", 500) if response is not None else 500
             client_host = request.client.host if request.client else None
 
             # Enrich response with headers so clients can correlate logs
-            if hasattr(response, "headers"):
+            if response is not None and hasattr(response, "headers"):
                 response.headers["X-Request-ID"] = request_id
                 response.headers["X-Response-Time"] = str(duration_ms)
 
@@ -258,8 +259,6 @@ class RequestIDMiddleware(BaseHTTPMiddleware):
 
             # Clear contextvars for this request
             structlog.contextvars.clear_contextvars()
-
-        return response
 
 
 app.add_middleware(RequestIDMiddleware)

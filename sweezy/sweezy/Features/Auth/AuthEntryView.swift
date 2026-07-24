@@ -31,13 +31,7 @@ struct AuthEntryView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Theme.Colors.darkBackground
-                    .ignoresSafeArea()
-
-                Color.black.opacity(0.18)
-                    .ignoresSafeArea()
-
-                AuthAuroraBackground()
+                JourneyPhotoBackground(imageName: JourneyBackdrop.city.rawValue, blurRadius: 5, darkness: 0.62)
 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 28) {
@@ -68,6 +62,7 @@ struct AuthEntryView: View {
                 }
             }
         }
+        .journeyScreen(.city, darkness: 0.62)
         .environment(\.locale, appContainer.currentLocale)
         .sheet(item: $activeDestination) { destination in
             switch destination {
@@ -228,6 +223,7 @@ struct AuthEntryView: View {
                     .shadow(color: Theme.Colors.primary.opacity(0.35), radius: 12, y: 6)
             }
             .buttonStyle(.plain)
+            .accessibilityIdentifier("auth.entry.createAccount")
 
             Button {
                 activeDestination = .login
@@ -247,6 +243,7 @@ struct AuthEntryView: View {
                     .foregroundColor(.white)
             }
             .buttonStyle(.plain)
+            .accessibilityIdentifier("auth.entry.signIn")
 
             SocialAuthPanel(
                 errorMessage: $socialErrorMessage,
@@ -271,6 +268,7 @@ struct AuthEntryView: View {
             }
             .buttonStyle(.plain)
             .padding(.top, 4)
+            .accessibilityIdentifier("auth.entry.continueAsGuest")
         }
     }
 

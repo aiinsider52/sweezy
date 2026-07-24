@@ -376,7 +376,6 @@ struct SantaSleigh: View {
 struct WinterSceneBackground: View {
     var body: some View {
         GeometryReader { geo in
-            let width = geo.size.width
             let height = geo.size.height
             
             ZStack {

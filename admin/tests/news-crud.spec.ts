@@ -25,7 +25,7 @@ test.describe('Admin - News CRUD (stubbed)', () => {
 
   test('open create form', async ({ page }) => {
     await page.route('**/api/v1/admin/news*', async route => {
-      const json = [];
+      const json: unknown[] = [];
       await route.fulfill({ contentType: 'application/json', body: JSON.stringify(json) });
     });
     await page.goto('/admin/news');
@@ -33,5 +33,4 @@ test.describe('Admin - News CRUD (stubbed)', () => {
     await expect(page).toHaveURL(/.*\/admin\/news\/create/);
   });
 });
-
 

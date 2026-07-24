@@ -24,11 +24,18 @@ struct MapView: View {
     )
     // Collapsing map header on list scroll
     @State private var scrollOffset: CGFloat = 0
-    private let mapExpandedHeight: CGFloat = 320
-    private let mapCollapsedHeight: CGFloat = 140
+    private let mapExpandedHeight: CGFloat = 380
+    private let mapCollapsedHeight: CGFloat = 168
     private var mapCurrentHeight: CGFloat {
         let delta = min(max(scrollOffset, 0), mapExpandedHeight - mapCollapsedHeight)
         return mapExpandedHeight - delta
+    }
+    private var mapCollapseProgress: CGFloat {
+        let range = max(1, mapExpandedHeight - mapCollapsedHeight)
+        return min(max(scrollOffset / range, 0), 1)
+    }
+    private var mapHeroOpacity: CGFloat {
+        max(0, 1 - (mapCollapseProgress * 1.45))
     }
     
     private var filteredPlaces: [Place] {
@@ -69,7 +76,7 @@ struct MapView: View {
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 20)
                                         .stroke(
-                                            LinearGradient(colors: [Color.cyan.opacity(0.5), Color.white.opacity(0.15)],
+                                            LinearGradient(colors: [Theme.Colors.primary.opacity(0.5), Color.white.opacity(0.15)],
                                                            startPoint: .topLeading, endPoint: .bottomTrailing),
                                             lineWidth: 1.5
                                         )
@@ -79,7 +86,7 @@ struct MapView: View {
                             mapSection
                         }
                     }
-                    .animation(Theme.Animation.smooth, value: mapCurrentHeight)
+                    .animation(.spring(response: 0.36, dampingFraction: 0.86), value: mapCurrentHeight)
                     .padding(.top, Theme.Spacing.sm)
                     
                     // Places list
@@ -96,12 +103,13 @@ struct MapView: View {
             .navigationTitle("map.title".localized)
             .navigationBarTitleDisplayMode(.large)
             .toolbarBackground(.hidden, for: .navigationBar)
-            .background(AdaptivePageBackground())
+            .background(Color.clear)
             .onAppear {
                 requestLocationPermission()
             }
             .featureOnboarding(.map)
         }
+        .journeyScreen(.city, darkness: 0.7)
     }
     
     private var filtersSection: some View {
@@ -158,19 +166,25 @@ struct MapView: View {
                 RoundedRectangle(cornerRadius: 20)
                     .stroke(
                         LinearGradient(
-                            colors: [Color.cyan.opacity(0.55), Color.white.opacity(0.2), Color.cyan.opacity(0.3)],
+                            colors: [Theme.Colors.primary.opacity(0.55), Color.white.opacity(0.2), Theme.Colors.primary.opacity(0.3)],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         ),
                         lineWidth: 1.5
                     )
             )
-            .shadow(color: Color.cyan.opacity(0.25), radius: 16, y: 6)
+            .shadow(color: Theme.Colors.primary.opacity(0.25), radius: 16, y: 6)
             .sheet(item: $selectedPlace) { place in
                 WinterPlaceBottomSheet(place: place)
                     .presentationDetents([.height(340), .medium])
                     .presentationDragIndicator(.visible)
             }
+
+            mapHeroOverlay
+                .opacity(mapHeroOpacity)
+                .allowsHitTesting(false)
+                .padding(18)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             
             // Floating action buttons
             VStack(spacing: 12) {
@@ -185,7 +199,7 @@ struct MapView: View {
                 // Use My Location button
                 WinterMapButton(
                     icon: "location.fill",
-                    color: Color.cyan
+                    color: Theme.Colors.primary
                 ) {
                     centerOnUserLocation()
                 }
@@ -210,6 +224,32 @@ struct MapView: View {
             }
         )
     }
+
+    private var mapHeroOverlay: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Знайдіть потрібний сервіс швидше")
+                .font(.system(size: 24, weight: .bold, design: .rounded))
+                .foregroundColor(.white)
+                .lineLimit(2)
+                .minimumScaleFactor(0.82)
+                .shadow(color: .black.opacity(0.45), radius: 8, y: 2)
+
+            Text("Показуємо найближчі відкриті місця та корисні категорії без зайвого шуму.")
+                .font(.system(size: 13, weight: .medium))
+                .foregroundColor(.white.opacity(0.82))
+                .lineLimit(2)
+                .minimumScaleFactor(0.84)
+                .fixedSize(horizontal: false, vertical: true)
+                .shadow(color: .black.opacity(0.35), radius: 6, y: 2)
+        }
+        .frame(maxWidth: 300, alignment: .leading)
+        .padding(14)
+        .background(
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .fill(Color.black.opacity(0.26))
+                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        )
+    }
     
     private var placesListSection: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -228,7 +268,7 @@ struct MapView: View {
                     HStack(spacing: 4) {
                         Image(systemName: "mappin.circle.fill")
                             .font(.system(size: 12))
-                            .foregroundColor(.cyan)
+                            .foregroundColor(Theme.Colors.primary)
                         Text("\(filteredPlaces.count)")
                             .font(.system(size: 13, weight: .semibold))
                             .foregroundColor(.white)
@@ -237,8 +277,8 @@ struct MapView: View {
                     .padding(.vertical, 6)
                     .background(
                         Capsule()
-                            .fill(Color.cyan.opacity(0.18))
-                            .overlay(Capsule().stroke(Color.cyan.opacity(0.3), lineWidth: 1))
+                            .fill(Theme.Colors.primary.opacity(0.18))
+                            .overlay(Capsule().stroke(Theme.Colors.primary.opacity(0.3), lineWidth: 1))
                     )
                 }
             }
@@ -279,7 +319,7 @@ struct MapView: View {
                             RoundedRectangle(cornerRadius: 20, style: .continuous)
                                 .stroke(
                                     LinearGradient(
-                                        colors: [Color.cyan.opacity(0.35), Color.white.opacity(0.08)],
+                                        colors: [Theme.Colors.primary.opacity(0.35), Color.white.opacity(0.08)],
                                         startPoint: .topLeading,
                                         endPoint: .bottomTrailing
                                     ),
@@ -464,6 +504,7 @@ struct PlaceBottomSheet: View {
             Spacer()
         }
         .padding(.horizontal, Theme.Spacing.md)
+        .journeyScreen(.city, darkness: 0.72)
         .onAppear {
             Task { await computeETA() }
             Task { await fetchLiveStatus() }
@@ -674,7 +715,7 @@ struct MapPillFilterChip: View {
     let title: String
     let icon: String
     let isSelected: Bool
-    var accentColor: Color = .cyan
+    var accentColor: Color = Theme.Colors.primary
     let action: () -> Void
     
     var body: some View {
@@ -686,6 +727,8 @@ struct MapPillFilterChip: View {
                 Text(title)
                     .font(.system(size: 13, weight: .medium))
                     .foregroundColor(isSelected ? .white : .white.opacity(0.75))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.82)
             }
             .padding(.horizontal, 13)
             .padding(.vertical, 8)
@@ -749,10 +792,12 @@ struct WinterPlaceRow: View {
                         .font(.system(size: 15, weight: .semibold))
                         .foregroundColor(Theme.Colors.textPrimary)
                         .lineLimit(1)
+                        .truncationMode(.tail)
                     
                     Text(place.type.localizedName)
                         .font(.system(size: 12))
                         .foregroundColor(Theme.Colors.textSecondary)
+                        .lineLimit(1)
                     
                     // Status dot + text
                     HStack(spacing: 5) {
@@ -813,7 +858,7 @@ struct WinterMapPin: View {
         ZStack {
             // Outer glow
             Circle()
-                .fill(Color.cyan.opacity(0.2))
+                .fill(Theme.Colors.primary.opacity(0.2))
                 .frame(width: 40, height: 40)
                 .blur(radius: 4)
             
@@ -832,7 +877,7 @@ struct WinterMapPin: View {
             Circle()
                 .stroke(
                     LinearGradient(
-                        colors: [Color.white.opacity(0.6), Color.cyan.opacity(0.4)],
+                        colors: [Color.white.opacity(0.6), Theme.Colors.primary.opacity(0.4)],
                         startPoint: .top,
                         endPoint: .bottom
                     ),
@@ -922,7 +967,7 @@ struct WinterPlaceCard: View {
                         ))
                         .frame(width: 50, height: 50)
                     Circle()
-                        .stroke(Color.cyan.opacity(0.3), lineWidth: 1)
+                        .stroke(Theme.Colors.primary.opacity(0.3), lineWidth: 1)
                         .frame(width: 50, height: 50)
                     
                     Image(systemName: place.type.iconName)
@@ -935,10 +980,13 @@ struct WinterPlaceCard: View {
                         .font(Theme.Typography.subheadline)
                         .fontWeight(.semibold)
                         .foregroundColor(.white)
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.86)
                     
                     Text(place.type.localizedName)
                         .font(Theme.Typography.caption)
                         .foregroundColor(.white.opacity(0.6))
+                        .lineLimit(1)
                     
                     HStack(spacing: 6) {
                         openBadge
@@ -958,17 +1006,20 @@ struct WinterPlaceCard: View {
                     .font(Theme.Typography.caption)
                     .foregroundColor(.white.opacity(0.6))
                     .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             
             // Address
             HStack(spacing: Theme.Spacing.xs) {
                 Image(systemName: "location.fill")
                     .font(.caption)
-                    .foregroundColor(.cyan.opacity(0.7))
+                    .foregroundColor(Theme.Colors.primary.opacity(0.7))
                 
                 Text(place.formattedAddress)
                     .font(Theme.Typography.caption)
                     .foregroundColor(.white.opacity(0.6))
+                    .lineLimit(1)
+                    .truncationMode(.tail)
             }
             
             // Actions
@@ -1008,14 +1059,14 @@ struct WinterPlaceCard: View {
             RoundedRectangle(cornerRadius: Theme.CornerRadius.lg)
                 .stroke(
                     LinearGradient(
-                        colors: [Color.cyan.opacity(0.3), Theme.Colors.adaptiveSurface],
+                        colors: [Theme.Colors.primary.opacity(0.3), Theme.Colors.adaptiveSurface],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     ),
                     lineWidth: 1
                 )
         )
-        .shadow(color: Color.cyan.opacity(0.1), radius: 8, y: 4)
+        .shadow(color: Theme.Colors.primary.opacity(0.1), radius: 8, y: 4)
     }
 }
 
@@ -1033,22 +1084,22 @@ struct WinterActionButton: View {
                 Text(title)
                     .font(Theme.Typography.caption)
             }
-            .foregroundColor(isPrimary ? .white : .cyan)
+            .foregroundColor(isPrimary ? .white : Theme.Colors.primary)
             .padding(.horizontal, 10)
             .padding(.vertical, 6)
             .background(
                 isPrimary
                     ? AnyShapeStyle(LinearGradient(
-                        colors: [Color.cyan.opacity(0.8), Color.blue.opacity(0.6)],
+                        colors: [Theme.Colors.primaryLight.opacity(0.8), Theme.Colors.primary.opacity(0.6)],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                       ))
-                    : AnyShapeStyle(Color.cyan.opacity(0.15))
+                    : AnyShapeStyle(Theme.Colors.primary.opacity(0.15))
             )
             .clipShape(Capsule())
             .overlay(
                 Capsule()
-                    .stroke(isPrimary ? Color.cyan.opacity(0.5) : Color.cyan.opacity(0.3), lineWidth: 1)
+                    .stroke(isPrimary ? Theme.Colors.primary.opacity(0.5) : Theme.Colors.primary.opacity(0.3), lineWidth: 1)
             )
         }
     }
@@ -1060,18 +1111,18 @@ struct WinterPlaceShimmer: View {
     var body: some View {
         HStack(spacing: Theme.Spacing.md) {
             Circle()
-                .fill(Color.cyan.opacity(0.1))
+                .fill(Theme.Colors.primary.opacity(0.1))
                 .frame(width: 50, height: 50)
             
             VStack(alignment: .leading, spacing: 8) {
                 RoundedRectangle(cornerRadius: 4)
-                    .fill(Color.cyan.opacity(0.1))
+                    .fill(Theme.Colors.primary.opacity(0.1))
                     .frame(height: 16)
                 RoundedRectangle(cornerRadius: 4)
-                    .fill(Color.cyan.opacity(0.08))
+                    .fill(Theme.Colors.primary.opacity(0.08))
                     .frame(width: 160, height: 14)
                 RoundedRectangle(cornerRadius: 4)
-                    .fill(Color.cyan.opacity(0.05))
+                    .fill(Theme.Colors.primary.opacity(0.05))
                     .frame(width: 100, height: 12)
             }
             Spacer()
@@ -1083,11 +1134,11 @@ struct WinterPlaceShimmer: View {
         )
         .overlay(
             RoundedRectangle(cornerRadius: Theme.CornerRadius.lg)
-                .stroke(Color.cyan.opacity(0.15), lineWidth: 1)
+                .stroke(Theme.Colors.primary.opacity(0.15), lineWidth: 1)
         )
         .overlay(
             LinearGradient(
-                colors: [Color.clear, Color.cyan.opacity(0.2), Color.clear],
+                colors: [Color.clear, Theme.Colors.primary.opacity(0.2), Color.clear],
                 startPoint: .leading,
                 endPoint: .trailing
             )
@@ -1112,15 +1163,15 @@ struct WinterEmptyState: View {
         VStack(spacing: Theme.Spacing.md) {
             ZStack {
                 Circle()
-                    .fill(Color.cyan.opacity(0.1))
+                    .fill(Theme.Colors.primary.opacity(0.1))
                     .frame(width: 80, height: 80)
                 Circle()
-                    .stroke(Color.cyan.opacity(0.25), lineWidth: 1)
+                    .stroke(Theme.Colors.primary.opacity(0.25), lineWidth: 1)
                     .frame(width: 80, height: 80)
                 
                 Image(systemName: icon)
                     .font(.system(size: 32))
-                    .foregroundColor(.cyan.opacity(0.7))
+                    .foregroundColor(Theme.Colors.primary.opacity(0.7))
             }
             
             Text(title)
@@ -1167,9 +1218,7 @@ struct WinterPlaceBottomSheet: View {
     
     var body: some View {
         ZStack {
-            // Adaptive background (dark/light aware)
-            AdaptivePageBackground()
-                .ignoresSafeArea()
+            JourneyPhotoBackground(imageName: JourneyBackdrop.city.rawValue, blurRadius: 8, darkness: 0.74)
             
             VStack(alignment: .leading, spacing: 0) {
                 // Drag handle area
@@ -1230,7 +1279,7 @@ struct WinterPlaceBottomSheet: View {
                             Text("\(liveWait) min")
                         }
                         .font(.system(size: 12))
-                        .foregroundColor(.cyan)
+                        .foregroundColor(Theme.Colors.primary)
                     }
                 }
                 .padding(.bottom, 16)
@@ -1239,7 +1288,7 @@ struct WinterPlaceBottomSheet: View {
                 HStack(alignment: .top, spacing: 10) {
                     Image(systemName: "mappin.circle.fill")
                         .font(.system(size: 18))
-                        .foregroundColor(.cyan)
+                        .foregroundColor(Theme.Colors.primary)
                     VStack(alignment: .leading, spacing: 2) {
                         Text("\(place.address.street) \(place.address.houseNumber)")
                             .font(.system(size: 14, weight: .medium))
@@ -1293,6 +1342,7 @@ struct WinterPlaceBottomSheet: View {
             }
             .padding(.horizontal, 20)
         }
+        .journeyScreen(.city, darkness: 0.74)
         .onAppear {
             Task { await computeETA() }
             Task { await fetchLiveStatus() }
@@ -1344,7 +1394,7 @@ struct WinterSheetButton: View {
                 if isLoading {
                     ProgressView()
                         .scaleEffect(0.7)
-                        .tint(isPrimary ? .white : .cyan)
+                        .tint(isPrimary ? Theme.Colors.textOnPrimary : Theme.Colors.primary)
                 } else {
                     Image(systemName: icon)
                         .font(.system(size: 14, weight: .semibold))
@@ -1352,13 +1402,13 @@ struct WinterSheetButton: View {
                 Text(title)
                     .font(.system(size: 13, weight: .semibold))
             }
-            .foregroundColor(isPrimary ? .white : Theme.Colors.textPrimary)
+            .foregroundColor(isPrimary ? Theme.Colors.textOnPrimary : Theme.Colors.textPrimary)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 13)
             .background(
                 isPrimary
                     ? AnyShapeStyle(LinearGradient(
-                        colors: [Color.cyan, Color.blue.opacity(0.8)],
+                        colors: [Theme.Colors.primaryLight, Theme.Colors.primary],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                       ))
@@ -1368,11 +1418,11 @@ struct WinterSheetButton: View {
             .overlay(
                 RoundedRectangle(cornerRadius: 14, style: .continuous)
                     .stroke(
-                        isPrimary ? Color.cyan.opacity(0.4) : Theme.Colors.adaptiveBorder.opacity(0.6),
+                        isPrimary ? Theme.Colors.primary.opacity(0.4) : Theme.Colors.adaptiveBorder.opacity(0.6),
                         lineWidth: 1
                     )
             )
-            .shadow(color: isPrimary ? Color.cyan.opacity(0.3) : .clear, radius: 8, y: 3)
+            .shadow(color: isPrimary ? Theme.Colors.primary.opacity(0.3) : .clear, radius: 8, y: 3)
         }
         .buttonStyle(.plain)
     }

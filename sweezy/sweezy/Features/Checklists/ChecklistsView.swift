@@ -77,7 +77,7 @@ struct ChecklistsView: View {
         let _ = checklistProgressVersion
         NavigationStack {
             ZStack {
-                AdaptivePageBackground()
+                JourneyPhotoBackground(imageName: JourneyBackdrop.alpine.rawValue, blurRadius: 7, darkness: 0.66)
                 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: Theme.Spacing.lg) {
@@ -131,6 +131,7 @@ struct ChecklistsView: View {
                 haptic(.light)
             }
         }
+        .journeyScreen(.alpine, darkness: 0.66)
     }
     
     // MARK: - Hero Progress Card
@@ -849,7 +850,7 @@ struct ChecklistDetailView: View {
     
     var body: some View {
         ZStack {
-            Theme.Colors.primaryBackground.ignoresSafeArea()
+            JourneyPhotoBackground(imageName: JourneyBackdrop.alpine.rawValue, blurRadius: 7, darkness: 0.7)
             
             ScrollView(showsIndicators: false) {
                 VStack(spacing: Theme.Spacing.lg) {
@@ -867,6 +868,7 @@ struct ChecklistDetailView: View {
         }
         .navigationTitle(checklist.title)
         .navigationBarTitleDisplayMode(.inline)
+        .journeyScreen(.alpine, darkness: 0.7)
         .onAppear {
             reloadCompletedSteps()
             appContainer.userStats.setChecklistActive(id: checklist.id, active: !completedSteps.isEmpty)

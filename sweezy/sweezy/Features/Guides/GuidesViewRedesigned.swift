@@ -46,7 +46,7 @@ struct GuidesViewRedesigned: View {
                 }
                 .padding(.bottom, Theme.Spacing.xxxl)
             }
-            .background(Theme.Colors.primaryBackground.ignoresSafeArea())
+            .background(Color.clear)
             .navigationBarTitleDisplayMode(.inline)
             .refreshable {
                 await appContainer.contentService.refreshContent()
@@ -56,6 +56,7 @@ struct GuidesViewRedesigned: View {
                 GuideDetailSheet(guide: guide)
             }
         }
+        .journeyScreen(.alpine, darkness: 0.68)
     }
     
     // MARK: - Header Section
@@ -385,7 +386,7 @@ private struct GuideDetailSheet: View {
                     .padding(Theme.Spacing.lg)
                 }
             }
-            .background(Theme.Colors.primaryBackground)
+            .background(Color.clear)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -395,6 +396,7 @@ private struct GuideDetailSheet: View {
                 }
             }
         }
+        .journeyScreen(.alpine, darkness: 0.72)
     }
 }
 
@@ -453,4 +455,3 @@ private struct GuideDetailSheet: View {
     
     return PreviewWrapper()
 }
-

@@ -4,7 +4,7 @@ import { Dialog } from '@/components/ui/dialog'
 import UIInput from '@/components/ui/input'
 import UIButton from '@/components/ui/button'
 
-type Checklist = { id?: string; title: string; description?: string; items: string[]; is_published?: boolean }
+type Checklist = { id?: string; title: string; description?: string; items: string[]; is_published?: boolean; source_url?: string; source_title?: string; verified_at?: string }
 type Step = { id: string; title: string; description?: string }
 
 export default function ChecklistEditorDialog({ item, onSaved }: { item?: Checklist; onSaved?: () => void }) {
@@ -43,6 +43,14 @@ export default function ChecklistEditorDialog({ item, onSaved }: { item?: Checkl
         <div className="grid grid-cols-1 gap-4">
           <UIInput placeholder="Title" value={form.title} onChange={e=>setForm({...form, title:e.target.value})} />
           <UIInput placeholder="Description" value={form.description} onChange={e=>setForm({...form, description:e.target.value})} />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <UIInput placeholder="Official source URL" value={form.source_url ?? ''} onChange={e=>setForm({...form, source_url:e.target.value})} />
+            <UIInput placeholder="Source title" value={form.source_title ?? ''} onChange={e=>setForm({...form, source_title:e.target.value})} />
+          </div>
+          <label className="text-sm opacity-80">
+            Last verified
+            <UIInput type="date" value={form.verified_at?.slice(0, 10) ?? ''} onChange={e=>setForm({...form, verified_at:e.target.value ? `${e.target.value}T00:00:00Z` : undefined})} />
+          </label>
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <div className="text-sm opacity-70">Steps</div>
@@ -100,5 +108,4 @@ export default function ChecklistEditorDialog({ item, onSaved }: { item?: Checkl
     </div>
   )
 }
-
 

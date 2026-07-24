@@ -1,10 +1,7 @@
-from __future__ import annotations
-
 from typing import Dict, List, Optional
-from fastapi import APIRouter, HTTPException, Query
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, HTTPException
 
-from ..dependencies import DBSession, CurrentUser, require_roles, CurrentAdmin
+from ..dependencies import DBSession, CurrentUser, require_roles
 from ..models.translation import Translation
 from ..models.glossary import GlossaryTerm
 
@@ -120,5 +117,4 @@ def delete_glossary_term(term_id: str, db: DBSession) -> Dict:
     db.delete(t)
     db.commit()
     return {"ok": True}
-
 

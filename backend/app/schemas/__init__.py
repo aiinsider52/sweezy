@@ -14,6 +14,8 @@ from .marketplace import (
     ServiceListingUpdate,
 )
 from .events import (
+    EventReportCreate,
+    EventSafetyResponse,
     EventListingCreate,
     EventListingDetail,
     EventListingPage,
@@ -51,6 +53,7 @@ __all__ = [
     "EventListingPage",
     "EventListingResponse",
     "EventListingUpdate",
+    "EventReportCreate",
+    "EventSafetyResponse",
 ]
-
 

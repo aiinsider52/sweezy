@@ -8,17 +8,29 @@ final class MarketplaceViewModel: ObservableObject {
     @Published var hasMore = true
     @Published var isShowingStaleData = false
     @Published var selectedCategory: ServiceCategory?
+    @Published var selectedItemCategory: ItemCategory?
     @Published var selectedCanton: String?
     @Published var searchText = ""
     @Published var error: Error?
 
+    let listingType: ListingType
+
     private var currentPage = 1
-    private let cacheKey = "marketplace_cache"
+    private let cacheKey: String
     private let cacheTTLSeconds: TimeInterval = 300 // 5 min
 
-    init(initialCategory: ServiceCategory? = nil, initialCanton: String? = nil) {
+    init(listingType: ListingType = .service, initialCategory: ServiceCategory? = nil, initialCanton: String? = nil) {
+        self.listingType = listingType
         self.selectedCategory = initialCategory
         self.selectedCanton = initialCanton
+        self.cacheKey = listingType == .item ? "marketplace_items_cache" : "marketplace_cache"
+    }
+
+    private var categoryParam: String? {
+        switch listingType {
+        case .service: return selectedCategory?.rawValue
+        case .item: return selectedItemCategory?.rawValue
+        }
     }
 
     var filteredListings: [ServiceListing] {
@@ -44,8 +56,9 @@ final class MarketplaceViewModel: ObservableObject {
 
         do {
             let page = try await APIClient.fetchListings(
-                category: selectedCategory,
+                category: categoryParam,
                 canton: selectedCanton,
+                listingType: listingType,
                 page: currentPage
             )
             if refresh {

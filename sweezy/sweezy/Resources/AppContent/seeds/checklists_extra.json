@@ -7,16 +7,64 @@
     "estimatedDuration": "3-5 днів",
     "difficulty": "easy",
     "steps": [
-      {"id":"c1s-01","title":"Запишіться до Gemeinde","description":"Знайдіть адміністрацію вашої громади та запишіться.","estimatedTime":"30 хв","isOptional":false,"links":[],"requiredDocuments":["Паспорт","Підтвердження адреси"],"tips":["Візьміть фото 3×4"],"order":0},
-      {"id":"c1s-02","title":"Реєстрація в Migrationsamt","description":"Подайте документи на посвідку.","estimatedTime":"1 год","isOptional":false,"links":[],"requiredDocuments":["Паспорт","Документи S/B"],"tips":[],"order":1},
-      {"id":"c1s-03","title":"Оберіть Krankenkasse","description":"Маєте 3 місяці на вибір страховки.","estimatedTime":"1-2 год","isOptional":false,"links":[],"requiredDocuments":[],"tips":["Порівняйте премії"],"order":2}
+      {
+        "id": "c1s-01",
+        "title": "Запишіться до Gemeinde",
+        "description": "Знайдіть адміністрацію вашої громади та запишіться.",
+        "estimatedTime": "30 хв",
+        "isOptional": false,
+        "links": [],
+        "requiredDocuments": [
+          "Паспорт",
+          "Підтвердження адреси"
+        ],
+        "tips": [
+          "Візьміть фото 3×4"
+        ],
+        "order": 0
+      },
+      {
+        "id": "c1s-02",
+        "title": "Реєстрація в Migrationsamt",
+        "description": "Подайте документи на посвідку.",
+        "estimatedTime": "1 год",
+        "isOptional": false,
+        "links": [],
+        "requiredDocuments": [
+          "Паспорт",
+          "Документи S/B"
+        ],
+        "tips": [],
+        "order": 1
+      },
+      {
+        "id": "c1s-03",
+        "title": "Оберіть Krankenkasse",
+        "description": "Маєте 3 місяці на вибір страховки.",
+        "estimatedTime": "1-2 год",
+        "isOptional": false,
+        "links": [],
+        "requiredDocuments": [],
+        "tips": [
+          "Порівняйте премії"
+        ],
+        "order": 2
+      }
     ],
-    "tags": ["ZH","registration"],
-    "cantonCodes": ["ZH"],
+    "tags": [
+      "ZH",
+      "registration"
+    ],
+    "cantonCodes": [
+      "ZH"
+    ],
     "priority": 9,
     "isNew": true,
     "createdAt": "2025-10-14T10:00:00Z",
-    "lastUpdated": "2025-10-14T10:00:00Z"
+    "lastUpdated": "2025-10-14T10:00:00Z",
+    "source": "https://www.ch.ch/en/foreign-nationals-in-switzerland/",
+    "sourceTitle": "ch.ch — Foreign nationals in Switzerland",
+    "verifiedAt": "2026-07-15T00:00:00Z"
   },
   {
     "id": "c1-0001-0001-0001-000000000002",
@@ -26,16 +74,56 @@
     "estimatedDuration": "1-2 тижні",
     "difficulty": "medium",
     "steps": [
-      {"id":"c2s-01","title":"Перевірте термін","description":"Перевірте дату завершення у вашій посвідці.","estimatedTime":"5 хв","isOptional":false,"links":[],"requiredDocuments":[],"tips":[],"order":0},
-      {"id":"c2s-02","title":"Підготуйте документи","description":"Паспорт, фото, договір оренди, довідка про доходи.","estimatedTime":"2-3 год","isOptional":false,"links":[],"requiredDocuments":["Паспорт","Фото","Договір оренди"],"tips":[],"order":1},
-      {"id":"c2s-03","title":"Запис до Migrationsamt","description":"Подайте заявку онлайн або у вікні.","estimatedTime":"30 хв","isOptional":false,"links":[],"requiredDocuments":[],"tips":[],"order":2}
+      {
+        "id": "c2s-01",
+        "title": "Перевірте термін",
+        "description": "Перевірте дату завершення у вашій посвідці.",
+        "estimatedTime": "5 хв",
+        "isOptional": false,
+        "links": [],
+        "requiredDocuments": [],
+        "tips": [],
+        "order": 0
+      },
+      {
+        "id": "c2s-02",
+        "title": "Підготуйте документи",
+        "description": "Паспорт, фото, договір оренди, довідка про доходи.",
+        "estimatedTime": "2-3 год",
+        "isOptional": false,
+        "links": [],
+        "requiredDocuments": [
+          "Паспорт",
+          "Фото",
+          "Договір оренди"
+        ],
+        "tips": [],
+        "order": 1
+      },
+      {
+        "id": "c2s-03",
+        "title": "Запис до Migrationsamt",
+        "description": "Подайте заявку онлайн або у вікні.",
+        "estimatedTime": "30 хв",
+        "isOptional": false,
+        "links": [],
+        "requiredDocuments": [],
+        "tips": [],
+        "order": 2
+      }
     ],
-    "tags": ["permit","renewal"],
+    "tags": [
+      "permit",
+      "renewal"
+    ],
     "cantonCodes": [],
     "priority": 8,
     "isNew": true,
     "createdAt": "2025-10-14T10:00:00Z",
-    "lastUpdated": "2025-10-14T10:00:00Z"
+    "lastUpdated": "2025-10-14T10:00:00Z",
+    "source": "https://www.ch.ch/en/foreign-nationals-in-switzerland/",
+    "sourceTitle": "ch.ch — Foreign nationals in Switzerland",
+    "verifiedAt": "2026-07-15T00:00:00Z"
   },
   {
     "id": "c1-0001-0001-0001-000000000003",
@@ -45,15 +133,44 @@
     "estimatedDuration": "1-2 тижні",
     "difficulty": "easy",
     "steps": [
-      {"id":"c3s-01","title":"Зв'яжіться з Schulamt","description":"Дізнайтеся місце для вашої дитини.","estimatedTime":"20 хв","isOptional":false,"links":[],"requiredDocuments":["Паспорт","Вакцинації"],"tips":[],"order":0},
-      {"id":"c3s-02","title":"Медичні щеплення","description":"Перевірте картку щеплень, зробіть пропущені.","estimatedTime":"Залежить","isOptional":false,"links":[],"requiredDocuments":[],"tips":[],"order":1}
+      {
+        "id": "c3s-01",
+        "title": "Зв'яжіться з Schulamt",
+        "description": "Дізнайтеся місце для вашої дитини.",
+        "estimatedTime": "20 хв",
+        "isOptional": false,
+        "links": [],
+        "requiredDocuments": [
+          "Паспорт",
+          "Вакцинації"
+        ],
+        "tips": [],
+        "order": 0
+      },
+      {
+        "id": "c3s-02",
+        "title": "Медичні щеплення",
+        "description": "Перевірте картку щеплень, зробіть пропущені.",
+        "estimatedTime": "Залежить",
+        "isOptional": false,
+        "links": [],
+        "requiredDocuments": [],
+        "tips": [],
+        "order": 1
+      }
     ],
-    "tags": ["kids","school"],
+    "tags": [
+      "kids",
+      "school"
+    ],
     "cantonCodes": [],
     "priority": 7,
     "isNew": true,
     "createdAt": "2025-10-14T10:00:00Z",
-    "lastUpdated": "2025-10-14T10:00:00Z"
+    "lastUpdated": "2025-10-14T10:00:00Z",
+    "source": "https://www.ch.ch/en/school-and-education/",
+    "sourceTitle": "ch.ch — School and education",
+    "verifiedAt": "2026-07-15T00:00:00Z"
   },
   {
     "id": "c1-0001-0001-0001-000000000004",
@@ -63,15 +180,41 @@
     "estimatedDuration": "1-2 тижні",
     "difficulty": "medium",
     "steps": [
-      {"id":"c4s-01","title":"Зберіть документи","description":"Довідки про доходи, оренду, страхові внески.","estimatedTime":"3-4 год","isOptional":false,"links":[],"requiredDocuments":[],"tips":[],"order":0},
-      {"id":"c4s-02","title":"Подайте декларацію","description":"Через програму кантону або письмово.","estimatedTime":"2-3 год","isOptional":false,"links":[],"requiredDocuments":[],"tips":[],"order":1}
+      {
+        "id": "c4s-01",
+        "title": "Зберіть документи",
+        "description": "Довідки про доходи, оренду, страхові внески.",
+        "estimatedTime": "3-4 год",
+        "isOptional": false,
+        "links": [],
+        "requiredDocuments": [],
+        "tips": [],
+        "order": 0
+      },
+      {
+        "id": "c4s-02",
+        "title": "Подайте декларацію",
+        "description": "Через програму кантону або письмово.",
+        "estimatedTime": "2-3 год",
+        "isOptional": false,
+        "links": [],
+        "requiredDocuments": [],
+        "tips": [],
+        "order": 1
+      }
     ],
-    "tags": ["tax","benefits"],
+    "tags": [
+      "tax",
+      "benefits"
+    ],
     "cantonCodes": [],
     "priority": 6,
     "isNew": true,
     "createdAt": "2025-10-14T10:00:00Z",
-    "lastUpdated": "2025-10-14T10:00:00Z"
+    "lastUpdated": "2025-10-14T10:00:00Z",
+    "source": "https://www.ch.ch/en/taxes-and-finances/",
+    "sourceTitle": "ch.ch — Taxes and finances",
+    "verifiedAt": "2026-07-15T00:00:00Z"
   },
   {
     "id": "7a6b4201-4d9e-4c4f-bf81-0b7300000001",
@@ -82,83 +225,147 @@
     "difficulty": "easy",
     "steps": [
       {
-        "id":"7a6b4201-4d9e-4c4f-bf81-0b7300000101",
-        "title":"Купіть prepaid SIM-картку в аеропорту, Migros або Coop",
-        "description":"Для старту найзручніше взяти prepaid без контракту. Візьміть із собою паспорт, бо для активації або реєстрації даних він може знадобитися.",
-        "estimatedTime":"30-60 хв",
-        "isOptional":false,
-        "links":[
-          {"id":"7a6b4201-4d9e-4c4f-bf81-0b7300001101","title":"Swisscom","url":"https://www.swisscom.ch/","type":"website","description":"Оператор мобільного зв'язку"},
-          {"id":"7a6b4201-4d9e-4c4f-bf81-0b7300001102","title":"Salt","url":"https://www.salt.ch/","type":"website","description":"Мобільні тарифи та SIM-картки"},
-          {"id":"7a6b4201-4d9e-4c4f-bf81-0b7300001103","title":"Sunrise","url":"https://www.sunrise.ch/","type":"website","description":"Мобільний зв'язок та інтернет"}
+        "id": "7a6b4201-4d9e-4c4f-bf81-0b7300000101",
+        "title": "Купіть prepaid SIM-картку в аеропорту, Migros або Coop",
+        "description": "Для старту найзручніше взяти prepaid без контракту. Візьміть із собою паспорт, бо для активації або реєстрації даних він може знадобитися.",
+        "estimatedTime": "30-60 хв",
+        "isOptional": false,
+        "links": [
+          {
+            "id": "7a6b4201-4d9e-4c4f-bf81-0b7300001101",
+            "title": "Swisscom",
+            "url": "https://www.swisscom.ch/",
+            "type": "website",
+            "description": "Оператор мобільного зв'язку"
+          },
+          {
+            "id": "7a6b4201-4d9e-4c4f-bf81-0b7300001102",
+            "title": "Salt",
+            "url": "https://www.salt.ch/",
+            "type": "website",
+            "description": "Мобільні тарифи та SIM-картки"
+          },
+          {
+            "id": "7a6b4201-4d9e-4c4f-bf81-0b7300001103",
+            "title": "Sunrise",
+            "url": "https://www.sunrise.ch/",
+            "type": "website",
+            "description": "Мобільний зв'язок та інтернет"
+          }
         ],
-        "requiredDocuments":["Паспорт"],
-        "tips":["Для перших днів prepaid зручніший за контракт","Запитайте одразу про eSIM, якщо ваш телефон її підтримує"],
-        "order":0
-      },
-      {
-        "id":"7a6b4201-4d9e-4c4f-bf81-0b7300000102",
-        "title":"Активуйте SIM за інструкцією на упаковці",
-        "description":"Вставте SIM або активуйте eSIM, завершіть реєстрацію та перевірте, чи працюють дзвінки, SMS і мобільний інтернет.",
-        "estimatedTime":"15-30 хв",
-        "isOptional":false,
-        "links":[],
-        "requiredDocuments":["Телефон","Упаковка SIM або QR-код eSIM"],
-        "tips":["Якщо номер не активується, перевірте ідентифікацію та перезапустіть телефон","Збережіть PIN/PUK з упаковки"],
-        "order":1
-      },
-      {
-        "id":"7a6b4201-4d9e-4c4f-bf81-0b7300000103",
-        "title":"Порівняйте постійні тарифи на Comparis",
-        "description":"Коли базовий зв'язок уже є, порівняйте мобільні плани та умови домашнього інтернету, щоб не переплачувати після першого тижня.",
-        "estimatedTime":"30-45 хв",
-        "isOptional":false,
-        "links":[
-          {"id":"7a6b4201-4d9e-4c4f-bf81-0b7300001104","title":"Comparis","url":"https://www.comparis.ch/","type":"website","description":"Порівняння мобільних і домашніх тарифів"}
+        "requiredDocuments": [
+          "Паспорт"
         ],
-        "requiredDocuments":[],
-        "tips":["Дивіться не лише на ціну, а й на строк договору та плату за активацію","Перевіряйте, чи ціна не змінюється після акції"],
-        "order":2
+        "tips": [
+          "Для перших днів prepaid зручніший за контракт",
+          "Запитайте одразу про eSIM, якщо ваш телефон її підтримує"
+        ],
+        "order": 0
       },
       {
-        "id":"7a6b4201-4d9e-4c4f-bf81-0b7300000104",
-        "title":"Після відкриття банківського рахунку оформіть контракт",
-        "description":"Коли вже є IBAN і стабільна адреса, можна переходити на контрактний тариф, якщо він вигідніший за prepaid.",
-        "estimatedTime":"30-60 хв",
-        "isOptional":false,
-        "links":[],
-        "requiredDocuments":["Паспорт","Підтвердження адреси","IBAN або банківський рахунок"],
-        "tips":["Не поспішайте з довгим контрактом у перший день","Уточнюйте умови скасування та перевірку платоспроможності [ПЕРЕВІРИТИ]"],
-        "order":3
+        "id": "7a6b4201-4d9e-4c4f-bf81-0b7300000102",
+        "title": "Активуйте SIM за інструкцією на упаковці",
+        "description": "Вставте SIM або активуйте eSIM, завершіть реєстрацію та перевірте, чи працюють дзвінки, SMS і мобільний інтернет.",
+        "estimatedTime": "15-30 хв",
+        "isOptional": false,
+        "links": [],
+        "requiredDocuments": [
+          "Телефон",
+          "Упаковка SIM або QR-код eSIM"
+        ],
+        "tips": [
+          "Якщо номер не активується, перевірте ідентифікацію та перезапустіть телефон",
+          "Збережіть PIN/PUK з упаковки"
+        ],
+        "order": 1
       },
       {
-        "id":"7a6b4201-4d9e-4c4f-bf81-0b7300000105",
-        "title":"Замовте домашній інтернет заздалегідь",
-        "description":"Після підписання договору оренди перевірте покриття за адресою і замовте домашній інтернет. Підключення може зайняти 2-4 тижні.",
-        "estimatedTime":"30 хв",
-        "isOptional":false,
-        "links":[],
-        "requiredDocuments":["Адреса житла","Договір оренди [ПЕРЕВІРИТИ]"],
-        "tips":["Перевіряйте, чи у квартирі доступне оптоволокно або кабель","Замовляйте відразу після отримання постійної адреси"],
-        "order":4
+        "id": "7a6b4201-4d9e-4c4f-bf81-0b7300000103",
+        "title": "Порівняйте постійні тарифи на Comparis",
+        "description": "Коли базовий зв'язок уже є, порівняйте мобільні плани та умови домашнього інтернету, щоб не переплачувати після першого тижня.",
+        "estimatedTime": "30-45 хв",
+        "isOptional": false,
+        "links": [
+          {
+            "id": "7a6b4201-4d9e-4c4f-bf81-0b7300001104",
+            "title": "Comparis",
+            "url": "https://www.comparis.ch/",
+            "type": "website",
+            "description": "Порівняння мобільних і домашніх тарифів"
+          }
+        ],
+        "requiredDocuments": [],
+        "tips": [
+          "Дивіться не лише на ціну, а й на строк договору та плату за активацію",
+          "Перевіряйте, чи ціна не змінюється після акції"
+        ],
+        "order": 2
       },
       {
-        "id":"7a6b4201-4d9e-4c4f-bf81-0b7300000106",
-        "title":"Підключіть eSIM, якщо це зручніше",
-        "description":"Якщо ваш телефон підтримує eSIM, зручно залишити фізичну SIM для українського номера, а швейцарський тариф активувати цифрово.",
-        "estimatedTime":"15-20 хв",
-        "isOptional":true,
-        "links":[],
-        "requiredDocuments":["Телефон з підтримкою eSIM"],
-        "tips":["Перевірте підтримку eSIM у вашого оператора та моделі телефону","Зручно для двох номерів в одному пристрої"],
-        "order":5
+        "id": "7a6b4201-4d9e-4c4f-bf81-0b7300000104",
+        "title": "Після відкриття банківського рахунку оформіть контракт",
+        "description": "Коли вже є IBAN і стабільна адреса, можна переходити на контрактний тариф, якщо він вигідніший за prepaid.",
+        "estimatedTime": "30-60 хв",
+        "isOptional": false,
+        "links": [],
+        "requiredDocuments": [
+          "Паспорт",
+          "Підтвердження адреси",
+          "IBAN або банківський рахунок"
+        ],
+        "tips": [
+          "Не поспішайте з довгим контрактом у перший день",
+          "Уточнюйте умови скасування та перевірку платоспроможності [ПЕРЕВІРИТИ]"
+        ],
+        "order": 3
+      },
+      {
+        "id": "7a6b4201-4d9e-4c4f-bf81-0b7300000105",
+        "title": "Замовте домашній інтернет заздалегідь",
+        "description": "Після підписання договору оренди перевірте покриття за адресою і замовте домашній інтернет. Підключення може зайняти 2-4 тижні.",
+        "estimatedTime": "30 хв",
+        "isOptional": false,
+        "links": [],
+        "requiredDocuments": [
+          "Адреса житла",
+          "Договір оренди [ПЕРЕВІРИТИ]"
+        ],
+        "tips": [
+          "Перевіряйте, чи у квартирі доступне оптоволокно або кабель",
+          "Замовляйте відразу після отримання постійної адреси"
+        ],
+        "order": 4
+      },
+      {
+        "id": "7a6b4201-4d9e-4c4f-bf81-0b7300000106",
+        "title": "Підключіть eSIM, якщо це зручніше",
+        "description": "Якщо ваш телефон підтримує eSIM, зручно залишити фізичну SIM для українського номера, а швейцарський тариф активувати цифрово.",
+        "estimatedTime": "15-20 хв",
+        "isOptional": true,
+        "links": [],
+        "requiredDocuments": [
+          "Телефон з підтримкою eSIM"
+        ],
+        "tips": [
+          "Перевірте підтримку eSIM у вашого оператора та моделі телефону",
+          "Зручно для двох номерів в одному пристрої"
+        ],
+        "order": 5
       }
     ],
-    "tags": ["integration","telecom","sim","internet"],
+    "tags": [
+      "integration",
+      "telecom",
+      "sim",
+      "internet"
+    ],
     "cantonCodes": [],
     "priority": 8,
     "isNew": true,
     "createdAt": "2025-10-14T10:00:00Z",
-    "lastUpdated": "2025-10-14T10:00:00Z"
+    "lastUpdated": "2025-10-14T10:00:00Z",
+    "source": "https://www.sem.admin.ch/sem/en/home/integration-einbuergerung.html",
+    "sourceTitle": "SEM — Integration and naturalisation",
+    "verifiedAt": "2026-07-15T00:00:00Z"
   }
 ]

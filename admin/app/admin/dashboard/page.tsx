@@ -1,6 +1,5 @@
 import Card from '@/components/Card'
-import dynamic from 'next/dynamic'
-const ChartContainer = dynamic(() => import('@/components/ChartContainer'), { ssr: false })
+import ChartContainer from '@/components/ChartContainer'
 import { serverFetch } from '@/lib/server'
 import KPI from '@/components/KPI'
 import { serverFetch as api } from '@/lib/server'
@@ -53,5 +52,4 @@ export default async function DashboardPage() {
     </section>
   )
 }
-
 

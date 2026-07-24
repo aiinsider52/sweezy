@@ -19,10 +19,12 @@ class Checklist(Base):
     items: Mapped[list] = mapped_column(JSON, default=list, nullable=False)
     is_published: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     status: Mapped[str] = mapped_column(String(20), default="published", nullable=False)
+    source_url: Mapped[Optional[str]] = mapped_column(String(1000))
+    source_title: Mapped[Optional[str]] = mapped_column(String(255))
+    verified_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
 
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
     )
-
 

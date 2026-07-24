@@ -23,10 +23,7 @@ struct AchievementsView: View {
                                 .multilineTextAlignment(.center)
                         }
                         .padding()
-                        .background(
-                            RoundedRectangle(cornerRadius: Theme.CornerRadius.xl, style: .continuous)
-                                .fill(Theme.Colors.secondaryBackground)
-                        )
+                        .journeyCard()
                     }
                 }
                 .padding(.horizontal, Theme.Spacing.lg)
@@ -34,6 +31,7 @@ struct AchievementsView: View {
             .padding(.top, Theme.Spacing.lg)
         }
         .featureOnboarding(.gamification)
+        .journeyScreen(.alpine, darkness: 0.68)
     }
     
     private func icon(for id: String) -> String {
@@ -61,5 +59,4 @@ struct AchievementsView: View {
         }
     }
 }
-
 

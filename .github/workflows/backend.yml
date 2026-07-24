@@ -4,14 +4,33 @@ on:
   push:
     paths:
       - 'backend/**'
+      - 'render.yaml'
+      - 'shared/openapi.json'
       - '.github/workflows/backend.yml'
   pull_request:
     paths:
       - 'backend/**'
+      - 'render.yaml'
+      - 'shared/openapi.json'
+      - '.github/workflows/backend.yml'
 
 jobs:
   build-test:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: sweezy_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d sweezy_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -21,11 +40,30 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r backend/requirements.txt
+          pip install 'check-jsonschema>=0.34,<1'
       - name: Lint (ruff)
         run: ruff check backend
       - name: Tests (pytest)
         env:
           DATABASE_URL: sqlite:///./test.db
+          APP_ENV: test
+          CHAT_ENABLED: 'true'
         run: pytest -q backend/tests
-
-
+      - name: Verify PostgreSQL migrations and production preflight
+        env:
+          DATABASE_URL: postgresql+psycopg2://postgres:postgres@localhost:5432/sweezy_ci
+          APP_ENV: test
+          CHAT_ENABLED: 'false'
+        run: |
+          python -m alembic -c backend/alembic.ini upgrade head
+          python backend/scripts/production_preflight.py
+      - name: Validate Render Blueprint
+        run: check-jsonschema --schemafile https://render.com/schema/render.yaml.json render.yaml
+      - name: Verify generated API contract and clients
+        env:
+          DATABASE_URL: sqlite:///./openapi.db
+          APP_ENV: test
+          CHAT_ENABLED: 'true'
+        run: |
+          python backend/scripts/generate_openapi.py
+          git diff --exit-code -- shared/openapi.json admin/lib/generated/openapi.generated.ts sweezy/sweezy/Core/Networking/Generated/OpenAPIClient.generated.swift

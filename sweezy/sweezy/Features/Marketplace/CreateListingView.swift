@@ -3,6 +3,7 @@ import SwiftUI
 import UIKit
 
 struct CreateListingView: View {
+    var listingType: ListingType = .service
     var onCreated: (() -> Void)?
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var colorScheme
@@ -11,8 +12,13 @@ struct CreateListingView: View {
     @State private var title = ""
     @State private var description = ""
     @State private var category: ServiceCategory = .other
+    @State private var itemCategory: ItemCategory = .other
     @State private var canton = "ZH"
     @State private var priceInfo = ""
+    @State private var priceText = ""
+    @State private var isFreeItem = false
+    @State private var condition: ItemCondition = .used
+    @State private var negotiable = false
     @State private var contactType: ContactType = .telegram
     @State private var contactValue = ""
     @State private var authorName = ""
@@ -37,16 +43,23 @@ struct CreateListingView: View {
     }
 
     private var isValid: Bool {
-        !title.trimmingCharacters(in: .whitespaces).isEmpty &&
+        let base = !title.trimmingCharacters(in: .whitespaces).isEmpty &&
         description.trimmingCharacters(in: .whitespaces).count >= 20 &&
         !contactValue.trimmingCharacters(in: .whitespaces).isEmpty &&
         !authorName.trimmingCharacters(in: .whitespaces).isEmpty
+        guard listingType == .item else { return base }
+        return base && (isFreeItem || parsedPrice != nil)
+    }
+
+    private var parsedPrice: Int? {
+        guard let value = Int(priceText.trimmingCharacters(in: .whitespaces)), value >= 0 else { return nil }
+        return value
     }
 
     var body: some View {
         NavigationStack {
             ZStack {
-                AdaptivePageBackground()
+                JourneyPhotoBackground(imageName: JourneyBackdrop.market.rawValue, blurRadius: 7, darkness: 0.72)
 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 20) {
@@ -55,7 +68,11 @@ struct CreateListingView: View {
                         categoryCard
                         cantonCard
                         descriptionCard
-                        priceCard
+                        if listingType == .item {
+                            itemPriceCard
+                        } else {
+                            priceCard
+                        }
                         contactCard
                         authorCard
                         submitButton
@@ -65,7 +82,9 @@ struct CreateListingView: View {
                     .padding(.bottom, 40)
                 }
             }
-            .navigationTitle("marketplace.create_title".localized)
+            .navigationTitle(listingType == .item
+                             ? "marketplace.create_item_title".localized
+                             : "marketplace.create_title".localized)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -99,6 +118,7 @@ struct CreateListingView: View {
                 Text(errorMessage ?? "")
             }
         }
+        .journeyScreen(.market, darkness: 0.72)
     }
 
     // MARK: - Photos Card
@@ -255,12 +275,137 @@ struct CreateListingView: View {
                 LazyVGrid(columns: [
                     GridItem(.adaptive(minimum: 100), spacing: 8)
                 ], spacing: 8) {
-                    ForEach(ServiceCategory.allCases) { cat in
-                        categoryChip(cat)
+                    if listingType == .item {
+                        ForEach(ItemCategory.allCases) { cat in
+                            itemCategoryChip(cat)
+                        }
+                    } else {
+                        ForEach(ServiceCategory.allCases) { cat in
+                            categoryChip(cat)
+                        }
                     }
                 }
             }
         }
+    }
+
+    private func itemCategoryChip(_ cat: ItemCategory) -> some View {
+        let isSelected = itemCategory == cat
+        return Button {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                itemCategory = cat
+                if cat == .free {
+                    isFreeItem = true
+                }
+            }
+        } label: {
+            HStack(spacing: 5) {
+                Image(systemName: cat.icon)
+                    .font(.system(size: 11))
+                Text(cat.displayName)
+                    .font(.system(size: 12, weight: .semibold))
+                    .lineLimit(1)
+            }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 9)
+            .frame(maxWidth: .infinity)
+            .background(
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(isSelected ? cat.color.opacity(0.2) : Theme.Colors.adaptiveCard.opacity(0.6))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 10)
+                    .stroke(isSelected ? cat.color.opacity(0.6) : Color.clear, lineWidth: isSelected ? 1.5 : 1)
+            )
+            .foregroundColor(isSelected ? cat.color : Theme.Colors.textSecondary)
+        }
+        .buttonStyle(.plain)
+    }
+
+    // MARK: - Item Price Card
+
+    private var itemPriceCard: some View {
+        formCard {
+            VStack(alignment: .leading, spacing: 12) {
+                formLabel("marketplace.field.price".localized, icon: "banknote.fill")
+
+                Toggle(isOn: $isFreeItem.animation(.easeInOut(duration: 0.2))) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "gift.fill")
+                            .font(.system(size: 13))
+                            .foregroundColor(Theme.Colors.accentCoral)
+                        Text("marketplace.field.give_away".localized)
+                            .font(.subheadline.weight(.medium))
+                            .foregroundColor(Theme.Colors.textPrimary)
+                    }
+                }
+                .tint(Theme.Colors.accentCoral)
+
+                if !isFreeItem {
+                    HStack(spacing: 10) {
+                        Text("CHF")
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundColor(Theme.Colors.textTertiary)
+
+                        TextField("marketplace.field.item_price_placeholder".localized, text: $priceText)
+                            .focused($focusedField, equals: .price)
+                            .font(.body)
+                            .keyboardType(.numberPad)
+                            .onChange(of: priceText) { _, newValue in
+                                let digits = newValue.filter(\.isNumber)
+                                if digits != newValue { priceText = digits }
+                                if digits.count > 7 { priceText = String(digits.prefix(7)) }
+                            }
+                    }
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 12)
+                    .background(fieldBackground)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+
+                    Toggle(isOn: $negotiable) {
+                        Text("marketplace.field.negotiable".localized)
+                            .font(.subheadline.weight(.medium))
+                            .foregroundColor(Theme.Colors.textPrimary)
+                    }
+                    .tint(Theme.Colors.primary)
+                }
+
+                VStack(alignment: .leading, spacing: 8) {
+                    formLabel("marketplace.field.condition".localized, icon: "checkmark.seal")
+
+                    HStack(spacing: 6) {
+                        ForEach(ItemCondition.allCases) { cond in
+                            conditionButton(cond)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private func conditionButton(_ cond: ItemCondition) -> some View {
+        let isSelected = condition == cond
+        return Button {
+            withAnimation(.easeInOut(duration: 0.2)) {
+                condition = cond
+            }
+        } label: {
+            Text(cond.displayName)
+                .font(.system(size: 12, weight: .semibold))
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 10)
+                .background(
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(isSelected ? Theme.Colors.primary.opacity(0.15) : Color.clear)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(isSelected ? Theme.Colors.primary.opacity(0.4) : Theme.Colors.adaptiveBorder,
+                                lineWidth: isSelected ? 1.5 : 0.5)
+                )
+                .foregroundColor(isSelected ? Theme.Colors.primary : Theme.Colors.textSecondary)
+        }
+        .buttonStyle(.plain)
     }
 
     private func categoryChip(_ cat: ServiceCategory) -> some View {
@@ -585,7 +730,7 @@ struct CreateListingView: View {
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)
                     .background(Theme.Colors.primary)
-                    .foregroundColor(.white)
+                    .foregroundColor(Theme.Colors.textOnPrimary)
                     .cornerRadius(14)
             }
             .padding(.horizontal, 24)
@@ -696,6 +841,7 @@ struct CreateListingView: View {
     // MARK: - Auto-Suggest Category
 
     private func updateCategorySuggestion(for text: String) {
+        guard listingType == .service else { return }
         let lower = text.lowercased()
         guard lower.count >= 3 else {
             withAnimation { categorySuggestionVisible = false }
@@ -739,11 +885,16 @@ struct CreateListingView: View {
         isSubmitting = true
 
         let payload = ServiceListingCreate(
+            listingType: listingType,
             title: title.trimmingCharacters(in: .whitespaces),
             description: description.trimmingCharacters(in: .whitespaces),
-            category: category,
+            category: listingType == .item ? itemCategory.rawValue : category.rawValue,
             canton: canton,
-            priceInfo: priceInfo.isEmpty ? nil : priceInfo,
+            priceInfo: listingType == .service && !priceInfo.isEmpty ? priceInfo : nil,
+            priceChf: listingType == .item && !isFreeItem ? parsedPrice : nil,
+            isFree: listingType == .item && isFreeItem,
+            condition: listingType == .item ? condition : nil,
+            negotiable: listingType == .item && !isFreeItem && negotiable,
             contactType: contactType,
             contactValue: contactValue.trimmingCharacters(in: .whitespaces),
             authorName: authorName.trimmingCharacters(in: .whitespaces),
@@ -754,6 +905,13 @@ struct CreateListingView: View {
             var payloadWithImages = payload
             payloadWithImages.imageURLs = try await uploadSelectedImages()
             _ = try await APIClient.createListing(payloadWithImages)
+            EventBus.shared.emit(GamEvent(
+                type: .marketplaceContribution,
+                metadata: [
+                    "entityId": payload.title,
+                    "title": "Service listing submitted"
+                ]
+            ))
             onCreated?()
             showSuccess = true
         } catch {
@@ -845,7 +1003,7 @@ private struct CantonPickerSheet: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                AdaptivePageBackground()
+                JourneyPhotoBackground(imageName: JourneyBackdrop.market.rawValue, blurRadius: 8, darkness: 0.76)
 
                 ScrollView {
                     LazyVStack(spacing: 6) {
@@ -866,6 +1024,7 @@ private struct CantonPickerSheet: View {
                 }
             }
         }
+        .journeyScreen(.market, darkness: 0.76)
         .presentationDetents([.large])
     }
 

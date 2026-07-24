@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 """
 Centralized rate limiting configuration for the API.
 
@@ -9,11 +7,12 @@ separate worker tier, you can swap the storage backend here without
 touching routers.
 """
 
+from __future__ import annotations
+
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 
 # Global limiter instance. By default we don't enforce a global limit and
 # instead configure limits per‑route for sensitive endpoints (auth, etc.).
 limiter = Limiter(key_func=get_remote_address)
-
 

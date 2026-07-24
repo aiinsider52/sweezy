@@ -2,8 +2,9 @@
 import { NextRequest, NextResponse } from "next/server"
 import { cookies } from "next/headers"
 
-export async function PATCH(_req: NextRequest, { params }: { params: { id: string } }) {
-  const token = cookies().get("access_token")?.value || ""
+export async function PATCH(_req: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
+  const token = (await cookies()).get("access_token")?.value || ""
   const base = process.env.NEXT_PUBLIC_API_URL || "https://sweezy-9xyk.onrender.com/api/v1"
   const res = await fetch(`${base}/admin/events/${params.id}/approve`, {
     method: "PATCH",

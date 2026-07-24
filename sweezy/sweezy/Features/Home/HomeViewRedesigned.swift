@@ -12,6 +12,13 @@ struct HomeViewRedesigned: View {
         enum Destination {
             case checklists
             case roadmap
+
+            var telemetryName: String {
+                switch self {
+                case .checklists: return "checklists"
+                case .roadmap: return "roadmap"
+                }
+            }
         }
 
         let title: String
@@ -35,6 +42,8 @@ struct HomeViewRedesigned: View {
     @State private var showCVBuilder = false
     @State private var showTemplates = false
     @State private var showRoadmap = false
+    @State private var showSweezyPassport = false
+    @State private var cityHubRoute: CityHubRoute?
     @State private var selectedGuide: Guide?
     @State private var selectedNews: NewsItem?
     @State private var cachedFeaturedGuides: [Guide] = []
@@ -50,42 +59,63 @@ struct HomeViewRedesigned: View {
     @State private var dismissedNewsIDs: Set<UUID> = []
     @State private var selectedJourneyStage: JourneyStage?
     @State private var recentlyCompletedTaskIDs: Set<UUID> = []
+    @State private var lastLoggedNextActionTitle: String?
     // Forces lightweight refresh on day change / foreground to keep "today focus" accurate
     @State private var dayToken: Date = Date()
-    
+    // Ink header pill tabs: 0 = focus (all), 1 = tasks, 2 = guides
+    @State private var homeTab = 0
+
+    private static let sheetCornerRadius: CGFloat = 32
+
     var body: some View {
         NavigationStack {
             GeometryReader { geo in
                 ScrollView(.vertical, showsIndicators: false) {
-                    VStack(spacing: Theme.Spacing.xl) {
+                    VStack(spacing: 0) {
                         greetingSection(topInset: geo.safeAreaInsets.top)
 
                         VStack(spacing: Theme.Spacing.xxl) {
-                            if shouldShowProgressSection {
-                                compactProgressSection
+                            switch homeTab {
+                            case 1:
+                                if shouldShowPriorityTasksSection {
+                                    priorityTasksSection
+                                }
+                                if shouldShowRoadmapEntrySection {
+                                    roadmapEntrySection
+                                }
+                                if !shouldShowPriorityTasksSection && !shouldShowRoadmapEntrySection {
+                                    homeTabEmptyState
+                                }
+                            case 2:
+                                if shouldShowCuratedContentSection {
+                                    curatedContentSection
+                                } else {
+                                    homeTabEmptyState
+                                }
+                                telegramSection
+                            default:
+                                focusTabContent
                             }
-
-                            if shouldShowPriorityTasksSection {
-                                priorityTasksSection
-                            }
-
-                            quickActionsSection
-
-                            if shouldShowRoadmapEntrySection {
-                                roadmapEntrySection
-                            }
-
-                            if shouldShowCuratedContentSection {
-                                curatedContentSection
-                            }
-
-                            telegramSection
                         }
-                        .padding(.top, Theme.Spacing.md)
+                        .padding(.top, Theme.Spacing.xl)
                         .padding(.bottom, Theme.Spacing.xxxl)
+                        .frame(maxWidth: .infinity)
+                        .background(
+                            UnevenRoundedRectangle(
+                                topLeadingRadius: Self.sheetCornerRadius,
+                                topTrailingRadius: Self.sheetCornerRadius,
+                                style: .continuous
+                            )
+                            .fill(Color.black.opacity(0.74))
+                        )
+                        .padding(.top, -Self.sheetCornerRadius)
                     }
                 }
-                .background(AdaptivePageBackground())
+                .background(
+                    // Ink behind the header (incl. status bar + top bounce),
+                    // paper behind the sheet (incl. bottom bounce).
+                    JourneyPhotoBackground(imageName: JourneyBackdrop.lake.rawValue, blurRadius: 6, darkness: 0.64)
+                )
                 .navigationBarHidden(true)
                 .navigationDestination(item: $selectedGuide) { guide in
                     GuideDetailView(guide: guide)
@@ -97,8 +127,19 @@ struct HomeViewRedesigned: View {
                 .navigationDestination(item: $selectedNews) { news in
                     NewsDetailView(news: news)
                 }
+                .navigationDestination(isPresented: $showSweezyPassport) {
+                    SweezyPassportView()
+                        .environmentObject(appContainer)
+                }
+                .navigationDestination(item: $cityHubRoute) { route in
+                    if let hub = CityHubRegistry.hub(for: route.slug) {
+                        CityHubView(hub: hub)
+                            .environmentObject(appContainer)
+                    }
+                }
             }
         }
+        .journeyScreen(.lake, darkness: 0.64)
         .sheet(isPresented: $showWhatsNewSheet) {
             WhatsNewView()
         }
@@ -124,7 +165,16 @@ struct HomeViewRedesigned: View {
         }
         .onAppear {
             AppLogger.ui("HomeViewRedesigned onAppear")
+            #if DEBUG
+            // Screenshot automation: pass "-screenshotRoute roadmap|passport" as a launch argument
+            switch UserDefaults.standard.string(forKey: "screenshotRoute") {
+            case "roadmap": showRoadmap = true
+            case "passport": showSweezyPassport = true
+            default: break
+            }
+            #endif
             roadmapService.refreshFromStorage()
+            logNextBestActionViewedIfNeeded()
             // Defer heavy operations to not block UI
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                 checkForWhatsNew()
@@ -202,54 +252,60 @@ struct HomeViewRedesigned: View {
     
     private func greetingSection(topInset: CGFloat) -> some View {
         VStack(alignment: .leading, spacing: Theme.Spacing.md) {
-            HStack(alignment: .top, spacing: Theme.Spacing.md) {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text(greetingTitle)
-                        .font(.system(size: 32, weight: .bold, design: .rounded))
+            HStack(alignment: .center, spacing: Theme.Spacing.md) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("home.brand.title".localized)
+                        .font(.system(size: 28, weight: .bold, design: .rounded))
                         .foregroundColor(.white)
-                    Text(formattedGreetingDate)
-                        .font(Theme.Typography.subheadline)
-                        .foregroundColor(.white.opacity(0.78))
+                    Text(greetingSubtitle)
+                        .font(.system(size: 15, weight: .medium))
+                        .foregroundColor(.white.opacity(0.82))
                 }
-                
+
                 Spacer()
-                
+
                 Button {
                     showSettings = true
                 } label: {
                     ZStack {
                         Circle()
-                            .fill(Color.white.opacity(0.14))
-                            .frame(width: 48, height: 48)
+                            .fill(
+                                LinearGradient(
+                                    colors: [Theme.Colors.primaryLight.opacity(0.9), Theme.Colors.primary],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                            .frame(width: 44, height: 44)
                         Circle()
-                            .stroke(Color.white.opacity(0.18), lineWidth: 1)
-                            .frame(width: 48, height: 48)
+                            .stroke(Color.white.opacity(0.25), lineWidth: 1.5)
+                            .frame(width: 44, height: 44)
                         Text(profileBadgeText)
-                            .font(.system(size: 18, weight: .bold, design: .rounded))
+                            .font(.system(size: 17, weight: .bold, design: .rounded))
                             .foregroundColor(.white)
                     }
                 }
                 .buttonStyle(.plain)
                 .accessibilityIdentifier("home.openSettingsButton")
             }
-            
-            if lockManager.isRegistered, !lockManager.userName.isEmpty {
-                Text("home.hero.subtitle.registered".localized(with: lockManager.userName))
-                    .font(Theme.Typography.caption)
-                    .foregroundColor(.white.opacity(0.68))
-            } else {
-                Text("home.hero.subtitle.guest".localized)
-                    .font(Theme.Typography.caption)
-                    .foregroundColor(.white.opacity(0.68))
-            }
+
+            PillSegmentedControl(
+                items: [
+                    "home.tab.focus".localized,
+                    "home.tab.tasks".localized,
+                    "home.tab.guides".localized
+                ],
+                selection: $homeTab
+            )
+            .padding(.top, Theme.Spacing.xs)
         }
         .padding(.top, topInset + Theme.Spacing.md)
         .padding(.horizontal, Theme.Spacing.lg)
-        .padding(.bottom, Theme.Spacing.lg)
+        .padding(.bottom, Theme.Spacing.lg + Self.sheetCornerRadius)
         .background(
             ZStack {
-                Theme.Colors.gradientHero
-                
+                Theme.Colors.ink
+
                 HStack {
                     Spacer()
                     Image(systemName: "leaf.fill")
@@ -260,18 +316,14 @@ struct HomeViewRedesigned: View {
                 }
             }
         )
-        .overlay(alignment: .bottomLeading) {
+        .overlay(alignment: .topTrailing) {
             Rectangle()
-                .fill(Theme.Colors.accent.opacity(0.12))
+                .fill(Theme.Colors.accent.opacity(0.10))
                 .frame(width: 180, height: 120)
                 .blur(radius: 50)
-                .offset(x: -20, y: 20)
+                .offset(x: 40, y: -20)
+                .allowsHitTesting(false)
         }
-        .clipShape(
-            RoundedRectangle(cornerRadius: 32, style: .continuous)
-        )
-        .padding(.horizontal, Theme.Spacing.md)
-        .padding(.top, 4)
     }
     
     // MARK: - Simplified Hero (for debugging)
@@ -385,6 +437,240 @@ struct HomeViewRedesigned: View {
             }
             .padding(.horizontal, Theme.Spacing.lg)
         }
+    }
+
+    // MARK: - Focus tab (mockup layout)
+
+    private var focusTabContent: some View {
+        VStack(spacing: Theme.Spacing.lg) {
+            todayFocusCardSection
+            mockupQuickActionsSection
+            swissMomentsGallerySection
+        }
+        .padding(.bottom, Theme.Spacing.xl)
+    }
+
+    private var todayFocusCardSection: some View {
+        HStack(alignment: .center, spacing: Theme.Spacing.md) {
+            HomeFocusProgressRing(
+                progress: todayFocusProgress,
+                percent: todayFocusPercent,
+                style: .ink
+            )
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text("home.todays_focus.title".localized)
+                    .font(.system(size: 17, weight: .bold))
+                    .foregroundColor(.white)
+                Text(todayFocusMotivation)
+                    .font(.system(size: 14))
+                    .foregroundColor(.white.opacity(0.55))
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            Spacer(minLength: 0)
+
+            Image(systemName: "scope")
+                .font(.system(size: 20, weight: .semibold))
+                .foregroundColor(Theme.Colors.primaryLight)
+        }
+        .padding(Theme.Spacing.lg)
+        .background(
+            RoundedRectangle(cornerRadius: 22, style: .continuous)
+                .fill(HomeInkSurface.card)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 22, style: .continuous)
+                .stroke(HomeInkSurface.cardBorder, lineWidth: 1)
+        )
+        .padding(.horizontal, Theme.Spacing.lg)
+        .accessibilityIdentifier("home.todaysFocusCard")
+    }
+
+    private var mockupQuickActionsSection: some View {
+        LazyVGrid(columns: quickActionColumns, spacing: 12) {
+            ForEach(mockupActionItems) { item in
+                HomeMockupGridTile(item: item)
+            }
+        }
+        .padding(.horizontal, Theme.Spacing.lg)
+    }
+
+    private var swissMomentsGallerySection: some View {
+        VStack(alignment: .leading, spacing: Theme.Spacing.md) {
+            HStack {
+                Text("home.swiss_moments.title".localized)
+                    .font(.system(size: 20, weight: .bold))
+                    .foregroundColor(Theme.Colors.textPrimary)
+                Spacer()
+                Button {
+                    NotificationCenter.default.post(name: .switchTab, object: 2)
+                } label: {
+                    Text("home.swiss_moments.view_all".localized)
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(Theme.Colors.primary)
+                }
+                .buttonStyle(.plain)
+            }
+            .padding(.horizontal, Theme.Spacing.lg)
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 14) {
+                    ForEach(swissMomentGalleryItems) { item in
+                        HomeSwissMomentPhotoCard(item: item) {
+                            openSwissMoment(item)
+                        }
+                    }
+                }
+                .padding(.horizontal, Theme.Spacing.lg)
+            }
+        }
+    }
+
+    private var mockupActionItems: [HomeMockupGridItem] {
+        [
+            HomeMockupGridItem(
+                icon: "doc.richtext",
+                title: "qa.cv_builder".localized,
+                subtitle: "qa.cv_builder.subtitle".localized,
+                accentColor: Theme.Colors.primaryLight,
+                accessibilityIdentifier: "home.quickAction.cvBuilder"
+            ) {
+                showCVBuilder = true
+            },
+            HomeMockupGridItem(
+                icon: "doc.text",
+                title: "qa.templates.title".localized,
+                subtitle: "qa.templates.subtitle".localized,
+                accentColor: Theme.Colors.accentCoral,
+                accessibilityIdentifier: "home.quickAction.templates"
+            ) {
+                showTemplates = true
+            },
+            HomeMockupGridItem(
+                icon: "map.fill",
+                title: "qa.map".localized,
+                subtitle: "qa.map.subtitle".localized,
+                accentColor: Color(red: 0.92, green: 0.78, blue: 0.28),
+                accessibilityIdentifier: "home.quickAction.map"
+            ) {
+                NotificationCenter.default.post(name: .switchTab, object: 2)
+            },
+            HomeMockupGridItem(
+                icon: "book.fill",
+                title: "qa.guides".localized,
+                subtitle: "qa.guides.subtitle".localized,
+                accentColor: Color(red: 0.45, green: 0.62, blue: 0.88),
+                accessibilityIdentifier: "home.quickAction.guides"
+            ) {
+                NotificationCenter.default.post(
+                    name: .switchTab,
+                    object: SwitchTabPayload(tab: 1, section: .guides)
+                )
+            }
+        ]
+    }
+
+    private var swissMomentGalleryItems: [HomeSwissMomentGalleryItem] {
+        [
+            HomeSwissMomentGalleryItem(
+                id: "grindelwald",
+                title: "Grindelwald",
+                subtitle: "home.swiss_moments.canton.be".localized,
+                imageName: "swiss-moment-grindelwald",
+                latitude: 46.6244,
+                longitude: 8.0414,
+                spanDelta: 0.12
+            ),
+            HomeSwissMomentGalleryItem(
+                id: "zurich",
+                title: "Zürich",
+                subtitle: "home.swiss_moments.canton.zh".localized,
+                imageName: "swiss-moment-zurich",
+                cityHubSlug: "zurich",
+                latitude: 47.3769,
+                longitude: 8.5417,
+                spanDelta: 0.09
+            ),
+            HomeSwissMomentGalleryItem(
+                id: "luzern",
+                title: "Luzern",
+                subtitle: "home.swiss_moments.canton.lu".localized,
+                imageName: "swiss-moment-luzern",
+                latitude: 47.0502,
+                longitude: 8.3093,
+                spanDelta: 0.09
+            ),
+            HomeSwissMomentGalleryItem(
+                id: "geneva",
+                title: "Genève",
+                subtitle: "home.swiss_moments.canton.ge".localized,
+                imageName: "swiss-moment-geneva",
+                latitude: 46.2044,
+                longitude: 6.1432,
+                spanDelta: 0.09
+            )
+        ]
+    }
+
+    private func openSwissMoment(_ item: HomeSwissMomentGalleryItem) {
+        if let slug = item.cityHubSlug, CityHubRegistry.hub(for: slug) != nil {
+            appContainer.telemetry.retention(
+                .contentOpened,
+                source: "home",
+                meta: ["type": "city_hub", "id": item.id]
+            )
+            cityHubRoute = CityHubRoute(slug: slug)
+            return
+        }
+        openMomentOnMap(item)
+    }
+
+    private func openMomentOnMap(_ item: HomeSwissMomentGalleryItem) {
+        MapFocusRouter.pending = MapFocusTarget(
+            latitude: item.latitude,
+            longitude: item.longitude,
+            spanDelta: item.spanDelta
+        )
+        appContainer.telemetry.retention(
+            .contentOpened,
+            source: "home",
+            meta: ["type": "swiss_moment_city", "id": item.id]
+        )
+        NotificationCenter.default.post(name: .switchTab, object: 2)
+    }
+
+    private var todayFocusPercent: Int {
+        min(100, max(
+            Int(roadmapService.overallProgress * 100),
+            Int(firstWeekProgress * 100),
+            min(statGuides * 8, 35)
+        ))
+    }
+
+    private var todayFocusProgress: CGFloat {
+        CGFloat(todayFocusPercent) / 100
+    }
+
+    private var todayFocusMotivation: String {
+        if todayFocusPercent >= 70 {
+            return "home.todays_focus.motivation_high".localized
+        }
+        if todayFocusPercent >= 35 {
+            return "home.todays_focus.motivation_mid".localized
+        }
+        return "home.todays_focus.motivation_low".localized
+    }
+
+    private var greetingSubtitle: String {
+        let name: String
+        if lockManager.isRegistered, !lockManager.userName.isEmpty {
+            let parts = lockManager.userName.split(separator: " ")
+            name = parts.first.map(String.init) ?? lockManager.userName
+        } else {
+            name = "home.friend".localized
+        }
+        return "\(dynamicGreeting), \(name) 👋"
     }
     
     // PHASE 4: Re-enable when Jobs flow is production-ready.
@@ -501,7 +787,7 @@ struct HomeViewRedesigned: View {
             }
             StackedRecommendationList(
                 cards: cards,
-                onSelect: { guide in selectedGuide = guide }
+                onSelect: openGuideFromHome
             )
             .padding(.horizontal, Theme.Spacing.lg)
         }
@@ -529,17 +815,22 @@ struct HomeViewRedesigned: View {
     
     // MARK: - Analytics Pinboard (Gamification)
     private var analyticsPinboard: some View {
-        GamificationLevelCard(
-            currentXP: userXP,
-            xpForNextLevel: xpForNextLevel,
-            level: userLevel,
-            levelTitle: levelTitle,
-            hoursSaved: estimatedHoursSaved,
-            guidesRead: appContainer.userStats.guidesReadCount,
-            lastAward: appContainer.gamification.lastAwardedXP,
-            todayXP: appContainer.gamification.xpGainedToday(),
-            badges: earnedBadges
-        )
+        Button {
+            showSweezyPassport = true
+        } label: {
+            GamificationLevelCard(
+                currentXP: userXP,
+                xpForNextLevel: xpForNextLevel,
+                level: userLevel,
+                levelTitle: levelTitle,
+                hoursSaved: estimatedHoursSaved,
+                guidesRead: appContainer.userStats.guidesReadCount,
+                lastAward: appContainer.gamification.lastAwardedXP,
+                todayXP: appContainer.gamification.xpGainedToday(),
+                badges: earnedBadges
+            )
+        }
+        .buttonStyle(.plain)
         .padding(.horizontal, Theme.Spacing.lg)
     }
     
@@ -646,7 +937,7 @@ struct HomeViewRedesigned: View {
             SectionHeader("home.popular_guides".localized)
             KnowledgeMindMapView(
                 guides: cachedFeaturedGuides.isEmpty ? featuredGuides : cachedFeaturedGuides,
-                onSelect: { guide in selectedGuide = guide }
+                onSelect: openGuideFromHome
             )
             .frame(height: 380)
             .padding(.horizontal, Theme.Spacing.md)
@@ -719,22 +1010,51 @@ struct HomeViewRedesigned: View {
     }
     
     private var compactProgressSection: some View {
-        GlassCard(innerGlow: false) {
+        Button {
+            showSweezyPassport = true
+        } label: {
+            compactProgressContent
+        }
+        .buttonStyle(.plain)
+        .padding(.horizontal, Theme.Spacing.lg)
+    }
+
+    private var embeddedPassportSection: some View {
+        Button {
+            showSweezyPassport = true
+        } label: {
+            compactProgressContent
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var compactProgressContent: some View {
+        VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
+            HStack {
+                Label("Sweezy Passport", systemImage: "person.text.rectangle.fill")
+                    .font(.system(size: 14, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
+                Spacer()
+                Text("Open")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundColor(.white.opacity(0.55))
+            }
+
             HStack(spacing: Theme.Spacing.md) {
                 CompactProgressPill(
                     icon: "bolt.fill",
                     value: "\(statXP)",
                     label: "XP",
-                    color: Theme.Colors.accentTurquoise
+                    color: Theme.Colors.primaryLight
                 )
-                
+
                 CompactProgressPill(
                     icon: "star.fill",
                     value: "\(statLevel)",
-                    label: "Level",
+                    label: "Status",
                     color: Theme.Colors.accent
                 )
-                
+
                 CompactProgressPill(
                     icon: "flame.fill",
                     value: "\(appContainer.gamification.currentStreak())",
@@ -742,8 +1062,33 @@ struct HomeViewRedesigned: View {
                     color: Theme.Colors.accentCoral
                 )
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(Theme.Spacing.md)
+        .background(
+            RoundedRectangle(cornerRadius: Theme.CornerRadius.xl, style: .continuous)
+                .fill(Theme.Colors.inkElevated)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: Theme.CornerRadius.xl, style: .continuous)
+                .stroke(Theme.Colors.inkBorder, lineWidth: 1)
+                .allowsHitTesting(false)
+        )
+    }
+
+    private var homeTabEmptyState: some View {
+        VStack(spacing: Theme.Spacing.sm) {
+            Image(systemName: "checkmark.circle")
+                .font(.system(size: 28, weight: .semibold))
+                .foregroundColor(Theme.Colors.primary)
+            Text("home.tab.empty".localized)
+                .font(Theme.Typography.subheadline)
+                .foregroundColor(Theme.Colors.textSecondary)
+                .multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, Theme.Spacing.xl)
+        .paperCard()
         .padding(.horizontal, Theme.Spacing.lg)
     }
 
@@ -798,7 +1143,7 @@ struct HomeViewRedesigned: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .background(
                         RoundedRectangle(cornerRadius: 24, style: .continuous)
-                            .fill(Theme.Colors.adaptiveCard)
+                            .fill(Theme.Colors.paperCard)
                     )
                     .overlay(
                         RoundedRectangle(cornerRadius: 24, style: .continuous)
@@ -858,8 +1203,8 @@ struct HomeViewRedesigned: View {
     }
     
     private var priorityTasksSection: some View {
-        let priorityBorderColor: Color = Theme.Colors.accentTurquoise.opacity(0.25)
-        let priorityShadowColor: Color = Theme.Colors.accentTurquoise.opacity(0.12)
+        let priorityBorderColor: Color = Theme.Colors.adaptiveBorder
+        let priorityShadowColor: Color = Color.black.opacity(0.05)
 
         return VStack(alignment: .leading, spacing: Theme.Spacing.md) {
             HStack(alignment: .top) {
@@ -937,13 +1282,13 @@ struct HomeViewRedesigned: View {
         .padding(Theme.Spacing.lg)
         .background(
             RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .fill(Theme.Colors.adaptiveCard)
+                .fill(Theme.Colors.paperCard)
         )
         .overlay(
             RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .stroke(priorityBorderColor, lineWidth: 1.5)
+                .stroke(priorityBorderColor, lineWidth: 1)
         )
-        .shadow(color: priorityShadowColor, radius: 18, x: 0, y: 8)
+        .shadow(color: priorityShadowColor, radius: 10, x: 0, y: 4)
         .padding(.horizontal, Theme.Spacing.lg)
         .accessibilityIdentifier("home.priorityTasksSection")
     }
@@ -965,16 +1310,16 @@ struct HomeViewRedesigned: View {
     
     private var quickActionItems: [HomeQuickActionItem] {
         [
-            HomeQuickActionItem(icon: "doc.richtext", title: "qa.cv_builder".localized, accentColor: .purple, accessibilityIdentifier: "home.quickAction.cvBuilder") {
+            HomeQuickActionItem(icon: "doc.richtext", title: "qa.cv_builder".localized, accentColor: Theme.Colors.primary, accessibilityIdentifier: "home.quickAction.cvBuilder") {
                 showCVBuilder = true
             },
-            HomeQuickActionItem(icon: "doc.text", title: "qa.templates_short".localized, accentColor: .pink, accessibilityIdentifier: "home.quickAction.templates") {
+            HomeQuickActionItem(icon: "doc.text", title: "qa.templates_short".localized, accentColor: Theme.Colors.accentCoral, accessibilityIdentifier: "home.quickAction.templates") {
                 showTemplates = true
             },
-            HomeQuickActionItem(icon: "map.fill", title: "qa.map".localized, accentColor: .orange, accessibilityIdentifier: "home.quickAction.map") {
+            HomeQuickActionItem(icon: "map.fill", title: "qa.map".localized, accentColor: Theme.Colors.accent, accessibilityIdentifier: "home.quickAction.map") {
                 NotificationCenter.default.post(name: .switchTab, object: 2)
             },
-            HomeQuickActionItem(icon: "book.fill", title: "qa.guides".localized, accentColor: .blue, accessibilityIdentifier: "home.quickAction.guides") {
+            HomeQuickActionItem(icon: "book.fill", title: "qa.guides".localized, accentColor: Theme.Colors.primaryLight, accessibilityIdentifier: "home.quickAction.guides") {
                 NotificationCenter.default.post(
                     name: .switchTab,
                     object: SwitchTabPayload(tab: 1, section: .guides)
@@ -994,7 +1339,7 @@ struct HomeViewRedesigned: View {
             if !topRecommendedCards.isEmpty {
                 StackedRecommendationList(
                     cards: topRecommendedCards,
-                    onSelect: { guide in selectedGuide = guide }
+                    onSelect: openGuideFromHome
                 )
                 .padding(.horizontal, Theme.Spacing.lg)
             }
@@ -1040,6 +1385,11 @@ struct HomeViewRedesigned: View {
     }
     
     private func handleNewsCardTap(_ news: NewsItem) {
+        appContainer.telemetry.retention(
+            .contentOpened,
+            source: "home",
+            meta: ["type": "news", "id": news.id.uuidString]
+        )
         let trimmedContent = news.content?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         if !trimmedContent.isEmpty {
             selectedNews = news
@@ -1050,6 +1400,15 @@ struct HomeViewRedesigned: View {
         if let url = URL(string: trimmedURL), UIApplication.shared.canOpenURL(url) {
             UIApplication.shared.open(url)
         }
+    }
+
+    private func openGuideFromHome(_ guide: Guide) {
+        appContainer.telemetry.retention(
+            .contentOpened,
+            source: "home",
+            meta: ["type": "guide", "id": guide.id.uuidString, "category": guide.category.rawValue]
+        )
+        selectedGuide = guide
     }
     
     private var checklistTasks: [FirstWeekChecklistService.TaskItem] {
@@ -1163,6 +1522,25 @@ struct HomeViewRedesigned: View {
         case .roadmap:
             showRoadmap = true
         }
+        appContainer.telemetry.retention(
+            .nextActionTapped,
+            source: "home",
+            meta: ["destination": destination.telemetryName]
+        )
+    }
+
+    private func logNextBestActionViewedIfNeeded() {
+        guard let action = nextBestAction else { return }
+        guard lastLoggedNextActionTitle != action.title else { return }
+        lastLoggedNextActionTitle = action.title
+        appContainer.telemetry.retention(
+            .nextActionViewed,
+            source: "home",
+            meta: [
+                "destination": action.destination.telemetryName,
+                "title": action.title
+            ]
+        )
     }
     
     private func checkForWhatsNew() {
@@ -1469,13 +1847,14 @@ private struct CompactProgressPill: View {
             }
             
             VStack(alignment: .leading, spacing: 2) {
+                // Always white: this pill lives on the ink header in both schemes
                 Text(value)
                     .font(.system(size: 17, weight: .bold, design: .rounded))
-                    .foregroundColor(Theme.Colors.textPrimary)
+                    .foregroundColor(.white)
                     .monospacedDigit()
                 Text(label)
                     .font(Theme.Typography.caption2)
-                    .foregroundColor(Theme.Colors.textTertiary)
+                    .foregroundColor(.white.opacity(0.55))
             }
             
             Spacer(minLength: 0)
@@ -1495,7 +1874,7 @@ private struct HomeQuickActionItem: Identifiable {
 
 private struct HomeQuickActionTile: View {
     let item: HomeQuickActionItem
-    
+
     var body: some View {
         Button(action: item.action) {
             HStack(spacing: 12) {
@@ -1507,13 +1886,13 @@ private struct HomeQuickActionTile: View {
                         .font(.system(size: 18, weight: .semibold))
                         .foregroundColor(item.accentColor)
                 }
-                
+
                 Text(item.title)
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundColor(Theme.Colors.textPrimary)
                     .lineLimit(2)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                
+
                 Image(systemName: "arrow.right")
                     .font(.system(size: 13, weight: .bold))
                     .foregroundColor(Theme.Colors.textTertiary)
@@ -1522,15 +1901,175 @@ private struct HomeQuickActionTile: View {
             .frame(maxWidth: .infinity, minHeight: 84)
             .background(
                 RoundedRectangle(cornerRadius: 20, style: .continuous)
-                    .fill(Theme.Colors.adaptiveCard)
+                    .fill(Theme.Colors.paperCard)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 20, style: .continuous)
-                    .stroke(item.accentColor.opacity(0.18), lineWidth: 1)
+                    .stroke(Theme.Colors.adaptiveBorder, lineWidth: 1)
+            )
+            .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 4)
+        }
+        .buttonStyle(ScaleButtonStyle(scaleAmount: 0.98))
+        .accessibilityIdentifier(item.accessibilityIdentifier)
+    }
+}
+
+private struct HomeMockupGridItem: Identifiable {
+    let id = UUID()
+    let icon: String
+    let title: String
+    let subtitle: String
+    let accentColor: Color
+    let accessibilityIdentifier: String
+    let action: () -> Void
+}
+
+private enum HomeInkSurface {
+    static let card = Color(red: 0.10, green: 0.15, blue: 0.12)
+    static let cardBorder = Color.white.opacity(0.08)
+}
+
+private struct HomeMockupGridTile: View {
+    let item: HomeMockupGridItem
+
+    var body: some View {
+        Button(action: item.action) {
+            VStack(alignment: .leading, spacing: 12) {
+                ZStack {
+                    Capsule()
+                        .fill(item.accentColor.opacity(0.18))
+                        .frame(width: 48, height: 34)
+                    Image(systemName: item.icon)
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundColor(item.accentColor)
+                }
+
+                Text(item.title)
+                    .font(.system(size: 15, weight: .bold))
+                    .foregroundColor(.white)
+                    .lineLimit(1)
+
+                Text(item.subtitle)
+                    .font(.system(size: 12))
+                    .foregroundColor(.white.opacity(0.52))
+                    .lineLimit(2)
+                    .multilineTextAlignment(.leading)
+            }
+            .padding(14)
+            .frame(maxWidth: .infinity, minHeight: 132, alignment: .topLeading)
+            .background(
+                RoundedRectangle(cornerRadius: 22, style: .continuous)
+                    .fill(HomeInkSurface.card)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 22, style: .continuous)
+                    .stroke(HomeInkSurface.cardBorder, lineWidth: 1)
             )
         }
         .buttonStyle(ScaleButtonStyle(scaleAmount: 0.98))
         .accessibilityIdentifier(item.accessibilityIdentifier)
+    }
+}
+
+private struct CityHubRoute: Identifiable, Hashable {
+    let slug: String
+    var id: String { slug }
+}
+
+private struct HomeSwissMomentGalleryItem: Identifiable {
+    let id: String
+    let title: String
+    let subtitle: String
+    let imageName: String
+    var cityHubSlug: String? = nil
+    let latitude: Double
+    let longitude: Double
+    let spanDelta: Double
+}
+
+private struct HomeSwissMomentPhotoCard: View {
+    let item: HomeSwissMomentGalleryItem
+    let onTap: () -> Void
+
+    private let cardSize = CGSize(width: 148, height: 196)
+
+    var body: some View {
+        Button(action: onTap) {
+            Image(item.imageName)
+                .resizable()
+                .scaledToFill()
+                .frame(width: cardSize.width, height: cardSize.height)
+                .clipped()
+                .overlay(alignment: .bottom) {
+                    LinearGradient(
+                        colors: [.clear, .black.opacity(0.35), .black.opacity(0.78)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                    .frame(height: 96)
+                }
+                .overlay(alignment: .bottomLeading) {
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(item.title)
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundColor(.white)
+                            .lineLimit(1)
+                        Text(item.subtitle)
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(.white.opacity(0.88))
+                            .lineLimit(1)
+                    }
+                    .padding(.horizontal, 14)
+                    .padding(.bottom, 14)
+                    .frame(width: cardSize.width, alignment: .leading)
+                }
+                .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+                .shadow(color: Color.black.opacity(0.18), radius: 10, x: 0, y: 5)
+        }
+        .buttonStyle(ScaleButtonStyle(scaleAmount: 0.98))
+    }
+}
+
+private struct HomeFocusProgressRing: View {
+    enum Style {
+        case paper
+        case ink
+    }
+
+    let progress: CGFloat
+    let percent: Int
+    var style: Style = .paper
+
+    var body: some View {
+        ZStack {
+            Circle()
+                .stroke(trackColor, lineWidth: 7)
+            Circle()
+                .trim(from: 0, to: progress)
+                .stroke(
+                    Theme.Colors.primaryLight,
+                    style: StrokeStyle(lineWidth: 7, lineCap: .round)
+                )
+                .rotationEffect(.degrees(-90))
+            Text("\(percent)%")
+                .font(.system(size: 15, weight: .bold, design: .rounded))
+                .foregroundColor(labelColor)
+        }
+        .frame(width: 68, height: 68)
+    }
+
+    private var trackColor: Color {
+        switch style {
+        case .paper: Theme.Colors.primary.opacity(0.12)
+        case .ink: Color.white.opacity(0.10)
+        }
+    }
+
+    private var labelColor: Color {
+        switch style {
+        case .paper: Theme.Colors.textPrimary
+        case .ink: .white
+        }
     }
 }
 
@@ -1665,7 +2204,7 @@ private struct FeaturedNewsInlineCard: View {
             .padding(18)
             .background(
                 RoundedRectangle(cornerRadius: 22, style: .continuous)
-                    .fill(Theme.Colors.adaptiveCard)
+                    .fill(Theme.Colors.paperCard)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 22, style: .continuous)
@@ -1854,7 +2393,7 @@ private struct BentoLevelCard: View {
         ZStack {
             // Background
             RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .fill(Theme.Colors.adaptiveCard)
+                .fill(Theme.Colors.paperCard)
             
             HStack(spacing: 14) {
                 // Level ring
@@ -1947,7 +2486,7 @@ private struct BentoMiniCard: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .fill(Theme.Colors.adaptiveCard)
+                .fill(Theme.Colors.paperCard)
             
             VStack(spacing: 4) {
                 Image(systemName: icon)
@@ -4038,7 +4577,7 @@ struct GamificationLevelCard: View {
         }
         .background(
             RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .fill(Theme.Colors.adaptiveCard)
+                .fill(Theme.Colors.paperCard)
                 .overlay(
                     RoundedRectangle(cornerRadius: 24, style: .continuous)
                         .stroke(
@@ -4157,7 +4696,7 @@ struct BadgeChip: View {
         .padding(.vertical, 6)
         .background(
             Capsule()
-                .fill(Theme.Colors.adaptiveCard)
+                .fill(Theme.Colors.paperCard)
                 .overlay(
                     Capsule()
                         .stroke(badge.color.opacity(0.3), lineWidth: 1)
@@ -4529,5 +5068,4 @@ private struct KnowledgeMindMapView: View {
         .environmentObject(ThemeManager())
         .preferredColorScheme(.dark)
 }
-
 

@@ -1,20 +1,16 @@
-from __future__ import annotations
-
 import json
 import os
 from datetime import datetime, timezone
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import StreamingResponse
 import asyncio
 from pydantic import BaseModel
-from sqlalchemy.orm import Session
 
-from ..dependencies import CurrentUser
+from ..dependencies import CurrentUser, DBSession
 from ..core.database import db_session
 from ..models.user import User
-from ..models.subscription import Subscription, SubscriptionEvent
 from ..services import stripe_service
 
 router = APIRouter()
@@ -254,5 +250,3 @@ async def stripe_webhook(request: Request):
             return {"ok": True}
 
     return await to_thread(_handle_event)
-
-

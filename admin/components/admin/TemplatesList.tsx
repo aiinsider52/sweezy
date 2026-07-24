@@ -1,5 +1,5 @@
 "use client"
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import UIButton from '@/components/ui/button'
 import UISelect from '@/components/ui/select'
 import UIInput from '@/components/ui/input'
@@ -14,7 +14,7 @@ export default function TemplatesList() {
   const [editing, setEditing] = useState<Template | undefined>(undefined)
   const [status, setStatus] = useState<'all'|'published'|'draft'>('all')
 
-  async function load() {
+  const load = useCallback(async () => {
     setLoading(true)
     try {
       const params = new URLSearchParams()
@@ -25,8 +25,8 @@ export default function TemplatesList() {
       const data = await res.json().catch(()=>[])
       setItems(Array.isArray(data) ? data : [])
     } catch { setItems([]) } finally { setLoading(false) }
-  }
-  useEffect(() => { load() }, [status])
+  }, [status])
+  useEffect(() => { void load() }, [load])
 
   const filtered = useMemo(() => items.filter(t => (t.name + (t.category||'')).toLowerCase().includes(q.toLowerCase())), [items, q])
 
@@ -76,5 +76,4 @@ export default function TemplatesList() {
     </div>
   )
 }
-
 

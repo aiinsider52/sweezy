@@ -1,3 +1,4 @@
+import Combine
 import SwiftUI
 
 struct EmailVerificationSheet: View {
@@ -6,18 +7,23 @@ struct EmailVerificationSheet: View {
     @EnvironmentObject private var sessionManager: SessionManager
     @Environment(\.dismiss) private var dismiss
 
+    private let email: String
     private let initialName: String?
     private let onVerified: (() -> Void)?
 
-    @State private var email: String
-    @State private var code: String = ""
+    @State private var code = ""
     @State private var isLoading = false
     @State private var errorMessage: String?
     @State private var infoMessage: String?
     @State private var verificationComplete = false
+    @State private var resendAvailableAt = Date().addingTimeInterval(60)
+    @State private var resendSecondsRemaining = 60
+    @FocusState private var codeIsFocused: Bool
+
+    private let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
     init(initialEmail: String, initialName: String? = nil, onVerified: (() -> Void)? = nil) {
-        self._email = State(initialValue: initialEmail)
+        self.email = initialEmail.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         self.initialName = initialName
         self.onVerified = onVerified
     }
@@ -27,149 +33,153 @@ struct EmailVerificationSheet: View {
     }
 
     private var canSubmit: Bool {
-        !email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && sanitizedCode.count == 6
+        sanitizedCode.count == 6 && !isLoading
     }
 
     var body: some View {
         NavigationStack {
             ZStack {
-                Theme.Colors.darkBackground
-                    .ignoresSafeArea()
-
-                AuthAuroraBackground()
+                JourneyPhotoBackground(
+                    imageName: "cityhub-zurich-oldtown",
+                    blurRadius: 3,
+                    darkness: 0.76
+                )
 
                 ScrollView(showsIndicators: false) {
-                    VStack(spacing: 24) {
-                        headerSection
-                            .padding(.top, 28)
+                    VStack(alignment: .leading, spacing: 22) {
+                        topBar
 
                         if verificationComplete {
-                            successCard
+                            successContent
                         } else {
-                            verificationCard
+                            verificationContent
                         }
-
-                        Spacer(minLength: 40)
                     }
                     .padding(.horizontal, 20)
+                    .padding(.top, 10)
+                    .padding(.bottom, 40)
                 }
+                .scrollDismissesKeyboard(.interactively)
             }
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.title3)
-                            .foregroundStyle(.white.opacity(0.6))
-                    }
-                }
+            .toolbar(.hidden, for: .navigationBar)
+        }
+        .preferredColorScheme(.dark)
+        .interactiveDismissDisabled(isLoading)
+        .onAppear {
+            refreshResendCountdown()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
+                codeIsFocused = true
             }
+        }
+        .onReceive(timer) { _ in
+            refreshResendCountdown()
         }
         .onChange(of: code) { _, newValue in
             let filtered = String(newValue.filter(\.isNumber).prefix(6))
             if filtered != newValue {
                 code = filtered
             }
+            if errorMessage != nil {
+                errorMessage = nil
+            }
         }
     }
 
-    private var headerSection: some View {
-        VStack(spacing: 14) {
-            ZStack {
-                Circle()
-                    .fill(
-                        RadialGradient(
-                            colors: [Theme.Colors.primary.opacity(0.24), .clear],
-                            center: .center,
-                            startRadius: 0,
-                            endRadius: 70
-                        )
-                    )
-                    .frame(width: 140, height: 140)
-
-                Circle()
-                    .fill(
-                        LinearGradient(
-                            colors: [Theme.Colors.primary.opacity(0.3), Theme.Colors.primaryDark.opacity(0.2)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                    .frame(width: 90, height: 90)
-
-                Image(systemName: verificationComplete ? "checkmark.circle.fill" : "envelope.badge.shield.half.filled")
-                    .font(.system(size: 40))
-                    .foregroundStyle(
-                        LinearGradient(
-                            colors: verificationComplete ? [Theme.Colors.success, .white] : [Theme.Colors.primary, .white],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
+    private var topBar: some View {
+        HStack {
+            HStack(spacing: 8) {
+                Image(systemName: verificationComplete ? "checkmark.shield.fill" : "envelope.badge.shield.half.filled")
+                    .foregroundStyle(JourneyVisual.lime)
+                Text("auth.verify.step_label".localized)
+                    .font(.caption.weight(.bold))
+                    .tracking(1.2)
+                    .foregroundStyle(.white.opacity(0.72))
             }
 
-            Text(verificationComplete ? "auth.verify.success.title" : "auth.verify.title")
-                .font(.system(size: 28, weight: .bold))
-                .foregroundColor(.white)
+            Spacer()
 
-            Text(verificationComplete ? "auth.verify.success.subtitle" : "auth.verify.subtitle")
-                .font(.subheadline)
-                .foregroundColor(.white.opacity(0.72))
-                .multilineTextAlignment(.center)
+            Button(action: dismiss.callAsFunction) {
+                Image(systemName: "xmark")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .frame(width: 44, height: 44)
+                    .background(Color.black.opacity(0.48), in: Circle())
+                    .overlay(Circle().stroke(.white.opacity(0.18), lineWidth: 1))
+            }
+            .disabled(isLoading)
+            .accessibilityLabel("common.close".localized)
         }
     }
 
-    private var verificationCard: some View {
-        VStack(spacing: 18) {
+    private var verificationContent: some View {
+        VStack(alignment: .leading, spacing: 22) {
             VStack(alignment: .leading, spacing: 10) {
-                Text("auth.verify.email_label")
-                    .font(.caption.weight(.semibold))
-                    .foregroundColor(.white.opacity(0.65))
+                Text("auth.verify.editorial_title".localized)
+                    .font(.system(size: 38, weight: .bold, design: .rounded))
+                    .foregroundStyle(.white)
+                    .lineSpacing(-2)
+                    .fixedSize(horizontal: false, vertical: true)
 
+                Text("auth.verify.editorial_subtitle".localized)
+                    .font(.subheadline)
+                    .foregroundStyle(.white.opacity(0.7))
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            emailCard
+            codeCard
+        }
+    }
+
+    private var emailCard: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "envelope.fill")
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundStyle(.black)
+                .frame(width: 38, height: 38)
+                .background(JourneyVisual.lime, in: RoundedRectangle(cornerRadius: 11, style: .continuous))
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text("auth.verify.sent_to".localized)
+                    .font(.caption)
+                    .foregroundStyle(.white.opacity(0.52))
                 Text(email)
-                    .font(.headline)
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 14)
-                    .background(
-                        RoundedRectangle(cornerRadius: 14, style: .continuous)
-                            .fill(Color.white.opacity(0.08))
-                    )
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.white)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.72)
             }
 
-            VStack(alignment: .leading, spacing: 10) {
-                Text("auth.verify.code_label")
-                    .font(.caption.weight(.semibold))
-                    .foregroundColor(.white.opacity(0.65))
+            Spacer(minLength: 4)
 
-                TextField("auth.verify.code_placeholder", text: $code)
-                    .keyboardType(.numberPad)
-                    .textContentType(.oneTimeCode)
-                    .font(.system(size: 28, weight: .semibold, design: .monospaced))
-                    .foregroundColor(.white)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 16)
-                    .background(
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .fill(Color.white.opacity(0.08))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                    .stroke(canSubmit ? Theme.Colors.primary.opacity(0.5) : Color.white.opacity(0.16), lineWidth: 1)
-                            )
-                    )
-            }
-
-            Text("auth.verify.code_hint")
+            Image(systemName: "lock.fill")
                 .font(.caption)
-                .foregroundColor(.white.opacity(0.6))
-                .frame(maxWidth: .infinity, alignment: .leading)
+                .foregroundStyle(.white.opacity(0.4))
+        }
+        .padding(14)
+        .background(Color.black.opacity(0.66), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .stroke(.white.opacity(0.14), lineWidth: 1)
+        )
+    }
+
+    private var codeCard: some View {
+        VStack(alignment: .leading, spacing: 18) {
+            VStack(alignment: .leading, spacing: 5) {
+                Text("auth.verify.code_label".localized)
+                    .font(.headline)
+                    .foregroundStyle(.white)
+                Text("auth.verify.latest_code_hint".localized)
+                    .font(.caption)
+                    .foregroundStyle(.white.opacity(0.56))
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            otpField
 
             if let infoMessage {
-                feedbackRow(icon: "checkmark.circle.fill", color: .green, text: infoMessage)
+                feedbackRow(icon: "checkmark.circle.fill", color: JourneyVisual.lime, text: infoMessage)
             }
 
             if let errorMessage {
@@ -177,177 +187,248 @@ struct EmailVerificationSheet: View {
             }
 
             Button {
+                codeIsFocused = false
                 Task { await verifyEmail() }
             } label: {
                 HStack(spacing: 10) {
                     if isLoading {
-                        ProgressView()
-                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        ProgressView().tint(.black)
                     } else {
-                        Image(systemName: "checkmark.shield.fill")
-                        Text("auth.verify.confirm")
-                            .fontWeight(.semibold)
+                        Text("auth.verify.confirm".localized)
+                            .font(.headline)
+                        Image(systemName: "arrow.right")
+                            .font(.headline)
                     }
                 }
+                .foregroundStyle(.black)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 16)
-                .background(
-                    LinearGradient(
-                        colors: [Theme.Colors.primary, Theme.Colors.primaryDark],
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    )
-                )
-                .foregroundColor(.white)
-                .cornerRadius(16)
+                .frame(height: 56)
+                .background(JourneyVisual.lime, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
             }
-            .disabled(!canSubmit || isLoading)
-            .opacity(canSubmit ? 1 : 0.6)
+            .buttonStyle(.plain)
+            .disabled(!canSubmit)
+            .opacity(canSubmit ? 1 : 0.45)
+            .accessibilityIdentifier("auth.verify.submit")
 
             Button {
                 Task { await resendCode() }
             } label: {
-                Text("auth.verify.resend")
-                    .font(.subheadline.weight(.medium))
-                    .foregroundColor(Theme.Colors.primary)
+                HStack(spacing: 7) {
+                    Image(systemName: "arrow.clockwise")
+                    Text(resendButtonTitle)
+                }
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(resendSecondsRemaining == 0 ? JourneyVisual.lime : .white.opacity(0.46))
+                .frame(maxWidth: .infinity)
+                .frame(minHeight: 44)
             }
-            .disabled(isLoading)
+            .buttonStyle(.plain)
+            .disabled(isLoading || resendSecondsRemaining > 0)
+            .accessibilityIdentifier("auth.verify.resend")
+
+            HStack(alignment: .top, spacing: 8) {
+                Image(systemName: "info.circle.fill")
+                    .foregroundStyle(.white.opacity(0.48))
+                Text("auth.verify.resend_warning".localized)
+                    .font(.caption2)
+                    .foregroundStyle(.white.opacity(0.48))
+                    .fixedSize(horizontal: false, vertical: true)
+            }
         }
-        .padding(24)
-        .background(
+        .padding(18)
+        .background(Color.black.opacity(0.76), in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .overlay(
             RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .fill(.ultraThinMaterial.opacity(0.6))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 24, style: .continuous)
-                        .stroke(
-                            LinearGradient(
-                                colors: [Theme.Colors.primary.opacity(0.35), .white.opacity(0.08)],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            ),
-                            lineWidth: 1
-                        )
-                )
+                .stroke(.white.opacity(0.16), lineWidth: 1)
         )
+        .shadow(color: .black.opacity(0.4), radius: 24, y: 12)
     }
 
-    private var successCard: some View {
-        VStack(spacing: 18) {
-            Text("auth.verify.success.body")
-                .font(.subheadline)
-                .foregroundColor(.white.opacity(0.72))
-                .multilineTextAlignment(.center)
+    private var otpField: some View {
+        ZStack {
+            TextField("", text: $code)
+                .keyboardType(.numberPad)
+                .textContentType(.oneTimeCode)
+                .focused($codeIsFocused)
+                .foregroundStyle(.clear)
+                .tint(.clear)
+                .accessibilityLabel("auth.verify.code_label".localized)
+                .accessibilityHint("auth.verify.code_placeholder".localized)
+                .accessibilityIdentifier("auth.verify.code")
+
+            HStack(spacing: 7) {
+                ForEach(0..<6, id: \.self) { index in
+                    otpCell(at: index)
+                }
+            }
+            .allowsHitTesting(false)
+        }
+        .frame(height: 64)
+        .contentShape(Rectangle())
+        .onTapGesture { codeIsFocused = true }
+    }
+
+    private func otpCell(at index: Int) -> some View {
+        let characters = Array(sanitizedCode)
+        let hasValue = index < characters.count
+        let isCurrent = min(characters.count, 5) == index && codeIsFocused && characters.count < 6
+
+        return Text(hasValue ? String(characters[index]) : "")
+            .font(.system(size: 24, weight: .bold, design: .rounded))
+            .foregroundStyle(.white)
+            .frame(maxWidth: .infinity)
+            .frame(height: 58)
+            .background(Color.white.opacity(hasValue ? 0.1 : 0.055), in: RoundedRectangle(cornerRadius: 13, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 13, style: .continuous)
+                    .stroke(
+                        hasValue || isCurrent ? JourneyVisual.lime.opacity(0.82) : .white.opacity(0.12),
+                        lineWidth: hasValue || isCurrent ? 1.4 : 1
+                    )
+            )
+    }
+
+    private var successContent: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            Image(systemName: "checkmark")
+                .font(.system(size: 28, weight: .bold))
+                .foregroundStyle(.black)
+                .frame(width: 64, height: 64)
+                .background(JourneyVisual.lime, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+
+            Text("auth.verify.success.title".localized)
+                .font(.system(size: 38, weight: .bold, design: .rounded))
+                .foregroundStyle(.white)
+
+            Text("auth.verify.success.body".localized)
+                .font(.body)
+                .foregroundStyle(.white.opacity(0.7))
+                .fixedSize(horizontal: false, vertical: true)
 
             Button {
                 dismiss()
                 onVerified?()
             } label: {
-                HStack(spacing: 10) {
-                    Image(systemName: "arrow.right.circle.fill")
-                    Text("auth.verify.success.continue")
-                        .fontWeight(.semibold)
+                HStack {
+                    Text("auth.verify.success.continue".localized)
+                        .font(.headline)
+                    Spacer()
+                    Image(systemName: "arrow.right")
                 }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 16)
-                .background(
-                    LinearGradient(colors: [Theme.Colors.success, Theme.Colors.primary], startPoint: .leading, endPoint: .trailing)
-                )
-                .foregroundColor(.white)
-                .cornerRadius(16)
+                .foregroundStyle(.black)
+                .padding(.horizontal, 18)
+                .frame(height: 56)
+                .background(JourneyVisual.lime, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
             }
+            .buttonStyle(.plain)
         }
-        .padding(24)
-        .background(
+        .padding(20)
+        .background(Color.black.opacity(0.76), in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .overlay(
             RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .fill(.ultraThinMaterial.opacity(0.6))
+                .stroke(.white.opacity(0.16), lineWidth: 1)
         )
     }
 
     private func feedbackRow(icon: String, color: Color, text: String) -> some View {
-        HStack(spacing: 8) {
+        HStack(alignment: .top, spacing: 9) {
             Image(systemName: icon)
-                .foregroundColor(color)
+                .foregroundStyle(color)
             Text(text)
                 .font(.caption)
-                .foregroundColor(color)
+                .foregroundStyle(.white.opacity(0.82))
+                .fixedSize(horizontal: false, vertical: true)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(12)
+        .background(color.opacity(0.11), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+    }
+
+    private var resendButtonTitle: String {
+        guard resendSecondsRemaining > 0 else {
+            return "auth.verify.resend".localized
+        }
+        return String(format: "auth.verify.resend_countdown".localized, resendSecondsRemaining)
+    }
+
+    private func refreshResendCountdown() {
+        resendSecondsRemaining = max(0, Int(ceil(resendAvailableAt.timeIntervalSinceNow)))
+    }
+
+    private func resetResendCountdown() {
+        resendAvailableAt = Date().addingTimeInterval(60)
+        refreshResendCountdown()
     }
 
     private func verifyEmail() async {
+        guard canSubmit else { return }
         errorMessage = nil
         infoMessage = nil
         isLoading = true
 
         do {
-            let trimmedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines)
-            let tokens = try await APIClient.confirmEmailVerification(email: trimmedEmail, code: sanitizedCode)
-            try KeychainStore.save(tokens.access_token, for: "access_token")
-            try KeychainStore.save(tokens.refresh_token, for: "refresh_token")
-
-            let previousEmail = lockManager.userEmail
-            let resolvedName = resolvedDisplayName(for: trimmedEmail)
-            withAnimation(Theme.Animation.smooth) {
-                lockManager.userName = resolvedName ?? lockManager.userName
-                lockManager.userEmail = trimmedEmail
-                lockManager.isRegistered = true
-            }
-            if previousEmail != trimmedEmail {
-                appContainer.userStats.reset()
-                appContainer.gamification.resetForNewUser()
-            }
-
-            var profile = appContainer.userProfile ?? UserProfile()
-            if let resolvedName, !resolvedName.isEmpty {
-                profile.fullName = resolvedName
-            }
-            profile.email = trimmedEmail
-            profile.preferredLanguage = appContainer.currentLocale.identifier
-            appContainer.userProfile = profile
-            sessionManager.activateAuthenticatedSession(email: trimmedEmail, name: profile.fullName.isEmpty ? nil : profile.fullName)
-
-            await MainActor.run {
+            let tokens = try await APIClient.confirmEmailVerification(email: email, code: sanitizedCode)
+            try await MainActor.run {
+                try AuthSessionBootstrapper.finishAuthenticatedSession(
+                    email: email,
+                    name: resolvedDisplayName,
+                    tokens: tokens,
+                    appContainer: appContainer,
+                    lockManager: lockManager,
+                    sessionManager: sessionManager
+                )
                 isLoading = false
-                withAnimation(.spring(response: 0.4, dampingFraction: 0.82)) {
+                UINotificationFeedbackGenerator().notificationOccurred(.success)
+                withAnimation(.spring(response: 0.4, dampingFraction: 0.84)) {
                     verificationComplete = true
                 }
             }
         } catch {
             await MainActor.run {
                 isLoading = false
-                errorMessage = (error as NSError).localizedDescription
+                UINotificationFeedbackGenerator().notificationOccurred(.error)
+                errorMessage = AuthErrorPresenter.message(
+                    for: error,
+                    fallbackKey: "auth.verify.error.invalid_or_expired"
+                )
+                codeIsFocused = true
             }
         }
     }
 
     private func resendCode() async {
+        guard !isLoading, resendSecondsRemaining == 0 else { return }
         errorMessage = nil
         infoMessage = nil
         isLoading = true
 
         do {
-            let response = try await APIClient.requestEmailVerification(email: email.trimmingCharacters(in: .whitespacesAndNewlines))
+            _ = try await APIClient.requestEmailVerification(email: email)
             await MainActor.run {
                 isLoading = false
-                infoMessage = response.message ?? "auth.verify.resent".localized
+                code = ""
+                infoMessage = "auth.verify.resent".localized
+                resetResendCountdown()
+                codeIsFocused = true
             }
         } catch {
             await MainActor.run {
                 isLoading = false
-                errorMessage = (error as NSError).localizedDescription
+                errorMessage = AuthErrorPresenter.message(
+                    for: error,
+                    fallbackKey: "auth.verify.error.resend_failed"
+                )
             }
         }
     }
 
-    private func resolvedDisplayName(for email: String) -> String? {
+    private var resolvedDisplayName: String? {
         let trimmedInitialName = initialName?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        if !trimmedInitialName.isEmpty {
-            return trimmedInitialName
-        }
+        if !trimmedInitialName.isEmpty { return trimmedInitialName }
+
         let storedName = lockManager.userName.trimmingCharacters(in: .whitespacesAndNewlines)
-        if !storedName.isEmpty {
-            return storedName
-        }
+        if !storedName.isEmpty { return storedName }
+
         let localPart = email.split(separator: "@").first.map(String.init) ?? ""
         return localPart.isEmpty ? nil : localPart.capitalized
     }

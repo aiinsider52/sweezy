@@ -103,7 +103,8 @@ final class FirstWeekChecklistService: ObservableObject {
         }
     }
     
-    func scheduleReminders(using notificationService: any NotificationServiceProtocol) async {
+    func scheduleReminders(using notificationService: any NotificationServiceProtocol) async -> Bool {
+        var scheduledAny = false
         for idx in tasks.indices {
             // Cancel old
             tasks[idx].notificationIds.forEach { notificationService.cancelNotification(with: $0) }
@@ -117,10 +118,12 @@ final class FirstWeekChecklistService: ObservableObject {
             let id2 = "fw_\\(tasks[idx].id.uuidString)_h2"
             let title = "Наближається дедлайн"
             let body = tasks[idx].title
-            _ = await notificationService.scheduleReminder(id: id1, title: title, body: body, at: dayBefore)
-            _ = await notificationService.scheduleReminder(id: id2, title: title, body: body, at: twoHoursBefore)
+            let scheduledDayBefore = await notificationService.scheduleReminder(id: id1, title: title, body: body, at: dayBefore)
+            let scheduledTwoHoursBefore = await notificationService.scheduleReminder(id: id2, title: title, body: body, at: twoHoursBefore)
+            scheduledAny = scheduledAny || scheduledDayBefore || scheduledTwoHoursBefore
             tasks[idx].notificationIds = [id1, id2]
         }
+        return scheduledAny
     }
     
     private func load() {

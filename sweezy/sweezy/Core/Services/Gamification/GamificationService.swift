@@ -28,8 +28,27 @@ enum GamificationXP {
             return 15
         case .notificationEnabled:
             return 3
+        case .deadlineTracked:
+            return 15
+        case .expertQuestionAsked:
+            return 20
+        case .marketplaceContribution:
+            return 25
+        case .profileCompleted:
+            return 30
+        case .dailyGermanCompleted:
+            return 20
         }
     }
+}
+
+struct XPHistoryEntry: Identifiable, Codable, Equatable {
+    let id: String
+    let type: String
+    let title: String
+    let amount: Int
+    let timestamp: Date
+    let metadata: [String: String]
 }
 
 @MainActor
@@ -39,6 +58,7 @@ final class GamificationService: ObservableObject {
     @Published private(set) var lastAwardedXP: Int
     @Published private(set) var badges: [String] = []
     @Published private(set) var streakDays: Int
+    @Published private(set) var xpHistory: [XPHistoryEntry] = []
     
     // MARK: - Private state
     private var todayXP: Int
@@ -54,6 +74,7 @@ final class GamificationService: ObservableObject {
     private let kSeenKeys = "gam.seen_keys"
     private let kStreakDays = "gam.streak_days"
     private let kStreakLastDate = "gam.streak_last_date"
+    private let kXPHistory = "gam.xp_history.v1"
     
     // MARK: - Init
     convenience init() {
@@ -84,6 +105,10 @@ final class GamificationService: ObservableObject {
             self.lastStreakDate = last
         } else {
             self.lastStreakDate = nil
+        }
+        if let data = defaults.data(forKey: kXPHistory),
+           let decoded = try? JSONDecoder().decode([XPHistoryEntry].self, from: data) {
+            self.xpHistory = decoded
         }
         
         // Subscribe to events
@@ -155,6 +180,7 @@ final class GamificationService: ObservableObject {
         totalXP += award
         lastAwardedXP = award
         todayXP += award
+        recordHistory(for: event, award: award)
         rememberKey(event.idempotencyKey)
         persist()
         recalcBadges()
@@ -184,6 +210,9 @@ final class GamificationService: ObservableObject {
         let defaults = UserDefaults.standard
         defaults.set(totalXP, forKey: kTotalXP)
         defaults.set(todayXP, forKey: kTodayXP)
+        if let data = try? JSONEncoder().encode(xpHistory) {
+            defaults.set(data, forKey: kXPHistory)
+        }
         if streakDays > 0 {
             defaults.set(streakDays, forKey: kStreakDays)
         } else {
@@ -234,6 +263,50 @@ final class GamificationService: ObservableObject {
         
         badges = newBadges
     }
+
+    private func recordHistory(for event: GamEvent, award: Int) {
+        let entry = XPHistoryEntry(
+            id: event.idempotencyKey,
+            type: event.type.rawValue,
+            title: title(for: event.type, metadata: event.metadata),
+            amount: award,
+            timestamp: event.timestamp,
+            metadata: event.metadata
+        )
+        xpHistory.insert(entry, at: 0)
+        if xpHistory.count > 40 {
+            xpHistory = Array(xpHistory.prefix(40))
+        }
+    }
+
+    private func title(for type: GamEventType, metadata _: [String: String]) -> String {
+        switch type {
+        case .appDailyOpen:
+            return "passport.history.event.daily_open".localized
+        case .guideOpened:
+            return "passport.history.event.guide_opened".localized
+        case .guideReadCompleted:
+            return "passport.history.event.guide_completed".localized
+        case .checklistStepCompleted:
+            return "passport.history.event.checklist_step".localized
+        case .checklistCompleted:
+            return "passport.history.event.checklist_completed".localized
+        case .roadmapStageCompleted:
+            return "passport.history.event.roadmap_progress".localized
+        case .notificationEnabled:
+            return "passport.history.event.notifications_enabled".localized
+        case .deadlineTracked:
+            return "passport.history.event.deadline_tracked".localized
+        case .expertQuestionAsked:
+            return "passport.history.event.expert_question".localized
+        case .marketplaceContribution:
+            return "passport.history.event.community_contribution".localized
+        case .profileCompleted:
+            return "passport.history.event.profile_completed".localized
+        case .dailyGermanCompleted:
+            return "passport.history.event.daily_german_completed".localized
+        }
+    }
     
     private static func makeDayKey(_ date: Date) -> String {
         let comps = Calendar.current.dateComponents([.year, .month, .day], from: date)
@@ -258,6 +331,8 @@ final class GamificationService: ObservableObject {
         defaults.removeObject(forKey: kSeenKeys)
         defaults.removeObject(forKey: kStreakDays)
         defaults.removeObject(forKey: kStreakLastDate)
+        defaults.removeObject(forKey: kXPHistory)
+        xpHistory = []
     }
 }
 

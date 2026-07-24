@@ -3,7 +3,8 @@ import { serverFetch } from '@/lib/server'
 import UIInput from '@/components/ui/input'
 import UIButton from '@/components/ui/button'
 
-export default async function GlossaryPage({ searchParams }: any) {
+export default async function GlossaryPage(props: any) {
+  const searchParams = await props.searchParams;
   const q = searchParams?.q ? `?q=${encodeURIComponent(searchParams.q)}` : ''
   const res = await serverFetch(`/translations/glossary${q}`).catch(()=>null)
   const data = res && res.ok ? await res.json().catch(()=>[]) : []

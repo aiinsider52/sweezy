@@ -1,11 +1,9 @@
-from __future__ import annotations
-
-from fastapi import APIRouter, Query, HTTPException, status
+from fastapi import APIRouter, HTTPException, status
 from typing import List
 from datetime import datetime, timezone
 
 from ..dependencies import CurrentUser, DBSession
-from ..schemas.job import JobItem, JobSearchResponse, JobFavoriteIn, JobFavoriteOut, JobSearchEventOut
+from ..schemas.job import JobSearchResponse, JobFavoriteIn, JobFavoriteOut, JobSearchEventOut
 from ..services.jobs_aggregator import search_jobs
 from ..models.job import JobFavorite, JobSearchEvent
 
@@ -126,5 +124,4 @@ def remove_favorite(favorite_id: str, user: CurrentUser, db: DBSession):
     db.delete(fav)
     db.commit()
     return
-
 

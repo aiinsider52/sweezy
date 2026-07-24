@@ -67,6 +67,7 @@ struct AppointmentsView: View {
             }
             .featureOnboarding(.appointments)
         }
+        .journeyScreen(.city, darkness: 0.66)
     }
     
     private var appointmentsListSection: some View {
@@ -273,6 +274,7 @@ struct AddAppointmentView: View {
                     TextField("Location name", text: $locationName)
                 }
             }
+            .journeyForm()
             .navigationTitle(existingAppointment == nil ? "appointments.add".localized : "appointments.edit".localized)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -300,6 +302,7 @@ struct AddAppointmentView: View {
                 }
             }
         }
+        .journeyScreen(.city, darkness: 0.7)
     }
     
     private func saveAppointment() {

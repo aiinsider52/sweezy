@@ -19,6 +19,9 @@ class AppContainer: ObservableObject {
     let localizationService: any LocalizationServiceProtocol
     let gamification: GamificationService
     let analytics: AnalyticsService
+    let lifeAdmin: LifeAdminService
+    let savedItems: SavedItemsService
+    let chatStore: ChatStore
     lazy var roadmapSync: RoadmapSyncService = RoadmapSyncService(app: self)
     let telemetry: TelemetryService
     lazy var performanceMonitor: PerformanceMonitorService = PerformanceMonitorService(telemetry: telemetry)
@@ -123,6 +126,9 @@ class AppContainer: ObservableObject {
         self.localizationService = LocalizationService()
         self.gamification = GamificationService()
         self.analytics = AnalyticsService()
+        self.lifeAdmin = LifeAdminService()
+        self.savedItems = SavedItemsService()
+        self.chatStore = ChatStore()
         self.telemetry = TelemetryService()
         
         // Configure a modest URLCache to improve offline behavior
@@ -131,7 +137,19 @@ class AppContainer: ObservableObject {
         URLCache.shared = URLCache(memoryCapacity: mem, diskCapacity: disk)
         
         // Initialize state from UserDefaults (fast)
-        if ProcessInfo.processInfo.arguments.contains("--reset-onboarding") {
+        let launchArguments = ProcessInfo.processInfo.arguments
+        if launchArguments.contains("--reset-ui-test-state") {
+            [
+                "onboarding_completed",
+                "initial_auth_choice_completed",
+                "pending_initial_auth_entry",
+                "selected_locale",
+                "preferredLanguage"
+            ].forEach(UserDefaults.standard.removeObject(forKey:))
+            KeychainStore.delete("access_token")
+            KeychainStore.delete("refresh_token")
+            KeychainStore.delete("user_id")
+        } else if launchArguments.contains("--reset-onboarding") {
             UserDefaults.standard.removeObject(forKey: "onboarding_completed")
         }
         self.isOnboardingCompleted = UserDefaults.standard.bool(forKey: "onboarding_completed")
@@ -149,6 +167,7 @@ class AppContainer: ObservableObject {
         
         // Load user profile (fast - just UserDefaults read)
         loadUserProfileForCurrentScope()
+        lifeAdmin.prepareDocuments(for: userProfile)
         
         setupBindings()
         
@@ -168,6 +187,15 @@ class AppContainer: ObservableObject {
     }
     
     private func setupBindings() {
+        // Forward nested store changes so screens observing AppContainer refresh immediately.
+        lifeAdmin.objectWillChange
+            .sink { [weak self] _ in self?.objectWillChange.send() }
+            .store(in: &cancellables)
+
+        savedItems.objectWillChange
+            .sink { [weak self] _ in self?.objectWillChange.send() }
+            .store(in: &cancellables)
+
         // Save locale changes
         $currentLocale
             .dropFirst() // Skip initial value
@@ -190,6 +218,7 @@ class AppContainer: ObservableObject {
                 } else {
                     UserDefaults.standard.removeObject(forKey: AccountScopedStorage.userProfileKey)
                 }
+                self.lifeAdmin.prepareDocuments(for: profile)
             }
             .store(in: &cancellables)
 

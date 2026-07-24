@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from typing import Dict, Any, Optional
 
 from fastapi import APIRouter, HTTPException, status
@@ -28,5 +26,4 @@ def log_paywall_event(payload: Dict[str, Any], db: DBSession, user: Optional[Cur
         db.rollback()
         raise HTTPException(status_code=500, detail="Failed to log")
     return
-
 

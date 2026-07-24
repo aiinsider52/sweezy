@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Dict, Any
+from typing import Dict
 from urllib.parse import urlparse, urljoin
 import time
 
@@ -62,10 +62,12 @@ class RSSImporter:
         def meta(prop=None, name=None):
           if prop:
             m = _re.search(rf'<meta[^>]+property=["\']{_re.escape(prop)}["\'][^>]*content=["\']([^"\']+)["\']', html, flags=_re.I)
-            if m: return m.group(1)
+            if m:
+              return m.group(1)
           if name:
             m = _re.search(rf'<meta[^>]+name=["\']{_re.escape(name)}["\'][^>]*content=["\']([^"\']+)["\']', html, flags=_re.I)
-            if m: return m.group(1)
+            if m:
+              return m.group(1)
           return None
         title = meta(prop="og:title") or meta(name="title")
         if not title:
@@ -108,9 +110,11 @@ class RSSImporter:
         }
         existing = db.query(News).filter(News.url == feed_url).first()
         if existing:
-          NewsService.update(db, existing, **data); updated += 1
+          NewsService.update(db, existing, **data)
+          updated += 1
         else:
-          NewsService.create(db, **data); created += 1
+          NewsService.create(db, **data)
+          created += 1
         client.close()
         return {"created": created, "updated": updated, "skipped": skipped}
       except Exception:
@@ -164,9 +168,11 @@ class RSSImporter:
           "import_reference_id": import_reference_id,
         }
         if existing:
-          NewsService.update(db, existing, **data); updated += 1
+          NewsService.update(db, existing, **data)
+          updated += 1
         else:
-          NewsService.create(db, **data); created += 1
+          NewsService.create(db, **data)
+          created += 1
       except Exception:
         skipped += 1
         continue
@@ -188,5 +194,4 @@ class RSSImporter:
     db.add(feed)
     db.commit()
     return res
-
 

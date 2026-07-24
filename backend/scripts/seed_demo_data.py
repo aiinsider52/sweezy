@@ -9,8 +9,8 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from backend.app.core.database import Base, SessionLocal, engine
-from backend.app.models import Appointment, Checklist, Guide, Template
+from backend.app.core.database import Base, SessionLocal, engine  # noqa: E402
+from backend.app.models import Appointment, Checklist, Guide, Template  # noqa: E402
 
 
 def run() -> None:
@@ -50,5 +50,4 @@ def run() -> None:
 
 if __name__ == "__main__":
     run()
-
 

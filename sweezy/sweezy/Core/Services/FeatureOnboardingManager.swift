@@ -34,23 +34,7 @@ enum OnboardingFeature: String, CaseIterable {
     
     /// Current onboarding version (increment to trigger "What's New")
     var currentVersion: Int {
-        switch self {
-        case .dovidnyk: return 1
-        case .calculator: return 1
-        case .roadmap: return 1
-        case .checklists: return 1
-        case .guides: return 1
-        case .map: return 1
-        case .marketplace: return 1
-        case .jobs: return 1
-        case .templates: return 1
-        case .settings: return 1
-        case .appointments: return 1
-        case .subscription: return 1
-        case .news: return 1
-        case .gamification: return 1
-        case .cvBuilder: return 1
-        }
+        2
     }
 }
 
@@ -65,6 +49,11 @@ final class FeatureOnboardingManager: ObservableObject {
     
     /// Check if onboarding should be shown for a feature
     func shouldShowOnboarding(for feature: OnboardingFeature) -> Bool {
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--skip-feature-onboarding") {
+            return false
+        }
+        #endif
         let seenVersion = defaults.integer(forKey: feature.versionKey)
         return seenVersion < feature.currentVersion
     }

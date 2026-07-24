@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 import uuid
 
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from ..core.security import get_password_hash, verify_password
@@ -11,6 +12,10 @@ from ..models.user import User
 
 
 class UserService:
+    @staticmethod
+    def get_by_id(db: Session, user_id: str) -> User | None:
+        return db.get(User, user_id)
+
     @staticmethod
     def get_by_email(db: Session, email: str) -> User | None:
         return db.query(User).filter(User.email == email.lower()).one_or_none()
@@ -124,26 +129,99 @@ class UserService:
         - remove related user data rows where we store user_id
         - anonymize email and password to revoke all existing tokens
         """
-        # Best-effort cleanup of related tables
-        try:
-            from ..models.analytics import PaywallEvent
-            db.query(PaywallEvent).filter(PaywallEvent.user_id == user.id).delete(synchronize_session=False)
-        except Exception:
-            pass
+        from ..models.analytics import PaywallEvent
+        from ..models.auth_email_code import AuthEmailCode
+        from ..models.chat import (
+            ChatConversation,
+            ChatMessage,
+            ChatMessageReport,
+            ChatParticipant,
+            MarketplaceReview,
+            NotificationOutbox,
+            PushDevice,
+        )
+        from ..models.event_listing import EventListing, EventReport
+        from ..models.job import JobFavorite
+        from ..models.marketplace import MarketplaceBlock, MarketplaceReport, ServiceListing
+        from ..models.subscription import Subscription, SubscriptionEvent
 
-        try:
-            from ..models.subscription import Subscription, SubscriptionEvent
-            db.query(Subscription).filter(Subscription.user_id == user.id).delete(synchronize_session=False)
-            db.query(SubscriptionEvent).filter(SubscriptionEvent.user_id == user.id).delete(synchronize_session=False)
-        except Exception:
-            pass
+        user_id = user.id
 
-        try:
-            from ..models.job import JobFavorite
-            # JobFavorite.user_id is UUID in DB, while User.id is stored as a UUID string.
-            db.query(JobFavorite).filter(JobFavorite.user_id == uuid.UUID(user.id)).delete(synchronize_session=False)
-        except Exception:
-            pass
+        def delete_conversations(conversation_ids: list[str]) -> None:
+            if not conversation_ids:
+                return
+            message_ids = [
+                row[0]
+                for row in db.query(ChatMessage.id)
+                .filter(ChatMessage.conversation_id.in_(conversation_ids))
+                .all()
+            ]
+            if message_ids:
+                db.query(ChatMessageReport).filter(ChatMessageReport.message_id.in_(message_ids)).delete(
+                    synchronize_session=False
+                )
+            db.query(MarketplaceReview).filter(MarketplaceReview.conversation_id.in_(conversation_ids)).delete(
+                synchronize_session=False
+            )
+            db.query(ChatMessage).filter(ChatMessage.conversation_id.in_(conversation_ids)).delete(
+                synchronize_session=False
+            )
+            db.query(ChatParticipant).filter(ChatParticipant.conversation_id.in_(conversation_ids)).delete(
+                synchronize_session=False
+            )
+            db.query(ChatConversation).filter(ChatConversation.id.in_(conversation_ids)).delete(
+                synchronize_session=False
+            )
+
+        authored_listing_ids = [
+            row[0] for row in db.query(ServiceListing.id).filter(ServiceListing.author_id == user_id).all()
+        ]
+        conversation_query = db.query(ChatConversation.id).filter(
+            or_(ChatConversation.buyer_id == user_id, ChatConversation.seller_id == user_id)
+        )
+        if authored_listing_ids:
+            conversation_query = conversation_query.union(
+                db.query(ChatConversation.id).filter(ChatConversation.listing_id.in_(authored_listing_ids))
+            )
+        delete_conversations(list(dict.fromkeys(row[0] for row in conversation_query.all())))
+
+        db.query(ChatMessageReport).filter(ChatMessageReport.reporter_id == user_id).delete(synchronize_session=False)
+        db.query(ChatMessageReport).filter(ChatMessageReport.resolved_by == user_id).update(
+            {ChatMessageReport.resolved_by: None}, synchronize_session=False
+        )
+        db.query(MarketplaceReview).filter(
+            or_(MarketplaceReview.reviewer_id == user_id, MarketplaceReview.reviewed_user_id == user_id)
+        ).delete(synchronize_session=False)
+        db.query(PushDevice).filter(PushDevice.user_id == user_id).delete(synchronize_session=False)
+        db.query(NotificationOutbox).filter(NotificationOutbox.recipient_id == user_id).delete(synchronize_session=False)
+
+        db.query(MarketplaceReport).filter(MarketplaceReport.reporter_id == user_id).delete(synchronize_session=False)
+        db.query(MarketplaceBlock).filter(
+            or_(MarketplaceBlock.user_id == user_id, MarketplaceBlock.blocked_author_id == user_id)
+        ).delete(synchronize_session=False)
+        if authored_listing_ids:
+            db.query(MarketplaceReport).filter(MarketplaceReport.listing_id.in_(authored_listing_ids)).delete(
+                synchronize_session=False
+            )
+            db.query(ServiceListing).filter(ServiceListing.id.in_(authored_listing_ids)).delete(
+                synchronize_session=False
+            )
+
+        authored_event_ids = [
+            row[0] for row in db.query(EventListing.id).filter(EventListing.author_id == user_id).all()
+        ]
+        db.query(EventReport).filter(EventReport.reporter_id == user_id).delete(synchronize_session=False)
+        if authored_event_ids:
+            db.query(EventReport).filter(EventReport.event_id.in_(authored_event_ids)).delete(synchronize_session=False)
+            db.query(EventListing).filter(EventListing.id.in_(authored_event_ids)).delete(synchronize_session=False)
+
+        db.query(AuthEmailCode).filter(
+            or_(AuthEmailCode.user_id == user_id, AuthEmailCode.email == user.email.lower())
+        ).delete(synchronize_session=False)
+        db.query(PaywallEvent).filter(PaywallEvent.user_id == user_id).delete(synchronize_session=False)
+        db.query(Subscription).filter(Subscription.user_id == user_id).delete(synchronize_session=False)
+        db.query(SubscriptionEvent).filter(SubscriptionEvent.user_id == user_id).delete(synchronize_session=False)
+        db.query(JobFavorite).filter(JobFavorite.user_id == uuid.UUID(user_id)).delete(synchronize_session=False)
 
         # Anonymize + deactivate
         user.is_active = False
@@ -234,4 +312,3 @@ def seed_demo_user(db: Session) -> None:
     if updated:
         db.add(user)
         db.commit()
-

@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from ..models import Guide
 from ..schemas import GuideCreate, GuideUpdate
+from .official_sources import validate_publishable_source
 
 
 class GuideService:
@@ -35,6 +36,13 @@ class GuideService:
 
     @staticmethod
     def create(db: Session, data: GuideCreate) -> Guide:
+        validate_publishable_source(
+            is_published=data.is_published,
+            status=data.status,
+            source_url=data.source_url,
+            source_title=data.source_title,
+            verified_at=data.verified_at,
+        )
         obj = Guide(**data.model_dump())
         db.add(obj)
         db.commit()
@@ -43,7 +51,15 @@ class GuideService:
 
     @staticmethod
     def update(db: Session, guide: Guide, data: GuideUpdate) -> Guide:
-        for key, value in data.model_dump(exclude_unset=True).items():
+        changes = data.model_dump(exclude_unset=True)
+        validate_publishable_source(
+            is_published=changes.get("is_published", guide.is_published),
+            status=changes.get("status", guide.status),
+            source_url=changes.get("source_url", guide.source_url),
+            source_title=changes.get("source_title", guide.source_title),
+            verified_at=changes.get("verified_at", guide.verified_at),
+        )
+        for key, value in changes.items():
             setattr(guide, key, value)
         db.add(guide)
         db.commit()
@@ -54,5 +70,4 @@ class GuideService:
     def delete(db: Session, guide: Guide) -> None:
         db.delete(guide)
         db.commit()
-
 

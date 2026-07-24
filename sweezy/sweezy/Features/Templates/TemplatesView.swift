@@ -45,7 +45,7 @@ struct TemplatesView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                AdaptivePageBackground()
+                JourneyPhotoBackground(imageName: JourneyBackdrop.city.rawValue, blurRadius: 7, darkness: 0.68)
                 
                 VStack(spacing: 0) {
                     headerSection
@@ -73,6 +73,7 @@ struct TemplatesView: View {
             }
             .featureOnboarding(.templates)
         }
+        .journeyScreen(.city, darkness: 0.68)
     }
     
     // MARK: - Header Section
@@ -392,7 +393,7 @@ struct TemplateDetailView: View {
     
     var body: some View {
         ZStack {
-            Theme.Colors.primaryBackground.ignoresSafeArea()
+            JourneyPhotoBackground(imageName: JourneyBackdrop.city.rawValue, blurRadius: 7, darkness: 0.72)
             
         ScrollView {
             VStack(alignment: .leading, spacing: Theme.Spacing.lg) {
@@ -409,6 +410,7 @@ struct TemplateDetailView: View {
         }
         .navigationTitle(template.title)
         .navigationBarTitleDisplayMode(.inline)
+        .journeyScreen(.city, darkness: 0.72)
         .sheet(isPresented: $showingPreview) {
             DocumentPreviewView(
                 baseTemplate: template,
@@ -755,7 +757,7 @@ struct DocumentPreviewView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Theme.Colors.primaryBackground.ignoresSafeArea()
+                JourneyPhotoBackground(imageName: JourneyBackdrop.city.rawValue, blurRadius: 8, darkness: 0.76)
                 
             ScrollView {
                 VStack(alignment: .leading, spacing: Theme.Spacing.md) {
@@ -829,6 +831,7 @@ struct DocumentPreviewView: View {
                 }
             }
         }
+        .journeyScreen(.city, darkness: 0.76)
     }
     
     // MARK: - Derived content

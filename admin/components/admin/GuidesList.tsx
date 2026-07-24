@@ -1,11 +1,11 @@
 "use client"
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import UIButton from '@/components/ui/button'
 import UISelect from '@/components/ui/select'
 import UIInput from '@/components/ui/input'
 import GuideEditorDialog from './GuideEditorDialog'
 
-type Guide = { id: string; title: string; slug: string; category?: string; description?: string; is_published?: boolean; status?: string }
+type Guide = { id: string; title: string; slug: string; category?: string; description?: string; is_published?: boolean; status?: string; source_url?: string; source_title?: string; verified_at?: string }
 
 export default function GuidesList() {
   const [items, setItems] = useState<Guide[]>([])
@@ -14,7 +14,7 @@ export default function GuidesList() {
   const [editing, setEditing] = useState<Guide | undefined>(undefined)
   const [status, setStatus] = useState<'all'|'published'|'draft'>('all')
 
-  async function load() {
+  const load = useCallback(async () => {
     setLoading(true)
     try {
       const params = new URLSearchParams()
@@ -25,9 +25,9 @@ export default function GuidesList() {
       const data = await res.json().catch(()=>[])
       setItems(Array.isArray(data) ? data : [])
     } catch { setItems([]) } finally { setLoading(false) }
-  }
+  }, [status])
 
-  useEffect(() => { load() }, [status])
+  useEffect(() => { void load() }, [load])
 
   const filtered = useMemo(() => items.filter(g => (g.title + g.slug + (g.category||''))
     .toLowerCase().includes(q.toLowerCase())), [items, q])
@@ -85,5 +85,3 @@ export default function GuidesList() {
     </div>
   )
 }
-
-

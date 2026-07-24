@@ -1,5 +1,5 @@
-from fastapi import APIRouter, Response
-from fastapi.responses import HTMLResponse, PlainTextResponse, RedirectResponse
+from fastapi import APIRouter
+from fastapi.responses import HTMLResponse
 
 router = APIRouter(tags=["public"])
 

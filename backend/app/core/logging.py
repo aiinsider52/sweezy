@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 """
 Structured logging configuration for the backend.
 
@@ -10,6 +8,8 @@ request‑scoped context (request_id, path, method, etc.) via
 All logs are emitted as single‑line JSON to stdout so that Render (or any
 other host) can aggregate and search them easily.
 """
+
+from __future__ import annotations
 
 from typing import Any
 import logging
@@ -57,6 +57,5 @@ def get_logger(**kwargs: Any) -> structlog.BoundLogger:
     Convenience accessor for the shared structlog logger.
     """
     return structlog.get_logger(**kwargs)
-
 
 

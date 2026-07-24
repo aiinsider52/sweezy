@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from ..models import Checklist
 from ..schemas import ChecklistCreate, ChecklistUpdate
+from .official_sources import validate_publishable_source
 
 
 class ChecklistService:
@@ -26,6 +27,13 @@ class ChecklistService:
 
     @staticmethod
     def create(db: Session, data: ChecklistCreate) -> Checklist:
+        validate_publishable_source(
+            is_published=data.is_published,
+            status=data.status,
+            source_url=data.source_url,
+            source_title=data.source_title,
+            verified_at=data.verified_at,
+        )
         obj = Checklist(**data.model_dump())
         db.add(obj)
         db.commit()
@@ -34,7 +42,15 @@ class ChecklistService:
 
     @staticmethod
     def update(db: Session, checklist: Checklist, data: ChecklistUpdate) -> Checklist:
-        for key, value in data.model_dump(exclude_unset=True).items():
+        changes = data.model_dump(exclude_unset=True)
+        validate_publishable_source(
+            is_published=changes.get("is_published", checklist.is_published),
+            status=changes.get("status", checklist.status),
+            source_url=changes.get("source_url", checklist.source_url),
+            source_title=changes.get("source_title", checklist.source_title),
+            verified_at=changes.get("verified_at", checklist.verified_at),
+        )
+        for key, value in changes.items():
             setattr(checklist, key, value)
         db.add(checklist)
         db.commit()
@@ -45,5 +61,4 @@ class ChecklistService:
     def delete(db: Session, checklist: Checklist) -> None:
         db.delete(checklist)
         db.commit()
-
 

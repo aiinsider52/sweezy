@@ -60,7 +60,7 @@ struct PrivacyPolicyView: View {
                 }
                 .padding(.vertical, Theme.Spacing.xl)
             }
-            .background(Theme.Colors.primaryBackground)
+            .background(Color.clear)
             .navigationTitle("privacy.title".localized)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -69,6 +69,7 @@ struct PrivacyPolicyView: View {
                 }
             }
         }
+        .journeyScreen(.city, darkness: 0.7)
     }
     
     private func formattedDate(_ date: Date) -> String {
@@ -93,8 +94,10 @@ private struct PrivacySection: View {
                 .foregroundColor(Theme.Colors.textSecondary)
         }
         .padding(.horizontal, Theme.Spacing.md)
+        .padding(.vertical, Theme.Spacing.md)
+        .journeyCard(cornerRadius: 18)
+        .padding(.horizontal, Theme.Spacing.md)
     }
 }
-
 
 

@@ -35,7 +35,7 @@ struct EditEventView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                AdaptivePageBackground()
+                JourneyPhotoBackground(imageName: JourneyBackdrop.city.rawValue, blurRadius: 7, darkness: 0.72)
 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 18) {
@@ -104,7 +104,7 @@ struct EditEventView: View {
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 15)
                             .background(Theme.Colors.primary)
-                            .foregroundColor(.white)
+                            .foregroundColor(Theme.Colors.textOnPrimary)
                             .cornerRadius(16)
                         }
                     }
@@ -129,6 +129,7 @@ struct EditEventView: View {
                 Text(errorMessage ?? "")
             }
         }
+        .journeyScreen(.city, darkness: 0.72)
     }
 
     private func editorCard<Content: View>(title: String, icon: String, @ViewBuilder content: () -> Content) -> some View {

@@ -53,9 +53,7 @@ struct OnboardingViewRedesigned: View {
     
     var body: some View {
         ZStack {
-                JourneyPhotoBackground(imageName: JourneyBackdrop.alpine.rawValue, blurRadius: 2, darkness: 0.5)
-                // Full-screen paged content
-                TabView(selection: $currentPage) {
+            TabView(selection: $currentPage) {
                     OnboardingV2PageView(page: introPages[0])
                         .tag(0)
                     // Language picker page
@@ -91,104 +89,120 @@ struct OnboardingViewRedesigned: View {
                     SuccessPageView()
                         .tag(totalPages - 1)
                 }
-                .tabViewStyle(.page(indexDisplayMode: .never))
-                .ignoresSafeArea()
+            .tabViewStyle(.page(indexDisplayMode: .never))
+            .ignoresSafeArea()
             
-            // Top controls (only Skip on the right)
             VStack {
                 HStack {
+                    HStack(spacing: 8) {
+                        Circle()
+                            .fill(JourneyVisual.lime)
+                            .frame(width: 9, height: 9)
+                        Text("SWEEZY")
+                            .font(.system(size: 12, weight: .bold))
+                            .tracking(1.5)
+                            .foregroundStyle(.white)
+                    }
+                    .padding(.horizontal, 14)
+                    .frame(height: 38)
+                    .background(Color.black.opacity(0.46))
+                    .background(.ultraThinMaterial.opacity(0.45))
+                    .clipShape(Capsule())
+                    .overlay(Capsule().stroke(Color.white.opacity(0.22), lineWidth: 1))
+
                     Spacer()
 
-                    // Skip button (only on non-final pages)
                     if currentPage < totalPages - 1 {
                         Button(action: completeOnboarding) {
-                            Text(LocalizedStringKey("onboarding.skip"))
-                                .font(Theme.Typography.subheadline)
-                                .fontWeight(.medium)
-                                .foregroundColor(.white)
-                                .padding(.horizontal, Theme.Spacing.md)
-                                .padding(.vertical, Theme.Spacing.sm)
+                            HStack(spacing: 7) {
+                                Text(LocalizedStringKey("onboarding.skip"))
+                                Image(systemName: "arrow.right")
+                                    .font(.system(size: 11, weight: .bold))
+                            }
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundColor(.white.opacity(0.9))
+                            .padding(.horizontal, 15)
+                            .frame(height: 38)
+                            .background(Color.black.opacity(0.46))
+                            .background(.ultraThinMaterial.opacity(0.45))
+                            .clipShape(Capsule())
+                            .overlay(Capsule().stroke(Color.white.opacity(0.22), lineWidth: 1))
                         }
                         .accessibilityIdentifier("onboarding.skipButton")
                     }
                 }
-                .padding(.horizontal, Theme.Spacing.lg)
-                .padding(.top, Theme.Spacing.xl)
+                .padding(.horizontal, 18)
+                .padding(.top, 10)
                 
                 Spacer()
             }
             
-            // Bottom controls
-            VStack {
-                Spacer()
-                
-                // Page indicator
-                HStack(spacing: 8) {
-                    ForEach(0..<totalPages, id: \.self) { index in
-                        Capsule()
-                            .fill(index == currentPage ? Color.white : Color.white.opacity(0.3))
-                            .frame(width: index == currentPage ? 32 : 8, height: 8)
-                            .animation(Theme.Animation.smooth, value: currentPage)
-                    }
-                }
-                .accessibilityLabel("Step \(currentPage + 1) of \(totalPages)")
-                .padding(.bottom, Theme.Spacing.lg)
-                
-                // Navigation buttons
-                HStack(spacing: Theme.Spacing.md) {
-                    // Back button (only if not first page)
-                    if currentPage > 0 {
-                        Button(action: goBack) {
-                            HStack {
-                                Image(systemName: "chevron.left")
-                                    .font(.system(size: 16, weight: .semibold))
-                                Text(LocalizedStringKey("common.back"))
-                                    .font(Theme.Typography.body)
-                                    .fontWeight(.semibold)
+            if currentPage != totalPages - 2 {
+                VStack {
+                    Spacer()
+
+                    VStack(spacing: 13) {
+                        HStack(spacing: 10) {
+                            Text(String(format: "%d / %d", currentPage + 1, totalPages))
+                                .font(.system(size: 11, weight: .bold, design: .monospaced))
+                                .foregroundStyle(.white.opacity(0.64))
+                            GeometryReader { geometry in
+                                ZStack(alignment: .leading) {
+                                    Capsule().fill(Color.white.opacity(0.14))
+                                    Capsule()
+                                        .fill(JourneyVisual.lime)
+                                        .frame(width: geometry.size.width * CGFloat(currentPage + 1) / CGFloat(totalPages))
+                                }
                             }
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, Theme.Spacing.md)
-                            .background(
-                                Capsule()
-                                    .fill(Color.white.opacity(0.18))
-                            )
+                            .frame(height: 4)
                         }
-                        .accessibilityIdentifier("onboarding.backButton")
-                        .transition(.move(edge: .leading).combined(with: .opacity))
-                    }
-                    
-                    // Next/Get Started button
-                    Button(action: goNext) {
-                        HStack {
-                            Text(LocalizedStringKey(currentPage == totalPages - 1 ? "onboarding.get_started" : "common.next"))
-                            .font(Theme.Typography.body)
-                            .fontWeight(.semibold)
-                            
-                            if currentPage < totalPages - 1 {
-                                Image(systemName: "chevron.right")
-                                    .font(.system(size: 16, weight: .semibold))
-                            } else {
-                                Image(systemName: "arrow.right")
-                                    .font(.system(size: 16, weight: .semibold))
+                        .accessibilityLabel("Step \(currentPage + 1) of \(totalPages)")
+
+                        HStack(spacing: 10) {
+                            if currentPage > 0 {
+                                Button(action: goBack) {
+                                    Image(systemName: "chevron.left")
+                                        .font(.system(size: 17, weight: .bold))
+                                        .foregroundColor(.white)
+                                        .frame(width: 52, height: 52)
+                                        .background(Color.white.opacity(0.09))
+                                        .clipShape(Circle())
+                                        .overlay(Circle().stroke(Color.white.opacity(0.18), lineWidth: 1))
+                                }
+                                .accessibilityLabel(Text(LocalizedStringKey("common.back")))
+                                .accessibilityIdentifier("onboarding.backButton")
                             }
+
+                            Button(action: goNext) {
+                                HStack(spacing: 10) {
+                                    Text(LocalizedStringKey(currentPage == totalPages - 1 ? "onboarding.get_started" : "common.next"))
+                                    Image(systemName: "arrow.right")
+                                        .font(.system(size: 14, weight: .bold))
+                                }
+                                .font(.system(size: 16, weight: .bold))
+                                .foregroundColor(.black)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 52)
+                                .background(JourneyVisual.lime)
+                                .clipShape(Capsule())
+                                .shadow(color: JourneyVisual.lime.opacity(0.22), radius: 18, y: 8)
+                            }
+                            .accessibilityIdentifier(currentPage == totalPages - 1 ? "onboarding.getStartedButton" : "onboarding.nextButton")
                         }
-                        .foregroundColor(Theme.Colors.primary)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, Theme.Spacing.md)
-                        .background(
-                            Capsule()
-                                .fill(Color.white)
-                                .shadow(color: Color.black.opacity(0.15), radius: 12, x: 0, y: 4)
-                        )
                     }
-                    .accessibilityIdentifier(currentPage == totalPages - 1 ? "onboarding.getStartedButton" : "onboarding.nextButton")
+                    .padding(14)
+                    .background(.ultraThinMaterial.opacity(0.78))
+                    .background(Color.black.opacity(0.60))
+                    .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 28, style: .continuous).stroke(Color.white.opacity(0.18), lineWidth: 1))
+                    .shadow(color: .black.opacity(0.42), radius: 24, y: 12)
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 8)
                 }
-                .padding(.horizontal, Theme.Spacing.lg)
-                .padding(.bottom, Theme.Spacing.xl)
             }
         }
         .animation(Theme.Animation.smooth, value: currentPage)
+        .preferredColorScheme(.dark)
         .onAppear {
             seedProfileStateIfNeeded()
             syncAppLocaleWithPreferredLanguage()

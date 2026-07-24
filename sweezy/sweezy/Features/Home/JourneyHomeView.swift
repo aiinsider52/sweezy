@@ -7,10 +7,10 @@ struct JourneyHomeView: View {
     @State private var showMyPlan = false
 
     private let actions: [(String, String, DovidnykRouteSection?)] = [
-        ("doc.text", "Документи", .checklists),
-        ("briefcase", "Робота", .tools),
-        ("house", "Житло", .guides),
-        ("cross.case", "Медицина", .guides)
+        ("doc.text", "journey.home.action.documents".localized, .checklists),
+        ("briefcase", "journey.home.action.jobs".localized, .tools),
+        ("house", "journey.home.action.housing".localized, .guides),
+        ("cross.case", "journey.home.action.health".localized, .guides)
     ]
 
     var body: some View {
@@ -81,7 +81,7 @@ struct JourneyHomeView: View {
                     .foregroundColor(.white)
             }
 
-            Text("Привіт, \(firstName)")
+            Text("journey.home.greeting".localized(with: firstName))
                 .font(.system(size: 13, weight: .semibold))
                 .foregroundColor(.white)
 
@@ -91,10 +91,10 @@ struct JourneyHomeView: View {
 
     private var heroTitle: some View {
         VStack(alignment: .leading, spacing: -3) {
-            Text("Твій шлях")
+            Text("journey.home.hero.line1".localized)
             HStack(spacing: 7) {
-                Text("у")
-                Text("Швейцарії")
+                Text("journey.home.hero.line2".localized)
+                Text("journey.home.hero.line3".localized)
                     .foregroundColor(.black)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 1)
@@ -115,7 +115,7 @@ struct JourneyHomeView: View {
         HStack(spacing: 8) {
             Text("\(completedTasks)/\(max(7, appContainer.firstWeekService.tasks.count))")
                 .font(.system(size: 16, weight: .bold, design: .rounded))
-            Text("кроків виконано")
+            Text("journey.home.steps_completed".localized)
                 .font(.system(size: 13, weight: .medium))
         }
         .foregroundColor(.white.opacity(0.7))
@@ -129,7 +129,7 @@ struct JourneyHomeView: View {
                         .font(.system(size: 19, weight: .bold))
                         .foregroundColor(urgentDeadlineCount > 0 ? .orange : JourneyVisual.lime)
                     VStack(alignment: .leading, spacing: 3) {
-                        Text("Мій план на сьогодні")
+                        Text("journey.home.plan_today".localized)
                             .font(.system(size: 15, weight: .bold, design: .rounded))
                             .foregroundColor(.white)
                         Text(planPulseSubtitle)
@@ -187,7 +187,7 @@ struct JourneyHomeView: View {
         JourneyGlassPanel(cornerRadius: 24) {
             HStack(spacing: 14) {
                 VStack(alignment: .leading, spacing: 7) {
-                    Text("Наступний крок →")
+                    Text("journey.home.next_step_arrow".localized)
                         .font(.system(size: 11, weight: .semibold))
                         .foregroundColor(.white.opacity(0.62))
 
@@ -196,7 +196,7 @@ struct JourneyHomeView: View {
                         .foregroundColor(.white)
                         .lineLimit(2)
 
-                    JourneyPrimaryButton(title: "Продовжити", compact: true) {
+                    JourneyPrimaryButton(title: "common.continue".localized, compact: true) {
                         if appContainer.firstWeekService.nextDueTask == nil {
                             showRoadmap = true
                         } else {
@@ -228,7 +228,7 @@ struct JourneyHomeView: View {
 
     private var firstName: String {
         let name = lockManager.userName.trimmingCharacters(in: .whitespacesAndNewlines)
-        return name.split(separator: " ").first.map(String.init) ?? "друже"
+        return name.split(separator: " ").first.map(String.init) ?? "journey.home.default_name".localized
     }
 
     private var completedTasks: Int {
@@ -236,7 +236,7 @@ struct JourneyHomeView: View {
     }
 
     private var nextStepTitle: String {
-        appContainer.firstWeekService.nextDueTask?.title ?? "Дозвіл на проживання"
+        appContainer.firstWeekService.nextDueTask?.title ?? "journey.home.default_next_step".localized
     }
 
     private var homeDeadlines: [LifeDeadline] {
@@ -252,8 +252,8 @@ struct JourneyHomeView: View {
     }
 
     private var planPulseSubtitle: String {
-        if urgentDeadlineCount > 0 { return "Термінових дій: \(urgentDeadlineCount)" }
-        if let next = homeDeadlines.first { return "Далі: \(next.title)" }
-        return "Усе критичне під контролем"
+        if urgentDeadlineCount > 0 { return "journey.home.urgent_actions".localized(with: urgentDeadlineCount) }
+        if let next = homeDeadlines.first { return "journey.home.next_deadline".localized(with: next.title) }
+        return "journey.home.all_under_control".localized
     }
 }

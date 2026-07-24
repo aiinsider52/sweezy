@@ -169,7 +169,7 @@ struct SettingsView: View {
                     ScrollView {
                         VStack(spacing: Theme.Spacing.lg) {
                             // Single top-level title stays in navigation bar,
-                            // here начинаем сразу с блока облікового запису
+                            // starts directly with the account block
                             SectionHeader("settings.account".localized)
                             accountBlock
                             
@@ -243,17 +243,17 @@ private extension SettingsView {
             )
 
             VStack(alignment: .leading, spacing: 7) {
-                Text("НАЛАШТУВАННЯ")
+                Text("settings.editorial.header".localized)
                     .font(.system(size: 11, weight: .bold, design: .rounded))
                     .tracking(2)
                     .foregroundColor(.white.opacity(0.68))
 
-                Text("Привіт, \(editorialGreetingName)")
+                Text("settings.editorial.greeting_format".localized(with: editorialGreetingName))
                     .font(.system(size: 32, weight: .bold, design: .rounded))
                     .foregroundColor(.white)
 
                 HStack(spacing: 5) {
-                    Text("Твій профіль готовий на")
+                    Text("settings.editorial.profile_ready_label".localized)
                         .foregroundColor(.white.opacity(0.72))
                     Text("\(profileCompletion)%")
                         .fontWeight(.bold)
@@ -309,7 +309,7 @@ private extension SettingsView {
         }
         .buttonStyle(CardPressStyle())
         .padding(.horizontal, 16)
-        .accessibilityHint("Відкрити редагування профілю")
+        .accessibilityHint("settings.editorial.edit_profile_hint".localized)
     }
 
     var editorialCompletionCard: some View {
@@ -319,10 +319,10 @@ private extension SettingsView {
             VStack(alignment: .leading, spacing: 14) {
                 HStack(alignment: .top, spacing: 14) {
                     VStack(alignment: .leading, spacing: 5) {
-                        Text("Заверши профіль")
+                        Text("settings.editorial.complete_profile_title".localized)
                             .font(.system(size: 18, weight: .bold, design: .rounded))
                             .foregroundColor(.white)
-                        Text("Отримуй точніші плани, дедлайни та рекомендації")
+                        Text("settings.editorial.complete_profile_subtitle".localized)
                             .font(.system(size: 13, weight: .medium))
                             .foregroundColor(.white.opacity(0.6))
                             .fixedSize(horizontal: false, vertical: true)
@@ -345,7 +345,7 @@ private extension SettingsView {
                 }
 
                 HStack {
-                    Text("Продовжити заповнення")
+                    Text("settings.editorial.continue_filling".localized)
                     Spacer()
                     Image(systemName: "arrow.right")
                 }
@@ -365,11 +365,11 @@ private extension SettingsView {
 
     var editorialActivityStrip: some View {
         HStack(spacing: 0) {
-            editorialActivityItem(icon: "book.closed", value: "\(appContainer.userStats.guidesReadCount)", label: "гайдів")
+            editorialActivityItem(icon: "book.closed", value: "\(appContainer.userStats.guidesReadCount)", label: "settings.editorial.stat.guides".localized)
             editorialActivityDivider
-            editorialActivityItem(icon: "checklist", value: "\(appContainer.userStats.activeChecklistsCount)", label: "чек-листів")
+            editorialActivityItem(icon: "checklist", value: "\(appContainer.userStats.activeChecklistsCount)", label: "settings.editorial.stat.checklists".localized)
             editorialActivityDivider
-            editorialActivityItem(icon: "target", value: "\(appContainer.userProfile?.goals.count ?? 0)", label: "цілей")
+            editorialActivityItem(icon: "target", value: "\(appContainer.userProfile?.goals.count ?? 0)", label: "settings.editorial.stat.goals".localized)
         }
         .padding(.vertical, 12)
         .editorialSettingsPanel(cornerRadius: 18)
@@ -378,7 +378,7 @@ private extension SettingsView {
 
     var editorialSettingsSections: some View {
         VStack(alignment: .leading, spacing: 18) {
-            editorialSectionTitle("Акаунт")
+            editorialSectionTitle("settings.account".localized)
             VStack(spacing: 0) {
                 editorialSettingsRow(icon: "globe", title: "settings.language".localized, value: currentLanguageName) {
                     showingLanguageSelection = true
@@ -416,12 +416,12 @@ private extension SettingsView {
             }
             .editorialSettingsPanel(cornerRadius: 20)
 
-            editorialSectionTitle("Безпека та дані")
+            editorialSectionTitle("settings.section.security_data".localized)
             VStack(spacing: 0) {
                 editorialToggleRow(
                     icon: lockManager.biometryDisplayName == "Face ID" ? "faceid" : "touchid",
                     title: lockManager.biometryDisplayName,
-                    subtitle: lockManager.isBiometryAvailable ? "Захист входу в застосунок" : (lockManager.biometryUnavailableReason ?? "Недоступно"),
+                    subtitle: lockManager.isBiometryAvailable ? "settings.security.biometry_subtitle".localized : (lockManager.biometryUnavailableReason ?? "common.unavailable".localized),
                     isOn: Binding(
                         get: { lockManager.biometricsEnabled },
                         set: { newValue in
@@ -436,8 +436,8 @@ private extension SettingsView {
                 editorialSettingsDivider
                 editorialToggleRow(
                     icon: "chart.bar.xaxis",
-                    title: "Аналітика",
-                    subtitle: "Анонімно допомагає покращувати Sweezy",
+                    title: "settings.analytics.title".localized,
+                    subtitle: "settings.analytics.subtitle".localized,
                     isOn: $analyticsEnabled
                 )
                 .onChange(of: analyticsEnabled) { _, enabled in
@@ -451,7 +451,7 @@ private extension SettingsView {
             }
             .editorialSettingsPanel(cornerRadius: 20)
 
-            editorialSectionTitle("Підтримка")
+            editorialSectionTitle("settings.section.support".localized)
             VStack(spacing: 0) {
                 if let supportURL = supportEmailURL {
                     Link(destination: supportURL) {
@@ -469,7 +469,7 @@ private extension SettingsView {
                 editorialSettingsDivider
                 editorialSettingsRow(
                     icon: "number",
-                    title: "Версія",
+                    title: "settings.version_label".localized,
                     value: Bundle.main.appVersion,
                     showsChevron: false
                 ) {}
@@ -621,15 +621,15 @@ private extension SettingsView {
 
     var settingsHero: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Text("НАЛАШТУВАННЯ")
+            Text("settings.editorial.header".localized)
                 .font(.system(size: 10, weight: .bold, design: .rounded))
                 .tracking(1.4)
                 .foregroundColor(.white.opacity(0.62))
 
             HStack(alignment: .bottom) {
                 VStack(alignment: .leading, spacing: -2) {
-                    Text("Привіт, \(profileName)")
-                    Text("твоя ситуація\nу Швейцарії")
+                    Text("settings.editorial.greeting_format".localized(with: profileName))
+                    Text("settings.hero.your_situation".localized)
                 }
                 .font(.system(size: 31, weight: .bold, design: .rounded))
                 .foregroundColor(.white)
@@ -777,8 +777,8 @@ private extension SettingsView {
                     // Quick stats row
                     if let profile = appContainer.userProfile, !profile.goals.isEmpty {
                         HStack(spacing: 12) {
-                            WinterQuickStat(icon: "target", value: "\(profile.goals.count)", label: "цілей")
-                            WinterQuickStat(icon: "calendar", value: daysInSwitzerlandText, label: "днів")
+                            WinterQuickStat(icon: "target", value: "\(profile.goals.count)", label: "settings.editorial.stat.goals".localized)
+                            WinterQuickStat(icon: "calendar", value: daysInSwitzerlandText, label: "settings.stat.days".localized)
                         }
                         .padding(.top, 4)
                     }
@@ -976,7 +976,7 @@ private extension SettingsView {
                         PrimaryButton("settings.register".localized) {
                             showingRegistration = true
                         }
-                        PrimaryButton("Войти", style: .outline) { showingLogin = true }
+                        PrimaryButton("auth.login.button".localized, style: .outline) { showingLogin = true }
                         .frame(maxWidth: 220)
                     }
                 }
@@ -1393,14 +1393,14 @@ struct ProfileEditView: View {
                             .padding(.top, 16)
                         }
                     }
-                    .navigationTitle("Редагувати профіль")
+                    .navigationTitle("settings.edit_profile.title".localized)
                     .navigationBarTitleDisplayMode(.inline)
                     .toolbar {
                         ToolbarItem(placement: .navigationBarLeading) {
-                            Button { dismiss() } label: { Text("Скасувати").foregroundColor(winterSecondaryText) }
+                            Button { dismiss() } label: { Text("common.cancel".localized).foregroundColor(winterSecondaryText) }
                         }
                         ToolbarItem(placement: .navigationBarTrailing) {
-                            Button { saveProfile() } label: { Text("Зберегти").fontWeight(.semibold).foregroundColor(.cyan) }
+                            Button { saveProfile() } label: { Text("common.save".localized).fontWeight(.semibold).foregroundColor(.cyan) }
                                 .disabled(!hasChanges)
                         }
                     }
@@ -1521,7 +1521,7 @@ struct ProfileEditView: View {
                     .rotationEffect(.degrees(-90))
             }
             VStack(spacing: 4) {
-                Text(fullName.isEmpty ? "Ваше ім'я" : fullName)
+                Text(fullName.isEmpty ? "settings.profile.your_name".localized : fullName)
                     .font(.system(size: 22, weight: .bold, design: .rounded))
                     .foregroundColor(Theme.Colors.textPrimary)
                 if !email.isEmpty {
@@ -1531,7 +1531,7 @@ struct ProfileEditView: View {
                 }
                 HStack(spacing: 6) {
                     Image(systemName: completionPercentage >= 1 ? "checkmark.seal.fill" : "chart.pie.fill").font(.system(size: 12))
-                    Text("Профіль заповнено на \(Int(completionPercentage * 100))%").font(.system(size: 12, weight: .medium))
+                    Text("settings.profile.completion_format".localized(with: Int(completionPercentage * 100))).font(.system(size: 12, weight: .medium))
                 }
                 .foregroundColor(completionPercentage >= 1 ? .green : Theme.Colors.textTertiary)
                 .padding(.top, 4)
@@ -1589,7 +1589,7 @@ struct ProfileEditView: View {
             }
             
             VStack(spacing: 6) {
-                Text(fullName.isEmpty ? "Ваше ім'я" : fullName)
+                Text(fullName.isEmpty ? "settings.profile.your_name".localized : fullName)
                     .font(.system(size: 22, weight: .bold, design: .rounded))
                     .foregroundColor(winterPrimaryText)
                 
@@ -1602,7 +1602,7 @@ struct ProfileEditView: View {
                 HStack(spacing: 6) {
                     Image(systemName: completionPercentage >= 1 ? "checkmark.seal.fill" : "chart.pie.fill")
                         .font(.system(size: 12))
-                    Text("Профіль заповнено на \(Int(completionPercentage * 100))%")
+                    Text("settings.profile.completion_format".localized(with: Int(completionPercentage * 100)))
                         .font(.system(size: 12, weight: .medium))
                 }
                 .foregroundColor(completionPercentage >= 1 ? .green : winterTertiaryText)
@@ -1619,33 +1619,33 @@ struct ProfileEditView: View {
     
     // MARK: - Cards (Original)
     private var profilePersonalCard: some View {
-        ProfileSectionCard(icon: "person.fill", title: "Особиста інформація", color: .blue) {
+        ProfileSectionCard(icon: "person.fill", title: "settings.profile.section.personal".localized, color: .blue) {
             VStack(spacing: 16) {
-                ProfileTextField(icon: "person", placeholder: "Повне ім'я", text: $fullName, isValid: !fullName.isEmpty)
-                ProfileTextField(icon: "envelope", placeholder: "Email", text: $email, keyboardType: .emailAddress, isValid: isEmailValid, validationMessage: isEmailValid ? nil : "Некоректний email")
-                ProfileTextField(icon: "phone", placeholder: "Телефон", text: $phoneNumber, keyboardType: .phonePad, isValid: true)
+                ProfileTextField(icon: "person", placeholder: "settings.full_name".localized, text: $fullName, isValid: !fullName.isEmpty)
+                ProfileTextField(icon: "envelope", placeholder: "Email", text: $email, keyboardType: .emailAddress, isValid: isEmailValid, validationMessage: isEmailValid ? nil : "validation.email_invalid".localized)
+                ProfileTextField(icon: "phone", placeholder: "settings.phone".localized, text: $phoneNumber, keyboardType: .phonePad, isValid: true)
             }
         }
     }
     
     // MARK: - Winter Cards
     private var winterProfilePersonalCard: some View {
-        WinterSectionCard(icon: "person.fill", title: "Особиста інформація", color: .blue) {
+        WinterSectionCard(icon: "person.fill", title: "settings.profile.section.personal".localized, color: .blue) {
             VStack(spacing: 16) {
-                WinterTextField(icon: "person", placeholder: "Повне ім'я", text: $fullName, isValid: !fullName.isEmpty)
-                WinterTextField(icon: "envelope", placeholder: "Email", text: $email, keyboardType: .emailAddress, isValid: isEmailValid, validationMessage: isEmailValid ? nil : "Некоректний email")
-                WinterTextField(icon: "phone", placeholder: "Телефон", text: $phoneNumber, keyboardType: .phonePad, isValid: true)
+                WinterTextField(icon: "person", placeholder: "settings.full_name".localized, text: $fullName, isValid: !fullName.isEmpty)
+                WinterTextField(icon: "envelope", placeholder: "Email", text: $email, keyboardType: .emailAddress, isValid: isEmailValid, validationMessage: isEmailValid ? nil : "validation.email_invalid".localized)
+                WinterTextField(icon: "phone", placeholder: "settings.phone".localized, text: $phoneNumber, keyboardType: .phonePad, isValid: true)
             }
         }
     }
     
     private var winterProfileLocationCard: some View {
-        WinterSectionCard(icon: "mappin.and.ellipse", title: "Локація та статус", color: .orange) {
+        WinterSectionCard(icon: "mappin.and.ellipse", title: "settings.profile.section.location".localized, color: .orange) {
             VStack(spacing: 16) {
                 Button { showCantonPicker = true } label: {
                     HStack {
                         Image(systemName: "building.2").foregroundColor(.orange).frame(width: 24)
-                        Text("Кантон").foregroundColor(winterSecondaryText)
+                        Text("calculator.canton".localized).foregroundColor(winterSecondaryText)
                         Spacer()
                         HStack(spacing: 6) {
                             Text(selectedCanton.flag).font(.system(size: 18))
@@ -1662,7 +1662,7 @@ struct ProfileEditView: View {
                 Button { showPermitPicker = true } label: {
                     HStack {
                         Image(systemName: "doc.badge.gearshape").foregroundColor(selectedPermitType.color).frame(width: 24)
-                        Text("Тип дозволу").foregroundColor(winterSecondaryText)
+                        Text("calculator.permit_type".localized).foregroundColor(winterSecondaryText)
                         Spacer()
                         HStack(spacing: 6) {
                             Text(selectedPermitType.rawValue)
@@ -1684,7 +1684,7 @@ struct ProfileEditView: View {
     }
     
     private var winterProfileTimelineCard: some View {
-        WinterSectionCard(icon: "calendar.badge.clock", title: "Дати", color: .purple) {
+        WinterSectionCard(icon: "calendar.badge.clock", title: "settings.profile.section.dates".localized, color: .purple) {
             VStack(spacing: 20) {
                 HStack(alignment: .top) {
                     VStack(spacing: 8) {
@@ -1692,7 +1692,7 @@ struct ProfileEditView: View {
                             Circle().fill(Color.green).frame(width: 16, height: 16)
                             Circle().fill(.white).frame(width: 6, height: 6)
                         }
-                        Text("Прибуття").font(.system(size: 11, weight: .medium)).foregroundColor(winterSecondaryText)
+                        Text("settings.profile.arrival".localized).font(.system(size: 11, weight: .medium)).foregroundColor(winterSecondaryText)
                         Text(arrivalDate.formatted(.dateTime.day().month(.abbreviated)))
                             .font(.system(size: 13, weight: .semibold))
                             .foregroundColor(winterPrimaryText)
@@ -1712,7 +1712,7 @@ struct ProfileEditView: View {
                             Circle().fill(permitStatusColor).frame(width: 16, height: 16)
                             Circle().fill(.white).frame(width: 6, height: 6)
                         }
-                        Text("Закінчення").font(.system(size: 11, weight: .medium)).foregroundColor(winterSecondaryText)
+                        Text("settings.profile.expiry".localized).font(.system(size: 11, weight: .medium)).foregroundColor(winterSecondaryText)
                         Text(permitExpiry.formatted(.dateTime.day().month(.abbreviated).year()))
                             .font(.system(size: 13, weight: .semibold))
                             .foregroundColor(winterPrimaryText)
@@ -1722,7 +1722,7 @@ struct ProfileEditView: View {
                 HStack(spacing: 8) {
                     Image(systemName: permitMonthsRemaining > 3 ? "clock" : "exclamationmark.triangle")
                         .font(.system(size: 14))
-                    Text("Залишилось: \(permitMonthsRemaining) місяців")
+                    Text("settings.profile.months_remaining_format".localized(with: permitMonthsRemaining))
                         .font(.system(size: 13, weight: .medium))
                 }
                 .foregroundColor(permitStatusColor)
@@ -1747,10 +1747,10 @@ struct ProfileEditView: View {
     }
     
     private var winterProfileFamilyCard: some View {
-        WinterSectionCard(icon: "figure.2.and.child.holdinghands", title: "Сім'я", color: .pink) {
+        WinterSectionCard(icon: "figure.2.and.child.holdinghands", title: "checklist.category.family".localized, color: .pink) {
             VStack(spacing: 16) {
                 HStack {
-                    Text("Розмір сім'ї").foregroundColor(winterSecondaryText)
+                    Text("settings.profile.family_size".localized).foregroundColor(winterSecondaryText)
                     Spacer()
                     HStack(spacing: 0) {
                         Button { if familySize > 1 { familySize -= 1 } } label: {
@@ -1776,7 +1776,7 @@ struct ProfileEditView: View {
                         Image(systemName: hasChildren ? "figure.and.child.holdinghands" : "figure.2")
                             .foregroundColor(hasChildren ? .pink : winterTertiaryText)
                             .frame(width: 24)
-                        Text("Є діти").foregroundColor(winterPrimaryText)
+                        Text("settings.profile.has_children".localized).foregroundColor(winterPrimaryText)
                     }
                     Spacer()
                     Toggle("", isOn: $hasChildren).labelsHidden().tint(.pink)
@@ -1790,7 +1790,7 @@ struct ProfileEditView: View {
     }
     
     private var winterProfileGoalsCard: some View {
-        WinterSectionCard(icon: "target", title: "Цілі", color: .cyan) {
+        WinterSectionCard(icon: "target", title: "settings.profile.section.goals".localized, color: .cyan) {
             winterGoalsGrid
         }
     }
@@ -1820,7 +1820,7 @@ struct ProfileEditView: View {
         Button {
             saveProfile()
         } label: {
-            Text("Зберегти зміни")
+            Text("marketplace.save_changes".localized)
                 .font(.system(size: 16, weight: .semibold))
                 .frame(maxWidth: .infinity)
                 .frame(height: 54)
@@ -1849,12 +1849,12 @@ struct ProfileEditView: View {
         )
     }
     private var profileLocationCard: some View {
-        ProfileSectionCard(icon: "mappin.and.ellipse", title: "Локація та статус", color: .orange) {
+        ProfileSectionCard(icon: "mappin.and.ellipse", title: "settings.profile.section.location".localized, color: .orange) {
             VStack(spacing: 16) {
                 Button { showCantonPicker = true } label: {
                     HStack {
                         Image(systemName: "building.2").foregroundColor(.orange).frame(width: 24)
-                        Text("Кантон").foregroundColor(Theme.Colors.textSecondary)
+                        Text("calculator.canton".localized).foregroundColor(Theme.Colors.textSecondary)
                         Spacer()
                         HStack(spacing: 6) { Text(selectedCanton.flag).font(.system(size: 18)); Text(selectedCanton.localizedName).foregroundColor(Theme.Colors.textPrimary) }
                         Image(systemName: "chevron.right").foregroundColor(Theme.Colors.textTertiary)
@@ -1867,7 +1867,7 @@ struct ProfileEditView: View {
                 Button { showPermitPicker = true } label: {
                     HStack {
                         Image(systemName: "doc.badge.gearshape").foregroundColor(selectedPermitType.color).frame(width: 24)
-                        Text("Тип дозволу").foregroundColor(Theme.Colors.textSecondary)
+                        Text("calculator.permit_type".localized).foregroundColor(Theme.Colors.textSecondary)
                         Spacer()
                         HStack(spacing: 6) {
                             Text(selectedPermitType.rawValue)
@@ -1887,25 +1887,25 @@ struct ProfileEditView: View {
         }
     }
     private var profileTimelineCard: some View {
-        ProfileSectionCard(icon: "calendar.badge.clock", title: "Дати", color: .purple) {
+        ProfileSectionCard(icon: "calendar.badge.clock", title: "settings.profile.section.dates".localized, color: .purple) {
             VStack(spacing: 20) {
                 HStack(alignment: .top) {
                     VStack(spacing: 8) {
                         ZStack { Circle().fill(Color.green).frame(width: 16, height: 16); Circle().fill(.white).frame(width: 6, height: 6) }
-                        Text("Прибуття").font(.system(size: 11, weight: .medium)).foregroundColor(Theme.Colors.textSecondary)
+                        Text("settings.profile.arrival".localized).font(.system(size: 11, weight: .medium)).foregroundColor(Theme.Colors.textSecondary)
                         Text(arrivalDate.formatted(.dateTime.day().month(.abbreviated))).font(.system(size: 13, weight: .semibold))
                     }.frame(maxWidth: .infinity)
                     VStack { Rectangle().fill(LinearGradient(colors: [.green, permitStatusColor], startPoint: .leading, endPoint: .trailing)).frame(height: 3).cornerRadius(2) }
                         .frame(maxWidth: .infinity).padding(.top, 6)
                     VStack(spacing: 8) {
                         ZStack { Circle().fill(permitStatusColor).frame(width: 16, height: 16); Circle().fill(.white).frame(width: 6, height: 6) }
-                        Text("Закінчення").font(.system(size: 11, weight: .medium)).foregroundColor(Theme.Colors.textSecondary)
+                        Text("settings.profile.expiry".localized).font(.system(size: 11, weight: .medium)).foregroundColor(Theme.Colors.textSecondary)
                         Text(permitExpiry.formatted(.dateTime.day().month(.abbreviated).year())).font(.system(size: 13, weight: .semibold))
                     }.frame(maxWidth: .infinity)
                 }
                 HStack(spacing: 8) {
                     Image(systemName: permitMonthsRemaining > 3 ? "clock" : "exclamationmark.triangle").font(.system(size: 14))
-                    Text("Залишилось: \(permitMonthsRemaining) місяців").font(.system(size: 13, weight: .medium))
+                    Text("settings.profile.months_remaining_format".localized(with: permitMonthsRemaining)).font(.system(size: 13, weight: .medium))
                 }
                 .foregroundColor(permitStatusColor)
                 .padding(.horizontal, 14).padding(.vertical, 8)
@@ -1919,10 +1919,10 @@ struct ProfileEditView: View {
         }
     }
     private var profileFamilyCard: some View {
-        ProfileSectionCard(icon: "figure.2.and.child.holdinghands", title: "Сім'я", color: .pink) {
+        ProfileSectionCard(icon: "figure.2.and.child.holdinghands", title: "checklist.category.family".localized, color: .pink) {
             VStack(spacing: 16) {
                 HStack {
-                    Text("Розмір сім'ї").foregroundColor(Theme.Colors.textSecondary)
+                    Text("settings.profile.family_size".localized).foregroundColor(Theme.Colors.textSecondary)
                     Spacer()
                     HStack(spacing: 0) {
                         Button { if familySize > 1 { familySize -= 1 } } label: { Image(systemName: "minus").frame(width: 36, height: 36) }
@@ -1937,7 +1937,7 @@ struct ProfileEditView: View {
                     HStack(spacing: 10) {
                         Image(systemName: hasChildren ? "figure.and.child.holdinghands" : "figure.2")
                             .foregroundColor(hasChildren ? .pink : Theme.Colors.textTertiary).frame(width: 24)
-                        Text("Є діти").foregroundColor(Theme.Colors.textPrimary)
+                        Text("settings.profile.has_children".localized).foregroundColor(Theme.Colors.textPrimary)
                     }
                     Spacer()
                     Toggle("", isOn: $hasChildren).labelsHidden().tint(.pink)
@@ -1947,7 +1947,7 @@ struct ProfileEditView: View {
         }
     }
     private var profileGoalsCard: some View {
-        ProfileSectionCard(icon: "target", title: "Цілі", color: .cyan) {
+        ProfileSectionCard(icon: "target", title: "settings.profile.section.goals".localized, color: .cyan) {
             goalsGrid
         }
     }
@@ -1957,7 +1957,7 @@ struct ProfileEditView: View {
         Button {
             saveProfile()
         } label: {
-            Text("Зберегти зміни")
+            Text("marketplace.save_changes".localized)
                 .font(.system(size: 16, weight: .semibold))
                 .frame(maxWidth: .infinity)
                 .frame(height: 54)
@@ -2000,8 +2000,8 @@ struct ProfileEditView: View {
                     }.buttonStyle(.plain)
                 }
             }
-            .navigationTitle("Виберіть кантон")
-            .toolbar { ToolbarItem(placement: .navigationBarTrailing) { Button("Готово") { showCantonPicker = false } } }
+            .navigationTitle("marketplace.select_canton".localized)
+            .toolbar { ToolbarItem(placement: .navigationBarTrailing) { Button("common.done".localized) { showCantonPicker = false } } }
         }
         .presentationDetents([.medium, .large])
     }
@@ -2030,8 +2030,8 @@ struct ProfileEditView: View {
                     }.buttonStyle(.plain)
                 }
             }
-            .navigationTitle("Тип дозволу")
-            .toolbar { ToolbarItem(placement: .navigationBarTrailing) { Button("Готово") { showPermitPicker = false } } }
+            .navigationTitle("calculator.permit_type".localized)
+            .toolbar { ToolbarItem(placement: .navigationBarTrailing) { Button("common.done".localized) { showPermitPicker = false } } }
         }
         .presentationDetents([.medium])
     }
@@ -2489,13 +2489,13 @@ private extension PermitType {
     }
     var shortName: String {
         switch self {
-        case .s: return "Захист"
-        case .b: return "Резидент"
-        case .c: return "Постійний"
-        case .f: return "Прийняття"
-        case .n: return "Біженець"
-        case .l: return "Короткий"
-        case .other: return "Інше"
+        case .s: return "settings.permit.short.s".localized
+        case .b: return "settings.permit.short.b".localized
+        case .c: return "settings.permit.short.c".localized
+        case .f: return "settings.permit.short.f".localized
+        case .n: return "settings.permit.short.n".localized
+        case .l: return "settings.permit.short.l".localized
+        case .other: return "common.other".localized
         }
     }
 }
@@ -2785,10 +2785,12 @@ private struct TrialCountdownChip: View {
     @State private var now = Date()
     private var remaining: TimeInterval { max(0, expireAt.timeIntervalSince(now)) }
     private var units: (d: String, h: String, m: String, label: String) {
-        let code = (locale?.identifier ?? Locale.current.identifier)
-        if code.hasPrefix("uk") { return ("д", "год", "хв", "Пробний") }
-        if code.hasPrefix("de") { return ("T", "Std", "Min", "Test") }
-        return ("d", "h", "m", "Trial")
+        (
+            "settings.trial.day_unit".localized,
+            "settings.trial.hour_unit".localized,
+            "settings.trial.minute_unit".localized,
+            "settings.trial.label".localized
+        )
     }
     private var text: String {
         let total = Int(remaining)

@@ -1,0 +1,23 @@
+Sweezy ist Ihr kostenloser Begleiter für den Start in der Schweiz.
+
+Praktische Guides, Checklisten, Stadtkarte, Marktplatz und eine klare Integrations-Roadmap — auf Ukrainisch, Englisch und Deutsch.
+
+Das erhalten Sie:
+• Schritt-für-Schritt-Guides zu Anmeldung, Wohnen, Versicherung, Arbeit und Alltag
+• Checklisten und Vorlagen, die Sie offline auf dem Handy erledigen können
+• Stadtkarte mit nützlichen Orten für Neuankömmlinge
+• Community-Marktplatz, Events und geprüfte Expertinnen und Experten
+• In-App-Chat für sichere Gespräche zu Anzeigen
+• Persönliche Roadmap für Ihren Fortschritt
+
+Dieser App-Store-Build ist kostenlos. Es gibt keine In-App-Käufe und keine automatisch verlängernden Abonnements.
+
+Datenschutz:
+• Konto-E-Mail für Login und Wiederherstellung
+• Optionale Analytics und Crash-Reports verbessern die Stabilität
+• Optionaler ungefährer Standort für Kartenfunktionen, nur mit Ihrer Erlaubnis
+• Wir verkaufen Ihre Daten nicht und nutzen kein Werbe-Tracking
+
+Support: https://sweezy-9xyk.onrender.com/support
+Datenschutz: https://sweezy-9xyk.onrender.com/legal/privacy
+Nutzungsbedingungen: https://sweezy-9xyk.onrender.com/legal/terms

@@ -1,0 +1,35 @@
+name: testflight-smoke
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'sweezy/**'
+      - 'fastlane/**'
+      - '.github/workflows/testflight-smoke.yml'
+
+jobs:
+  ios-smoke:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_16.4.app || sudo xcode-select -s /Applications/Xcode.app
+      - name: Build & test
+        run: |
+          xcodebuild \
+            -scheme sweezy \
+            -project sweezy/sweezy.xcodeproj \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
+            test
+      - name: Metadata presence check
+        run: |
+          test -s fastlane/metadata/privacy_url.txt
+          test -s fastlane/metadata/terms_url.txt
+          test -s fastlane/metadata/en-US/description.txt
+          test -s fastlane/metadata/uk/description.txt
+          test -s fastlane/metadata/de-DE/description.txt
+          test -s docs/asc-app-privacy-answers.md
+          test -s docs/testflight-smoke-checklist.md

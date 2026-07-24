@@ -1,7 +1,3 @@
-/* InfoPlist.strings (Ukrainian) */
-
-"NSCameraUsageDescription" = "Камера може знадобитися для сканування документів або QR‑кодів.";
-"NSFaceIDUsageDescription" = "Використовуємо Face ID для розблокування додатку та підтвердження дій.";
-"NSLocationWhenInUseUsageDescription" = "Локація потрібна для відображення найближчих сервісів та релевантних гідів.";
-"NSPhotoLibraryUsageDescription" = "Доступ до Фото потрібен для збереження або вибору зображень документів.";
-
+/* Localized Info.plist permission strings */
+"NSCalendarsFullAccessUsageDescription" = "Sweezy додає вибрані події до вашого календаря лише після підтвердження.";
+"NSLocationWhenInUseUsageDescription" = "Sweezy використовує ваше приблизне місцезнаходження, щоб показати найближчі сервіси та місця на карті.";

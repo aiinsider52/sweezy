@@ -146,7 +146,7 @@ struct JourneyGuideArticleView: View {
                     .shadow(color: .black.opacity(0.48), radius: 12, y: 4)
 
                 HStack(spacing: 16) {
-                    Label("\(guide.estimatedReadingTime) хв читання", systemImage: "clock")
+                    Label("guides.reading_time".localized(with: guide.estimatedReadingTime), systemImage: "clock")
                     if let verifiedAt = guide.verifiedAt {
                         Label(verifiedAt.formatted(date: .abbreviated, time: .omitted), systemImage: "checkmark.seal.fill")
                     }
@@ -167,7 +167,7 @@ struct JourneyGuideArticleView: View {
                             .clipShape(Circle())
                             .overlay(Circle().stroke(.white.opacity(0.24), lineWidth: 1))
                     }
-                    .accessibilityLabel("Назад")
+                    .accessibilityLabel("common.back".localized)
 
                     Spacer()
 
@@ -180,7 +180,7 @@ struct JourneyGuideArticleView: View {
                             .clipShape(Circle())
                             .overlay(Circle().stroke(.white.opacity(0.24), lineWidth: 1))
                     }
-                    .accessibilityLabel("Поділитися")
+                    .accessibilityLabel("common.share".localized)
                 }
                 .padding(.horizontal, 18)
                 .padding(.top, 10)
@@ -201,15 +201,15 @@ struct JourneyGuideArticleView: View {
                         .foregroundColor(JourneyVisual.lime)
 
                     VStack(alignment: .leading, spacing: 3) {
-                        Text("ОФІЦІЙНЕ ДЖЕРЕЛО")
+                        Text("journey.guide.official_source".localized)
                             .font(.system(size: 9, weight: .black))
                             .foregroundColor(JourneyVisual.lime)
-                        Text(guide.sourceTitle ?? sourceURL.host() ?? "Офіційний портал")
+                        Text(guide.sourceTitle ?? sourceURL.host() ?? "journey.guide.official_portal".localized)
                             .font(.system(size: 13, weight: .bold))
                             .foregroundColor(.white)
                             .lineLimit(2)
                         if let date = guide.verifiedAt {
-                            Text("Перевірено \(date.formatted(date: .long, time: .omitted))")
+                            Text("journey.guide.verified".localized(with: date.formatted(date: .long, time: .omitted)))
                                 .font(.system(size: 10, weight: .medium))
                                 .foregroundColor(.white.opacity(0.48))
                         }
@@ -233,7 +233,7 @@ struct JourneyGuideArticleView: View {
             HStack(spacing: 12) {
                 Image(systemName: "exclamationmark.shield.fill")
                     .foregroundColor(.orange)
-                Text("Джерело матеріалу ще проходить перевірку редакцією.")
+                Text("journey.guide.source_pending".localized)
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundColor(.white.opacity(0.68))
                 Spacer()
@@ -246,7 +246,7 @@ struct JourneyGuideArticleView: View {
 
     private func summaryCard(_ summary: String) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("КОРОТКО")
+            Text("journey.guide.summary".localized)
                 .font(.system(size: 10, weight: .black))
                 .foregroundColor(.black)
                 .padding(.horizontal, 9)
@@ -268,7 +268,7 @@ struct JourneyGuideArticleView: View {
 
     private var usefulLinks: some View {
         VStack(alignment: .leading, spacing: 11) {
-            Text("Корисні посилання")
+            Text("journey.guide.useful_links".localized)
                 .font(.system(size: 21, weight: .bold, design: .rounded))
                 .foregroundColor(.white)
 
@@ -306,7 +306,7 @@ struct JourneyGuideArticleView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 15, style: .continuous))
 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("ПЕРЕЙТИ ДО ДІЇ")
+                    Text("journey.guide.take_action".localized)
                         .font(.system(size: 9, weight: .black))
                         .foregroundColor(JourneyVisual.lime)
                     Text(checklist.title)

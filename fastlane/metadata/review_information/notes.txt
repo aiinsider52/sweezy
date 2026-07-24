@@ -1,0 +1,17 @@
+Sweezy is a free Switzerland integration companion (guides, checklists, map, marketplace, chat, roadmap).
+
+This build has NO in-app purchases and NO subscriptions. Please do not expect a paywall.
+
+Demo / review account:
+- Create a new account with any email via the in-app sign-up flow, or use Sign in with Apple / Google if configured.
+- Account deletion: Settings → Data Management → Delete Account.
+
+Key flows to review:
+1. Home / Directory / Map / Market / Settings tabs
+2. Open a guide and a checklist
+3. Marketplace listings + experts directory (contacts are not publicly exposed)
+4. Chat requires two accounts and an approved listing
+
+Privacy Policy: https://sweezy-9xyk.onrender.com/legal/privacy
+Terms: https://sweezy-9xyk.onrender.com/legal/terms
+Support: https://sweezy-9xyk.onrender.com/support

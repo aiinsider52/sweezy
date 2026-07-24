@@ -1,7 +1,3 @@
-/* InfoPlist.strings (English) */
-
-"NSCameraUsageDescription" = "Camera may be used to scan documents or QR codes.";
-"NSFaceIDUsageDescription" = "We use Face ID to unlock the app and confirm actions.";
-"NSLocationWhenInUseUsageDescription" = "Location helps show nearby services and relevant guides.";
-"NSPhotoLibraryUsageDescription" = "Photo access is needed to save or select document images.";
-
+/* Localized Info.plist permission strings */
+"NSCalendarsFullAccessUsageDescription" = "Sweezy adds selected events to your calendar only after you confirm.";
+"NSLocationWhenInUseUsageDescription" = "Sweezy uses your approximate location to show nearby services and map places when you ask.";

@@ -70,23 +70,23 @@ struct EventDetailView: View {
             VStack(alignment: .leading, spacing: 12) {
                 HStack(spacing: 10) {
                     eventAction(
-                        title: appContainer.savedItems.isEventSaved(event.id) ? "Збережено" : "Зберегти",
+                        title: appContainer.savedItems.isEventSaved(event.id) ? "journey.event.saved".localized : "common.save".localized,
                         icon: appContainer.savedItems.isEventSaved(event.id) ? "heart.fill" : "heart"
                     ) {
                         appContainer.savedItems.toggleEvent(event.id)
-                        actionMessage = appContainer.savedItems.isEventSaved(event.id) ? "Подію збережено" : "Подію прибрано"
+                        actionMessage = appContainer.savedItems.isEventSaved(event.id) ? "journey.event.saved_message".localized : "journey.event.removed_message".localized
                     }
-                    eventAction(title: "Календар", icon: "calendar.badge.plus") {
+                    eventAction(title: "journey.marketplace.calendar".localized, icon: "calendar.badge.plus") {
                         Task { @MainActor in
                             do {
                                 try await calendarService.add(event)
-                                actionMessage = "Додано до календаря"
+                                actionMessage = "journey.event.added_to_calendar".localized
                             } catch {
                                 actionMessage = error.localizedDescription
                             }
                         }
                     }
-                    eventAction(title: "Нагадати", icon: "bell.badge") {
+                    eventAction(title: "journey.event.remind_me".localized, icon: "bell.badge") {
                         scheduleEventReminder(event)
                     }
                 }
@@ -165,7 +165,7 @@ struct EventDetailView: View {
                     Circle()
                         .fill(Color.white.opacity(0.34))
                         .frame(width: 3, height: 3)
-                    Label("\(event.viewCount) переглядів", systemImage: "person.2")
+                    Label("journey.event.views_count".localized(with: event.viewCount), systemImage: "person.2")
                 }
                 .font(.system(size: 12, weight: .semibold))
                 .foregroundColor(.white.opacity(0.68))
@@ -224,7 +224,7 @@ struct EventDetailView: View {
             .overlay(Circle().stroke(Color.white.opacity(0.18), lineWidth: 1))
 
             VStack(alignment: .leading, spacing: 4) {
-                Text("Організатор")
+                Text("journey.event.organizer".localized)
                     .font(.system(size: 10, weight: .bold))
                     .foregroundColor(.white.opacity(0.46))
                     .textCase(.uppercase)
@@ -251,7 +251,7 @@ struct EventDetailView: View {
 
     private func descriptionCard(_ event: EventListing) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Про подію")
+            Text("journey.event.about".localized)
                 .font(.system(size: 22, weight: .bold, design: .rounded))
                 .foregroundColor(.white)
 
@@ -267,7 +267,7 @@ struct EventDetailView: View {
         VStack(alignment: .leading, spacing: 11) {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Місце")
+                    Text("journey.event.location".localized)
                         .font(.system(size: 10, weight: .bold))
                         .foregroundColor(JourneyVisual.lime)
                         .textCase(.uppercase)
@@ -309,7 +309,7 @@ struct EventDetailView: View {
                 } label: {
                     HStack(spacing: 9) {
                         Image(systemName: event.contactType.icon)
-                        Text("Зареєструватися")
+                        Text("journey.event.register".localized)
                         Spacer()
                         Image(systemName: "arrow.right")
                     }
@@ -377,11 +377,11 @@ struct EventDetailView: View {
     }
 
     private func dateText(_ event: EventListing) -> String {
-        event.startsAt?.formatted(.dateTime.weekday(.wide).day().month(.wide).locale(locale)) ?? "Дата уточнюється"
+        event.startsAt?.formatted(.dateTime.weekday(.wide).day().month(.wide).locale(locale)) ?? "journey.event.date_tbd".localized
     }
 
     private func timeText(_ event: EventListing) -> String {
-        guard let startsAt = event.startsAt else { return "Час уточнюється" }
+        guard let startsAt = event.startsAt else { return "journey.event.time_tbd".localized }
         let start = startsAt.formatted(.dateTime.hour().minute().locale(locale))
         if let endsAt = event.endsAt {
             return "\(start) — \(endsAt.formatted(.dateTime.hour().minute().locale(locale)))"
@@ -393,7 +393,7 @@ struct EventDetailView: View {
         let values = [event.venueName, event.city, event.canton]
             .compactMap { $0 }
             .filter { !$0.isEmpty }
-        return values.isEmpty ? "Місце уточнюється" : values.joined(separator: ", ")
+        return values.isEmpty ? "journey.event.location_tbd".localized : values.joined(separator: ", ")
     }
 
     private func locationTitle(_ event: EventListing) -> String {
@@ -404,7 +404,7 @@ struct EventDetailView: View {
     }
 
     private func priceText(_ event: EventListing) -> String {
-        event.isFree ? "Безкоштовно" : (event.priceInfo ?? "Квиток")
+        event.isFree ? "journey.marketplace.free".localized : (event.priceInfo ?? "journey.event.ticket".localized)
     }
 
     private func eventCoverImageName(_ event: EventListing) -> String {
@@ -467,7 +467,7 @@ struct EventDetailView: View {
     private func scheduleEventReminder(_ event: EventListing) {
         guard let startsAt = event.startsAt,
               let fireDate = Calendar.current.date(byAdding: .day, value: -1, to: startsAt) else {
-            actionMessage = "Дата події не вказана"
+            actionMessage = "journey.event.date_missing".localized
             return
         }
         Task { @MainActor in
@@ -477,14 +477,14 @@ struct EventDetailView: View {
             let success = await appContainer.notificationService.scheduleReminder(
                 id: "event.\(event.id)",
                 title: event.title,
-                body: "Подія починається завтра: \(fullLocationText(event))",
+                body: "journey.event.reminder_body_format".localized(with: fullLocationText(event)),
                 at: fireDate
             )
             if success {
                 if !appContainer.savedItems.isEventSaved(event.id) { appContainer.savedItems.toggleEvent(event.id) }
-                actionMessage = "Нагадування заплановано"
+                actionMessage = "moments.reminder.scheduled".localized
             } else {
-                actionMessage = "Не вдалося створити нагадування"
+                actionMessage = "journey.event.reminder_failed".localized
             }
         }
     }

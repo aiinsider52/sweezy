@@ -152,11 +152,11 @@ struct JourneyBottomBar: View {
     @Binding var selection: Int
 
     private let items: [(String, String)] = [
-        ("house", "Головна"),
-        ("list.bullet.rectangle", "Довідник"),
-        ("mappin", "Карта"),
-        ("cart", "Маркет"),
-        ("gearshape", "Налаштування")
+        ("house", "journey.tab.home".localized),
+        ("list.bullet.rectangle", "journey.tab.directory".localized),
+        ("mappin", "journey.tab.map".localized),
+        ("cart", "journey.tab.marketplace".localized),
+        ("gearshape", "journey.tab.settings".localized)
     ]
 
     var body: some View {
@@ -187,7 +187,7 @@ struct JourneyBottomBar: View {
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel(item.1)
-                .accessibilityValue(selection == index ? "Вибрано" : "")
+                .accessibilityValue(selection == index ? "journey.tab.selected".localized : "")
                 .accessibilityAddTraits(selection == index ? [.isSelected] : [])
                 .accessibilityIdentifier("tab.\(tabIdentifier(for: index))")
             }

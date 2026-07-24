@@ -30,7 +30,13 @@
 	<key>GOOGLE_CLIENT_ID</key>
 	<string>$(GOOGLE_CLIENT_ID)</string>
 	<key>NSCalendarsFullAccessUsageDescription</key>
-	<string>Sweezy додає вибрані події до вашого календаря лише після підтвердження.</string>
+	<string>Sweezy adds selected events to your calendar only after you confirm.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Sweezy uses your approximate location to show nearby services and map places when you ask.</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+	</array>
 	<key>SENTRY_DSN</key>
 	<string>$(SENTRY_DSN)</string>
 	<key>SUPPORT_EMAIL</key>

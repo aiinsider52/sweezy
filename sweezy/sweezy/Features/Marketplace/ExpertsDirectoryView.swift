@@ -50,7 +50,7 @@ struct ExpertsDirectoryView: View {
                 if vm.isLoading && vm.experts.isEmpty {
                     ProgressView().frame(maxWidth: .infinity).padding()
                 } else if vm.experts.isEmpty {
-                    Text("No experts match these filters yet.")
+                    Text("experts.empty".localized)
                         .foregroundColor(Theme.Colors.textSecondary)
                         .padding(Theme.Spacing.md)
                 } else {
@@ -80,7 +80,7 @@ struct ExpertsDirectoryView: View {
     private var filterBar: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: Theme.Spacing.sm) {
-                pill(label: "All", isOn: vm.specialty == nil) {
+                pill(label: "common.all".localized, isOn: vm.specialty == nil) {
                     vm.specialty = nil
                     Task { await vm.reload() }
                 }
@@ -201,7 +201,7 @@ struct ExpertDetailView: View {
                     } label: {
                         HStack {
                             Image(systemName: "calendar.badge.plus")
-                            Text("Записатися").font(.system(size: 15, weight: .semibold))
+                            Text("experts.cta.book".localized).font(.system(size: 15, weight: .semibold))
                         }
                         .frame(maxWidth: .infinity).padding(.vertical, 14)
                         .background(JourneyVisual.lime).foregroundColor(.black)
@@ -222,7 +222,7 @@ struct ExpertDetailView: View {
                 }
 
                 if !questions.isEmpty {
-                    Text("Recent answered questions")
+                    Text("experts.recent_questions".localized)
                         .font(.system(size: 18, weight: .semibold))
                     ForEach(questions) { q in
                         VStack(alignment: .leading, spacing: 6) {
@@ -273,7 +273,7 @@ private struct BookExpertAppointmentView: View {
                 JourneyPhotoBackground(imageName: "journey-market-consultant", blurRadius: 8, darkness: 0.76)
                 ScrollView {
                     VStack(alignment: .leading, spacing: 18) {
-                        Text("Консультація")
+                        Text("experts.appointment.title".localized)
                             .font(.system(size: 30, weight: .bold, design: .rounded))
                             .foregroundColor(.white)
                         Label(expert.authorName, systemImage: "checkmark.seal.fill")
@@ -282,9 +282,9 @@ private struct BookExpertAppointmentView: View {
 
                         JourneyGlassPanel(cornerRadius: 22) {
                             VStack(alignment: .leading, spacing: 14) {
-                                DatePicker("Дата і час", selection: $date, in: Date()..., displayedComponents: [.date, .hourAndMinute])
+                                DatePicker("experts.appointment.date_and_time".localized, selection: $date, in: Date()..., displayedComponents: [.date, .hourAndMinute])
                                     .tint(JourneyVisual.lime)
-                                TextField("Що потрібно обговорити", text: $notes, axis: .vertical)
+                                TextField("experts.appointment.notes_placeholder".localized, text: $notes, axis: .vertical)
                                     .lineLimit(3...6)
                                     .padding(12)
                                     .background(Color.black.opacity(0.24))
@@ -294,12 +294,12 @@ private struct BookExpertAppointmentView: View {
                             .padding(16)
                         }
 
-                        JourneyPrimaryButton(title: didSave ? "Запит збережено" : "Зберегти зустріч") {
+                        JourneyPrimaryButton(title: didSave ? "experts.appointment.saved".localized : "experts.appointment.save".localized) {
                             saveAppointment()
                         }
                         .disabled(didSave)
 
-                        Text("Sweezy збереже зустріч і нагадування. Щоб підтвердити час з експертом, надішліть запит через «Запитати».")
+                        Text("experts.appointment.disclaimer".localized)
                             .font(.system(size: 11, weight: .medium))
                             .foregroundColor(.white.opacity(0.58))
                     }
@@ -307,7 +307,7 @@ private struct BookExpertAppointmentView: View {
                 }
             }
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Закрити") { dismiss() } }
+                ToolbarItem(placement: .cancellationAction) { Button("common.close".localized) { dismiss() } }
             }
         }
         .preferredColorScheme(.dark)
@@ -315,14 +315,14 @@ private struct BookExpertAppointmentView: View {
 
     private func saveAppointment() {
         let appointment = Appointment(
-            title: "Консультація: \(expert.authorName)",
+            title: "experts.appointment.consultation_with".localized(with: expert.authorName),
             description: notes.isEmpty ? expert.expertSpecialtyEnum?.localizedName : notes,
             category: .integration,
             dateTime: date,
             duration: 3600,
             contactInfo: ContactInfo(
                 name: expert.authorName,
-                title: "Sweezy Expert",
+                title: "experts.appointment.contact_title".localized,
                 phoneNumber: nil,
                 email: nil,
                 website: nil,
@@ -349,7 +349,7 @@ struct AskExpertView: View {
             VStack(alignment: .leading, spacing: Theme.Spacing.lg) {
                 Text("experts.qa.title".localized)
                     .font(.system(size: 22, weight: .bold, design: .rounded))
-                Text("Replying to **\(expert.authorName)**")
+                Text("experts.qa.replying_to".localized(with: expert.authorName))
                     .font(.system(size: 14))
                     .foregroundColor(Theme.Colors.textSecondary)
 

@@ -21,12 +21,12 @@ struct JourneyMapView: View {
     @State private var showsPlaceList = false
 
     private let filters: [(PlaceType?, String, String)] = [
-        (nil, "Усі", "square.grid.2x2"),
-        (.government, "Установи", "building.columns"),
-        (.healthcare, "Здоров’я", "cross.case"),
-        (.education, "Освіта", "graduationcap"),
-        (.employment, "Робота", "briefcase"),
-        (.community, "Спільнота", "person.2")
+        (nil, "common.all".localized, "square.grid.2x2"),
+        (.government, "map.type.government".localized, "building.columns"),
+        (.healthcare, "map.type.healthcare".localized, "cross.case"),
+        (.education, "map.type.education".localized, "graduationcap"),
+        (.employment, "map.type.employment".localized, "briefcase"),
+        (.community, "map.type.community".localized, "person.2")
     ]
 
     var body: some View {
@@ -127,7 +127,7 @@ struct JourneyMapView: View {
 
     private var topControls: some View {
         HStack(spacing: 10) {
-            JourneySearchField(text: $searchText, prompt: "Пошук на карті")
+            JourneySearchField(text: $searchText, prompt: "journey.map.search_placeholder".localized)
 
             Button {
                 showsPlaceList = true
@@ -142,7 +142,7 @@ struct JourneyMapView: View {
                     .overlay(Circle().stroke(Color.white.opacity(0.34), lineWidth: 1))
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("Показати список місць")
+            .accessibilityLabel("journey.map.show_list".localized)
 
             Button {
                 activateUserLocation()
@@ -156,8 +156,8 @@ struct JourneyMapView: View {
                     .overlay(Circle().stroke(Color.white.opacity(0.34), lineWidth: 1))
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("Моє місцезнаходження")
-            .accessibilityHint("Запитує доступ до геолокації лише після натискання")
+            .accessibilityLabel("map.center_on_me.label".localized)
+            .accessibilityHint("journey.map.location_hint".localized)
         }
     }
 
@@ -177,7 +177,7 @@ struct JourneyMapView: View {
     private var nearbyPlacesRail: some View {
         VStack(spacing: 9) {
             HStack(spacing: 8) {
-                Text(selectedType == nil ? "Поруч із вами" : filterTitle)
+                Text(selectedType == nil ? "journey.map.near_you".localized : filterTitle)
                     .font(.system(size: 17, weight: .bold, design: .rounded))
                     .foregroundColor(.white)
 
@@ -191,7 +191,7 @@ struct JourneyMapView: View {
 
                 Spacer()
 
-                Button("Усі місця") {
+                Button("journey.map.all_places".localized) {
                     showsPlaceList = true
                 }
                 .font(.system(size: 12, weight: .semibold))
@@ -239,10 +239,10 @@ struct JourneyMapView: View {
                     .font(.system(size: 21, weight: .semibold))
                     .foregroundColor(JourneyVisual.lime)
                 VStack(alignment: .leading, spacing: 3) {
-                    Text("Нічого не знайдено")
+                    Text("journey.map.nothing_found".localized)
                         .font(.system(size: 16, weight: .bold))
                         .foregroundColor(.white)
-                    Text("Змініть пошук або виберіть іншу категорію")
+                    Text("journey.map.change_search_or_category".localized)
                         .font(.system(size: 12))
                         .foregroundColor(.white.opacity(0.62))
                 }
@@ -299,7 +299,7 @@ struct JourneyMapView: View {
                             .clipShape(Circle())
                     }
                     .buttonStyle(.plain)
-                    .accessibilityLabel("Зберегти місце")
+                    .accessibilityLabel("journey.map.save_place".localized)
                 }
 
                 Label(locationLine(for: place), systemImage: "mappin.and.ellipse")
@@ -336,7 +336,7 @@ struct JourneyMapView: View {
                             } else {
                                 Image(systemName: "arrow.triangle.turn.up.right.diamond.fill")
                             }
-                            Text("Маршрут")
+                            Text("map.directions".localized)
                                 .lineLimit(1)
                         }
                         .font(.system(size: 12, weight: .bold))
@@ -361,7 +361,7 @@ struct JourneyMapView: View {
                                 .overlay(Circle().stroke(Color.white.opacity(0.16), lineWidth: 1))
                         }
                         .buttonStyle(.plain)
-                        .accessibilityLabel("Записатися")
+                        .accessibilityLabel("journey.map.book_appointment".localized)
                     }
                 }
             }
@@ -405,11 +405,11 @@ struct JourneyMapView: View {
                     .padding(.bottom, 28)
                 }
             }
-            .navigationTitle("Місця поруч")
+            .navigationTitle("journey.map.places_nearby".localized)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Готово") {
+                    Button("common.done".localized) {
                         showsPlaceList = false
                     }
                     .foregroundColor(JourneyVisual.lime)
@@ -495,7 +495,7 @@ struct JourneyMapView: View {
     }
 
     private var filterTitle: String {
-        filters.first(where: { $0.0 == selectedType })?.1 ?? "Поруч із вами"
+        filters.first(where: { $0.0 == selectedType })?.1 ?? "journey.map.near_you".localized
     }
 
     private func applyFilter(_ type: PlaceType?) {
@@ -587,17 +587,17 @@ struct JourneyMapView: View {
 
     private func typeTitle(for type: PlaceType) -> String {
         switch type {
-        case .government: return "Установа"
-        case .healthcare: return "Здоров’я"
-        case .education: return "Освіта"
-        case .employment: return "Робота"
-        case .community, .social: return "Спільнота"
-        case .housing: return "Житло"
-        case .legal: return "Право"
-        case .transport: return "Транспорт"
-        case .banking: return "Фінанси"
-        case .shopping: return "Покупки"
-        case .emergency: return "Допомога"
+        case .government: return "map.type.government".localized
+        case .healthcare: return "map.type.healthcare".localized
+        case .education: return "map.type.education".localized
+        case .employment: return "map.type.employment".localized
+        case .community, .social: return "map.type.community".localized
+        case .housing: return "map.type.housing".localized
+        case .legal: return "journey.map.type.legal".localized
+        case .transport: return "map.type.transport".localized
+        case .banking: return "map.type.banking".localized
+        case .shopping: return "map.type.shopping".localized
+        case .emergency: return "map.type.emergency".localized
         }
     }
 
@@ -644,8 +644,8 @@ struct JourneyMapView: View {
               meters <= 300_000 else {
             return nil
         }
-        if meters < 1_000 { return "\(Int(meters.rounded())) м" }
-        return String(format: "%.1f км", meters / 1_000)
+        if meters < 1_000 { return "journey.map.distance_meters".localized(with: Int(meters.rounded())) }
+        return "journey.map.distance_km".localized(with: meters / 1_000)
     }
 
     private func locationLine(for place: Place) -> String {
@@ -656,10 +656,10 @@ struct JourneyMapView: View {
     private func todayHours(for place: Place) -> String {
         let weekday = Calendar.current.component(.weekday, from: Date())
         guard let hours = place.openingHours.first(where: { $0.weekday == weekday }) else {
-            return "Години уточнюються"
+            return "journey.map.hours_tbd".localized
         }
-        if hours.isClosed { return "Сьогодні зачинено" }
-        let prefix = place.isOpen() ? "Відкрито" : "Сьогодні"
+        if hours.isClosed { return "journey.map.closed_today".localized }
+        let prefix = place.isOpen() ? "map.open".localized : "journey.map.today".localized
         return "\(prefix) · \(hours.openTime.formatted)–\(hours.closeTime.formatted)"
     }
 

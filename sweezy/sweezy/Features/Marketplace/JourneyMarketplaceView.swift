@@ -91,11 +91,11 @@ struct JourneyMarketplaceView: View {
                 ChatInboxView()
                     .environmentObject(appContainer)
             }
-            .alert("Календар", isPresented: Binding(
+            .alert("journey.marketplace.calendar".localized, isPresented: Binding(
                 get: { calendarMessage != nil },
                 set: { if !$0 { calendarMessage = nil } }
             )) {
-                Button("OK") { calendarMessage = nil }
+                Button("common.ok".localized) { calendarMessage = nil }
             } message: {
                 Text(calendarMessage ?? "")
             }
@@ -182,7 +182,7 @@ struct JourneyMarketplaceView: View {
                         .overlay(Circle().stroke(.white.opacity(0.24), lineWidth: 1))
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("Експерти")
+                .accessibilityLabel("experts.section.title".localized)
 
                 Button {
                     guard sessionManager.isAuthenticated else {
@@ -227,7 +227,7 @@ struct JourneyMarketplaceView: View {
         case .services:
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
-                    MarketFilterChip(title: "Усі", icon: nil, selected: servicesVM.selectedCategory == nil) {
+                    MarketFilterChip(title: "common.all".localized, icon: nil, selected: servicesVM.selectedCategory == nil) {
                         servicesVM.selectedCategory = nil
                         Task { await servicesVM.applyFilters() }
                     }
@@ -242,7 +242,7 @@ struct JourneyMarketplaceView: View {
         case .items:
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
-                    MarketFilterChip(title: "Усі", icon: nil, selected: itemsVM.selectedItemCategory == nil) {
+                    MarketFilterChip(title: "common.all".localized, icon: nil, selected: itemsVM.selectedItemCategory == nil) {
                         itemsVM.selectedItemCategory = nil
                         Task { await itemsVM.applyFilters() }
                     }
@@ -257,7 +257,7 @@ struct JourneyMarketplaceView: View {
         case .events:
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
-                    MarketFilterChip(title: "Усі", icon: nil, selected: eventsVM.selectedCategory == nil) {
+                    MarketFilterChip(title: "common.all".localized, icon: nil, selected: eventsVM.selectedCategory == nil) {
                         eventsVM.selectedCategory = nil
                         Task { await eventsVM.applyFilters() }
                     }
@@ -284,19 +284,19 @@ struct JourneyMarketplaceView: View {
     private var servicesContent: some View {
         VStack(alignment: .leading, spacing: 14) {
             if servicesVM.isLoading && servicesVM.listings.isEmpty {
-                MarketLoadingView(title: "Шукаємо перевірених фахівців")
+                MarketLoadingView(title: "journey.marketplace.services.loading".localized)
             } else if servicesVM.filteredListings.isEmpty {
                 MarketEmptyCard(
                     icon: "person.2.badge.plus",
-                    title: "Поки немає послуг",
-                    subtitle: "Стань першим перевіреним спеціалістом у своєму кантоні.",
-                    actionTitle: "Додати послугу",
+                    title: "journey.marketplace.services.empty_title".localized,
+                    subtitle: "journey.marketplace.services.empty_subtitle".localized,
+                    actionTitle: "journey.marketplace.services.add_action".localized,
                     action: handleCreateTap
                 )
             } else {
                 sectionHeader(
-                    "Рекомендуємо",
-                    trailing: servicesVM.isShowingStaleData ? "Офлайн-дані" : "Перевірені профілі"
+                    "journey.marketplace.recommended".localized,
+                    trailing: servicesVM.isShowingStaleData ? "journey.marketplace.offline_data".localized : "journey.marketplace.verified_profiles".localized
                 )
 
                 ScrollView(.horizontal, showsIndicators: false) {
@@ -315,7 +315,7 @@ struct JourneyMarketplaceView: View {
                 }
                 .scrollTargetBehavior(.viewAligned)
 
-                sectionHeader("Усі послуги", trailing: "\(servicesVM.filteredListings.count)")
+                sectionHeader("journey.marketplace.all_services".localized, trailing: "\(servicesVM.filteredListings.count)")
 
                 LazyVStack(spacing: 11) {
                     ForEach(servicesVM.filteredListings.prefix(12)) { listing in
@@ -334,7 +334,7 @@ struct JourneyMarketplaceView: View {
     private var itemsContent: some View {
         VStack(alignment: .leading, spacing: 14) {
             if itemsVM.isLoading && itemsVM.listings.isEmpty {
-                MarketLoadingView(title: "Оновлюємо речі поруч")
+                MarketLoadingView(title: "journey.marketplace.items.loading".localized)
             } else if let featuredItem {
                 JourneyGoodsFeatureCard(
                     listing: featuredItem,
@@ -343,7 +343,7 @@ struct JourneyMarketplaceView: View {
                     save: { appContainer.savedItems.toggleListing(featuredItem.id) }
                 )
 
-                sectionHeader("Ще поруч", trailing: itemsVM.isShowingStaleData ? "Офлайн-дані" : nil)
+                sectionHeader("journey.marketplace.more_nearby".localized, trailing: itemsVM.isShowingStaleData ? "journey.marketplace.offline_data".localized : nil)
 
                 LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible())], spacing: 10) {
                     ForEach(remainingItems.prefix(8)) { listing in
@@ -360,9 +360,9 @@ struct JourneyMarketplaceView: View {
             } else {
                 MarketEmptyCard(
                     icon: "shippingbox.fill",
-                    title: "Речей поки немає",
-                    subtitle: "Додай річ з фото, станом, ціною та датою актуальності.",
-                    actionTitle: "Додати річ",
+                    title: "journey.marketplace.items.empty_title".localized,
+                    subtitle: "journey.marketplace.items.empty_subtitle".localized,
+                    actionTitle: "journey.marketplace.items.add_action".localized,
                     action: handleCreateTap
                 )
             }
@@ -372,7 +372,7 @@ struct JourneyMarketplaceView: View {
     private var eventsContent: some View {
         VStack(alignment: .leading, spacing: 14) {
             if eventsVM.isLoading && eventsVM.events.isEmpty {
-                MarketLoadingView(title: "Збираємо актуальні події")
+                MarketLoadingView(title: "journey.marketplace.events.loading".localized)
             } else if let featuredEvent {
                 JourneyEventFeatureCard(
                     event: featuredEvent,
@@ -384,7 +384,7 @@ struct JourneyMarketplaceView: View {
                     }
                 )
 
-                sectionHeader("Незабаром", trailing: eventsVM.isShowingStaleData ? "Офлайн-дані" : nil)
+                sectionHeader("journey.marketplace.coming_soon".localized, trailing: eventsVM.isShowingStaleData ? "journey.marketplace.offline_data".localized : nil)
 
                 ForEach(remainingEvents.prefix(6)) { event in
                     Button { selectedEvent = event } label: {
@@ -399,9 +399,9 @@ struct JourneyMarketplaceView: View {
             } else {
                 MarketEmptyCard(
                     icon: "calendar.badge.plus",
-                    title: "Подій поки немає",
-                    subtitle: "Створи першу зустріч для спільноти у своєму кантоні.",
-                    actionTitle: "Додати подію",
+                    title: "journey.marketplace.events.empty_title".localized,
+                    subtitle: "journey.marketplace.events.empty_subtitle".localized,
+                    actionTitle: "journey.marketplace.events.add_action".localized,
                     action: handleCreateTap
                 )
             }
@@ -474,17 +474,17 @@ struct JourneyMarketplaceView: View {
 
     private var searchPrompt: String {
         switch selectedMode {
-        case .services: return "Пошук послуг"
-        case .items: return "Пошук речей"
-        case .events: return "Пошук подій"
+        case .services: return "journey.marketplace.search.services".localized
+        case .items: return "journey.marketplace.search.items".localized
+        case .events: return "events.search".localized
         }
     }
 
     private var heroTitle: String {
         switch selectedMode {
-        case .services: return "Поруч є люди,\nякі допоможуть"
-        case .items: return "Речі поруч"
-        case .events: return "Події поруч"
+        case .services: return "journey.marketplace.hero.services".localized
+        case .items: return "journey.marketplace.hero.items".localized
+        case .events: return "journey.marketplace.hero.events".localized
         }
     }
 
@@ -498,20 +498,29 @@ struct JourneyMarketplaceView: View {
 
     private var createAccessibilityLabel: String {
         switch selectedMode {
-        case .services: return "Додати послугу"
-        case .items: return "Додати річ"
-        case .events: return "Додати подію"
+        case .services: return "journey.marketplace.services.add_action".localized
+        case .items: return "journey.marketplace.items.add_action".localized
+        case .events: return "journey.marketplace.events.add_action".localized
         }
     }
 
     private let serviceFilters: [(ServiceCategory, String)] = [
-        (.documents, "Документи"), (.translation, "Переклад"), (.legal, "Юридичні"), (.moving, "Переїзд")
+        (.documents, "journey.marketplace.filter.documents".localized),
+        (.translation, "journey.marketplace.filter.translation".localized),
+        (.legal, "journey.marketplace.filter.legal".localized),
+        (.moving, "journey.marketplace.filter.moving".localized)
     ]
     private let itemFilters: [(ItemCategory, String)] = [
-        (.furniture, "Меблі"), (.electronics, "Техніка"), (.kids, "Дитяче"), (.free, "Безкоштовно")
+        (.furniture, "journey.marketplace.filter.furniture".localized),
+        (.electronics, "journey.marketplace.filter.electronics".localized),
+        (.kids, "journey.marketplace.filter.kids".localized),
+        (.free, "journey.marketplace.filter.free".localized)
     ]
     private let eventFilters: [(EventCategory, String)] = [
-        (.community, "Зустрічі"), (.education, "Освіта"), (.kids, "Діти"), (.culture, "Культура")
+        (.community, "events.category.community".localized),
+        (.education, "events.category.education".localized),
+        (.kids, "journey.marketplace.filter.kids".localized),
+        (.culture, "events.category.culture".localized)
     ]
 
     private func handleCreateTap() {
@@ -558,7 +567,7 @@ struct JourneyMarketplaceView: View {
     private func addToCalendar(_ event: EventListing) async {
         do {
             try await calendarService.add(event)
-            calendarMessage = "Подію додано до календаря"
+            calendarMessage = "journey.marketplace.event_added_to_calendar".localized
         } catch {
             calendarMessage = error.localizedDescription
         }
@@ -573,9 +582,9 @@ private enum JourneyMarketMode: String, CaseIterable, Identifiable {
     var id: String { rawValue }
     var title: String {
         switch self {
-        case .services: return "Послуги"
-        case .items: return "Речі"
-        case .events: return "Події"
+        case .services: return "journey.marketplace.mode.services".localized
+        case .items: return "journey.marketplace.mode.items".localized
+        case .events: return "journey.marketplace.mode.events".localized
         }
     }
 }
@@ -629,7 +638,7 @@ private struct MarketSearchField: View {
                         .foregroundColor(.white.opacity(0.45))
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("Очистити пошук")
+                .accessibilityLabel("journey.marketplace.clear_search".localized)
             }
         }
         .font(.system(size: 15, weight: .medium))
@@ -683,35 +692,35 @@ private struct JourneyServiceFeatureCard: View {
 
                 VStack(alignment: .leading, spacing: 11) {
                     HStack {
-                        Label(listing?.expertLanguages.first?.uppercased() ?? "УКРАЇНСЬКОЮ", systemImage: "globe")
+                        Label(listing?.expertLanguages.first?.uppercased() ?? "journey.marketplace.language_uk".localized, systemImage: "globe")
                             .marketPill(background: Color.black.opacity(0.62))
                         Spacer()
                         if listing?.isVerified ?? true {
-                            Label("Перевірено", systemImage: "checkmark.seal.fill")
+                            Label("map.verified".localized, systemImage: "checkmark.seal.fill")
                                 .marketPill(foreground: .black, background: JourneyVisual.lime)
                         } else {
-                            Text("Спільнота")
+                            Text("journey.marketplace.community".localized)
                                 .marketPill(background: Color.black.opacity(0.62))
                         }
                     }
 
                     Spacer()
 
-                    Text(listing?.title ?? "Консультації з переїзду")
+                    Text(listing?.title ?? "journey.marketplace.sample_service_title".localized)
                         .font(.system(size: 27, weight: .bold, design: .rounded))
                         .foregroundColor(.white)
                         .lineLimit(2)
                         .multilineTextAlignment(.leading)
 
-                    Text(listing?.authorName ?? "Наталія М.")
+                    Text(listing?.authorName ?? "journey.marketplace.sample_author".localized)
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundColor(.white.opacity(0.72))
 
                     HStack(spacing: 16) {
-                        Label(listing.map(\.freshnessText) ?? "Перевірено 2 дні тому", systemImage: "clock.badge.checkmark")
+                        Label(listing.map(\.freshnessText) ?? "journey.marketplace.sample_freshness".localized, systemImage: "clock.badge.checkmark")
                         Label(responseText, systemImage: "message")
                         Spacer()
-                        Text(listing?.priceDisplay ?? "від CHF 80")
+                        Text(listing?.priceDisplay ?? "journey.marketplace.sample_price".localized)
                             .fontWeight(.bold)
                     }
                     .font(.system(size: 11, weight: .medium))
@@ -740,8 +749,8 @@ private struct JourneyServiceFeatureCard: View {
     }
 
     private var responseText: String {
-        guard let hours = listing?.responseTimeHours else { return "Відповідає ≈ 2 год" }
-        return hours < 24 ? "Відповідає ≈ \(hours) год" : "Відповідає до доби"
+        guard let hours = listing?.responseTimeHours else { return "journey.marketplace.responds_default".localized }
+        return hours < 24 ? "journey.marketplace.responds_hours".localized(with: hours) : "journey.marketplace.responds_within_day".localized
     }
 }
 
@@ -800,7 +809,7 @@ private struct JourneyServiceSpotlightCard: View {
                             Label(listing.freshnessText, systemImage: "clock.badge.checkmark")
                                 .lineLimit(1)
                             Spacer(minLength: 6)
-                            Text(listing.priceDisplay ?? "За домовленістю")
+                            Text(listing.priceDisplay ?? "journey.marketplace.negotiable_price".localized)
                                 .fontWeight(.black)
                                 .foregroundColor(.white)
                         }
@@ -814,7 +823,7 @@ private struct JourneyServiceSpotlightCard: View {
 
             HStack(spacing: 8) {
                 if listing.isVerified {
-                    Label("Перевірено", systemImage: "checkmark.seal.fill")
+                    Label("map.verified".localized, systemImage: "checkmark.seal.fill")
                         .font(.system(size: 10, weight: .black, design: .rounded))
                         .foregroundColor(.black)
                         .padding(.horizontal, 10)
@@ -833,7 +842,7 @@ private struct JourneyServiceSpotlightCard: View {
                         .overlay(Circle().stroke(.white.opacity(0.24), lineWidth: 1))
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel(isSaved ? "Прибрати зі збережених" : "Зберегти")
+                .accessibilityLabel(isSaved ? "journey.marketplace.remove_saved".localized : "journey.marketplace.save".localized)
             }
             .padding(13)
         }
@@ -875,7 +884,7 @@ private struct JourneyServiceRow: View {
                     VStack(alignment: .leading, spacing: 7) {
                         HStack(spacing: 6) {
                             Image(systemName: listing.isVerified ? "checkmark.seal.fill" : "person.2.fill")
-                            Text(listing.isVerified ? "Перевірено" : "Спільнота")
+                            Text(listing.isVerified ? "map.verified".localized : "journey.marketplace.community".localized)
                             Text("•")
                             Text(listing.freshnessText)
                                 .lineLimit(1)
@@ -924,7 +933,7 @@ private struct JourneyServiceRow: View {
             }
             .buttonStyle(.plain)
             .padding(10)
-            .accessibilityLabel(isSaved ? "Прибрати зі збережених" : "Зберегти")
+            .accessibilityLabel(isSaved ? "journey.marketplace.remove_saved".localized : "journey.marketplace.save".localized)
         }
         .frame(minHeight: 148)
         .background(Color.white.opacity(0.07))
@@ -950,14 +959,14 @@ private struct JourneyGoodsFeatureCard: View {
                 LinearGradient(colors: [.clear, .black.opacity(0.88)], startPoint: .center, endPoint: .bottom)
                 VStack(alignment: .leading, spacing: 8) {
                     HStack {
-                        Text(listing.condition?.displayName ?? "Стан не вказано")
+                        Text(listing.condition?.displayName ?? "journey.marketplace.condition_unspecified".localized)
                             .marketPill(background: Color.black.opacity(0.64))
                         Spacer()
-                        Text(listing.isVerified ? "Перевірений продавець" : "Спільнота")
+                        Text(listing.isVerified ? "journey.marketplace.verified_seller".localized : "journey.marketplace.community".localized)
                             .marketPill(foreground: listing.isVerified ? .black : .white, background: listing.isVerified ? JourneyVisual.lime : Color.black.opacity(0.64))
                     }
                     Spacer()
-                    Text(listing.priceDisplay ?? "Безкоштовно")
+                    Text(listing.priceDisplay ?? "journey.marketplace.free".localized)
                         .font(.system(size: 23, weight: .bold, design: .rounded))
                         .foregroundColor(.white)
                     Text(listing.title)
@@ -1016,7 +1025,7 @@ private struct JourneyGoodsGridCard: View {
                 .padding(7)
             }
             VStack(alignment: .leading, spacing: 5) {
-                Text(listing.priceDisplay ?? "Безкоштовно")
+                Text(listing.priceDisplay ?? "journey.marketplace.free".localized)
                     .font(.system(size: 14, weight: .bold, design: .rounded))
                     .foregroundColor(JourneyVisual.lime)
                 Text(listing.title)
@@ -1039,7 +1048,7 @@ private struct JourneyGoodsGridCard: View {
     }
 
     private func shortFreshness(_ date: Date?) -> String {
-        guard let date else { return "Без дати" }
+        guard let date else { return "journey.marketplace.no_date".localized }
         return date.formatted(.dateTime.day().month(.abbreviated))
     }
 }
@@ -1102,12 +1111,12 @@ private struct JourneyEventFeatureCard: View {
 
                 HStack(spacing: 8) {
                     Button(action: addToCalendar) {
-                        Label("До календаря", systemImage: "calendar.badge.plus")
+                        Label("journey.marketplace.add_to_calendar".localized, systemImage: "calendar.badge.plus")
                             .marketActionButton()
                     }
                     .buttonStyle(.plain)
                     ShareLink(item: shareText) {
-                        Label("Поділитися", systemImage: "square.and.arrow.up")
+                        Label("common.share".localized, systemImage: "square.and.arrow.up")
                             .marketActionButton()
                     }
                 }
@@ -1128,7 +1137,7 @@ private struct JourneyEventFeatureCard: View {
         return "\(schedule) · \(place)"
     }
     private var eventTrustText: String {
-        event.isVerified ? "Перевірений організатор · \(event.freshnessText)" : "Модерація Sweezy · \(event.freshnessText)"
+        event.isVerified ? "journey.marketplace.verified_organizer".localized(with: event.freshnessText) : "journey.marketplace.moderated_by_sweezy".localized(with: event.freshnessText)
     }
     private var shareText: String { "\(event.title) — \(scheduleAndPlace)" }
     private var eventImageName: String {
@@ -1171,7 +1180,7 @@ private struct JourneyUpcomingEventRow: View {
                     .font(.system(size: 10, weight: .medium))
                     .foregroundColor(.white.opacity(0.5))
                     .lineLimit(1)
-                Text(event.isVerified ? "Організатор перевірений" : "Модерація Sweezy")
+                Text(event.isVerified ? "journey.marketplace.organizer_verified".localized : "journey.marketplace.moderated_by_sweezy_short".localized)
                     .font(.system(size: 10, weight: .semibold))
                     .foregroundColor(JourneyVisual.lime)
             }

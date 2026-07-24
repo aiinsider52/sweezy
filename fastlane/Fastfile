@@ -25,18 +25,31 @@ platform :ios do
     deliver(
       submit_for_review: false,
       skip_metadata: false,
-      skip_screenshots: false,
+      # Screenshots are captured separately via scripts/capture-journey-screenshots.sh
+      skip_screenshots: true,
       skip_binary_upload: true
     )
   end
 
-  desc "Upload build + metadata to TestFlight"
+  desc "Upload build to TestFlight (metadata optional)"
   lane :upload do
     build_app(
       scheme: "sweezy",
       project: "sweezy/sweezy.xcodeproj"
     )
-    upload_to_testflight
+    upload_to_testflight(
+      skip_waiting_for_build_processing: true
+    )
+  end
+
+  desc "Upload metadata only (no binary)"
+  lane :deliver_metadata do
+    deliver(
+      submit_for_review: false,
+      skip_metadata: false,
+      skip_screenshots: true,
+      skip_binary_upload: true
+    )
   end
 end
 

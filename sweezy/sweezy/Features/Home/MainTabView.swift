@@ -503,7 +503,7 @@ struct OptimizedMapView: View {
     private var filtersSection: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
-                // Диапазон: рядом или вся Швейцария
+                // Range: nearby or all of Switzerland
                 MapFilterChip(
                     title: "map.range.nearby_10km".localized,
                     isSelected: rangeMode == .nearby,
@@ -526,7 +526,7 @@ struct OptimizedMapView: View {
                     }
                 }
                 
-                // Разделитель по смыслу: ниже — фильтр по типу сервиса
+                // Semantic divider: service-type filter below
                 MapFilterChip(
                     title: "common.all".localized,
                     isSelected: selectedType == nil,
@@ -864,9 +864,9 @@ struct OptimizedMapView: View {
         guard let userLocation else { return nil }
         let distance = place.distance(from: userLocation)
         if distance < 1000 {
-            return "\(Int(distance)) м"
+            return "\(Int(distance)) \("common.unit.meters".localized)"
         }
-        return String(format: "%.1f км", distance / 1000)
+        return String(format: "%.1f %@", distance / 1000, "common.unit.kilometers".localized)
     }
     
     private func distanceMeters(from: CLLocationCoordinate2D, to: CLLocationCoordinate2D) -> Double {
@@ -881,7 +881,7 @@ struct OptimizedMapView: View {
                 sin(dLon / 2) * sin(dLon / 2) * cos(lat1) * cos(lat2)
         let c = 2 * atan2(sqrt(a), sqrt(1 - a))
         
-        return earthRadiusKm * c * 1_000 // в метры
+        return earthRadiusKm * c * 1_000 // meters
     }
     
     private func loadPlacesOnce() {
@@ -1623,9 +1623,9 @@ struct PlaceDetailSheet: View {
         guard let userLoc = appContainer.locationService.currentLocation else { return }
         let distance = place.distance(from: userLoc)
         if distance < 1000 {
-            distanceText = "\(Int(distance)) м"
+            distanceText = "\(Int(distance)) \("common.unit.meters".localized)"
         } else {
-            distanceText = String(format: "%.1f км", distance / 1000)
+            distanceText = String(format: "%.1f %@", distance / 1000, "common.unit.kilometers".localized)
         }
     }
 }
@@ -1681,9 +1681,9 @@ struct PlaceLiteRow: View {
         guard let userLocation = appContainer.locationService.currentLocation else { return nil }
         let distance = place.distance(from: userLocation)
         if distance < 1000 {
-            return "\(Int(distance)) м"
+            return "\(Int(distance)) \("common.unit.meters".localized)"
         }
-        return String(format: "%.1f км", distance / 1000)
+        return String(format: "%.1f %@", distance / 1000, "common.unit.kilometers".localized)
     }
     
     var body: some View {
@@ -2501,7 +2501,7 @@ struct SettingsLiteView: View {
 struct LanguageSettingsView: View {
     var body: some View {
         List {
-            Text("Українська")
+            Text("language.ukrainian".localized)
             Text("English")
             Text("Deutsch")
         }

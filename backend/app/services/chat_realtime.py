@@ -84,20 +84,54 @@ class ChatRealtime:
         await self._deliver_local(user_id, event)
 
     async def _listen(self) -> None:
-        assert self._pubsub is not None
+        backoff_seconds = 1.0
         while True:
             try:
+                if self._pubsub is None:
+                    await self._resubscribe()
+                    backoff_seconds = 1.0
+                assert self._pubsub is not None
                 message = await self._pubsub.get_message(ignore_subscribe_messages=True, timeout=1.0)
                 if not message:
                     await asyncio.sleep(0.05)
                     continue
                 envelope = json.loads(message["data"])
                 await self._deliver_local(str(envelope["user_id"]), dict(envelope["event"]))
+                backoff_seconds = 1.0
             except asyncio.CancelledError:
                 raise
             except Exception as exc:
-                log.warning("chat_redis_listener_error", error=str(exc))
-                await asyncio.sleep(1)
+                log.warning("chat_redis_listener_error", error=str(exc), backoff=backoff_seconds)
+                await self._reset_pubsub()
+                await asyncio.sleep(backoff_seconds)
+                backoff_seconds = min(backoff_seconds * 2, 30.0)
+
+    async def _resubscribe(self) -> None:
+        redis_url = get_settings().REDIS_URL
+        if not redis_url:
+            raise RuntimeError("REDIS_URL is empty")
+        from redis.asyncio import Redis
+
+        if self._redis is None:
+            self._redis = Redis.from_url(redis_url, encoding="utf-8", decode_responses=True)
+        await self._redis.ping()
+        self._pubsub = self._redis.pubsub()
+        await self._pubsub.subscribe(self._channel)
+        log.info("chat_redis_resubscribed")
+
+    async def _reset_pubsub(self) -> None:
+        if self._pubsub is not None:
+            try:
+                await self._pubsub.close()
+            except Exception:
+                pass
+            self._pubsub = None
+        if self._redis is not None:
+            try:
+                await self._redis.close()
+            except Exception:
+                pass
+            self._redis = None
 
     async def _deliver_local(self, user_id: str, event: dict[str, Any]) -> None:
         async with self._lock:

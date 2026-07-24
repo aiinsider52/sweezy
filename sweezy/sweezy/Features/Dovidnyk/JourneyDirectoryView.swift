@@ -19,11 +19,11 @@ struct JourneyDirectoryView: View {
     @State private var contentRevision = 0
 
     private let featuredCategories: [(GuideCategory?, String, String)] = [
-        (nil, "Усі", "sparkles"),
-        (.documents, "Документи", "doc.text"),
-        (.housing, "Житло", "house"),
-        (.work, "Робота", "briefcase"),
-        (.healthcare, "Здоров’я", "cross.case")
+        (nil, "common.all".localized, "sparkles"),
+        (.documents, "journey.directory.category.documents".localized, "doc.text"),
+        (.housing, "journey.directory.category.housing".localized, "house"),
+        (.work, "journey.directory.category.work".localized, "briefcase"),
+        (.healthcare, "journey.directory.category.healthcare".localized, "cross.case")
     ]
 
     var body: some View {
@@ -139,7 +139,7 @@ struct JourneyDirectoryView: View {
 
     private var guidesWorkspace: some View {
         VStack(alignment: .leading, spacing: 18) {
-            JourneySearchField(text: $searchText, prompt: "Пошук у довіднику")
+            JourneySearchField(text: $searchText, prompt: "journey.directory.search_placeholder".localized)
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
@@ -171,10 +171,10 @@ struct JourneyDirectoryView: View {
                     Image(systemName: "book.closed")
                         .font(.system(size: 28, weight: .medium))
                         .foregroundColor(JourneyVisual.lime)
-                    Text("Гайдів поки немає")
+                    Text("journey.directory.no_guides.title".localized)
                         .font(.system(size: 18, weight: .bold, design: .rounded))
                         .foregroundColor(.white)
-                    Text("Онови контент або змініть фільтр категорії.")
+                    Text("journey.directory.no_guides.subtitle".localized)
                         .font(.system(size: 13, weight: .medium))
                         .foregroundColor(.white.opacity(0.58))
                         .multilineTextAlignment(.center)
@@ -185,11 +185,11 @@ struct JourneyDirectoryView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
             } else {
                 HStack {
-                    Text("Перевірені матеріали")
+                    Text("journey.directory.verified_materials".localized)
                         .font(.system(size: 17, weight: .bold, design: .rounded))
                         .foregroundColor(.white)
                     Spacer()
-                    Label("Офіційні джерела", systemImage: "checkmark.seal.fill")
+                    Label("journey.directory.official_sources".localized, systemImage: "checkmark.seal.fill")
                         .font(.system(size: 10, weight: .semibold))
                         .foregroundColor(JourneyVisual.lime)
                 }
@@ -208,7 +208,7 @@ struct JourneyDirectoryView: View {
 
     private var toolsWorkspace: some View {
         VStack(alignment: .leading, spacing: 18) {
-            Text("Усе практичне — в одному місці")
+            Text("journey.directory.tools_subtitle".localized)
                 .font(.system(size: 14, weight: .medium))
                 .foregroundColor(.white.opacity(0.72))
 
@@ -244,7 +244,7 @@ struct JourneyDirectoryView: View {
                 }
             }
 
-            Text("Що далі?")
+            Text("journey.directory.whats_next".localized)
                 .font(.system(size: 22, weight: .bold, design: .rounded))
                 .foregroundColor(.white)
                 .padding(.top, 4)
@@ -268,7 +268,7 @@ struct JourneyDirectoryView: View {
             } label: {
                 HStack(spacing: 9) {
                     Image(systemName: "square.grid.2x2.fill")
-                    Text(showsAllTools ? "Сховати інструменти" : "Відкрити всі інструменти")
+                    Text(showsAllTools ? "journey.directory.hide_tools".localized : "journey.directory.show_all_tools".localized)
                     Image(systemName: showsAllTools ? "chevron.up" : "chevron.right")
                 }
                 .font(.system(size: 14, weight: .semibold, design: .rounded))
@@ -304,7 +304,7 @@ struct JourneyDirectoryView: View {
 
     private var nextPlanAction: String {
         appContainer.firstWeekService.tasks.first(where: { !$0.isDone })?.title
-            ?? "Обери наступний крок"
+            ?? "journey.directory.pick_next_step".localized
     }
 
     private var tasksWorkspace: some View {
@@ -315,9 +315,9 @@ struct JourneyDirectoryView: View {
 
     private var workspaceTitle: String {
         switch selectedWorkspace {
-        case .guides: return "Знайди\nпотрібну\nвідповідь"
-        case .tools: return "Зроби\nнаступний\nкрок"
-        case .tasks: return "Твій прогрес\nкрок за кроком"
+        case .guides: return "journey.directory.workspace_title.guides".localized
+        case .tools: return "journey.directory.workspace_title.tools".localized
+        case .tasks: return "journey.directory.workspace_title.tasks".localized
         }
     }
 
@@ -326,11 +326,11 @@ struct JourneyDirectoryView: View {
         let completedCount = tasks.filter(\.isDone).count
         let remindersScheduled = tasks.contains { !$0.notificationIds.isEmpty }
         return [
-            JourneyActivationStage(id: "profile", title: "Профіль заповнено", icon: "person.crop.circle", isComplete: appContainer.userProfile != nil),
-            JourneyActivationStage(id: "next", title: "Наступний крок визначено", icon: "arrow.right.circle", isComplete: !tasks.isEmpty),
-            JourneyActivationStage(id: "action", title: "Першу дію виконано", icon: "checkmark.circle", isComplete: completedCount > 0),
-            JourneyActivationStage(id: "reminder", title: "Нагадування підключено", icon: "bell", isComplete: remindersScheduled),
-            JourneyActivationStage(id: "result", title: "Результат зафіксовано", icon: "chart.line.uptrend.xyaxis", isComplete: completedCount > 0 || !appContainer.roadmapProgress.completedStageIds.isEmpty)
+            JourneyActivationStage(id: "profile", title: "journey.directory.activation.profile".localized, icon: "person.crop.circle", isComplete: appContainer.userProfile != nil),
+            JourneyActivationStage(id: "next", title: "journey.directory.activation.next_step".localized, icon: "arrow.right.circle", isComplete: !tasks.isEmpty),
+            JourneyActivationStage(id: "action", title: "journey.directory.activation.first_action".localized, icon: "checkmark.circle", isComplete: completedCount > 0),
+            JourneyActivationStage(id: "reminder", title: "journey.directory.activation.reminder".localized, icon: "bell", isComplete: remindersScheduled),
+            JourneyActivationStage(id: "result", title: "journey.directory.activation.result".localized, icon: "chart.line.uptrend.xyaxis", isComplete: completedCount > 0 || !appContainer.roadmapProgress.completedStageIds.isEmpty)
         ]
     }
 
@@ -356,7 +356,7 @@ struct JourneyDirectoryView: View {
             let scheduled = await appContainer.firstWeekService.scheduleReminders(
                 using: appContainer.notificationService
             )
-            reminderMessage = scheduled ? "Нагадування підключено" : "Перевір налаштування сповіщень"
+            reminderMessage = scheduled ? "journey.directory.reminders_enabled".localized : "journey.directory.check_notification_settings".localized
             isSchedulingReminders = false
             appContainer.telemetry.retention(
                 .firstWeekReminderScheduled,
@@ -429,9 +429,9 @@ private enum JourneyDirectoryWorkspace: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .guides: return "Гайди"
-        case .tools: return "Інструменти"
-        case .tasks: return "Чек-листи"
+        case .guides: return "journey.directory.workspace.guides".localized
+        case .tools: return "journey.directory.workspace.tools".localized
+        case .tasks: return "journey.directory.workspace.tasks".localized
         }
     }
 
@@ -471,43 +471,43 @@ private enum JourneyToolRoute: String, Identifiable, CaseIterable {
 
     var title: String {
         switch self {
-        case .myPlan: return "Мій план"
-        case .documents: return "Готовність документів"
-        case .ask: return "Запитати Sweezy"
-        case .deadlines: return "Дедлайни"
-        case .appointments: return "Мої зустрічі"
-        case .digest: return "Тижневий дайджест"
-        case .jobs: return "Робота"
-        case .cv: return "Створити CV"
-        case .templates: return "Шаблони"
-        case .calculator: return "Калькулятор"
-        case .cityHub: return "Моє місто"
-        case .passport: return "Sweezy Passport"
-        case .experts: return "Перевірені експерти"
-        case .moments: return "Актуально зараз"
-        case .language: return "Німецька щодня"
-        case .roadmap: return "Відкрити повний шлях"
+        case .myPlan: return "journey.tool.my_plan.title".localized
+        case .documents: return "journey.tool.documents.title".localized
+        case .ask: return "journey.tool.ask.title".localized
+        case .deadlines: return "journey.tool.deadlines.title".localized
+        case .appointments: return "journey.tool.appointments.title".localized
+        case .digest: return "journey.tool.digest.title".localized
+        case .jobs: return "journey.tool.jobs.title".localized
+        case .cv: return "journey.tool.cv.title".localized
+        case .templates: return "journey.tool.templates.title".localized
+        case .calculator: return "journey.tool.calculator.title".localized
+        case .cityHub: return "journey.tool.city_hub.title".localized
+        case .passport: return "journey.tool.passport.title".localized
+        case .experts: return "journey.tool.experts.title".localized
+        case .moments: return "journey.tool.moments.title".localized
+        case .language: return "journey.tool.language.title".localized
+        case .roadmap: return "journey.tool.roadmap.title".localized
         }
     }
 
     var subtitle: String {
         switch self {
-        case .myPlan: return "Дії на сьогодні й тиждень"
-        case .documents: return "Що готово, чого бракує"
-        case .ask: return "Відповіді з офіційними джерелами"
-        case .deadlines: return "Permit, insurance, tax"
-        case .appointments: return "Офіси та консультації"
-        case .digest: return "Усе важливе раз на тиждень"
-        case .jobs: return "Пошук і AI match"
-        case .cv: return "Швейцарський формат"
-        case .templates: return "Документи без помилок"
-        case .calculator: return "Виплати та субсидії"
-        case .cityHub: return "Життя у твоєму місті"
-        case .passport: return "Прогрес і досягнення"
-        case .experts: return "Допомога від людей поруч"
-        case .moments: return "Дедлайни й важливі події"
-        case .language: return "Одна корисна гра на день"
-        case .roadmap: return "Усі етапи та результати"
+        case .myPlan: return "journey.tool.my_plan.subtitle".localized
+        case .documents: return "journey.tool.documents.subtitle".localized
+        case .ask: return "journey.tool.ask.subtitle".localized
+        case .deadlines: return "journey.tool.deadlines.subtitle".localized
+        case .appointments: return "journey.tool.appointments.subtitle".localized
+        case .digest: return "journey.tool.digest.subtitle".localized
+        case .jobs: return "journey.tool.jobs.subtitle".localized
+        case .cv: return "journey.tool.cv.subtitle".localized
+        case .templates: return "journey.tool.templates.subtitle".localized
+        case .calculator: return "journey.tool.calculator.subtitle".localized
+        case .cityHub: return "journey.tool.city_hub.subtitle".localized
+        case .passport: return "journey.tool.passport.subtitle".localized
+        case .experts: return "journey.tool.experts.subtitle".localized
+        case .moments: return "journey.tool.moments.subtitle".localized
+        case .language: return "journey.tool.language.subtitle".localized
+        case .roadmap: return "journey.tool.roadmap.subtitle".localized
         }
     }
 
@@ -582,12 +582,12 @@ private struct JourneyPlanHeroCard: View {
                 )
 
                 VStack(alignment: .leading, spacing: 9) {
-                    Label("Мій план", systemImage: "checklist.checked")
+                    Label("journey.tool.my_plan.title".localized, systemImage: "checklist.checked")
                         .font(.system(size: 25, weight: .bold, design: .rounded))
                         .foregroundColor(.white)
                         .symbolRenderingMode(.monochrome)
 
-                    Text(totalCount > 0 ? "\(completedCount) з \(totalCount) кроків виконано" : "План готовий до налаштування")
+                    Text(totalCount > 0 ? "journey.directory.plan_hero.progress".localized(with: completedCount, totalCount) : "journey.directory.plan_hero.ready_to_setup".localized)
                         .font(.system(size: 12, weight: .medium))
                         .foregroundColor(.white.opacity(0.78))
 
@@ -596,7 +596,7 @@ private struct JourneyPlanHeroCard: View {
                         .frame(maxWidth: 170)
 
                     HStack(spacing: 12) {
-                        Text("Наступний крок: \(nextAction)")
+                        Text("journey.directory.plan_hero.next_step".localized(with: nextAction))
                             .font(.system(size: 11, weight: .medium))
                             .foregroundColor(.white.opacity(0.72))
                             .lineLimit(1)
@@ -604,7 +604,7 @@ private struct JourneyPlanHeroCard: View {
                         Spacer(minLength: 4)
 
                         HStack(spacing: 8) {
-                            Text(totalCount > 0 ? "Продовжити" : "Налаштувати")
+                            Text(totalCount > 0 ? "common.continue".localized : "journey.directory.plan_hero.setup".localized)
                             Image(systemName: "arrow.right")
                         }
                         .font(.system(size: 12, weight: .bold, design: .rounded))
@@ -626,7 +626,7 @@ private struct JourneyPlanHeroCard: View {
             .shadow(color: JourneyVisual.lime.opacity(0.08), radius: 20, y: 8)
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("Мій план. \(completedCount) з \(totalCount) кроків виконано. Наступний крок: \(nextAction)")
+        .accessibilityLabel("journey.directory.plan_hero.accessibility".localized(with: completedCount, totalCount, nextAction))
     }
 }
 
@@ -807,18 +807,18 @@ private struct JourneyNextActionCard: View {
 
     private var cardTitle: String {
         switch route {
-        case .experts: return "Знайти експерта"
-        case .appointments: return "Мої зустрічі"
-        case .moments: return "Актуально зараз"
+        case .experts: return "journey.directory.next_action.experts.title".localized
+        case .appointments: return "journey.tool.appointments.title".localized
+        case .moments: return "journey.tool.moments.title".localized
         default: return route.title
         }
     }
 
     private var statusText: String {
         switch route {
-        case .experts: return "Перевірені спеціалісти"
-        case .appointments: return "Календар зустрічей"
-        case .moments: return "Стрічка оновлень"
+        case .experts: return "journey.directory.next_action.experts.status".localized
+        case .appointments: return "journey.directory.next_action.appointments.status".localized
+        case .moments: return "journey.directory.next_action.moments.status".localized
         default: return route.subtitle
         }
     }
@@ -834,10 +834,10 @@ private struct JourneyNextActionCard: View {
 
     private var buttonTitle: String {
         switch route {
-        case .experts: return "Обрати"
-        case .appointments: return "Відкрити"
-        case .moments: return "Переглянути"
-        default: return "Відкрити"
+        case .experts: return "journey.directory.next_action.experts.button".localized
+        case .appointments: return "common.open".localized
+        case .moments: return "journey.directory.next_action.moments.button".localized
+        default: return "common.open".localized
         }
     }
 }
@@ -853,10 +853,10 @@ private struct JourneyDigestStrip: View {
                     .foregroundColor(JourneyVisual.lime)
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Тижневий дайджест")
+                    Text("journey.tool.digest.title".localized)
                         .font(.system(size: 14, weight: .bold, design: .rounded))
                         .foregroundColor(.white)
-                    Text("Новий випуск")
+                    Text("journey.directory.digest.new_issue".localized)
                         .font(.system(size: 10, weight: .medium))
                         .foregroundColor(.white.opacity(0.58))
                 }
@@ -875,7 +875,7 @@ private struct JourneyDigestStrip: View {
             .overlay(Capsule().stroke(Color.white.opacity(0.3), lineWidth: 1))
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("Тижневий дайджест. Новий випуск")
+        .accessibilityLabel("journey.directory.digest.accessibility".localized)
     }
 }
 
@@ -964,7 +964,7 @@ private struct JourneyMomentsView: View {
 
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 22) {
-                    Text("Актуально\nдля тебе зараз")
+                    Text("journey.directory.moments.title".localized)
                         .font(.system(size: 36, weight: .bold, design: .rounded))
                         .foregroundColor(.white)
 
@@ -1073,7 +1073,7 @@ private struct JourneyGuideDeckCard: View {
                         .multilineTextAlignment(.leading)
 
                     HStack {
-                        Label("\(item.readingTime) хв", systemImage: "clock")
+                        Label("journey.directory.reading_time_minutes".localized(with: item.readingTime), systemImage: "clock")
                             .font(.system(size: 10, weight: .medium))
                             .foregroundColor(.white.opacity(0.74))
                         Spacer()
@@ -1085,7 +1085,7 @@ private struct JourneyGuideDeckCard: View {
                     if isFeatured {
                         HStack {
                             Spacer()
-                            Text("Читати")
+                            Text("journey.directory.read".localized)
                             Spacer()
                             Image(systemName: "arrow.right")
                         }

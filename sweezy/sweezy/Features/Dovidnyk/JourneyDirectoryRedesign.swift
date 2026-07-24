@@ -33,9 +33,9 @@ struct JourneyGuideCompactRow: View {
                     .multilineTextAlignment(.leading)
 
                 HStack(spacing: 12) {
-                    Label("\(guide.estimatedReadingTime) хв", systemImage: "clock")
+                    Label("journey.directory.reading_time_minutes".localized(with: guide.estimatedReadingTime), systemImage: "clock")
                     if guide.relatedChecklistId != nil {
-                        Label("чек-лист", systemImage: "checklist")
+                        Label("journey.directory.checklist_label".localized, systemImage: "checklist")
                     }
                 }
                 .font(.system(size: 10, weight: .medium))
@@ -108,7 +108,7 @@ struct JourneyChecklistWorkspace: View {
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
-                    checklistFilter(title: "Усі", icon: "square.grid.2x2", category: nil)
+                    checklistFilter(title: "common.all".localized, icon: "square.grid.2x2", category: nil)
                     ForEach(visibleCategories, id: \.self) { category in
                         checklistFilter(title: category.localizedName, icon: category.iconName, category: category)
                     }
@@ -142,7 +142,7 @@ struct JourneyChecklistWorkspace: View {
                 VStack(spacing: 0) {
                     Text("\(Int((progress.fraction * 100).rounded()))%")
                         .font(.system(size: 22, weight: .black, design: .rounded))
-                    Text("готово")
+                    Text("journey.directory.checklists.done".localized)
                         .font(.system(size: 9, weight: .bold))
                 }
                 .foregroundColor(.black)
@@ -150,13 +150,13 @@ struct JourneyChecklistWorkspace: View {
             .frame(width: 86, height: 86)
 
             VStack(alignment: .leading, spacing: 6) {
-                Text("Твій прогрес")
+                Text("journey.directory.checklists.your_progress".localized)
                     .font(.system(size: 22, weight: .bold, design: .rounded))
                     .foregroundColor(.black)
-                Text("\(progress.done) з \(progress.total) кроків")
+                Text("journey.directory.checklists.steps_count".localized(with: progress.done, progress.total))
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundColor(.black.opacity(0.72))
-                Text(progress.done == 0 ? "Почни з одного простого кроку" : "Продовжуй — ти вже в русі")
+                Text(progress.done == 0 ? "journey.directory.checklists.start_simple".localized : "journey.directory.checklists.keep_going".localized)
                     .font(.system(size: 12, weight: .medium))
                     .foregroundColor(.black.opacity(0.58))
             }
@@ -192,7 +192,7 @@ struct JourneyChecklistWorkspace: View {
                     .clipShape(RoundedRectangle(cornerRadius: 15, style: .continuous))
 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("НАСТУПНИЙ КРОК")
+                    Text("journey.directory.checklists.next_step_label".localized)
                         .font(.system(size: 9, weight: .bold))
                         .foregroundColor(.white.opacity(0.5))
                     Text(step.title)
@@ -272,7 +272,7 @@ private struct JourneyChecklistRow: View {
                         .multilineTextAlignment(.leading)
 
                     if checklist.isNew {
-                        Text("NEW")
+                        Text("common.new".localized.uppercased())
                             .font(.system(size: 8, weight: .black))
                             .foregroundColor(.black)
                             .padding(.horizontal, 7)
@@ -285,7 +285,7 @@ private struct JourneyChecklistRow: View {
                 HStack {
                     Label(checklist.estimatedDuration, systemImage: "clock")
                     Spacer()
-                    Text("\(completed)/\(checklist.steps.count)")
+                    Text("journey.directory.checklists.completed_ratio".localized(with: completed, checklist.steps.count))
                 }
                 .font(.system(size: 10, weight: .medium))
                 .foregroundColor(.white.opacity(0.52))

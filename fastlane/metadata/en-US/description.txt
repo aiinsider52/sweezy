@@ -1,12 +1,23 @@
-Sweezy helps you integrate in Switzerland faster: read localized guides, complete checklists, generate CVs and letters, track your roadmap and deadlines. 
+Sweezy is your free companion for starting life in Switzerland.
 
-Highlights:
-- Personalized integration roadmap
-- Localized guides and checklists
-- AI CV and letter generator (RAV/Gemeinde)
-- Notifications for deadlines and trial reminders
-- Gamified progress (XP, levels, achievements)
+Get practical guides, checklists, a city map, marketplace help, and a clear integration roadmap — in Ukrainian, English, and German.
 
-Privacy: Data stays on your device. No sensitive documents leave your phone.
+What you get:
+• Step-by-step guides for registration, housing, insurance, work, and daily life
+• Checklists and templates you can complete offline on your phone
+• City map with useful places for newcomers
+• Community marketplace, events, and verified experts
+• In-app chat for safe conversations about listings
+• Personal roadmap to track your progress
 
+This App Store build is free. There are no in-app purchases and no auto-renewing subscriptions.
 
+Privacy:
+• Account email is used for login and recovery
+• Optional analytics and crash reports help improve stability
+• Optional coarse location powers nearby map features when you allow it
+• We do not sell your data and we do not use advertising tracking
+
+Support: https://sweezy-9xyk.onrender.com/support
+Privacy: https://sweezy-9xyk.onrender.com/legal/privacy
+Terms: https://sweezy-9xyk.onrender.com/legal/terms

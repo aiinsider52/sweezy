@@ -164,7 +164,7 @@ class RoadmapService: ObservableObject {
         guard let current = currentLevel else { return "" }
         let currentProgress = levelProgress(for: current.id)
         let remaining = Int((1.0 - currentProgress) * 100)
-        return "\(remaining)% до завершення \"\(current.title)\""
+        return "roadmap.percent_to_complete".localized(with: remaining, current.title.localized)
     }
     
     // MARK: - Task Progress Calculation

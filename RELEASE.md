@@ -3,34 +3,46 @@
 Current App Store build posture: **free, fully unlocked, no In‑App Purchases**.
 Do not declare IAP products in App Store Connect until StoreKit is re‑enabled in the app.
 
-1) App Store Connect
-- Create app "Sweezy", bundle id matches Xcode target
-- Do **not** add IAP SKUs for this build (`sweezy.pro.monthly` / `sweezy.pro.yearly` are deferred)
-- Fill App Privacy from `PrivacyInfo.xcprivacy` (no tracking; email, crash diagnostics, optional analytics, optional coarse location)
-- Privacy Policy URL: `https://<api-host>/legal/privacy`
-- Support URL: `https://<api-host>/support`
-- Terms URL: `https://<api-host>/legal/terms`
+## Backend / chat reliability
 
-2) Secrets
-- Add `SENTRY_DSN` and `AMPLITUDE_API_KEY` to Info.plist or .xcconfig
+- `render.yaml`: API + admin + Redis Key Value on **starter** (always-on), same `oregon` region
+- Chat Redis listener auto-resubscribes with backoff (`backend/app/services/chat_realtime.py`)
+- Keep `PUSH_NOTIFICATIONS_ENABLED=false` until APNs `.p8` secrets are set, then:
+  - `./scripts/enable-apns-push.sh` (checks secrets) → flip flag → redeploy
+  - Device QA: `docs/chat-production-runbook.md`
 
-3) Icons
-- Place icon set in `Assets.xcassets/AppIcon.appiconset/` (1024 and iOS sizes)
+## App Store Connect
 
-4) Screenshots & Metadata
-- Edit fastlane/metadata (en-US, uk). Add screenshots to `fastlane/metadata/<lang>/screenshots/`
-- Generate screenshots locally (Xcode, Simulator) or use fastlane snapshot
+1. Create app "Sweezy", bundle id `com.sweezy.mobile`
+2. Do **not** add IAP SKUs for this build
+3. Fill App Privacy from `docs/asc-app-privacy-answers.md` + `PrivacyInfo.xcprivacy`
+4. URLs (also in `fastlane/metadata/`):
+   - Privacy: https://sweezy-9xyk.onrender.com/legal/privacy
+   - Terms: https://sweezy-9xyk.onrender.com/legal/terms
+   - Support: https://sweezy-9xyk.onrender.com/support
+5. Screenshots: `./scripts/capture-journey-screenshots.sh` → `fastlane/metadata/<locale>/screenshots/`
+6. Review notes: `fastlane/metadata/review_information/notes.txt` (states free / no IAP)
 
-5) Build & Upload
+## Secrets (iOS)
+
+- Add `SENTRY_DSN` and `AMPLITUDE_API_KEY` to Info.plist / xcconfig
+- Configure `fastlane/Appfile` (or `FASTLANE_USER` / team env vars)
+
+## Build & upload
+
 ```bash
-bundle exec fastlane metadata   # upload metadata only
-bundle exec fastlane upload     # build & upload to TestFlight
+bundle install
+bundle exec fastlane tests
+bundle exec fastlane upload          # binary → TestFlight
+bundle exec fastlane deliver_metadata
 ```
 
-6) QA
-- Run GitHub Actions CI; ensure tests pass
-- Test TestFlight build on devices
-- Confirm experts/events never expose raw `contact_value` on public endpoints
+Full device matrix: `docs/testflight-smoke-checklist.md`
 
-7) Release
-- Promote build to App Store after review
+## QA before submit
+
+- [ ] Journey language switch uk/en/de
+- [ ] Guides/checklists load from API
+- [ ] Experts/events never leak `contact_value` publicly
+- [ ] Account deletion path works
+- [ ] Chat WS on two devices (push optional until APNs live)

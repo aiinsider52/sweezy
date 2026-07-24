@@ -80,12 +80,12 @@ struct MountainRoadmapPreviewCard: View {
             VStack(alignment: .leading, spacing: 16) {
                 HStack(alignment: .top, spacing: 16) {
                     VStack(alignment: .leading, spacing: 6) {
-                        Text(roadmapService.currentLevel?.title ?? "Базовий табір")
+                        Text(roadmapService.currentLevel.map { $0.title.localized } ?? "roadmap.default_level_title".localized)
                             .font(.system(size: 21, weight: .bold, design: .rounded))
                             .foregroundColor(Theme.Colors.textPrimary)
                             .lineLimit(2)
 
-                        Text("Рівень \(roadmapService.progress.currentLevel) з 10")
+                        Text("roadmap.level_of_total_format".localized(with: roadmapService.progress.currentLevel))
                             .font(.system(size: 13, weight: .medium))
                             .foregroundColor(Theme.Colors.textSecondary)
                     }
@@ -115,7 +115,7 @@ struct MountainRoadmapPreviewCard: View {
 
                 VStack(alignment: .leading, spacing: 10) {
                     HStack {
-                        Text("Загальний прогрес")
+                        Text("roadmap.overall_progress".localized)
                             .font(.system(size: 14, weight: .medium))
                             .foregroundColor(Theme.Colors.textSecondary)
                         Spacer()
@@ -154,7 +154,7 @@ struct MountainRoadmapPreviewCard: View {
                     Spacer()
 
                     HStack(spacing: 6) {
-                        Text("Відкрити")
+                        Text("common.open".localized)
                             .font(.system(size: 14, weight: .medium))
                             .foregroundColor(Theme.Colors.textSecondary)
                         Image(systemName: "chevron.right")

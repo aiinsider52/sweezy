@@ -35,11 +35,11 @@ struct MountainRoadmapView: View {
                     currentStageCard
 
                     HStack(alignment: .firstTextBaseline) {
-                        Text("Увесь маршрут")
+                        Text("roadmap.chrome.full_route".localized)
                             .font(.system(size: 23, weight: .bold, design: .rounded))
                             .foregroundColor(.white)
                         Spacer()
-                        Text("10 етапів")
+                        Text("roadmap.chrome.stage_count".localized)
                             .font(.system(size: 12, weight: .semibold))
                             .foregroundColor(.white.opacity(0.52))
                     }
@@ -70,15 +70,15 @@ struct MountainRoadmapView: View {
         .onReceive(NotificationCenter.default.publisher(for: .roadmapProgressUpdated)) { _ in
             roadmapService.refreshFromStorage()
         }
-        .alert("Пропустити рівень?", isPresented: $showSkipConfirmation) {
-            Button("Скасувати", role: .cancel) {}
-            Button("Пропустити") {
+        .alert("roadmap.chrome.skip_level_title".localized, isPresented: $showSkipConfirmation) {
+            Button("common.cancel".localized, role: .cancel) {}
+            Button("roadmap.chrome.skip".localized) {
                 if let level = levelToSkip {
                     _ = roadmapService.skipLevel(level.id, isPremium: isPremium)
                 }
             }
         } message: {
-            Text("Ви впевнені? Ви зможете повернутися до цього рівня пізніше.")
+            Text("roadmap.chrome.skip_level_message".localized)
         }
         .featureOnboarding(.roadmap)
         .onAppear {
@@ -106,7 +106,7 @@ struct MountainRoadmapView: View {
 
             Spacer()
 
-            Text("ТВІЙ ПЛАН")
+            Text("roadmap.chrome.your_plan".localized)
                 .font(.system(size: 10, weight: .bold))
                 .tracking(1.3)
                 .foregroundColor(.white.opacity(0.62))
@@ -124,12 +124,12 @@ struct MountainRoadmapView: View {
 
     private var headerSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Не губись у\nшвейцарських справах")
+            Text("roadmap.chrome.hero_title".localized)
                 .font(.system(size: 35, weight: .bold, design: .rounded))
                 .foregroundColor(.white)
                 .lineSpacing(-3)
 
-            Text("Один маршрут: від першого документа до впевненого життя.")
+            Text("roadmap.chrome.hero_subtitle".localized)
                 .font(.system(size: 14, weight: .medium))
                 .foregroundColor(.white.opacity(0.66))
                 .frame(maxWidth: 310, alignment: .leading)
@@ -141,7 +141,7 @@ struct MountainRoadmapView: View {
             VStack(alignment: .leading, spacing: 12) {
                 HStack(alignment: .firstTextBaseline) {
                     VStack(alignment: .leading, spacing: 3) {
-                        Text("ЗАГАЛЬНИЙ ПРОГРЕС")
+                        Text("roadmap.chrome.overall_progress".localized)
                             .font(.system(size: 9, weight: .bold))
                             .tracking(0.8)
                             .foregroundColor(.white.opacity(0.5))
@@ -170,9 +170,9 @@ struct MountainRoadmapView: View {
                 .frame(height: 7)
 
                 HStack {
-                    Label("Рівень \(roadmapService.progress.currentLevel) з 10", systemImage: "flag.fill")
+                    Label("roadmap.level_of_total_format".localized(with: roadmapService.progress.currentLevel), systemImage: "flag.fill")
                     Spacer()
-                    Label("\(roadmapService.currentLevel?.estimatedDays ?? "")", systemImage: "clock")
+                    Label((roadmapService.currentLevel?.estimatedDays ?? "").localized, systemImage: "clock")
                 }
                 .font(.system(size: 11, weight: .medium))
                 .foregroundColor(.white.opacity(0.58))
@@ -201,7 +201,7 @@ struct MountainRoadmapView: View {
 
                     VStack(alignment: .leading, spacing: 0) {
                         HStack {
-                            Text("АКТИВНИЙ ЕТАП")
+                            Text("roadmap.chrome.active_stage".localized)
                                 .font(.system(size: 9, weight: .bold))
                                 .tracking(0.9)
                                 .foregroundColor(.black)
@@ -223,20 +223,20 @@ struct MountainRoadmapView: View {
 
                         Spacer()
 
-                        Text("Крок \(level.id)")
+                        Text("roadmap.chrome.step".localized(with: level.id))
                             .font(.system(size: 11, weight: .bold))
                             .foregroundColor(JourneyVisual.lime)
                             .textCase(.uppercase)
 
-                        Text(level.title)
+                        Text(level.title.localized)
                             .font(.system(size: 27, weight: .bold, design: .rounded))
                             .foregroundColor(.white)
                             .lineLimit(2)
                             .multilineTextAlignment(.leading)
 
                         HStack(spacing: 10) {
-                            Label("\(level.tasks.count) завдань", systemImage: "checklist")
-                            Label(level.estimatedDays, systemImage: "clock")
+                            Label("roadmap.tasks_count_format".localized(with: level.tasks.count), systemImage: "checklist")
+                            Label(level.estimatedDays.localized, systemImage: "clock")
                             Spacer()
                             Image(systemName: "arrow.right")
                         }
@@ -308,13 +308,13 @@ struct LevelNode: View {
 
                 VStack(alignment: .leading, spacing: 6) {
                     HStack(spacing: 7) {
-                        Text(level.title)
+                        Text(level.title.localized)
                             .font(.system(size: 16, weight: .bold, design: .rounded))
                             .foregroundColor(isLocked ? .white.opacity(0.44) : .white)
                             .lineLimit(1)
 
                         if isActive {
-                            Text("ЗАРАЗ")
+                            Text("roadmap.chrome.now".localized)
                                 .font(.system(size: 8, weight: .bold))
                                 .foregroundColor(.black)
                                 .padding(.horizontal, 7)
@@ -324,7 +324,7 @@ struct LevelNode: View {
                         }
                     }
 
-                    Text(level.subtitle)
+                    Text(level.subtitle.localized)
                         .font(.system(size: 12, weight: .medium))
                         .foregroundColor(.white.opacity(isLocked ? 0.32 : 0.52))
                         .lineLimit(1)
@@ -390,10 +390,10 @@ struct LevelNode: View {
 
     private var statusText: String {
         switch status {
-        case .completed: return "Завершено"
-        case .locked: return "Відкриється пізніше"
-        case .inProgress: return "\(Int(progress * 100))% · \(level.estimatedDays)"
-        case .available: return "Можна почати · \(level.estimatedDays)"
+        case .completed: return "roadmap.chrome.completed".localized
+        case .locked: return "roadmap.chrome.opens_later".localized
+        case .inProgress: return "\(Int(progress * 100))% · \(level.estimatedDays.localized)"
+        case .available: return "roadmap.chrome.can_start".localized(with: level.estimatedDays.localized)
         }
     }
 
@@ -553,11 +553,11 @@ struct LevelDetailSheet: View {
                 .padding()
             }
             .background(Color.clear)
-            .navigationTitle(level.title)
+            .navigationTitle(level.title.localized)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Закрити") { dismiss() }
+                    Button("common.close".localized) { dismiss() }
                 }
             }
         }
@@ -574,7 +574,7 @@ struct LevelDetailSheet: View {
     private var tasksSection: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
-                Text("📋 Завдання рівня")
+                Text("📋 " + "roadmap.chrome.level_tasks".localized)
                     .font(.headline)
                 Spacer()
                 Text("\(completedTasksCount)/\(availableTasks.count)")
@@ -587,7 +587,7 @@ struct LevelDetailSheet: View {
                 Image(systemName: "star.fill")
                     .foregroundColor(.yellow)
                     .font(.caption)
-                Text("До \(totalXPForLevel) XP за рівень")
+                Text("roadmap.chrome.xp_for_level".localized(with: totalXPForLevel))
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
@@ -736,17 +736,17 @@ struct LevelDetailSheet: View {
             
             VStack(alignment: .leading, spacing: 4) {
                 HStack {
-                    Text("Рівень \(level.id)")
+                    Text("roadmap.chrome.level_n".localized(with: level.id))
                         .font(.caption)
                         .foregroundColor(.secondary)
                     
                     // TEMPORARY: no subscription labels.
                 }
                 
-                Text(level.subtitle)
+                Text(level.subtitle.localized)
                     .font(.headline)
                 
-                Text("Висота: \(level.altitude) м • \(level.estimatedDays)")
+                Text("roadmap.chrome.altitude".localized(with: level.altitude, level.estimatedDays.localized))
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
@@ -802,7 +802,7 @@ struct LevelDetailSheet: View {
     private var progressSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text("Прогрес")
+                Text("roadmap.chrome.progress".localized)
                     .font(.headline)
                 Spacer()
                 Text("\(Int(progress * 100))%")
@@ -829,10 +829,10 @@ struct LevelDetailSheet: View {
     
     private var descriptionSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Опис")
+            Text("roadmap.chrome.description".localized)
                 .font(.headline)
             
-            Text(level.description)
+            Text(level.description.localized)
                 .font(.body)
                 .foregroundColor(.secondary)
         }
@@ -844,7 +844,7 @@ struct LevelDetailSheet: View {
     
     private var tipsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("💡 Поради")
+            Text("💡 " + "roadmap.chrome.tips".localized)
                 .font(.headline)
             
             ForEach(level.tips, id: \.self) { tip in
@@ -852,7 +852,7 @@ struct LevelDetailSheet: View {
                     Image(systemName: "lightbulb.fill")
                         .foregroundColor(.yellow)
                         .font(.caption)
-                    Text(tip)
+                    Text(tip.localized)
                         .font(.subheadline)
                 }
             }
@@ -863,7 +863,7 @@ struct LevelDetailSheet: View {
                     Image(systemName: "star.fill")
                         .foregroundColor(.yellow)
                         .font(.caption)
-                    Text(tip)
+                    Text(tip.localized)
                         .font(.subheadline)
                 }
             }
@@ -881,7 +881,7 @@ struct LevelDetailSheet: View {
                     onSkip()
                     dismiss()
                 } label: {
-                    Label("Пропустити рівень", systemImage: "forward.fill")
+                    Label("roadmap.chrome.skip_level".localized, systemImage: "forward.fill")
                         .frame(maxWidth: .infinity)
                         .padding()
                         .background(Color.orange)
@@ -893,7 +893,7 @@ struct LevelDetailSheet: View {
                     dismiss()
                     NotificationCenter.default.post(name: .switchTab, object: 1)
                 } label: {
-                    Label("Перейти до довідника", systemImage: "book.fill")
+                    Label("roadmap.chrome.go_directory".localized, systemImage: "book.fill")
                         .frame(maxWidth: .infinity)
                         .padding()
                         .background(Color.blue)
@@ -941,7 +941,7 @@ struct TaskCard: View {
                 // Task info
                 VStack(alignment: .leading, spacing: 4) {
                     HStack {
-                        Text(task.title)
+                        Text(task.title.localized)
                             .font(.subheadline.bold())
                             .foregroundColor(isLocked ? .secondary : .primary)
                             .strikethrough(isCompleted, color: .green)
@@ -950,7 +950,7 @@ struct TaskCard: View {
                         // TEMPORARY: no subscription markers.
                     }
                     
-                    Text(task.description)
+                    Text(task.description.localized)
                         .font(.caption)
                         .foregroundColor(.secondary)
                         .lineLimit(2)

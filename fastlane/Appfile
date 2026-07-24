@@ -1,0 +1,12 @@
+# Fill with your Apple Developer / ASC credentials (do not commit secrets beyond public ids).
+# Example:
+#   apple_id("you@example.com")
+#   team_id("XXXXXXXXXX")
+#   itc_team_id("12345678")
+
+app_identifier("com.sweezy.mobile")
+
+# Uncomment and set before `bundle exec fastlane upload` / `metadata`:
+# apple_id(ENV["FASTLANE_USER"] || "you@example.com")
+# team_id(ENV["FASTLANE_TEAM_ID"] || "XXXXXXXXXX")
+# itc_team_id(ENV["FASTLANE_ITC_TEAM_ID"] || "12345678")

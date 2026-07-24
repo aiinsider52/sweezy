@@ -27,9 +27,7 @@ PUSH_REVOKED_RETENTION_DAYS=30
 
 Deploy the backend only after the Render PostgreSQL backup policy is enabled and migration `0025_production_chat` is visible at `alembic current`.
 
-`render.yaml` manages the existing `sweezy` and `sweezy_admin` services and provisions
-`sweezy-chat-realtime` as a private Render Key Value instance. Confirm the existing backend
-region before the first Blueprint sync; the Key Value instance must use the same region.
+`render.yaml` keeps the API, admin, and Redis Key Value on **starter** (always-on) plans in the same region so chat WebSockets and the push outbox worker do not die from free-tier spin-down.
 
 Production deploy order:
 
@@ -39,6 +37,7 @@ Production deploy order:
 4. Deploy backend. Render runs migration `0025_production_chat` and
    `backend/scripts/production_preflight.py` before traffic switches.
 5. Deploy admin after backend `/ready` returns 200.
+6. When APNs `.p8` secrets are set, enable push via dashboard or `./scripts/enable-apns-push.sh`, then redeploy.
 
 ## Release checks
 

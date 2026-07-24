@@ -2201,4 +2201,7 @@
 "journey.roadmap.task.10-7.description" = "Надихніть тих, хто тільки починає";
 "chat.listing.no_seller" = "Чати для цього оголошення поки недоступні — у продавця немає акаунта.";
 "chat.listing.unavailable" = "Чат недоступний";
+"chat.listing.verify_email" = "Підтвердіть email, щоб писати продавцям у Sweezy.";
+"chat.notification.title" = "Нове повідомлення";
+"chat.notification.body_fallback" = "У вас нове повідомлення в чаті.";
 "settings.edit_profile.nav_title" = "Профіль";

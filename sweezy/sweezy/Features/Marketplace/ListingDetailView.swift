@@ -560,6 +560,8 @@ struct ListingDetailView: View {
                 if raw.localizedCaseInsensitiveContains("Listing not found")
                     || raw.localizedCaseInsensitiveContains("no seller") {
                     safetyMessage = "chat.listing.no_seller".localized
+                } else if raw.localizedCaseInsensitiveContains("Verify your email") {
+                    safetyMessage = "chat.listing.verify_email".localized
                 } else {
                     safetyMessage = raw
                 }

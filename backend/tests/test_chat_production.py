@@ -81,6 +81,15 @@ def test_chat_end_to_end_idempotency_read_close_review_and_report() -> None:
     assert conversation["other_user_id"] == owner_id
     assert conversation["is_seller"] is False
 
+    fetched = client.get(f"/api/v1/chat/conversations/{conversation_id}", headers=buyer)
+    assert fetched.status_code == 200, fetched.text
+    assert fetched.json()["id"] == conversation_id
+    assert fetched.json()["other_user_id"] == owner_id
+
+    stranger, _ = _identity()
+    denied = client.get(f"/api/v1/chat/conversations/{conversation_id}", headers=stranger)
+    assert denied.status_code == 404
+
     public_listing = client.get(f"/api/v1/marketplace/{listing_id}")
     assert public_listing.status_code == 200
     assert "contact_value" not in public_listing.json()

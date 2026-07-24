@@ -4,7 +4,7 @@
 
 - PostgreSQL is the source of truth for conversations, messages, read state, reports, reviews, devices, and the push outbox.
 - Redis is mandatory in production. It distributes WebSocket events across backend instances; startup fails if it is unavailable.
-- APNs is independently feature-flagged. Chat and realtime can run while push notifications are disabled. Notification text is private by default and does not include message content.
+- APNs is independently feature-flagged. Chat and realtime can run while push notifications are disabled. While `PUSH_NOTIFICATIONS_ENABLED=false`, iOS still shows local in-app banners for incoming WebSocket messages when the thread is not open. Notification text is private by default and does not include message content for remote APNs.
 - External seller contact values are not returned by the public marketplace API. Communication stays inside the reportable and blockable chat flow.
 
 ## Required Render variables
@@ -50,6 +50,16 @@ Production deploy order:
 7. Report a received message; verify only the bounded context appears in **Admin > Chat Safety**.
 8. Close the deal as seller; verify the listing is no longer public and each participant can leave one review.
 9. Log out; verify the stored push device is revoked and no notification for the old account reaches the device.
+
+API-only preflight (no devices):
+
+```bash
+BUYER_EMAIL=... BUYER_PASSWORD=... ./scripts/chat-api-smoke.py
+# optional two-user:
+SELLER_EMAIL=... SELLER_PASSWORD=... ADMIN_EMAIL=... ADMIN_PASSWORD=... ./scripts/chat-api-smoke.py
+```
+
+While APNs is off, still verify the iOS local banner when a WebSocket message arrives and the conversation is not open.
 
 ## Monitoring and alerts
 

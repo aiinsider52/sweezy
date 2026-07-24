@@ -318,6 +318,13 @@ def unread_count(db: DBSession, user: CurrentUser) -> dict[str, int]:
     return {"count": total}
 
 
+@router.get("/conversations/{conversation_id}", response_model=ConversationResponse)
+def get_conversation(conversation_id: str, db: DBSession, user: CurrentUser) -> ConversationResponse:
+    conversation, _ = _ensure_participant(db, conversation_id, user.id)
+    _ensure_not_blocked(db, conversation)
+    return _conversation_response(db, conversation, user.id)
+
+
 @router.get("/conversations/{conversation_id}/messages", response_model=MessagePage)
 def list_messages(
     conversation_id: str,

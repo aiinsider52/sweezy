@@ -144,7 +144,11 @@ class AppContainer: ObservableObject {
                 "initial_auth_choice_completed",
                 "pending_initial_auth_entry",
                 "selected_locale",
-                "preferredLanguage"
+                "preferredLanguage",
+                "userName",
+                "userEmail",
+                "isRegistered",
+                "biometricsEnabled"
             ].forEach(UserDefaults.standard.removeObject(forKey:))
             KeychainStore.delete("access_token")
             KeychainStore.delete("refresh_token")

@@ -67,6 +67,10 @@ enum ChatAPI {
         try await request("chat/conversations", method: "POST", body: ConversationCreatePayload(listingID: listingID), as: ChatConversation.self)
     }
 
+    static func conversation(id: String) async throws -> ChatConversation {
+        try await request("chat/conversations/\(id)", as: ChatConversation.self)
+    }
+
     static func conversations(archived: Bool = false, cursor: String? = nil) async throws -> ChatConversationPage {
         var path = "chat/conversations?archived=\(archived)"
         if let cursor, let encoded = cursor.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) {

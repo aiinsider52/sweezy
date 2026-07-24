@@ -491,7 +491,9 @@ private struct NotificationPermissionPage: View {
                             .foregroundColor(.white.opacity(0.72))
                             .frame(maxWidth: .infinity)
                             .frame(height: 46)
+                            .contentShape(Rectangle())
                     }
+                    .buttonStyle(.plain)
                     .accessibilityIdentifier("onboarding.notifications.laterButton")
                 }
                 .padding(14)
@@ -499,7 +501,9 @@ private struct NotificationPermissionPage: View {
                 .background(.ultraThinMaterial.opacity(0.68))
                 .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
                 .overlay(RoundedRectangle(cornerRadius: 26, style: .continuous).stroke(Color.white.opacity(0.16), lineWidth: 1))
-                .padding(.bottom, 14)
+                // Keep both actions clear of the home indicator even though the
+                // page background intentionally extends under the safe areas.
+                .padding(.bottom, 42)
             }
             .padding(.horizontal, 20)
             .opacity(titleAppeared ? 1 : 0)

@@ -305,6 +305,7 @@ struct ChatConversationView: View {
             }
         }
         .task {
+            appContainer.chatStore.setActiveConversation(conversation.id)
             await appContainer.chatStore.loadMessages(conversationID: conversation.id, force: true)
         }
         .onChange(of: threadMessages.count) { _, _ in
@@ -313,6 +314,9 @@ struct ChatConversationView: View {
         .onDisappear {
             typingTask?.cancel()
             appContainer.chatStore.setTyping(false, conversationID: conversation.id)
+            if appContainer.chatStore.activeConversationID == conversation.id {
+                appContainer.chatStore.setActiveConversation(nil)
+            }
         }
         .confirmationDialog("chat.report.title".localized, isPresented: $showReportDialog) {
             Button("chat.report.fraud".localized) { report(reason: "fraud") }

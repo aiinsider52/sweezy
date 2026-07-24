@@ -15,6 +15,8 @@ final class ChatStore: ObservableObject {
     @Published private(set) var isLoadingMoreConversations = false
     @Published var typingConversationIDs: Set<String> = []
     @Published var errorMessage: String?
+    /// Currently visible conversation — suppresses in-app banners for that thread.
+    @Published private(set) var activeConversationID: String?
 
     private let cache = ChatCache()
     private let socket = ChatSocketService()
@@ -120,8 +122,19 @@ final class ChatStore: ObservableObject {
 
     func conversation(id: String) async -> ChatConversation? {
         if let cached = conversations.first(where: { $0.id == id }) { return cached }
-        await refresh()
-        return conversations.first(where: { $0.id == id })
+        do {
+            let remote = try await ChatAPI.conversation(id: id)
+            upsert(remote)
+            persist()
+            return remote
+        } catch {
+            await refresh()
+            return conversations.first(where: { $0.id == id })
+        }
+    }
+
+    func setActiveConversation(_ id: String?) {
+        activeConversationID = id
     }
 
     func loadMessages(conversationID: String, force: Bool = false) async {
@@ -274,6 +287,14 @@ final class ChatStore: ObservableObject {
                     conversations[index].unreadCount += 1
                 } else {
                     Task { await refresh() }
+                }
+                if activeConversationID != message.conversationID {
+                    ChatInAppNotifier.shared.present(
+                        conversationID: message.conversationID,
+                        title: conversations.first(where: { $0.id == message.conversationID })?.otherUserName
+                            ?? "chat.notification.title".localized,
+                        body: message.body
+                    )
                 }
             }
             typingConversationIDs.remove(message.conversationID)

@@ -1983,4 +1983,7 @@
 "journey.roadmap.task.10-7.description" = "Inspiriere jene, die gerade starten";
 "chat.listing.no_seller" = "Chat für dieses Inserat ist noch nicht verfügbar — der Anbieter hat kein Konto.";
 "chat.listing.unavailable" = "Chat nicht verfügbar";
+"chat.listing.verify_email" = "Bestätige deine E-Mail, um Anbietern in Sweezy zu schreiben.";
+"chat.notification.title" = "Neue Nachricht";
+"chat.notification.body_fallback" = "Du hast eine neue Chat-Nachricht.";
 "settings.edit_profile.nav_title" = "Profil";

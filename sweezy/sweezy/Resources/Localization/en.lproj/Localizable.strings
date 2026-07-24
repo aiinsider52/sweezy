@@ -2164,4 +2164,7 @@
 "journey.roadmap.task.10-7.description" = "Inspire those who are just starting";
 "chat.listing.no_seller" = "Chat is unavailable for this listing — the seller has no account yet.";
 "chat.listing.unavailable" = "Chat unavailable";
+"chat.listing.verify_email" = "Verify your email to message sellers in Sweezy.";
+"chat.notification.title" = "New message";
+"chat.notification.body_fallback" = "You have a new chat message.";
 "settings.edit_profile.nav_title" = "Profile";

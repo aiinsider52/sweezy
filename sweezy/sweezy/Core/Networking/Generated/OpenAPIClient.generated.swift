@@ -2,7 +2,7 @@
 import Foundation
 
 enum GeneratedOpenAPIContract {
-    static let sha256 = "90f4754cea7bf1e90a80573f1ce6133806b96d06721a90c4b8f40bf6532c0931"
+    static let sha256 = "45440118200e2842844655a3913dc8a8f89ad172a46108d0ad3fd94e918a6000"
 
     struct Operation: Sendable {
         let method: String
@@ -82,6 +82,7 @@ enum GeneratedOpenAPIContract {
         "list_conversations_api_v1_chat_conversations_get": Operation(method: "GET", path: "/api/v1/chat/conversations", requiresAuthentication: true),
         "create_conversation_api_v1_chat_conversations_post": Operation(method: "POST", path: "/api/v1/chat/conversations", requiresAuthentication: true),
         "unread_count_api_v1_chat_conversations_unread_count_get": Operation(method: "GET", path: "/api/v1/chat/conversations/unread-count", requiresAuthentication: true),
+        "get_conversation_api_v1_chat_conversations__conversation_id__get": Operation(method: "GET", path: "/api/v1/chat/conversations/{conversation_id}", requiresAuthentication: true),
         "update_conversation_api_v1_chat_conversations__conversation_id__patch": Operation(method: "PATCH", path: "/api/v1/chat/conversations/{conversation_id}", requiresAuthentication: true),
         "block_chat_user_api_v1_chat_conversations__conversation_id__block_post": Operation(method: "POST", path: "/api/v1/chat/conversations/{conversation_id}/block", requiresAuthentication: true),
         "close_deal_api_v1_chat_conversations__conversation_id__close_post": Operation(method: "POST", path: "/api/v1/chat/conversations/{conversation_id}/close", requiresAuthentication: true),

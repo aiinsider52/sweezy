@@ -18,6 +18,7 @@ struct SettingsView: View {
     @State private var showingLanguageSelection = false
     @State private var showingProfileEdit = false
     @State private var showingNotificationSettings = false
+    @State private var showingChatInbox = false
     
     @State private var regName: String = ""
     @State private var regEmail: String = ""
@@ -154,6 +155,10 @@ struct SettingsView: View {
             NavigationStack {
                 NotificationSettingsView()
             }
+        }
+        .sheet(isPresented: $showingChatInbox) {
+            ChatInboxView()
+                .environmentObject(appContainer)
         }
         .sheet(isPresented: $showingLogin) {
             LoginView()
@@ -408,6 +413,20 @@ private extension SettingsView {
                     accessibilityIdentifier: "settings.notifications.open"
                 ) {
                     showingNotificationSettings = true
+                }
+                editorialSettingsDivider
+                editorialSettingsRow(
+                    icon: "bubble.left.and.bubble.right.fill",
+                    title: "chat.inbox.title".localized,
+                    value: appContainer.chatStore.unreadCount > 0
+                        ? "\(min(appContainer.chatStore.unreadCount, 99))"
+                        : nil
+                ) {
+                    if sessionManager.isAuthenticated {
+                        showingChatInbox = true
+                    } else {
+                        showingAuthEntry = true
+                    }
                 }
                 editorialSettingsDivider
                 editorialSettingsRow(icon: "hand.raised", title: "privacy.title".localized) {

@@ -160,6 +160,19 @@ async def lifespan(app: FastAPI):
     except Exception as exc:
         log.warning("seed_moments_failed", error=str(exc))
 
+    def _seed_content() -> dict:
+        from .services.content_seed import seed_core_content
+
+        with SessionLocal() as db:
+            return seed_core_content(db)
+
+    try:
+        seeded = await asyncio.to_thread(_seed_content)
+        if any(seeded.values()):
+            log.info("seed_content_ok", **seeded)
+    except Exception as exc:
+        log.warning("seed_content_failed", error=str(exc))
+
     from .services.chat_realtime import chat_realtime
     from .services.push_notifications import notification_worker
 

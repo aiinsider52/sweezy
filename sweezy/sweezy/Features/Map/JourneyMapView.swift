@@ -51,7 +51,11 @@ struct JourneyMapView: View {
             if appContainer.locationService.isLocationEnabled {
                 appContainer.locationService.startLocationUpdates()
             }
+            applyPendingMapFocus()
             selectFirstVisiblePlace()
+        }
+        .onAppear {
+            applyPendingMapFocus()
         }
         .onChange(of: appContainer.locationService.authorizationStatus) { _, status in
             if status == .authorizedWhenInUse || status == .authorizedAlways {
@@ -520,6 +524,21 @@ struct JourneyMapView: View {
                 MapCamera(
                     centerCoordinate: place.coordinate.clLocationCoordinate,
                     distance: 3_600,
+                    heading: 18,
+                    pitch: 72
+                )
+            )
+        }
+    }
+
+    private func applyPendingMapFocus() {
+        guard let target = MapFocusRouter.pending else { return }
+        MapFocusRouter.pending = nil
+        withAnimation(.easeInOut(duration: 0.35)) {
+            cameraPosition = .camera(
+                MapCamera(
+                    centerCoordinate: CLLocationCoordinate2D(latitude: target.latitude, longitude: target.longitude),
+                    distance: max(2_400, target.spanDelta * 55_000),
                     heading: 18,
                     pitch: 72
                 )

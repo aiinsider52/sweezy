@@ -162,11 +162,28 @@ struct JourneyDirectoryView: View {
                 guides: Array(filteredGuides.prefix(3)),
                 imageNames: cardImages
             ) { guide in
-                if let guide { selectedGuide = guide }
+                selectedGuide = guide
             }
             .frame(maxWidth: .infinity)
 
-            if !filteredGuides.isEmpty {
+            if filteredGuides.isEmpty {
+                VStack(spacing: 12) {
+                    Image(systemName: "book.closed")
+                        .font(.system(size: 28, weight: .medium))
+                        .foregroundColor(JourneyVisual.lime)
+                    Text("Гайдів поки немає")
+                        .font(.system(size: 18, weight: .bold, design: .rounded))
+                        .foregroundColor(.white)
+                    Text("Онови контент або змініть фільтр категорії.")
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(.white.opacity(0.58))
+                        .multilineTextAlignment(.center)
+                }
+                .padding(24)
+                .frame(maxWidth: .infinity)
+                .background(Color.white.opacity(0.055))
+                .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+            } else {
                 HStack {
                     Text("Перевірені матеріали")
                         .font(.system(size: 17, weight: .bold, design: .rounded))
@@ -967,66 +984,40 @@ private struct JourneyMomentsView: View {
 private struct JourneyGuideDeck: View {
     let guides: [Guide]
     let imageNames: [String]
-    let action: (Guide?) -> Void
+    let action: (Guide) -> Void
 
     var body: some View {
-        ZStack {
-            JourneyGuideDeckCard(item: leftItem, isFeatured: false) {
-                action(leftItem.guide)
+        Group {
+            if guides.isEmpty {
+                EmptyView()
+            } else {
+                ZStack {
+                    if guides.count > 1 {
+                        JourneyGuideDeckCard(item: item(for: guides[1], imageName: imageNames[safe: 1] ?? imageNames[0]), isFeatured: false) {
+                            action(guides[1])
+                        }
+                        .offset(x: -118, y: 12)
+                        .rotationEffect(.degrees(-2.5))
+                        .zIndex(0)
+                    }
+
+                    if guides.count > 2 {
+                        JourneyGuideDeckCard(item: item(for: guides[2], imageName: imageNames[safe: 2] ?? imageNames[0]), isFeatured: false) {
+                            action(guides[2])
+                        }
+                        .offset(x: 118, y: 12)
+                        .rotationEffect(.degrees(2.5))
+                        .zIndex(0)
+                    }
+
+                    JourneyGuideDeckCard(item: item(for: guides[0], imageName: imageNames[safe: 0] ?? "swiss-moment-grindelwald"), isFeatured: true) {
+                        action(guides[0])
+                    }
+                    .zIndex(2)
+                }
+                .frame(height: 334)
             }
-            .offset(x: -118, y: 12)
-            .rotationEffect(.degrees(-2.5))
-            .zIndex(0)
-
-            JourneyGuideDeckCard(item: rightItem, isFeatured: false) {
-                action(rightItem.guide)
-            }
-            .offset(x: 118, y: 12)
-            .rotationEffect(.degrees(2.5))
-            .zIndex(0)
-
-            JourneyGuideDeckCard(item: centerItem, isFeatured: true) {
-                action(centerItem.guide)
-            }
-            .zIndex(2)
         }
-        .frame(height: 334)
-    }
-
-    private var centerItem: JourneyGuideDeckItem {
-        if let guide = guides.first {
-            return item(for: guide, imageName: imageNames[0])
-        }
-        return JourneyGuideDeckItem(
-            guide: nil,
-            title: "Перші 30 днів\nу Швейцарії",
-            readingTime: 12,
-            imageName: "swiss-moment-grindelwald"
-        )
-    }
-
-    private var leftItem: JourneyGuideDeckItem {
-        if guides.count > 1 {
-            return item(for: guides[1], imageName: imageNames[1])
-        }
-        return JourneyGuideDeckItem(
-            guide: nil,
-            title: "Робота\nу Швейцарії",
-            readingTime: 8,
-            imageName: "cityhub-zurich-oldtown"
-        )
-    }
-
-    private var rightItem: JourneyGuideDeckItem {
-        if guides.count > 2 {
-            return item(for: guides[2], imageName: imageNames[2])
-        }
-        return JourneyGuideDeckItem(
-            guide: nil,
-            title: "Медичне\nстрахування",
-            readingTime: 10,
-            imageName: "swiss-moment-luzern"
-        )
     }
 
     private func item(for guide: Guide, imageName: String) -> JourneyGuideDeckItem {
@@ -1039,8 +1030,14 @@ private struct JourneyGuideDeck: View {
     }
 }
 
+private extension Array {
+    subscript(safe index: Int) -> Element? {
+        indices.contains(index) ? self[index] : nil
+    }
+}
+
 private struct JourneyGuideDeckItem {
-    let guide: Guide?
+    let guide: Guide
     let title: String
     let readingTime: Int
     let imageName: String

@@ -1,15 +1,24 @@
 import Card from '@/components/Card'
 
-export default async function MonitoringPage() {
+function apiOrigin(): string {
   const base = process.env.NEXT_PUBLIC_API_URL || 'https://sweezy-9xyk.onrender.com/api/v1'
+  try {
+    return new URL(base).origin
+  } catch {
+    return 'https://sweezy-9xyk.onrender.com'
+  }
+}
+
+export default async function MonitoringPage() {
+  const origin = apiOrigin()
   const start1 = Date.now();
   const c1 = new AbortController(); const t1 = setTimeout(()=>c1.abort(), 8000)
-  const healthRes = await fetch(`${base}/health`, { cache: 'no-store', signal: c1.signal }).catch(()=>null)
+  const healthRes = await fetch(`${origin}/health`, { cache: 'no-store', signal: c1.signal }).catch(()=>null)
   clearTimeout(t1)
   const healthMs = Date.now() - start1
   const start2 = Date.now();
   const c2 = new AbortController(); const t2 = setTimeout(()=>c2.abort(), 8000)
-  const readyRes = await fetch(`${base}/ready`, { cache: 'no-store', signal: c2.signal }).catch(()=>null)
+  const readyRes = await fetch(`${origin}/ready`, { cache: 'no-store', signal: c2.signal }).catch(()=>null)
   clearTimeout(t2)
   const readyMs = Date.now() - start2
 
@@ -34,6 +43,7 @@ export default async function MonitoringPage() {
       </div>
       <Card title="Notes">
         <ul className="list-disc pl-5 text-sm opacity-80 space-y-1">
+          <li>Health checks hit API host root (`/health`, `/ready`), not `/api/v1/*`.</li>
           <li>Для продакшна можно подключить Sentry и вывести счётчики ошибок.</li>
           <li>Можно показывать последние деплои/версии, метрики БД и т.д.</li>
         </ul>
@@ -41,5 +51,3 @@ export default async function MonitoringPage() {
     </section>
   )
 }
-
-

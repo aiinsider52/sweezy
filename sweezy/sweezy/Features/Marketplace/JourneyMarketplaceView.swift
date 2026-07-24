@@ -170,36 +170,51 @@ struct JourneyMarketplaceView: View {
         }
         .frame(height: 258)
         .overlay(alignment: .topTrailing) {
-            Button {
-                guard sessionManager.isAuthenticated else {
-                    pendingInbox = true
-                    showAuth = true
-                    return
-                }
-                showInbox = true
-            } label: {
-                ZStack(alignment: .topTrailing) {
-                    Image(systemName: "bubble.left.and.bubble.right.fill")
-                        .font(.system(size: 18, weight: .bold))
+            HStack(spacing: 10) {
+                Button { showExperts = true } label: {
+                    Image(systemName: "person.badge.shield.checkmark.fill")
+                        .font(.system(size: 17, weight: .bold))
                         .foregroundColor(.white)
                         .frame(width: 48, height: 48)
                         .background(Color.black.opacity(0.5))
                         .background(.ultraThinMaterial.opacity(0.65))
                         .clipShape(Circle())
                         .overlay(Circle().stroke(.white.opacity(0.24), lineWidth: 1))
-                    if appContainer.chatStore.unreadCount > 0 {
-                        Text("\(min(appContainer.chatStore.unreadCount, 99))")
-                            .font(.system(size: 10, weight: .black))
-                            .foregroundColor(.black)
-                            .frame(minWidth: 21, minHeight: 21)
-                            .background(JourneyVisual.lime)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Експерти")
+
+                Button {
+                    guard sessionManager.isAuthenticated else {
+                        pendingInbox = true
+                        showAuth = true
+                        return
+                    }
+                    showInbox = true
+                } label: {
+                    ZStack(alignment: .topTrailing) {
+                        Image(systemName: "bubble.left.and.bubble.right.fill")
+                            .font(.system(size: 18, weight: .bold))
+                            .foregroundColor(.white)
+                            .frame(width: 48, height: 48)
+                            .background(Color.black.opacity(0.5))
+                            .background(.ultraThinMaterial.opacity(0.65))
                             .clipShape(Circle())
-                            .offset(x: 3, y: -3)
+                            .overlay(Circle().stroke(.white.opacity(0.24), lineWidth: 1))
+                        if appContainer.chatStore.unreadCount > 0 {
+                            Text("\(min(appContainer.chatStore.unreadCount, 99))")
+                                .font(.system(size: 10, weight: .black))
+                                .foregroundColor(.black)
+                                .frame(minWidth: 21, minHeight: 21)
+                                .background(JourneyVisual.lime)
+                                .clipShape(Circle())
+                                .offset(x: 3, y: -3)
+                        }
                     }
                 }
+                .buttonStyle(.plain)
+                .accessibilityLabel("chat.accessibility.inbox".localized(with: appContainer.chatStore.unreadCount))
             }
-            .buttonStyle(.plain)
-            .accessibilityLabel("chat.accessibility.inbox".localized(with: appContainer.chatStore.unreadCount))
             .padding(.top, 52)
             .padding(.trailing, 18)
         }
@@ -358,18 +373,13 @@ struct JourneyMarketplaceView: View {
         VStack(alignment: .leading, spacing: 14) {
             if eventsVM.isLoading && eventsVM.events.isEmpty {
                 MarketLoadingView(title: "Збираємо актуальні події")
-            } else {
+            } else if let featuredEvent {
                 JourneyEventFeatureCard(
                     event: featuredEvent,
-                    isSaved: featuredEvent.map { appContainer.savedItems.isEventSaved($0.id) } ?? false,
-                    open: {
-                        if let featuredEvent { selectedEvent = featuredEvent } else { handleCreateTap() }
-                    },
-                    save: {
-                        if let featuredEvent { appContainer.savedItems.toggleEvent(featuredEvent.id) }
-                    },
+                    isSaved: appContainer.savedItems.isEventSaved(featuredEvent.id),
+                    open: { selectedEvent = featuredEvent },
+                    save: { appContainer.savedItems.toggleEvent(featuredEvent.id) },
                     addToCalendar: {
-                        guard let featuredEvent else { return }
                         Task { await addToCalendar(featuredEvent) }
                     }
                 )
@@ -386,6 +396,14 @@ struct JourneyMarketplaceView: View {
                     }
                     .buttonStyle(.plain)
                 }
+            } else {
+                MarketEmptyCard(
+                    icon: "calendar.badge.plus",
+                    title: "Подій поки немає",
+                    subtitle: "Створи першу зустріч для спільноти у своєму кантоні.",
+                    actionTitle: "Додати подію",
+                    action: handleCreateTap
+                )
             }
         }
     }
@@ -1028,7 +1046,7 @@ private struct JourneyGoodsGridCard: View {
 
 private struct JourneyEventFeatureCard: View {
     @Environment(\.locale) private var locale
-    let event: EventListing?
+    let event: EventListing
     let isSaved: Bool
     let open: () -> Void
     let save: () -> Void
@@ -1067,7 +1085,7 @@ private struct JourneyEventFeatureCard: View {
                 Spacer()
                 Button(action: open) {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text(event?.title ?? "Українська зустріч у Zürich")
+                        Text(event.title)
                             .font(.system(size: 25, weight: .bold, design: .rounded))
                             .foregroundColor(.white)
                             .lineLimit(2)
@@ -1101,22 +1119,20 @@ private struct JourneyEventFeatureCard: View {
         .overlay(RoundedRectangle(cornerRadius: 26, style: .continuous).stroke(.white.opacity(0.25), lineWidth: 1))
     }
 
-    private var date: Date { event?.startsAt ?? Calendar.current.date(from: DateComponents(year: 2026, month: 7, day: 18)) ?? Date() }
+    private var date: Date { event.startsAt ?? Date() }
     private var dayText: String { date.formatted(.dateTime.day().locale(locale)) }
     private var monthText: String { date.formatted(.dateTime.month(.abbreviated).locale(locale)).uppercased() }
     private var scheduleAndPlace: String {
         let schedule = date.formatted(.dateTime.weekday(.abbreviated).hour().minute().locale(locale))
-        let place = event?.city.isEmpty == false ? event!.city : "Zürich"
+        let place = event.city.isEmpty == false ? event.city : "Zürich"
         return "\(schedule) · \(place)"
     }
     private var eventTrustText: String {
-        guard let event else { return "Модератор: Спільнота Sweezy" }
-        return event.isVerified ? "Перевірений організатор · \(event.freshnessText)" : "Модерація Sweezy · \(event.freshnessText)"
+        event.isVerified ? "Перевірений організатор · \(event.freshnessText)" : "Модерація Sweezy · \(event.freshnessText)"
     }
-    private var shareText: String { "\(event?.title ?? "Подія Sweezy") — \(scheduleAndPlace)" }
+    private var shareText: String { "\(event.title) — \(scheduleAndPlace)" }
     private var eventImageName: String {
-        guard let category = event?.category else { return "cityhub-zurich-sechselaeutenplatz" }
-        switch category {
+        switch event.category {
         case .community, .career: return "cityhub-zurich-viadukt"
         case .kids, .sports: return "cityhub-zurich-lake"
         case .education, .language: return "cityhub-zurich-landesmuseum"

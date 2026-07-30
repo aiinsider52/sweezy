@@ -28,6 +28,9 @@ struct JourneyMarketplaceView: View {
             ZStack(alignment: .bottomTrailing) {
                 JourneyVisual.black.ignoresSafeArea()
 
+                marketOverscrollBackdrop
+                    .allowsHitTesting(false)
+
                 ScrollView(showsIndicators: false) {
                     LazyVStack(alignment: .leading, spacing: 0) {
                         marketHero
@@ -42,7 +45,10 @@ struct JourneyMarketplaceView: View {
                         .padding(.bottom, 132)
                     }
                 }
-                .refreshable { await refreshSelectedMode() }
+                .refreshable {
+                    await refreshSelectedMode()
+                }
+                .tint(JourneyVisual.lime)
 
                 Button(action: handleCreateTap) {
                     Image(systemName: "plus")
@@ -138,6 +144,35 @@ struct JourneyMarketplaceView: View {
         }
         .featureOnboarding(.marketplace)
         .accessibilityIdentifier("marketplace.screen")
+    }
+
+    /// Continues the hero photo above the fold so pull-to-refresh never reveals a flat black slab.
+    private var marketOverscrollBackdrop: some View {
+        VStack(spacing: 0) {
+            ZStack {
+                Image(heroImageName)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(height: 300)
+                    .frame(maxWidth: .infinity)
+                    .clipped()
+
+                LinearGradient(
+                    colors: [
+                        Color.black.opacity(0.38),
+                        Color.black.opacity(0.18),
+                        JourneyVisual.black
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+            }
+            .frame(height: 300)
+            .frame(maxWidth: .infinity)
+
+            Spacer(minLength: 0)
+        }
+        .ignoresSafeArea(edges: .top)
     }
 
     private var marketHero: some View {

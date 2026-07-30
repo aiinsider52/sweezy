@@ -55,7 +55,7 @@ struct LoginView: View {
         }
         .journeyScreen(.alpine, darkness: 0.64)
         .sheet(isPresented: $showReset) {
-            PasswordResetSheet(initialEmail: email)
+            PasswordResetSheet(initialEmail: normalizedEmail)
         }
         .sheet(isPresented: $showEmailVerification) {
             EmailVerificationSheet(initialEmail: email, initialName: appContainer.userProfile?.fullName.isEmpty == false ? appContainer.userProfile?.fullName : nil) {
@@ -76,6 +76,10 @@ struct LoginView: View {
                 animateIcon = true
             }
         }
+    }
+
+    private var normalizedEmail: String {
+        email.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
     }
     
     // MARK: - Header
@@ -436,7 +440,7 @@ struct LoginView: View {
         isLoading = true
         do {
             let previousEmail = lockManager.userEmail
-            let tokens = try await APIClient.login(email: email, password: password)
+            let tokens = try await APIClient.login(email: normalizedEmail, password: password)
             try KeychainStore.save(tokens.access_token, for: "access_token")
             try KeychainStore.save(tokens.refresh_token, for: "refresh_token")
             try KeychainStore.save(tokens.user_id, for: "user_id")
@@ -449,44 +453,47 @@ struct LoginView: View {
             }
             #endif
             withAnimation(Theme.Animation.smooth) {
-                lockManager.userEmail = email
+                lockManager.userEmail = normalizedEmail
                 lockManager.isRegistered = true
             }
             // Reset local stats for a new account (avoid inheriting previous user's stats)
-            if previousEmail != email {
+            if previousEmail != normalizedEmail {
                 appContainer.userStats.reset()
                 appContainer.gamification.resetForNewUser()
             }
             // Prime user profile for Settings / Profile forms
             if var profile = appContainer.userProfile {
-                profile.email = email
+                profile.email = normalizedEmail
                 appContainer.userProfile = profile
                 sessionManager.activateAuthenticatedSession(
                     userID: tokens.user_id,
-                    email: email,
+                    email: normalizedEmail,
                     name: profile.fullName.isEmpty ? nil : profile.fullName
                 )
             } else {
                 var profile = UserProfile()
                 // Derive a readable name from email local-part if possible
-                let local = email.split(separator: "@").first.map(String.init) ?? "User"
+                let local = normalizedEmail.split(separator: "@").first.map(String.init) ?? "User"
                 profile.fullName = local.capitalized
-                profile.email = email
+                profile.email = normalizedEmail
                 profile.preferredLanguage = appContainer.currentLocale.identifier
                 appContainer.userProfile = profile
                 sessionManager.activateAuthenticatedSession(
                     userID: tokens.user_id,
-                    email: email,
+                    email: normalizedEmail,
                     name: profile.fullName
                 )
             }
             dismiss()
-        } catch {
+        } catch let error {
             if APIClient.isEmailNotVerified(error) {
                 errorMessage = nil
                 showEmailVerification = true
             } else {
-                errorMessage = (error as NSError).localizedDescription
+                errorMessage = AuthErrorPresenter.message(
+                    for: error,
+                    fallbackKey: "auth.error.generic"
+                )
             }
         }
         isLoading = false
@@ -602,6 +609,9 @@ struct PasswordResetSheet: View {
     private var passwordsMatch: Bool { newPassword == confirmPassword && !confirmPassword.isEmpty }
     private var canProceedToPassword: Bool { code.count == 6 && code.allSatisfy(\.isNumber) }
     private var canResetPassword: Bool { passwordStrength.isStrong && passwordsMatch }
+    private var normalizedEmail: String {
+        email.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+    }
     
     var body: some View {
         NavigationStack {
@@ -1170,7 +1180,8 @@ struct PasswordResetSheet: View {
         isLoading = true
 
         do {
-            _ = try await APIClient.requestPasswordReset(email: email)
+            email = normalizedEmail
+            _ = try await APIClient.requestPasswordReset(email: normalizedEmail)
             await MainActor.run {
                 isLoading = false
                 emailSent = true
@@ -1181,10 +1192,13 @@ struct PasswordResetSheet: View {
                     }
                 }
             }
-        } catch {
+        } catch let error {
             await MainActor.run {
                 isLoading = false
-                errorMessage = (error as NSError).localizedDescription
+                errorMessage = AuthErrorPresenter.message(
+                    for: error,
+                    fallbackKey: "auth.error.generic"
+                )
             }
         }
     }
@@ -1194,17 +1208,25 @@ struct PasswordResetSheet: View {
         isLoading = true
 
         do {
-            _ = try await APIClient.resetPassword(email: email, code: code, newPassword: newPassword)
+            email = normalizedEmail
+            _ = try await APIClient.resetPassword(
+                email: normalizedEmail,
+                code: code,
+                newPassword: newPassword
+            )
             await MainActor.run {
                 isLoading = false
                 withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
                     currentStep = .success
                 }
             }
-        } catch {
+        } catch let error {
             await MainActor.run {
                 isLoading = false
-                errorMessage = (error as NSError).localizedDescription
+                errorMessage = AuthErrorPresenter.message(
+                    for: error,
+                    fallbackKey: "auth.error.generic"
+                )
             }
         }
     }

@@ -1346,70 +1346,32 @@ struct ProfileEditView: View {
         if permitMonthsRemaining > 3 { return .yellow }
         return .red
     }
-    
+
+    // Legacy helpers remain only for source-compatible, non-rendered winter components.
     private var isDarkTheme: Bool { colorScheme == .dark }
-    
-    private var winterPrimaryText: Color {
-        isDarkTheme ? .white : Theme.Colors.textPrimary
-    }
-    
-    private var winterSecondaryText: Color {
-        isDarkTheme ? .white.opacity(0.68) : Theme.Colors.textSecondary
-    }
-    
-    private var winterTertiaryText: Color {
-        isDarkTheme ? .white.opacity(0.5) : Theme.Colors.textTertiary
-    }
-    
-    private var winterScreenBackground: LinearGradient {
-        if isDarkTheme {
-            return LinearGradient(
-                colors: [
-                    Theme.Colors.primaryDark,
-                    Theme.Colors.primary.opacity(0.85),
-                    Theme.Colors.primaryDark
-                ],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-        }
-        
-        return LinearGradient(
-            colors: [
-                Theme.Colors.primaryBackground,
-                Theme.Colors.backgroundStone,
-                Color.white
-            ],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
-    }
-    
+    private var winterPrimaryText: Color { isDarkTheme ? .white : Theme.Colors.textPrimary }
+    private var winterSecondaryText: Color { isDarkTheme ? .white.opacity(0.68) : Theme.Colors.textSecondary }
+    private var winterTertiaryText: Color { isDarkTheme ? .white.opacity(0.5) : Theme.Colors.textTertiary }
+
     var body: some View {
         Group {
             if sessionManager.isAuthenticated {
                 NavigationStack {
                     ZStack {
-                        JourneyPhotoBackground(imageName: JourneyBackdrop.zurich.rawValue, blurRadius: 7, darkness: 0.7)
+                        JourneyPhotoBackground(imageName: JourneyBackdrop.city.rawValue, blurRadius: 5, darkness: 0.82)
                         
                         ScrollView(showsIndicators: false) {
-                            VStack(spacing: 20) {
-                                // Hero
-                                winterHeroSection
-                                // Personal
-                                winterProfilePersonalCard
-                                // Location & Permit
-                                winterProfileLocationCard
-                                // Timeline
-                                winterProfileTimelineCard
-                                // Family
-                                winterProfileFamilyCard
-                                // Goals
-                                winterProfileGoalsCard
-                                Spacer(minLength: 140)
+                            VStack(spacing: 14) {
+                                heroSection
+                                profilePersonalCard
+                                profileLocationCard
+                                profileTimelineCard
+                                profileFamilyCard
+                                profileGoalsCard
+                                Spacer(minLength: 116)
                             }
                             .padding(.horizontal, 16)
-                            .padding(.top, 16)
+                            .padding(.top, 10)
                         }
                     }
                     .navigationTitle("settings.edit_profile.nav_title".localized)
@@ -1417,14 +1379,20 @@ struct ProfileEditView: View {
                     .toolbar {
                         ToolbarItem(placement: .navigationBarLeading) {
                             Button { dismiss() } label: {
-                                Text("common.cancel".localized)
-                                    .foregroundColor(winterSecondaryText)
+                                Image(systemName: "xmark")
+                                    .font(.system(size: 14, weight: .bold))
+                                    .foregroundColor(.white)
+                                    .frame(width: 38, height: 38)
+                                    .background(Color.black.opacity(0.48))
+                                    .clipShape(Circle())
+                                    .overlay(Circle().stroke(Color.white.opacity(0.2), lineWidth: 1))
                             }
+                            .accessibilityLabel("common.cancel".localized)
                         }
                     }
-                    .safeAreaInset(edge: .bottom) { winterSaveButton }
+                    .safeAreaInset(edge: .bottom) { saveButton }
                 }
-                .journeyScreen(.zurich, darkness: 0.7)
+                .journeyScreen(.city, darkness: 0.82)
                 .onAppear { loadCurrentProfile() }
                 .onChange(of: fullName) { _, _ in hasChanges = true }
                 .onChange(of: email) { _, _ in hasChanges = true }
@@ -1454,20 +1422,20 @@ struct ProfileEditView: View {
     private var guestGateContent: some View {
         NavigationStack {
             ZStack {
-                JourneyPhotoBackground(imageName: JourneyBackdrop.zurich.rawValue, blurRadius: 7, darkness: 0.72)
+                JourneyPhotoBackground(imageName: JourneyBackdrop.city.rawValue, blurRadius: 7, darkness: 0.84)
                 
                 VStack(spacing: 12) {
                     Image(systemName: "lock.fill")
                         .font(.system(size: 34, weight: .semibold))
-                        .foregroundColor(winterPrimaryText)
+                        .foregroundColor(JourneyVisual.lime)
                     
                     Text("auth.login.title")
                         .font(.system(size: 20, weight: .bold))
-                        .foregroundColor(winterPrimaryText)
+                        .foregroundColor(.white)
                     
                     Text("auth.login.subtitle")
                         .font(.subheadline)
-                        .foregroundColor(winterSecondaryText)
+                        .foregroundColor(.white.opacity(0.62))
                         .multilineTextAlignment(.center)
                     
                     Button {
@@ -1475,12 +1443,12 @@ struct ProfileEditView: View {
                     } label: {
                         Text("auth.entry.open_auth")
                             .font(.subheadline.weight(.semibold))
-                            .foregroundColor(.white)
+                            .foregroundColor(.black)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 14)
                             .background(
                                 RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                    .fill(LinearGradient(colors: [.cyan, .blue], startPoint: .leading, endPoint: .trailing))
+                                    .fill(JourneyVisual.lime)
                             )
                     }
                     .buttonStyle(.plain)
@@ -1489,73 +1457,75 @@ struct ProfileEditView: View {
                     Button { dismiss() } label: {
                         Text("common.close")
                             .font(.subheadline.weight(.medium))
-                            .foregroundColor(winterSecondaryText)
+                            .foregroundColor(.white.opacity(0.62))
                     }
                     .buttonStyle(.plain)
                 }
                 .padding(24)
                 .background(
-                    RoundedRectangle(cornerRadius: 20, style: .continuous)
-                        .fill(Theme.Colors.adaptiveCard)
+                    RoundedRectangle(cornerRadius: 24, style: .continuous)
+                        .fill(Color.black.opacity(0.58))
+                        .background(.ultraThinMaterial.opacity(0.72))
                         .overlay(
-                            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                                .stroke(Theme.Colors.adaptiveBorder.opacity(0.7), lineWidth: 1)
+                            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                                .stroke(Color.white.opacity(0.2), lineWidth: 1)
                         )
                 )
                 .padding(.horizontal, 20)
             }
-            .journeyScreen(.zurich, darkness: 0.72)
+            .journeyScreen(.city, darkness: 0.84)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button { dismiss() } label: {
                         Image(systemName: "xmark")
                             .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(winterSecondaryText)
+                            .foregroundColor(.white.opacity(0.7))
                     }
                 }
             }
         }
     }
     
-    // MARK: - Hero (Original)
+    // MARK: - Hero
     private var heroSection: some View {
-        VStack(spacing: 16) {
+        HStack(spacing: 15) {
             ZStack {
                 Circle()
-                    .fill(LinearGradient(colors: [Theme.Colors.accentTurquoise, Theme.Colors.primary], startPoint: .topLeading, endPoint: .bottomTrailing))
-                    .frame(width: 100, height: 100)
-                    .shadow(color: Theme.Colors.accentTurquoise.opacity(0.35), radius: 12, x: 0, y: 6)
-                Text(initials)
-                    .font(.system(size: 36, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
+                    .fill(Color.black.opacity(0.72))
+                    .frame(width: 72, height: 72)
                 Circle()
-                    .stroke(Color.white.opacity(0.25), lineWidth: 4)
-                    .frame(width: 108, height: 108)
+                    .stroke(Color.white.opacity(0.15), lineWidth: 4)
+                    .frame(width: 76, height: 76)
                 Circle()
                     .trim(from: 0, to: completionPercentage)
-                    .stroke(LinearGradient(colors: [.green, .cyan], startPoint: .leading, endPoint: .trailing), style: StrokeStyle(lineWidth: 4, lineCap: .round))
-                    .frame(width: 108, height: 108)
+                    .stroke(JourneyVisual.lime, style: StrokeStyle(lineWidth: 4, lineCap: .round))
+                    .frame(width: 76, height: 76)
                     .rotationEffect(.degrees(-90))
+                Text(initials)
+                    .font(.system(size: 25, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
             }
-            VStack(spacing: 4) {
+
+            VStack(alignment: .leading, spacing: 5) {
                 Text(fullName.isEmpty ? "settings.profile.your_name".localized : fullName)
-                    .font(.system(size: 22, weight: .bold, design: .rounded))
-                    .foregroundColor(Theme.Colors.textPrimary)
+                    .font(.system(size: 21, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
+                    .lineLimit(1)
                 if !email.isEmpty {
                     Text(email)
-                        .font(.system(size: 14))
-                        .foregroundColor(Theme.Colors.textSecondary)
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(.white.opacity(0.58))
+                        .lineLimit(1)
                 }
-                HStack(spacing: 6) {
-                    Image(systemName: completionPercentage >= 1 ? "checkmark.seal.fill" : "chart.pie.fill").font(.system(size: 12))
-                    Text("settings.profile.completion_format".localized(with: Int(completionPercentage * 100))).font(.system(size: 12, weight: .medium))
-                }
-                .foregroundColor(completionPercentage >= 1 ? .green : Theme.Colors.textTertiary)
-                .padding(.top, 4)
+                Text("settings.profile.completion_format".localized(with: Int(completionPercentage * 100)))
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundColor(JourneyVisual.lime)
             }
+            Spacer(minLength: 0)
         }
-        .padding(.vertical, 12)
+        .padding(18)
+        .journeyCard(cornerRadius: 24)
     }
     
     // MARK: - Winter Hero
@@ -1632,7 +1602,7 @@ struct ProfileEditView: View {
     private var initials: String {
         let comps = fullName.split(separator: " ")
         let letters = comps.compactMap { $0.first }.prefix(2)
-        return letters.isEmpty ? "👤" : String(letters).uppercased()
+        return letters.isEmpty ? "U" : String(letters).uppercased()
     }
     
     // MARK: - Cards (Original)
@@ -1871,21 +1841,22 @@ struct ProfileEditView: View {
             VStack(spacing: 16) {
                 Button { showCantonPicker = true } label: {
                     HStack {
-                        Image(systemName: "building.2").foregroundColor(.orange).frame(width: 24)
-                        Text("calculator.canton".localized).foregroundColor(Theme.Colors.textSecondary)
+                        Image(systemName: "building.2").foregroundColor(JourneyVisual.lime).frame(width: 24)
+                        Text("calculator.canton".localized).foregroundColor(.white.opacity(0.62))
                         Spacer()
-                        HStack(spacing: 6) { Text(selectedCanton.flag).font(.system(size: 18)); Text(selectedCanton.localizedName).foregroundColor(Theme.Colors.textPrimary) }
-                        Image(systemName: "chevron.right").foregroundColor(Theme.Colors.textTertiary)
+                        HStack(spacing: 6) { Text(selectedCanton.flag).font(.system(size: 18)); Text(selectedCanton.localizedName).foregroundColor(.white) }
+                        Image(systemName: "chevron.right").foregroundColor(.white.opacity(0.34))
                     }
                     .padding(14)
-                    .background(Theme.Colors.chipBackground)
-                    .cornerRadius(12)
+                    .background(Color.white.opacity(0.07))
+                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.white.opacity(0.1), lineWidth: 1))
                 }.buttonStyle(.plain)
                 
                 Button { showPermitPicker = true } label: {
                     HStack {
                         Image(systemName: "doc.badge.gearshape").foregroundColor(selectedPermitType.color).frame(width: 24)
-                        Text("calculator.permit_type".localized).foregroundColor(Theme.Colors.textSecondary)
+                        Text("calculator.permit_type".localized).foregroundColor(.white.opacity(0.62))
                         Spacer()
                         HStack(spacing: 6) {
                             Text(selectedPermitType.rawValue)
@@ -1893,13 +1864,14 @@ struct ProfileEditView: View {
                                 .foregroundColor(.white)
                                 .padding(.horizontal, 8).padding(.vertical, 4)
                                 .background(selectedPermitType.color).cornerRadius(6)
-                            Text(selectedPermitType.shortName).foregroundColor(Theme.Colors.textPrimary)
+                            Text(selectedPermitType.shortName).foregroundColor(.white)
                         }
-                        Image(systemName: "chevron.right").foregroundColor(Theme.Colors.textTertiary)
+                        Image(systemName: "chevron.right").foregroundColor(.white.opacity(0.34))
                     }
                     .padding(14)
-                    .background(Theme.Colors.chipBackground)
-                    .cornerRadius(12)
+                    .background(Color.white.opacity(0.07))
+                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.white.opacity(0.1), lineWidth: 1))
                 }.buttonStyle(.plain)
             }
         }
@@ -1910,15 +1882,17 @@ struct ProfileEditView: View {
                 HStack(alignment: .top) {
                     VStack(spacing: 8) {
                         ZStack { Circle().fill(Color.green).frame(width: 16, height: 16); Circle().fill(.white).frame(width: 6, height: 6) }
-                        Text("settings.profile.arrival".localized).font(.system(size: 11, weight: .medium)).foregroundColor(Theme.Colors.textSecondary)
+                        Text("settings.profile.arrival".localized).font(.system(size: 11, weight: .medium)).foregroundColor(.white.opacity(0.58))
                         Text(arrivalDate.formatted(.dateTime.day().month(.abbreviated))).font(.system(size: 13, weight: .semibold))
+                            .foregroundColor(.white)
                     }.frame(maxWidth: .infinity)
                     VStack { Rectangle().fill(LinearGradient(colors: [.green, permitStatusColor], startPoint: .leading, endPoint: .trailing)).frame(height: 3).cornerRadius(2) }
                         .frame(maxWidth: .infinity).padding(.top, 6)
                     VStack(spacing: 8) {
                         ZStack { Circle().fill(permitStatusColor).frame(width: 16, height: 16); Circle().fill(.white).frame(width: 6, height: 6) }
-                        Text("settings.profile.expiry".localized).font(.system(size: 11, weight: .medium)).foregroundColor(Theme.Colors.textSecondary)
+                        Text("settings.profile.expiry".localized).font(.system(size: 11, weight: .medium)).foregroundColor(.white.opacity(0.58))
                         Text(permitExpiry.formatted(.dateTime.day().month(.abbreviated).year())).font(.system(size: 13, weight: .semibold))
+                            .foregroundColor(.white)
                     }.frame(maxWidth: .infinity)
                 }
                 HStack(spacing: 8) {
@@ -1930,7 +1904,7 @@ struct ProfileEditView: View {
                 .background(permitStatusColor.opacity(0.15)).cornerRadius(10)
                 HStack(spacing: 12) {
                     DatePicker("", selection: $arrivalDate, displayedComponents: .date).labelsHidden().datePickerStyle(.compact).scaleEffect(0.9)
-                    Text("→").foregroundColor(Theme.Colors.textTertiary)
+                    Text("→").foregroundColor(.white.opacity(0.42))
                     DatePicker("", selection: $permitExpiry, displayedComponents: .date).labelsHidden().datePickerStyle(.compact).scaleEffect(0.9)
                 }
             }
@@ -1940,27 +1914,32 @@ struct ProfileEditView: View {
         ProfileSectionCard(icon: "figure.2.and.child.holdinghands", title: "checklist.category.family".localized, color: .pink) {
             VStack(spacing: 16) {
                 HStack {
-                    Text("settings.profile.family_size".localized).foregroundColor(Theme.Colors.textSecondary)
+                    Text("settings.profile.family_size".localized).foregroundColor(.white.opacity(0.62))
                     Spacer()
                     HStack(spacing: 0) {
                         Button { if familySize > 1 { familySize -= 1 } } label: { Image(systemName: "minus").frame(width: 36, height: 36) }
                             .disabled(familySize <= 1)
                         Divider().frame(height: 20)
+                        Text("\(familySize)")
+                            .font(.system(size: 16, weight: .bold, design: .rounded))
+                            .frame(width: 38)
+                        Divider().frame(height: 20)
                         Button { if familySize < 20 { familySize += 1 } } label: { Image(systemName: "plus").frame(width: 36, height: 36) }
                     }
-                    .foregroundColor(Theme.Colors.textPrimary)
-                    .background(Theme.Colors.chipBackground).cornerRadius(10)
+                    .foregroundColor(.white)
+                    .background(Color.white.opacity(0.08)).cornerRadius(10)
                 }
                 HStack {
                     HStack(spacing: 10) {
                         Image(systemName: hasChildren ? "figure.and.child.holdinghands" : "figure.2")
-                            .foregroundColor(hasChildren ? .pink : Theme.Colors.textTertiary).frame(width: 24)
-                        Text("settings.profile.has_children".localized).foregroundColor(Theme.Colors.textPrimary)
+                            .foregroundColor(hasChildren ? JourneyVisual.lime : .white.opacity(0.42)).frame(width: 24)
+                        Text("settings.profile.has_children".localized).foregroundColor(.white)
                     }
                     Spacer()
-                    Toggle("", isOn: $hasChildren).labelsHidden().tint(.pink)
+                    Toggle("", isOn: $hasChildren).labelsHidden().tint(JourneyVisual.lime)
                 }
-                .padding(14).background(Theme.Colors.chipBackground).cornerRadius(12)
+                .padding(14).background(Color.white.opacity(0.07)).cornerRadius(14)
+                .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.white.opacity(0.1), lineWidth: 1))
             }
         }
     }
@@ -1979,22 +1958,20 @@ struct ProfileEditView: View {
                 .font(.system(size: 16, weight: .semibold))
                 .frame(maxWidth: .infinity)
                 .frame(height: 54)
-                .foregroundColor(.white)
-                .background(
-                    Group {
-                        if hasChanges {
-                            AnyView(LinearGradient(colors: [Theme.Colors.accentTurquoise, Theme.Colors.primary], startPoint: .leading, endPoint: .trailing))
-                        } else {
-                            AnyView(Color.gray.opacity(0.3))
-                        }
-                    }
+                .foregroundColor(hasChanges ? .black : .white.opacity(0.42))
+                .background(hasChanges ? JourneyVisual.lime : Color.white.opacity(0.09))
+                .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        .stroke(Color.white.opacity(hasChanges ? 0 : 0.12), lineWidth: 1)
                 )
-                .cornerRadius(16)
+                .shadow(color: hasChanges ? JourneyVisual.lime.opacity(0.22) : .clear, radius: 18, y: 7)
         }
         .disabled(!hasChanges)
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
-        .background(.ultraThinMaterial)
+        .background(.ultraThinMaterial.opacity(0.92))
+        .background(Color.black.opacity(0.72))
     }
     
     // MARK: - Sheets
@@ -2203,20 +2180,19 @@ private struct GoalChipButton: View {
     var body: some View {
         Button(action: onTap) {
             HStack(spacing: 10) {
-                // Icon with background
                 ZStack {
                     Circle()
-                        .fill(isSelected ? goalColor : goalColor.opacity(0.15))
+                        .fill(isSelected ? Color.black.opacity(0.16) : Color.white.opacity(0.08))
                         .frame(width: 32, height: 32)
                     
                     Image(systemName: goalIcon)
                         .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(isSelected ? .white : goalColor)
+                        .foregroundColor(isSelected ? .black : JourneyVisual.lime)
                 }
                 
                 Text(goal.localizedName)
                     .font(.system(size: 13, weight: .medium))
-                    .foregroundColor(isSelected ? .white : Theme.Colors.textPrimary)
+                    .foregroundColor(isSelected ? .black : .white)
                     .lineLimit(2)
                     .minimumScaleFactor(0.8)
                 
@@ -2226,20 +2202,20 @@ private struct GoalChipButton: View {
                 if isSelected {
                     Image(systemName: "checkmark")
                         .font(.system(size: 12, weight: .bold))
-                        .foregroundColor(.white)
+                        .foregroundColor(.black)
                 }
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 10)
             .background(
                 RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .fill(isSelected ? goalColor : Theme.Colors.chipBackground)
+                    .fill(isSelected ? JourneyVisual.lime : Color.white.opacity(0.07))
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .stroke(isSelected ? goalColor : goalColor.opacity(0.3), lineWidth: isSelected ? 0 : 1)
+                    .stroke(isSelected ? Color.clear : Color.white.opacity(0.12), lineWidth: 1)
             )
-            .shadow(color: isSelected ? goalColor.opacity(0.3) : .clear, radius: 6, x: 0, y: 3)
+            .shadow(color: isSelected ? JourneyVisual.lime.opacity(0.22) : .clear, radius: 8, x: 0, y: 4)
             .scaleEffect(isSelected ? 1.02 : 1.0)
         }
         .buttonStyle(.plain)
@@ -2260,20 +2236,18 @@ private struct ProfileSectionCard<Content: View>: View {
             HStack(spacing: 10) {
                 Image(systemName: icon)
                     .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(.white)
-                    .frame(width: 28, height: 28)
-                    .background(color)
-                    .cornerRadius(8)
+                    .foregroundColor(.black)
+                    .frame(width: 32, height: 32)
+                    .background(JourneyVisual.lime)
+                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                 Text(title)
-                    .font(.system(size: 15, weight: .semibold))
-                    .foregroundColor(Theme.Colors.textPrimary)
+                    .font(.system(size: 16, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
             }
             content
         }
-        .padding(16)
-        .background(.ultraThinMaterial)
-        .cornerRadius(20)
-        .overlay(RoundedRectangle(cornerRadius: 20).stroke(color.opacity(0.2), lineWidth: 1))
+        .padding(17)
+        .journeyCard(cornerRadius: 22)
     }
 }
 private struct ProfileTextField: View {
@@ -2288,10 +2262,11 @@ private struct ProfileTextField: View {
             HStack(spacing: 12) {
                 Image(systemName: icon)
                     .font(.system(size: 16))
-                    .foregroundColor(isValid ? Theme.Colors.textTertiary : .red)
+                    .foregroundColor(isValid ? JourneyVisual.lime : .red)
                     .frame(width: 24)
                 TextField(placeholder, text: $text)
                     .font(.system(size: 15))
+                    .foregroundColor(.white)
                     .keyboardType(keyboardType)
                     .autocapitalization(keyboardType == .emailAddress ? .none : .words)
                 if !text.isEmpty {
@@ -2301,8 +2276,12 @@ private struct ProfileTextField: View {
                 }
             }
             .padding(14)
-            .background(Theme.Colors.chipBackground)
-            .cornerRadius(12)
+            .background(Color.white.opacity(0.07))
+            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .stroke(isValid ? Color.white.opacity(0.1) : Color.red.opacity(0.55), lineWidth: 1)
+            )
             if let message = validationMessage {
                 Text(message).font(.system(size: 11)).foregroundColor(.red).padding(.leading, 36)
             }

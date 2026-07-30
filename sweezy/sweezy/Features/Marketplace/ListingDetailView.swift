@@ -483,7 +483,7 @@ struct ListingDetailView: View {
 
     private func bottomActionBar(listing: ServiceListing) -> some View {
         let chatAvailable = listing.authorID != nil && !isOwnListing(listing)
-        HStack(spacing: 12) {
+        return HStack(spacing: 12) {
             Button {
                 guard chatAvailable else {
                     if listing.authorID == nil {

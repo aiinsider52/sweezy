@@ -1408,6 +1408,9 @@
 "auth.error.rate_limited" = "Too many requests. Wait a few minutes and try again.";
 "auth.error.email_delivery" = "We couldn't send the email. Check the address or try again later.";
 
+"auth.error.generic" = "Something went wrong. Please try again.";
+"auth.error.invalid_credentials" = "Incorrect email or password.";
+
 
 /* ===== Journey shell (auto) ===== */
 "common.all" = "All";
@@ -1496,6 +1499,8 @@
 "journey.map.show_list" = "Show list";
 "journey.map.today" = "Today";
 "journey.map.type.legal" = "Legal";
+"journey.map.zoom_in" = "Zoom in";
+"journey.map.zoom_out" = "Zoom out";
 "journey.tab.directory" = "Directory";
 "journey.tab.home" = "Home";
 "journey.tab.map" = "Map";

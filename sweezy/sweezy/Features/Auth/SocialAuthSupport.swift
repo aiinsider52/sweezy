@@ -106,6 +106,7 @@ struct SocialAuthPanel: View {
             } onCompletion: { result in
                 Task { await handleAppleSignIn(result) }
             }
+            .environment(\.locale, appContainer.currentLocale)
             .signInWithAppleButtonStyle(.white)
             .frame(height: 50)
             .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))

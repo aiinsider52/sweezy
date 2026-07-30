@@ -1217,6 +1217,9 @@
 "auth.error.rate_limited" = "Zu viele Anfragen. Warte einige Minuten.";
 "auth.error.email_delivery" = "Die E-Mail konnte nicht gesendet werden. Prüfe die Adresse oder versuche es später.";
 
+"auth.error.generic" = "Etwas ist schiefgelaufen. Bitte versuche es erneut.";
+"auth.error.invalid_credentials" = "E-Mail oder Passwort ist falsch.";
+
 
 /* ===== Journey shell (auto) ===== */
 "common.all" = "Alle";
@@ -1305,6 +1308,8 @@
 "journey.map.show_list" = "Liste zeigen";
 "journey.map.today" = "Heute";
 "journey.map.type.legal" = "Rechtliches";
+"journey.map.zoom_in" = "Vergrößern";
+"journey.map.zoom_out" = "Verkleinern";
 "journey.tab.directory" = "Guide";
 "journey.tab.home" = "Start";
 "journey.tab.map" = "Karte";

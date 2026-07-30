@@ -5,12 +5,23 @@ struct JourneyMapView: View {
     @EnvironmentObject private var appContainer: AppContainer
     @Environment(\.openURL) private var openURL
 
+    private static let defaultCenter = CLLocationCoordinate2D(latitude: 47.3769, longitude: 8.5417)
+    private static let minCameraDistance: CLLocationDistance = 700
+    private static let maxCameraDistance: CLLocationDistance = 48_000
+    private static let defaultCameraDistance: CLLocationDistance = 6_800
+    private static let defaultHeading: CLLocationDirection = 18
+    private static let defaultPitch: CGFloat = 58
+
+    @State private var cameraDistance: CLLocationDistance = Self.defaultCameraDistance
+    @State private var cameraCenter: CLLocationCoordinate2D = Self.defaultCenter
+    @State private var cameraHeading: CLLocationDirection = Self.defaultHeading
+    @State private var cameraPitch: CGFloat = Self.defaultPitch
     @State private var cameraPosition: MapCameraPosition = .camera(
         MapCamera(
-            centerCoordinate: CLLocationCoordinate2D(latitude: 47.3769, longitude: 8.5417),
-            distance: 6_800,
-            heading: 18,
-            pitch: 72
+            centerCoordinate: Self.defaultCenter,
+            distance: Self.defaultCameraDistance,
+            heading: Self.defaultHeading,
+            pitch: Self.defaultPitch
         )
     )
     @State private var selectedType: PlaceType?
@@ -38,11 +49,17 @@ struct JourneyMapView: View {
                 topControls
                 filterBar
                 Spacer(minLength: 16)
+                    .allowsHitTesting(false)
                 nearbyPlacesRail
             }
             .padding(.horizontal, 18)
             .padding(.top, 12)
             .padding(.bottom, 108)
+        }
+        .overlay(alignment: .trailing) {
+            zoomRail
+                .padding(.trailing, 14)
+                .padding(.bottom, 214)
         }
         .task {
             if appContainer.contentService.places.isEmpty {
@@ -79,7 +96,7 @@ struct JourneyMapView: View {
     }
 
     private var mapLayer: some View {
-        Map(position: $cameraPosition) {
+        Map(position: $cameraPosition, interactionModes: [.pan, .zoom, .rotate, .pitch]) {
             if let activeRoute {
                 MapPolyline(activeRoute.polyline)
                     .stroke(
@@ -106,8 +123,107 @@ struct JourneyMapView: View {
             }
         }
         .mapStyle(.imagery(elevation: .realistic))
-        .mapControlVisibility(.hidden)
+        .mapControls {
+            MapScaleView()
+                .mapControlVisibility(.visible)
+        }
+        .onMapCameraChange(frequency: .continuous) { context in
+            cameraCenter = context.camera.centerCoordinate
+            cameraDistance = context.camera.distance
+            cameraHeading = context.camera.heading
+            cameraPitch = context.camera.pitch
+        }
         .ignoresSafeArea()
+    }
+
+    private var zoomRail: some View {
+        VStack(spacing: 0) {
+            Button {
+                adjustZoom(factor: 0.62)
+            } label: {
+                Image(systemName: "plus")
+                    .font(.system(size: 15, weight: .bold))
+                    .foregroundColor(.white)
+                    .frame(width: 40, height: 40)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("journey.map.zoom_in".localized)
+
+            zoomGradation
+                .frame(width: 40, height: 92)
+                .padding(.vertical, 4)
+
+            Button {
+                adjustZoom(factor: 1.55)
+            } label: {
+                Image(systemName: "minus")
+                    .font(.system(size: 15, weight: .bold))
+                    .foregroundColor(.white)
+                    .frame(width: 40, height: 40)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("journey.map.zoom_out".localized)
+        }
+        .background(.ultraThinMaterial.opacity(0.88))
+        .background(Color.black.opacity(0.28))
+        .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 22, style: .continuous)
+                .stroke(Color.white.opacity(0.28), lineWidth: 1)
+        )
+        .shadow(color: .black.opacity(0.35), radius: 12, y: 4)
+        .accessibilityElement(children: .contain)
+    }
+
+    private var zoomGradation: some View {
+        GeometryReader { geometry in
+            let trackWidth: CGFloat = 3
+            let thumbHeight: CGFloat = 14
+            let progress = zoomProgress
+            let travel = max(geometry.size.height - thumbHeight, 1)
+            let thumbY = (1 - progress) * travel
+
+            ZStack {
+                Capsule()
+                    .fill(Color.white.opacity(0.16))
+                    .frame(width: trackWidth)
+
+                VStack(spacing: geometry.size.height / 5.2) {
+                    ForEach(0..<4, id: \.self) { _ in
+                        Capsule()
+                            .fill(Color.white.opacity(0.28))
+                            .frame(width: 10, height: 1.5)
+                    }
+                }
+
+                Capsule()
+                    .fill(
+                        LinearGradient(
+                            colors: [JourneyVisual.lime, JourneyVisual.lime.opacity(0.55)],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
+                    .frame(width: trackWidth, height: max(progress * geometry.size.height, 6))
+                    .frame(maxHeight: .infinity, alignment: .bottom)
+
+                Capsule()
+                    .fill(JourneyVisual.lime)
+                    .frame(width: 12, height: thumbHeight)
+                    .shadow(color: JourneyVisual.lime.opacity(0.55), radius: 6, y: 0)
+                    .offset(y: thumbY - travel / 2)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+        .accessibilityHidden(true)
+    }
+
+    private var zoomProgress: CGFloat {
+        let clamped = min(max(cameraDistance, Self.minCameraDistance), Self.maxCameraDistance)
+        let logMin = log(Self.minCameraDistance)
+        let logMax = log(Self.maxCameraDistance)
+        let logCur = log(clamped)
+        return CGFloat((logMax - logCur) / (logMax - logMin))
     }
 
     private var mapReadabilityGradient: some View {
@@ -519,31 +635,17 @@ struct JourneyMapView: View {
 
     private func focus(on place: Place) {
         selectedPlace = place
-        withAnimation(.easeInOut(duration: 0.3)) {
-            cameraPosition = .camera(
-                MapCamera(
-                    centerCoordinate: place.coordinate.clLocationCoordinate,
-                    distance: 3_600,
-                    heading: 18,
-                    pitch: 72
-                )
-            )
-        }
+        moveCamera(to: place.coordinate.clLocationCoordinate, distance: 3_600)
     }
 
     private func applyPendingMapFocus() {
         guard let target = MapFocusRouter.pending else { return }
         MapFocusRouter.pending = nil
-        withAnimation(.easeInOut(duration: 0.35)) {
-            cameraPosition = .camera(
-                MapCamera(
-                    centerCoordinate: CLLocationCoordinate2D(latitude: target.latitude, longitude: target.longitude),
-                    distance: max(2_400, target.spanDelta * 55_000),
-                    heading: 18,
-                    pitch: 72
-                )
-            )
-        }
+        moveCamera(
+            to: CLLocationCoordinate2D(latitude: target.latitude, longitude: target.longitude),
+            distance: min(max(2_400, target.spanDelta * 55_000), Self.maxCameraDistance),
+            duration: 0.35
+        )
     }
 
     private func activateUserLocation() {
@@ -555,18 +657,40 @@ struct JourneyMapView: View {
         case .authorizedWhenInUse, .authorizedAlways:
             appContainer.locationService.startLocationUpdates()
             guard let location = appContainer.locationService.currentLocation else { return }
-            withAnimation(.easeInOut(duration: 0.3)) {
-                cameraPosition = .camera(
-                    MapCamera(
-                        centerCoordinate: location.coordinate,
-                        distance: 3_600,
-                        heading: 18,
-                        pitch: 72
-                    )
-                )
-            }
+            moveCamera(to: location.coordinate, distance: 3_600)
         @unknown default:
             break
+        }
+    }
+
+    private func adjustZoom(factor: Double) {
+        let next = min(max(cameraDistance * factor, Self.minCameraDistance), Self.maxCameraDistance)
+        moveCamera(to: cameraCenter, distance: next, heading: cameraHeading, pitch: cameraPitch, duration: 0.22)
+    }
+
+    private func moveCamera(
+        to coordinate: CLLocationCoordinate2D,
+        distance: CLLocationDistance,
+        heading: CLLocationDirection? = nil,
+        pitch: CGFloat? = nil,
+        duration: Double = 0.3
+    ) {
+        let resolvedHeading = heading ?? Self.defaultHeading
+        let resolvedPitch = pitch ?? Self.defaultPitch
+        let resolvedDistance = min(max(distance, Self.minCameraDistance), Self.maxCameraDistance)
+        cameraCenter = coordinate
+        cameraDistance = resolvedDistance
+        cameraHeading = resolvedHeading
+        cameraPitch = resolvedPitch
+        withAnimation(.easeInOut(duration: duration)) {
+            cameraPosition = .camera(
+                MapCamera(
+                    centerCoordinate: coordinate,
+                    distance: resolvedDistance,
+                    heading: resolvedHeading,
+                    pitch: resolvedPitch
+                )
+            )
         }
     }
 

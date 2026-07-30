@@ -1432,6 +1432,9 @@
 "auth.error.rate_limited" = "Забагато запитів. Зачекайте кілька хвилин.";
 "auth.error.email_delivery" = "Не вдалося надіслати лист. Перевірте адресу або спробуйте пізніше.";
 
+"auth.error.generic" = "Сталася помилка. Спробуйте ще раз.";
+"auth.error.invalid_credentials" = "Невірний email або пароль.";
+
 
 /* ===== Journey shell (auto) ===== */
 "common.all" = "Усі";
@@ -1521,6 +1524,8 @@
 "journey.map.show_list" = "Показати список місць";
 "journey.map.today" = "Сьогодні";
 "journey.map.type.legal" = "Право";
+"journey.map.zoom_in" = "Збільшити масштаб";
+"journey.map.zoom_out" = "Зменшити масштаб";
 "journey.tab.directory" = "Довідник";
 "journey.tab.home" = "Головна";
 "journey.tab.map" = "Карта";

@@ -31,7 +31,9 @@ final class OnboardingUITests: XCTestCase {
 
         XCTAssertTrue(app.descendants(matching: .any)["onboarding.notificationPermissionPage"].waitForExistence(timeout: 10))
         let later = app.buttons["onboarding.notifications.laterButton"]
-        XCTAssertTrue(later.isHittable)
+        let hittable = NSPredicate(format: "exists == true AND hittable == true")
+        expectation(for: hittable, evaluatedWith: later)
+        waitForExpectations(timeout: 5)
         later.tap()
 
         let getStarted = app.buttons["onboarding.getStartedButton"]

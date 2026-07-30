@@ -17,6 +17,8 @@ enum AuthErrorPresenter {
 
         if let code = nsError.userInfo["api.code"] as? String {
             switch code {
+            case "INVALID_CREDENTIALS":
+                return "auth.error.invalid_credentials".localized
             case "INVALID_CODE", "CODE_NOT_FOUND":
                 return "auth.verify.error.invalid".localized
             case "CODE_EXPIRED":
@@ -37,6 +39,9 @@ enum AuthErrorPresenter {
         }
 
         let rawMessage = nsError.localizedDescription.lowercased()
+        if rawMessage.contains("invalid credentials") {
+            return "auth.error.invalid_credentials".localized
+        }
         if rawMessage.contains("invalid or expired code") {
             return "auth.verify.error.invalid_or_expired".localized
         }

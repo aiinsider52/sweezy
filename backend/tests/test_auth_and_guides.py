@@ -74,17 +74,24 @@ def test_register_and_login_success():
     assert "refresh_token" in tokens
 
 
-def test_register_duplicate_email_fails():
+def test_reregistering_unverified_email_uses_latest_password():
     email = _unique_email()
-    password = "StrongPass1!"
+    first_password = "FirstPass1!"
+    latest_password = "LatestPass1!"
 
-    res = client.post("/api/v1/auth/register", json={"email": email, "password": password})
+    res = client.post("/api/v1/auth/register", json={"email": email, "password": first_password})
     assert res.status_code == 201
 
-    # Second registration with same email should re-send verification while still unverified
-    res = client.post("/api/v1/auth/register", json={"email": email, "password": password})
+    # A restarted registration replaces the password because the account cannot
+    # be used until the email owner completes verification.
+    res = client.post("/api/v1/auth/register", json={"email": email, "password": latest_password})
     assert res.status_code == 201
     assert res.json()["status"] == "verification_required"
+
+    code = _issue_code(email, AuthEmailCodeService.VERIFY_EMAIL)
+    assert client.post("/api/v1/auth/verify-email/confirm", json={"email": email, "code": code}).status_code == 200
+    assert client.post("/api/v1/auth/login", json={"email": email, "password": first_password}).status_code == 401
+    assert client.post("/api/v1/auth/login", json={"email": email, "password": latest_password}).status_code == 200
 
 
 def test_email_verification_returns_machine_readable_invalid_code():
@@ -119,6 +126,22 @@ def test_login_invalid_credentials_returns_401():
     # wrong password
     res = client.post("/api/v1/auth/login", json={"email": email, "password": "WrongPass1!"})
     assert res.status_code == 401
+    assert res.json()["detail"] == {
+        "code": "INVALID_CREDENTIALS",
+        "message": "Invalid credentials",
+    }
+
+
+def test_login_matches_case_insensitive_email():
+    email = _unique_email()
+    password = "StrongPass1!"
+
+    assert client.post("/api/v1/auth/register", json={"email": email, "password": password}).status_code == 201
+    code = _issue_code(email, AuthEmailCodeService.VERIFY_EMAIL)
+    assert client.post("/api/v1/auth/verify-email/confirm", json={"email": email, "code": code}).status_code == 200
+
+    response = client.post("/api/v1/auth/login", json={"email": email.upper(), "password": password})
+    assert response.status_code == 200
 
 
 def test_forgot_password_always_ok_even_for_unknown_email():
@@ -131,7 +154,7 @@ def test_forgot_password_always_ok_even_for_unknown_email():
 def test_password_reset_flow_changes_password():
     email = _unique_email()
     old_password = "OldPass1!"
-    new_password = "NewPass1!"
+    new_password = "NewEmailLike@example.comB2!"
 
     # Register user
     res = client.post("/api/v1/auth/register", json={"email": email, "password": old_password})

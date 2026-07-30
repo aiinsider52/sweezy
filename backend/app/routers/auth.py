@@ -190,6 +190,13 @@ def register(
     if existing_user:
         if existing_user.email_verified:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
+        # The account is not usable until its owner completes email verification.
+        # Let the same owner restart registration with a corrected password while
+        # preserving the same account and issuing a fresh verification code.
+        existing_user.hashed_password = get_password_hash(user_in.password)
+        existing_user.password_login_enabled = True
+        db.add(existing_user)
+        db.commit()
         code = AuthEmailCodeService.issue_code(
             db,
             user=existing_user,
@@ -219,7 +226,13 @@ def login_user(
 ) -> TokenPair:
     user = UserService.authenticate(db, email=payload.email, password=payload.password)
     if not user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+        # Do not reveal whether the email exists, has password login enabled,
+        # or belongs to an inactive account. The code is stable for clients;
+        # the message remains intentionally generic for every 401 path.
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail={"code": "INVALID_CREDENTIALS", "message": "Invalid credentials"},
+        )
     if not user.email_verified:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,

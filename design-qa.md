@@ -1,3 +1,38 @@
+**Chat Archive, Marketplace Mosaic And Feature Onboarding v3 — 2026-07-31**
+- Source visual truth: `/Users/vladyslav.katash/Library/Containers/ru.keepcoder.Telegram/Data/tmp/IMAGE 2026-07-31 13:20:43.jpg` through `IMAGE 2026-07-31 13:20:52.jpg`.
+- Runtime screenshot: `/private/tmp/sweezy-marketplace-qa.png`.
+- Viewport: iPhone 17 Pro simulator, 402 × 874 points, 3× capture (1206 × 2622 pixels).
+- State: Ukrainian locale, guest session, Marketplace services, live backend content.
+
+**Full-View Evidence**
+- Marketplace keeps the approved photographic black/lime shell, oversized Ukrainian heading, compact search/filter controls, horizontal recommendation deck, coral creation action, and floating navigation.
+- Service artwork now varies by uploaded media or deterministic category-aware fallback. Four dedicated generated photo assets cover moving, business/IT, family/photo, and beauty categories.
+- The former flat all-services rows are replaced with an asymmetric two-column photo mosaic using alternating heights, image gradients, lime category pills, save controls, location, author, and price.
+- Feature onboarding v3 assigns a different background and a distinct preview image to every feature; multi-slide sections also alternate preview artwork.
+
+**Functional Evidence**
+- Root cause of recurring chat `Not Found`: query text was appended as a URL path component, encoding `?` as `%3F`. API URL construction now separates path and percent-encoded query.
+- Archive uses optimistic state, rolls back recoverable failures, removes stale 404 conversations from cache, refreshes the inbox, and dismisses stale detail screens.
+- Focused regression `testAPIClientURLKeepsQuerySeparateFromPath` passes on iPhone 17 Pro simulator.
+- Debug iOS Simulator build succeeds with GoogleSignIn dependencies resolved.
+- Live backend health returns OK and OpenAPI exposes `PATCH /api/v1/chat/conversations/{conversation_id}`.
+
+**Design QA Checklist**
+- [x] Four generated marketplace images are unique by SHA-256 and valid asset-catalog JSON.
+- [x] Existing uploaded listing media remains first priority.
+- [x] Missing-media fallback is category-aware and deterministic without one repeated placeholder.
+- [x] Mosaic cards preserve open/save actions and 44-point save targets.
+- [x] Onboarding backgrounds and center previews no longer reuse one asset per screen.
+- [x] Onboarding version bump re-shows refreshed design once to existing users.
+- [x] `git diff --check` passes.
+
+**Open QA Caveat**
+- [P3] Cross-tab XCUI run is inconclusive: iOS 26.1 simulator clone refused to launch `com.sweezy.sweezyUITests.xctrunner` with `RequestDenied`; fresh simulator later stalled before runner launch. App build, focused unit test, direct simulator launch, and Marketplace runtime capture pass.
+
+final result: passed with simulator-runner caveat
+
+---
+
 **Profile Editor Graphite/Lime Redesign — 2026-07-29**
 - Source visual truth: `/var/folders/h0/856jbdbx62dc4n9mfh_35k540000gn/T/TemporaryItems/NSIRD_screencaptureui_1VPtXV/Bildschirmfoto 2026-07-29 um 10.20.06.png`.
 - Implementation screenshot: `/private/tmp/sweezy-profile-redesign-profile-filled.png`.

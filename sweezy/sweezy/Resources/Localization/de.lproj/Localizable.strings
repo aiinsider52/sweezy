@@ -1110,6 +1110,7 @@
 
 // MARK: - Marketplace Chat
 "chat.inbox.title" = "Nachrichten";
+"chat.error.update_failed" = "Unterhaltung konnte nicht aktualisiert werden. Bitte versuche es erneut.";
 "chat.inbox.subtitle" = "Sweezy Marktplatz";
 "chat.inbox.active" = "Aktiv";
 "chat.inbox.archive" = "Archiv";

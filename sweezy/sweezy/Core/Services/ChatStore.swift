@@ -148,7 +148,11 @@ final class ChatStore: ObservableObject {
             persist()
             await markLatestRead(conversationID: conversationID)
         } catch {
-            errorMessage = error.localizedDescription
+            if ChatAPI.isNotFound(error) {
+                removeStaleConversation(conversationID)
+            } else {
+                errorMessage = error.localizedDescription
+            }
         }
     }
 
@@ -220,11 +224,28 @@ final class ChatStore: ObservableObject {
     }
 
     func setArchived(_ archived: Bool, conversationID: String) async {
+        guard let index = conversations.firstIndex(where: { $0.id == conversationID }) else { return }
+        let previousValue = conversations[index].archived
+        conversations[index].archived = archived
+        errorMessage = nil
+        persist()
+
         do {
             let updated = try await ChatAPI.update(conversationID: conversationID, archived: archived)
             upsert(updated)
             persist()
-        } catch { errorMessage = error.localizedDescription }
+        } catch {
+            if ChatAPI.isNotFound(error) {
+                removeStaleConversation(conversationID)
+                await refresh()
+            } else {
+                if let rollbackIndex = conversations.firstIndex(where: { $0.id == conversationID }) {
+                    conversations[rollbackIndex].archived = previousValue
+                }
+                errorMessage = "chat.error.update_failed".localized
+                persist()
+            }
+        }
     }
 
     func setMuted(_ muted: Bool, conversationID: String) async {
@@ -360,6 +381,20 @@ final class ChatStore: ObservableObject {
             conversations.insert(conversation, at: 0)
         }
         unreadCount = conversations.reduce(0) { $0 + $1.unreadCount }
+    }
+
+    private func removeStaleConversation(_ conversationID: String) {
+        conversations.removeAll { $0.id == conversationID }
+        messages[conversationID] = nil
+        nextMessageCursor[conversationID] = nil
+        olderMessageConversationIDs.remove(conversationID)
+        loadingOlderConversationIDs.remove(conversationID)
+        typingConversationIDs.remove(conversationID)
+        typingExpiryTasks[conversationID]?.cancel()
+        typingExpiryTasks[conversationID] = nil
+        unreadCount = conversations.reduce(0) { $0 + $1.unreadCount }
+        errorMessage = nil
+        persist()
     }
 
     private func persist() {

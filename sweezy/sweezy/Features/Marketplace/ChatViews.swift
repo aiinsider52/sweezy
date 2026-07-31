@@ -307,6 +307,9 @@ struct ChatConversationView: View {
         .task {
             appContainer.chatStore.setActiveConversation(conversation.id)
             await appContainer.chatStore.loadMessages(conversationID: conversation.id, force: true)
+            if !appContainer.chatStore.conversations.contains(where: { $0.id == conversation.id }) {
+                dismiss()
+            }
         }
         .onChange(of: threadMessages.count) { _, _ in
             Task { await appContainer.chatStore.markLatestRead(conversationID: conversation.id) }

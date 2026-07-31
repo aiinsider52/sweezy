@@ -207,20 +207,7 @@ struct ListingDetailView: View {
     }
 
     private func fallbackAssetName(for listing: ServiceListing) -> String {
-        guard listing.listingType == .service else { return "cityhub-zurich-kreis4" }
-
-        switch listing.category {
-        case .moving, .repair:
-            return "marketplace-moving-fallback"
-        case .beauty, .childcare:
-            return "journey-market-consultant"
-        case .documents, .translation, .accounting, .legal:
-            return "cityhub-zurich-landesmuseum"
-        case .it, .tutoring:
-            return "cityhub-zurich-viadukt"
-        case .cleaning, .other:
-            return "cityhub-zurich-oldtown"
-        }
+        listing.listingType == .service ? listing.marketplaceFallbackAsset : "cityhub-zurich-kreis4"
     }
 
     private func contentSheet(_ listing: ServiceListing) -> some View {

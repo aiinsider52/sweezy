@@ -46,7 +46,7 @@ struct FeatureOnboardingView: View {
 
     private var onboardingBackground: some View {
         GeometryReader { geometry in
-            Image(content.feature.onboardingImageName)
+            Image(content.feature.onboardingBackgroundImageName)
                 .resizable()
                 .scaledToFill()
                 .frame(width: geometry.size.width, height: geometry.size.height)
@@ -144,7 +144,7 @@ struct FeatureOnboardingView: View {
 
     private func featurePreview(_ slide: OnboardingSlide, index: Int) -> some View {
         ZStack(alignment: .bottomLeading) {
-            Image(content.feature.onboardingImageName)
+            Image(content.feature.onboardingPreviewImageName(for: index))
                 .resizable()
                 .scaledToFill()
                 .frame(height: 244)
@@ -275,22 +275,45 @@ struct FeatureOnboardingView: View {
 }
 
 private extension OnboardingFeature {
-    var onboardingImageName: String {
+    var onboardingBackgroundImageName: String {
         switch self {
-        case .dovidnyk, .checklists, .guides, .templates, .news:
-            return "cityhub-zurich-landesmuseum"
-        case .roadmap:
-            return "swiss-moment-grindelwald"
-        case .map:
-            return "cityhub-zurich-lake"
-        case .marketplace, .appointments:
-            return "journey-market-consultant"
-        case .jobs, .cvBuilder:
-            return "cityhub-zurich-viadukt"
-        case .calculator, .settings, .subscription:
-            return "cityhub-zurich-oldtown"
-        case .gamification:
-            return "cityhub-zurich-uetliberg"
+        case .dovidnyk: return "cityhub-zurich-landesmuseum"
+        case .calculator: return "cityhub-zurich-limmat"
+        case .roadmap: return "swiss-moment-grindelwald"
+        case .checklists: return "journey-place-government"
+        case .guides: return "journey-place-education"
+        case .map: return "cityhub-zurich-lake"
+        case .marketplace: return "cityhub-zurich-kreis4"
+        case .jobs: return "cityhub-zurich-viadukt"
+        case .templates: return "cityhub-zurich-fraumuenster"
+        case .settings: return "cityhub-zurich-rietberg"
+        case .appointments: return "journey-market-consultant"
+        case .subscription: return "cityhub-zurich-opernhaus"
+        case .news: return "cityhub-zurich-kunsthaus"
+        case .gamification: return "cityhub-zurich-uetliberg"
+        case .cvBuilder: return "marketplace-service-business"
+        }
+    }
+
+    func onboardingPreviewImageName(for index: Int) -> String {
+        switch self {
+        case .dovidnyk:
+            return index.isMultiple(of: 2) ? "journey-place-government" : "journey-place-education"
+        case .calculator: return "cityhub-zurich-sechselaeutenplatz"
+        case .roadmap: return index.isMultiple(of: 2) ? "journey-place-housing" : "swiss-moment-luzern"
+        case .checklists: return "cityhub-zurich-landesmuseum"
+        case .guides: return "cityhub-zurich-grossmuenster"
+        case .map: return "cityhub-zurich-chinagarten"
+        case .marketplace:
+            return index.isMultiple(of: 2) ? "marketplace-service-family" : "marketplace-service-beauty"
+        case .jobs: return "marketplace-service-business"
+        case .templates: return "journey-place-government"
+        case .settings: return "cityhub-zurich-kunsthaus"
+        case .appointments: return "marketplace-service-family"
+        case .subscription: return "cityhub-zurich-lake"
+        case .news: return "cityhub-zurich-limmat"
+        case .gamification: return "swiss-moment-zurich"
+        case .cvBuilder: return "cityhub-zurich-viadukt"
         }
     }
 }

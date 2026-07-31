@@ -1301,6 +1301,7 @@
 
 // MARK: - Marketplace Chat
 "chat.inbox.title" = "Messages";
+"chat.error.update_failed" = "Could not update conversation. Please try again.";
 "chat.inbox.subtitle" = "Sweezy Marketplace";
 "chat.inbox.active" = "Active";
 "chat.inbox.archive" = "Archive";

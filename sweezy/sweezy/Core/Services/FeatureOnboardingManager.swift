@@ -34,7 +34,7 @@ enum OnboardingFeature: String, CaseIterable {
     
     /// Current onboarding version (increment to trigger "What's New")
     var currentVersion: Int {
-        2
+        3
     }
 }
 

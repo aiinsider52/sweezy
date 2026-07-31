@@ -113,6 +113,11 @@ enum ChatAPI {
         )
     }
 
+    static func isNotFound(_ error: Error) -> Bool {
+        let nsError = error as NSError
+        return nsError.domain == "ChatAPI" && nsError.code == 404
+    }
+
     static func close(conversationID: String) async throws -> ChatConversation {
         try await request("chat/conversations/\(conversationID)/close", method: "POST", as: ChatConversation.self)
     }

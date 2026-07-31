@@ -352,15 +352,38 @@ struct JourneyMarketplaceView: View {
 
                 sectionHeader("journey.marketplace.all_services".localized, trailing: "\(servicesVM.filteredListings.count)")
 
-                LazyVStack(spacing: 11) {
-                    ForEach(servicesVM.filteredListings.prefix(12)) { listing in
-                        JourneyServiceRow(
-                            listing: listing,
-                            isSaved: appContainer.savedItems.isListingSaved(listing.id),
-                            openAction: { selectedListing = listing },
-                            saveAction: { appContainer.savedItems.toggleListing(listing.id) }
-                        )
-                    }
+                serviceMosaic(Array(servicesVM.filteredListings.prefix(12)))
+            }
+        }
+    }
+
+    private func serviceMosaic(_ listings: [ServiceListing]) -> some View {
+        let indexed = Array(listings.enumerated())
+        let left = indexed.filter { $0.offset.isMultiple(of: 2) }
+        let right = indexed.filter { !$0.offset.isMultiple(of: 2) }
+
+        return HStack(alignment: .top, spacing: 10) {
+            VStack(spacing: 10) {
+                ForEach(left, id: \.element.id) { index, listing in
+                    JourneyServiceMosaicCard(
+                        listing: listing,
+                        isSaved: appContainer.savedItems.isListingSaved(listing.id),
+                        height: index.isMultiple(of: 4) ? 276 : 222,
+                        openAction: { selectedListing = listing },
+                        saveAction: { appContainer.savedItems.toggleListing(listing.id) }
+                    )
+                }
+            }
+
+            VStack(spacing: 10) {
+                ForEach(right, id: \.element.id) { index, listing in
+                    JourneyServiceMosaicCard(
+                        listing: listing,
+                        isSaved: appContainer.savedItems.isListingSaved(listing.id),
+                        height: index.isMultiple(of: 4) ? 222 : 276,
+                        openAction: { selectedListing = listing },
+                        saveAction: { appContainer.savedItems.toggleListing(listing.id) }
+                    )
                 }
             }
         }
@@ -799,7 +822,7 @@ private struct JourneyServiceSpotlightCard: View {
         ZStack(alignment: .topTrailing) {
             Button(action: openAction) {
                 ZStack(alignment: .bottomLeading) {
-                    JourneyRemoteImage(url: listing.primaryImageURL, fallbackAsset: "journey-market-consultant")
+                    JourneyRemoteImage(url: listing.primaryImageURL, fallbackAsset: listing.marketplaceFallbackAsset)
                         .frame(maxWidth: .infinity)
                         .frame(height: 324)
                         .clipped()
@@ -891,72 +914,71 @@ private struct JourneyServiceSpotlightCard: View {
     }
 }
 
-private struct JourneyServiceRow: View {
+private struct JourneyServiceMosaicCard: View {
     let listing: ServiceListing
     let isSaved: Bool
+    let height: CGFloat
     let openAction: () -> Void
     let saveAction: () -> Void
 
     var body: some View {
         ZStack(alignment: .topTrailing) {
             Button(action: openAction) {
-                HStack(spacing: 14) {
-                    ZStack(alignment: .bottomLeading) {
-                        JourneyRemoteImage(url: listing.primaryImageURL, fallbackAsset: "cityhub-zurich-oldtown")
-                            .frame(width: 112, height: 126)
-                            .clipped()
+                ZStack(alignment: .bottomLeading) {
+                    JourneyRemoteImage(url: listing.primaryImageURL, fallbackAsset: listing.marketplaceFallbackAsset)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: height)
+                        .clipped()
 
-                        Image(systemName: listing.categoryIcon)
-                            .font(.system(size: 13, weight: .bold))
-                            .foregroundColor(.black)
-                            .frame(width: 32, height: 32)
-                            .background(JourneyVisual.lime)
-                            .clipShape(Circle())
-                            .padding(8)
-                    }
-                    .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                    LinearGradient(
+                        colors: [.black.opacity(0.04), .black.opacity(0.12), .black.opacity(0.96)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
 
                     VStack(alignment: .leading, spacing: 7) {
-                        HStack(spacing: 6) {
-                            Image(systemName: listing.isVerified ? "checkmark.seal.fill" : "person.2.fill")
-                            Text(listing.isVerified ? "map.verified".localized : "journey.marketplace.community".localized)
-                            Text("•")
-                            Text(listing.freshnessText)
+                        Spacer()
+
+                        HStack(spacing: 5) {
+                            Image(systemName: listing.categoryIcon)
+                            Text(listing.categoryDisplayName.uppercased())
                                 .lineLimit(1)
                         }
-                        .font(.system(size: 10, weight: .bold, design: .rounded))
-                        .foregroundColor(listing.isVerified ? JourneyVisual.lime : .white.opacity(0.58))
+                        .font(.system(size: 9, weight: .black, design: .rounded))
+                        .foregroundColor(.black)
+                        .padding(.horizontal, 9)
+                        .frame(height: 26)
+                        .background(JourneyVisual.lime)
+                        .clipShape(Capsule())
 
                         Text(listing.title)
-                            .font(.system(size: 17, weight: .bold, design: .rounded))
+                            .font(.system(size: 17, weight: .black, design: .rounded))
                             .foregroundColor(.white)
-                            .lineLimit(2)
+                            .lineLimit(3)
                             .multilineTextAlignment(.leading)
 
                         Text(listing.authorName)
-                            .font(.system(size: 12, weight: .semibold, design: .rounded))
-                            .foregroundColor(.white.opacity(0.58))
+                            .font(.system(size: 11, weight: .bold, design: .rounded))
+                            .foregroundColor(.white.opacity(0.7))
                             .lineLimit(1)
 
-                        HStack(spacing: 7) {
-                            Label(listing.canton, systemImage: "mappin")
-                            Spacer(minLength: 4)
-                            Text(listing.priceDisplay ?? listing.categoryDisplayName)
+                        HStack(spacing: 5) {
+                            Label(listing.canton == "all" ? "CH" : listing.canton, systemImage: "mappin")
+                            Spacer(minLength: 2)
+                            Text(listing.priceDisplay ?? "journey.marketplace.negotiable_price".localized)
                                 .fontWeight(.black)
                                 .foregroundColor(.white)
+                                .lineLimit(1)
                         }
-                        .font(.system(size: 11, weight: .semibold, design: .rounded))
-                        .foregroundColor(.white.opacity(0.62))
+                        .font(.system(size: 10, weight: .semibold, design: .rounded))
+                        .foregroundColor(.white.opacity(0.64))
                     }
-
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 12, weight: .black))
-                        .foregroundColor(.white.opacity(0.36))
+                    .padding(13)
                 }
-                .padding(11)
-                .padding(.trailing, 30)
             }
             .buttonStyle(.plain)
+            .accessibilityElement(children: .combine)
+            .accessibilityHint("marketplace.open".localized)
 
             Button(action: saveAction) {
                 Image(systemName: isSaved ? "heart.fill" : "heart")
@@ -970,11 +992,10 @@ private struct JourneyServiceRow: View {
             .padding(10)
             .accessibilityLabel(isSaved ? "journey.marketplace.remove_saved".localized : "journey.marketplace.save".localized)
         }
-        .frame(minHeight: 148)
-        .background(Color.white.opacity(0.07))
-        .background(.ultraThinMaterial.opacity(0.42))
+        .frame(height: height)
         .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous).stroke(.white.opacity(0.16), lineWidth: 1))
+        .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous).stroke(.white.opacity(0.22), lineWidth: 1))
+        .shadow(color: .black.opacity(0.3), radius: 16, y: 9)
     }
 }
 

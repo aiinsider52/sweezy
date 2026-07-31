@@ -1325,6 +1325,7 @@
 
 // MARK: - Marketplace Chat
 "chat.inbox.title" = "Повідомлення";
+"chat.error.update_failed" = "Не вдалося оновити розмову. Спробуйте ще раз.";
 "chat.inbox.subtitle" = "Marketplace Sweezy";
 "chat.inbox.active" = "Активні";
 "chat.inbox.archive" = "Архів";

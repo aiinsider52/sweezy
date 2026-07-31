@@ -454,4 +454,31 @@ extension ServiceListing {
     var resolvedImageURLs: [URL] {
         imageURLs.compactMap(APIClient.resolveMediaURL)
     }
+
+    /// Stable local artwork for listings without uploaded media.
+    /// Uses category-aware pools and a deterministic ID seed, so nearby cards do not repeat one placeholder.
+    var marketplaceFallbackAsset: String {
+        let pool: [String]
+        switch category {
+        case .moving, .repair, .cleaning:
+            pool = ["marketplace-service-moving", "journey-place-housing", "cityhub-zurich-viadukt"]
+        case .beauty:
+            pool = ["marketplace-service-beauty", "cityhub-zurich-rietberg", "cityhub-zurich-kunsthaus"]
+        case .childcare:
+            pool = ["marketplace-service-family", "journey-place-community", "cityhub-zurich-lake"]
+        case .it, .accounting:
+            pool = ["marketplace-service-business", "journey-market-consultant", "journey-place-employment"]
+        case .translation, .tutoring:
+            pool = ["journey-place-education", "marketplace-service-business", "cityhub-zurich-landesmuseum"]
+        case .documents, .legal:
+            pool = ["journey-place-government", "marketplace-service-business", "cityhub-zurich-fraumuenster"]
+        case .other:
+            pool = ["marketplace-service-business", "marketplace-service-family", "cityhub-zurich-kreis4", "cityhub-zurich-limmat"]
+        }
+
+        let seed = id.unicodeScalars.reduce(0) { partial, scalar in
+            (partial &* 31 &+ Int(scalar.value)) % pool.count
+        }
+        return pool[seed]
+    }
 }

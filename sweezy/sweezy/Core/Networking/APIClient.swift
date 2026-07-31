@@ -21,7 +21,16 @@ enum APIClient {
         var p = path
         if p.hasPrefix("/") { p = String(p.dropFirst()) }
         if !p.hasPrefix("api/") { p = "\(apiPrefix)/\(p)" }
-        return baseURL.appendingPathComponent(p)
+
+        let parts = p.split(separator: "?", maxSplits: 1, omittingEmptySubsequences: false)
+        let endpoint = baseURL.appendingPathComponent(String(parts[0]))
+        guard parts.count == 2,
+              var components = URLComponents(url: endpoint, resolvingAgainstBaseURL: false) else {
+            return endpoint
+        }
+
+        components.percentEncodedQuery = String(parts[1])
+        return components.url ?? endpoint
     }
 
     // MARK: - Auth

@@ -1996,7 +1996,7 @@
 
 /* Swiss Discovery */
 "journey.tool.discover_switzerland.title" = "Schweiz entdecken";
-"journey.tool.discover_switzerland.subtitle" = "22 geprüfte Orte mit Routen, Galerien und praktischen Tipps";
+"journey.tool.discover_switzerland.subtitle" = "30 geprüfte Orte mit Routen, Galerien und praktischen Tipps";
 "swiss.discovery.eyebrow" = "Schweiz in deiner Nähe";
 "swiss.discovery.title" = "Entdecke Orte, die in Erinnerung bleiben";
 "swiss.discovery.subtitle" = "Natur, Kultur und fertige Ausflugsideen mit praktischen Details und offiziellen Quellen.";
@@ -2237,3 +2237,86 @@
 "swiss.discovery.reviews.delete_confirm.body" = "Diese Aktion kann nicht rückgängig gemacht werden.";
 "swiss.discovery.reviews.delete_confirm.action" = "Löschen";
 "swiss.discovery.reviews.cancel" = "Abbrechen";
+
+"swiss.discovery.setting.all" = "Alle";
+"swiss.discovery.setting.city" = "Städte";
+"swiss.discovery.setting.mountain" = "Berge";
+"swiss.discovery.setting.lake" = "Am See";
+"swiss.discovery.collections.title" = "Wähle deinen Rhythmus";
+"swiss.discovery.all_places" = "Alle Entdeckungen";
+"swiss.discovery.map_filter" = "Schweiz entdecken";
+"swiss.discovery.map_title" = "Orte in der ganzen Schweiz";
+"swiss.discovery.map_subtitle" = "30 Ideen für Städte, Berge und Seen";
+"swiss.discovery.open_place" = "Ort öffnen";
+
+"swiss.discovery.interlaken.title" = "Interlaken";
+"swiss.discovery.interlaken.region" = "Berner Oberland · zwischen zwei Seen";
+"swiss.discovery.interlaken.summary" = "Ein Ort zwischen Thuner- und Brienzersee, ideal für Bergtouren und ruhige Wege am Wasser.";
+"swiss.discovery.interlaken.details" = "Interlaken verbindet gute städtische Infrastruktur mit direktem Zugang zu den Alpen. Nach Uferweg und Höhematte führen direkte Züge in die Täler von Lauterbrunnen oder Grindelwald. Als Tagesziel funktioniert der Ort gut, als Basis für mehrere Tage noch besser: ein Tag am See, einer für die Bergbahn und einer für die Stadt.";
+"swiss.discovery.interlaken.tip" = "Pro Tag einen See und eine Bergrichtung wählen. Wetter und Fahrplan vor der Abfahrt prüfen.";
+"swiss.discovery.interlaken.season" = "Ganzjährig";
+"swiss.discovery.interlaken.duration" = "1–3 Tage";
+"swiss.discovery.interlaken.route" = "Interlaken Ost → Höhematte → Ufer oder Zug in ein Alpental";
+
+"swiss.discovery.crans_montana.title" = "Crans-Montana";
+"swiss.discovery.crans_montana.region" = "Wallis · sonniges Alpenplateau";
+"swiss.discovery.crans_montana.summary" = "Panoramaort über dem Rhonetal mit Seen, Wegen, Bergbahnen und Weinbergen.";
+"swiss.discovery.crans_montana.details" = "Crans-Montana liegt auf einem breiten Sonnenplateau und verbindet komfortable Infrastruktur mit freier Alpensicht und kurzen Wegen. Im Sommer lassen sich ein Spaziergang um die Seen und eine Bergbahnfahrt gut kombinieren; weiter unten ergänzt das Weinwallis den Tag mit einer ganz anderen Landschaft.";
+"swiss.discovery.crans_montana.tip" = "Früh in die Berge starten und den Nachmittag für einen See oder ein Weindorf im Tal reservieren.";
+"swiss.discovery.crans_montana.season" = "Ganzjährig";
+"swiss.discovery.crans_montana.duration" = "1–2 Tage";
+"swiss.discovery.crans_montana.route" = "Montana Gare → Seen → Bergbahn → Panoramaweg";
+
+"swiss.discovery.locarno.title" = "Locarno";
+"swiss.discovery.locarno.region" = "Tessin · Lago Maggiore";
+"swiss.discovery.locarno.summary" = "Palmen, Piazza Grande und ein schneller Aufstieg vom See zu Aussichtspunkten über dem Tessin.";
+"swiss.discovery.locarno.details" = "Locarno wirkt fast mediterran: Altstadtarkaden, Gärten und Uferpromenade ergeben eine kompakte Route. Eine Standseilbahn führt zur Madonna del Sasso, weitere Bahnen öffnen den Blick über See und Voralpen. Ein unkomplizierter Einstieg ins Tessin ohne Auto.";
+"swiss.discovery.locarno.tip" = "Altstadt am Morgen, Heiligtum vor dem Mittag und den Abend für die Uferpromenade einplanen.";
+"swiss.discovery.locarno.season" = "Frühling bis Herbst";
+"swiss.discovery.locarno.duration" = "1–2 Tage";
+"swiss.discovery.locarno.route" = "Piazza Grande → Altstadt → Madonna del Sasso → Seeufer";
+
+"swiss.discovery.martigny.title" = "Martigny";
+"swiss.discovery.martigny.region" = "Wallis · Kreuzung der Alpenrouten";
+"swiss.discovery.martigny.summary" = "Römisches Erbe, Kunst, Weinberge und eine Burg in einer kompakten Stadt bei wichtigen Alpenpässen.";
+"swiss.discovery.martigny.details" = "Martigny zeigt Geschichte vom römischen Amphitheater bis zum mittelalterlichen Château de la Bâtiaz. Kulturorte liegen zwischen Obstgärten und Reben im Rhonetal. Der Ort ist zudem eine gute Basis für Saint-Maurice, Emosson und Routen Richtung Frankreich und Italien.";
+"swiss.discovery.martigny.tip" = "Amphitheater und Museum vormittags verbinden, am Abend zur Burg oder in die Weinberge gehen.";
+"swiss.discovery.martigny.season" = "Ganzjährig";
+"swiss.discovery.martigny.duration" = "1 Tag";
+"swiss.discovery.martigny.route" = "Bahnhof → historisches Zentrum → Amphitheater → Château de la Bâtiaz";
+
+"swiss.discovery.flims_laax.title" = "Flims–Laax–Falera";
+"swiss.discovery.flims_laax.region" = "Graubünden · Seen und Rheinschlucht";
+"swiss.discovery.flims_laax.summary" = "Türkisfarbene Waldseen, Hochgebirgswege und moderne Verbindungen direkt bei der Ruinaulta.";
+"swiss.discovery.flims_laax.details" = "Flims–Laax–Falera vereint auf kleinem Raum den klaren Caumasee, Waldwege, Aussichtspunkte über der Rheinschlucht und höhere Bergtouren. Der Ortsverkehr verbindet die Dörfer und macht Rundwanderungen ohne Auto möglich.";
+"swiss.discovery.flims_laax.tip" = "Für einen leichten Tag Caumasee und Il Spir verbinden. Hochalpine Tour und Bahnbetrieb separat prüfen.";
+"swiss.discovery.flims_laax.season" = "Ganzjährig";
+"swiss.discovery.flims_laax.duration" = "1–3 Tage";
+"swiss.discovery.flims_laax.route" = "Flims Waldhaus → Caumasee → Conn → Aussichtspunkt Il Spir";
+
+"swiss.discovery.vaud.title" = "Region Waadt";
+"swiss.discovery.vaud.region" = "Genfersee · Städte, Reben und Jura";
+"swiss.discovery.vaud.summary" = "Von Lausanne und Morges zu Seeufern, Weinbergen und ruhigen Routen am Jurafuss.";
+"swiss.discovery.vaud.details" = "Die Waadt verbindet urbane Kultur, Seelandschaften und Winzerdörfer mit einem dichten Bahnnetz. Start am Markt und Ufer von Morges, weiter zu Lausannes Museen oder Schlössern am See und am nächsten Tag in die Rebberge oder ins Vallée de Joux.";
+"swiss.discovery.vaud.tip" = "Nicht den ganzen Kanton an einem Tag planen. Eine Seelinie und einen Kulturstopp auswählen.";
+"swiss.discovery.vaud.season" = "Ganzjährig";
+"swiss.discovery.vaud.duration" = "2–4 Tage";
+"swiss.discovery.vaud.route" = "Morges → Seeufer → Lausanne oder Winzerdörfer der Region";
+
+"swiss.discovery.jura_lakes.title" = "Jura & Drei-Seen-Land";
+"swiss.discovery.jura_lakes.region" = "Biel–Neuenburg · Seen, Uhrmacherei und Kalkfelsen";
+"swiss.discovery.jura_lakes.summary" = "Drei ruhige Seen, Rebberge, historische Städte und der natürliche Felskessel Creux du Van.";
+"swiss.discovery.jura_lakes.details" = "Die Region verbindet Bieler-, Neuenburger- und Murtensee mit zweisprachigen Städten, Rebbergen und Jurawegen. Eine langsame Reise kombiniert Schiff oder Velo am Wasser, eine Altstadt am Nachmittag und einen eigenen Tag für Creux du Van oder die Uhrmachertäler.";
+"swiss.discovery.jura_lakes.tip" = "Für die erste Reise einen Seeweg mit Neuenburg verbinden. Creux du Van bei stabilem Wetter besuchen.";
+"swiss.discovery.jura_lakes.season" = "Frühling bis Herbst";
+"swiss.discovery.jura_lakes.duration" = "2–3 Tage";
+"swiss.discovery.jura_lakes.route" = "Biel → Seeufer → Neuenburg → eigener Tag am Creux du Van";
+
+"swiss.discovery.bern_region.title" = "Region Bern";
+"swiss.discovery.bern_region.region" = "Bern · Thunersee · Berner Oberland";
+"swiss.discovery.bern_region.summary" = "Berns Altstadt, türkise Seen und Täler unter dem Eiger in einer aussergewöhnlich vielfältigen Region.";
+"swiss.discovery.bern_region.details" = "Die Region Bern zeigt mehrere Seiten der Schweiz: Arkaden der Hauptstadt über der Aare, Schlösser und Promenaden am Thunersee, danach Bergdörfer und Täler unter dem Eiger. Mit der Bahn gelingt die Route ohne Auto, doch jede Zone verdient einen eigenen Tag.";
+"swiss.discovery.bern_region.tip" = "Je einen Tag für Bern und den See sowie mindestens einen Tag im Oberland einplanen. Weite Punkte nicht kombinieren.";
+"swiss.discovery.bern_region.season" = "Ganzjährig";
+"swiss.discovery.bern_region.duration" = "3–5 Tage";
+"swiss.discovery.bern_region.route" = "Bern → Thun oder Spiez → Interlaken → Grindelwald";

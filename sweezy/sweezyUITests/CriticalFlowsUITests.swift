@@ -101,6 +101,30 @@ final class CriticalFlowsUITests: XCTestCase {
     }
 
     @MainActor
+    func testPrimaryMapShowsSwissDiscoveryPlaces() throws {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "-onboarding_completed", "YES",
+            "-initial_auth_choice_completed", "YES",
+            "--skip-feature-onboarding"
+        ]
+        app.launchEnvironment["UITESTS"] = "1"
+        app.launch()
+
+        let mapTab = app.buttons["tab.map"]
+        XCTAssertTrue(mapTab.waitForExistence(timeout: 15))
+        mapTab.tap()
+
+        XCTAssertTrue(app.descendants(matching: .any)["map.screen"].waitForExistence(timeout: 10))
+        let discoveryFilter = app.buttons["journey.map.discovery.filter"]
+        XCTAssertTrue(discoveryFilter.waitForExistence(timeout: 10))
+        discoveryFilter.tap()
+
+        XCTAssertTrue(app.descendants(matching: .any)["journey.map.discovery.card.aletsch"].waitForExistence(timeout: 10))
+        keepScreenshot(app, name: "primary-map-swiss-discovery")
+    }
+
+    @MainActor
     private func launchCleanApp() -> XCUIApplication {
         let app = XCUIApplication()
         app.launchArguments = ["--reset-ui-test-state"]

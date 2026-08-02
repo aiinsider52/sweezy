@@ -2214,7 +2214,7 @@
 
 /* Swiss Discovery */
 "journey.tool.discover_switzerland.title" = "Відкрий Швейцарію";
-"journey.tool.discover_switzerland.subtitle" = "22 перевірені місця з маршрутами, галереями й порадами";
+"journey.tool.discover_switzerland.subtitle" = "30 перевірених місць з маршрутами, галереями й порадами";
 "swiss.discovery.eyebrow" = "Швейцарія поруч";
 "swiss.discovery.title" = "Відкрий місця, які хочеться запам’ятати";
 "swiss.discovery.subtitle" = "Природа, культура й готові ідеї для поїздок — з практичними деталями та офіційними джерелами.";
@@ -2455,3 +2455,86 @@
 "swiss.discovery.reviews.delete_confirm.body" = "Цю дію неможливо скасувати.";
 "swiss.discovery.reviews.delete_confirm.action" = "Видалити";
 "swiss.discovery.reviews.cancel" = "Скасувати";
+
+"swiss.discovery.setting.all" = "Усі";
+"swiss.discovery.setting.city" = "Міста";
+"swiss.discovery.setting.mountain" = "Гори";
+"swiss.discovery.setting.lake" = "Біля озера";
+"swiss.discovery.collections.title" = "Оберіть свій ритм";
+"swiss.discovery.all_places" = "Усі відкриття";
+"swiss.discovery.map_filter" = "Відкрий Швейцарію";
+"swiss.discovery.map_title" = "Місця Швейцарії";
+"swiss.discovery.map_subtitle" = "30 ідей для міста, гір та озер";
+"swiss.discovery.open_place" = "Відкрити місце";
+
+"swiss.discovery.interlaken.title" = "Інтерлакен";
+"swiss.discovery.interlaken.region" = "Бернське високогір’я · між двома озерами";
+"swiss.discovery.interlaken.summary" = "Місто між Тунським і Брієнцьким озерами — база для гірських маршрутів та спокійних прогулянок біля води.";
+"swiss.discovery.interlaken.details" = "Інтерлакен поєднує міську інфраструктуру з близькістю до Альп: від набережних і парку Höhematte легко перейти до поїздок у долини Лаутербруннен та Гріндельвальд. Місце зручне як одноденна зупинка, але найкраще працює як база на кілька днів: один день для озера, другий — для гірської залізниці, третій — для неквапливої прогулянки містом.";
+"swiss.discovery.interlaken.tip" = "Обирайте одне озеро та один гірський напрямок на день. Перевірте прогноз і розклад транспорту перед виїздом.";
+"swiss.discovery.interlaken.season" = "Цілий рік";
+"swiss.discovery.interlaken.duration" = "1–3 дні";
+"swiss.discovery.interlaken.route" = "Вокзал Interlaken Ost → Höhematte → набережна або поїзд у гірську долину";
+
+"swiss.discovery.crans_montana.title" = "Кран-Монтана";
+"swiss.discovery.crans_montana.region" = "Вале · сонячне альпійське плато";
+"swiss.discovery.crans_montana.summary" = "Панорамний курорт над долиною Рони з озерами, стежками, канатними дорогами та виноградниками.";
+"swiss.discovery.crans_montana.details" = "Кран-Монтана лежить на широкому сонячному плато й дає рідкісне поєднання курортної інфраструктури, відкритих альпійських панорам та коротких маршрутів без складної логістики. Влітку тут зручно комбінувати прогулянку навколо озер із підйомом канатною дорогою, а нижче за курортом — знайомство з виноробним Вале.";
+"swiss.discovery.crans_montana.tip" = "Почніть рано з підйому в гори, а після обіду залиште час для озера або виноградних сіл у долині.";
+"swiss.discovery.crans_montana.season" = "Цілий рік";
+"swiss.discovery.crans_montana.duration" = "1–2 дні";
+"swiss.discovery.crans_montana.route" = "Montana Gare → курортні озера → канатна дорога → панорамна стежка";
+
+"swiss.discovery.locarno.title" = "Локарно";
+"swiss.discovery.locarno.region" = "Тічино · озеро Маджоре";
+"swiss.discovery.locarno.summary" = "Пальми, історична Piazza Grande та швидкий підйом із озерної набережної до гірських оглядових майданчиків.";
+"swiss.discovery.locarno.details" = "Локарно має майже середземноморський характер: старе місто, аркади, набережна й сади легко поєднуються в одному пішому маршруті. Фунікулер веде до Мадонна-дель-Сассо, а далі канатні дороги відкривають панорами озера та передгір’я. Це вдалий старт для знайомства з Тічино без автомобіля.";
+"swiss.discovery.locarno.tip" = "Пройдіть старе місто вранці, підніміться до святині до обіду, а вечір залиште для набережної.";
+"swiss.discovery.locarno.season" = "Весна — осінь";
+"swiss.discovery.locarno.duration" = "1–2 дні";
+"swiss.discovery.locarno.route" = "Piazza Grande → старе місто → Madonna del Sasso → набережна озера";
+
+"swiss.discovery.martigny.title" = "Мартіньї";
+"swiss.discovery.martigny.region" = "Вале · перехрестя альпійських маршрутів";
+"swiss.discovery.martigny.summary" = "Римська спадщина, мистецтво, виноградники та замок у компактному місті біля важливих альпійських перевалів.";
+"swiss.discovery.martigny.details" = "Мартіньї зберігає шари історії від римського амфітеатру до середньовічного Château de la Bâtiaz. Місто відоме культурними просторами й розташоване серед садів та виноградників у долині Рони. Звідси зручно продовжити маршрут до Сен-Моріса, Емоссона або перевалів у напрямку Франції та Італії.";
+"swiss.discovery.martigny.tip" = "Поєднайте амфітеатр і музей у першій половині дня, а ввечері підніміться до замку або виноградників.";
+"swiss.discovery.martigny.season" = "Цілий рік";
+"swiss.discovery.martigny.duration" = "1 день";
+"swiss.discovery.martigny.route" = "Вокзал → історичний центр → римський амфітеатр → Château de la Bâtiaz";
+
+"swiss.discovery.flims_laax.title" = "Флімс–Лаакс–Фалера";
+"swiss.discovery.flims_laax.region" = "Граубюнден · озера та Рейнська ущелина";
+"swiss.discovery.flims_laax.summary" = "Бірюзові лісові озера, високогірні стежки та сучасна курортна інфраструктура поруч із Ruinaulta.";
+"swiss.discovery.flims_laax.details" = "Регіон Флімс–Лаакс–Фалера дає кілька різних пейзажів на невеликій відстані: прозоре озеро Caumasee, лісові стежки, оглядові точки над Рейнською ущелиною та високогірні маршрути. Транспорт між селами дозволяє будувати кільцеві прогулянки й повертатися без автомобіля.";
+"swiss.discovery.flims_laax.tip" = "Для спокійного дня оберіть Caumasee та Il Spir. Високогірний маршрут плануйте окремо й перевіряйте роботу підйомників.";
+"swiss.discovery.flims_laax.season" = "Цілий рік";
+"swiss.discovery.flims_laax.duration" = "1–3 дні";
+"swiss.discovery.flims_laax.route" = "Flims Waldhaus → Caumasee → Conn → оглядовий майданчик Il Spir";
+
+"swiss.discovery.vaud.title" = "Регіон Во";
+"swiss.discovery.vaud.region" = "Женевське озеро · міста, виноградники та Юра";
+"swiss.discovery.vaud.summary" = "Від Лозанни й Моржа до озерних набережних, виноградників та спокійних маршрутів у передгір’ях Юри.";
+"swiss.discovery.vaud.details" = "Во — різноманітний регіон, де міська культура, озерні пейзажі та виноробні села з’єднані щільною мережею поїздів. Можна почати з ринку й набережної Моржа, продовжити до музеїв Лозанни або замків уздовж озера, а наступного дня вирушити в напрямку виноградників чи долини Жу.";
+"swiss.discovery.vaud.tip" = "Не намагайтеся охопити весь кантон за день: оберіть одну озерну лінію та одну культурну зупинку.";
+"swiss.discovery.vaud.season" = "Цілий рік";
+"swiss.discovery.vaud.duration" = "2–4 дні";
+"swiss.discovery.vaud.route" = "Морж → озерна набережна → Лозанна або виноградні села регіону";
+
+"swiss.discovery.jura_lakes.title" = "Юра та Три озера";
+"swiss.discovery.jura_lakes.region" = "Біль–Невшатель · озера, годинникарство та вапнякові схили";
+"swiss.discovery.jura_lakes.summary" = "Спокійний регіон трьох озер із виноградними берегами, історичними містами та природним амфітеатром Creux du Van.";
+"swiss.discovery.jura_lakes.details" = "Регіон об’єднує озера Біль, Невшатель і Муртен із двомовними містами, виноградниками та пішими маршрутами Юри. Тут легко скласти повільну подорож: човен або велосипед уздовж води, старе місто після обіду й окремий день для Creux du Van чи годинникарських долин.";
+"swiss.discovery.jura_lakes.tip" = "Для першої поїздки поєднайте один озерний маршрут із Невшателем. Creux du Van залиште на день зі стабільною погодою.";
+"swiss.discovery.jura_lakes.season" = "Весна — осінь";
+"swiss.discovery.jura_lakes.duration" = "2–3 дні";
+"swiss.discovery.jura_lakes.route" = "Біль → берег озера → Невшатель → окремий день у Creux du Van";
+
+"swiss.discovery.bern_region.title" = "Бернський регіон";
+"swiss.discovery.bern_region.region" = "Берн · Тунське озеро · Бернське високогір’я";
+"swiss.discovery.bern_region.summary" = "Старе місто Берна, бірюзові озера та долини біля Ейгера в одному з найрізноманітніших регіонів країни.";
+"swiss.discovery.bern_region.details" = "Бернський регіон дозволяє побачити одразу кілька образів Швейцарії: аркади столиці над Ааре, замки й набережні Тунського озера, а далі — гірські села та долини біля Ейгера. Завдяки залізниці маршрут легко будувати без автомобіля, але на кожну зону варто виділити окремий день.";
+"swiss.discovery.bern_region.tip" = "Проведіть день у Берні, день біля озера й щонайменше один день у високогір’ї. Не поєднуйте далекі точки в один маршрут.";
+"swiss.discovery.bern_region.season" = "Цілий рік";
+"swiss.discovery.bern_region.duration" = "3–5 днів";
+"swiss.discovery.bern_region.route" = "Берн → Тун або Шпіц → Інтерлакен → Гріндельвальд";

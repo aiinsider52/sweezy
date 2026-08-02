@@ -1,5 +1,6 @@
 import MapKit
 import SwiftUI
+import UIKit
 
 struct JourneyMapView: View {
     @EnvironmentObject private var appContainer: AppContainer
@@ -7,7 +8,7 @@ struct JourneyMapView: View {
 
     private static let defaultCenter = CLLocationCoordinate2D(latitude: 47.3769, longitude: 8.5417)
     private static let minCameraDistance: CLLocationDistance = 700
-    private static let maxCameraDistance: CLLocationDistance = 48_000
+    private static let maxCameraDistance: CLLocationDistance = 520_000
     private static let defaultCameraDistance: CLLocationDistance = 6_800
     private static let defaultHeading: CLLocationDirection = 18
     private static let defaultPitch: CGFloat = 58
@@ -26,6 +27,10 @@ struct JourneyMapView: View {
     )
     @State private var selectedType: PlaceType?
     @State private var selectedPlace: Place?
+    @State private var selectedDiscoveryPlace: SwissDiscoveryPlace?
+    @State private var presentedDiscoveryPlace: SwissDiscoveryPlace?
+    @State private var discoverySavedPlaceIDs = Set<String>()
+    @State private var showsDiscoveryOnly = false
     @State private var searchText = ""
     @State private var activeRoute: MKRoute?
     @State private var isCalculatingRoute = false
@@ -69,6 +74,7 @@ struct JourneyMapView: View {
                 appContainer.locationService.startLocationUpdates()
             }
             applyPendingMapFocus()
+            discoverySavedPlaceIDs = SwissDiscoveryProgressStore.savedPlaceIDs()
             selectFirstVisiblePlace()
         }
         .onAppear {
@@ -88,9 +94,19 @@ struct JourneyMapView: View {
         }
         .onChange(of: searchText) { _, _ in
             keepSelectionVisible()
+            keepDiscoverySelectionVisible()
         }
         .sheet(isPresented: $showsPlaceList) {
             placeListSheet
+        }
+        .fullScreenCover(item: $presentedDiscoveryPlace) { place in
+            NavigationStack {
+                SwissDiscoveryDetailView(
+                    place: place,
+                    isSaved: discoverySavedPlaceIDs.contains(place.id),
+                    toggleSaved: { toggleDiscoverySaved(place) }
+                )
+            }
         }
         .accessibilityIdentifier("map.screen")
     }
@@ -107,18 +123,38 @@ struct JourneyMapView: View {
 
             UserAnnotation()
 
-            ForEach(displayedPlaces.prefix(24)) { place in
-                Annotation(place.name, coordinate: place.coordinate.clLocationCoordinate) {
-                    Button {
-                        focus(on: place)
-                    } label: {
-                        JourneyMapPin(
-                            icon: icon(for: place.type),
-                            isSelected: selectedPlace?.id == place.id
-                        )
+            if !showsDiscoveryOnly {
+                ForEach(displayedPlaces.prefix(24)) { place in
+                    Annotation(place.name, coordinate: place.coordinate.clLocationCoordinate) {
+                        Button {
+                            focus(on: place)
+                        } label: {
+                            JourneyMapPin(
+                                icon: icon(for: place.type),
+                                isSelected: selectedPlace?.id == place.id
+                            )
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel(place.name)
                     }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel(place.name)
+                }
+            }
+
+            if selectedType == nil {
+                ForEach(displayedDiscoveryPlaces) { place in
+                    Annotation(place.title, coordinate: place.coordinate) {
+                        Button {
+                            focus(on: place)
+                        } label: {
+                            JourneyMapPin(
+                                icon: "sparkles",
+                                isSelected: selectedDiscoveryPlace?.id == place.id
+                            )
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("\(place.title), \(place.region)")
+                        .accessibilityIdentifier("journey.map.discovery.pin.\(place.id)")
+                    }
                 }
             }
         }
@@ -280,8 +316,21 @@ struct JourneyMapView: View {
     private var filterBar: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
+                JourneyFilterChip(
+                    title: "swiss.discovery.map_filter".localized,
+                    icon: "sparkles",
+                    isSelected: showsDiscoveryOnly
+                ) {
+                    applyDiscoveryFilter()
+                }
+                .accessibilityIdentifier("journey.map.discovery.filter")
+
                 ForEach(filters, id: \.1) { type, title, icon in
-                    JourneyFilterChip(title: title, icon: icon, isSelected: selectedType == type) {
+                    JourneyFilterChip(
+                        title: title,
+                        icon: icon,
+                        isSelected: !showsDiscoveryOnly && selectedType == type
+                    ) {
                         applyFilter(type)
                     }
                 }
@@ -293,11 +342,11 @@ struct JourneyMapView: View {
     private var nearbyPlacesRail: some View {
         VStack(spacing: 9) {
             HStack(spacing: 8) {
-                Text(selectedType == nil ? "journey.map.near_you".localized : filterTitle)
+                Text(railTitle)
                     .font(.system(size: 17, weight: .bold, design: .rounded))
                     .foregroundColor(.white)
 
-                Text("\(displayedPlaces.count)")
+                Text("\(railCount)")
                     .font(.system(size: 11, weight: .bold))
                     .foregroundColor(.black)
                     .padding(.horizontal, 8)
@@ -315,8 +364,10 @@ struct JourneyMapView: View {
             }
             .shadow(color: .black.opacity(0.65), radius: 6, y: 2)
 
-            if displayedPlaces.isEmpty {
+            if railCount == 0 {
                 emptyPlacesCard
+            } else if showsDiscoveryOnly || selectedDiscoveryPlace != nil {
+                discoveryCarousel
             } else {
                 placeCarousel
             }
@@ -346,6 +397,31 @@ struct JourneyMapView: View {
             }
         }
         .frame(height: 170)
+    }
+
+    private var discoveryCarousel: some View {
+        GeometryReader { geometry in
+            ScrollViewReader { proxy in
+                ScrollView(.horizontal, showsIndicators: false) {
+                    LazyHStack(spacing: 10) {
+                        ForEach(displayedDiscoveryPlaces) { place in
+                            discoveryPlaceCard(place)
+                                .frame(width: geometry.size.width)
+                                .id(place.id)
+                        }
+                    }
+                    .scrollTargetLayout()
+                }
+                .scrollTargetBehavior(.viewAligned)
+                .onChange(of: selectedDiscoveryPlace?.id) { _, placeID in
+                    guard let placeID else { return }
+                    withAnimation(.spring(response: 0.38, dampingFraction: 0.84)) {
+                        proxy.scrollTo(placeID, anchor: .center)
+                    }
+                }
+            }
+        }
+        .frame(height: 180)
     }
 
     private var emptyPlacesCard: some View {
@@ -504,6 +580,114 @@ struct JourneyMapView: View {
         }
     }
 
+    private func discoveryPlaceCard(_ place: SwissDiscoveryPlace) -> some View {
+        HStack(spacing: 0) {
+            ZStack(alignment: .bottomLeading) {
+                Image(place.imageName)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 132, height: 180)
+                    .clipped()
+
+                LinearGradient(
+                    colors: [.clear, .black.opacity(0.78)],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+
+                Label("swiss.discovery.setting.\(place.settings.first?.rawValue ?? "all")".localized, systemImage: "sparkles")
+                    .font(.system(size: 9, weight: .bold))
+                    .foregroundColor(.black)
+                    .padding(.horizontal, 8)
+                    .frame(height: 25)
+                    .background(JourneyVisual.lime)
+                    .clipShape(Capsule())
+                    .padding(10)
+            }
+            .frame(width: 132, height: 180)
+
+            VStack(alignment: .leading, spacing: 7) {
+                HStack(alignment: .top, spacing: 7) {
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(place.title)
+                            .font(.system(size: 17, weight: .bold, design: .rounded))
+                            .foregroundColor(.white)
+                            .lineLimit(2)
+
+                        Text(place.region)
+                            .font(.system(size: 10, weight: .medium))
+                            .foregroundColor(.white.opacity(0.58))
+                            .lineLimit(1)
+                    }
+
+                    Spacer(minLength: 2)
+
+                    Button { toggleDiscoverySaved(place) } label: {
+                        Image(systemName: discoverySavedPlaceIDs.contains(place.id) ? "bookmark.fill" : "bookmark")
+                            .font(.system(size: 13, weight: .bold))
+                            .foregroundColor(discoverySavedPlaceIDs.contains(place.id) ? JourneyVisual.lime : .white.opacity(0.74))
+                            .frame(width: 30, height: 30)
+                            .background(Color.white.opacity(0.08))
+                            .clipShape(Circle())
+                    }
+                    .buttonStyle(.plain)
+                }
+
+                Text(place.summary)
+                    .font(.system(size: 10, weight: .medium))
+                    .foregroundColor(.white.opacity(0.66))
+                    .lineLimit(2)
+
+                HStack(spacing: 9) {
+                    Label(place.duration, systemImage: "clock")
+                    Label(place.season, systemImage: "sun.max")
+                }
+                .font(.system(size: 9, weight: .semibold))
+                .foregroundColor(JourneyVisual.lime)
+
+                Spacer(minLength: 0)
+
+                HStack(spacing: 8) {
+                    Button {
+                        presentedDiscoveryPlace = place
+                    } label: {
+                        Label("swiss.discovery.open_place".localized, systemImage: "arrow.up.right")
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundColor(.black)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 38)
+                            .background(JourneyVisual.lime)
+                            .clipShape(Capsule())
+                    }
+                    .buttonStyle(.plain)
+
+                    Button { openDirections(to: place) } label: {
+                        Image(systemName: "arrow.triangle.turn.up.right.diamond.fill")
+                            .font(.system(size: 13, weight: .bold))
+                            .foregroundColor(.white)
+                            .frame(width: 38, height: 38)
+                            .background(Color.white.opacity(0.1))
+                            .clipShape(Circle())
+                            .overlay(Circle().stroke(Color.white.opacity(0.16), lineWidth: 1))
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(11)
+        }
+        .frame(height: 180)
+        .background(.ultraThinMaterial.opacity(0.84))
+        .background(Color(red: 0.035, green: 0.075, blue: 0.05).opacity(0.94))
+        .clipShape(RoundedRectangle(cornerRadius: 25, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 25, style: .continuous)
+                .stroke(Color.white.opacity(0.25), lineWidth: 1)
+        )
+        .shadow(color: .black.opacity(0.42), radius: 22, y: 10)
+        .onTapGesture { focus(on: place) }
+        .accessibilityIdentifier("journey.map.discovery.card.\(place.id)")
+    }
+
     private var placeListSheet: some View {
         NavigationStack {
             ZStack {
@@ -511,9 +695,44 @@ struct JourneyMapView: View {
                     .ignoresSafeArea()
 
                 ScrollView {
-                    LazyVStack(spacing: 11) {
-                        ForEach(displayedPlaces) { place in
-                            placeListRow(place)
+                    LazyVStack(alignment: .leading, spacing: 11) {
+                        if selectedType == nil {
+                            HStack {
+                                VStack(alignment: .leading, spacing: 3) {
+                                    Text("swiss.discovery.map_title".localized)
+                                        .font(.system(size: 22, weight: .bold, design: .rounded))
+                                        .foregroundStyle(.white)
+                                    Text("swiss.discovery.map_subtitle".localized)
+                                        .font(.system(size: 12, weight: .medium))
+                                        .foregroundStyle(.white.opacity(0.56))
+                                }
+                                Spacer()
+                                Text("\(displayedDiscoveryPlaces.count)")
+                                    .font(.system(size: 12, weight: .bold))
+                                    .foregroundStyle(.black)
+                                    .padding(.horizontal, 10)
+                                    .frame(height: 28)
+                                    .background(JourneyVisual.lime)
+                                    .clipShape(Capsule())
+                            }
+                            .padding(.horizontal, 2)
+                            .padding(.bottom, 3)
+
+                            ForEach(displayedDiscoveryPlaces) { place in
+                                discoveryPlaceListRow(place)
+                            }
+                        }
+
+                        if !showsDiscoveryOnly {
+                            if selectedType == nil, !displayedPlaces.isEmpty {
+                                Text("journey.map.places_nearby".localized)
+                                    .font(.system(size: 18, weight: .bold, design: .rounded))
+                                    .foregroundStyle(.white)
+                                    .padding(.top, 10)
+                            }
+                            ForEach(displayedPlaces) { place in
+                                placeListRow(place)
+                            }
                         }
                     }
                     .padding(.horizontal, 16)
@@ -594,6 +813,62 @@ struct JourneyMapView: View {
         .buttonStyle(.plain)
     }
 
+    private func discoveryPlaceListRow(_ place: SwissDiscoveryPlace) -> some View {
+        Button {
+            focus(on: place)
+            showsPlaceList = false
+        } label: {
+            ZStack(alignment: .bottomLeading) {
+                Image(place.imageName)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(height: 190)
+                    .clipped()
+
+                LinearGradient(
+                    colors: [.clear, .black.opacity(0.9)],
+                    startPoint: .center,
+                    endPoint: .bottom
+                )
+
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(place.region.uppercased())
+                        .font(.system(size: 9, weight: .bold))
+                        .tracking(0.7)
+                        .foregroundStyle(JourneyVisual.lime)
+                    Text(place.title)
+                        .font(.system(size: 22, weight: .bold, design: .rounded))
+                        .foregroundStyle(.white)
+                        .lineLimit(2)
+                    Text(place.summary)
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundStyle(.white.opacity(0.7))
+                        .lineLimit(2)
+                    Label(place.duration, systemImage: "clock")
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundStyle(.white.opacity(0.72))
+                }
+                .padding(15)
+
+                Image(systemName: "arrow.up.right")
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundStyle(.black)
+                    .frame(width: 38, height: 38)
+                    .background(JourneyVisual.lime)
+                    .clipShape(Circle())
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+                    .padding(14)
+            }
+            .frame(height: 190)
+            .clipShape(RoundedRectangle(cornerRadius: 25, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 25, style: .continuous)
+                    .stroke(Color.white.opacity(0.2), lineWidth: 1)
+            )
+        }
+        .buttonStyle(.plain)
+    }
+
     private var displayedPlaces: [Place] {
         let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
         let matches = appContainer.contentService.places.filter { place in
@@ -610,16 +885,60 @@ struct JourneyMapView: View {
         return matches.sorted { $0.distance(from: location) < $1.distance(from: location) }
     }
 
+    private var displayedDiscoveryPlaces: [SwissDiscoveryPlace] {
+        guard selectedType == nil else { return [] }
+        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        return SwissDiscoveryCatalog.places.filter { place in
+            query.isEmpty
+                || place.title.localizedCaseInsensitiveContains(query)
+                || place.region.localizedCaseInsensitiveContains(query)
+                || place.summary.localizedCaseInsensitiveContains(query)
+        }
+    }
+
+    private var railTitle: String {
+        if showsDiscoveryOnly || selectedDiscoveryPlace != nil {
+            return "swiss.discovery.map_title".localized
+        }
+        return selectedType == nil ? "journey.map.near_you".localized : filterTitle
+    }
+
+    private var railCount: Int {
+        if showsDiscoveryOnly || selectedDiscoveryPlace != nil {
+            return displayedDiscoveryPlaces.count
+        }
+        return displayedPlaces.count
+    }
+
     private var filterTitle: String {
         filters.first(where: { $0.0 == selectedType })?.1 ?? "journey.map.near_you".localized
     }
 
     private func applyFilter(_ type: PlaceType?) {
         withAnimation(.easeInOut(duration: 0.22)) {
+            showsDiscoveryOnly = false
+            selectedDiscoveryPlace = nil
             selectedType = type
             activeRoute = nil
         }
         selectFirstVisiblePlace()
+    }
+
+    private func applyDiscoveryFilter() {
+        withAnimation(.easeInOut(duration: 0.24)) {
+            showsDiscoveryOnly = true
+            selectedType = nil
+            selectedPlace = nil
+            activeRoute = nil
+            selectedDiscoveryPlace = displayedDiscoveryPlaces.first
+        }
+        moveCamera(
+            to: CLLocationCoordinate2D(latitude: 46.82, longitude: 8.23),
+            distance: 430_000,
+            heading: 8,
+            pitch: 43,
+            duration: 0.42
+        )
     }
 
     private func selectFirstVisiblePlace() {
@@ -633,9 +952,35 @@ struct JourneyMapView: View {
         }
     }
 
+    private func keepDiscoverySelectionVisible() {
+        guard let selectedDiscoveryPlace else { return }
+        guard displayedDiscoveryPlaces.contains(where: { $0.id == selectedDiscoveryPlace.id }) else {
+            self.selectedDiscoveryPlace = displayedDiscoveryPlaces.first
+            return
+        }
+    }
+
     private func focus(on place: Place) {
+        selectedDiscoveryPlace = nil
         selectedPlace = place
         moveCamera(to: place.coordinate.clLocationCoordinate, distance: 3_600)
+    }
+
+    private func focus(on place: SwissDiscoveryPlace) {
+        selectedPlace = nil
+        selectedDiscoveryPlace = place
+        activeRoute = nil
+        moveCamera(to: place.coordinate, distance: 12_000, heading: 14, pitch: 52)
+    }
+
+    private func toggleDiscoverySaved(_ place: SwissDiscoveryPlace) {
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        if discoverySavedPlaceIDs.contains(place.id) {
+            discoverySavedPlaceIDs.remove(place.id)
+        } else {
+            discoverySavedPlaceIDs.insert(place.id)
+        }
+        SwissDiscoveryProgressStore.save(discoverySavedPlaceIDs)
     }
 
     private func applyPendingMapFocus() {
@@ -730,6 +1075,14 @@ struct JourneyMapView: View {
         let encodedName = place.name.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? place.name
         guard let url = URL(
             string: "http://maps.apple.com/?daddr=\(coordinate.latitude),\(coordinate.longitude)&q=\(encodedName)"
+        ) else { return }
+        openURL(url)
+    }
+
+    private func openDirections(to place: SwissDiscoveryPlace) {
+        let encodedName = place.title.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? place.title
+        guard let url = URL(
+            string: "http://maps.apple.com/?daddr=\(place.latitude),\(place.longitude)&q=\(encodedName)"
         ) else { return }
         openURL(url)
     }

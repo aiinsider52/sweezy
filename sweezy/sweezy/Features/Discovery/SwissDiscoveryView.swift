@@ -17,20 +17,17 @@ struct SwissDiscoveryView: View {
 
     @State private var query = ""
     @State private var selectedFilter: SwissDiscoveryFilter = .all
+    @State private var selectedSetting: SwissDiscoverySetting = .all
     @State private var selectedPlace: SwissDiscoveryPlace?
     @State private var savedPlaceIDs = Set<String>()
     @State private var showsSavedOnly = false
     @State private var presentation: SwissDiscoveryPresentation = .list
     @State private var ratingSummaries: [String: APIClient.DiscoveryRatingSummary] = [:]
 
-    private let columns = [
-        GridItem(.flexible(), spacing: 10),
-        GridItem(.flexible(), spacing: 10)
-    ]
-
     private var filteredPlaces: [SwissDiscoveryPlace] {
         SwissDiscoveryCatalog.places.filter { place in
             place.matches(query: query, filter: selectedFilter)
+                && place.matches(setting: selectedSetting)
                 && (!showsSavedOnly || savedPlaceIDs.contains(place.id))
         }
     }
@@ -38,7 +35,7 @@ struct SwissDiscoveryView: View {
     var body: some View {
         ZStack {
             JourneyPhotoBackground(
-                imageName: "swiss-discovery-aletsch",
+                imageName: filteredPlaces.first?.imageName ?? "swiss-discovery-aletsch",
                 blurRadius: 10,
                 darkness: 0.7
             )
@@ -67,12 +64,21 @@ struct SwissDiscoveryView: View {
                         )
 
                         if filteredPlaces.count > 1 {
-                            LazyVGrid(columns: columns, spacing: 10) {
+                            if !showsSavedOnly && query.isEmpty {
+                                settingCollections
+                            }
+
+                            sectionHeader(
+                                title: "swiss.discovery.all_places".localized,
+                                count: filteredPlaces.count - 1
+                            )
+
+                            LazyVStack(spacing: 14) {
                                 ForEach(Array(filteredPlaces.dropFirst().enumerated()), id: \.element.id) { index, place in
-                                    SwissDiscoveryGridCard(
+                                    SwissDiscoveryEditorialCard(
                                         place: place,
                                         rating: ratingSummaries[place.id],
-                                        height: index.isMultiple(of: 3) ? 278 : 238,
+                                        index: index + 2,
                                         isSaved: savedPlaceIDs.contains(place.id),
                                         action: { selectedPlace = place },
                                         toggleSaved: { toggleSaved(place) }
@@ -214,7 +220,58 @@ struct SwissDiscoveryView: View {
                 }
             }
             .contentMargins(.horizontal, 0, for: .scrollContent)
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    ForEach(SwissDiscoverySetting.allCases) { setting in
+                        JourneyFilterChip(
+                            title: setting.title,
+                            icon: setting.icon,
+                            isSelected: selectedSetting == setting
+                        ) {
+                            withAnimation(.easeInOut(duration: 0.2)) {
+                                selectedSetting = setting
+                            }
+                        }
+                    }
+                }
+            }
+            .contentMargins(.horizontal, 0, for: .scrollContent)
         }
+    }
+
+    private var settingCollections: some View {
+        VStack(alignment: .leading, spacing: 11) {
+            Text("swiss.discovery.collections.title".localized)
+                .font(.system(size: 22, weight: .bold, design: .rounded))
+                .foregroundStyle(.white)
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 10) {
+                    ForEach(SwissDiscoverySetting.allCases.filter { $0 != .all }) { setting in
+                        let place = representativePlace(for: setting)
+                        SwissDiscoverySettingCard(setting: setting, place: place) {
+                            withAnimation(.spring(response: 0.34, dampingFraction: 0.84)) {
+                                selectedSetting = setting
+                            }
+                        }
+                    }
+                }
+            }
+            .contentMargins(.horizontal, 0, for: .scrollContent)
+        }
+    }
+
+    private func representativePlace(for setting: SwissDiscoverySetting) -> SwissDiscoveryPlace {
+        let preferredID: String
+        switch setting {
+        case .city: preferredID = "locarno"
+        case .mountain: preferredID = "crans-montana"
+        case .lake: preferredID = "interlaken"
+        case .all: preferredID = "bern-region"
+        }
+        return SwissDiscoveryCatalog.places.first(where: { $0.id == preferredID })
+            ?? SwissDiscoveryCatalog.places[0]
     }
 
     private func sectionHeader(title: String, count: Int) -> some View {
@@ -245,6 +302,7 @@ struct SwissDiscoveryView: View {
                 Button("swiss.discovery.empty.reset".localized) {
                     query = ""
                     selectedFilter = .all
+                    selectedSetting = .all
                     showsSavedOnly = false
                 }
                 .font(.system(size: 14, weight: .bold))
@@ -456,10 +514,55 @@ private struct SwissDiscoveryFeaturedCard: View {
     }
 }
 
-private struct SwissDiscoveryGridCard: View {
+private struct SwissDiscoverySettingCard: View {
+    let setting: SwissDiscoverySetting
+    let place: SwissDiscoveryPlace
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            ZStack(alignment: .bottomLeading) {
+                Image(place.imageNames[1])
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 178, height: 166)
+                    .clipped()
+
+                LinearGradient(
+                    colors: [.clear, .black.opacity(0.82)],
+                    startPoint: .center,
+                    endPoint: .bottom
+                )
+
+                VStack(alignment: .leading, spacing: 6) {
+                    Image(systemName: setting.icon)
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundStyle(.black)
+                        .frame(width: 34, height: 34)
+                        .background(JourneyVisual.lime)
+                        .clipShape(RoundedRectangle(cornerRadius: 11, style: .continuous))
+
+                    Text(setting.title)
+                        .font(.system(size: 17, weight: .bold, design: .rounded))
+                        .foregroundStyle(.white)
+                }
+                .padding(13)
+            }
+            .frame(width: 178, height: 166)
+            .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 24, style: .continuous)
+                    .stroke(Color.white.opacity(0.28), lineWidth: 1)
+            )
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+private struct SwissDiscoveryEditorialCard: View {
     let place: SwissDiscoveryPlace
     let rating: APIClient.DiscoveryRatingSummary?
-    let height: CGFloat
+    let index: Int
     let isSaved: Bool
     let action: () -> Void
     let toggleSaved: () -> Void
@@ -467,59 +570,74 @@ private struct SwissDiscoveryGridCard: View {
     var body: some View {
         ZStack(alignment: .topTrailing) {
             Button(action: action) {
-                gridVisual
+                ZStack(alignment: .bottomLeading) {
+                Image(place.imageName)
+                    .resizable()
+                    .scaledToFill()
+                        .frame(height: 252)
+                    .clipped()
+
+                LinearGradient(
+                        colors: [.black.opacity(0.06), .clear, .black.opacity(0.92)],
+                        startPoint: .top,
+                    endPoint: .bottom
+                )
+
+                    VStack(alignment: .leading, spacing: 7) {
+                        HStack(spacing: 8) {
+                            Text(String(format: "%02d", index))
+                                .font(.system(size: 11, weight: .black, design: .rounded))
+                                .foregroundStyle(.black)
+                                .frame(width: 34, height: 26)
+                                .background(JourneyVisual.lime)
+                                .clipShape(Capsule())
+
+                            Text(place.region.uppercased())
+                                .font(.system(size: 9, weight: .bold))
+                                .tracking(0.7)
+                                .foregroundStyle(.white.opacity(0.78))
+                                .lineLimit(1)
+                        }
+
+                        Text(place.title)
+                            .font(.system(size: 25, weight: .bold, design: .rounded))
+                        .foregroundStyle(.white)
+                        .multilineTextAlignment(.leading)
+                            .lineLimit(2)
+
+                        Text(place.summary)
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundStyle(.white.opacity(0.7))
+                            .lineLimit(2)
+                            .fixedSize(horizontal: false, vertical: true)
+
+                        HStack(spacing: 12) {
+                            Label(place.duration, systemImage: "clock")
+                            Label(place.season, systemImage: "sun.max")
+                            if let rating, rating.reviewCount > 0 {
+                                Label(String(format: "%.1f", rating.averageRating), systemImage: "star.fill")
+                            }
+                        }
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundStyle(JourneyVisual.lime)
+                    }
+                    .padding(16)
+                }
+                .frame(height: 252)
+                .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 28, style: .continuous)
+                        .stroke(Color.white.opacity(0.28), lineWidth: 1)
+                )
             }
             .buttonStyle(.plain)
             .accessibilityLabel("\(place.title), \(place.region)")
             .accessibilityIdentifier("swiss.discovery.place.\(place.id)")
 
             SwissDiscoverySaveButton(isSaved: isSaved, action: toggleSaved, compact: true)
-                .padding(10)
+                .padding(13)
         }
-    }
-
-    private var gridVisual: some View {
-        ZStack(alignment: .bottomLeading) {
-                Image(place.imageName)
-                    .resizable()
-                    .scaledToFill()
-                    .frame(height: height)
-                    .clipped()
-
-                LinearGradient(
-                    colors: [.clear, .black.opacity(0.88)],
-                    startPoint: .center,
-                    endPoint: .bottom
-                )
-
-                VStack(alignment: .leading, spacing: 6) {
-                    Text(place.region.uppercased())
-                        .font(.system(size: 9, weight: .bold))
-                        .tracking(0.8)
-                        .foregroundStyle(JourneyVisual.lime)
-                        .lineLimit(1)
-                    Text(place.title)
-                        .font(.system(size: 17, weight: .bold, design: .rounded))
-                        .foregroundStyle(.white)
-                        .multilineTextAlignment(.leading)
-                        .lineLimit(3)
-                    Label(place.duration, systemImage: "clock")
-                        .font(.system(size: 10, weight: .medium))
-                        .foregroundStyle(.white.opacity(0.68))
-                    if let rating, rating.reviewCount > 0 {
-                        Label(String(format: "%.1f · %d", rating.averageRating, rating.reviewCount), systemImage: "star.fill")
-                            .font(.system(size: 10, weight: .bold))
-                            .foregroundStyle(JourneyVisual.lime)
-                    }
-                }
-                .padding(14)
-        }
-        .frame(height: height)
-        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .stroke(Color.white.opacity(0.3), lineWidth: 1)
-        )
+        .shadow(color: .black.opacity(0.32), radius: 18, y: 9)
     }
 }
 
@@ -543,7 +661,7 @@ private struct SwissDiscoverySaveButton: View {
     }
 }
 
-private struct SwissDiscoveryDetailView: View {
+struct SwissDiscoveryDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var appContainer: AppContainer
     @EnvironmentObject private var sessionManager: SessionManager

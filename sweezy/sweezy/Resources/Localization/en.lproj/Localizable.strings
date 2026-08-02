@@ -2177,7 +2177,7 @@
 
 /* Swiss Discovery */
 "journey.tool.discover_switzerland.title" = "Discover Switzerland";
-"journey.tool.discover_switzerland.subtitle" = "22 verified places with routes, galleries and practical tips";
+"journey.tool.discover_switzerland.subtitle" = "30 verified places with routes, galleries and practical tips";
 "swiss.discovery.eyebrow" = "Switzerland nearby";
 "swiss.discovery.title" = "Discover places worth remembering";
 "swiss.discovery.subtitle" = "Nature, culture and ready-made day-trip ideas with practical details and official sources.";
@@ -2418,3 +2418,86 @@
 "swiss.discovery.reviews.delete_confirm.body" = "This action cannot be undone.";
 "swiss.discovery.reviews.delete_confirm.action" = "Delete";
 "swiss.discovery.reviews.cancel" = "Cancel";
+
+"swiss.discovery.setting.all" = "All";
+"swiss.discovery.setting.city" = "Cities";
+"swiss.discovery.setting.mountain" = "Mountains";
+"swiss.discovery.setting.lake" = "By the lake";
+"swiss.discovery.collections.title" = "Choose your rhythm";
+"swiss.discovery.all_places" = "All discoveries";
+"swiss.discovery.map_filter" = "Discover Switzerland";
+"swiss.discovery.map_title" = "Places across Switzerland";
+"swiss.discovery.map_subtitle" = "30 ideas for cities, mountains and lakes";
+"swiss.discovery.open_place" = "Open place";
+
+"swiss.discovery.interlaken.title" = "Interlaken";
+"swiss.discovery.interlaken.region" = "Bernese Oberland · between two lakes";
+"swiss.discovery.interlaken.summary" = "A town between Lakes Thun and Brienz, ideal for mountain trips and relaxed walks by the water.";
+"swiss.discovery.interlaken.details" = "Interlaken combines practical town infrastructure with immediate access to the Alps. Walk the waterfront and Höhematte, then take a direct train into the Lauterbrunnen or Grindelwald valleys. It works as a day trip, but is better as a multi-day base: one day for a lake, one for a mountain railway and one for the town at a slower pace.";
+"swiss.discovery.interlaken.tip" = "Choose one lake and one mountain direction per day. Check weather and transport schedules before leaving.";
+"swiss.discovery.interlaken.season" = "All year";
+"swiss.discovery.interlaken.duration" = "1–3 days";
+"swiss.discovery.interlaken.route" = "Interlaken Ost → Höhematte → waterfront or train into an alpine valley";
+
+"swiss.discovery.crans_montana.title" = "Crans-Montana";
+"swiss.discovery.crans_montana.region" = "Valais · sunny alpine plateau";
+"swiss.discovery.crans_montana.summary" = "A panoramic resort above the Rhône Valley with lakes, trails, cable cars and vineyards.";
+"swiss.discovery.crans_montana.details" = "Crans-Montana sits on a broad, sunny plateau and blends resort convenience with open alpine views and short routes that need little planning. In summer, combine a walk around the lakes with a cable-car ascent; lower down, the wine-growing Valais adds a different landscape and slower rhythm.";
+"swiss.discovery.crans_montana.tip" = "Start early in the mountains, then leave the afternoon for a lake or a wine village in the valley.";
+"swiss.discovery.crans_montana.season" = "All year";
+"swiss.discovery.crans_montana.duration" = "1–2 days";
+"swiss.discovery.crans_montana.route" = "Montana Gare → resort lakes → cable car → panoramic trail";
+
+"swiss.discovery.locarno.title" = "Locarno";
+"swiss.discovery.locarno.region" = "Ticino · Lake Maggiore";
+"swiss.discovery.locarno.summary" = "Palm trees, historic Piazza Grande and a quick climb from the waterfront to mountain viewpoints.";
+"swiss.discovery.locarno.details" = "Locarno has an almost Mediterranean character: old-town arcades, gardens and the lakefront fit naturally into one walking route. A funicular reaches Madonna del Sasso, with further lifts opening views over the lake and foothills. It is an easy car-free introduction to Ticino.";
+"swiss.discovery.locarno.tip" = "Explore the old town in the morning, climb to the sanctuary before lunch and keep sunset for the waterfront.";
+"swiss.discovery.locarno.season" = "Spring to autumn";
+"swiss.discovery.locarno.duration" = "1–2 days";
+"swiss.discovery.locarno.route" = "Piazza Grande → old town → Madonna del Sasso → lakefront";
+
+"swiss.discovery.martigny.title" = "Martigny";
+"swiss.discovery.martigny.region" = "Valais · crossroads of alpine routes";
+"swiss.discovery.martigny.summary" = "Roman heritage, art, vineyards and a castle in a compact town near major alpine passes.";
+"swiss.discovery.martigny.details" = "Martigny layers history from a Roman amphitheatre to the medieval Château de la Bâtiaz. Cultural spaces sit among orchards and vineyards in the Rhône Valley. The town also makes a practical base for Saint-Maurice, Emosson and routes towards the French and Italian passes.";
+"swiss.discovery.martigny.tip" = "Combine the amphitheatre and museum before lunch, then climb to the castle or vineyards in the evening.";
+"swiss.discovery.martigny.season" = "All year";
+"swiss.discovery.martigny.duration" = "1 day";
+"swiss.discovery.martigny.route" = "Station → historic centre → Roman amphitheatre → Château de la Bâtiaz";
+
+"swiss.discovery.flims_laax.title" = "Flims–Laax–Falera";
+"swiss.discovery.flims_laax.region" = "Graubünden · lakes and Rhine Gorge";
+"swiss.discovery.flims_laax.summary" = "Turquoise forest lakes, high-alpine trails and modern resort links next to Ruinaulta.";
+"swiss.discovery.flims_laax.details" = "Flims–Laax–Falera packs several landscapes into a small area: clear Caumasee, forest paths, viewpoints above the Rhine Gorge and higher mountain routes. Local transport links the villages, making circular walks possible without returning by car.";
+"swiss.discovery.flims_laax.tip" = "For an easy day, combine Caumasee and Il Spir. Plan the high-alpine route separately and check lift operation.";
+"swiss.discovery.flims_laax.season" = "All year";
+"swiss.discovery.flims_laax.duration" = "1–3 days";
+"swiss.discovery.flims_laax.route" = "Flims Waldhaus → Caumasee → Conn → Il Spir viewpoint";
+
+"swiss.discovery.vaud.title" = "Vaud Region";
+"swiss.discovery.vaud.region" = "Lake Geneva · cities, vineyards and Jura";
+"swiss.discovery.vaud.summary" = "From Lausanne and Morges to waterfronts, vineyards and quiet routes in the Jura foothills.";
+"swiss.discovery.vaud.details" = "Vaud links urban culture, lakeside landscapes and wine villages with a dense train network. Start at Morges market and waterfront, continue to Lausanne’s museums or lakeside castles, then spend another day in vineyards or the Vallée de Joux.";
+"swiss.discovery.vaud.tip" = "Do not try to cover the canton in one day. Choose one lakeside line and one cultural stop.";
+"swiss.discovery.vaud.season" = "All year";
+"swiss.discovery.vaud.duration" = "2–4 days";
+"swiss.discovery.vaud.route" = "Morges → waterfront → Lausanne or the region’s wine villages";
+
+"swiss.discovery.jura_lakes.title" = "Jura & Three Lakes";
+"swiss.discovery.jura_lakes.region" = "Biel–Neuchâtel · lakes, watchmaking and limestone ridges";
+"swiss.discovery.jura_lakes.summary" = "Three calm lakes, vineyard shores, historic towns and the natural amphitheatre of Creux du Van.";
+"swiss.discovery.jura_lakes.details" = "The region joins Lakes Biel, Neuchâtel and Murten with bilingual towns, vineyards and Jura walking routes. Build a slower journey around a boat or cycle leg by the water, an old town in the afternoon and a separate day for Creux du Van or the watchmaking valleys.";
+"swiss.discovery.jura_lakes.tip" = "For a first trip, pair one lakeside route with Neuchâtel. Save Creux du Van for stable weather.";
+"swiss.discovery.jura_lakes.season" = "Spring to autumn";
+"swiss.discovery.jura_lakes.duration" = "2–3 days";
+"swiss.discovery.jura_lakes.route" = "Biel → lakeshore → Neuchâtel → separate day at Creux du Van";
+
+"swiss.discovery.bern_region.title" = "Bern Region";
+"swiss.discovery.bern_region.region" = "Bern · Lake Thun · Bernese Oberland";
+"swiss.discovery.bern_region.summary" = "Bern’s old town, turquoise lakes and valleys below the Eiger in one remarkably varied region.";
+"swiss.discovery.bern_region.details" = "The Bern Region reveals several versions of Switzerland: capital arcades above the Aare, castles and promenades on Lake Thun, then mountain villages and valleys below the Eiger. Rail makes the route easy without a car, but each zone deserves its own day.";
+"swiss.discovery.bern_region.tip" = "Spend one day in Bern, one by the lake and at least one in the Oberland. Avoid combining distant stops on one day.";
+"swiss.discovery.bern_region.season" = "All year";
+"swiss.discovery.bern_region.duration" = "3–5 days";
+"swiss.discovery.bern_region.route" = "Bern → Thun or Spiez → Interlaken → Grindelwald";

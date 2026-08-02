@@ -5,7 +5,7 @@ final class SwissDiscoveryCatalogTests: XCTestCase {
     func testCatalogContainsUniqueProductionReadyPlaces() {
         let places = SwissDiscoveryCatalog.places
 
-        XCTAssertEqual(places.count, 22)
+        XCTAssertEqual(places.count, 30)
         XCTAssertEqual(Set(places.map(\.id)).count, places.count)
         XCTAssertEqual(Set(places.map(\.imageName)).count, places.count)
         XCTAssertTrue(places.allSatisfy { $0.imageNames.count >= 3 })
@@ -15,6 +15,7 @@ final class SwissDiscoveryCatalogTests: XCTestCase {
         XCTAssertTrue(places.allSatisfy { $0.details.count > $0.summary.count })
         XCTAssertTrue(places.allSatisfy { (-90...90).contains($0.latitude) })
         XCTAssertTrue(places.allSatisfy { (-180...180).contains($0.longitude) })
+        XCTAssertTrue(places.allSatisfy { !$0.settings.isEmpty })
     }
 
     func testFiltersReturnRelevantPlaces() {

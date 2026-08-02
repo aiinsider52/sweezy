@@ -58,7 +58,7 @@ def test_discovery_review_lifecycle_and_public_aggregate() -> None:
 
     summaries = client.get("/api/v1/discovery/ratings")
     assert summaries.status_code == 200
-    assert len(summaries.json()) == 22
+    assert len(summaries.json()) == 30
     matterhorn = next(item for item in summaries.json() if item["place_id"] == "matterhorn")
     assert matterhorn == {"place_id": "matterhorn", "average_rating": 4.0, "review_count": 1}
 
@@ -70,7 +70,7 @@ def test_discovery_review_lifecycle_and_public_aggregate() -> None:
     assert deleted.status_code == 204
     assert client.get("/api/v1/discovery/matterhorn/reviews").json()["review_count"] == 0
 
-    new_destination = client.get("/api/v1/discovery/zurich/reviews")
+    new_destination = client.get("/api/v1/discovery/interlaken/reviews")
     assert new_destination.status_code == 200
     assert new_destination.json() == {
         "average_rating": 0.0,

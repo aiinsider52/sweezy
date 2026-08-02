@@ -25,6 +25,25 @@ enum SwissDiscoveryFilter: String, CaseIterable, Identifiable, Hashable {
     }
 }
 
+enum SwissDiscoverySetting: String, CaseIterable, Identifiable, Hashable {
+    case all
+    case city
+    case mountain
+    case lake
+
+    var id: String { rawValue }
+    var title: String { "swiss.discovery.setting.\(rawValue)".localized }
+
+    var icon: String {
+        switch self {
+        case .all: return "sparkles"
+        case .city: return "building.2.fill"
+        case .mountain: return "mountain.2.fill"
+        case .lake: return "water.waves"
+        }
+    }
+}
+
 struct SwissDiscoveryPlace: Identifiable, Hashable {
     let id: String
     let imageNames: [String]
@@ -55,12 +74,39 @@ struct SwissDiscoveryPlace: Identifiable, Hashable {
     var route: String { routeKey.localized }
     var coordinate: CLLocationCoordinate2D { .init(latitude: latitude, longitude: longitude) }
     var officialURL: URL { URL(string: officialURLString)! }
+    var settings: Set<SwissDiscoverySetting> {
+        switch id {
+        case "basel", "bern", "st-gallen-abbey":
+            return [.city]
+        case "aletsch", "creux-du-van", "ruinaulta", "monte-generoso", "matterhorn",
+             "jungfraujoch", "crans-montana", "flims-laax":
+            return [.mountain]
+        case "lavaux", "rhine-falls":
+            return [.lake]
+        case "zurich", "geneva", "lausanne", "ascona", "vaud-region":
+            return [.city, .lake]
+        case "lucerne", "montreux", "lugano", "engadin", "interlaken", "locarno":
+            return [.city, .mountain, .lake]
+        case "davos", "martigny":
+            return [.city, .mountain]
+        case "oeschinensee", "rigi", "jura-three-lakes":
+            return [.mountain, .lake]
+        case "bern-region":
+            return [.city, .mountain, .lake]
+        default:
+            return []
+        }
+    }
 
     func matches(query: String, filter: SwissDiscoveryFilter) -> Bool {
         let trimmedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
         let matchesFilter = filter == .all || filters.contains(filter)
         let haystack = [title, region, summary, season].joined(separator: " ")
         return matchesFilter && (trimmedQuery.isEmpty || haystack.localizedCaseInsensitiveContains(trimmedQuery))
+    }
+
+    func matches(setting: SwissDiscoverySetting) -> Bool {
+        setting == .all || settings.contains(setting)
     }
 }
 
@@ -397,6 +443,126 @@ enum SwissDiscoveryCatalog {
             latitude: 46.4908,
             longitude: 9.8355,
             officialURLString: "https://meetings.myswitzerland.com/ru/meetingcountry/engadin-st-moritz/"
+        ),
+        SwissDiscoveryPlace(
+            id: "interlaken",
+            imageNames: ["swiss-discovery-interlaken", "swiss-discovery-interlaken-2", "swiss-discovery-interlaken-3"],
+            titleKey: "swiss.discovery.interlaken.title",
+            regionKey: "swiss.discovery.interlaken.region",
+            summaryKey: "swiss.discovery.interlaken.summary",
+            tipKey: "swiss.discovery.interlaken.tip",
+            seasonKey: "swiss.discovery.interlaken.season",
+            durationKey: "swiss.discovery.interlaken.duration",
+            routeKey: "swiss.discovery.interlaken.route",
+            filters: [.nature, .culture, .family, .easy],
+            latitude: 46.6863,
+            longitude: 7.8632,
+            officialURLString: "https://meetings.myswitzerland.com/ru/meetingcountry/interlaken-region/"
+        ),
+        SwissDiscoveryPlace(
+            id: "crans-montana",
+            imageNames: ["swiss-discovery-crans-montana", "swiss-discovery-crans-montana-2", "swiss-discovery-crans-montana-3"],
+            titleKey: "swiss.discovery.crans_montana.title",
+            regionKey: "swiss.discovery.crans_montana.region",
+            summaryKey: "swiss.discovery.crans_montana.summary",
+            tipKey: "swiss.discovery.crans_montana.tip",
+            seasonKey: "swiss.discovery.crans_montana.season",
+            durationKey: "swiss.discovery.crans_montana.duration",
+            routeKey: "swiss.discovery.crans_montana.route",
+            filters: [.nature, .culture, .family, .easy],
+            latitude: 46.3119,
+            longitude: 7.4822,
+            officialURLString: "https://meetings.myswitzerland.com/en-us/inspiration/crans-montana/"
+        ),
+        SwissDiscoveryPlace(
+            id: "locarno",
+            imageNames: ["swiss-discovery-locarno", "swiss-discovery-locarno-2", "swiss-discovery-locarno-3"],
+            titleKey: "swiss.discovery.locarno.title",
+            regionKey: "swiss.discovery.locarno.region",
+            summaryKey: "swiss.discovery.locarno.summary",
+            tipKey: "swiss.discovery.locarno.tip",
+            seasonKey: "swiss.discovery.locarno.season",
+            durationKey: "swiss.discovery.locarno.duration",
+            routeKey: "swiss.discovery.locarno.route",
+            filters: [.nature, .culture, .family, .easy],
+            latitude: 46.1690,
+            longitude: 8.7955,
+            officialURLString: "https://meetings.myswitzerland.com/ru/meetingcountry/locarno/"
+        ),
+        SwissDiscoveryPlace(
+            id: "martigny",
+            imageNames: ["swiss-discovery-martigny", "swiss-discovery-martigny-2", "swiss-discovery-martigny-3"],
+            titleKey: "swiss.discovery.martigny.title",
+            regionKey: "swiss.discovery.martigny.region",
+            summaryKey: "swiss.discovery.martigny.summary",
+            tipKey: "swiss.discovery.martigny.tip",
+            seasonKey: "swiss.discovery.martigny.season",
+            durationKey: "swiss.discovery.martigny.duration",
+            routeKey: "swiss.discovery.martigny.route",
+            filters: [.nature, .culture, .family, .easy],
+            latitude: 46.1024,
+            longitude: 7.0722,
+            officialURLString: "https://meetings.myswitzerland.com/en-us/inspiration/martigny/"
+        ),
+        SwissDiscoveryPlace(
+            id: "flims-laax",
+            imageNames: ["swiss-discovery-flims-laax", "swiss-discovery-flims-laax-2", "swiss-discovery-flims-laax-3"],
+            titleKey: "swiss.discovery.flims_laax.title",
+            regionKey: "swiss.discovery.flims_laax.region",
+            summaryKey: "swiss.discovery.flims_laax.summary",
+            tipKey: "swiss.discovery.flims_laax.tip",
+            seasonKey: "swiss.discovery.flims_laax.season",
+            durationKey: "swiss.discovery.flims_laax.duration",
+            routeKey: "swiss.discovery.flims_laax.route",
+            filters: [.nature, .family, .easy],
+            latitude: 46.8213,
+            longitude: 9.2650,
+            officialURLString: "https://meetings.myswitzerland.com/en-gb/inspiration/flims-laax-falera/"
+        ),
+        SwissDiscoveryPlace(
+            id: "vaud-region",
+            imageNames: ["swiss-discovery-vaud", "swiss-discovery-vaud-2", "swiss-discovery-vaud-3"],
+            titleKey: "swiss.discovery.vaud.title",
+            regionKey: "swiss.discovery.vaud.region",
+            summaryKey: "swiss.discovery.vaud.summary",
+            tipKey: "swiss.discovery.vaud.tip",
+            seasonKey: "swiss.discovery.vaud.season",
+            durationKey: "swiss.discovery.vaud.duration",
+            routeKey: "swiss.discovery.vaud.route",
+            filters: [.nature, .culture, .family, .easy],
+            latitude: 46.5090,
+            longitude: 6.4980,
+            officialURLString: "https://meetings.myswitzerland.com/ru/meetingcountry/lake-geneva-region-vaud/"
+        ),
+        SwissDiscoveryPlace(
+            id: "jura-three-lakes",
+            imageNames: ["swiss-discovery-jura-lakes", "swiss-discovery-jura-lakes-2", "swiss-discovery-jura-lakes-3"],
+            titleKey: "swiss.discovery.jura_lakes.title",
+            regionKey: "swiss.discovery.jura_lakes.region",
+            summaryKey: "swiss.discovery.jura_lakes.summary",
+            tipKey: "swiss.discovery.jura_lakes.tip",
+            seasonKey: "swiss.discovery.jura_lakes.season",
+            durationKey: "swiss.discovery.jura_lakes.duration",
+            routeKey: "swiss.discovery.jura_lakes.route",
+            filters: [.nature, .culture, .family, .easy],
+            latitude: 47.0460,
+            longitude: 7.3080,
+            officialURLString: "https://meetings.myswitzerland.com/en-us/inspiration/jura-amp-threelakes/"
+        ),
+        SwissDiscoveryPlace(
+            id: "bern-region",
+            imageNames: ["swiss-discovery-bern-region", "swiss-discovery-bern-region-2", "swiss-discovery-bern-region-3"],
+            titleKey: "swiss.discovery.bern_region.title",
+            regionKey: "swiss.discovery.bern_region.region",
+            summaryKey: "swiss.discovery.bern_region.summary",
+            tipKey: "swiss.discovery.bern_region.tip",
+            seasonKey: "swiss.discovery.bern_region.season",
+            durationKey: "swiss.discovery.bern_region.duration",
+            routeKey: "swiss.discovery.bern_region.route",
+            filters: [.nature, .culture, .family, .easy],
+            latitude: 46.6590,
+            longitude: 8.0540,
+            officialURLString: "https://meetings.myswitzerland.com/ru/meetingcountry/bern-region/"
         )
     ]
 }

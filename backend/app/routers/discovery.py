@@ -27,6 +27,8 @@ DISCOVERY_PLACE_IDS = {
     "monte-generoso", "st-gallen-abbey", "matterhorn", "jungfraujoch", "bern", "rigi",
     "zurich", "geneva", "lucerne", "basel", "lausanne", "montreux", "lugano", "davos",
     "ascona", "engadin",
+    "interlaken", "crans-montana", "locarno", "martigny", "flims-laax", "vaud-region",
+    "jura-three-lakes", "bern-region",
 }
 
 

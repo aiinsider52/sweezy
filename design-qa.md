@@ -79,6 +79,19 @@ final result: passed
 
 ---
 
+**Scroll Comfort, Sticky Actions, And Home Copy — 2026-08-02**
+- Scope: marketplace listing detail, guide article, Journey Home.
+- Marketplace detail: moved back/share/favorite outside `ScrollView`; controls remain sticky. Moved category badge into content sheet, removing hero/sheet collision. Added minimum scroll height and dark-pine root backdrop so bottom bounce no longer reveals a pure-black slab.
+- Guide detail: moved back/share outside article scroll; added photographic overscroll continuation and size-aware vertical bounce. Removed one-second reading timer; read eligibility now wakes once after 20 seconds, reducing repeated full article recomposition.
+- Home: fixed literal `%d` and `\\(next.title)` output in Ukrainian copy, corrected EN/DE format variants, and replaced `UIScreen.main.bounds` layout with container geometry.
+- Runtime evidence: `/tmp/sweezy-listing-comfort.png`, `/tmp/sweezy-home-localization.png` on iPhone 17 Pro simulator.
+- Validation: generic iOS Simulator build passed; 38/38 `sweezyTests` passed; UK/EN/DE strings passed `plutil -lint`; `git diff --check` passed.
+- Infrastructure note [P3]: one UI-runner attempt failed before sticky-header assertions because cloned iOS 26.1 runner could not expose existing onboarding skip control. Direct simulator render and source placement verified intended sticky structure.
+
+final result: passed with one non-blocking UI-runner infrastructure limitation
+
+---
+
 **Marketplace Photo-First Listing Detail — 2026-07-20**
 - Source visual truth: `/Users/vladyslav.katash/Desktop/SWEEEZY/artifacts/marketplace-photo-first/source-photo-first-mockup.png`.
 - Implementation screenshot: `/Users/vladyslav.katash/Desktop/SWEEEZY/artifacts/marketplace-photo-first/listing-detail-final.png`.

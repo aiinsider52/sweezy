@@ -25,6 +25,8 @@ admin_router = APIRouter()
 DISCOVERY_PLACE_IDS = {
     "aletsch", "lavaux", "creux-du-van", "rhine-falls", "oeschinensee", "ruinaulta",
     "monte-generoso", "st-gallen-abbey", "matterhorn", "jungfraujoch", "bern", "rigi",
+    "zurich", "geneva", "lucerne", "basel", "lausanne", "montreux", "lugano", "davos",
+    "ascona", "engadin",
 }
 
 

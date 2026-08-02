@@ -68,6 +68,38 @@ final class CriticalFlowsUITests: XCTestCase {
     }
 
     @MainActor
+    func testSwissDiscoveryCatalogIsReachable() throws {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "-onboarding_completed", "YES",
+            "-initial_auth_choice_completed", "YES",
+            "-screenshotTab", "1",
+            "-screenshotDirectoryWorkspace", "tools",
+            "--skip-feature-onboarding"
+        ]
+        app.launchEnvironment["UITESTS"] = "1"
+        app.launch()
+
+        let discoveryCard = app.buttons["journey.tool.discoverSwitzerland"]
+        XCTAssertTrue(discoveryCard.waitForExistence(timeout: 15))
+        discoveryCard.tap()
+
+        XCTAssertTrue(app.descendants(matching: .any)["swiss.discovery.screen"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons["journey.tool.discoverSwitzerland"].exists == false)
+
+        keepScreenshot(app, name: "swiss-discovery-catalog")
+
+        let featuredPlace = app.buttons["swiss.discovery.place.aletsch"]
+        XCTAssertTrue(featuredPlace.waitForExistence(timeout: 10))
+        featuredPlace.tap()
+
+        XCTAssertTrue(app.descendants(matching: .any)["swiss.discovery.detail.aletsch"].waitForExistence(timeout: 10))
+        XCTAssertFalse(app.buttons["tab.directory"].exists)
+        XCTAssertFalse(app.alerts.firstMatch.waitForExistence(timeout: 3))
+        keepScreenshot(app, name: "swiss-discovery-detail")
+    }
+
+    @MainActor
     private func launchCleanApp() -> XCUIApplication {
         let app = XCUIApplication()
         app.launchArguments = ["--reset-ui-test-state"]
@@ -94,5 +126,13 @@ final class CriticalFlowsUITests: XCTestCase {
         XCTAssertTrue(tabButton.waitForExistence(timeout: 10), "Missing tab: \(tab)")
         tabButton.tap()
         XCTAssertTrue(app.descendants(matching: .any)[screen].waitForExistence(timeout: 10), "Missing screen: \(screen)")
+    }
+
+    @MainActor
+    private func keepScreenshot(_ app: XCUIApplication, name: String) {
+        let screenshot = XCTAttachment(screenshot: app.screenshot())
+        screenshot.name = name
+        screenshot.lifetime = .keepAlways
+        add(screenshot)
     }
 }

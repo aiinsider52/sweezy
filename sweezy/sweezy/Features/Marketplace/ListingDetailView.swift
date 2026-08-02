@@ -29,11 +29,15 @@ struct ListingDetailView: View {
     }
 
     var body: some View {
-        ZStack {
-            JourneyVisual.black.ignoresSafeArea()
+        ZStack(alignment: .top) {
+            Color(red: 0.035, green: 0.055, blue: 0.043)
+                .ignoresSafeArea()
 
             if let listing {
                 detailContent(listing)
+                    .overlay(alignment: .top) {
+                        stickyHeader(listing)
+                    }
             } else if isLoading {
                 listingLoadingState
             } else {
@@ -92,19 +96,22 @@ struct ListingDetailView: View {
         GeometryReader { geometry in
             ScrollView(showsIndicators: false) {
                 LazyVStack(spacing: 0) {
-                    heroSection(listing, topInset: geometry.safeAreaInsets.top)
+                    heroSection(listing)
 
                     contentSheet(listing)
                         .offset(y: -34)
                         .padding(.bottom, -34)
                 }
+                .frame(minHeight: geometry.size.height + 80, alignment: .top)
                 .padding(.bottom, 36)
             }
+            .scrollBounceBehavior(.basedOnSize, axes: .vertical)
             .ignoresSafeArea(edges: .top)
+            .accessibilityIdentifier("listing.detail.scroll")
         }
     }
 
-    private func heroSection(_ listing: ServiceListing, topInset: CGFloat) -> some View {
+    private func heroSection(_ listing: ServiceListing) -> some View {
         ZStack(alignment: .bottom) {
             listingHeroMedia(listing)
 
@@ -115,46 +122,9 @@ struct ListingDetailView: View {
             )
 
             VStack {
-                HStack {
-                    circularControl(icon: "chevron.left", accessibilityLabel: "common.back".localized) {
-                        dismiss()
-                    }
-
-                    Spacer()
-
-                    ShareLink(
-                        item: "\(listing.title)\n\(listing.description)",
-                        subject: Text(listing.title),
-                        message: Text("marketplace.share_message".localized)
-                    ) {
-                        circularControlLabel(icon: "square.and.arrow.up")
-                    }
-                    .accessibilityLabel("marketplace.share".localized)
-
-                    Button {
-                        toggleSaved(listing)
-                    } label: {
-                        circularControlLabel(
-                            icon: appContainer.savedItems.isListingSaved(listing.id) ? "heart.fill" : "heart"
-                        )
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel(appContainer.savedItems.isListingSaved(listing.id) ? "Збережено" : "Зберегти")
-                }
-                .padding(.horizontal, 20)
-                .padding(.top, max(topInset, 44) + 10)
-
                 Spacer()
 
                 HStack(alignment: .bottom) {
-                    Label(listing.categoryDisplayName, systemImage: listing.categoryIcon)
-                        .font(.system(size: 15, weight: .bold, design: .rounded))
-                        .foregroundColor(.black)
-                        .padding(.horizontal, 16)
-                        .frame(height: 42)
-                        .background(JourneyVisual.lime)
-                        .clipShape(Capsule())
-
                     Spacer()
 
                     if listing.resolvedImageURLs.count > 1 {
@@ -169,7 +139,7 @@ struct ListingDetailView: View {
                     }
                 }
                 .padding(.horizontal, 20)
-                .padding(.bottom, 48)
+                .padding(.bottom, 52)
             }
         }
         .frame(height: 520)
@@ -212,11 +182,20 @@ struct ListingDetailView: View {
 
     private func contentSheet(_ listing: ServiceListing) -> some View {
         VStack(alignment: .leading, spacing: 0) {
+            Label(listing.categoryDisplayName, systemImage: listing.categoryIcon)
+                .font(.system(size: 13, weight: .bold, design: .rounded))
+                .foregroundColor(.black)
+                .padding(.horizontal, 14)
+                .frame(height: 38)
+                .background(JourneyVisual.lime)
+                .clipShape(Capsule())
+
             Text(listing.title)
                 .font(.system(size: 31, weight: .bold, design: .rounded))
                 .foregroundColor(.white)
                 .lineSpacing(-1)
                 .fixedSize(horizontal: false, vertical: true)
+                .padding(.top, 16)
 
             HStack(spacing: 9) {
                 Image(systemName: "mappin")
@@ -448,12 +427,38 @@ struct ListingDetailView: View {
             .frame(height: 1)
     }
 
-    private func circularControl(icon: String, accessibilityLabel: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            circularControlLabel(icon: icon)
+    private func stickyHeader(_ listing: ServiceListing) -> some View {
+        HStack(spacing: 12) {
+            Button { dismiss() } label: {
+                circularControlLabel(icon: "chevron.left")
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("common.back".localized)
+            .accessibilityIdentifier("listing.detail.back")
+
+            Spacer()
+
+            ShareLink(
+                item: "\(listing.title)\n\(listing.description)",
+                subject: Text(listing.title),
+                message: Text("marketplace.share_message".localized)
+            ) {
+                circularControlLabel(icon: "square.and.arrow.up")
+            }
+            .accessibilityLabel("marketplace.share".localized)
+            .accessibilityIdentifier("listing.detail.share")
+
+            Button { toggleSaved(listing) } label: {
+                circularControlLabel(
+                    icon: appContainer.savedItems.isListingSaved(listing.id) ? "heart.fill" : "heart"
+                )
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(appContainer.savedItems.isListingSaved(listing.id) ? "Збережено" : "Зберегти")
+            .accessibilityIdentifier("listing.detail.favorite")
         }
-        .buttonStyle(.plain)
-        .accessibilityLabel(accessibilityLabel)
+        .padding(.horizontal, 20)
+        .padding(.top, 10)
     }
 
     private func circularControlLabel(icon: String) -> some View {

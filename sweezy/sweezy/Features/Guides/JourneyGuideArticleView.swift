@@ -8,7 +8,7 @@ struct JourneyGuideArticleView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     @State private var scrollOffset: CGFloat = 0
-    @State private var readingSeconds = 0
+    @State private var didSpendEnoughTime = false
     @State private var didMarkRead = false
 
     private var sourceURL: URL? {
@@ -39,7 +39,7 @@ struct JourneyGuideArticleView: View {
 
     var body: some View {
         ZStack(alignment: .top) {
-            JourneyVisual.black.ignoresSafeArea()
+            overscrollBackdrop
 
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 0) {
@@ -65,6 +65,8 @@ struct JourneyGuideArticleView: View {
                     .padding(.horizontal, 20)
                     .padding(.top, 20)
                     .padding(.bottom, 72)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(JourneyVisual.black)
                 }
                 .background(
                     GeometryReader { geometry in
@@ -77,8 +79,10 @@ struct JourneyGuideArticleView: View {
             }
             .coordinateSpace(name: "journeyArticleScroll")
             .onPreferenceChange(JourneyArticleOffsetKey.self) { scrollOffset = max(0, $0) }
+            .scrollBounceBehavior(.basedOnSize, axes: .vertical)
 
             readingProgress
+            stickyHeader
         }
         .toolbar(.hidden, for: .navigationBar)
         .onAppear {
@@ -87,28 +91,64 @@ struct JourneyGuideArticleView: View {
         .onDisappear {
             NotificationCenter.default.post(name: .setJourneyBottomBarHidden, object: false)
         }
-        .onReceive(Timer.publish(every: 1, on: .main, in: .common).autoconnect()) { _ in
-            guard !didMarkRead else { return }
-            readingSeconds += 1
-            guard readingSeconds >= 20, scrollOffset > 260 else { return }
-            didMarkRead = true
-            if !appContainer.userStats.isGuideRead(id: guide.id) {
-                appContainer.userStats.markGuideRead(id: guide.id)
-                AppReviewManager.recordGuideRead()
-                appContainer.analytics.track(
-                    "guide_read",
-                    properties: ["guide_id": guide.id, "category": guide.category.rawValue]
-                )
-            }
+        .task(id: guide.id) {
+            try? await Task.sleep(for: .seconds(20))
+            guard !Task.isCancelled else { return }
+            didSpendEnoughTime = true
+            markReadIfEligible()
         }
+        .onChange(of: scrollOffset) { _, _ in
+            markReadIfEligible()
+        }
+    }
+
+    private var overscrollBackdrop: some View {
+        VStack(spacing: 0) {
+            JourneyGuideHeroImage(guide: guide)
+                .frame(height: 520)
+                .clipped()
+                .overlay(Color.black.opacity(0.34))
+            JourneyVisual.black
+        }
+        .ignoresSafeArea()
+    }
+
+    private var stickyHeader: some View {
+        HStack {
+            Button { dismiss() } label: {
+                stickyControlLabel(icon: "chevron.left", tint: .white)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("common.back".localized)
+
+            Spacer()
+
+            ShareLink(item: shareText) {
+                stickyControlLabel(icon: "square.and.arrow.up", tint: JourneyVisual.lime)
+            }
+            .accessibilityLabel("common.share".localized)
+        }
+        .padding(.horizontal, 18)
+        .padding(.top, 9)
+    }
+
+    private func stickyControlLabel(icon: String, tint: Color) -> some View {
+        Image(systemName: icon)
+            .font(.system(size: 17, weight: .bold))
+            .foregroundColor(tint)
+            .frame(width: 48, height: 48)
+            .background(Color.black.opacity(0.58))
+            .background(.ultraThinMaterial.opacity(0.72))
+            .clipShape(Circle())
+            .overlay(Circle().stroke(.white.opacity(0.24), lineWidth: 1))
+            .shadow(color: .black.opacity(0.24), radius: 12, y: 5)
     }
 
     private var hero: some View {
         GeometryReader { geometry in
             ZStack(alignment: .bottomLeading) {
-                JourneyGuideHeroImage(guide: guide)
+                Color.clear
                     .frame(width: geometry.size.width, height: 408)
-                    .clipped()
 
             LinearGradient(
                 colors: [.black.opacity(0.12), .black.opacity(0.12), JourneyVisual.black],
@@ -157,34 +197,6 @@ struct JourneyGuideArticleView: View {
             .padding(.horizontal, 20)
             .padding(.bottom, 18)
 
-                HStack {
-                    Button { dismiss() } label: {
-                        Image(systemName: "chevron.left")
-                            .font(.system(size: 16, weight: .bold))
-                            .foregroundColor(.white)
-                            .frame(width: 42, height: 42)
-                            .background(Color.black.opacity(0.45))
-                            .clipShape(Circle())
-                            .overlay(Circle().stroke(.white.opacity(0.24), lineWidth: 1))
-                    }
-                    .accessibilityLabel("common.back".localized)
-
-                    Spacer()
-
-                    ShareLink(item: shareText) {
-                        Image(systemName: "square.and.arrow.up")
-                            .font(.system(size: 16, weight: .bold))
-                            .foregroundColor(JourneyVisual.lime)
-                            .frame(width: 42, height: 42)
-                            .background(Color.black.opacity(0.45))
-                            .clipShape(Circle())
-                            .overlay(Circle().stroke(.white.opacity(0.24), lineWidth: 1))
-                    }
-                    .accessibilityLabel("common.share".localized)
-                }
-                .padding(.horizontal, 18)
-                .padding(.top, 10)
-                .frame(maxHeight: .infinity, alignment: .top)
             }
             .frame(width: geometry.size.width, height: 408)
         }
@@ -339,6 +351,18 @@ struct JourneyGuideArticleView: View {
 
     private var shareText: String {
         [guide.title, guide.summary, guide.source].compactMap { $0 }.joined(separator: "\n\n")
+    }
+
+    private func markReadIfEligible() {
+        guard didSpendEnoughTime, scrollOffset > 260, !didMarkRead else { return }
+        didMarkRead = true
+        guard !appContainer.userStats.isGuideRead(id: guide.id) else { return }
+        appContainer.userStats.markGuideRead(id: guide.id)
+        AppReviewManager.recordGuideRead()
+        appContainer.analytics.track(
+            "guide_read",
+            properties: ["guide_id": guide.id, "category": guide.category.rawValue]
+        )
     }
 }
 

@@ -15,32 +15,35 @@ struct JourneyHomeView: View {
 
     var body: some View {
         NavigationStack {
-            ZStack {
-                JourneyPhotoBackground(imageName: "cityhub-zurich-lake", darkness: 0.24)
+            GeometryReader { geometry in
+                ZStack {
+                    JourneyPhotoBackground(imageName: "cityhub-zurich-lake", darkness: 0.24)
 
-                ScrollView(showsIndicators: false) {
-                    VStack(alignment: .leading, spacing: 0) {
-                        profileHeader
-                            .padding(.top, 12)
+                    ScrollView(showsIndicators: false) {
+                        VStack(alignment: .leading, spacing: 0) {
+                            profileHeader
+                                .padding(.top, 12)
 
-                        heroTitle
-                            .padding(.top, 24)
+                            heroTitle
+                                .padding(.top, 24)
 
-                        progressLabel
-                            .padding(.top, 18)
+                            progressLabel
+                                .padding(.top, 18)
 
-                        planPulse
-                            .padding(.top, 24)
+                            planPulse
+                                .padding(.top, 24)
 
-                        Spacer(minLength: 28)
+                            Spacer(minLength: 28)
 
-                        quickActions
-                        nextStepCard
-                            .padding(.top, 20)
+                            quickActions
+                            nextStepCard
+                                .padding(.top, 20)
+                        }
+                        .padding(.horizontal, 20)
+                        .padding(.bottom, 126)
+                        .frame(maxWidth: .infinity, minHeight: geometry.size.height - 24, alignment: .top)
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 126)
-                    .frame(maxWidth: .infinity, minHeight: UIScreen.main.bounds.height - 24, alignment: .top)
+                    .scrollBounceBehavior(.basedOnSize, axes: .vertical)
                 }
             }
             .navigationBarHidden(true)

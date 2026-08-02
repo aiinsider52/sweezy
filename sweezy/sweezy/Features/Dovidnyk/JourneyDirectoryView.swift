@@ -212,6 +212,10 @@ struct JourneyDirectoryView: View {
                 .font(.system(size: 14, weight: .medium))
                 .foregroundColor(.white.opacity(0.72))
 
+            JourneyToolCard(route: .discoverSwitzerland, height: 178, titleSize: 22) {
+                selectedTool = .discoverSwitzerland
+            }
+
             JourneyPlanHeroCard(
                 completedCount: completedPlanTaskCount,
                 totalCount: totalPlanTaskCount,
@@ -385,6 +389,7 @@ struct JourneyDirectoryView: View {
         case .language: DailyGermanGameView(service: germanGame)
         case .passport: SweezyPassportView()
         case .roadmap: MountainRoadmapView()
+        case .discoverSwitzerland: SwissDiscoveryView()
         }
     }
 
@@ -461,6 +466,7 @@ private enum JourneyToolRoute: String, Identifiable, CaseIterable {
     case moments
     case language
     case roadmap
+    case discoverSwitzerland
 
     var id: String { rawValue }
 
@@ -487,6 +493,7 @@ private enum JourneyToolRoute: String, Identifiable, CaseIterable {
         case .moments: return "journey.tool.moments.title".localized
         case .language: return "journey.tool.language.title".localized
         case .roadmap: return "journey.tool.roadmap.title".localized
+        case .discoverSwitzerland: return "journey.tool.discover_switzerland.title".localized
         }
     }
 
@@ -508,6 +515,7 @@ private enum JourneyToolRoute: String, Identifiable, CaseIterable {
         case .moments: return "journey.tool.moments.subtitle".localized
         case .language: return "journey.tool.language.subtitle".localized
         case .roadmap: return "journey.tool.roadmap.subtitle".localized
+        case .discoverSwitzerland: return "journey.tool.discover_switzerland.subtitle".localized
         }
     }
 
@@ -529,6 +537,7 @@ private enum JourneyToolRoute: String, Identifiable, CaseIterable {
         case .moments: return "calendar.badge.clock"
         case .language: return "character.book.closed.fill"
         case .roadmap: return "point.topleft.down.to.point.bottomright.curvepath"
+        case .discoverSwitzerland: return "binoculars.fill"
         }
     }
 
@@ -547,6 +556,7 @@ private enum JourneyToolRoute: String, Identifiable, CaseIterable {
         case .moments: return "swiss-moment-luzern"
         case .language: return "swiss-moment-grindelwald"
         case .roadmap: return "swiss-moment-grindelwald"
+        case .discoverSwitzerland: return "swiss-discovery-aletsch"
         }
     }
 }
@@ -695,6 +705,7 @@ private struct JourneyToolCard: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel("\(route.title). \(route.subtitle)")
+        .accessibilityIdentifier("journey.tool.\(route.rawValue)")
     }
 }
 

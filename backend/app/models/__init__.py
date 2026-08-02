@@ -22,6 +22,7 @@ from .chat import (
     NotificationOutbox,
     PushDevice,
 )
+from .discovery_review import DiscoveryReview, DiscoveryReviewReport
 
 __all__ = [
     "Guide",
@@ -51,4 +52,6 @@ __all__ = [
     "MarketplaceReview",
     "NotificationOutbox",
     "PushDevice",
+    "DiscoveryReview",
+    "DiscoveryReviewReport",
 ]

@@ -49,6 +49,8 @@ from .routers.experts import admin_router as experts_admin_router
 from .routers.chat import router as chat_router
 from .routers.chat import admin_router as chat_admin_router
 from .routers.chat import devices_router
+from .routers.discovery import router as discovery_router
+from .routers.discovery import admin_router as discovery_admin_router
 
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
@@ -401,6 +403,8 @@ app.include_router(experts_admin_router, prefix=f"{API_PREFIX}/admin", tags=["ad
 app.include_router(chat_router, prefix=f"{API_PREFIX}/chat", tags=["chat"])
 app.include_router(chat_admin_router, prefix=f"{API_PREFIX}/admin", tags=["admin", "chat"])
 app.include_router(devices_router, prefix=f"{API_PREFIX}/devices", tags=["devices"])
+app.include_router(discovery_router, prefix=f"{API_PREFIX}/discovery", tags=["discovery"])
+app.include_router(discovery_admin_router, prefix=f"{API_PREFIX}/admin", tags=["admin", "discovery"])
 
 # Public pages (App Store / legal)
 app.include_router(legal_router, tags=["legal"])

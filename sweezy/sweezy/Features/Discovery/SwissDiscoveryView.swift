@@ -691,10 +691,10 @@ private struct SwissDiscoveryDetailView: View {
                     .lineSpacing(-2)
                     .fixedSize(horizontal: false, vertical: true)
 
-                Text(place.details)
+                Text(place.summary)
                     .font(.system(size: 15, weight: .medium))
                     .foregroundStyle(.white.opacity(0.76))
-                    .lineLimit(3)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             .padding(.horizontal, 22)
             .padding(.bottom, 24)
@@ -726,10 +726,12 @@ private struct SwissDiscoveryDetailView: View {
                 Text("swiss.discovery.detail.why".localized)
                     .font(.system(size: 22, weight: .bold, design: .rounded))
                     .foregroundStyle(.white)
-                Text(place.summary)
+                Text(place.details)
                     .font(.system(size: 16, weight: .regular))
                     .foregroundStyle(.white.opacity(0.78))
                     .lineSpacing(4)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityIdentifier("swiss.discovery.detail.description")
             }
 
             JourneyGlassPanel(cornerRadius: 23) {

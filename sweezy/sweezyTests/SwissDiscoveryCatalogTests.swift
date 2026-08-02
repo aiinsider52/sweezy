@@ -12,7 +12,7 @@ final class SwissDiscoveryCatalogTests: XCTestCase {
         XCTAssertEqual(Set(places.flatMap(\.imageNames)).count, places.flatMap(\.imageNames).count)
         XCTAssertTrue(places.allSatisfy { $0.officialURL.scheme == "https" })
         XCTAssertTrue(places.allSatisfy { $0.officialURL.host?.contains("myswitzerland.com") == true })
-        XCTAssertTrue(places.allSatisfy { $0.details.count >= $0.summary.count })
+        XCTAssertTrue(places.allSatisfy { $0.details.count > $0.summary.count })
         XCTAssertTrue(places.allSatisfy { (-90...90).contains($0.latitude) })
         XCTAssertTrue(places.allSatisfy { (-180...180).contains($0.longitude) })
     }

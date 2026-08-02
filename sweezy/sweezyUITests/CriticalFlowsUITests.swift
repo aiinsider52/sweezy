@@ -94,6 +94,7 @@ final class CriticalFlowsUITests: XCTestCase {
         featuredPlace.tap()
 
         XCTAssertTrue(app.descendants(matching: .any)["swiss.discovery.detail.aletsch"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.staticTexts["swiss.discovery.detail.description"].waitForExistence(timeout: 10))
         XCTAssertFalse(app.buttons["tab.directory"].exists)
         XCTAssertFalse(app.alerts.firstMatch.waitForExistence(timeout: 3))
         keepScreenshot(app, name: "swiss-discovery-detail")

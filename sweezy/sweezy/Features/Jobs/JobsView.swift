@@ -7,6 +7,7 @@
 
 import SwiftUI
 import CoreHaptics
+import MapKit
 
 struct JobsView: View {
     @EnvironmentObject private var appContainer: AppContainer
@@ -18,9 +19,22 @@ struct JobsView: View {
     @State private var isLoading: Bool = false
     @State private var items: [APIClient.JobItem] = []
     @State private var sources: [String: Int] = [:]
+    @State private var catalogStatus: String = "ready"
+    @State private var loadErrorMessage: String?
     @State private var favoriteIds: Set<String> = []
     @State private var didSearchOnce: Bool = false
     @State private var selectedJob: APIClient.JobItem?
+    @State private var selectedConversation: ChatConversation?
+    @State private var applications: [APIClient.JobApplication] = []
+    @State private var alerts: [APIClient.JobAlert] = []
+    @State private var showApplicationTracker = false
+    @State private var showAlerts = false
+    @State private var showJobMap = false
+    @State private var showEmployerHub = false
+    @State private var noExperienceOnly = false
+    @State private var noDegreeOnly = false
+    @State private var minimumSalary = 0
+    @State private var interactionMessage: String?
     @State private var favoritesCount: Int = 0
     @State private var page: Int = 1
     @State private var canLoadMore: Bool = false
@@ -35,6 +49,8 @@ struct JobsView: View {
     @State private var showAIMatchProfile: Bool = false
     @State private var isAIMatching: Bool = false
     @State private var matchedItems: [APIClient.JobItem] = []
+    @State private var matchScores: [String: Int] = [:]
+    @State private var matchReasons: [String: [String]] = [:]
     @State private var showMatchResults: Bool = false
     
     // Onboarding
@@ -68,6 +84,15 @@ struct JobsView: View {
         case partTime = "Part-time"
         case contract = "Contract"
         case remote = "Remote"
+
+        var serverEmploymentType: String? {
+            switch self {
+            case .all, .remote: return nil
+            case .fullTime: return "full"
+            case .partTime: return "part"
+            case .contract: return "contract"
+            }
+        }
     }
     
     private var favoriteIdsKey: String { AccountScopedStorage.jobsKey("favoriteIds") }
@@ -116,7 +141,9 @@ struct JobsView: View {
                 case .fullTime: if !t.contains("full") && !t.contains("vollzeit") { return false }
                 case .partTime: if !t.contains("part") && !t.contains("teilzeit") { return false }
                 case .contract: if !t.contains("contract") && !t.contains("auftrag") { return false }
-                case .remote: if !t.contains("remote") && !t.contains("home") { return false }
+                case .remote:
+                    let workplace = (job.workplace_type ?? "").lowercased()
+                    if !workplace.contains("remote") && !workplace.contains("hybrid") { return false }
                 }
             }
             return true
@@ -191,11 +218,48 @@ struct JobsView: View {
             appContainer.telemetry.info("view_open", source: "jobs", message: "JobsView opened")
         }
         .sheet(item: $selectedJob) { job in
-            JobDetailSheet(job: job, onDraft: { await draftApply(job) })
+            JobDetailSheet(
+                job: job,
+                matchScore: matchScores[job.id],
+                matchReasons: matchReasons[job.id] ?? [],
+                isApplied: appliedJobIds.contains(job.id),
+                onOpen: { await openJob(job) },
+                onDraft: { await draftApply(job) },
+                onApplied: { await markApplied(job) },
+                onChat: { await openJobChat(job) },
+                onReport: { await reportJob(job) }
+            )
+                .environmentObject(appContainer)
+        }
+        .fullScreenCover(item: $selectedConversation) { conversation in
+            ChatConversationView(conversation: conversation)
                 .environmentObject(appContainer)
         }
         .sheet(isPresented: $showDraftSheet) {
             DraftSheet(text: draftedText, isDrafting: isDrafting)
+        }
+        .sheet(isPresented: $showApplicationTracker) {
+            JobApplicationTrackerSheet(applications: applications) { jobID, status in
+                await updateApplication(jobID: jobID, status: status)
+            }
+        }
+        .sheet(isPresented: $showAlerts) {
+            JobAlertsSheet(
+                alerts: alerts,
+                defaultKeywords: keyword,
+                defaultCanton: canton,
+                onCreate: { name, keywords in await createAlert(name: name, keywords: keywords) },
+                onDelete: { alertID in await deleteAlert(alertID) }
+            )
+        }
+        .sheet(isPresented: $showJobMap) {
+            JobMapSheet(jobs: displayedItems) { job in
+                showJobMap = false
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { selectedJob = job }
+            }
+        }
+        .sheet(isPresented: $showEmployerHub) {
+            JobEmployerHubSheet(cantons: cantons)
         }
         .sheet(isPresented: $showAIMatchProfile, onDismiss: {
             persistAIMatchProfile()
@@ -254,6 +318,7 @@ struct JobsView: View {
             loadScopedState()
             showMatchResults = false
             selectedJob = nil
+            selectedConversation = nil
             draftedText = nil
             matchedItems = []
             didSearchOnce = false
@@ -261,6 +326,14 @@ struct JobsView: View {
                 await performSearch()
                 await refreshFavoritesCount()
             }
+        }
+        .alert("Вакансії", isPresented: Binding(
+            get: { interactionMessage != nil },
+            set: { if !$0 { interactionMessage = nil } }
+        )) {
+            Button("OK", role: .cancel) { interactionMessage = nil }
+        } message: {
+            Text(interactionMessage ?? "")
         }
     }
     
@@ -377,7 +450,43 @@ struct JobsView: View {
             Circle().fill(Color.white.opacity(0.34)).frame(width: 4, height: 4)
             JobsInlineMetric(icon: "heart", value: favoritesCount, label: "збережено")
             Circle().fill(Color.white.opacity(0.34)).frame(width: 4, height: 4)
-            JobsInlineMetric(icon: "paperplane", value: appliedCount, label: "відгуків")
+            Button {
+                showApplicationTracker = true
+            } label: {
+                JobsInlineMetric(icon: "paperplane", value: appliedCount, label: "трекер")
+            }
+            .buttonStyle(.plain)
+
+            Spacer(minLength: 0)
+
+            Button {
+                showAlerts = true
+            } label: {
+                Image(systemName: alerts.isEmpty ? "bell.badge" : "bell.badge.fill")
+                    .font(.system(size: 15, weight: .bold))
+                    .foregroundColor(alerts.isEmpty ? .white.opacity(0.72) : JourneyVisual.lime)
+                    .frame(width: 34, height: 34)
+                    .background(Color.white.opacity(0.08))
+                    .clipShape(Circle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Сповіщення про вакансії")
+
+            Menu {
+                Button { showJobMap = true } label: {
+                    Label("Карта вакансій", systemImage: "map")
+                }
+                Button { showEmployerHub = true } label: {
+                    Label("Для роботодавців", systemImage: "building.2")
+                }
+            } label: {
+                Image(systemName: "ellipsis")
+                    .font(.system(size: 15, weight: .bold))
+                    .foregroundColor(.white.opacity(0.72))
+                    .frame(width: 34, height: 34)
+                    .background(Color.white.opacity(0.08))
+                    .clipShape(Circle())
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 4)
@@ -437,6 +546,7 @@ struct JobsView: View {
                             Button(filter.rawValue) {
                                 selectedEmployment = filter
                                 haptic(.light)
+                                Task { await performSearch() }
                             }
                         }
                     } label: {
@@ -450,6 +560,7 @@ struct JobsView: View {
                     Button {
                         selectedEmployment = selectedEmployment == .remote ? .all : .remote
                         haptic(.light)
+                        Task { await performSearch() }
                     } label: {
                         JobsMenuPill(icon: "house", text: "Віддалено", isActive: selectedEmployment == .remote, showsChevron: false)
                     }
@@ -489,6 +600,37 @@ struct JobsView: View {
                         .foregroundColor(.white)
                     cityChipsSection
                 }
+
+                Divider().overlay(Color.white.opacity(0.12))
+                Toggle("Без досвіду", isOn: $noExperienceOnly)
+                    .tint(JourneyVisual.lime)
+                    .foregroundColor(.white)
+                Toggle("Без обов'язкового диплома", isOn: $noDegreeOnly)
+                    .tint(JourneyVisual.lime)
+                    .foregroundColor(.white)
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(minimumSalary == 0 ? "Будь-яка зарплата" : "Від CHF \(minimumSalary / 1000)k / рік")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(.white.opacity(0.74))
+                    Slider(value: Binding(
+                        get: { Double(minimumSalary) },
+                        set: { minimumSalary = Int($0 / 5_000) * 5_000 }
+                    ), in: 0...200_000, step: 5_000)
+                    .tint(JourneyVisual.lime)
+                }
+
+                Button {
+                    Task { await performSearch() }
+                } label: {
+                    Text("Застосувати фільтри")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundColor(.black)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(JourneyVisual.lime)
+                        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                }
+                .buttonStyle(.plain)
 
                 if showMatchResults {
                     Button {
@@ -576,8 +718,21 @@ struct JobsView: View {
                 ForEach(0..<4, id: \.self) { _ in
                     JobCardSkeleton()
                 }
+            } else if let loadErrorMessage {
+                JobsRecoveryState(
+                    icon: "wifi.exclamationmark",
+                    title: "Не вдалося оновити вакансії",
+                    message: loadErrorMessage,
+                    actionTitle: "Спробувати ще"
+                ) { Task { await performSearch() } }
+            } else if catalogStatus == "source_unavailable" {
+                JobsRecoveryState(
+                    icon: "antenna.radiowaves.left.and.right.slash",
+                    title: "Джерела вакансій тимчасово недоступні",
+                    message: "Ми вже перевіряємо підключення. Збережені вакансії та трекер залишаються доступними.",
+                    actionTitle: "Перевірити знову"
+                ) { Task { await performSearch() } }
             } else if displayedItems.isEmpty {
-                // Empty state
                 JobsEmptyState(hasSearched: didSearchOnce, isAIMatch: showMatchResults)
             } else {
                 // Job cards
@@ -585,7 +740,7 @@ struct JobsView: View {
                     JobCard(
                         job: job,
                         isSaved: favoriteIds.contains(job.id),
-                        matchScore: showMatchResults ? calculateMatchScore(job) : nil,
+                        matchScore: showMatchResults ? matchScores[job.id] : nil,
                         onTap: { selectedJob = job },
                         onSave: { toggleFavorite(job) },
                         onShare: { shareJob(job) }
@@ -640,25 +795,17 @@ struct JobsView: View {
         let searchCanton = aiPreferredCanton.isEmpty ? nil : aiPreferredCanton
         
         do {
-            // Fetch jobs with profile-based query
-            let resp = try await APIClient.searchJobs(
-                keyword: searchQuery,
+            let response = try await APIClient.matchJobs(
+                desiredPosition: aiDesiredPosition,
+                skills: skillsList,
                 canton: searchCanton,
-                page: 1,
-                perPage: 50 // Get more for better matching
+                employmentType: aiEmploymentType.isEmpty ? nil : aiEmploymentType,
+                remote: aiRemotePreference,
+                experienceLevel: aiExperienceLevel.isEmpty ? nil : aiExperienceLevel
             )
-            
-            // Score and sort jobs
-            var scoredJobs = resp.items.map { job -> (job: APIClient.JobItem, score: Int) in
-                let score = calculateMatchScore(job)
-                return (job, score)
-            }
-            
-            // Sort by score descending
-            scoredJobs.sort { $0.score > $1.score }
-            
-            // Take top matches
-            matchedItems = scoredJobs.prefix(20).map { $0.job }
+            matchedItems = response.items.map(\.job)
+            matchScores = Dictionary(uniqueKeysWithValues: response.items.map { ($0.job.id, $0.score) })
+            matchReasons = Dictionary(uniqueKeysWithValues: response.items.map { ($0.job.id, $0.reasons) })
             showMatchResults = true
             
             haptic(.success)
@@ -673,62 +820,6 @@ struct JobsView: View {
         }
         
         isAIMatching = false
-    }
-    
-    private func calculateMatchScore(_ job: APIClient.JobItem) -> Int {
-        var score = 0
-        let title = job.title.lowercased()
-        let snippet = (job.snippet ?? "").lowercased()
-        let location = (job.location ?? "").lowercased()
-        let employmentType = (job.employment_type ?? "").lowercased()
-        
-        // Position match (0-40 points)
-        if !aiDesiredPosition.isEmpty {
-            let positionWords = aiDesiredPosition.lowercased().components(separatedBy: " ")
-            for word in positionWords where word.count > 2 {
-                if title.contains(word) { score += 15 }
-                if snippet.contains(word) { score += 5 }
-            }
-        }
-        
-        // Skills match (0-30 points)
-        let skillsList = aiSkills.lowercased().components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }
-        for skill in skillsList where !skill.isEmpty {
-            if title.contains(skill) { score += 10 }
-            else if snippet.contains(skill) { score += 5 }
-        }
-        
-        // Canton match (0-15 points)
-        if !aiPreferredCanton.isEmpty {
-            if job.canton == aiPreferredCanton { score += 15 }
-            else if location.contains(aiPreferredCanton.lowercased()) { score += 10 }
-        }
-        
-        // Employment type match (0-10 points)
-        if !aiEmploymentType.isEmpty {
-            let prefType = aiEmploymentType.lowercased()
-            if employmentType.contains(prefType) { score += 10 }
-        }
-        
-        // Remote preference (0-10 points)
-        if aiRemotePreference {
-            if employmentType.contains("remote") || location.contains("remote") || snippet.contains("remote") || snippet.contains("home office") {
-                score += 10
-            }
-        }
-        
-        // Experience level match (0-5 points)
-        if !aiExperienceLevel.isEmpty {
-            let level = aiExperienceLevel.lowercased()
-            if snippet.contains(level) || title.contains(level) { score += 5 }
-        }
-        
-        // Bonus for new jobs
-        if let dateStr = job.posted_at, let date = parseDate(dateStr) {
-            if date > Date().addingTimeInterval(-24 * 60 * 60) { score += 5 }
-        }
-        
-        return min(score, 100)
     }
     
     private func applyJobsPresetIfNeeded() {
@@ -780,6 +871,7 @@ struct JobsView: View {
     // MARK: - Actions
     private func performSearch() async {
         isLoading = true
+        loadErrorMessage = nil
         didSearchOnce = true
         defer { isLoading = false }
         
@@ -788,12 +880,18 @@ struct JobsView: View {
             let resp = try await APIClient.searchJobs(
                 keyword: keyword.trimmingCharacters(in: .whitespacesAndNewlines),
                 canton: canton.isEmpty ? nil : canton,
+                employmentType: selectedEmployment.serverEmploymentType,
+                workplaceType: selectedEmployment == .remote ? "remote" : nil,
+                noExperience: noExperienceOnly ? true : nil,
+                noDegree: noDegreeOnly ? true : nil,
+                minSalary: minimumSalary > 0 ? minimumSalary : nil,
                 page: page,
                 perPage: perPage
             )
             items = resp.items
             sources = resp.sources ?? [:]
-            canLoadMore = resp.items.count >= perPage
+            catalogStatus = resp.catalog_status ?? "ready"
+            canLoadMore = page < (resp.pages ?? 1)
             
             // Calculate new today
             let today = Calendar.current.startOfDay(for: Date())
@@ -811,6 +909,8 @@ struct JobsView: View {
         } catch {
             items = []
             sources = [:]
+            catalogStatus = "ready"
+            loadErrorMessage = (error as NSError).localizedDescription
             canLoadMore = false
             appContainer.telemetry.error("jobs_search_error", source: "jobs", message: (error as NSError).localizedDescription)
         }
@@ -826,11 +926,16 @@ struct JobsView: View {
             let resp = try await APIClient.searchJobs(
                 keyword: keyword.trimmingCharacters(in: .whitespacesAndNewlines),
                 canton: canton.isEmpty ? nil : canton,
+                employmentType: selectedEmployment.serverEmploymentType,
+                workplaceType: selectedEmployment == .remote ? "remote" : nil,
+                noExperience: noExperienceOnly ? true : nil,
+                noDegree: noDegreeOnly ? true : nil,
+                minSalary: minimumSalary > 0 ? minimumSalary : nil,
                 page: page,
                 perPage: perPage
             )
             items.append(contentsOf: resp.items)
-            canLoadMore = resp.items.count >= perPage
+            canLoadMore = page < (resp.pages ?? page)
         } catch {
             page -= 1
             canLoadMore = false
@@ -838,15 +943,29 @@ struct JobsView: View {
     }
     
     private func refreshFavoritesCount() async {
-        // Favorites are fully available in this build.
-        // For guests (no backend token), we rely on local persistence.
-        await MainActor.run { favoritesCount = favoriteIds.count }
+        guard KeychainStore.get("access_token") != nil else {
+            favoritesCount = favoriteIds.count
+            return
+        }
+        let favorites = await APIClient.listJobFavorites()
+        let remoteIds = Set(favorites.map(\.job_id))
+        favoriteIds.formUnion(remoteIds)
+        defaults.set(Array(favoriteIds), forKey: favoriteIdsKey)
+        favoritesCount = favoriteIds.count
+
+        if let remoteApplications = try? await APIClient.listJobApplications() {
+            applications = remoteApplications
+            appliedJobIds = Set(remoteApplications.filter { ["applied", "interview", "offer"].contains($0.status) }.map(\.job_id))
+            appliedCount = appliedJobIds.count
+        }
+        alerts = (try? await APIClient.listJobAlerts()) ?? []
     }
     
     private func toggleFavorite(_ job: APIClient.JobItem) {
         haptic(.medium)
         
-        if favoriteIds.contains(job.id) {
+        let isRemoving = favoriteIds.contains(job.id)
+        if isRemoving {
             favoriteIds.remove(job.id)
             favoritesCount = max(0, favoritesCount - 1)
         } else {
@@ -854,6 +973,26 @@ struct JobsView: View {
             favoritesCount += 1
         }
         defaults.set(Array(favoriteIds), forKey: favoriteIdsKey)
+        guard KeychainStore.get("access_token") != nil else { return }
+        Task {
+            if isRemoving {
+                if !(await APIClient.removeJobFavorite(jobId: job.id, source: job.source)) {
+                    await MainActor.run {
+                        favoriteIds.insert(job.id)
+                        favoritesCount = favoriteIds.count
+                    }
+                }
+            } else {
+                let outcome = await APIClient.addJobFavorite(job: job)
+                if case .failure = outcome {
+                    await MainActor.run {
+                        favoriteIds.remove(job.id)
+                        favoritesCount = favoriteIds.count
+                    }
+                }
+            }
+            await MainActor.run { defaults.set(Array(favoriteIds), forKey: favoriteIdsKey) }
+        }
     }
     
     private func shareJob(_ job: APIClient.JobItem) {
@@ -881,10 +1020,86 @@ struct JobsView: View {
         draftedText = text ?? "Не вдалося згенерувати відповідь."
         isDrafting = false
         
-        // Track applied
-        appliedJobIds.insert(job.id)
+        if let text {
+            _ = try? await APIClient.updateJobApplication(jobId: job.id, status: "prepared", coverLetter: text)
+        }
+    }
+
+    private func markApplied(_ job: APIClient.JobItem) async {
+        guard KeychainStore.get("access_token") != nil else {
+            return
+        }
+        if !applications.contains(where: { $0.job_id == job.id }) {
+            _ = try? await APIClient.updateJobApplication(jobId: job.id, status: "prepared")
+        }
+        if let updated = try? await APIClient.updateJobApplication(jobId: job.id, status: "applied") {
+            applications.removeAll { $0.job_id == job.id }
+            applications.append(updated)
+            appliedJobIds.insert(job.id)
+            appliedCount = appliedJobIds.count
+            persistJobsScopedState()
+        }
+    }
+
+    private func openJob(_ job: APIClient.JobItem) async {
+        guard let url = URL(string: job.url) else { return }
+        await UIApplication.shared.open(url)
+    }
+
+    private func openJobChat(_ job: APIClient.JobItem) async {
+        guard job.can_message == true else { return }
+        do {
+            let conversation = try await appContainer.chatStore.openJobConversation(for: job.id)
+            await MainActor.run {
+                selectedJob = nil
+                selectedConversation = conversation
+            }
+        } catch {
+            appContainer.telemetry.error("job_chat_error", source: "jobs", message: error.localizedDescription)
+            await MainActor.run { interactionMessage = error.localizedDescription }
+        }
+    }
+
+    private func reportJob(_ job: APIClient.JobItem) async {
+        do {
+            try await APIClient.reportJob(id: job.id, reason: "suspicious")
+            haptic(.success)
+            await MainActor.run { interactionMessage = "Скаргу надіслано. Модерація перевірить вакансію." }
+        } catch {
+            haptic(.error)
+            await MainActor.run { interactionMessage = error.localizedDescription }
+        }
+    }
+
+    private func updateApplication(jobID: String, status: String) async {
+        guard let updated = try? await APIClient.updateJobApplication(jobId: jobID, status: status) else { return }
+        applications.removeAll { $0.job_id == jobID }
+        applications.append(updated)
+        appliedJobIds = Set(applications.filter { ["applied", "interview", "offer"].contains($0.status) }.map(\.job_id))
         appliedCount = appliedJobIds.count
         persistJobsScopedState()
+    }
+
+    private func createAlert(name: String, keywords: String) async {
+        guard !keywords.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+        if let alert = try? await APIClient.createJobAlert(
+            name: name,
+            keywords: keywords,
+            canton: canton.isEmpty ? nil : canton,
+            employmentType: selectedEmployment.serverEmploymentType,
+            workplaceType: selectedEmployment == .remote ? "remote" : nil
+        ) {
+            alerts.insert(alert, at: 0)
+        }
+    }
+
+    private func deleteAlert(_ id: String) async {
+        do {
+            try await APIClient.deleteJobAlert(id: id)
+            alerts.removeAll { $0.id == id }
+        } catch {
+            interactionMessage = error.localizedDescription
+        }
     }
     
     private func parseDate(_ s: String?) -> Date? {
@@ -1137,8 +1352,8 @@ private struct JobsOnboardingSheet: View {
             color1: Theme.Colors.primary,
             color2: Theme.Colors.primaryDark,
             title: "Знайди роботу мрії",
-            subtitle: "Агрегатор вакансій зі Швейцарії",
-            features: ["RAV + Indeed", "Тисячі вакансій", "Щоденні оновлення"]
+            subtitle: "Актуальні вакансії з перевірених джерел",
+            features: ["Дата оновлення", "Пряме посилання", "Статус джерела"]
         ),
         (
             icon: "magnifyingglass",
@@ -1153,8 +1368,8 @@ private struct JobsOnboardingSheet: View {
             color1: Theme.Colors.primaryLight,
             color2: Theme.Colors.primary,
             title: "AI Match",
-            subtitle: "Персоналізовані рекомендації",
-            features: ["Заповни профіль", "AI підбере вакансії", "Оцінка відповідності"]
+            subtitle: "Пояснює, чому вакансія підходить",
+            features: ["Семантичний пошук", "Збіги навичок", "Чого бракує"]
         )
     ]
     
@@ -1817,12 +2032,67 @@ private struct JobsEmptyState: View {
     }
 }
 
+private struct JobsRecoveryState: View {
+    let icon: String
+    let title: String
+    let message: String
+    let actionTitle: String
+    let action: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(alignment: .top, spacing: 14) {
+                Image(systemName: icon)
+                    .font(.system(size: 23, weight: .semibold))
+                    .foregroundColor(JourneyVisual.lime)
+                    .frame(width: 48, height: 48)
+                    .background(JourneyVisual.lime.opacity(0.1))
+                    .clipShape(RoundedRectangle(cornerRadius: 15, style: .continuous))
+                VStack(alignment: .leading, spacing: 5) {
+                    Text(title)
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(.white)
+                    Text(message)
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(.white.opacity(0.58))
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            Button(action: action) {
+                Text(actionTitle)
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundColor(.black)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+                    .background(JourneyVisual.lime)
+                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(16)
+        .background(Color.white.opacity(0.055))
+        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(Color.white.opacity(0.12), lineWidth: 1))
+    }
+}
+
 // MARK: - Job Detail Sheet
 private struct JobDetailSheet: View {
     let job: APIClient.JobItem
+    let matchScore: Int?
+    let matchReasons: [String]
+    let isApplied: Bool
+    let onOpen: () async -> Void
     let onDraft: () async -> Void
+    let onApplied: () async -> Void
+    let onChat: () async -> Void
+    let onReport: () async -> Void
     
     @Environment(\.dismiss) private var dismiss
+    @State private var showReportConfirmation = false
+    @State private var translatedDescription: String?
+    @State private var isTranslating = false
+    @State private var translationError: String?
     
     var body: some View {
         NavigationStack {
@@ -1840,30 +2110,127 @@ private struct JobDetailSheet: View {
                     }
                     
                     Divider()
+
+                    HStack(spacing: 10) {
+                        Label(job.is_verified == true ? "Перевірене джерело" : job.source.capitalized, systemImage: job.is_verified == true ? "checkmark.seal.fill" : "link")
+                        if let freshness = job.freshness {
+                            Label(freshness == "fresh" ? "Оновлено нещодавно" : "Перевір дату", systemImage: "clock")
+                        }
+                    }
+                    .font(.caption.weight(.semibold))
+                    .foregroundColor(job.freshness == "stale" ? .orange : Theme.Colors.primary)
+
+                    if let matchScore {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Підходить на \(matchScore)%")
+                                .font(.headline)
+                            ForEach(matchReasons, id: \.self) { reason in
+                                Label(reason, systemImage: "checkmark.circle.fill")
+                                    .font(.subheadline)
+                            }
+                        }
+                        .padding()
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(Theme.Colors.primary.opacity(0.12))
+                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    }
+
+                    jobFacts
+
+                    if job.recognition_required == true {
+                        Label(
+                            "Для цієї професії може знадобитися офіційне визнання диплома у Швейцарії.",
+                            systemImage: "checkmark.seal"
+                        )
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundColor(.orange)
+                        .padding(14)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(Color.orange.opacity(0.12))
+                        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    }
                     
                     // Description
-                    if let snippet = job.snippet, !snippet.isEmpty {
-                        Text(snippet)
-                            .font(.body)
-                            .foregroundColor(.primary)
+                    if let description = job.description ?? job.snippet, !description.isEmpty {
+                        VStack(alignment: .leading, spacing: 12) {
+                            HStack {
+                                Text(translatedDescription == nil ? "Опис вакансії" : "Переклад українською")
+                                    .font(.headline)
+                                Spacer()
+                                Button {
+                                    if translatedDescription != nil {
+                                        translatedDescription = nil
+                                    } else {
+                                        Task { await translateDescription() }
+                                    }
+                                } label: {
+                                    if isTranslating {
+                                        ProgressView()
+                                    } else {
+                                        Label(
+                                            translatedDescription == nil ? "Перекласти" : "Оригінал",
+                                            systemImage: "character.book.closed"
+                                        )
+                                    }
+                                }
+                                .font(.caption.weight(.bold))
+                                .disabled(isTranslating)
+                            }
+                            Text(translatedDescription ?? description)
+                                .font(.body)
+                                .foregroundColor(.primary)
+                                .textSelection(.enabled)
+                        }
                     }
                     
                     // Actions
                     VStack(spacing: 12) {
-                        Button {
-                            if let url = URL(string: job.url) {
-                                UIApplication.shared.open(url)
+                        if job.source != "sweezy" {
+                            Button {
+                                Task { await onOpen() }
+                            } label: {
+                                HStack {
+                                    Image(systemName: "arrow.up.right.square")
+                                    Text("Відкрити вакансію")
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Theme.Colors.primary)
+                                .foregroundColor(Theme.Colors.textOnPrimary)
+                                .cornerRadius(12)
                             }
-                        } label: {
-                            HStack {
-                                Image(systemName: "arrow.up.right.square")
-                                Text("Відкрити вакансію")
+                        }
+
+                        if !isApplied {
+                            Button {
+                                Task { await onApplied() }
+                            } label: {
+                                Label("Позначити як відправлено", systemImage: "paperplane.fill")
+                                    .frame(maxWidth: .infinity)
+                                    .padding()
+                                    .background(Color.white.opacity(0.1))
+                                    .foregroundColor(.primary)
+                                    .cornerRadius(12)
                             }
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Theme.Colors.primary)
-                            .foregroundColor(Theme.Colors.textOnPrimary)
-                            .cornerRadius(12)
+                        } else {
+                            Label("Відгук додано до трекера", systemImage: "checkmark.circle.fill")
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundColor(Theme.Colors.primary)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 10)
+                        }
+
+                        if job.can_message == true {
+                            Button {
+                                Task { await onChat() }
+                            } label: {
+                                Label("Написати роботодавцю", systemImage: "bubble.left.and.bubble.right.fill")
+                                    .frame(maxWidth: .infinity)
+                                    .padding()
+                                    .background(Color.white.opacity(0.1))
+                                    .foregroundColor(.primary)
+                                    .cornerRadius(12)
+                            }
                         }
                         
                         Button {
@@ -1887,11 +2254,102 @@ private struct JobDetailSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Закрити") { dismiss() }
+                    Menu {
+                        Button(role: .destructive) {
+                            showReportConfirmation = true
+                        } label: {
+                            Label("Поскаржитися", systemImage: "exclamationmark.triangle")
+                        }
+                        Button("Закрити") { dismiss() }
+                    } label: {
+                        Image(systemName: "ellipsis.circle")
+                    }
                 }
             }
         }
         .journeyScreen(.city, darkness: 0.72)
+        .confirmationDialog("Повідомити про підозрілу вакансію?", isPresented: $showReportConfirmation) {
+            Button("Надіслати скаргу", role: .destructive) { Task { await onReport() } }
+            Button("Скасувати", role: .cancel) {}
+        }
+        .alert("Переклад недоступний", isPresented: Binding(
+            get: { translationError != nil },
+            set: { if !$0 { translationError = nil } }
+        )) {
+            Button("OK", role: .cancel) { translationError = nil }
+        } message: {
+            Text(translationError ?? "Спробуйте пізніше.")
+        }
+    }
+
+    @MainActor
+    private func translateDescription() async {
+        isTranslating = true
+        defer { isTranslating = false }
+        do {
+            translatedDescription = try await APIClient.translateJob(id: job.id, language: "uk").text
+        } catch {
+            translationError = error.localizedDescription
+        }
+    }
+
+    private var jobFacts: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            if let salary = salaryText {
+                Label(salary, systemImage: "banknote")
+                Text("Вказана зарплата — brutto. Netto залежить від кантону, сімейного стану та відрахувань.")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            if let workload = workloadText {
+                Label(workload, systemImage: "clock")
+            }
+            if let workplace = job.workplace_type, !workplace.isEmpty {
+                Label(workplaceLabel(workplace), systemImage: "house.and.flag")
+            }
+            if let languages = job.languages, !languages.isEmpty {
+                Label("Мови: \(languages.joined(separator: ", "))", systemImage: "character.bubble")
+            }
+            if let permits = job.permit_requirements, !permits.isEmpty {
+                Label("Дозвіл: \(permits.joined(separator: ", "))", systemImage: "person.text.rectangle")
+            }
+            if job.no_experience_required == true {
+                Label("Підходить без досвіду", systemImage: "sparkles")
+            }
+            if job.degree_required == false {
+                Label("Диплом не вказаний як обов’язковий", systemImage: "graduationcap")
+            }
+        }
+        .font(.subheadline.weight(.semibold))
+        .foregroundColor(.primary)
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.white.opacity(0.07))
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+    }
+
+    private var salaryText: String? {
+        if let salary = job.salary, !salary.isEmpty { return salary }
+        guard job.salary_min != nil || job.salary_max != nil else { return nil }
+        let currency = job.salary_currency ?? "CHF"
+        let period = ["year": "/рік", "month": "/місяць", "hour": "/год"].first { job.salary_period?.lowercased().contains($0.key) == true }?.value ?? ""
+        if let minimum = job.salary_min, let maximum = job.salary_max {
+            return "\(currency) \(minimum.formatted())–\(maximum.formatted())\(period) brutto"
+        }
+        if let minimum = job.salary_min { return "від \(currency) \(minimum.formatted())\(period) brutto" }
+        if let maximum = job.salary_max { return "до \(currency) \(maximum.formatted())\(period) brutto" }
+        return nil
+    }
+
+    private var workloadText: String? {
+        if let minimum = job.workload_min, let maximum = job.workload_max { return "Зайнятість: \(minimum)–\(maximum)%" }
+        if let minimum = job.workload_min { return "Зайнятість: від \(minimum)%" }
+        if let maximum = job.workload_max { return "Зайнятість: до \(maximum)%" }
+        return job.employment_type
+    }
+
+    private func workplaceLabel(_ value: String) -> String {
+        ["remote": "Віддалено", "hybrid": "Гібридно", "on_site": "На місці"][value] ?? value
     }
 }
 
@@ -1933,6 +2391,541 @@ private struct DraftSheet: View {
             }
         }
         .journeyScreen(.city, darkness: 0.74)
+    }
+}
+
+private struct JobApplicationTrackerSheet: View {
+    let applications: [APIClient.JobApplication]
+    let onStatusChange: (String, String) async -> Void
+
+    @Environment(\.dismiss) private var dismiss
+    private let stages = ["saved", "prepared", "applied", "interview", "offer", "rejected", "withdrawn"]
+
+    private func title(_ status: String) -> String {
+        ["saved": "Збережено", "prepared": "Готово", "applied": "Відправлено", "interview": "Співбесіда", "offer": "Офер", "rejected": "Відмова", "withdrawn": "Закрито"][status] ?? status
+    }
+
+    private func nextStages(after status: String) -> [String] {
+        [
+            "saved": ["prepared", "applied", "withdrawn"],
+            "prepared": ["saved", "applied", "withdrawn"],
+            "applied": ["interview", "rejected", "withdrawn"],
+            "interview": ["offer", "rejected", "withdrawn"],
+            "offer": ["withdrawn"],
+            "rejected": ["saved"],
+            "withdrawn": ["saved"]
+        ][status] ?? []
+    }
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 18) {
+                    Text("Твій шлях до оферу")
+                        .font(.system(size: 30, weight: .bold, design: .rounded))
+                        .foregroundColor(.white)
+                    Text("Оновлюй статус після кожного кроку. Уся історія синхронізується між пристроями.")
+                        .font(.subheadline)
+                        .foregroundColor(.white.opacity(0.62))
+
+                    if applications.isEmpty {
+                        JobsRecoveryState(
+                            icon: "paperplane",
+                            title: "Трекер поки порожній",
+                            message: "Відкрий вакансію, підготуй відгук або познач його як відправлений.",
+                            actionTitle: "Знайти вакансію"
+                        ) { dismiss() }
+                    } else {
+                        ForEach(stages, id: \.self) { stage in
+                            let rows = applications.filter { $0.status == stage }
+                            if !rows.isEmpty {
+                                VStack(alignment: .leading, spacing: 10) {
+                                    HStack {
+                                        Text(title(stage))
+                                            .font(.headline)
+                                            .foregroundColor(.white)
+                                        Text("\(rows.count)")
+                                            .font(.caption.bold())
+                                            .foregroundColor(.black)
+                                            .padding(.horizontal, 8)
+                                            .padding(.vertical, 4)
+                                            .background(JourneyVisual.lime)
+                                            .clipShape(Capsule())
+                                    }
+                                    ForEach(rows) { application in
+                                        VStack(alignment: .leading, spacing: 10) {
+                                            HStack(alignment: .top) {
+                                                VStack(alignment: .leading, spacing: 4) {
+                                                    Text(application.job_title)
+                                                        .font(.system(size: 16, weight: .bold))
+                                                        .foregroundColor(.white)
+                                                    Text([application.company, application.location].compactMap { $0 }.joined(separator: " · "))
+                                                        .font(.caption)
+                                                        .foregroundColor(.white.opacity(0.55))
+                                                }
+                                                Spacer()
+                                                if let url = URL(string: application.job_url) {
+                                                    Link(destination: url) {
+                                                        Image(systemName: "arrow.up.right")
+                                                            .foregroundColor(JourneyVisual.lime)
+                                                    }
+                                                }
+                                            }
+                                            Menu {
+                                                ForEach(nextStages(after: application.status), id: \.self) { next in
+                                                    Button(title(next)) {
+                                                        Task { await onStatusChange(application.job_id, next) }
+                                                    }
+                                                }
+                                            } label: {
+                                                Label("Змінити етап", systemImage: "arrow.triangle.2.circlepath")
+                                                    .font(.caption.bold())
+                                                    .foregroundColor(.black)
+                                                    .frame(maxWidth: .infinity)
+                                                    .padding(.vertical, 10)
+                                                    .background(JourneyVisual.lime)
+                                                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                                            }
+                                        }
+                                        .padding(14)
+                                        .background(Color.white.opacity(0.065))
+                                        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                                        .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(Color.white.opacity(0.12)))
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                .padding(20)
+                .padding(.bottom, 30)
+            }
+            .background(Color.black.ignoresSafeArea())
+            .navigationTitle("Відгуки")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Готово") { dismiss() } } }
+        }
+        .preferredColorScheme(.dark)
+    }
+}
+
+private struct JobAlertsSheet: View {
+    let alerts: [APIClient.JobAlert]
+    let onCreate: (String, String) async -> Void
+    let onDelete: (String) async -> Void
+
+    @Environment(\.dismiss) private var dismiss
+    @State private var name: String
+    @State private var keywords: String
+
+    init(
+        alerts: [APIClient.JobAlert],
+        defaultKeywords: String,
+        defaultCanton: String,
+        onCreate: @escaping (String, String) async -> Void,
+        onDelete: @escaping (String) async -> Void
+    ) {
+        self.alerts = alerts
+        self.onCreate = onCreate
+        self.onDelete = onDelete
+        _name = State(initialValue: defaultCanton.isEmpty ? "Нові вакансії" : "Нові вакансії · \(defaultCanton)")
+        _keywords = State(initialValue: defaultKeywords)
+    }
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 18) {
+                    Text("Не пропусти свій шанс")
+                        .font(.system(size: 29, weight: .bold, design: .rounded))
+                        .foregroundColor(.white)
+                    Text("Sweezy перевіряє нові збіги після синхронізації каталогу та надсилає push лише про релевантні вакансії.")
+                        .font(.subheadline)
+                        .foregroundColor(.white.opacity(0.62))
+
+                    VStack(spacing: 12) {
+                        JobsDarkField(title: "Назва", text: $name, icon: "bell")
+                        JobsDarkField(title: "Ключові слова", text: $keywords, icon: "magnifyingglass")
+                        Button {
+                            Task { await onCreate(name, keywords) }
+                        } label: {
+                            Label("Створити сповіщення", systemImage: "bell.badge.fill")
+                                .font(.headline)
+                                .foregroundColor(.black)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 14)
+                                .background(JourneyVisual.lime)
+                                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        }
+                        .disabled(keywords.trimmingCharacters(in: .whitespacesAndNewlines).count < 2)
+                        .opacity(keywords.trimmingCharacters(in: .whitespacesAndNewlines).count < 2 ? 0.45 : 1)
+                    }
+                    .padding(15)
+                    .background(Color.white.opacity(0.055))
+                    .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+
+                    ForEach(alerts) { alert in
+                        HStack(spacing: 13) {
+                            Image(systemName: "bell.fill")
+                                .foregroundColor(.black)
+                                .frame(width: 42, height: 42)
+                                .background(JourneyVisual.lime)
+                                .clipShape(RoundedRectangle(cornerRadius: 13, style: .continuous))
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text(alert.name).font(.headline).foregroundColor(.white)
+                                Text([alert.keywords, alert.canton].compactMap { $0 }.joined(separator: " · "))
+                                    .font(.caption).foregroundColor(.white.opacity(0.55))
+                            }
+                            Spacer()
+                            Button(role: .destructive) { Task { await onDelete(alert.id) } } label: {
+                                Image(systemName: "trash")
+                            }
+                        }
+                        .padding(14)
+                        .background(Color.white.opacity(0.055))
+                        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                    }
+                }
+                .padding(20)
+            }
+            .background(Color.black.ignoresSafeArea())
+            .navigationTitle("Job Alerts")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Готово") { dismiss() } } }
+        }
+        .preferredColorScheme(.dark)
+    }
+}
+
+private struct JobMapSheet: View {
+    let jobs: [APIClient.JobItem]
+    let onSelect: (APIClient.JobItem) -> Void
+    @Environment(\.dismiss) private var dismiss
+
+    private var mappedJobs: [APIClient.JobItem] {
+        jobs.filter { $0.latitude != nil && $0.longitude != nil }
+    }
+
+    var body: some View {
+        NavigationStack {
+            ZStack(alignment: .bottom) {
+                Map {
+                    ForEach(mappedJobs) { job in
+                        if let latitude = job.latitude, let longitude = job.longitude {
+                            Annotation(job.title, coordinate: CLLocationCoordinate2D(latitude: latitude, longitude: longitude)) {
+                                Button { onSelect(job) } label: {
+                                    Image(systemName: "briefcase.fill")
+                                        .font(.system(size: 15, weight: .bold))
+                                        .foregroundColor(.black)
+                                        .frame(width: 40, height: 40)
+                                        .background(JourneyVisual.lime)
+                                        .clipShape(Circle())
+                                        .shadow(radius: 8)
+                                }
+                            }
+                        }
+                    }
+                }
+                .mapStyle(.standard(elevation: .realistic))
+
+                if mappedJobs.isEmpty {
+                    Text("У цих результатах немає координат. Зміни пошук або кантон.")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundColor(.white)
+                        .padding(16)
+                        .background(.ultraThinMaterial)
+                        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                        .padding(20)
+                }
+            }
+            .navigationTitle("Карта вакансій")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Закрити") { dismiss() } } }
+        }
+    }
+}
+
+private struct JobEmployerHubSheet: View {
+    let cantons: [String]
+    @Environment(\.dismiss) private var dismiss
+    @State private var company = ""
+    @State private var website = ""
+    @State private var canton = "ZH"
+    @State private var contactName = ""
+    @State private var contactEmail = ""
+    @State private var companyDescription = ""
+    @State private var title = ""
+    @State private var jobDescription = ""
+    @State private var location = ""
+    @State private var skills = ""
+    @State private var languages = "Deutsch"
+    @State private var salaryMin = ""
+    @State private var salaryMax = ""
+    @State private var ownJobs: [APIClient.JobItem] = []
+    @State private var candidates: [APIClient.EmployerJobApplication] = []
+    @State private var isVerified = false
+    @State private var isLoading = false
+    @State private var message: String?
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 18) {
+                    Text("Знайди людей, які підходять")
+                        .font(.system(size: 30, weight: .bold, design: .rounded))
+                        .foregroundColor(.white)
+                    Label(isVerified ? "Перевірена компанія" : "Профіль очікує перевірки", systemImage: isVerified ? "checkmark.seal.fill" : "clock.badge")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundColor(isVerified ? JourneyVisual.lime : .orange)
+
+                    JobsPanelTitle("Компанія", icon: "building.2")
+                    VStack(spacing: 11) {
+                        JobsDarkField(title: "Назва компанії", text: $company, icon: "building.2")
+                        JobsDarkField(title: "Контактна особа", text: $contactName, icon: "person")
+                        JobsDarkField(title: "Робочий email", text: $contactEmail, icon: "envelope")
+                            .textInputAutocapitalization(.never)
+                            .keyboardType(.emailAddress)
+                        JobsDarkField(title: "Website (необов'язково)", text: $website, icon: "globe")
+                            .textInputAutocapitalization(.never)
+                        Picker("Кантон", selection: $canton) {
+                            ForEach(cantons.filter { !$0.isEmpty }, id: \.self) { Text($0).tag($0) }
+                        }
+                        .tint(JourneyVisual.lime)
+                        JobsDarkField(title: "Про компанію", text: $companyDescription, icon: "text.alignleft")
+                    }
+
+                    JobsPanelTitle("Нова вакансія", icon: "briefcase")
+                    VStack(spacing: 11) {
+                        JobsDarkField(title: "Посада", text: $title, icon: "briefcase")
+                        JobsDarkField(title: "Місто / адреса", text: $location, icon: "mappin")
+                        JobsDarkField(title: "Опис — мінімум 30 символів", text: $jobDescription, icon: "text.alignleft")
+                        JobsDarkField(title: "Навички через кому", text: $skills, icon: "checkmark.circle")
+                        JobsDarkField(title: "Мови через кому", text: $languages, icon: "character.book.closed")
+                        HStack {
+                            JobsDarkField(title: "CHF від", text: $salaryMin, icon: "francsign")
+                                .keyboardType(.numberPad)
+                            JobsDarkField(title: "CHF до", text: $salaryMax, icon: "francsign")
+                                .keyboardType(.numberPad)
+                        }
+                    }
+
+                    Button {
+                        Task { await publish() }
+                    } label: {
+                        HStack {
+                            if isLoading { ProgressView().tint(.black) }
+                            Text("Надіслати на модерацію")
+                            Spacer()
+                            Image(systemName: "arrow.right")
+                        }
+                        .font(.headline)
+                        .foregroundColor(.black)
+                        .padding(.horizontal, 18)
+                        .frame(maxWidth: .infinity, minHeight: 54)
+                        .background(JourneyVisual.lime)
+                        .clipShape(RoundedRectangle(cornerRadius: 17, style: .continuous))
+                    }
+                    .disabled(isLoading || company.count < 2 || title.count < 3 || jobDescription.count < 30)
+                    .opacity(company.count < 2 || title.count < 3 || jobDescription.count < 30 ? 0.45 : 1)
+
+                    if let message {
+                        Text(message)
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundColor(message.contains("помил") ? .orange : JourneyVisual.lime)
+                    }
+
+                    if !ownJobs.isEmpty {
+                        JobsPanelTitle("Мої вакансії", icon: "tray.full")
+                        ForEach(ownJobs) { job in
+                            HStack {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(job.title).font(.headline).foregroundColor(.white)
+                                    Text(["pending": "На модерації", "active": "Активна", "rejected": "Відхилена", "closed": "Закрита"][job.status ?? ""] ?? (job.status ?? ""))
+                                        .font(.caption).foregroundColor(.white.opacity(0.55))
+                                }
+                                Spacer()
+                                Image(systemName: job.is_verified == true ? "checkmark.seal.fill" : "clock")
+                                    .foregroundColor(job.is_verified == true ? JourneyVisual.lime : .orange)
+                            }
+                            .padding(14)
+                            .background(Color.white.opacity(0.055))
+                            .clipShape(RoundedRectangle(cornerRadius: 17, style: .continuous))
+                        }
+                    }
+
+                    if !candidates.isEmpty {
+                        JobsPanelTitle("Відгуки кандидатів", icon: "person.2.badge.gearshape")
+                        ForEach(candidates) { candidate in
+                            VStack(alignment: .leading, spacing: 12) {
+                                HStack(alignment: .top) {
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text(candidate.job_title)
+                                            .font(.headline)
+                                            .foregroundColor(.white)
+                                        Text(candidate.candidate_email)
+                                            .font(.subheadline)
+                                            .foregroundColor(.white.opacity(0.58))
+                                    }
+                                    Spacer()
+                                    Text(applicationStatusTitle(candidate.status))
+                                        .font(.caption.weight(.bold))
+                                        .foregroundColor(candidate.status == "offer" ? .black : JourneyVisual.lime)
+                                        .padding(.horizontal, 10)
+                                        .padding(.vertical, 6)
+                                        .background(candidate.status == "offer" ? JourneyVisual.lime : JourneyVisual.lime.opacity(0.12))
+                                        .clipShape(Capsule())
+                                }
+                                if candidate.status == "applied" {
+                                    HStack(spacing: 9) {
+                                        employerStatusButton("Співбесіда", icon: "video", status: "interview", candidate: candidate)
+                                        employerStatusButton("Відмовити", icon: "xmark", status: "rejected", candidate: candidate)
+                                    }
+                                } else if candidate.status == "interview" {
+                                    HStack(spacing: 9) {
+                                        employerStatusButton("Зробити offer", icon: "checkmark.seal", status: "offer", candidate: candidate)
+                                        employerStatusButton("Відмовити", icon: "xmark", status: "rejected", candidate: candidate)
+                                    }
+                                }
+                            }
+                            .padding(15)
+                            .background(Color.white.opacity(0.055))
+                            .clipShape(RoundedRectangle(cornerRadius: 19, style: .continuous))
+                            .overlay(RoundedRectangle(cornerRadius: 19).stroke(Color.white.opacity(0.1), lineWidth: 1))
+                        }
+                    }
+                }
+                .padding(20)
+                .padding(.bottom, 30)
+            }
+            .background(Color.black.ignoresSafeArea())
+            .navigationTitle("Для роботодавців")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Готово") { dismiss() } } }
+            .task { await load() }
+        }
+        .preferredColorScheme(.dark)
+    }
+
+    private func load() async {
+        guard KeychainStore.get("access_token") != nil else {
+            message = "Увійди в акаунт, щоб публікувати вакансії."
+            return
+        }
+        if let profile = try? await APIClient.getJobEmployerProfile() {
+            company = profile.company_name
+            website = profile.website ?? ""
+            canton = profile.canton
+            contactName = profile.contact_name
+            contactEmail = profile.contact_email
+            companyDescription = profile.description ?? ""
+            isVerified = profile.is_verified
+        }
+        ownJobs = (try? await APIClient.listEmployerJobs()) ?? []
+        candidates = (try? await APIClient.listEmployerJobApplications()) ?? []
+    }
+
+    private func applicationStatusTitle(_ status: String) -> String {
+        ["applied": "Новий відгук", "interview": "Співбесіда", "offer": "Offer", "rejected": "Відмовлено", "withdrawn": "Відкликано"][status] ?? status
+    }
+
+    private func employerStatusButton(
+        _ title: String,
+        icon: String,
+        status: String,
+        candidate: APIClient.EmployerJobApplication
+    ) -> some View {
+        Button {
+            Task {
+                do {
+                    let updated = try await APIClient.updateEmployerJobApplication(id: candidate.id, status: status)
+                    if let index = candidates.firstIndex(where: { $0.id == updated.id }) { candidates[index] = updated }
+                } catch {
+                    message = "Помилка: \(error.localizedDescription)"
+                }
+            }
+        } label: {
+            Label(title, systemImage: icon)
+                .font(.caption.weight(.bold))
+                .foregroundColor(status == "rejected" ? .white : .black)
+                .frame(maxWidth: .infinity, minHeight: 40)
+                .background(status == "rejected" ? Color.white.opacity(0.09) : JourneyVisual.lime)
+                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        }
+    }
+
+    private func publish() async {
+        isLoading = true
+        defer { isLoading = false }
+        do {
+            let profile = try await APIClient.saveJobEmployerProfile(.init(
+                company_name: company,
+                website: website.isEmpty ? nil : website,
+                canton: canton,
+                contact_name: contactName,
+                contact_email: contactEmail,
+                description: companyDescription.isEmpty ? nil : companyDescription
+            ))
+            isVerified = profile.is_verified
+            let job = try await APIClient.createEmployerJob(.init(
+                title: title,
+                description: jobDescription,
+                location: location,
+                canton: canton,
+                employment_type: "full",
+                workplace_type: "on_site",
+                workload_min: 80,
+                workload_max: 100,
+                salary_min: Int(salaryMin),
+                salary_max: Int(salaryMax),
+                salary_period: "year",
+                languages: languages.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) },
+                skills: skills.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) },
+                permit_requirements: [],
+                experience_level: nil,
+                no_experience_required: false,
+                degree_required: false,
+                recognition_required: false,
+                apply_url: nil,
+                expires_at: nil
+            ))
+            ownJobs.insert(job, at: 0)
+            title = ""
+            jobDescription = ""
+            message = "Вакансію надіслано на модерацію."
+        } catch {
+            message = "Помилка: \(error.localizedDescription)"
+        }
+    }
+}
+
+private struct JobsPanelTitle: View {
+    let title: String
+    let icon: String
+    init(_ title: String, icon: String) { self.title = title; self.icon = icon }
+    var body: some View {
+        Label(title, systemImage: icon)
+            .font(.headline)
+            .foregroundColor(.white)
+            .padding(.top, 4)
+    }
+}
+
+private struct JobsDarkField: View {
+    let title: String
+    @Binding var text: String
+    let icon: String
+    var body: some View {
+        HStack(spacing: 11) {
+            Image(systemName: icon).foregroundColor(JourneyVisual.lime).frame(width: 22)
+            TextField(title, text: $text, axis: .vertical)
+                .foregroundColor(.white)
+                .lineLimit(1...5)
+        }
+        .padding(.horizontal, 14)
+        .frame(minHeight: 52)
+        .background(Color.white.opacity(0.065))
+        .clipShape(RoundedRectangle(cornerRadius: 15, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 15, style: .continuous).stroke(Color.white.opacity(0.12)))
     }
 }
 

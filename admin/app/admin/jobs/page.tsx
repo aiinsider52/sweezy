@@ -1,283 +1,219 @@
 'use client'
-import { useEffect, useMemo, useRef, useState } from 'react'
-import Card from '@/components/Card'
-import { useRouter } from 'next/navigation'
 
-type JobItem = {
+import { useCallback, useEffect, useState } from 'react'
+import type { ReactNode } from 'react'
+import { AlertTriangle, Building2, CheckCircle2, Database, RefreshCw, ShieldCheck, XCircle } from 'lucide-react'
+import Card from '@/components/Card'
+
+type Provider = {
+  provider: string
+  configured: boolean
+  status: string
+  last_success_at?: string
+  last_item_count: number
+  message?: string
+}
+
+type Job = {
   id: string
-  source: 'indeed' | 'rav' | string
   title: string
   company?: string
   location?: string
   canton?: string
-  url: string
+  source: string
+  status?: string
   posted_at?: string
-  employment_type?: string
-  salary?: string
-  snippet?: string
 }
 
-const CANTONS = ['AG','AI','AR','BE','BL','BS','FR','GE','GL','GR','JU','LU','NE','NW','OW','SG','SH','SO','SZ','TG','TI','UR','VD','VS','ZG','ZH']
-
-const dict: Record<string, Record<string, string>> = {
-  en: {
-    title: 'Job Finder',
-    searchPlaceholder: 'Keyword (e.g., nurse, Java, warehouse)',
-    canton: 'Canton',
-    search: 'Search',
-    results: 'Results',
-    favorite: 'Favorite',
-    unfavorite: 'Unfavorite',
-    notify: 'Notify about new jobs',
-    apply: 'AI: draft application',
-    copied: 'Copied to clipboard',
-    empty: 'No jobs found. Try different keywords.',
-  },
-  de: {
-    title: 'Jobsuche',
-    searchPlaceholder: 'Stichwort (z. B. Pflege, Java, Lager)',
-    canton: 'Kanton',
-    search: 'Suchen',
-    results: 'Ergebnisse',
-    favorite: 'Merken',
-    unfavorite: 'Entfernen',
-    notify: 'Benachrichtigungen über neue Stellen',
-    apply: 'KI: Bewerbung erstellen',
-    copied: 'In die Zwischenablage kopiert',
-    empty: 'Keine Stellen gefunden. Andere Suchbegriffe versuchen.',
-  },
-  ru: {
-    title: 'Поиск работы',
-    searchPlaceholder: 'Ключевое слово (например, медсестра, Java, склад)',
-    canton: 'Кантон',
-    search: 'Искать',
-    results: 'Результаты',
-    favorite: 'В избранное',
-    unfavorite: 'Убрать',
-    notify: 'Уведомлять о новых вакансиях',
-    apply: 'ИИ: отклик на вакансию',
-    copied: 'Скопировано в буфер',
-    empty: 'Вакансии не найдены. Попробуйте другой запрос.',
-  },
-  uk: {
-    title: 'Пошук роботи',
-    searchPlaceholder: 'Ключове слово (напр., медсестра, Java, склад)',
-    canton: 'Кантон',
-    search: 'Шукати',
-    results: 'Результати',
-    favorite: 'В обране',
-    unfavorite: 'Прибрати',
-    notify: 'Сповіщати про нові вакансії',
-    apply: 'ШІ: відгук на вакансію',
-    copied: 'Скопійовано',
-    empty: 'Вакансій не знайдено. Спробуйте інший запит.',
-  },
+type Employer = {
+  user_id: string
+  company_name: string
+  canton: string
+  contact_name: string
+  contact_email: string
+  is_verified: boolean
 }
 
-function useI18n() {
-  // Avoid hydration mismatch: render EN on server and first client paint,
-  // then switch to user language after mount.
-  const [code, setCode] = useState<'en' | 'de' | 'ru' | 'uk'>('en')
-  useEffect(() => {
+type Report = {
+  id: string
+  job_id: string
+  reason: string
+  details?: string
+  created_at: string
+}
+
+async function readJSON<T>(url: string): Promise<T> {
+  const response = await fetch(url, { cache: 'no-store' })
+  const body = await response.text()
+  if (!response.ok) throw new Error(body || `HTTP ${response.status}`)
+  return JSON.parse(body) as T
+}
+
+export default function JobsOperationsPage() {
+  const [providers, setProviders] = useState<Provider[]>([])
+  const [pending, setPending] = useState<Job[]>([])
+  const [employers, setEmployers] = useState<Employer[]>([])
+  const [reports, setReports] = useState<Report[]>([])
+  const [busy, setBusy] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  const load = useCallback(async () => {
+    setError(null)
     try {
-      const stored = typeof window !== 'undefined' ? localStorage.getItem('lang') : null
-      const nav = typeof navigator !== 'undefined' ? navigator.language.split('-')[0] : 'en'
-      const detected = ((stored || nav || 'en').toLowerCase().slice(0,2)) as 'en' | 'de' | 'ru' | 'uk'
-      if (dict[detected]) setCode(detected)
-    } catch {}
-  }, [])
-  return (key: string) => (dict[code]?.[key] ?? dict.en[key] ?? key)
-}
-
-export default function JobsPage() {
-  const t = useI18n()
-  const [q, setQ] = useState('')
-  const [canton, setCanton] = useState<string>('')
-  const [results, setResults] = useState<JobItem[]>([])
-  const [top, setTop] = useState<{ keyword: string, canton?: string, count: number }[]>([])
-  const [loading, setLoading] = useState(false)
-  const [favorites, setFavorites] = useState<Record<string, JobItem>>({})
-  const [notify, setNotify] = useState(false)
-  const intervalRef = useRef<any>(null)
-
-  // Load local favorites
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    try {
-      const raw = localStorage.getItem('job_favorites') || '{}'
-      setFavorites(JSON.parse(raw))
-    } catch {}
+      const [sourceData, pendingData, employerData, reportData] = await Promise.all([
+        readJSON<Provider[]>('/api/admin/jobs/sources'),
+        readJSON<Job[]>('/api/admin/jobs/pending'),
+        readJSON<Employer[]>('/api/admin/jobs/employers'),
+        readJSON<Report[]>('/api/admin/jobs/reports?status=open'),
+      ])
+      setProviders(sourceData)
+      setPending(pendingData)
+      setEmployers(employerData)
+      setReports(reportData)
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Jobs dashboard unavailable')
+    }
   }, [])
 
-  function saveFavorites(next: Record<string, JobItem>) {
-    setFavorites(next)
-    if (typeof window !== 'undefined') localStorage.setItem('job_favorites', JSON.stringify(next))
-  }
+  useEffect(() => { void load() }, [load])
 
-  async function searchJobs(log = true) {
-    if (!q.trim()) return
-    setLoading(true)
+  async function mutate(key: string, url: string) {
+    setBusy(key)
+    setError(null)
     try {
-      const url = `/api/jobs/search?q=${encodeURIComponent(q)}&canton=${encodeURIComponent(canton)}`
-      const res = await fetch(url, { cache: 'no-store' })
-      const data = await res.json()
-      setResults(Array.isArray(data.items) ? data.items : [])
-      if (log) fetch(`/api/jobs/analytics/top`, { cache: 'no-store' }) // warm analytics endpoint
-      // refresh top analytics list
-      try {
-        const topRes = await fetch('/api/jobs/analytics/top', { cache: 'no-store' })
-        const topData = await topRes.json()
-        if (Array.isArray(topData)) setTop(topData)
-      } catch {}
-      // fire analytics event (best-effort, via local API to avoid CORS)
-      fetch(`/api/jobs/analytics/events?keyword=${encodeURIComponent(q)}&canton=${encodeURIComponent(canton)}`, { method: 'POST' }).catch(() => {})
-      // track last seen ids for notifications
-      if (typeof window !== 'undefined') {
-        const key = `job_seen_${q}_${canton}`
-        const ids = (data.items || []).map((it: JobItem) => it.id)
-        localStorage.setItem(key, JSON.stringify(ids))
-      }
+      const response = await fetch(url, { method: 'POST' })
+      if (!response.ok) throw new Error(await response.text())
+      await load()
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Action failed')
     } finally {
-      setLoading(false)
+      setBusy(null)
     }
   }
 
-  function toggleFavorite(job: JobItem) {
-    const next = { ...favorites }
-    if (next[job.id]) {
-      delete next[job.id]
-      // also try to delete on backend if exists
-      // (we do not track backend id here for simplicity)
-    } else {
-      next[job.id] = job
-      // best-effort sync to backend if logged-in
-      fetch('/api/jobs/favorites', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          job_id: job.id,
-          source: job.source,
-          title: job.title,
-          company: job.company,
-          location: job.location,
-          canton: job.canton,
-          url: job.url
-        })
-      }).catch(() => {})
-    }
-    saveFavorites(next)
-  }
-
-  async function draftApplication(job: JobItem) {
-    const res = await fetch('/api/ai/job-apply', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        jobTitle: job.title,
-        company: job.company,
-        description: job.snippet,
-        language: (localStorage.getItem('lang') || 'en')
-      })
-    })
-    const data = await res.json()
-    if (data?.text) {
-      await navigator.clipboard.writeText(data.text)
-      alert(t('copied'))
-    }
-  }
-
-  // Notifications about new jobs for current filters
-  useEffect(() => {
-    if (!notify) {
-      if (intervalRef.current) clearInterval(intervalRef.current)
-      return
-    }
-    if (typeof window === 'undefined') return
-    Notification.requestPermission().then(() => {})
-    intervalRef.current = setInterval(async () => {
-      if (!q.trim()) return
-      const res = await fetch(`/api/jobs/search?q=${encodeURIComponent(q)}&canton=${encodeURIComponent(canton)}`, { cache: 'no-store' })
-      const data = await res.json()
-      const newIds: string[] = (data.items || []).map((it: JobItem) => it.id)
-      const key = `job_seen_${q}_${canton}`
-      const prev = JSON.parse(localStorage.getItem(key) || '[]')
-      const diff = newIds.filter(id => !prev.includes(id))
-      if (diff.length > 0 && Notification.permission === 'granted') {
-        new Notification('New jobs available', { body: `${diff.length} new results for "${q}"` })
-        localStorage.setItem(key, JSON.stringify(newIds))
-      }
-    }, 60000)
-    return () => { if (intervalRef.current) clearInterval(intervalRef.current) }
-  }, [notify, q, canton])
+  const totalImported = providers.reduce((sum, item) => sum + item.last_item_count, 0)
+  const healthy = providers.filter(item => item.status === 'healthy').length
 
   return (
-    <div className="p-6 space-y-4">
+    <div className="p-6 space-y-5">
+      <header className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div>
+          <p className="text-xs uppercase tracking-[0.24em] opacity-50">Sweezy Jobs Operations</p>
+          <h1 className="mt-2 text-3xl font-semibold">Каталог, модерація, довіра</h1>
+          <p className="mt-1 max-w-2xl text-sm opacity-60">Вакансії зберігаються в PostgreSQL. Цей екран керує синхронізацією джерел, роботодавцями й скаргами.</p>
+        </div>
+        <button
+          onClick={() => mutate('sync', '/api/admin/jobs/sync')}
+          disabled={busy !== null}
+          className="glass inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 font-medium disabled:opacity-50"
+        >
+          <RefreshCw size={17} className={busy === 'sync' ? 'animate-spin' : ''} />
+          Синхронізувати зараз
+        </button>
+      </header>
+
+      {error && <div className="rounded-xl border border-red-400/30 bg-red-500/10 p-4 text-sm text-red-200">{error}</div>}
+
+      <section className="grid gap-3 md:grid-cols-4">
+        <Metric icon={<Database size={19} />} label="Останній імпорт" value={totalImported} />
+        <Metric icon={<CheckCircle2 size={19} />} label="Здорові джерела" value={`${healthy}/${providers.length}`} />
+        <Metric icon={<ShieldCheck size={19} />} label="На модерації" value={pending.length} />
+        <Metric icon={<AlertTriangle size={19} />} label="Відкриті скарги" value={reports.length} />
+      </section>
+
       <Card>
-        <div className="flex items-center justify-between pb-3">
-          <div className="text-xl font-semibold">{t('title')}</div>
-        </div>
-        <div className="flex flex-col md:flex-row gap-3">
-          <input
-            placeholder={t('searchPlaceholder')}
-            value={q}
-            onChange={e => setQ(e.target.value)}
-            className="glass px-3 py-2 rounded-md flex-1"
-          />
-          <select value={canton} onChange={e => setCanton(e.target.value)} className="glass px-3 py-2 rounded-md w-full md:w-48">
-            <option value="">{t('canton')}</option>
-            {CANTONS.map(c => <option key={c} value={c}>{c}</option>)}
-          </select>
-          <button onClick={() => searchJobs()} className="glass px-4 py-2 rounded-md">{loading ? '...' : t('search')}</button>
-        </div>
-        <div className="mt-3 flex items-center gap-2">
-          <input id="notify" type="checkbox" checked={notify} onChange={e => setNotify(e.target.checked)} />
-          <label htmlFor="notify" className="text-sm opacity-80">{t('notify')}</label>
+        <SectionTitle title="Джерела вакансій" subtitle="Jooble та офіційні ATS feeds. Помилка одного провайдера не зупиняє каталог." />
+        <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+          {providers.map(provider => (
+            <div key={provider.provider} className="glass rounded-xl p-4">
+              <div className="flex items-center justify-between gap-3">
+                <strong className="capitalize">{provider.provider}</strong>
+                <Status value={provider.configured ? provider.status : 'disabled'} />
+              </div>
+              <div className="mt-4 text-2xl font-semibold">{provider.last_item_count}</div>
+              <div className="text-xs opacity-50">вакансій в останньому sync</div>
+              {provider.last_success_at && <div className="mt-3 text-xs opacity-50">{new Date(provider.last_success_at).toLocaleString()}</div>}
+              {provider.message && <div className="mt-2 text-xs text-orange-300 line-clamp-3">{provider.message}</div>}
+            </div>
+          ))}
+          {providers.length === 0 && <Empty text="Джерела ще не ініціалізовані. Запусти sync після додавання API keys або ATS board IDs." />}
         </div>
       </Card>
 
       <Card>
-        <div className="text-sm opacity-70 mb-2">{t('results')}</div>
-        {results.length === 0 && (
-          <div className="text-sm opacity-60">{t('empty')}</div>
-        )}
-        <div className="grid grid-cols-1 gap-3">
-          {results.map(job => {
-            const fav = !!favorites[job.id]
-            return (
-              <div key={job.id} className="glass p-3 rounded-lg flex flex-col md:flex-row md:items-center gap-3">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <div className="font-medium">{job.title}</div>
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-white/10">{job.source.toUpperCase()}</span>
-                  </div>
-                  <div className="text-sm opacity-80">{job.company ?? ''} {job.location ? `• ${job.location}` : ''} {job.canton ? `• ${job.canton}` : ''}</div>
-                  {job.snippet && <div className="text-sm opacity-70 line-clamp-2 mt-1">{job.snippet}</div>}
-                </div>
-                <div className="flex items-center gap-2">
-                  <a href={job.url} target="_blank" rel="noreferrer" className="glass px-3 py-1.5 rounded-md">Open</a>
-                  <button onClick={() => draftApplication(job)} className="glass px-3 py-1.5 rounded-md">{t('apply')}</button>
-                  <button onClick={() => toggleFavorite(job)} className="glass px-3 py-1.5 rounded-md">{fav ? t('unfavorite') : t('favorite')}</button>
-                </div>
+        <SectionTitle title="Вакансії на модерації" subtitle="Власні вакансії Sweezy не потрапляють у каталог до ручної перевірки." />
+        <div className="mt-4 space-y-3">
+          {pending.map(job => (
+            <div key={job.id} className="glass flex flex-col gap-3 rounded-xl p-4 lg:flex-row lg:items-center">
+              <div className="min-w-0 flex-1">
+                <div className="font-medium">{job.title}</div>
+                <div className="mt-1 text-sm opacity-60">{job.company || 'Компанія'} · {job.location || job.canton || 'Switzerland'}</div>
               </div>
-            )
-          })}
+              <button onClick={() => mutate(`approve-${job.id}`, `/api/admin/jobs/${job.id}/approve`)} disabled={busy !== null} className="rounded-lg bg-lime-300 px-4 py-2 text-sm font-semibold text-black disabled:opacity-50">Схвалити</button>
+              <button onClick={() => mutate(`reject-${job.id}`, `/api/admin/jobs/${job.id}/reject?reason=${encodeURIComponent('Недостатньо даних або порушення правил')}`)} disabled={busy !== null} className="rounded-lg border border-red-400/30 px-4 py-2 text-sm text-red-200 disabled:opacity-50">Відхилити</button>
+            </div>
+          ))}
+          {pending.length === 0 && <Empty text="Черга чиста." />}
         </div>
       </Card>
-      
-      {top.length > 0 && (
+
+      <div className="grid gap-5 xl:grid-cols-2">
         <Card>
-          <div className="text-sm opacity-70 mb-2">Top searches</div>
-          <div className="flex flex-wrap gap-2">
-            {top.map((e, idx) => (
-              <span key={idx} className="glass px-2 py-1 rounded-md text-sm">
-                {e.keyword} {e.canton ? `(${e.canton})` : ''} — {e.count}
-              </span>
+          <SectionTitle title="Роботодавці" subtitle="Verified badge відкриває сильніший trust signal, але вакансії все одно проходять модерацію." />
+          <div className="mt-4 space-y-3">
+            {employers.map(employer => (
+              <div key={employer.user_id} className="glass flex items-center gap-3 rounded-xl p-4">
+                <Building2 size={20} className="shrink-0 opacity-70" />
+                <div className="min-w-0 flex-1">
+                  <div className="truncate font-medium">{employer.company_name}</div>
+                  <div className="truncate text-xs opacity-50">{employer.canton} · {employer.contact_email}</div>
+                </div>
+                {employer.is_verified ? <Status value="verified" /> : (
+                  <button onClick={() => mutate(`verify-${employer.user_id}`, `/api/admin/jobs/employers/${employer.user_id}/verify`)} disabled={busy !== null} className="rounded-lg bg-white/10 px-3 py-2 text-xs disabled:opacity-50">Перевірити</button>
+                )}
+              </div>
             ))}
+            {employers.length === 0 && <Empty text="Business accounts ще не створені." />}
           </div>
         </Card>
-      )}
+
+        <Card>
+          <SectionTitle title="Скарги" subtitle="Підозрілі, неактуальні або оманливі вакансії." />
+          <div className="mt-4 space-y-3">
+            {reports.map(report => (
+              <div key={report.id} className="glass flex items-center gap-3 rounded-xl p-4">
+                <AlertTriangle size={20} className="shrink-0 text-orange-300" />
+                <div className="min-w-0 flex-1">
+                  <div className="font-medium">{report.reason}</div>
+                  <div className="truncate text-xs opacity-50">Job {report.job_id} · {new Date(report.created_at).toLocaleString()}</div>
+                </div>
+                <button onClick={() => mutate(`resolve-${report.id}`, `/api/admin/jobs/reports/${report.id}/resolve`)} disabled={busy !== null} className="rounded-lg bg-white/10 px-3 py-2 text-xs disabled:opacity-50">Закрити</button>
+              </div>
+            ))}
+            {reports.length === 0 && <Empty text="Відкритих скарг немає." />}
+          </div>
+        </Card>
+      </div>
     </div>
   )
 }
 
+function Metric({ icon, label, value }: { icon: ReactNode, label: string, value: string | number }) {
+  return <div className="glass rounded-2xl p-4"><div className="flex items-center gap-2 text-sm opacity-60">{icon}{label}</div><div className="mt-3 text-3xl font-semibold">{value}</div></div>
+}
 
+function SectionTitle({ title, subtitle }: { title: string, subtitle: string }) {
+  return <div><h2 className="text-lg font-semibold">{title}</h2><p className="mt-1 text-sm opacity-55">{subtitle}</p></div>
+}
+
+function Status({ value }: { value: string }) {
+  const good = ['healthy', 'verified'].includes(value)
+  const bad = value === 'error'
+  return <span className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] ${good ? 'bg-lime-300/15 text-lime-200' : bad ? 'bg-red-400/15 text-red-200' : 'bg-white/10 opacity-70'}`}>
+    {bad ? <XCircle size={11} /> : <CheckCircle2 size={11} />}{value}
+  </span>
+}
+
+function Empty({ text }: { text: string }) {
+  return <div className="rounded-xl border border-dashed border-white/15 p-5 text-sm opacity-50">{text}</div>
+}

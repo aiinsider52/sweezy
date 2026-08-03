@@ -9,6 +9,7 @@ enum ChatDeliveryState: String, Codable {
 struct ChatConversation: Codable, Identifiable, Equatable {
     let id: String
     let listingID: String?
+    let jobID: String?
     let listingType: String
     let listingTitle: String
     let listingImageURL: String?
@@ -29,6 +30,7 @@ struct ChatConversation: Codable, Identifiable, Equatable {
     private enum CodingKeys: String, CodingKey {
         case id, status, muted, archived
         case listingID = "listing_id"
+        case jobID = "job_id"
         case listingType = "listing_type"
         case listingTitle = "listing_title"
         case listingImageURL = "listing_image_url"

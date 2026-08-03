@@ -32,6 +32,7 @@ from .routers.news import router as news_router
 from starlette.staticfiles import StaticFiles
 from .routers.admin import router as admin_router
 from .routers.ai import router as ai_router
+from .routers.jobs import admin_router as jobs_admin_router
 from .routers.jobs import router as jobs_router
 from .routers.live import router as live_router
 from .routers.translations import router as translations_router
@@ -190,10 +191,12 @@ async def lifespan(app: FastAPI):
 
     from .services.chat_realtime import chat_realtime
     from .services.push_notifications import notification_worker
+    from .services.jobs_aggregator import jobs_sync_worker
 
     if settings.CHAT_ENABLED:
         await chat_realtime.start()
     task = asyncio.create_task(_background_tick())
+    jobs_task = asyncio.create_task(jobs_sync_worker())
     push_task = (
         asyncio.create_task(notification_worker())
         if settings.CHAT_ENABLED and settings.PUSH_NOTIFICATIONS_ENABLED
@@ -203,11 +206,14 @@ async def lifespan(app: FastAPI):
         yield
     finally:
         task.cancel()
+        jobs_task.cancel()
         if push_task:
             push_task.cancel()
         # Suppress task cancellation on shutdown to avoid noisy tracebacks
         with contextlib.suppress(asyncio.CancelledError):
             await task
+        with contextlib.suppress(asyncio.CancelledError):
+            await jobs_task
         if push_task:
             with contextlib.suppress(asyncio.CancelledError):
                 await push_task
@@ -387,6 +393,7 @@ app.include_router(media_router, prefix=f"{API_PREFIX}/media", tags=["media"])
 app.include_router(news_router, prefix=f"{API_PREFIX}/news", tags=["news"])
 app.include_router(ai_router, prefix=f"{API_PREFIX}/ai", tags=["ai"])
 app.include_router(jobs_router, prefix=f"{API_PREFIX}/jobs", tags=["jobs"])
+app.include_router(jobs_admin_router, prefix=f"{API_PREFIX}/admin/jobs", tags=["admin-jobs"])
 app.include_router(live_router, prefix=f"{API_PREFIX}/live", tags=["live"])
 app.include_router(translations_router, prefix=f"{API_PREFIX}/translations", tags=["translations"])
 app.include_router(subscriptions_router, prefix=f"{API_PREFIX}/subscriptions", tags=["subscriptions"])

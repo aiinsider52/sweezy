@@ -1,5 +1,14 @@
 from .guide import Guide
-from .job import JobFavorite, JobSearchEvent
+from .job import (
+    Job,
+    JobAlert,
+    JobApplication,
+    JobEmployerProfile,
+    JobFavorite,
+    JobProviderState,
+    JobReport,
+    JobSearchEvent,
+)
 from .checklist import Checklist
 from .template import Template
 from .appointment import Appointment
@@ -37,6 +46,12 @@ __all__ = [
     "MarketplaceBlock",
     "JobFavorite",
     "JobSearchEvent",
+    "Job",
+    "JobAlert",
+    "JobApplication",
+    "JobEmployerProfile",
+    "JobProviderState",
+    "JobReport",
     "EventListing",
     "EventReport",
     "SwissMoment",

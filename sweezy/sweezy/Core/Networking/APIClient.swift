@@ -411,12 +411,63 @@ enum APIClient {
         let url: String
         let posted_at: String?
         let employment_type: String?
+        let workplace_type: String?
+        let workload_min: Int?
+        let workload_max: Int?
         let salary: String?
+        let salary_min: Int?
+        let salary_max: Int?
+        let salary_currency: String?
+        let salary_period: String?
         let snippet: String?
+        let description: String?
+        let languages: [String]?
+        let skills: [String]?
+        let permit_requirements: [String]?
+        let experience_level: String?
+        let no_experience_required: Bool?
+        let degree_required: Bool?
+        let recognition_required: Bool?
+        let latitude: Double?
+        let longitude: Double?
+        let is_verified: Bool?
+        let is_promoted: Bool?
+        let can_message: Bool?
+        let status: String?
+        let freshness: String?
+        let expires_at: String?
     }
-    struct JobSearchResponse: Codable { let items: [JobItem]; let total: Int?; let sources: [String:Int]? }
+    struct JobProviderHealth: Codable, Hashable {
+        let provider: String
+        let configured: Bool
+        let status: String
+        let last_success_at: String?
+        let last_item_count: Int
+        let message: String?
+    }
+    struct JobSearchResponse: Codable {
+        let items: [JobItem]
+        let total: Int?
+        let page: Int?
+        let per_page: Int?
+        let pages: Int?
+        let sources: [String:Int]?
+        let catalog_status: String?
+        let is_stale: Bool?
+        let providers: [JobProviderHealth]?
+    }
     
-    static func searchJobs(keyword: String, canton: String?, page: Int = 1, perPage: Int = 20) async throws -> JobSearchResponse {
+    static func searchJobs(
+        keyword: String,
+        canton: String?,
+        employmentType: String? = nil,
+        workplaceType: String? = nil,
+        noExperience: Bool? = nil,
+        noDegree: Bool? = nil,
+        minSalary: Int? = nil,
+        page: Int = 1,
+        perPage: Int = 20
+    ) async throws -> JobSearchResponse {
         // Build URL safely
         var comps = URLComponents(url: url("jobs/search"), resolvingAgainstBaseURL: false)
         var qItems: [URLQueryItem] = [
@@ -425,23 +476,31 @@ enum APIClient {
             URLQueryItem(name: "per_page", value: String(perPage))
         ]
         if let canton, !canton.isEmpty { qItems.append(URLQueryItem(name: "canton", value: canton)) }
+        if let employmentType, !employmentType.isEmpty { qItems.append(URLQueryItem(name: "employment_type", value: employmentType)) }
+        if let workplaceType, !workplaceType.isEmpty { qItems.append(URLQueryItem(name: "workplace_type", value: workplaceType)) }
+        if let noExperience { qItems.append(URLQueryItem(name: "no_experience", value: String(noExperience))) }
+        if let noDegree { qItems.append(URLQueryItem(name: "no_degree", value: String(noDegree))) }
+        if let minSalary { qItems.append(URLQueryItem(name: "min_salary", value: String(minSalary))) }
         comps?.queryItems = qItems
         guard let finalURL = comps?.url ?? URL(string: url("jobs/search").absoluteString + "?q=\(keyword)") else {
-            return JobSearchResponse(items: [], total: 0, sources: [:])
+            throw URLError(.badURL)
         }
         
-        // Cache key (1h TTL)
-        let cacheKey = "jobs|q=\(keyword)|canton=\(canton ?? "")|page=\(page)|per=\(perPage)"
-        let ttl: TimeInterval = 3600
+        // Catalog is server-backed. Keep short offline cache; never cache empty/provider-error states.
+        let cacheKey = "jobs|q=\(keyword)|canton=\(canton ?? "")|employment=\(employmentType ?? "")|workplace=\(workplaceType ?? "")|experience=\(String(describing: noExperience))|degree=\(String(describing: noDegree))|salary=\(minSalary ?? 0)|page=\(page)|per=\(perPage)"
+        let ttl: TimeInterval = 300
         
         do {
             let (data, resp) = try await timedData(from: finalURL, context: "jobs_search")
             guard let http = resp as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
                 if let cached = loadJobSearchCache(for: cacheKey, ttl: ttl) { return cached }
-                return JobSearchResponse(items: [], total: 0, sources: [:])
+                guard let http = resp as? HTTPURLResponse else { throw URLError(.badServerResponse) }
+                throw makeAPIError(data: data, response: http, fallback: "Job catalog unavailable")
             }
-            let decoded = (try? JSONDecoder().decode(JobSearchResponse.self, from: data)) ?? JobSearchResponse(items: [], total: 0, sources: [:])
-            saveJobSearchCache(decoded, for: cacheKey)
+            let decoded = try JSONDecoder().decode(JobSearchResponse.self, from: data)
+            if !decoded.items.isEmpty && decoded.catalog_status != "source_unavailable" {
+                saveJobSearchCache(decoded, for: cacheKey)
+            }
             return decoded
         } catch {
             if let cached = loadJobSearchCache(for: cacheKey, ttl: ttl) { return cached }
@@ -555,7 +614,10 @@ enum APIClient {
         case upgradeRequired
         case failure
     }
-    struct JobFavorite: Decodable { let id: String }
+    struct JobFavorite: Decodable {
+        let id: String
+        let job_id: String
+    }
     
     static func listJobFavorites() async -> [JobFavorite] {
         let url = url("jobs/favorites")
@@ -597,8 +659,7 @@ enum APIClient {
     
     @discardableResult
     static func removeJobFavorite(jobId: String, source: String) async -> Bool {
-        // Try path variant first
-        var req = URLRequest(url: url("jobs/favorites/\(jobId)"))
+        var req = URLRequest(url: url("jobs/favorites/by-job/\(jobId)"))
         req.httpMethod = "DELETE"
         attachAuth(&req)
         do {
@@ -607,20 +668,302 @@ enum APIClient {
         } catch {
             // fallthrough to query-variant
         }
-        // Fallback variant with query
-        var comps = URLComponents(url: url("jobs/favorites"), resolvingAgainstBaseURL: false)
-        comps?.queryItems = [URLQueryItem(name: "job_id", value: jobId), URLQueryItem(name: "source", value: source)]
-        guard let url2 = comps?.url else { return false }
-        var req2 = URLRequest(url: url2)
-        req2.httpMethod = "DELETE"
-        attachAuth(&req2)
-        do {
-            let (_, resp) = try await URLSession.shared.data(for: req2)
-            guard let http = resp as? HTTPURLResponse, (200..<300).contains(http.statusCode) else { return false }
-            return true
-        } catch {
-            return false
+        return false
+    }
+
+    struct JobApplication: Codable, Identifiable {
+        let id: String
+        let job_id: String
+        let job_title: String
+        let company: String?
+        let location: String?
+        let source: String
+        let job_url: String
+        let status: String
+        let notes: String?
+        let cover_letter: String?
+        let applied_at: String?
+        let next_action_at: String?
+        let created_at: String
+        let updated_at: String
+    }
+
+    struct EmployerJobApplication: Codable, Identifiable {
+        let id: String
+        let job_id: String
+        let job_title: String
+        let company: String?
+        let location: String?
+        let source: String
+        let job_url: String
+        let status: String
+        let notes: String?
+        let cover_letter: String?
+        let applied_at: String?
+        let next_action_at: String?
+        let created_at: String
+        let updated_at: String
+        let candidate_id: String
+        let candidate_email: String
+    }
+
+    static func listJobApplications() async throws -> [JobApplication] {
+        let (data, response) = try await authorizedData(from: url("jobs/applications"))
+        guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+            throw URLError(.badServerResponse)
         }
+        return try JSONDecoder().decode([JobApplication].self, from: data)
+    }
+
+    static func updateJobApplication(
+        jobId: String,
+        status: String,
+        notes: String? = nil,
+        coverLetter: String? = nil,
+        nextActionAt: Date? = nil
+    ) async throws -> JobApplication {
+        var request = URLRequest(url: url("jobs/applications/\(jobId)"))
+        request.httpMethod = "PUT"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        var payload: [String: Any] = ["job_id": jobId, "status": status]
+        if let notes { payload["notes"] = notes }
+        if let coverLetter { payload["cover_letter"] = coverLetter }
+        if let nextActionAt { payload["next_action_at"] = ISO8601DateFormatter().string(from: nextActionAt) }
+        request.httpBody = try JSONSerialization.data(withJSONObject: payload)
+        let (data, response) = try await authorizedData(for: request, context: "job_application_update")
+        guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+            throw URLError(.badServerResponse)
+        }
+        return try JSONDecoder().decode(JobApplication.self, from: data)
+    }
+
+    struct JobAlert: Codable, Identifiable {
+        let id: String
+        let name: String
+        let keywords: String
+        let canton: String?
+        let employment_type: String?
+        let workplace_type: String?
+        let min_salary: Int?
+        let enabled: Bool
+        let last_notified_at: String?
+        let created_at: String
+        let updated_at: String
+    }
+
+    static func listJobAlerts() async throws -> [JobAlert] {
+        let (data, response) = try await authorizedData(from: url("jobs/alerts"))
+        guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+            throw URLError(.badServerResponse)
+        }
+        return try JSONDecoder().decode([JobAlert].self, from: data)
+    }
+
+    static func createJobAlert(name: String, keywords: String, canton: String?, employmentType: String?, workplaceType: String?) async throws -> JobAlert {
+        var request = URLRequest(url: url("jobs/alerts"))
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        var payload: [String: Any] = ["name": name, "keywords": keywords, "enabled": true]
+        if let canton, !canton.isEmpty { payload["canton"] = canton }
+        if let employmentType, !employmentType.isEmpty { payload["employment_type"] = employmentType }
+        if let workplaceType, !workplaceType.isEmpty { payload["workplace_type"] = workplaceType }
+        request.httpBody = try JSONSerialization.data(withJSONObject: payload)
+        let (data, response) = try await authorizedData(for: request, context: "job_alert_create")
+        guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+            throw URLError(.badServerResponse)
+        }
+        return try JSONDecoder().decode(JobAlert.self, from: data)
+    }
+
+    static func deleteJobAlert(id: String) async throws {
+        var request = URLRequest(url: url("jobs/alerts/\(id)"))
+        request.httpMethod = "DELETE"
+        let (_, response) = try await authorizedData(for: request, context: "job_alert_delete")
+        guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+            throw URLError(.badServerResponse)
+        }
+    }
+
+    static func reportJob(id: String, reason: String, details: String? = nil) async throws {
+        var request = URLRequest(url: url("jobs/\(id)/report"))
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        var payload: [String: Any] = ["reason": reason]
+        if let details { payload["details"] = details }
+        request.httpBody = try JSONSerialization.data(withJSONObject: payload)
+        let (_, response) = try await authorizedData(for: request, context: "job_report")
+        guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+            throw URLError(.badServerResponse)
+        }
+    }
+
+    struct JobTranslation: Codable {
+        let job_id: String
+        let language: String
+        let text: String
+        let cached: Bool
+    }
+
+    static func translateJob(id: String, language: String) async throws -> JobTranslation {
+        var request = URLRequest(url: url("jobs/\(id)/translation"))
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONSerialization.data(withJSONObject: ["language": language])
+        let (data, response) = try await authorizedData(for: request, context: "job_translation")
+        guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+            throw makeAPIError(
+                data: data,
+                response: response as? HTTPURLResponse,
+                fallback: "Job translation unavailable"
+            )
+        }
+        return try JSONDecoder().decode(JobTranslation.self, from: data)
+    }
+
+    struct JobEmployerProfile: Codable {
+        let user_id: String
+        let company_name: String
+        let website: String?
+        let canton: String
+        let contact_name: String
+        let contact_email: String
+        let description: String?
+        let is_verified: Bool
+        let created_at: String
+        let updated_at: String
+    }
+
+    struct JobEmployerProfilePayload: Encodable {
+        let company_name: String
+        let website: String?
+        let canton: String
+        let contact_name: String
+        let contact_email: String
+        let description: String?
+    }
+
+    struct EmployerJobPayload: Encodable {
+        let title: String
+        let description: String
+        let location: String
+        let canton: String
+        let employment_type: String?
+        let workplace_type: String?
+        let workload_min: Int?
+        let workload_max: Int?
+        let salary_min: Int?
+        let salary_max: Int?
+        let salary_period: String?
+        let languages: [String]
+        let skills: [String]
+        let permit_requirements: [String]
+        let experience_level: String?
+        let no_experience_required: Bool
+        let degree_required: Bool
+        let recognition_required: Bool
+        let apply_url: String?
+        let expires_at: String?
+    }
+
+    static func getJobEmployerProfile() async throws -> JobEmployerProfile {
+        let (data, response) = try await authorizedData(from: url("jobs/employer/profile"))
+        guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+            throw makeAPIError(data: data, response: response as? HTTPURLResponse, fallback: "Employer profile unavailable")
+        }
+        return try JSONDecoder().decode(JobEmployerProfile.self, from: data)
+    }
+
+    static func saveJobEmployerProfile(_ payload: JobEmployerProfilePayload) async throws -> JobEmployerProfile {
+        var request = URLRequest(url: url("jobs/employer/profile"))
+        request.httpMethod = "PUT"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONEncoder().encode(payload)
+        let (data, response) = try await authorizedData(for: request, context: "job_employer_profile")
+        guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+            throw makeAPIError(data: data, response: response as? HTTPURLResponse, fallback: "Could not save employer profile")
+        }
+        return try JSONDecoder().decode(JobEmployerProfile.self, from: data)
+    }
+
+    static func listEmployerJobs() async throws -> [JobItem] {
+        let (data, response) = try await authorizedData(from: url("jobs/employer/jobs"))
+        guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+            throw makeAPIError(data: data, response: response as? HTTPURLResponse, fallback: "Employer jobs unavailable")
+        }
+        return try JSONDecoder().decode([JobItem].self, from: data)
+    }
+
+    static func listEmployerJobApplications() async throws -> [EmployerJobApplication] {
+        let (data, response) = try await authorizedData(from: url("jobs/employer/applications"))
+        guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+            throw makeAPIError(data: data, response: response as? HTTPURLResponse, fallback: "Employer applications unavailable")
+        }
+        return try JSONDecoder().decode([EmployerJobApplication].self, from: data)
+    }
+
+    static func updateEmployerJobApplication(id: String, status: String) async throws -> EmployerJobApplication {
+        var request = URLRequest(url: url("jobs/employer/applications/\(id)"))
+        request.httpMethod = "PUT"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONSerialization.data(withJSONObject: ["status": status])
+        let (data, response) = try await authorizedData(for: request, context: "job_employer_application_update")
+        guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+            throw makeAPIError(data: data, response: response as? HTTPURLResponse, fallback: "Could not update application")
+        }
+        return try JSONDecoder().decode(EmployerJobApplication.self, from: data)
+    }
+
+    static func createEmployerJob(_ payload: EmployerJobPayload) async throws -> JobItem {
+        var request = URLRequest(url: url("jobs/employer/jobs"))
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONEncoder().encode(payload)
+        let (data, response) = try await authorizedData(for: request, context: "job_employer_publish")
+        guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+            throw makeAPIError(data: data, response: response as? HTTPURLResponse, fallback: "Could not submit vacancy")
+        }
+        return try JSONDecoder().decode(JobItem.self, from: data)
+    }
+
+    struct JobMatchResult: Decodable {
+        let job: JobItem
+        let score: Int
+        let reasons: [String]
+        let missing: [String]
+        let method: String
+    }
+    struct JobMatchResponse: Decodable {
+        let items: [JobMatchResult]
+        let method: String
+        let profile_quality: Int
+    }
+
+    static func matchJobs(
+        desiredPosition: String,
+        skills: [String],
+        canton: String?,
+        employmentType: String?,
+        remote: Bool,
+        experienceLevel: String?
+    ) async throws -> JobMatchResponse {
+        var request = URLRequest(url: url("jobs/match"))
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        var payload: [String: Any] = [
+            "desired_position": desiredPosition,
+            "skills": skills,
+            "remote": remote,
+            "limit": 20
+        ]
+        if let canton { payload["canton"] = canton }
+        if let employmentType { payload["employment_type"] = employmentType }
+        if let experienceLevel { payload["experience_level"] = experienceLevel }
+        request.httpBody = try JSONSerialization.data(withJSONObject: payload)
+        let (data, response) = try await authorizedData(for: request, context: "jobs_match")
+        guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+            throw URLError(.badServerResponse)
+        }
+        return try JSONDecoder().decode(JobMatchResponse.self, from: data)
     }
     
     // MARK: - Live place status

@@ -62,6 +62,29 @@ services:
         value: "30"
       - key: PUSH_REVOKED_RETENTION_DAYS
         value: "30"
+      # Jobs catalog. Set provider values in Render dashboard after partnership approval.
+      - key: JOOBLE_API_KEY
+        sync: false
+      - key: JOOBLE_SYNC_QUERIES
+        value: software,nurse,driver,warehouse,sales,marketing
+      - key: JOOBLE_SYNC_PAGES
+        value: "5"
+      - key: JOOBLE_RESULTS_PER_PAGE
+        value: "50"
+      - key: GREENHOUSE_BOARD_TOKENS
+        sync: false
+      - key: LEVER_SITES
+        sync: false
+      - key: PERSONIO_COMPANIES
+        sync: false
+      - key: PERSONIO_FEED_LANGUAGE
+        value: de
+      - key: JOBS_SYNC_INTERVAL_SEC
+        value: "1800"
+      - key: JOBS_STALE_AFTER_HOURS
+        value: "48"
+      - key: OPENAI_EMBEDDING_MODEL
+        value: text-embedding-3-small
 
   - type: web
     name: sweezy_admin

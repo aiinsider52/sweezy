@@ -67,6 +67,10 @@ enum ChatAPI {
         try await request("chat/conversations", method: "POST", body: ConversationCreatePayload(listingID: listingID), as: ChatConversation.self)
     }
 
+    static func createJobConversation(jobID: String) async throws -> ChatConversation {
+        try await request("chat/conversations/jobs/\(jobID)", method: "POST", as: ChatConversation.self)
+    }
+
     static func conversation(id: String) async throws -> ChatConversation {
         try await request("chat/conversations/\(id)", as: ChatConversation.self)
     }

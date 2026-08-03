@@ -53,6 +53,13 @@ python backend/scripts/generate_openapi.py
 ```
 Outputs `shared/openapi.json` at the repo root.
 
+### 7) Jobs Copilot
+
+Jobs use a normalized PostgreSQL catalog, scheduled provider sync, server favorites,
+application tracking, alerts, employer publishing/moderation, reports, semantic matching,
+and direct employer chat. Configure only licensed feeds. Deployment, monitoring, recovery,
+and launch checks: [JOBS_RUNBOOK.md](JOBS_RUNBOOK.md).
+
 ### Docker
 ```bash
 docker build -t sweeezy-backend -f backend/Dockerfile .

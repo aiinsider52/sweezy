@@ -120,6 +120,16 @@ final class ChatStore: ObservableObject {
         return conversation
     }
 
+    func openJobConversation(for jobID: String) async throws -> ChatConversation {
+        if let existing = conversations.first(where: { $0.jobID == jobID && !$0.archived }) {
+            return existing
+        }
+        let conversation = try await ChatAPI.createJobConversation(jobID: jobID)
+        upsert(conversation)
+        persist()
+        return conversation
+    }
+
     func conversation(id: String) async -> ChatConversation? {
         if let cached = conversations.first(where: { $0.id == id }) { return cached }
         do {

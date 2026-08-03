@@ -4,7 +4,16 @@ import math
 import re
 from datetime import datetime, timedelta, timezone
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, WebSocket, WebSocketDisconnect, status
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    HTTPException,
+    Query,
+    WebSocket,
+    WebSocketDisconnect,
+    status,
+)
 from sqlalchemy import and_, exists, func, or_, select
 from sqlalchemy.exc import IntegrityError
 
@@ -27,6 +36,7 @@ from ..models.chat import (
     MarketplaceReview,
     PushDevice,
 )
+from ..models.job import Job
 from ..models.marketplace import MarketplaceBlock, ServiceListing
 from ..models.user import User
 from ..schemas.chat import (
@@ -141,14 +151,16 @@ def _conversation_response(db, conversation: ChatConversation, user_id: str) -> 
         unread_stmt = unread_stmt.where(ChatMessage.created_at > participant.last_read_at)
     unread = db.scalar(unread_stmt) or 0
     listing = db.get(ServiceListing, conversation.listing_id) if conversation.listing_id else None
+    job = db.get(Job, conversation.job_id) if conversation.job_id else None
     return ConversationResponse(
         id=conversation.id,
         listing_id=conversation.listing_id,
+        job_id=conversation.job_id,
         listing_type=conversation.listing_type,
         listing_title=conversation.listing_title,
         listing_image_url=conversation.listing_image_url,
         listing_price=conversation.listing_price,
-        listing_status=listing.status if listing else "removed",
+        listing_status=listing.status if listing else (job.status if job else "removed"),
         other_user_id=other_id,
         other_user_name=other_name,
         is_seller=user_id == conversation.seller_id,
@@ -242,6 +254,88 @@ def create_conversation(payload: ConversationCreate, db: DBSession, user: Curren
     db.refresh(conversation)
     if created_new:
         CHAT_CONVERSATIONS_CREATED.labels(listing_type=conversation.listing_type).inc()
+    return _conversation_response(db, conversation, user.id)
+
+
+@router.post("/conversations/jobs/{job_id}", response_model=ConversationResponse, status_code=status.HTTP_201_CREATED)
+def create_job_conversation(job_id: str, db: DBSession, user: CurrentUser) -> ConversationResponse:
+    if not user.email_verified:
+        raise HTTPException(status_code=403, detail="Verify your email before messaging")
+    job = db.get(Job, job_id)
+    if not job or job.status != "active" or not job.employer_id:
+        raise HTTPException(status_code=404, detail="Sweezy employer job not found")
+    if job.employer_id == user.id:
+        raise HTTPException(status_code=400, detail="You cannot message your own job")
+    if _is_blocked(db, user.id, job.employer_id):
+        raise HTTPException(status_code=403, detail="Conversation unavailable")
+
+    existing = db.execute(
+        select(ChatConversation).where(
+            ChatConversation.job_id == job.id,
+            ChatConversation.buyer_id == user.id,
+            ChatConversation.seller_id == job.employer_id,
+        )
+    ).scalar_one_or_none()
+    if existing:
+        participant = db.execute(
+            select(ChatParticipant).where(
+                ChatParticipant.conversation_id == existing.id,
+                ChatParticipant.user_id == user.id,
+            )
+        ).scalar_one()
+        participant.archived = False
+        participant.deleted_at = None
+        db.commit()
+        return _conversation_response(db, existing, user.id)
+
+    recent_count = db.scalar(
+        select(func.count())
+        .select_from(ChatConversation)
+        .where(ChatConversation.buyer_id == user.id, ChatConversation.created_at >= _now() - timedelta(hours=1))
+    ) or 0
+    if recent_count >= 5:
+        raise HTTPException(status_code=429, detail="Too many new conversations. Try again later")
+
+    salary = job.salary_text
+    if not salary and (job.salary_min or job.salary_max):
+        low = str(job.salary_min or "")
+        high = str(job.salary_max or "")
+        salary = f"CHF {low}{'–' if low and high else ''}{high}"
+    conversation = ChatConversation(
+        listing_id=None,
+        job_id=job.id,
+        buyer_id=user.id,
+        seller_id=job.employer_id,
+        listing_type="job",
+        listing_title=job.title[:100],
+        listing_image_url=None,
+        listing_price=salary,
+        seller_name=(job.company or "Sweezy employer")[:100],
+    )
+    db.add(conversation)
+    created_new = True
+    try:
+        db.flush()
+        db.add_all(
+            [
+                ChatParticipant(conversation_id=conversation.id, user_id=user.id),
+                ChatParticipant(conversation_id=conversation.id, user_id=job.employer_id),
+            ]
+        )
+        db.commit()
+    except IntegrityError:
+        created_new = False
+        db.rollback()
+        conversation = db.execute(
+            select(ChatConversation).where(
+                ChatConversation.job_id == job.id,
+                ChatConversation.buyer_id == user.id,
+                ChatConversation.seller_id == job.employer_id,
+            )
+        ).scalar_one()
+    db.refresh(conversation)
+    if created_new:
+        CHAT_CONVERSATIONS_CREATED.labels(listing_type="job").inc()
     return _conversation_response(db, conversation, user.id)
 
 
@@ -602,7 +696,7 @@ def report_message(
     message = db.get(ChatMessage, message_id)
     if not message:
         raise HTTPException(status_code=404, detail="Message not found")
-    conversation, _ = _ensure_participant(db, message.conversation_id, user.id)
+    _conversation, _ = _ensure_participant(db, message.conversation_id, user.id)
     if message.sender_id == user.id:
         raise HTTPException(status_code=400, detail="You cannot report your own message")
     existing = db.execute(
@@ -688,7 +782,7 @@ async def chat_websocket(websocket: WebSocket) -> None:
             user = UserService.get_by_id(db, user_id)
             if not user or not user.is_active:
                 raise ValueError("Inactive user")
-    except Exception:
+    except Exception:  # noqa: BLE001 - websocket authentication rejects every malformed token variant
         await websocket.close(code=4401, reason="Invalid authentication")
         return
 

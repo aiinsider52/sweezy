@@ -20,6 +20,8 @@ on:
 jobs:
   build-test:
     runs-on: ubuntu-latest
+    env:
+      PYTHONPATH: .
     services:
       postgres:
         image: postgres:16

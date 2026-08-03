@@ -65,6 +65,8 @@ services:
       # Jobs catalog. Set provider values in Render dashboard after partnership approval.
       - key: JOOBLE_API_KEY
         sync: false
+      - key: JOOBLE_API_BASE_URL
+        value: https://de.jooble.org/api
       - key: JOOBLE_SYNC_QUERIES
         value: software,nurse,driver,warehouse,sales,marketing
       - key: JOOBLE_SYNC_PAGES

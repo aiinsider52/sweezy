@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import asyncio
 import uuid
 from datetime import datetime, timezone
 
+import httpx
 from fastapi.testclient import TestClient
 
 from backend.app.core.database import SessionLocal
@@ -11,12 +13,35 @@ from backend.app.main import app
 from backend.app.models.job import Job
 from backend.app.services.jobs_aggregator import (
     NormalizedJob,
+    _fetch_jooble,
     _upsert_jobs,
     job_fingerprint,
 )
 from backend.app.services.users import UserService
 
 client = TestClient(app)
+
+
+def test_jooble_uses_localized_api_endpoint(monkeypatch) -> None:
+    requests: list[httpx.Request] = []
+
+    async def handler(request: httpx.Request) -> httpx.Response:
+        requests.append(request)
+        return httpx.Response(200, json={"totalCount": 0, "jobs": []})
+
+    monkeypatch.setenv("JOOBLE_API_KEY", "test-key")
+    monkeypatch.setenv("JOOBLE_SYNC_QUERIES", "it")
+    monkeypatch.setenv("JOOBLE_SYNC_PAGES", "1")
+    monkeypatch.setenv("JOOBLE_RESULTS_PER_PAGE", "10")
+    monkeypatch.delenv("JOOBLE_API_BASE_URL", raising=False)
+
+    async def run() -> list[NormalizedJob]:
+        transport = httpx.MockTransport(handler)
+        async with httpx.AsyncClient(transport=transport) as api_client:
+            return await _fetch_jooble(api_client)
+
+    assert asyncio.run(run()) == []
+    assert requests[0].url == "https://de.jooble.org/api/test-key"
 
 
 def _identity(*, admin: bool = False) -> tuple[dict[str, str], str]:

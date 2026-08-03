@@ -109,6 +109,7 @@ def _optional_user_id(
 def search(
     request: Request,
     db: DBSession,
+    user: CurrentUser,
     q: str | None = Query(None, max_length=300),
     canton: str | None = Query(None, max_length=10),
     employment_type: str | None = Query(None, max_length=60),

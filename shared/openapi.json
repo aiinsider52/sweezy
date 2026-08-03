@@ -14356,6 +14356,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Search",
         "tags": [
           "jobs"

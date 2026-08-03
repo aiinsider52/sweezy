@@ -491,7 +491,7 @@ enum APIClient {
         let ttl: TimeInterval = 300
         
         do {
-            let (data, resp) = try await timedData(from: finalURL, context: "jobs_search")
+            let (data, resp) = try await authorizedData(from: finalURL)
             guard let http = resp as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
                 if let cached = loadJobSearchCache(for: cacheKey, ttl: ttl) { return cached }
                 guard let http = resp as? HTTPURLResponse else { throw URLError(.badServerResponse) }

@@ -102,9 +102,11 @@ def _catalog_job(*, suffix: str = "external") -> str:
 
 
 def test_catalog_search_filters_and_health_state() -> None:
+    headers, _ = _identity()
     job_id = _catalog_job(suffix="search")
     response = client.get(
         "/api/v1/jobs/search",
+        headers=headers,
         params={
             "q": "Product Designer",
             "canton": "ZH",
@@ -120,6 +122,11 @@ def test_catalog_search_filters_and_health_state() -> None:
     assert body["sources"]["greenhouse"] >= 1
     selected = next(item for item in body["items"] if item["id"] == job_id)
     assert selected["salary_period"] == "year"
+
+
+def test_catalog_search_requires_registration() -> None:
+    response = client.get("/api/v1/jobs/search", params={"q": "designer"})
+    assert response.status_code == 401
 
 
 def test_cross_provider_jobs_are_deduplicated_by_fingerprint() -> None:

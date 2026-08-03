@@ -11,6 +11,7 @@ import MapKit
 
 struct JobsView: View {
     @EnvironmentObject private var appContainer: AppContainer
+    @EnvironmentObject private var sessionManager: SessionManager
     @Environment(\.dismiss) private var dismiss
     
     // MARK: - State
@@ -44,6 +45,7 @@ struct JobsView: View {
     @State private var showDraftSheet: Bool = false
     @State private var draftedText: String?
     @State private var isDrafting: Bool = false
+    @State private var showAuthEntry: Bool = false
     
     // AI Match
     @State private var showAIMatchProfile: Bool = false
@@ -166,6 +168,26 @@ struct JobsView: View {
     
     // MARK: - Body
     var body: some View {
+        Group {
+            if sessionManager.isAuthenticated {
+                jobsContent
+            } else {
+                jobsAccessGate
+            }
+        }
+        .sheet(isPresented: $showAuthEntry) {
+            AuthEntryView(showsCloseButton: true) {
+                showAuthEntry = false
+            }
+        }
+        .onChange(of: sessionManager.isAuthenticated) { _, authenticated in
+            if authenticated {
+                showAuthEntry = false
+            }
+        }
+    }
+
+    private var jobsContent: some View {
         ZStack(alignment: .top) {
             Color.black.ignoresSafeArea()
 
@@ -335,6 +357,110 @@ struct JobsView: View {
         } message: {
             Text(interactionMessage ?? "")
         }
+    }
+
+    private var jobsAccessGate: some View {
+        ZStack {
+            Image("jobs-zurich-hero")
+                .resizable()
+                .scaledToFill()
+                .ignoresSafeArea()
+                .overlay(Color.black.opacity(0.58))
+                .overlay(
+                    LinearGradient(
+                        colors: [.clear, .black.opacity(0.42), .black],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+
+            VStack(alignment: .leading, spacing: 0) {
+                Button { dismiss() } label: {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 22, weight: .semibold))
+                        .foregroundColor(.white)
+                        .frame(width: 52, height: 52)
+                        .background(.ultraThinMaterial.opacity(0.78))
+                        .background(Color.black.opacity(0.34))
+                        .clipShape(Circle())
+                        .overlay(Circle().stroke(Color.white.opacity(0.24), lineWidth: 1))
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Назад")
+
+                Spacer()
+
+                Text("РОБОТА У ШВЕЙЦАРІЇ")
+                    .font(.system(size: 13, weight: .bold))
+                    .tracking(2.2)
+                    .foregroundColor(JourneyVisual.lime)
+
+                Text("Твій пошук роботи\nпочинається тут")
+                    .font(.system(size: 38, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
+                    .lineSpacing(-2)
+                    .padding(.top, 12)
+
+                Text("Створи акаунт, щоб бачити вакансії, зберігати пропозиції, отримувати AI Match і стежити за заявками.")
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundColor(.white.opacity(0.72))
+                    .lineSpacing(4)
+                    .padding(.top, 16)
+
+                JourneyGlassPanel(cornerRadius: 25) {
+                    VStack(spacing: 14) {
+                        accessBenefit(icon: "sparkles", title: "Персональний AI Match")
+                        accessBenefit(icon: "bookmark.fill", title: "Збережені вакансії")
+                        accessBenefit(icon: "paperplane.fill", title: "Трекер відгуків")
+
+                        Button {
+                            showAuthEntry = true
+                            haptic(.medium)
+                        } label: {
+                            HStack(spacing: 10) {
+                                Image(systemName: "person.crop.circle.badge.plus")
+                                Text("Зареєструватися або увійти")
+                                Spacer()
+                                Image(systemName: "arrow.right")
+                            }
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundColor(.black)
+                            .padding(.horizontal, 20)
+                            .frame(maxWidth: .infinity, minHeight: 58)
+                            .background(JourneyVisual.lime)
+                            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityHint("Відкриває вхід або створення акаунта")
+                    }
+                    .padding(18)
+                }
+                .padding(.top, 24)
+            }
+            .padding(.horizontal, 22)
+            .padding(.top, 12)
+            .padding(.bottom, 28)
+        }
+        .toolbar(.hidden, for: .navigationBar)
+        .navigationBarBackButtonHidden(true)
+    }
+
+    private func accessBenefit(icon: String, title: String) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: icon)
+                .font(.system(size: 15, weight: .bold))
+                .foregroundColor(JourneyVisual.lime)
+                .frame(width: 34, height: 34)
+                .background(JourneyVisual.lime.opacity(0.12))
+                .clipShape(RoundedRectangle(cornerRadius: 11, style: .continuous))
+            Text(title)
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundColor(.white)
+            Spacer()
+            Image(systemName: "checkmark.circle.fill")
+                .foregroundColor(.white.opacity(0.38))
+        }
+        .accessibilityElement(children: .combine)
     }
     
     // MARK: - Hero

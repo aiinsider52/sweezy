@@ -9,7 +9,6 @@ from fastapi.testclient import TestClient
 from backend.app.core.url_security import fetch_public_url, validate_public_http_url
 from backend.app.main import app
 
-
 client = TestClient(app)
 
 

@@ -5,6 +5,9 @@ from pathlib import Path
 from typing import Protocol
 
 from ..core.config import Settings
+from ..core.logging import get_logger
+
+log = get_logger(component="media_storage")
 
 
 class MediaStorageError(RuntimeError):
@@ -103,6 +106,8 @@ def get_media_storage(settings: Settings) -> MediaStorage:
     )
     if configured:
         return S3MediaStorage(settings)
-    if settings.APP_ENV.lower() in {"development", "test"}:
+    if settings.APP_ENV.lower() in {"development", "test"} or settings.MEDIA_ALLOW_EPHEMERAL_FALLBACK:
+        if settings.APP_ENV.lower() == "production":
+            log.warning("media_ephemeral_fallback_enabled")
         return LocalMediaStorage(Path(settings.MEDIA_LOCAL_DIR))
     raise MediaStorageError("Object storage is required for media in this environment")

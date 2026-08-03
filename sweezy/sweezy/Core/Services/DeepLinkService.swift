@@ -95,6 +95,8 @@ class DeepLinkService: ObservableObject {
               components.user == nil, components.password == nil, components.fragment == nil,
               let scheme = components.scheme?.lowercased(),
               let rawHost = components.host?.lowercased() else { return nil }
+        let encodedPath = components.percentEncodedPath.lowercased()
+        guard !encodedPath.contains("%2f"), !encodedPath.contains("%5c") else { return nil }
         let rawPath = components.path.split(separator: "/").map(String.init)
         let host: String
         let path: [String]

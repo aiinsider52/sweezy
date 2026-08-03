@@ -62,6 +62,9 @@ services:
         value: media
       - key: MEDIA_SIGNED_URL_TTL_SECONDS
         value: "300"
+      # Temporary compatibility mode. Set false after private S3/R2 credentials are configured.
+      - key: MEDIA_ALLOW_EPHEMERAL_FALLBACK
+        value: "true"
       # Keep false until APNS_KEY_ID / APNS_TEAM_ID / APNS_PRIVATE_KEY are set in the dashboard.
       - key: PUSH_NOTIFICATIONS_ENABLED
         value: "false"

@@ -5084,7 +5084,6 @@
           "debug": {
             "anyOf": [
               {
-                "additionalProperties": true,
                 "type": "object"
               },
               {
@@ -6724,7 +6723,6 @@
             "default": "link"
           },
           "cta_payload": {
-            "additionalProperties": true,
             "title": "Cta Payload",
             "type": "object"
           },
@@ -6794,7 +6792,6 @@
             "default": "link"
           },
           "cta_payload": {
-            "additionalProperties": true,
             "title": "Cta Payload",
             "type": "object"
           },
@@ -6886,7 +6883,6 @@
           "cta_payload": {
             "anyOf": [
               {
-                "additionalProperties": true,
                 "type": "object"
               },
               {
@@ -7396,7 +7392,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "title": "Response Activity Api V1 Admin Activity Get",
                   "type": "object"
                 }
@@ -7437,7 +7432,6 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
                     "type": "object"
                   },
                   "title": "Response List Audit Logs Api V1 Admin Audit Logs Get",
@@ -7478,7 +7472,6 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
                     "type": "object"
                   },
                   "title": "Response List Brave News Queries Api V1 Admin Brave News Queries Get",
@@ -7505,7 +7498,6 @@
           "content": {
             "application/json": {
               "schema": {
-                "additionalProperties": true,
                 "title": "Payload",
                 "type": "object"
               }
@@ -7518,7 +7510,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "title": "Response Create Brave News Query Api V1 Admin Brave News Queries Post",
                   "type": "object"
                 }
@@ -7567,7 +7558,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "title": "Response Delete Brave News Query Api V1 Admin Brave News Queries  Query Id  Delete",
                   "type": "object"
                 }
@@ -7613,7 +7603,6 @@
           "content": {
             "application/json": {
               "schema": {
-                "additionalProperties": true,
                 "title": "Payload",
                 "type": "object"
               }
@@ -7626,7 +7615,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "title": "Response Update Brave News Query Api V1 Admin Brave News Queries  Query Id  Patch",
                   "type": "object"
                 }
@@ -7675,7 +7663,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "title": "Response Run Brave News Query Api V1 Admin Brave News Queries  Query Id  Run Post",
                   "type": "object"
                 }
@@ -7713,7 +7700,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "title": "Response Run All Brave News Queries Api V1 Admin Brave News Run All Post",
                   "type": "object"
                 }
@@ -7741,7 +7727,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "title": "Response Guide Categories Api V1 Admin Categories Guides Get",
                   "type": "object"
                 }
@@ -8168,7 +8153,6 @@
           "content": {
             "application/json": {
               "schema": {
-                "additionalProperties": true,
                 "title": "Payload",
                 "type": "object"
               }
@@ -8439,7 +8423,6 @@
           "content": {
             "application/json": {
               "schema": {
-                "additionalProperties": true,
                 "title": "Payload",
                 "type": "object"
               }
@@ -8452,7 +8435,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "title": "Response Import Checklists Api V1 Admin Import Checklists Post",
                   "type": "object"
                 }
@@ -8489,7 +8471,6 @@
           "content": {
             "application/json": {
               "schema": {
-                "additionalProperties": true,
                 "title": "Payload",
                 "type": "object"
               }
@@ -8502,7 +8483,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "title": "Response Import Guides Api V1 Admin Import Guides Post",
                   "type": "object"
                 }
@@ -8539,7 +8519,6 @@
           "content": {
             "application/json": {
               "schema": {
-                "additionalProperties": true,
                 "title": "Payload",
                 "type": "object"
               }
@@ -8552,7 +8531,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "title": "Response Import News Api V1 Admin Import News Post",
                   "type": "object"
                 }
@@ -8590,7 +8568,6 @@
           "content": {
             "application/json": {
               "schema": {
-                "additionalProperties": true,
                 "title": "Payload",
                 "type": "object"
               }
@@ -8603,7 +8580,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "title": "Response Import News Rss Api V1 Admin Import News Rss Post",
                   "type": "object"
                 }
@@ -8640,7 +8616,6 @@
           "content": {
             "application/json": {
               "schema": {
-                "additionalProperties": true,
                 "title": "Payload",
                 "type": "object"
               }
@@ -8653,7 +8628,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "title": "Response Import Templates Api V1 Admin Import Templates Post",
                   "type": "object"
                 }
@@ -9227,7 +9201,6 @@
               "schema": {
                 "anyOf": [
                   {
-                    "additionalProperties": true,
                     "type": "object"
                   },
                   {
@@ -9291,7 +9264,6 @@
           "content": {
             "application/json": {
               "schema": {
-                "additionalProperties": true,
                 "title": "Payload",
                 "type": "object"
               }
@@ -9527,7 +9499,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "title": "Response Paywall Funnel Api V1 Admin Paywall Funnel Get",
                   "type": "object"
                 }
@@ -9566,7 +9537,6 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
                     "type": "object"
                   },
                   "title": "Response List Rss Feeds Api V1 Admin Rss Feeds Get",
@@ -9593,7 +9563,6 @@
           "content": {
             "application/json": {
               "schema": {
-                "additionalProperties": true,
                 "title": "Payload",
                 "type": "object"
               }
@@ -9606,7 +9575,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "title": "Response Create Rss Feed Api V1 Admin Rss Feeds Post",
                   "type": "object"
                 }
@@ -9655,7 +9623,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "title": "Response Delete Rss Feed Api V1 Admin Rss Feeds  Feed Id  Delete",
                   "type": "object"
                 }
@@ -9701,7 +9668,6 @@
           "content": {
             "application/json": {
               "schema": {
-                "additionalProperties": true,
                 "title": "Payload",
                 "type": "object"
               }
@@ -9714,7 +9680,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "title": "Response Update Rss Feed Api V1 Admin Rss Feeds  Feed Id  Patch",
                   "type": "object"
                 }
@@ -9763,7 +9728,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "title": "Response Run Rss Feed Import Api V1 Admin Rss Feeds  Feed Id  Import Post",
                   "type": "object"
                 }
@@ -9801,7 +9765,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "title": "Response Stats Api V1 Admin Stats Get",
                   "type": "object"
                 }
@@ -9842,7 +9805,6 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
                     "type": "object"
                   },
                   "title": "Response List Subscriptions Api V1 Admin Subscriptions Get",
@@ -9894,7 +9856,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "title": "Response Subscriptions Analytics Api V1 Admin Subscriptions Analytics Get",
                   "type": "object"
                 }
@@ -9945,7 +9906,6 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
                     "type": "object"
                   },
                   "title": "Response List Subscription Events Api V1 Admin Subscriptions Events Get",
@@ -9986,7 +9946,6 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
                     "type": "object"
                   },
                   "title": "Response List Users Api V1 Admin Users Get",
@@ -10026,7 +9985,6 @@
           "content": {
             "application/json": {
               "schema": {
-                "additionalProperties": true,
                 "title": "Payload",
                 "type": "object"
               }
@@ -10039,7 +9997,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "title": "Response Update User Role Api V1 Admin Users  User Id  Role Put",
                   "type": "object"
                 }
@@ -10087,7 +10044,6 @@
           "content": {
             "application/json": {
               "schema": {
-                "additionalProperties": true,
                 "title": "Payload",
                 "type": "object"
               }
@@ -10100,7 +10056,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "title": "Response Set User Subscription Api V1 Admin Users  User Id  Subscription Post",
                   "type": "object"
                 }
@@ -10165,6 +10120,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Ask Sweezy",
         "tags": [
           "ai"
@@ -10287,7 +10247,6 @@
           "content": {
             "application/json": {
               "schema": {
-                "additionalProperties": true,
                 "title": "Payload",
                 "type": "object"
               }
@@ -10370,6 +10329,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "List Appointments",
         "tags": [
           "appointments"
@@ -10494,6 +10458,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Get Appointment",
         "tags": [
           "appointments"
@@ -10937,7 +10906,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "title": "Response Seed Admin Api V1 Auth Seed Admin Post",
                   "type": "object"
                 }
@@ -11851,6 +11819,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "List Checklists",
         "tags": [
           "checklists"
@@ -11975,6 +11948,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Get Checklist",
         "tags": [
           "checklists"
@@ -13039,6 +13017,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "List Guides",
         "tags": [
           "guides"
@@ -13125,6 +13108,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Get Guide By Slug",
         "tags": [
           "guides"
@@ -13205,6 +13193,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Get Guide",
         "tags": [
           "guides"
@@ -15357,6 +15350,87 @@
               "title": "Moment Id",
               "type": "string"
             }
+          },
+          {
+            "in": "query",
+            "name": "canton",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Canton"
+            }
+          },
+          {
+            "in": "query",
+            "name": "permit",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Permit"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tenure_months",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Tenure Months"
+            }
+          },
+          {
+            "in": "query",
+            "name": "has_children",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Has Children"
+            }
+          },
+          {
+            "in": "query",
+            "name": "life_events",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Life Events"
+            }
           }
         ],
         "responses": {
@@ -15707,7 +15781,6 @@
           "content": {
             "application/json": {
               "schema": {
-                "additionalProperties": true,
                 "title": "Payload",
                 "type": "object"
               }
@@ -15995,7 +16068,6 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
                     "type": "object"
                   },
                   "title": "Response List Telemetry Api V1 Telemetry Admin Get",
@@ -16063,7 +16135,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "title": "Response Ingest Batch Api V1 Telemetry Batch Post",
                   "type": "object"
                 }
@@ -16173,6 +16244,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "List Templates",
         "tags": [
           "templates"
@@ -16297,6 +16373,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Get Template",
         "tags": [
           "templates"
@@ -16427,7 +16508,6 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
                     "type": "object"
                   },
                   "title": "Response List Translations Api V1 Translations  Get",
@@ -16448,6 +16528,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "List Translations",
         "tags": [
           "translations"
@@ -16459,7 +16544,6 @@
           "content": {
             "application/json": {
               "schema": {
-                "additionalProperties": true,
                 "title": "Payload",
                 "type": "object"
               }
@@ -16472,7 +16556,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "title": "Response Create Or Update Translation Api V1 Translations  Post",
                   "type": "object"
                 }
@@ -16539,7 +16622,6 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
                     "type": "object"
                   },
                   "title": "Response List Glossary Api V1 Translations Glossary Get",
@@ -16571,7 +16653,6 @@
           "content": {
             "application/json": {
               "schema": {
-                "additionalProperties": true,
                 "title": "Payload",
                 "type": "object"
               }
@@ -16584,7 +16665,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "title": "Response Create Glossary Term Api V1 Translations Glossary Post",
                   "type": "object"
                 }
@@ -16633,7 +16713,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "title": "Response Delete Glossary Term Api V1 Translations Glossary  Term Id  Delete",
                   "type": "object"
                 }
@@ -16682,7 +16761,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "title": "Response Approve Translation Api V1 Translations  Translation Id  Approve Post",
                   "type": "object"
                 }
@@ -16720,7 +16798,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "title": "Response Health",
                   "type": "object"
                 }
@@ -16740,7 +16817,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
                   "title": "Response Ready",
                   "type": "object"
                 }

@@ -45,6 +45,9 @@ class Settings(BaseSettings):
     MEDIA_S3_SECRET_ACCESS_KEY: str | None = Field(default=None)
     MEDIA_S3_PREFIX: str = Field(default="media")
     MEDIA_SIGNED_URL_TTL_SECONDS: int = Field(default=300, ge=60, le=3600)
+    # Temporary compatibility switch while production object storage is provisioned.
+    # Keep false by default; Render must opt in explicitly and logs a warning.
+    MEDIA_ALLOW_EPHEMERAL_FALLBACK: bool = False
     TELEMETRY_MAX_BATCH_SIZE: int = Field(default=50)
 
     # Marketplace chat realtime and push notifications

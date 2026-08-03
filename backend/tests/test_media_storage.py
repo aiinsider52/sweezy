@@ -29,6 +29,17 @@ def test_local_storage_is_limited_to_development_and_tests(tmp_path: Path) -> No
         get_media_storage(_settings(APP_ENV="production"))
 
 
+def test_production_ephemeral_fallback_requires_explicit_opt_in(tmp_path: Path) -> None:
+    storage = get_media_storage(
+        _settings(
+            APP_ENV="production",
+            MEDIA_LOCAL_DIR=str(tmp_path),
+            MEDIA_ALLOW_EPHEMERAL_FALLBACK=True,
+        )
+    )
+    assert isinstance(storage, LocalMediaStorage)
+
+
 def test_local_storage_rejects_path_traversal(tmp_path: Path) -> None:
     storage = LocalMediaStorage(tmp_path)
     with pytest.raises(MediaStorageError, match="Invalid media key"):

@@ -131,7 +131,7 @@ final class CalculatorServiceTests: XCTestCase {
         let formatted = CalculatorService.formatCurrency(amount)
         
         // Then
-        XCTAssertTrue(formatted.contains("1235") || formatted.contains("1'235") || formatted.contains("1’235"))
+        XCTAssertTrue(formatted.filter(\.isNumber).contains("1235"))
         XCTAssertTrue(formatted.contains("CHF"))
     }
     

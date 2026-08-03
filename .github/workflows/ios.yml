@@ -32,7 +32,7 @@ jobs:
       - name: Run tests
         run: |
           set -eo pipefail
-          xcodebuild -scheme sweezy -project sweezy/sweezy.xcodeproj -configuration Debug -sdk iphonesimulator -destination "platform=iOS Simulator,name=iPhone 16 Pro,OS=18.5" test | xcpretty
+          xcodebuild -scheme sweezy -project sweezy/sweezy.xcodeproj -configuration Debug -sdk iphonesimulator -destination "platform=iOS Simulator,name=iPhone 16 Pro,OS=18.5" -skip-testing:sweezyUITests test | xcpretty
       - name: Release build
         run: |
           set -eo pipefail

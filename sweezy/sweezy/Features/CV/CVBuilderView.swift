@@ -1171,7 +1171,7 @@ struct CVBuilderView: View {
         guard !lockManager.userEmail.isEmpty else { return }
         if let data = try? JSONEncoder().encode(cv) {
             let key = "cv_saved_data_\(lockManager.userEmail.lowercased())"
-            UserDefaults.standard.set(data, forKey: key)
+            try? ProtectedLocalStore.write(data, for: key)
         }
     }
 
@@ -1192,7 +1192,8 @@ struct CVBuilderView: View {
             at: url.deletingLastPathComponent(),
             withIntermediateDirectories: true
         )
-        try? data.write(to: url, options: .atomic)
+        try? data.write(to: url, options: [.atomic, .completeFileProtection])
+        ProtectedLocalStore.protectExistingFile(at: url)
     }
 
     private func loadSavedPhoto() {
@@ -1204,7 +1205,7 @@ struct CVBuilderView: View {
         var loaded = CVResume.empty
         if !lockManager.userEmail.isEmpty {
             let key = "cv_saved_data_\(lockManager.userEmail.lowercased())"
-            if let data = UserDefaults.standard.data(forKey: key),
+            if let data = ProtectedLocalStore.data(for: key, migratingFrom: key),
                let saved = try? JSONDecoder().decode(CVResume.self, from: data) {
                 loaded = saved
             }

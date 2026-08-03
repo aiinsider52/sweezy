@@ -51,8 +51,8 @@ struct SweezyApp: App {
                     appContainer.crashReporter.start()
                     appContainer.crashReporter.setUser(
                         id: KeychainStore.get("user_id"),
-                        email: lockManager.userEmail,
-                        username: lockManager.userName
+                        email: nil,
+                        username: nil
                     )
                     
                     // Performance monitor + TTI

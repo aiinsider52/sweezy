@@ -169,7 +169,7 @@ class AppContainer: ObservableObject {
         // Keep localization service in sync with the same initial locale
         self.localizationService.setLocale(self.currentLocale)
         
-        // Load user profile (fast - just UserDefaults read)
+        // Load the protected, account-scoped profile (with one-time soft migration).
         loadUserProfileForCurrentScope()
         lifeAdmin.prepareDocuments(for: userProfile)
         
@@ -218,9 +218,12 @@ class AppContainer: ObservableObject {
             .sink { profile in
                 if let profile,
                    let data = try? JSONEncoder().encode(profile) {
-                    UserDefaults.standard.set(data, forKey: AccountScopedStorage.userProfileKey)
+                    try? ProtectedLocalStore.write(data, for: AccountScopedStorage.userProfileKey)
                 } else {
-                    UserDefaults.standard.removeObject(forKey: AccountScopedStorage.userProfileKey)
+                    ProtectedLocalStore.remove(
+                        AccountScopedStorage.userProfileKey,
+                        legacyDefaultsKey: AccountScopedStorage.userProfileKey
+                    )
                 }
                 self.lifeAdmin.prepareDocuments(for: profile)
             }
@@ -254,7 +257,10 @@ class AppContainer: ObservableObject {
     }
 
     private func loadUserProfileForCurrentScope() {
-        if let profileData = UserDefaults.standard.data(forKey: AccountScopedStorage.userProfileKey),
+        if let profileData = ProtectedLocalStore.data(
+            for: AccountScopedStorage.userProfileKey,
+            migratingFrom: AccountScopedStorage.userProfileKey
+        ),
            let profile = try? JSONDecoder().decode(UserProfile.self, from: profileData) {
             userProfile = profile
         } else {

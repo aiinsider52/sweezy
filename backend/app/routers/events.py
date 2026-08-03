@@ -162,6 +162,8 @@ def create_event(
     db: DBSession,
     user: CurrentUser,
 ) -> EventListingResponse:
+    if not user.email_verified:
+        raise HTTPException(status_code=403, detail="Verify your email before creating an event")
     event = EventListing(
         title=payload.title,
         description=payload.description,

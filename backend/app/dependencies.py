@@ -13,6 +13,7 @@ from datetime import datetime, timezone
 
 
 security_scheme = HTTPBearer(auto_error=True)
+optional_security_scheme = HTTPBearer(auto_error=False)
 
 
 def get_current_admin(
@@ -34,6 +35,23 @@ def get_current_admin(
 
 CurrentAdmin = Annotated[Dict, Depends(get_current_admin)]
 DBSession = Annotated[Session, Depends(get_db)]
+
+
+def is_current_admin(
+    credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(optional_security_scheme)],
+    db: Session = Depends(get_db),
+) -> bool:
+    if credentials is None:
+        return False
+    try:
+        payload = decode_token(credentials.credentials)
+        user = UserService.get_by_id(db, payload.get("sub"))
+        return bool(user and user.is_active and user.is_superuser and payload.get("is_admin"))
+    except Exception:
+        return False
+
+
+OptionalAdmin = Annotated[bool, Depends(is_current_admin)]
 
 
 def get_current_user(
@@ -80,18 +98,18 @@ def require_premium():
     def dependency(user=Depends(get_current_user)):
         # Expire trial/premium if past date
         expire_at = getattr(user, "subscription_expire_at", None)
-        status = getattr(user, "subscription_status", "free") or "free"
-        if status in {"trial", "premium"} and expire_at is not None:
+        entitlement_status = getattr(user, "subscription_status", "free") or "free"
+        if entitlement_status in {"trial", "premium"} and expire_at is not None:
             try:
                 if expire_at < datetime.now(timezone.utc):
                     # downgrade
                     user.subscription_status = "free"
                     user.subscription_expire_at = None
                     # We do not have db session here; silently rely on next write to persist, or ignore.
-                    status = "free"
+                    entitlement_status = "free"
             except Exception:
                 pass
-        if status not in {"trial", "premium"}:
+        if entitlement_status not in {"trial", "premium"}:
             raise HTTPException(
                 status_code=status.HTTP_402_PAYMENT_REQUIRED,
                 detail="Premium required. Subscribe to continue.",

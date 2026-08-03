@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
+import { verifyAdminToken } from '@/lib/admin-auth'
 
 export async function GET(req: NextRequest) {
   return NextResponse.redirect(new URL('/login', req.url))
@@ -15,9 +16,12 @@ export async function POST(req: NextRequest) {
   })
   const text = await res.text()
   if (!res.ok) return new NextResponse(text || 'Login failed', { status: res.status })
-  let payload: any = {}
+  let payload: { access_token?: string } = {}
   try { payload = JSON.parse(text) } catch {}
-  if (payload?.access_token) {
+  if (!payload.access_token || !(await verifyAdminToken(payload.access_token))) {
+    return NextResponse.json({ error: 'Administrator access required' }, { status: 403 })
+  }
+  if (payload.access_token) {
     (await cookies()).set('access_token', payload.access_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -26,7 +30,7 @@ export async function POST(req: NextRequest) {
       maxAge: 60*60*24
     })
   }
-  return NextResponse.json(payload)
+  return NextResponse.json({ authenticated: true })
 }
 
 

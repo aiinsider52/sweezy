@@ -17,6 +17,7 @@ from ..routers.media import UPLOAD_DIR
 from ..models.rss_feed import RSSFeed
 from ..models.brave_news_query import BraveNewsQuery
 from ..services.rss_importer import RSSImporter
+from ..core.url_security import validate_public_http_url
 from ..services.brave_search_importer import BraveSearchImporter
 from ..models.subscription import Subscription, SubscriptionEvent
 from ..models.analytics import PaywallEvent
@@ -348,6 +349,13 @@ def import_news_rss(payload: Dict[str, Any], db: DBSession, _: CurrentAdmin) -> 
     status = payload.get("status", "draft")
     max_items = int(payload.get("max_items", 50))
     download_images = bool(payload.get("download_images", True))
+    try:
+        return RSSImporter.import_from_url(
+            db, str(feed_url), language=str(language), status=str(status),
+            max_items=max(1, min(max_items, 100)), download_images=download_images,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
 
     # Fetch feed with proper headers (some hosts block default user agents)
     client = httpx.Client(timeout=10, follow_redirects=True, headers={
@@ -554,6 +562,10 @@ def list_rss_feeds(_: CurrentAdmin, db: DBSession) -> List[Dict[str, Any]]:
 
 @router.post("/rss-feeds")
 def create_rss_feed(payload: Dict[str, Any], db: DBSession, _: CurrentAdmin) -> Dict[str, Any]:
+    try:
+        validate_public_http_url(str(payload.get("url") or ""))
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
     r = RSSFeed(
         id=str(__import__("uuid").uuid4()),
         url=payload["url"],
@@ -590,6 +602,11 @@ def update_rss_feed(feed_id: str, payload: Dict[str, Any], db: DBSession, _: Cur
     r = db.query(RSSFeed).filter(RSSFeed.id == feed_id).first()
     if not r:
         raise HTTPException(status_code=404, detail="Not found")
+    if payload.get("url") is not None:
+        try:
+            validate_public_http_url(str(payload["url"]))
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
     for k in ["url","language","status"]:
         if k in payload and payload[k] is not None:
             setattr(r, k, payload[k])

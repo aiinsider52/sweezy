@@ -742,7 +742,8 @@ def register_push_device(payload: PushDeviceCreate, db: DBSession, user: Current
     token = payload.token.lower()
     device = db.execute(select(PushDevice).where(PushDevice.token == token)).scalar_one_or_none()
     if device:
-        device.user_id = user.id
+        if device.user_id != user.id:
+            raise HTTPException(status_code=409, detail="Push token is already bound to another account")
         device.environment = payload.environment
         device.enabled = True
         device.revoked_at = None

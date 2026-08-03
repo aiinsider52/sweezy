@@ -7,7 +7,7 @@ export async function apiLogin(email: string, password: string) {
     headers: { 'Content-Type': 'application/json' }
   })
   if (!res.ok) throw new Error(await res.text())
-  return res.json() as Promise<{ access_token: string; refresh_token: string }>
+  return res.json() as Promise<{ authenticated: true }>
 }
 
 export async function getUsers(token?: string) {

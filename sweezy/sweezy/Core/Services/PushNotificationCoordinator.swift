@@ -10,6 +10,19 @@ enum NotificationPreference {
     }
 }
 
+enum PushTokenStore {
+    static let key = "apns_device_token"
+    static var token: String? {
+        if let token = KeychainStore.get(key), !token.isEmpty { return token }
+        guard let legacy = UserDefaults.standard.string(forKey: key), !legacy.isEmpty else { return nil }
+        do {
+            try KeychainStore.save(legacy, for: key)
+            UserDefaults.standard.removeObject(forKey: key)
+        } catch { return legacy }
+        return legacy
+    }
+}
+
 final class SweezyAppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
     func application(
         _ application: UIApplication,
@@ -21,7 +34,8 @@ final class SweezyAppDelegate: NSObject, UIApplicationDelegate, UNUserNotificati
 
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         let token = deviceToken.map { String(format: "%02x", $0) }.joined()
-        UserDefaults.standard.set(token, forKey: "apns_device_token")
+        try? KeychainStore.save(token, for: PushTokenStore.key)
+        UserDefaults.standard.removeObject(forKey: PushTokenStore.key)
         guard NotificationPreference.isEnabled else { return }
         guard KeychainStore.get("access_token")?.isEmpty == false else { return }
         Task {
@@ -65,7 +79,7 @@ final class SweezyAppDelegate: NSObject, UIApplicationDelegate, UNUserNotificati
         }
         guard allowed else { return }
         UIApplication.shared.registerForRemoteNotifications()
-        if let token = UserDefaults.standard.string(forKey: "apns_device_token") {
+        if let token = PushTokenStore.token {
             #if DEBUG
             let environment = "sandbox"
             #else
@@ -77,7 +91,7 @@ final class SweezyAppDelegate: NSObject, UIApplicationDelegate, UNUserNotificati
 
     @MainActor
     static func disableChatPush() async {
-        if let token = UserDefaults.standard.string(forKey: "apns_device_token"),
+        if let token = PushTokenStore.token,
            KeychainStore.get("access_token")?.isEmpty == false {
             try? await ChatAPI.unregisterPush(token: token)
         }

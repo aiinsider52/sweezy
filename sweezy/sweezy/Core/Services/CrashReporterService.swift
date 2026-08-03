@@ -25,6 +25,7 @@ final class CrashReporterService: CrashReporterServiceProtocol {
     }
     
     func start() {
+        guard AnalyticsConsentStore.isGranted else { return }
         #if canImport(Sentry)
         if let dsn = dsn {
             SentrySDK.start { options in
@@ -40,15 +41,20 @@ final class CrashReporterService: CrashReporterServiceProtocol {
     }
     
     func setUser(id: String?, email: String?, username: String?) {
+        guard AnalyticsConsentStore.isGranted else {
+            #if canImport(Sentry)
+            SentrySDK.setUser(nil)
+            #endif
+            return
+        }
         #if canImport(Sentry)
         let user = User(userId: id)
-        user.email = email
-        user.username = username
         SentrySDK.setUser(user)
         #endif
     }
     
     func addBreadcrumb(_ message: String, data: [String: String]? = nil) {
+        guard AnalyticsConsentStore.isGranted else { return }
         #if canImport(Sentry)
         let crumb = Breadcrumb()
         crumb.message = message
@@ -58,6 +64,7 @@ final class CrashReporterService: CrashReporterServiceProtocol {
     }
     
     func capture(error: Error, context: [String: String]? = nil) {
+        guard AnalyticsConsentStore.isGranted else { return }
         #if canImport(Sentry)
         SentrySDK.capture(error: error) { scope in
             context?.forEach { scope.setContext(value: [$0.key: $0.value], key: "ctx") }
@@ -66,6 +73,7 @@ final class CrashReporterService: CrashReporterServiceProtocol {
     }
     
     func capture(message: String, level: String = "info") {
+        guard AnalyticsConsentStore.isGranted else { return }
         #if canImport(Sentry)
         SentrySDK.capture(message: message) { scope in
             scope.setLevel(level == "error" ? .error : .info)

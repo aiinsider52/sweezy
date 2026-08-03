@@ -264,6 +264,8 @@ def create_listing(
     db: DBSession,
     user: CurrentUser,
 ) -> ServiceListingResponse:
+    if not user.email_verified:
+        raise HTTPException(status_code=403, detail="Verify your email before creating a listing")
     listing = ServiceListing(
         listing_type=payload.listing_type.value,
         title=payload.title,

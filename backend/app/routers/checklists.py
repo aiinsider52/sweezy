@@ -2,7 +2,7 @@ from typing import List
 
 from fastapi import APIRouter, HTTPException, Query, Request
 
-from ..dependencies import CurrentAdmin, DBSession
+from ..dependencies import CurrentAdmin, DBSession, OptionalAdmin
 from ..schemas import ChecklistCreate, ChecklistOut, ChecklistUpdate
 from ..services import ChecklistService
 
@@ -13,18 +13,21 @@ router = APIRouter()
 @router.get("/", response_model=List[ChecklistOut])
 def list_checklists(
     db: DBSession,
+    is_admin: OptionalAdmin,
     offset: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
     status: str | None = None,
     include_drafts: bool = False,
 ) -> list[ChecklistOut]:
+    if (include_drafts or (status and status != "published")) and not is_admin:
+        raise HTTPException(status_code=403, detail="Admin access required")
     return ChecklistService.list(db, offset=offset, limit=limit, status=status, include_drafts=include_drafts)
 
 
 @router.get("/{checklist_id}", response_model=ChecklistOut)
-def get_checklist(checklist_id: str, db: DBSession) -> ChecklistOut:
+def get_checklist(checklist_id: str, db: DBSession, is_admin: OptionalAdmin) -> ChecklistOut:
     obj = ChecklistService.get(db, checklist_id)
-    if not obj:
+    if not obj or ((obj.status != "published" or not obj.is_published) and not is_admin):
         raise HTTPException(status_code=404, detail="Checklist not found")
     return obj
 

@@ -27,9 +27,9 @@ from .routers.templates import router as templates_router
 from .routers.analytics import router as analytics_router
 from .routers.appointments import router as appointments_router
 from .routers.remote_config import router as remote_config_router
+from .routers.media import public_router as media_public_router
 from .routers.media import router as media_router
 from .routers.news import router as news_router
-from starlette.staticfiles import StaticFiles
 from .routers.admin import router as admin_router
 from .routers.ai import router as ai_router
 from .routers.jobs import admin_router as jobs_admin_router
@@ -225,6 +225,9 @@ app = FastAPI(
     title=settings.APP_NAME,
     version=settings.APP_VERSION,
     lifespan=lifespan,
+    docs_url=None if settings.APP_ENV.lower() == "production" else "/docs",
+    redoc_url=None if settings.APP_ENV.lower() == "production" else "/redoc",
+    openapi_url=None if settings.APP_ENV.lower() == "production" else "/openapi.json",
 )
 
 # Attach global limiter to app state so slowapi decorators can access it
@@ -302,7 +305,7 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.add_middleware(SlowAPIMiddleware)
 
 # Prometheus metrics must be registered BEFORE startup (instrumentator adds middleware).
-if settings.APP_ENV.lower() != "test":
+if settings.APP_ENV.lower() not in {"test", "production"}:
     try:
         instrumentator.instrument(app).expose(app, endpoint="/metrics", include_in_schema=False)
         log.info("metrics_enabled", endpoint="/metrics")
@@ -368,7 +371,8 @@ def ready() -> dict:
     from .core.readiness import run_readiness_checks
 
     try:
-        return {"status": "ready", "checks": run_readiness_checks()}
+        run_readiness_checks()
+        return {"status": "ready"}
     except Exception as exc:
         log.warning("readiness_failed", error=str(exc))
         raise HTTPException(status_code=503, detail="not ready") from exc
@@ -412,13 +416,8 @@ app.include_router(chat_admin_router, prefix=f"{API_PREFIX}/admin", tags=["admin
 app.include_router(devices_router, prefix=f"{API_PREFIX}/devices", tags=["devices"])
 app.include_router(discovery_router, prefix=f"{API_PREFIX}/discovery", tags=["discovery"])
 app.include_router(discovery_admin_router, prefix=f"{API_PREFIX}/admin", tags=["admin", "discovery"])
+app.include_router(media_public_router)
 
 # Public pages (App Store / legal)
 app.include_router(legal_router, tags=["legal"])
 
-# Serve uploaded media
-try:
-    app.mount("/media", StaticFiles(directory="backend/uploads"), name="media")
-except Exception:
-    # directory may not exist at build time
-    pass

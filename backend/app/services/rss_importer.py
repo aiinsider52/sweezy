@@ -13,18 +13,16 @@ from ..models.news import News
 from ..models.rss_feed import RSSFeed
 from .news_service import NewsService
 from ..routers.media import UPLOAD_DIR
+from ..core.url_security import fetch_public_bytes, fetch_public_url, validate_public_http_url
 
 
 class RSSImporter:
   @staticmethod
   def _fetch_text(client: httpx.Client, url: str) -> str:
     try:
-      r = client.get(url)
-      if r.status_code < 400:
-        return r.text
-    except Exception:
-      pass
-    return ""
+      return fetch_public_url(client, url)[0]
+    except (httpx.HTTPError, ValueError) as exc:
+      raise ValueError(f"Unsafe or unavailable import URL: {exc}") from exc
 
   @staticmethod
   def import_from_url(
@@ -37,7 +35,8 @@ class RSSImporter:
     download_images: bool = True,
     import_reference_id: str | None = None,
   ) -> Dict[str, int]:
-    client = httpx.Client(timeout=10, follow_redirects=True, headers={
+    validate_public_http_url(feed_url)
+    client = httpx.Client(timeout=10, follow_redirects=False, headers={
       "User-Agent": "SweezyRSS/1.0 (+https://sweezy-9xyk.onrender.com)"
     })
     text = RSSImporter._fetch_text(client, feed_url)
@@ -86,10 +85,10 @@ class RSSImporter:
         image_url = None
         if img:
           try:
-            r = client.get(urljoin(feed_url, img))
-            if r.status_code == 200 and download_images:
+            image_bytes = fetch_public_bytes(client, urljoin(feed_url, img), max_bytes=8 * 1024 * 1024)[0]
+            if download_images:
               name = f"{__import__('uuid').uuid4()}.jpg"
-              (UPLOAD_DIR / name).write_bytes(r.content)
+              (UPLOAD_DIR / name).write_bytes(image_bytes)
               image_url = f"/media/{name}"
             else:
               image_url = img
@@ -147,10 +146,10 @@ class RSSImporter:
             image_url = m.group(1)
         if image_url and download_images:
           try:
-            r = client.get(image_url)
-            if r.status_code == 200:
+            image_bytes = fetch_public_bytes(client, image_url, max_bytes=8 * 1024 * 1024)[0]
+            if image_bytes:
               name = f"{__import__('uuid').uuid4()}.jpg"
-              (UPLOAD_DIR / name).write_bytes(r.content)
+              (UPLOAD_DIR / name).write_bytes(image_bytes)
               image_url = f"/media/{name}"
           except Exception:
             pass

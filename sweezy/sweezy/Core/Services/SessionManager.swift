@@ -19,10 +19,10 @@ enum AccountScopedStorage {
     private static let defaults = UserDefaults.standard
 
     static func currentAccountKey() -> String {
-        let isRegistered = defaults.bool(forKey: "isRegistered")
+        let isRegistered = KeychainStore.get("access_token")?.isEmpty == false
         let backendID = (KeychainStore.get("user_id") ?? "")
             .trimmingCharacters(in: .whitespacesAndNewlines)
-        let email = (defaults.string(forKey: "userEmail") ?? "")
+        let email = (KeychainStore.get("user_email") ?? "")
             .trimmingCharacters(in: .whitespacesAndNewlines)
             .lowercased()
 
@@ -194,7 +194,7 @@ final class SessionManager: ObservableObject {
     func signOut() {
         let previousScope = AccountScopedStorage.currentAccountKey()
         let accessToken = KeychainStore.get("access_token")
-        let pushToken = UserDefaults.standard.string(forKey: "apns_device_token")
+        let pushToken = PushTokenStore.token
         if let accessToken, !accessToken.isEmpty, let pushToken, !pushToken.isEmpty {
             Task {
                 try? await ChatAPI.unregisterPush(token: pushToken, accessToken: accessToken)
@@ -203,6 +203,10 @@ final class SessionManager: ObservableObject {
         KeychainStore.delete("access_token")
         KeychainStore.delete("refresh_token")
         KeychainStore.delete("user_id")
+        KeychainStore.delete("user_email")
+        KeychainStore.delete("user_name")
+        KeychainStore.delete(PushTokenStore.key)
+        UserDefaults.standard.removeObject(forKey: PushTokenStore.key)
 
         // Clear local identity fields
         lockManager.userName = ""
@@ -221,6 +225,13 @@ final class SessionManager: ObservableObject {
         let previousScope = AccountScopedStorage.currentAccountKey()
         let trimmedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedName = name?.trimmingCharacters(in: .whitespacesAndNewlines)
+        try? KeychainStore.save(userID, for: "user_id")
+        try? KeychainStore.save(trimmedEmail, for: "user_email")
+        if let trimmedName, !trimmedName.isEmpty {
+            try? KeychainStore.save(trimmedName, for: "user_name")
+        } else {
+            KeychainStore.delete("user_name")
+        }
         state = .authenticated(
             User(
                 id: userID,
@@ -237,9 +248,11 @@ final class SessionManager: ObservableObject {
     private func recomputeStateFromStorage() {
         let previousScope = currentScope
         let hasToken = !(KeychainStore.get("access_token") ?? "").isEmpty
-        if lockManager.isRegistered && hasToken {
-            let email = lockManager.userEmail.trimmingCharacters(in: .whitespacesAndNewlines)
-            let name = lockManager.userName.trimmingCharacters(in: .whitespacesAndNewlines)
+        if hasToken {
+            let legacyEmail = lockManager.userEmail.trimmingCharacters(in: .whitespacesAndNewlines)
+            let legacyName = lockManager.userName.trimmingCharacters(in: .whitespacesAndNewlines)
+            let email = (KeychainStore.get("user_email") ?? legacyEmail).trimmingCharacters(in: .whitespacesAndNewlines)
+            let name = (KeychainStore.get("user_name") ?? legacyName).trimmingCharacters(in: .whitespacesAndNewlines)
             let backendID = (KeychainStore.get("user_id") ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
             guard !backendID.isEmpty else {
                 state = .guest
@@ -247,6 +260,9 @@ final class SessionManager: ObservableObject {
                 AccountScopedStorage.notifyScopeChange(from: previousScope)
                 return
             }
+            if KeychainStore.get("user_email") == nil, !email.isEmpty { try? KeychainStore.save(email, for: "user_email") }
+            if KeychainStore.get("user_name") == nil, !name.isEmpty { try? KeychainStore.save(name, for: "user_name") }
+            lockManager.isRegistered = true
             let user = User(
                 id: backendID,
                 email: email.isEmpty ? "user@local" : email,

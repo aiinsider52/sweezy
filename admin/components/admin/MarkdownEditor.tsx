@@ -1,6 +1,8 @@
 "use client"
 import { useEffect, useMemo, useRef, useState } from 'react'
 import UIButton from '@/components/ui/button'
+import DOMPurify from 'dompurify'
+import { marked } from 'marked'
 
 type Props = {
   value: string
@@ -41,27 +43,15 @@ export default function MarkdownEditor({ value, onChange, placeholder }: Props) 
     if (file) uploadImage(file)
   }
 
-  function renderMarkdown(md?: string) {
-    if (!md) return ''
-    let html = md
-      .replace(/^######\s(.+)$/gim, '<h6>$1</h6>')
-      .replace(/^#####\s(.+)$/gim, '<h5>$1</h5>')
-      .replace(/^####\s(.+)$/gim, '<h4>$1</h4>')
-      .replace(/^###\s(.+)$/gim, '<h3>$1</h3>')
-      .replace(/^##\s(.+)$/gim, '<h2>$1</h2>')
-      .replace(/^#\s(.+)$/gim, '<h1>$1</h1>')
-      .replace(/^>\s(.+)$/gim, '<blockquote>$1</blockquote>')
-      .replace(/\*\*(.+?)\*\*/gim, '<strong>$1</strong>')
-      .replace(/\*(.+?)\*/gim, '<em>$1</em>')
-      .replace(/`([^`]+)`/gim, '<code>$1</code>')
-      .replace(/!\[(.*?)\]\((.*?)\)/gim, '<img alt="$1" src="$2" />')
-      .replace(/\[(.*?)\]\((.*?)\)/gim, '<a href="$2" target="_blank" rel="noreferrer">$1<\/a>')
-      .replace(/\n\-\s(.+)/gim, '<ul><li>$1</li></ul>')
-      .replace(/\n/g, '<br/>')
-    // merge adjacent <ul>
-    html = html.replace(/<\/ul><ul>/g, '')
-    return html
-  }
+  const previewHtml = useMemo(() => {
+    if (!value) return ''
+    const rendered = marked.parse(value, { async: false }) as string
+    return DOMPurify.sanitize(rendered, {
+      USE_PROFILES: { html: true },
+      FORBID_TAGS: ['style', 'iframe', 'object', 'embed'],
+      FORBID_ATTR: ['style'],
+    })
+  }, [value])
 
   return (
     <div className="space-y-2">
@@ -100,7 +90,7 @@ export default function MarkdownEditor({ value, onChange, placeholder }: Props) 
         />
         {showPreview && (
           <div className="glass w-full px-4 py-3 min-h-[220px] md-preview"
-               dangerouslySetInnerHTML={{ __html: renderMarkdown(value) }} />
+               dangerouslySetInnerHTML={{ __html: previewHtml }} />
         )}
       </div>
     </div>

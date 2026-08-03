@@ -7,14 +7,22 @@ local development and tests keep working without a real email provider.
 
 from __future__ import annotations
 
+import hashlib
 import html
+import time
+import uuid
 
 import httpx
+import sentry_sdk
 
 from ..core.config import get_settings
-
+from ..core.email_metrics import EMAIL_DELIVERY_ATTEMPTS, EMAIL_DELIVERY_OUTCOMES
+from ..core.logging import get_logger
 
 RESEND_API_URL = "https://api.resend.com/emails"
+MAX_DELIVERY_ATTEMPTS = 3
+RETRY_DELAYS_SECONDS = (0.25, 0.75)
+logger = get_logger(component="transactional_email")
 
 
 class EmailDeliveryError(RuntimeError):
@@ -30,15 +38,42 @@ def _from_address() -> str:
     return from_email
 
 
-def _send_email(to_email: str, *, subject: str, text_body: str, html_body: str | None = None) -> None:
+def _recipient_fingerprint(email: str) -> str:
+    """Stable correlation key that does not expose the recipient address."""
+    return hashlib.sha256(email.strip().lower().encode("utf-8")).hexdigest()[:12]
+
+
+def _is_retryable(exc: Exception) -> bool:
+    if isinstance(exc, (httpx.TimeoutException, httpx.NetworkError)):
+        return True
+    if isinstance(exc, httpx.HTTPStatusError):
+        return exc.response.status_code == 429 or exc.response.status_code >= 500
+    return False
+
+
+def _send_email(
+    to_email: str,
+    *,
+    subject: str,
+    text_body: str,
+    email_type: str,
+    html_body: str | None = None,
+) -> None:
     settings = get_settings()
     api_key = settings.RESEND_API_KEY
+    recipient_id = _recipient_fingerprint(to_email)
     if not api_key or not settings.RESEND_FROM_EMAIL:
         if settings.APP_ENV.lower() == "production":
-            raise EmailDeliveryError("Transactional email provider is not configured")
-        print(f"📧 [DEV] Email to {to_email}")
-        print(f"📧 [DEV] Subject: {subject}")
-        print(f"📧 [DEV] Body:\n{text_body}")
+            EMAIL_DELIVERY_OUTCOMES.labels(email_type=email_type, outcome="configuration_error").inc()
+            logger.error(
+                "email_delivery_configuration_error",
+                email_type=email_type,
+                recipient_id=recipient_id,
+            )
+            configuration_error = EmailDeliveryError("Transactional email provider is not configured")
+            sentry_sdk.capture_exception(configuration_error)
+            raise configuration_error
+        logger.info("email_delivery_skipped_in_development", email_type=email_type, recipient_id=recipient_id)
         return
 
     payload: dict[str, object] = {
@@ -53,13 +88,59 @@ def _send_email(to_email: str, *, subject: str, text_body: str, html_body: str |
     headers = {
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json",
+        # Retries after a lost response must not create duplicate code emails.
+        "Idempotency-Key": f"sweezy-{email_type}-{uuid.uuid4()}",
     }
-    try:
-        with httpx.Client(timeout=10) as client:
-            response = client.post(RESEND_API_URL, headers=headers, json=payload)
-            response.raise_for_status()
-    except Exception as exc:
-        raise EmailDeliveryError("Transactional email provider rejected the request") from exc
+    last_error: Exception | None = None
+    with httpx.Client(timeout=10) as client:
+        for attempt in range(1, MAX_DELIVERY_ATTEMPTS + 1):
+            EMAIL_DELIVERY_ATTEMPTS.labels(email_type=email_type).inc()
+            try:
+                response = client.post(RESEND_API_URL, headers=headers, json=payload)
+                response.raise_for_status()
+                provider_message_id = response.json().get("id") if response.content else None
+                EMAIL_DELIVERY_OUTCOMES.labels(email_type=email_type, outcome="accepted").inc()
+                logger.info(
+                    "email_delivery_accepted",
+                    email_type=email_type,
+                    recipient_id=recipient_id,
+                    attempt=attempt,
+                    provider_message_id=provider_message_id,
+                )
+                return
+            except (httpx.HTTPError, ValueError) as exc:
+                last_error = exc
+                retryable = _is_retryable(exc)
+                status_code = exc.response.status_code if isinstance(exc, httpx.HTTPStatusError) else None
+                if retryable and attempt < MAX_DELIVERY_ATTEMPTS:
+                    logger.warning(
+                        "email_delivery_retry",
+                        email_type=email_type,
+                        recipient_id=recipient_id,
+                        attempt=attempt,
+                        status_code=status_code,
+                    )
+                    time.sleep(RETRY_DELAYS_SECONDS[attempt - 1])
+                    continue
+                break
+
+    EMAIL_DELIVERY_OUTCOMES.labels(email_type=email_type, outcome="failed").inc()
+    delivery_error = EmailDeliveryError("Transactional email provider rejected the request")
+    logger.error(
+        "email_delivery_failed",
+        email_type=email_type,
+        recipient_id=recipient_id,
+        attempts=attempt,
+        retryable=_is_retryable(last_error) if last_error else False,
+        status_code=(
+            last_error.response.status_code
+            if isinstance(last_error, httpx.HTTPStatusError)
+            else None
+        ),
+        error_type=type(last_error).__name__ if last_error else None,
+    )
+    sentry_sdk.capture_exception(delivery_error)
+    raise delivery_error from last_error
 
 
 def _code_email_html(*, heading: str, intro: str, code: str, expires_minutes: int, footer: str) -> str:
@@ -100,7 +181,13 @@ def send_verification_code_email(to_email: str, code: str, expires_minutes: int)
         expires_minutes=expires_minutes,
         footer="Якщо ви не створювали акаунт у Sweezy, просто проігноруйте цей лист.",
     )
-    _send_email(to_email, subject=subject, text_body=text_body, html_body=html_body)
+    _send_email(
+        to_email,
+        subject=subject,
+        text_body=text_body,
+        html_body=html_body,
+        email_type="verification",
+    )
 
 
 def send_password_reset_code_email(to_email: str, code: str, expires_minutes: int) -> None:
@@ -119,4 +206,10 @@ def send_password_reset_code_email(to_email: str, code: str, expires_minutes: in
         expires_minutes=expires_minutes,
         footer="Якщо ви не запитували зміну пароля, просто проігноруйте цей лист.",
     )
-    _send_email(to_email, subject=subject, text_body=text_body, html_body=html_body)
+    _send_email(
+        to_email,
+        subject=subject,
+        text_body=text_body,
+        html_body=html_body,
+        email_type="password_reset",
+    )

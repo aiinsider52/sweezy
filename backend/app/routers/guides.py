@@ -2,7 +2,7 @@ from typing import List
 
 from fastapi import APIRouter, HTTPException, Query, Request
 
-from ..dependencies import CurrentAdmin, DBSession
+from ..dependencies import CurrentAdmin, DBSession, OptionalAdmin
 from ..schemas import GuideCreate, GuideOut, GuideUpdate
 from ..services import GuideService
 
@@ -13,26 +13,29 @@ router = APIRouter()
 @router.get("/", response_model=List[GuideOut])
 def list_guides(
     db: DBSession,
+    is_admin: OptionalAdmin,
     offset: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
     status: str | None = None,
     include_drafts: bool = False,
 ) -> list[GuideOut]:
+    if (include_drafts or (status and status != "published")) and not is_admin:
+        raise HTTPException(status_code=403, detail="Admin access required")
     return GuideService.list(db, offset=offset, limit=limit, status=status, include_drafts=include_drafts)
 
 
 @router.get("/{guide_id}", response_model=GuideOut)
-def get_guide(guide_id: str, db: DBSession) -> GuideOut:
+def get_guide(guide_id: str, db: DBSession, is_admin: OptionalAdmin) -> GuideOut:
     obj = GuideService.get(db, guide_id)
-    if not obj:
+    if not obj or ((obj.status != "published" or not obj.is_published) and not is_admin):
         raise HTTPException(status_code=404, detail="Guide not found")
     return obj
 
 
 @router.get("/slug/{slug}", response_model=GuideOut)
-def get_guide_by_slug(slug: str, db: DBSession) -> GuideOut:
+def get_guide_by_slug(slug: str, db: DBSession, is_admin: OptionalAdmin) -> GuideOut:
     obj = GuideService.get_by_slug(db, slug)
-    if not obj:
+    if not obj or ((obj.status != "published" or not obj.is_published) and not is_admin):
         raise HTTPException(status_code=404, detail="Guide not found")
     return obj
 

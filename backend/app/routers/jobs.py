@@ -503,6 +503,8 @@ def get_employer_profile(user: CurrentUser, db: DBSession):
 def create_employer_job(
     request: Request, payload: EmployerJobCreate, user: CurrentUser, db: DBSession
 ):
+    if not user.email_verified:
+        raise HTTPException(status_code=403, detail="Verify your email before creating a job")
     profile = db.get(JobEmployerProfile, user.id)
     if not profile:
         raise HTTPException(status_code=409, detail="Create employer profile first")

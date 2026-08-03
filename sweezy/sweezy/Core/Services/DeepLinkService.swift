@@ -90,74 +90,91 @@ class DeepLinkService: ObservableObject {
     
     // MARK: - URL Parsing
     
-    private func parse(url: URL) -> DeepLink? {
-        // Universal link: https://sweezy.app/guide/abc123
-        // URL scheme: sweezy://guide/abc123
-        
-        let components = URLComponents(url: url, resolvingAgainstBaseURL: true)
-        guard let host = components?.host ?? url.host else {
+    func parse(url: URL) -> DeepLink? {
+        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
+              components.user == nil, components.password == nil, components.fragment == nil,
+              let scheme = components.scheme?.lowercased(),
+              let rawHost = components.host?.lowercased() else { return nil }
+        let rawPath = components.path.split(separator: "/").map(String.init)
+        let host: String
+        let path: [String]
+        switch scheme {
+        case "https":
+            guard rawHost == "sweezy.app" || rawHost == "www.sweezy.app",
+                  let route = rawPath.first else { return nil }
+            host = route.lowercased()
+            path = Array(rawPath.dropFirst())
+        case "sweezy":
+            host = rawHost
+            path = rawPath
+        default:
             return nil
         }
-        let path: [String] = components?.path.split(separator: "/").map(String.init) ?? url.pathComponents.filter { $0 != "/" }
+        func validID(_ value: String) -> Bool {
+            (1...128).contains(value.count) &&
+            value.unicodeScalars.allSatisfy { CharacterSet.alphanumerics.union(CharacterSet(charactersIn: "-_")).contains($0) }
+        }
         
         // Parse based on host/path
         switch host {
         case "guide", "guides":
-            if let id = path.first {
+            if path.count == 1, let id = path.first, validID(id) {
                 return .guide(id: id)
             }
             
         case "checklist", "checklists":
-            if let id = path.first {
+            if path.count == 1, let id = path.first, validID(id) {
                 return .checklist(id: id)
             }
             
         case "template", "templates":
-            if let id = path.first {
+            if path.count == 1, let id = path.first, validID(id) {
                 return .template(id: id)
             }
             
         case "place", "places":
-            if let id = path.first {
+            if path.count == 1, let id = path.first, validID(id) {
                 return .place(id: id)
             }
             
         case "map":
-            let filter = components?.queryItems?.first(where: { $0.name == "filter" })?.value
+            guard path.isEmpty else { return nil }
+            let filter = components.queryItems?.first(where: { $0.name == "filter" })?.value
             return .map(filter: filter)
             
         case "calculator":
-            return .calculator
+            guard path.isEmpty else { return nil }; return .calculator
             
         case "appointments":
-            return .appointments
+            guard path.isEmpty else { return nil }; return .appointments
             
         case "news":
-            return .news
+            guard path.isEmpty else { return nil }; return .news
 
         case "chat":
-            if let id = path.first { return .chat(id: id) }
+            if path.count == 1, let id = path.first, validID(id) { return .chat(id: id) }
             
         case "settings":
-            if path.contains("profile") {
+            if path == ["profile"] {
                 return .profile
-            } else if path.contains("privacy") {
+            } else if path == ["privacy"] {
                 return .privacy
-            } else if path.contains("language") {
+            } else if path == ["language"] {
                 return .language
             }
-            return .settings
+            guard path.isEmpty else { return nil }; return .settings
         
         case "auth", "password", "reset":
-            // Support: https://sweezy.app/auth/reset?token=XYZ and sweezy://auth/reset?token=XYZ
-            let token = components?.queryItems?.first(where: { $0.name == "token" })?.value ?? path.last
-            return .passwordReset(token: token)
+            guard (host == "auth" && path == ["reset"]) ||
+                    ((host == "password" || host == "reset") && path.isEmpty) else { return nil }
+            // Never accept OTP/reset credentials from a URL; users enter the code in-app.
+            return .passwordReset(token: nil)
             
         case "onboarding":
-            return .onboarding
+            guard path.isEmpty else { return nil }; return .onboarding
             
         case "whats-new":
-            return .whatsNew
+            guard path.isEmpty else { return nil }; return .whatsNew
         
         default:
             break
@@ -216,8 +233,7 @@ class DeepLinkService: ObservableObject {
         case .language:
             return URL(string: "\(baseURL)/settings/language")
         
-        case .passwordReset(let token):
-            if let token { return URL(string: "\(baseURL)/auth/reset?token=\(token)") }
+        case .passwordReset:
             return URL(string: "\(baseURL)/auth/reset")
         
         case .onboarding:

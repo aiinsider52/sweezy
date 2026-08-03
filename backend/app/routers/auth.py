@@ -451,11 +451,13 @@ def reset_password(
 
 
 @router.post("/seed-admin")
+@limiter.limit("3/hour")
 def seed_admin(request: Request, db: Session = Depends(get_db)) -> dict:
     settings = get_settings()
     secret = request.headers.get("x-setup-secret")
-    allowed = [s for s in [settings.SETUP_SECRET, settings.SECRET_KEY, settings.JWT_SECRET_KEY] if s]
-    if not allowed or secret not in allowed:
+    if settings.APP_ENV.lower() == "production" and not settings.SETUP_SECRET:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
+    if not settings.SETUP_SECRET or not secret or not __import__("hmac").compare_digest(secret, settings.SETUP_SECRET):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
     seed_admin_user(db)
     return {"status": "ok"}

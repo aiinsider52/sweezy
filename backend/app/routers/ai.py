@@ -234,7 +234,7 @@ def _generate_ask_answer(payload: AskSweezyRequest, documents: list[AskSweezyDoc
         return _fallback_answer(payload, documents)
 
 
-@router.post("/ask-sweezy", response_model=AskSweezyResponse)
+@router.post("/ask-sweezy", response_model=AskSweezyResponse, dependencies=[require_premium()])
 @limiter.limit("6/minute")
 def ask_sweezy(request: Request, payload: AskSweezyRequest, db: Session = Depends(get_db)) -> AskSweezyResponse:
     documents = _rank_documents(payload, db)

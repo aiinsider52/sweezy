@@ -35,8 +35,16 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = Field(default=60 * 24, alias="JWT_EXPIRE_MINUTES")
     REFRESH_TOKEN_EXPIRE_DAYS: int = Field(default=7)
 
-    # Media and telemetry abuse controls
-    MEDIA_MAX_UPLOAD_BYTES: int = Field(default=8 * 1024 * 1024)
+    # Private media storage. S3-compatible settings support AWS S3 and Cloudflare R2.
+    MEDIA_MAX_UPLOAD_BYTES: int = Field(default=8 * 1024 * 1024, ge=1, le=25 * 1024 * 1024)
+    MEDIA_LOCAL_DIR: str = Field(default="backend/uploads")
+    MEDIA_S3_BUCKET: str | None = Field(default=None)
+    MEDIA_S3_REGION: str = Field(default="auto")
+    MEDIA_S3_ENDPOINT_URL: str | None = Field(default=None)
+    MEDIA_S3_ACCESS_KEY_ID: str | None = Field(default=None)
+    MEDIA_S3_SECRET_ACCESS_KEY: str | None = Field(default=None)
+    MEDIA_S3_PREFIX: str = Field(default="media")
+    MEDIA_SIGNED_URL_TTL_SECONDS: int = Field(default=300, ge=60, le=3600)
     TELEMETRY_MAX_BATCH_SIZE: int = Field(default=50)
 
     # Marketplace chat realtime and push notifications
@@ -76,6 +84,7 @@ class Settings(BaseSettings):
     SETUP_SECRET: Optional[str] = None
     # Fallback for setups that already use SECRET_KEY
     SECRET_KEY: Optional[str] = None
+    STRIPE_REDIRECT_ORIGINS: str | None = None
 
     # Sentry
     SENTRY_DSN: Optional[str] = None
@@ -119,6 +128,15 @@ class Settings(BaseSettings):
         return [part.strip() for part in s.split(",") if part.strip()]
 
     def assert_valid(self) -> None:
+        media_credentials = (
+            self.MEDIA_S3_BUCKET,
+            self.MEDIA_S3_ACCESS_KEY_ID,
+            self.MEDIA_S3_SECRET_ACCESS_KEY,
+        )
+        if any(media_credentials) and not all(media_credentials):
+            raise RuntimeError("MEDIA_S3_BUCKET and media S3 credentials must be configured together")
+        if self.MEDIA_S3_ENDPOINT_URL and not self.MEDIA_S3_ENDPOINT_URL.startswith("https://"):
+            raise RuntimeError("MEDIA_S3_ENDPOINT_URL must use HTTPS")
         if self.APP_ENV.lower() == "production":
             if (
                 not self.JWT_SECRET_KEY

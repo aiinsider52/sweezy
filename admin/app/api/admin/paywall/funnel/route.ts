@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from "next/server"
+import { serverFetch } from "@/lib/server"
 
 export async function GET(req: NextRequest) {
-  const base = process.env.NEXT_PUBLIC_API_BASE || process.env.API_BASE || "https://sweezy-9xyk.onrender.com"
-  const url = new URL(`${base}/api/v1/admin/paywall/funnel`)
   const days = req.nextUrl.searchParams.get("days") || "30"
-  url.searchParams.set("days", days)
   try {
-    const r = await fetch(url.toString(), { cache: "no-store", headers: { "x-admin": "1" } })
+    const r = await serverFetch(`/admin/paywall/funnel?days=${encodeURIComponent(days)}`)
     const data = await r.json().catch(() => ({}))
     return NextResponse.json(data, { status: r.status })
   } catch {

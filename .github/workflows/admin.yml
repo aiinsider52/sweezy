@@ -1,5 +1,8 @@
 name: admin-ci
 
+permissions:
+  contents: read
+
 on:
   push:
     paths:
@@ -21,8 +24,8 @@ jobs:
       run:
         working-directory: admin
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/setup-node@1e60f620b9541dba90f7a17293d10a07c6c3e405 # v4
         with:
           node-version: '20'
           cache: npm

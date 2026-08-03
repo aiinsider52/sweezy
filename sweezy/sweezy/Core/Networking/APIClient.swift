@@ -1005,9 +1005,13 @@ enum APIClient {
         guard let http = resp as? HTTPURLResponse else { throw URLError(.badServerResponse) }
         AppLogger.auth("password/forgot status = \(http.statusCode)")
         guard (200..<300).contains(http.statusCode) else {
+            #if DEBUG
             if let body = String(data: data, encoding: .utf8) {
                 AppLogger.auth("password/forgot error body: \(body)", isError: true)
             }
+            #else
+            AppLogger.auth("password/forgot failed with status \(http.statusCode)", isError: true)
+            #endif
             throw makeAPIError(data: data, response: http, fallback: "Password reset request failed")
         }
         return try JSONDecoder().decode(AuthStatusResponse.self, from: data)

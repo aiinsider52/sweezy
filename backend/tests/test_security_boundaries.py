@@ -63,19 +63,26 @@ def test_media_upload_requires_authentication() -> None:
     assert response.status_code in {401, 403}
 
 
-def test_media_upload_ignores_attacker_filename_and_validates_content() -> None:
+def test_media_upload_rejects_unsafe_filename_and_validates_content() -> None:
     headers = _authenticated_headers()
+    unsafe = client.post(
+        "/api/v1/media/upload",
+        headers=headers,
+        files={"file": ("../../photo.jpg", BytesIO(b"\xff\xd8\xffpayload"), "image/jpeg")},
+    )
+    assert unsafe.status_code == 400
+
     invalid = client.post(
         "/api/v1/media/upload",
         headers=headers,
-        files={"file": ("../../shell.jpg", BytesIO(b"not-an-image"), "image/jpeg")},
+        files={"file": ("photo.jpg", BytesIO(b"not-an-image"), "image/jpeg")},
     )
     assert invalid.status_code == 415
 
     valid = client.post(
         "/api/v1/media/upload",
         headers=headers,
-        files={"file": ("../../photo.jpg", BytesIO(b"\xff\xd8\xffpayload"), "image/jpeg")},
+        files={"file": ("photo.jpg", BytesIO(b"\xff\xd8\xffpayload"), "image/jpeg")},
     )
     assert valid.status_code == 201
     body = valid.json()

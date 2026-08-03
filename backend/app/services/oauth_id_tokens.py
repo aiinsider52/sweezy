@@ -6,14 +6,16 @@ from time import monotonic
 from typing import Any
 
 import httpx
-from jose import jwt
+import jwt
+from jwt.algorithms import RSAAlgorithm
+from jwt.exceptions import InvalidTokenError
 
 from ..core.config import get_settings
-
 
 APPLE_JWKS_URL = "https://appleid.apple.com/auth/keys"
 GOOGLE_JWKS_URL = "https://www.googleapis.com/oauth2/v3/certs"
 JWKS_TTL_SECONDS = 60 * 60
+OAUTH_SIGNING_ALGORITHM = "RS256"
 
 _jwks_cache: dict[str, tuple[float, dict[str, Any]]] = {}
 
@@ -109,11 +111,16 @@ def _decode_provider_jwt(
     issuer_values: set[str],
     allowed_audiences: set[str],
 ) -> dict[str, Any]:
-    header = jwt.get_unverified_header(token)
+    try:
+        header = jwt.get_unverified_header(token)
+    except InvalidTokenError as exc:
+        raise OAuthIdentityError("Invalid identity token") from exc
     kid = str(header.get("kid") or "").strip()
-    alg = str(header.get("alg") or "RS256").strip()
+    alg = str(header.get("alg") or "").strip()
     if not kid:
         raise OAuthIdentityError("Missing token key id")
+    if alg != OAUTH_SIGNING_ALGORITHM:
+        raise OAuthIdentityError("Invalid token algorithm")
 
     jwks = _load_jwks(jwks_url)
     key = next((item for item in jwks.get("keys", []) if item.get("kid") == kid), None)
@@ -121,26 +128,17 @@ def _decode_provider_jwt(
         raise OAuthIdentityError("Unknown signing key")
 
     try:
+        signing_key = RSAAlgorithm.from_jwk(key)
         claims = jwt.decode(
             token,
-            key,
-            algorithms=[alg],
-            options={"verify_aud": False},
+            signing_key,
+            algorithms=[OAUTH_SIGNING_ALGORITHM],
+            audience=list(allowed_audiences),
+            issuer=list(issuer_values),
+            options={"require": ["exp", "iat", "iss", "aud", "sub"]},
         )
-    except Exception as exc:
+    except (InvalidTokenError, TypeError, ValueError) as exc:
         raise OAuthIdentityError("Invalid identity token") from exc
-
-    issuer = str(claims.get("iss") or "").strip()
-    if issuer not in issuer_values:
-        raise OAuthIdentityError("Invalid token issuer")
-
-    audience_claim = claims.get("aud")
-    if isinstance(audience_claim, list):
-        audiences = {str(item).strip() for item in audience_claim if str(item).strip()}
-    else:
-        audiences = {str(audience_claim).strip()} if audience_claim else set()
-    if not audiences.intersection(allowed_audiences):
-        raise OAuthIdentityError("Invalid token audience")
 
     return claims
 

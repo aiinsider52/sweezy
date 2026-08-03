@@ -98,7 +98,8 @@ final class AppointmentRepository: ObservableObject {
             let directoryURL = localURL.deletingLastPathComponent()
             try fileManager.createDirectory(at: directoryURL, withIntermediateDirectories: true, attributes: nil)
             let data = try encoder.encode(sortedAppointments(appointments))
-            try data.write(to: localURL, options: .atomic)
+            try data.write(to: localURL, options: [.atomic, .completeFileProtection])
+            ProtectedLocalStore.protectExistingFile(at: localURL)
         } catch {
             AppLogger.error("Failed to save appointments locally: \(error)")
         }
@@ -124,6 +125,7 @@ final class AppointmentRepository: ObservableObject {
         }
 
         do {
+            ProtectedLocalStore.protectExistingFile(at: localURL)
             let data = try Data(contentsOf: localURL)
             appointments = try decodeAppointments(from: data)
         } catch {

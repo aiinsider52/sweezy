@@ -1,7 +1,7 @@
 from typing import Dict, List, Optional
 from fastapi import APIRouter, HTTPException
 
-from ..dependencies import DBSession, CurrentUser, require_roles
+from ..dependencies import DBSession, CurrentUser, OptionalAdmin, require_roles
 from ..models.translation import Translation
 from ..models.glossary import GlossaryTerm
 
@@ -11,6 +11,7 @@ router = APIRouter()
 @router.get("/", response_model=List[Dict])
 def list_translations(
     db: DBSession,
+    is_admin: OptionalAdmin,
     entity: Optional[str] = None,
     language: Optional[str] = None,
     status: Optional[str] = None,
@@ -21,8 +22,12 @@ def list_translations(
         q = q.filter(Translation.entity == entity)
     if language:
         q = q.filter(Translation.language == language)
+    if status and status != "approved" and not is_admin:
+        raise HTTPException(status_code=403, detail="Admin access required")
     if status:
         q = q.filter(Translation.status == status)
+    elif not is_admin:
+        q = q.filter(Translation.status == "approved")
     rows = q.order_by(Translation.updated_at.desc()).limit(limit).all()
     return [
         {

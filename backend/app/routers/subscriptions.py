@@ -12,6 +12,8 @@ from ..dependencies import CurrentUser, DBSession
 from ..core.database import db_session
 from ..models.user import User
 from ..services import stripe_service
+from ..core.config import get_settings
+from urllib.parse import urlparse
 
 router = APIRouter()
 
@@ -123,10 +125,20 @@ class CheckoutOut(BaseModel):
     url: str
 
 
+def _validate_redirect_url(value: str) -> None:
+    parsed = urlparse(value)
+    origin = f"{parsed.scheme}://{parsed.netloc}"
+    allowed = {item.strip().rstrip("/") for item in (get_settings().STRIPE_REDIRECT_ORIGINS or "").split(",") if item.strip()}
+    if parsed.scheme not in {"https", "sweezy"} or not parsed.netloc or origin not in allowed:
+        raise HTTPException(status_code=422, detail="Redirect URL is not allowed")
+
+
 @router.post("/checkout", response_model=CheckoutOut)
 def create_checkout(payload: CheckoutIn, db: DBSession, user: CurrentUser) -> CheckoutOut:
     if payload.plan not in {"monthly", "yearly"}:
         raise HTTPException(status_code=400, detail="Invalid plan")
+    _validate_redirect_url(payload.success_url)
+    _validate_redirect_url(payload.cancel_url)
     try:
         url = stripe_service.create_checkout_session(
             db,

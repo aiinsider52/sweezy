@@ -7,7 +7,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Any
 
 import httpx
-from jose import jwt
+import jwt
 from sqlalchemy import delete, func, or_, select
 
 from ..core.chat_metrics import CHAT_PUSH_DELIVERIES
@@ -15,7 +15,6 @@ from ..core.config import get_settings
 from ..core.database import SessionLocal
 from ..core.logging import get_logger
 from ..models.chat import ChatMessage, ChatParticipant, NotificationOutbox, PushDevice
-
 
 log = get_logger(module="push_notifications")
 

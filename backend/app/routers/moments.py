@@ -91,9 +91,31 @@ def list_moments(
 
 
 @router.get("/{moment_id}", response_model=SwissMomentResponse)
-def get_moment(moment_id: str, db: DBSession) -> SwissMomentResponse:
+def get_moment(
+    moment_id: str, db: DBSession, canton: Optional[str] = None, permit: Optional[str] = None,
+    tenure_months: Optional[int] = Query(None, ge=0), has_children: Optional[bool] = None,
+    life_events: Optional[str] = None,
+) -> SwissMomentResponse:
+    return _get_moment_for_audience(
+        moment_id, db, canton, permit, tenure_months, has_children, life_events
+    )
+
+
+def _get_moment_for_audience(
+    moment_id: str,
+    db: DBSession,
+    canton: Optional[str] = None,
+    permit: Optional[str] = None,
+    tenure_months: Optional[int] = None,
+    has_children: Optional[bool] = None,
+    life_events: Optional[str] = None,
+) -> SwissMomentResponse:
     moment = db.get(SwissMoment, moment_id)
-    if not moment or not moment.is_active:
+    events = [e.strip() for e in (life_events.split(",") if life_events else []) if e.strip()]
+    if not moment or not moment.is_active or not _matches_audience(
+        moment.audience_filters or {}, canton=canton, permit=permit, tenure_months=tenure_months,
+        has_children=has_children, life_events=events,
+    ):
         raise HTTPException(status_code=404, detail="Moment not found")
     return SwissMomentResponse.model_validate(moment)
 

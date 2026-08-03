@@ -73,7 +73,7 @@ final class AnalyticsService: AnalyticsServiceProtocol {
             "events": [
                 [
                     "event_type": event,
-                    "user_id": defaults.string(forKey: "user.id") ?? "anon",
+                    "user_id": KeychainStore.get("user_id") ?? "anon",
                     "event_properties": properties ?? [:],
                     "time": Int(Date().timeIntervalSince1970 * 1000)
                 ]

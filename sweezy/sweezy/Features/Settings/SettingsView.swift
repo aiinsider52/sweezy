@@ -7,6 +7,7 @@ import SwiftUI
 import StoreKit
 import UniformTypeIdentifiers
 import Combine
+import CryptoKit
 
 struct SettingsView: View {
     @EnvironmentObject private var appContainer: AppContainer
@@ -1125,12 +1126,13 @@ private extension SettingsView {
         let places: [Place]
         let benefitRules: [BenefitRule]
         let news: [NewsItem]
+        var integrity: String?
     }
     
     func prepareExport() {
         let locale = appContainer.currentLocale.identifier
         let backup = SweezyBackup(
-            version: "1",
+            version: "2",
             createdAt: Date(),
             locale: locale,
             userProfile: appContainer.userProfile,
@@ -1139,11 +1141,14 @@ private extension SettingsView {
             checklists: (appContainer.contentService as? ContentService)?.checklists ?? [],
             places: (appContainer.contentService as? ContentService)?.places ?? [],
             benefitRules: (appContainer.contentService as? ContentService)?.benefitRules ?? [],
-            news: (appContainer.contentService as? ContentService)?.news ?? []
+            news: (appContainer.contentService as? ContentService)?.news ?? [],
+            integrity: nil
         )
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-        if let data = try? encoder.encode(backup) {
+        var signedBackup = backup
+        signedBackup.integrity = backupDigest(backup)
+        if let data = try? encoder.encode(signedBackup) {
             exportDocument = SweezyBackupDocument(data: data)
             showingExporter = true
         }
@@ -1153,9 +1158,31 @@ private extension SettingsView {
         guard url.startAccessingSecurityScopedResource() else { return }
         defer { url.stopAccessingSecurityScopedResource() }
         do {
-            let data = try Data(contentsOf: url)
+            let resourceValues = try url.resourceValues(forKeys: [.fileSizeKey, .isRegularFileKey])
+            guard resourceValues.isRegularFile == true,
+                  let size = resourceValues.fileSize, size > 0, size <= 10_000_000 else {
+                throw CocoaError(.fileReadTooLarge)
+            }
+            let data = try Data(contentsOf: url, options: [.mappedIfSafe])
             let decoder = JSONDecoder()
             let backup = try decoder.decode(SweezyBackup.self, from: data)
+            guard ["1", "2"].contains(backup.version),
+                  Locale.availableIdentifiers.contains(backup.locale),
+                  backup.guides.count <= 10_000,
+                  backup.templates.count <= 10_000,
+                  backup.checklists.count <= 10_000,
+                  backup.places.count <= 10_000,
+                  backup.benefitRules.count <= 10_000,
+                  backup.news.count <= 10_000 else {
+                throw CocoaError(.fileReadCorruptFile)
+            }
+            if backup.version == "2" {
+                guard let integrity = backup.integrity,
+                      let expected = backupDigest(backup),
+                      integrity == expected else {
+                    throw CocoaError(.fileReadCorruptFile)
+                }
+            }
             if let service = appContainer.contentService as? ContentService {
                 service.guides = backup.guides
                 service.templates = backup.templates
@@ -1174,6 +1201,15 @@ private extension SettingsView {
         } catch {
             AppLogger.error("Import failed: \(error)")
         }
+    }
+
+    func backupDigest(_ backup: SweezyBackup) -> String? {
+        var unsigned = backup
+        unsigned.integrity = nil
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.sortedKeys]
+        guard let data = try? encoder.encode(unsigned) else { return nil }
+        return SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined()
     }
     
     func persistToCache(service: ContentService) {

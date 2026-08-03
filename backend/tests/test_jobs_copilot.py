@@ -14,12 +14,19 @@ from backend.app.models.job import Job
 from backend.app.services.jobs_aggregator import (
     NormalizedJob,
     _fetch_jooble,
+    _salary_currency,
     _upsert_jobs,
     job_fingerprint,
 )
 from backend.app.services.users import UserService
 
 client = TestClient(app)
+
+
+def test_salary_currency_preserves_provider_currency() -> None:
+    assert _salary_currency("€ 33 - € 36 pro Stunde") == "EUR"
+    assert _salary_currency("CHF 95'000 pro Jahr") == "CHF"
+    assert _salary_currency("$ 120,000 per year") == "USD"
 
 
 def test_jooble_uses_localized_api_endpoint(monkeypatch) -> None:

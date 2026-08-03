@@ -118,6 +118,7 @@ class NormalizedJob:
     salary_text: str | None = None
     salary_min: int | None = None
     salary_max: int | None = None
+    salary_currency: str = "CHF"
     salary_period: str | None = None
     posted_at: datetime | None = None
     source_updated_at: datetime | None = None
@@ -276,6 +277,17 @@ def _parse_salary(value: str | None) -> tuple[int | None, int | None, str | None
     return min(numbers), max(numbers), period
 
 
+def _salary_currency(value: str | None, default: str = "CHF") -> str:
+    text = (value or "").upper()
+    if "EUR" in text or "€" in text:
+        return "EUR"
+    if "USD" in text or "$" in text:
+        return "USD"
+    if "GBP" in text or "£" in text:
+        return "GBP"
+    return "CHF" if "CHF" in text else default
+
+
 def _source_id(
     source: str, raw_id: Any, url: str, title: str, company: str | None
 ) -> str:
@@ -353,6 +365,7 @@ async def _fetch_jooble(client: httpx.AsyncClient) -> list[NormalizedJob]:
                         salary_text=salary_text,
                         salary_min=salary_min,
                         salary_max=salary_max,
+                        salary_currency=_salary_currency(salary_text),
                         salary_period=salary_period,
                         languages=_infer_languages(description or ""),
                         permit_requirements=permits,
@@ -489,6 +502,9 @@ async def _fetch_lever(client: httpx.AsyncClient) -> list[NormalizedJob]:
                     salary_text=salary_text,
                     salary_min=salary_range.get("min"),
                     salary_max=salary_range.get("max"),
+                    salary_currency=_salary_currency(
+                        salary_text, str(salary_range.get("currency") or "CHF")[:3]
+                    ),
                     salary_period=salary_range.get("interval"),
                     languages=_infer_languages(description or ""),
                     permit_requirements=permits,
@@ -635,6 +651,7 @@ def _upsert_jobs(
         job.salary_text = item.salary_text
         job.salary_min = item.salary_min
         job.salary_max = item.salary_max
+        job.salary_currency = item.salary_currency
         job.salary_period = item.salary_period
         job.posted_at = item.posted_at or job.posted_at
         job.source_updated_at = item.source_updated_at or job.source_updated_at

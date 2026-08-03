@@ -11,12 +11,17 @@ router = APIRouter()
 
 
 @router.get("/", response_model=List[AppointmentOut])
-def list_appointments(db: DBSession, offset: int = Query(0, ge=0), limit: int = Query(100, ge=1, le=1000)) -> list[AppointmentOut]:
+def list_appointments(
+    db: DBSession,
+    _: CurrentAdmin,
+    offset: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=1000),
+) -> list[AppointmentOut]:
     return AppointmentService.list(db, offset=offset, limit=limit)
 
 
 @router.get("/{appointment_id}", response_model=AppointmentOut)
-def get_appointment(appointment_id: str, db: DBSession) -> AppointmentOut:
+def get_appointment(appointment_id: str, db: DBSession, _: CurrentAdmin) -> AppointmentOut:
     obj = AppointmentService.get(db, appointment_id)
     if not obj:
         raise HTTPException(status_code=404, detail="Appointment not found")

@@ -4,8 +4,13 @@ import socket
 
 import httpx
 import pytest
+from fastapi.testclient import TestClient
 
 from backend.app.core.url_security import fetch_public_url, validate_public_http_url
+from backend.app.main import app
+
+
+client = TestClient(app)
 
 
 @pytest.mark.parametrize(
@@ -57,3 +62,8 @@ def test_import_response_size_is_limited(monkeypatch: pytest.MonkeyPatch) -> Non
     )
     with httpx.Client(transport=transport) as client, pytest.raises(ValueError):
         fetch_public_url(client, "https://example.com/feed", max_bytes=10)
+
+
+@pytest.mark.parametrize("path", ["/api/v1/appointments/", "/api/v1/appointments/unknown"])
+def test_appointments_are_not_public(path: str) -> None:
+    assert client.get(path).status_code == 401

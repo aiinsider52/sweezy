@@ -6,11 +6,19 @@ on:
   pull_request:
     branches: [ main ]
 
+concurrency:
+  group: ios-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: macos-15
+    timeout-minutes: 35
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       - name: Select Xcode
         run: sudo xcode-select -s "/Applications/Xcode_16.4.app/Contents/Developer"
       - name: List projects

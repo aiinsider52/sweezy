@@ -17,6 +17,9 @@ struct JourneyDirectoryView: View {
     @State private var isSchedulingReminders = false
     @State private var reminderMessage: String?
     @State private var contentRevision = 0
+    #if DEBUG
+    @State private var didApplyUITestRoute = false
+    #endif
 
     private let featuredCategories: [(GuideCategory?, String, String)] = [
         (nil, "common.all".localized, "sparkles"),
@@ -90,12 +93,17 @@ struct JourneyDirectoryView: View {
             .navigationBarHidden(true)
             .navigationDestination(item: $selectedGuide) { guide in
                 GuideDetailView(guide: guide)
+                    .interactiveSwipeBackEnabled()
             }
             .navigationDestination(item: $selectedChecklist) { checklist in
                 ChecklistDetailView(checklist: checklist)
+                    .interactiveSwipeBackEnabled()
             }
             .navigationDestination(item: $selectedTool) { route in
                 toolDestination(route)
+                    .interactiveSwipeBackEnabled {
+                        selectedTool = nil
+                    }
             }
             .task {
                 if appContainer.contentService.guides.isEmpty || appContainer.contentService.checklists.isEmpty {
@@ -115,6 +123,14 @@ struct JourneyDirectoryView: View {
                 if let raw = UserDefaults.standard.string(forKey: "screenshotDirectoryWorkspace"),
                    let workspace = JourneyDirectoryWorkspace(rawValue: raw) {
                     selectedWorkspace = workspace
+                }
+                if !didApplyUITestRoute,
+                   ProcessInfo.processInfo.arguments.contains("--ui-test-cv-builder") {
+                    didApplyUITestRoute = true
+                    selectedWorkspace = .tools
+                    DispatchQueue.main.async {
+                        selectedTool = .cv
+                    }
                 }
                 #endif
             }
@@ -380,7 +396,9 @@ struct JourneyDirectoryView: View {
         case .appointments: AppointmentsView()
         case .digest: WeeklyDigestView()
         case .jobs: JobsView()
-        case .cv: CVBuilderView()
+        case .cv: CVBuilderView {
+            selectedTool = nil
+        }
         case .templates: TemplatesView()
         case .calculator: BenefitsCalculatorView()
         case .cityHub: CityHubView(hub: CityHubData.zurich)

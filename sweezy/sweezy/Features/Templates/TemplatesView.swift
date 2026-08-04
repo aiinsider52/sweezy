@@ -43,8 +43,7 @@ struct TemplatesView: View {
     }
     
     var body: some View {
-        NavigationStack {
-            ZStack {
+        ZStack {
                 JourneyPhotoBackground(imageName: JourneyBackdrop.city.rawValue, blurRadius: 7, darkness: 0.68)
                 
                 VStack(spacing: 0) {
@@ -55,24 +54,23 @@ struct TemplatesView: View {
                 
                     contentSection
                 }
-            }
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: { dismiss() }) {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.title3)
-                            .foregroundStyle(.white.opacity(0.7))
-                    }
-                }
-            }
-            .task {
-                if appContainer.contentService.templates.isEmpty {
-                    await appContainer.contentService.refreshContent()
-                }
-            }
-            .featureOnboarding(.templates)
         }
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button(action: { dismiss() }) {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.title3)
+                        .foregroundStyle(.white.opacity(0.7))
+                }
+            }
+        }
+        .task {
+            if appContainer.contentService.templates.isEmpty {
+                await appContainer.contentService.refreshContent()
+            }
+        }
+        .featureOnboarding(.templates)
         .journeyScreen(.city, darkness: 0.68)
     }
     
@@ -410,6 +408,7 @@ struct TemplateDetailView: View {
         }
         .navigationTitle(template.title)
         .navigationBarTitleDisplayMode(.inline)
+        .interactiveSwipeBackEnabled()
         .journeyScreen(.city, darkness: 0.72)
         .sheet(isPresented: $showingPreview) {
             DocumentPreviewView(

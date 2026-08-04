@@ -21,8 +21,7 @@ struct BenefitsCalculatorView: View {
     @State private var showingResults: Bool = false
     
     var body: some View {
-        NavigationStack {
-            ScrollView {
+        ScrollView {
                 VStack(spacing: Theme.Spacing.lg) {
                     // Header
                     headerSection
@@ -42,18 +41,17 @@ struct BenefitsCalculatorView: View {
                     disclaimerSection
                 }
                 .padding(Theme.Spacing.md)
-            }
-            .navigationTitle("calculator.title".localized)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("common.close".localized) {
-                        dismiss()
-                    }
+        }
+        .navigationTitle("calculator.title".localized)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button("common.close".localized) {
+                    dismiss()
                 }
             }
-            .featureOnboarding(.calculator)
         }
+        .featureOnboarding(.calculator)
         .journeyScreen(.alpine, darkness: 0.68)
     }
     

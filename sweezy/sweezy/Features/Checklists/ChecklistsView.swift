@@ -868,6 +868,7 @@ struct ChecklistDetailView: View {
         }
         .navigationTitle(checklist.title)
         .navigationBarTitleDisplayMode(.inline)
+        .interactiveSwipeBackEnabled()
         .journeyScreen(.alpine, darkness: 0.7)
         .onAppear {
             reloadCompletedSteps()

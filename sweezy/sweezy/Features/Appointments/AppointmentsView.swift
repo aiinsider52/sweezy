@@ -25,8 +25,7 @@ struct AppointmentsView: View {
     }
     
     var body: some View {
-        NavigationStack {
-            VStack(spacing: 0) {
+        VStack(spacing: 0) {
                 // Segment control
                 Picker("Appointments", selection: $selectedSegment) {
                     ForEach(0..<segments.count, id: \.self) { index in
@@ -39,34 +38,33 @@ struct AppointmentsView: View {
                 
                 // Appointments list
                 appointmentsListSection
-            }
-            .navigationTitle("appointments.title".localized)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("common.close".localized) {
-                        dismiss()
-                    }
-                }
-                
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: { showingAddAppointment = true }) {
-                        Image(systemName: "plus")
-                    }
-                }
-            }
-            .sheet(isPresented: $showingAddAppointment) {
-                AddAppointmentView { appointment in
-                    repository.add(appointment)
-                }
-            }
-            .sheet(item: $editingAppointment) { appointment in
-                AddAppointmentView(appointment: appointment) { updatedAppointment in
-                    repository.update(updatedAppointment)
-                }
-            }
-            .featureOnboarding(.appointments)
         }
+        .navigationTitle("appointments.title".localized)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button("common.close".localized) {
+                    dismiss()
+                }
+            }
+
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button(action: { showingAddAppointment = true }) {
+                    Image(systemName: "plus")
+                }
+            }
+        }
+        .sheet(isPresented: $showingAddAppointment) {
+            AddAppointmentView { appointment in
+                repository.add(appointment)
+            }
+        }
+        .sheet(item: $editingAppointment) { appointment in
+            AddAppointmentView(appointment: appointment) { updatedAppointment in
+                repository.update(updatedAppointment)
+            }
+        }
+        .featureOnboarding(.appointments)
         .journeyScreen(.city, darkness: 0.66)
     }
     

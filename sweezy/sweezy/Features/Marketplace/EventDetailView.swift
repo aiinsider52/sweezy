@@ -37,6 +37,7 @@ struct EventDetailView: View {
 
             closeButton
         }
+        .interactiveSwipeBackEnabled()
         .preferredColorScheme(.dark)
         .task { await loadDetail() }
         .safeAreaInset(edge: .bottom) {

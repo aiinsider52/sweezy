@@ -38,6 +38,7 @@ struct ChatInboxView: View {
         } message: {
             Text(appContainer.chatStore.errorMessage ?? "")
         }
+        .interactiveSwipeBackEnabled()
         .preferredColorScheme(.dark)
     }
 
@@ -345,6 +346,7 @@ struct ChatConversationView: View {
         )) {
             Button("common.ok".localized, role: .cancel) { actionMessage = nil }
         } message: { Text(actionMessage ?? "") }
+        .interactiveSwipeBackEnabled()
         .preferredColorScheme(.dark)
     }
 

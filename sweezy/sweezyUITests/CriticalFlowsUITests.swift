@@ -125,6 +125,44 @@ final class CriticalFlowsUITests: XCTestCase {
     }
 
     @MainActor
+    func testCVBuilderSupportsBackButtonAndInteractiveSwipe() throws {
+        var app = launchCVBuilder()
+        let directory = app.descendants(matching: .any)["directory.screen"]
+        let backButton = app.buttons["cv.builder.back"]
+        XCTAssertTrue(backButton.waitForExistence(timeout: 10))
+        app.coordinate(withNormalizedOffset: CGVector(dx: 0.09, dy: 0.085)).tap()
+        XCTAssertTrue(directory.waitForExistence(timeout: 10))
+        XCTAssertFalse(backButton.exists)
+
+        app.terminate()
+        app = launchCVBuilder()
+        XCTAssertTrue(app.buttons["cv.builder.back"].waitForExistence(timeout: 10))
+
+        let start = app.coordinate(withNormalizedOffset: CGVector(dx: 0.01, dy: 0.5))
+        let end = app.coordinate(withNormalizedOffset: CGVector(dx: 0.78, dy: 0.5))
+        start.press(forDuration: 0.05, thenDragTo: end, withVelocity: .fast, thenHoldForDuration: 0)
+
+        XCTAssertTrue(directory.waitForExistence(timeout: 10))
+        XCTAssertFalse(app.buttons["cv.builder.back"].exists)
+    }
+
+    @MainActor
+    private func launchCVBuilder() -> XCUIApplication {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "-onboarding_completed", "YES",
+            "-initial_auth_choice_completed", "YES",
+            "-screenshotTab", "1",
+            "-screenshotDirectoryWorkspace", "tools",
+            "--skip-feature-onboarding",
+            "--ui-test-cv-builder"
+        ]
+        app.launchEnvironment["UITESTS"] = "1"
+        app.launch()
+        return app
+    }
+
+    @MainActor
     private func launchCleanApp() -> XCUIApplication {
         let app = XCUIApplication()
         app.launchArguments = ["--reset-ui-test-state"]

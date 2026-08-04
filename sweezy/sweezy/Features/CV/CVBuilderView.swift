@@ -14,6 +14,11 @@ struct CVBuilderView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var appContainer: AppContainer
     @EnvironmentObject private var lockManager: AppLockManager
+    private let onClose: (() -> Void)?
+
+    init(onClose: (() -> Void)? = nil) {
+        self.onClose = onClose
+    }
     
     // Step-by-step navigation
     @State private var currentStep: CVStep = .personal
@@ -93,13 +98,13 @@ struct CVBuilderView: View {
     private let hasAIAccess: Bool = true
     
     var body: some View {
-        NavigationStack {
-            ZStack {
+        ZStack {
                 Color(red: 0.025, green: 0.03, blue: 0.028)
                     .ignoresSafeArea()
 
                 VStack(spacing: 0) {
                     cvTopBar
+                        .zIndex(20)
                     cvHero
 
                     TabView(selection: $currentStep) {
@@ -115,27 +120,36 @@ struct CVBuilderView: View {
 
                     navigationButtons
                 }
-            }
-            .navigationBarHidden(true)
-            .sheet(isPresented: $showTips) {
-                swissCVTipsSheet
-            }
-            .onAppear {
-                loadSavedCV()
-                loadSavedPhoto()
-                NotificationCenter.default.post(name: .setJourneyBottomBarHidden, object: true)
-            }
-            .onDisappear {
-                NotificationCenter.default.post(name: .setJourneyBottomBarHidden, object: false)
-            }
-            .onChange(of: selectedPhotoItem) { _, item in
-                guard let item else { return }
-                Task {
-                    if let data = try? await item.loadTransferable(type: Data.self) {
-                        await MainActor.run {
-                            selectedPhotoData = data
-                            saveSelectedPhoto(data)
-                        }
+        }
+        .navigationBarHidden(true)
+        .interactiveSwipeBackEnabled()
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 18, coordinateSpace: .global)
+                .onEnded { value in
+                    guard value.startLocation.x <= 28,
+                          value.translation.width >= 88,
+                          abs(value.translation.height) <= 90 else { return }
+                    closeScreen()
+                }
+        )
+        .sheet(isPresented: $showTips) {
+            swissCVTipsSheet
+        }
+        .onAppear {
+            loadSavedCV()
+            loadSavedPhoto()
+            NotificationCenter.default.post(name: .setJourneyBottomBarHidden, object: true)
+        }
+        .onDisappear {
+            NotificationCenter.default.post(name: .setJourneyBottomBarHidden, object: false)
+        }
+        .onChange(of: selectedPhotoItem) { _, item in
+            guard let item else { return }
+            Task {
+                if let data = try? await item.loadTransferable(type: Data.self) {
+                    await MainActor.run {
+                        selectedPhotoData = data
+                        saveSelectedPhoto(data)
                     }
                 }
             }
@@ -147,7 +161,7 @@ struct CVBuilderView: View {
     private var cvTopBar: some View {
         HStack(spacing: 12) {
             Button {
-                dismiss()
+                closeScreen()
             } label: {
                 Image(systemName: "chevron.left")
                     .font(.system(size: 17, weight: .bold))
@@ -157,7 +171,10 @@ struct CVBuilderView: View {
                     .clipShape(Circle())
                     .overlay(Circle().stroke(Color.white.opacity(0.14), lineWidth: 1))
             }
+            .buttonStyle(.plain)
+            .contentShape(Circle())
             .accessibilityLabel("Назад")
+            .accessibilityIdentifier("cv.builder.back")
 
             Spacer()
 
@@ -188,6 +205,14 @@ struct CVBuilderView: View {
         .padding(.horizontal, 16)
         .padding(.vertical, 8)
         .background(Color.black.opacity(0.3))
+    }
+
+    private func closeScreen() {
+        if let onClose {
+            onClose()
+        } else {
+            dismiss()
+        }
     }
 
     private var cvHero: some View {

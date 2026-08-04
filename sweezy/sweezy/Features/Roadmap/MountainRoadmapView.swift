@@ -52,6 +52,7 @@ struct MountainRoadmapView: View {
             }
         }
         .navigationBarBackButtonHidden(true)
+        .interactiveSwipeBackEnabled()
         .preferredColorScheme(.dark)
         .sheet(item: $selectedLevel) { level in
             LevelDetailSheet(

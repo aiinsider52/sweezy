@@ -712,7 +712,9 @@ struct GuideDetailView: View {
             GuidesShareSheet(items: [guide.title, guide.bodyMarkdown])
         }
         .sheet(item: $selectedTemplateFilter) { filter in
-            TemplatesView(initialTemplateIDs: filter.templateIDs)
+            NavigationStack {
+                TemplatesView(initialTemplateIDs: filter.templateIDs)
+            }
         }
         .sheet(item: $selectedMarketplaceCategory) { category in
             MarketplaceView(initialCategory: category)

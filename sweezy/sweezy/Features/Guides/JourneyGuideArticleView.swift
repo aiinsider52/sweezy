@@ -85,6 +85,7 @@ struct JourneyGuideArticleView: View {
             stickyHeader
         }
         .toolbar(.hidden, for: .navigationBar)
+        .interactiveSwipeBackEnabled()
         .onAppear {
             NotificationCenter.default.post(name: .setJourneyBottomBarHidden, object: true)
         }

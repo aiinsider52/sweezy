@@ -175,6 +175,7 @@ struct JobsView: View {
                 jobsAccessGate
             }
         }
+        .interactiveSwipeBackEnabled()
         .sheet(isPresented: $showAuthEntry) {
             AuthEntryView(showsCloseButton: true) {
                 showAuthEntry = false

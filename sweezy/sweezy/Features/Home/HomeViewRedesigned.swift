@@ -158,10 +158,12 @@ struct HomeViewRedesigned: View {
                 .environmentObject(lockManager)
         }
         .sheet(isPresented: $showTemplates) {
-            TemplatesView()
-                .environmentObject(appContainer)
-                .environmentObject(appContainer.accountManager)
-                .environmentObject(lockManager)
+            NavigationStack {
+                TemplatesView()
+                    .environmentObject(appContainer)
+                    .environmentObject(appContainer.accountManager)
+                    .environmentObject(lockManager)
+            }
         }
         .onAppear {
             AppLogger.ui("HomeViewRedesigned onAppear")

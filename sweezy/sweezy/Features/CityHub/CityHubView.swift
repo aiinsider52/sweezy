@@ -23,6 +23,7 @@ private enum CityHubTab: Int, CaseIterable {
 struct CityHubView: View {
     let hub: CityHubDefinition
 
+    @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var appContainer: AppContainer
 
     @State private var tab: CityHubTab = .discover
@@ -99,6 +100,7 @@ struct CityHubView: View {
             }
         }
         .navigationBarHidden(true)
+        .interactiveSwipeBackEnabled()
         .navigationDestination(item: $selectedGuide) { guide in
             GuideDetailView(guide: guide)
         }
@@ -134,6 +136,18 @@ struct CityHubView: View {
     private var inkHeader: some View {
         VStack(alignment: .leading, spacing: Theme.Spacing.md) {
             HStack(alignment: .top) {
+                Button { dismiss() } label: {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(.white)
+                        .frame(width: 44, height: 44)
+                        .background(Color.black.opacity(0.36))
+                        .clipShape(Circle())
+                        .overlay(Circle().stroke(Color.white.opacity(0.22), lineWidth: 1))
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("common.back".localized)
+
                 VStack(alignment: .leading, spacing: 4) {
                     Text(hub.title)
                         .font(.system(size: 28, weight: .bold, design: .rounded))

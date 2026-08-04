@@ -89,6 +89,7 @@ struct ListingDetailView: View {
             }
         }
         .presentationDragIndicator(.hidden)
+        .interactiveSwipeBackEnabled()
         .preferredColorScheme(.dark)
     }
 

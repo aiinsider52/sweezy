@@ -98,6 +98,7 @@ struct SwissDiscoveryView: View {
             }
         }
         .navigationBarHidden(true)
+        .interactiveSwipeBackEnabled()
         .navigationDestination(item: $selectedPlace) { place in
             SwissDiscoveryDetailView(
                 place: place,
@@ -698,6 +699,7 @@ struct SwissDiscoveryDetailView: View {
             stickyHeader
         }
         .navigationBarHidden(true)
+        .interactiveSwipeBackEnabled()
         .onAppear {
             NotificationCenter.default.post(name: .setJourneyBottomBarHidden, object: true)
             visitedPlaceIDs = SwissDiscoveryProgressStore.visitedPlaceIDs()

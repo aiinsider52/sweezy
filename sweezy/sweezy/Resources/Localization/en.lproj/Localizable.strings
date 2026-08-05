@@ -1,3 +1,7 @@
+"onboarding.analytics.title" = "Help improve Sweezy";
+"onboarding.analytics.body" = "Share anonymous usage events and app performance data. We never include your name, email, messages, precise location, or account identifiers. You can change this anytime in Settings.";
+"onboarding.analytics.allow" = "Share anonymous analytics";
+"onboarding.analytics.decline" = "Not now";
 "auth.social.or_continue_with" = "or continue with";
 "auth.social.google" = "Continue with Google";
 "auth.social.link.title" = "Link sign-in method";
@@ -434,7 +438,7 @@
 "privacy.data_storage.content" = "Most of your personal data is stored locally on your device. Account information is stored securely on Sweezy servers for sync. The current build has no in-app purchases.";
 "privacy.data_storage.local" = "We only send data to our own backend and trusted providers (such as crash reporting and analytics) to improve the app.";
 "privacy.third_parties.title" = "Third Parties";
-"privacy.third_parties.content" = "Sweezy uses privacy-friendly crash reporting and usage analytics (for example Sentry and Amplitude) to improve stability and features. We do not use this data for advertising or to track you across other apps or websites.";
+"privacy.third_parties.content" = "With your consent, Sweezy sends pseudonymous usage events to its first-party service using random install and session identifiers. Events exclude names, email addresses, messages, precise location, and account identifiers. We do not use this data for advertising or cross-app tracking.";
 "privacy.rights.title" = "Your Rights";
 "privacy.rights.access" = "Access your data at any time";
 "privacy.rights.delete" = "Delete all data via Settings";
@@ -498,7 +502,7 @@
 "privacy.data_storage.content" = "Most of your personal data is stored locally on your device. Account information is stored securely on Sweezy servers for sync. The current build has no in-app purchases.";
 "privacy.data_storage.local" = "We only send data to our own backend and trusted providers (such as crash reporting and analytics) to improve the app.";
 "privacy.third_parties.title" = "Third Parties";
-"privacy.third_parties.content" = "Sweezy uses privacy-friendly crash reporting and usage analytics (for example Sentry and Amplitude) to improve stability and features. We do not use this data for advertising or to track you across other apps or websites.";
+"privacy.third_parties.content" = "With your consent, Sweezy sends pseudonymous usage events to its first-party service using random install and session identifiers. Events exclude names, email addresses, messages, precise location, and account identifiers. We do not use this data for advertising or cross-app tracking.";
 "privacy.rights.title" = "Your Rights";
 "privacy.rights.access" = "Access your data at any time";
 "privacy.rights.delete" = "Delete all data via Settings";

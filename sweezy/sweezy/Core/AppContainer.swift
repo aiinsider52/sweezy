@@ -117,6 +117,7 @@ class AppContainer: ObservableObject {
     @Published var userProfile: UserProfile?
     
     private var cancellables = Set<AnyCancellable>()
+    private var hasStartedInitialContentLoad = false
     
     init() {
         // Initialize only lightweight services synchronously
@@ -125,11 +126,12 @@ class AppContainer: ObservableObject {
         self.userStats = UserStatsService()
         self.localizationService = LocalizationService()
         self.gamification = GamificationService()
-        self.analytics = AnalyticsService()
+        let telemetry = TelemetryService()
+        self.telemetry = telemetry
+        self.analytics = AnalyticsService(telemetry: telemetry)
         self.lifeAdmin = LifeAdminService()
         self.savedItems = SavedItemsService()
         self.chatStore = ChatStore()
-        self.telemetry = TelemetryService()
         
         // Configure a modest URLCache to improve offline behavior
         let mem = 50 * 1024 * 1024 // 50 MB
@@ -175,16 +177,13 @@ class AppContainer: ObservableObject {
         
         setupBindings()
         
-        // Ensure content is loaded and then localized for the current locale
-        Task { @MainActor [weak self] in
-            guard let self else { return }
-            let service = self.contentService
-            await service.loadContent()
-            await service.loadLocalizedContent(for: self.currentLocale.identifier)
+        // Onboarding does not consume the content catalog. Deferring its many
+        // network requests and JSON files keeps first-launch controls responsive,
+        // especially on older devices.
+        if isOnboardingCompleted {
+            startInitialContentLoadIfNeeded()
+            _ = roadmapSync
         }
-        
-        // Activate roadmap sync lazily after init completes
-        _ = roadmapSync
         
         // App started
         telemetry.info("app_started", source: "app", message: "AppContainer initialized")
@@ -207,6 +206,7 @@ class AppContainer: ObservableObject {
                 guard let self else { return }
                 UserDefaults.standard.set(locale.identifier, forKey: "selected_locale")
                 self.localizationService.setLocale(locale)
+                guard self.isOnboardingCompleted else { return }
                 Task { @MainActor in
                     await self.contentService.loadLocalizedContent(for: locale.identifier)
                 }
@@ -242,6 +242,8 @@ class AppContainer: ObservableObject {
         UserDefaults.standard.set(true, forKey: "onboarding_completed")
         shouldPresentInitialAuthEntry = true
         UserDefaults.standard.set(true, forKey: "pending_initial_auth_entry")
+        startInitialContentLoadIfNeeded()
+        _ = roadmapSync
     }
 
     func markInitialAuthChoiceCompleted() {
@@ -252,8 +254,21 @@ class AppContainer: ObservableObject {
     }
     
     func updateLocale(_ locale: Locale) {
+        guard currentLocale.identifier != locale.identifier else { return }
         currentLocale = locale
-        localizationService.setLocale(locale)
+    }
+
+    private func startInitialContentLoadIfNeeded() {
+        guard !hasStartedInitialContentLoad else { return }
+        hasStartedInitialContentLoad = true
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            // Let the first interactive frame commit before any local decoding.
+            await Task.yield()
+            let service = self.contentService
+            await service.loadContent()
+            await service.loadLocalizedContent(for: self.currentLocale.identifier)
+        }
     }
 
     private func loadUserProfileForCurrentScope() {

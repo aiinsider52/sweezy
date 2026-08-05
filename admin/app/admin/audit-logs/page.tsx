@@ -7,6 +7,9 @@ export default async function AuditLogsPage() {
   return (
     <section className="space-y-6">
       <Card title="Audit Logs">
+        <div className="flex justify-end mb-3">
+          <a className="glass px-3 py-2 rounded-lg text-sm" href="/api/admin/audit-logs/export">Export CSV</a>
+        </div>
         <div className="overflow-x-auto">
           <table className="min-w-full text-sm">
             <thead className="text-left opacity-70">

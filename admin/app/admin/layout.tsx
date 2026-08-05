@@ -7,9 +7,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   if (!(await getAdminToken())) redirect('/login')
 
   return (
-    <div className="min-h-screen grid grid-cols-[288px_1fr]">
+    <div className="min-h-screen lg:grid lg:grid-cols-[288px_minmax(0,1fr)]">
       <Sidebar/>
-      <div className="flex flex-col">
+      <div className="flex min-w-0 flex-col">
         <Header/>
         <main className="container-grid py-8">
           {children}

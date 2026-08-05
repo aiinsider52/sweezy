@@ -1,3 +1,7 @@
+"onboarding.analytics.title" = "Hilf, Sweezy zu verbessern";
+"onboarding.analytics.body" = "Teile anonyme Nutzungsereignisse und Leistungsdaten. Namen, E-Mail-Adressen, Nachrichten, genaue Standorte und Konto-IDs werden nie einbezogen. Dies kann jederzeit in den Einstellungen geändert werden.";
+"onboarding.analytics.allow" = "Anonyme Analyse teilen";
+"onboarding.analytics.decline" = "Nicht jetzt";
 "auth.social.or_continue_with" = "oder fortfahren mit";
 "auth.social.google" = "Mit Google fortfahren";
 "auth.social.link.title" = "Anmeldemethode verknuepfen";

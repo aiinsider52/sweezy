@@ -11,7 +11,7 @@ Fill ASC **App Privacy** to match `sweezy/sweezy/Resources/PrivacyInfo.xcprivacy
 |-----------|-----------------|--------------------|----------|-------|
 | Email Address | Yes | No | App Functionality | Account login / recovery |
 | Crash Data | No | No | App Functionality | Sentry diagnostics |
-| Product Interaction | No | No | Analytics | Optional Amplitude product analytics |
+| Product Interaction | No | No | Analytics | Optional first-party product analytics using pseudonymous install/session IDs |
 | Coarse Location | No | No | App Functionality | Optional, when user grants permission for nearby map |
 
 ## Not collected (declare “No” unless product changes)
@@ -25,7 +25,7 @@ Fill ASC **App Privacy** to match `sweezy/sweezy/Resources/PrivacyInfo.xcprivacy
 ## Third-party partners (disclose in ASC if asked)
 
 - Sentry — crash/diagnostics
-- Amplitude — optional analytics (opt-in / privacy-friendly)
+- SWEEEZY backend — optional first-party analytics (opt-in; no advertising identifiers)
 - Resend — transactional email
 - Apple — Sign in with Apple (if enabled)
 - Google — Sign in with Google (if enabled)

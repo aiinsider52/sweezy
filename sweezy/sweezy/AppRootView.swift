@@ -39,8 +39,12 @@ struct AppRootView: View {
                     }
                 )
                 .environment(\.locale, appContainer.currentLocale)
+                .environmentObject(appContainer)
+                .environmentObject(lockManager)
+                .environmentObject(sessionManager)
             }
             .onAppear {
+                appContainer.telemetry.appDidBecomeActive()
                 updatePostOnboardingAuthPresentation()
             }
             .onChange(of: appContainer.isOnboardingCompleted) { _, _ in
@@ -80,8 +84,10 @@ struct AppRootView: View {
         switch phase {
         case .background, .inactive:
             lockManager.appDidEnterBackground()
+            appContainer.telemetry.appDidEnterBackground()
         case .active:
             lockManager.appDidBecomeActive()
+            appContainer.telemetry.appDidBecomeActive()
         @unknown default:
             break
         }

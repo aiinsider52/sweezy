@@ -27,13 +27,13 @@ def privacy_policy() -> HTMLResponse:
   </head>
   <body>
     <h1>Sweezy – Privacy Policy</h1>
-    <p class="muted">Last updated: 2026‑07‑24</p>
+    <p class="muted">Last updated: 2026‑08‑05</p>
 
     <h2>What we collect</h2>
     <ul>
       <li><strong>Account data</strong>: email (for login and account recovery).</li>
       <li><strong>Diagnostics</strong>: crash reports and basic performance data to improve stability (e.g. Sentry).</li>
-      <li><strong>Usage analytics</strong>: optional, privacy‑friendly product analytics to improve features (e.g. Amplitude).</li>
+      <li><strong>Usage analytics</strong>: optional first‑party product analytics, using pseudonymous install and session identifiers, to improve features.</li>
       <li><strong>Location</strong>: optional coarse location for nearby services (only when you grant permission).</li>
     </ul>
 

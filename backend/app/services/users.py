@@ -129,7 +129,7 @@ class UserService:
         - remove related user data rows where we store user_id
         - anonymize email and password to revoke all existing tokens
         """
-        from ..models.analytics import PaywallEvent
+        from ..models.analytics import AnalyticsEvent, AnalyticsSession, PaywallEvent
         from ..models.auth_email_code import AuthEmailCode
         from ..models.chat import (
             ChatConversation,
@@ -219,6 +219,20 @@ class UserService:
             or_(AuthEmailCode.user_id == user_id, AuthEmailCode.email == user.email.lower())
         ).delete(synchronize_session=False)
         db.query(PaywallEvent).filter(PaywallEvent.user_id == user_id).delete(synchronize_session=False)
+        # Analytics properties and diagnostic messages can still be user-related;
+        # erase authenticated analytics instead of merely unlinking the account.
+        analytics_session_ids = [
+            row[0]
+            for row in db.query(AnalyticsSession.id).filter(AnalyticsSession.user_id == user_id).all()
+        ]
+        db.query(AnalyticsEvent).filter(AnalyticsEvent.user_id == user_id).delete(synchronize_session="fetch")
+        if analytics_session_ids:
+            db.query(AnalyticsEvent).filter(AnalyticsEvent.session_id.in_(analytics_session_ids)).delete(
+                synchronize_session="fetch"
+            )
+            db.query(AnalyticsSession).filter(AnalyticsSession.id.in_(analytics_session_ids)).delete(
+                synchronize_session="fetch"
+            )
         db.query(Subscription).filter(Subscription.user_id == user_id).delete(synchronize_session=False)
         db.query(SubscriptionEvent).filter(SubscriptionEvent.user_id == user_id).delete(synchronize_session=False)
         db.query(JobFavorite).filter(JobFavorite.user_id == uuid.UUID(user_id)).delete(synchronize_session=False)

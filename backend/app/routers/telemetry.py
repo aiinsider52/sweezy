@@ -1,24 +1,19 @@
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
-import json
-from pathlib import Path
-from threading import Lock
-from typing import Annotated, Any, Dict, List, Literal, Optional
+from datetime import datetime, timezone
+from typing import Annotated, Any, Dict, Literal
 
 from fastapi import APIRouter, Header, HTTPException, Request, status
 from pydantic import BaseModel, Field, field_validator
 
 from ..core.config import get_settings
 from ..core.rate_limit import limiter
-from ..dependencies import CurrentAdmin, CurrentUser
+from ..dependencies import DBSession, OptionalCurrentUser
+from ..models.analytics import AnalyticsEvent, AnalyticsSession
 
 
 router = APIRouter()
 
-LOG_DIR = Path("backend/logs")
-LOG_DIR.mkdir(parents=True, exist_ok=True)
-_LOG_LOCK = Lock()
 _SENSITIVE_META_KEYS = {"email", "phone", "name", "token", "password", "address", "message"}
 
 
@@ -55,6 +50,10 @@ class TelemetryEventIn(BaseModel):
 
 class TelemetryBatchIn(BaseModel):
     events: list[TelemetryEventIn] = Field(min_length=1)
+    session_id: str | None = Field(default=None, min_length=8, max_length=64)
+    guest_id: str | None = Field(default=None, min_length=8, max_length=64)
+    app_version: str | None = Field(default=None, max_length=32)
+    platform: str = Field(default="ios", min_length=1, max_length=24)
 
     @field_validator("events")
     @classmethod
@@ -64,59 +63,85 @@ class TelemetryBatchIn(BaseModel):
         return value
 
 
-def _log_file_path(dt: Optional[datetime] = None) -> Path:
-    day = (dt or datetime.now(timezone.utc)).strftime("%Y-%m-%d")
-    return LOG_DIR / f"telemetry-{day}.jsonl"
-
-
 @router.post("/batch")
 @limiter.limit("30/minute")
 def ingest_batch(
     request: Request,
     payload: TelemetryBatchIn,
-    user: CurrentUser,
+    db: DBSession,
+    user: OptionalCurrentUser,
     x_analytics_consent: Annotated[str | None, Header()] = None,
 ) -> Dict[str, Any]:
     if x_analytics_consent != "granted":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Analytics consent required")
 
-    path = _log_file_path()
-    lines = []
-    for event in payload.events:
-        record = event.model_dump(mode="json")
-        record["user_id"] = user.id
-        lines.append(json.dumps(record, ensure_ascii=False, separators=(",", ":")))
+    if user is None and not payload.guest_id:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="guest_id required for guests")
 
-    with _LOG_LOCK:
-        with path.open("a", encoding="utf-8") as file_handle:
-            file_handle.write("\n".join(lines) + "\n")
-    return {"accepted": len(lines)}
-
-
-@router.get("/admin")
-def list_telemetry(
-    _: CurrentAdmin,
-    limit: int = 200,
-    level: Optional[str] = None,
-    source: Optional[str] = None,
-) -> List[Dict[str, Any]]:
-    out: List[Dict[str, Any]] = []
     now = datetime.now(timezone.utc)
-    files = [path for path in [_log_file_path(now), _log_file_path(now - timedelta(days=1))] if path.exists()]
-    for path in files:
-        try:
-            with path.open("r", encoding="utf-8") as file_handle:
-                for line in file_handle:
-                    try:
-                        obj = json.loads(line.strip() or "{}")
-                        if level and str(obj.get("level")) != level:
-                            continue
-                        if source and str(obj.get("source")) != source:
-                            continue
-                        out.append(obj)
-                    except (json.JSONDecodeError, TypeError):
-                        continue
-        except OSError:
+    client_session_id = payload.session_id or f"legacy-{payload.events[0].id}"[:64]
+    session = db.query(AnalyticsSession).filter(
+        AnalyticsSession.client_session_id == client_session_id
+    ).one_or_none()
+    if session is None:
+        session = AnalyticsSession(
+            client_session_id=client_session_id,
+            user_id=getattr(user, "id", None),
+            guest_id=None if user else payload.guest_id,
+            app_version=payload.app_version,
+            platform=payload.platform,
+            started_at=min(event.ts for event in payload.events),
+            last_seen_at=max(event.ts for event in payload.events),
+            consent_granted=True,
+        )
+        db.add(session)
+        db.flush()
+    elif session.user_id and (user is None or session.user_id != getattr(user, "id", None)):
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="session belongs to another user")
+    elif session.guest_id and user is None and session.guest_id != payload.guest_id:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="session belongs to another guest")
+    elif user is not None and session.user_id is None:
+        session.user_id = user.id
+        session.guest_id = None
+
+    accepted = 0
+    for event in payload.events:
+        if db.get(AnalyticsEvent, event.id) is not None:
             continue
-    out.sort(key=lambda item: item.get("ts") or "", reverse=True)
-    return out[: max(1, min(1000, limit))]
+        db.add(AnalyticsEvent(
+            id=event.id,
+            session_id=session.id,
+            user_id=getattr(user, "id", None),
+            guest_id=None if user else payload.guest_id,
+            occurred_at=event.ts,
+            level=event.level,
+            source=event.source,
+            event_type=event.type,
+            message=event.message,
+            properties=event.meta,
+            app_version=payload.app_version,
+        ))
+        accepted += 1
+    previous_seen = session.last_seen_at
+    if previous_seen.tzinfo is None:
+        previous_seen = previous_seen.replace(tzinfo=timezone.utc)
+    session.last_seen_at = max(previous_seen, max(event.ts for event in payload.events))
+    session.event_count += accepted
+    session.app_version = payload.app_version or session.app_version
+    db.commit()
+    critical_types = {
+        item.strip() for item in get_settings().INCIDENT_CRITICAL_TELEMETRY_TYPES.split(",") if item.strip()
+    }
+    for event in payload.events:
+        if event.level == "error" and event.type in critical_types:
+            from ..services.incidents import record_incident
+
+            record_incident(
+                source=f"telemetry:{event.source}",
+                title=f"Critical telemetry: {event.type}",
+                severity="critical",
+                message=event.message,
+                context=event.meta,
+                dedupe_key=event.type,
+            )
+    return {"accepted": accepted}

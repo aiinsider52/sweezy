@@ -1333,7 +1333,6 @@ extension APIClient {
     
     static func sendTelemetryBatch(events: [TelemetryEventPayload]) async throws {
         guard AnalyticsConsentStore.isGranted, !events.isEmpty else { return }
-        guard let token = KeychainStore.get("access_token"), !token.isEmpty else { return }
         let url = url("telemetry/batch")
         var req = URLRequest(url: url)
         req.httpMethod = "POST"

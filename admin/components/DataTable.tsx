@@ -1,7 +1,16 @@
 "use client"
 import Card from './Card'
 
-type User = { id: string; email: string; is_superuser: boolean; role?: string; created_at: string }
+type User = {
+  id: string
+  email: string
+  is_superuser: boolean
+  is_active?: boolean
+  email_verified?: boolean
+  subscription_status?: string
+  role?: string
+  created_at: string
+}
 
 export default function DataTable({ data }: { data: User[] | any }) {
   const rows: User[] = Array.isArray(data) ? data : []
@@ -13,17 +22,21 @@ export default function DataTable({ data }: { data: User[] | any }) {
             <tr>
               <th className="py-2 pr-4">Email</th>
               <th className="py-2 pr-4">Role</th>
+              <th className="py-2 pr-4">Status</th>
+              <th className="py-2 pr-4">Subscription</th>
               <th className="py-2 pr-4">Created</th>
             </tr>
           </thead>
           <tbody>
-            {rows.length === 0 && (<tr><td className="py-4" colSpan={3}>No users yet</td></tr>)}
+            {rows.length === 0 && (<tr><td className="py-4" colSpan={5}>No matching users</td></tr>)}
             {rows.map(u => (
               <tr key={u.id} className="border-t border-white/10">
                 <td className="py-2 pr-4">{u.email}</td>
                 <td className="py-2 pr-4">
                   <RoleSelect userId={u.id} defaultValue={u.role || (u.is_superuser ? 'admin' : 'viewer')} />
                 </td>
+                <td className="py-2 pr-4">{u.is_active === false ? 'Inactive' : 'Active'}{u.email_verified ? ' · verified' : ''}</td>
+                <td className="py-2 pr-4">{u.subscription_status ?? 'free'}</td>
                 <td className="py-2 pr-4">{new Date(u.created_at).toLocaleString()}</td>
               </tr>
             ))}

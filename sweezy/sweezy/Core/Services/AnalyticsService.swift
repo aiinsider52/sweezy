@@ -2,7 +2,7 @@
 //  AnalyticsService.swift
 //  sweezy
 //
-//  Lightweight analytics abstraction with optional Amplitude HTTP API.
+//  Compatibility facade for the first-party telemetry pipeline.
 //
 
 import Foundation
@@ -35,72 +35,28 @@ protocol AnalyticsServiceProtocol {
 
 @MainActor
 final class AnalyticsService: AnalyticsServiceProtocol {
-    private let defaults = UserDefaults.standard
-    private let session = URLSession(configuration: .ephemeral)
-    private let apiKey: String?
+    private let telemetry: TelemetryService
     
     var isEnabled: Bool {
         AnalyticsConsentStore.isGranted
     }
     
-    init(apiKey: String? = Bundle.main.object(forInfoDictionaryKey: "AMPLITUDE_API_KEY") as? String) {
-        self.apiKey = Self.normalizedBuildSettingValue(apiKey)
+    init(telemetry: TelemetryService) {
+        self.telemetry = telemetry
     }
     
     func setEnabled(_ enabled: Bool) {
         AnalyticsConsentStore.setGranted(enabled)
+        telemetry.consentDidChange()
     }
     
     func identify(userId: String?, properties: [String: Any]? = nil) {
-        guard isEnabled, let apiKey, !apiKey.isEmpty else { return }
-        // Amplitude Identify via HTTP API v2
-        let payload: [String: Any] = [
-            "api_key": apiKey,
-            "identification": [
-                [
-                    "user_id": userId ?? "anon",
-                    "user_properties": properties ?? [:]
-                ]
-            ]
-        ]
-        postJSON("https://api2.amplitude.com/identify", payload)
+        // Intentionally does not transmit account identifiers. The first-party
+        // pipeline uses pseudonymous install/session IDs for guests and members.
     }
     
     func track(_ event: String, properties: [String: Any]? = nil) {
-        guard isEnabled, let apiKey, !apiKey.isEmpty else { return }
-        let payload: [String: Any] = [
-            "api_key": apiKey,
-            "events": [
-                [
-                    "event_type": event,
-                    "user_id": KeychainStore.get("user_id") ?? "anon",
-                    "event_properties": properties ?? [:],
-                    "time": Int(Date().timeIntervalSince1970 * 1000)
-                ]
-            ]
-        ]
-        postJSON("https://api2.amplitude.com/2/httpapi", payload)
-    }
-    
-    private func postJSON(_ url: String, _ body: [String: Any]) {
-        guard let u = URL(string: url) else { return }
-        var req = URLRequest(url: u)
-        req.httpMethod = "POST"
-        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        req.httpBody = try? JSONSerialization.data(withJSONObject: body, options: [])
-        // Fire-and-forget
-        let task = session.dataTask(with: req)
-        task.resume()
-    }
-
-    private static func normalizedBuildSettingValue(_ raw: String?) -> String? {
-        guard let raw else { return nil }
-        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return nil }
-        // When Info.plist uses $(AMPLITUDE_API_KEY) and the build setting is not defined,
-        // Xcode may leave the placeholder in place. Treat that as "not configured".
-        if trimmed.hasPrefix("$(") && trimmed.hasSuffix(")") { return nil }
-        return trimmed
+        telemetry.track(event, properties: properties)
     }
 }
 

@@ -27,16 +27,50 @@ def _events(db: DBSession, days: int) -> list[AnalyticsEvent]:
 
 
 @router.get("/overview")
-def overview(_: CurrentAdmin, db: DBSession, days: int = 30) -> dict[str, Any]:
+def overview(
+    _: CurrentAdmin,
+    db: DBSession,
+    days: int = Query(30, ge=1, le=365),
+    app_version: str | None = Query(None, max_length=64),
+) -> dict[str, Any]:
     since = _window(days)
-    events = db.query(AnalyticsEvent).filter(AnalyticsEvent.occurred_at >= since).all()
-    sessions = db.query(AnalyticsSession).filter(AnalyticsSession.last_seen_at >= since).count()
+    event_query = db.query(AnalyticsEvent).filter(AnalyticsEvent.occurred_at >= since)
+    session_query = db.query(AnalyticsSession).filter(AnalyticsSession.last_seen_at >= since)
+    if app_version:
+        event_query = event_query.filter(AnalyticsEvent.app_version == app_version)
+        session_query = session_query.filter(AnalyticsSession.app_version == app_version)
+    events = event_query.all()
+    sessions = session_query.count()
+    active_users = len({_actor(event) for event in events})
+    errors = sum(event.level == "error" for event in events)
+    events_by_day = Counter(event.occurred_at.date() for event in events)
+    action_counts = Counter(event.event_type for event in events)
+    versions = sorted({event.app_version for event in events if event.app_version})
     return {
         "since": since.isoformat(),
         "events": len(events),
         "sessions": sessions,
-        "active_users": len({_actor(event) for event in events}),
-        "errors": sum(event.level == "error" for event in events),
+        "active_users": active_users,
+        "errors": errors,
+        "kpis": [
+            {"key": "events", "label": "Events", "value": len(events)},
+            {"key": "sessions", "label": "Sessions", "value": sessions},
+            {"key": "active_users", "label": "Active users", "value": active_users},
+            {"key": "errors", "label": "Errors", "value": errors},
+        ],
+        "trends": [
+            {
+                "date": (since.date() + timedelta(days=offset)).isoformat(),
+                "events": events_by_day.get(since.date() + timedelta(days=offset), 0),
+            }
+            for offset in range((datetime.now(timezone.utc).date() - since.date()).days + 1)
+        ],
+        "top": [
+            {"name": action.replace("_", " ").title(), "count": count}
+            for action, count in action_counts.most_common(10)
+        ],
+        "funnels": [],
+        "versions": versions,
     }
 
 

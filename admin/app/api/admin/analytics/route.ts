@@ -1,13 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { serverFetch } from '@/lib/server'
 
-const ALLOWED_PARAMS = new Set(['range', 'start_date', 'end_date', 'app_version'])
+const RANGE_DAYS: Record<string, string> = {
+  '7d': '7',
+  '30d': '30',
+  '90d': '90',
+  '365d': '365',
+}
 
 export async function GET(request: NextRequest) {
   const query = new URLSearchParams()
-  request.nextUrl.searchParams.forEach((value, key) => {
-    if (ALLOWED_PARAMS.has(key) && value.length <= 64) query.set(key, value)
-  })
+  const range = request.nextUrl.searchParams.get('range') ?? '30d'
+  query.set('days', RANGE_DAYS[range] ?? '30')
+  const appVersion = request.nextUrl.searchParams.get('app_version')
+  if (appVersion && appVersion.length <= 64) query.set('app_version', appVersion)
 
   try {
     const suffix = query.size ? `?${query.toString()}` : ''

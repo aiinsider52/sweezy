@@ -1,7 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  outputFileTracingRoot: process.cwd(),
   async headers() {
     const apiOrigin = process.env.NEXT_PUBLIC_API_URL
       ? new URL(process.env.NEXT_PUBLIC_API_URL).origin

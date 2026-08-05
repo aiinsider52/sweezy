@@ -665,6 +665,7 @@ private struct SwissDiscoverySaveButton: View {
 struct SwissDiscoveryDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var appContainer: AppContainer
+    @EnvironmentObject private var lockManager: AppLockManager
     @EnvironmentObject private var sessionManager: SessionManager
 
     let place: SwissDiscoveryPlace
@@ -723,6 +724,10 @@ struct SwissDiscoveryDetailView: View {
         }
         .sheet(isPresented: $showAuth) {
             AuthEntryView(showsCloseButton: true) { showAuth = false }
+                .environment(\.locale, appContainer.currentLocale)
+                .environmentObject(appContainer)
+                .environmentObject(lockManager)
+                .environmentObject(sessionManager)
         }
         .sheet(isPresented: $showReviewEditor) {
             SwissDiscoveryReviewEditor(
@@ -1222,7 +1227,10 @@ struct SwissDiscoveryDetailView: View {
     }
 
     private func openInMaps() {
-        let mapItem = MKMapItem(placemark: MKPlacemark(coordinate: place.coordinate))
+        let mapItem = MKMapItem(
+            location: CLLocation(latitude: place.coordinate.latitude, longitude: place.coordinate.longitude),
+            address: nil
+        )
         mapItem.name = place.title
         mapItem.openInMaps(launchOptions: [
             MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeTransit

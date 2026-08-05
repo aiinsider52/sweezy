@@ -22,6 +22,7 @@ from .news import News
 from .rss_feed import RSSFeed
 from .brave_news_query import BraveNewsQuery
 from .auth_email_code import AuthEmailCode
+from .analytics import AnalyticsEvent, AnalyticsSession, PaywallEvent
 from .chat import (
     ChatConversation,
     ChatMessage,
@@ -32,6 +33,7 @@ from .chat import (
     PushDevice,
 )
 from .discovery_review import DiscoveryReview, DiscoveryReviewReport
+from .incident import Incident
 
 __all__ = [
     "Guide",
@@ -60,6 +62,9 @@ __all__ = [
     "RSSFeed",
     "BraveNewsQuery",
     "AuthEmailCode",
+    "AnalyticsEvent",
+    "AnalyticsSession",
+    "PaywallEvent",
     "ChatConversation",
     "ChatMessage",
     "ChatMessageReport",
@@ -69,4 +74,5 @@ __all__ = [
     "PushDevice",
     "DiscoveryReview",
     "DiscoveryReviewReport",
+    "Incident",
 ]

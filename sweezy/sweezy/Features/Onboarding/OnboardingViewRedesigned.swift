@@ -82,9 +82,11 @@ struct OnboardingViewRedesigned: View {
                     // Theme picker page
                     ThemePickerPage(selectedTheme: $themeManager.selectedTheme)
                         .tag(5)
+                    AnalyticsConsentPage(onDecision: goNext)
+                        .tag(6)
                     // Notification permission page
                     NotificationPermissionPage(onNext: goNext)
-                        .tag(6)
+                        .tag(7)
                     // Success page (last)
                     SuccessPageView()
                         .tag(totalPages - 1)
@@ -137,7 +139,7 @@ struct OnboardingViewRedesigned: View {
                 Spacer()
             }
             
-            if currentPage != totalPages - 2 {
+            if currentPage != totalPages - 3 && currentPage != totalPages - 2 {
                 VStack {
                     Spacer()
 
@@ -239,6 +241,9 @@ struct OnboardingViewRedesigned: View {
     }
     
     private func completeOnboarding() {
+        if !AnalyticsConsentStore.hasDecision {
+            appContainer.analytics.setEnabled(false)
+        }
         appContainer.analytics.track("onboarding_completed", properties: [
             "skipped_profile": skippedAboutStep,
             "skipped_family": skippedFamilyStep
@@ -261,7 +266,7 @@ struct OnboardingViewRedesigned: View {
         goNext()
     }
     
-    private var totalPages: Int { introPages.count + 6 }
+    private var totalPages: Int { introPages.count + 7 }
     
     private var languageDisplayName: String {
         switch preferredLanguage {
@@ -392,6 +397,63 @@ struct OnboardingViewRedesigned: View {
         default:
             return 1
         }
+    }
+}
+
+// MARK: - Analytics Consent Page
+
+private struct AnalyticsConsentPage: View {
+    @EnvironmentObject private var appContainer: AppContainer
+    let onDecision: () -> Void
+
+    var body: some View {
+        OnboardingDetailsBackground {
+            VStack(alignment: .leading, spacing: 22) {
+                Spacer().frame(height: 130)
+                Image(systemName: "chart.bar.xaxis")
+                    .font(.system(size: 30, weight: .bold))
+                    .foregroundStyle(JourneyVisual.lime)
+                Text("onboarding.analytics.title".localized)
+                    .font(.system(size: 36, weight: .bold, design: .rounded))
+                    .foregroundStyle(.white)
+                Text("onboarding.analytics.body".localized)
+                    .font(.system(size: 16))
+                    .foregroundStyle(.white.opacity(0.75))
+                    .lineSpacing(4)
+
+                Spacer()
+
+                VStack(spacing: 12) {
+                    Button("onboarding.analytics.allow".localized) {
+                        appContainer.analytics.setEnabled(true)
+                        appContainer.telemetry.track(
+                            .analyticsConsentUpdated,
+                            source: "onboarding",
+                            meta: ["granted": "true"]
+                        )
+                        onDecision()
+                    }
+                    .font(.system(size: 17, weight: .bold))
+                    .foregroundStyle(.black)
+                    .frame(maxWidth: .infinity, minHeight: 54)
+                    .background(JourneyVisual.lime)
+                    .clipShape(Capsule())
+                    .accessibilityIdentifier("onboarding.analytics.allowButton")
+
+                    Button("onboarding.analytics.decline".localized) {
+                        appContainer.analytics.setEnabled(false)
+                        onDecision()
+                    }
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(.white.opacity(0.75))
+                    .frame(maxWidth: .infinity, minHeight: 46)
+                    .accessibilityIdentifier("onboarding.analytics.declineButton")
+                }
+                .padding(.bottom, 46)
+            }
+            .padding(.horizontal, 20)
+        }
+        .accessibilityIdentifier("onboarding.analyticsConsentPage")
     }
 }
 
@@ -1509,22 +1571,24 @@ private struct FloatingParticlesOverlayV2: View {
     @State private var animate = false
     
     var body: some View {
-        ZStack {
-            ForEach(0..<20, id: \.self) { index in
-                Circle()
-                    .fill(Color.white)
-                    .frame(width: CGFloat.random(in: 15...40))
-                    .offset(
-                        x: CGFloat.random(in: -200...200),
-                        y: animate ? -UIScreen.main.bounds.height : UIScreen.main.bounds.height
-                    )
-                    .opacity(0.3)
-                    .animation(
-                        Animation.linear(duration: Double.random(in: 10...20))
-                            .repeatForever(autoreverses: false)
-                            .delay(Double.random(in: 0...5)),
-                        value: animate
-                    )
+        GeometryReader { geometry in
+            ZStack {
+                ForEach(0..<20, id: \.self) { index in
+                    Circle()
+                        .fill(Color.white)
+                        .frame(width: CGFloat.random(in: 15...40))
+                        .offset(
+                            x: CGFloat.random(in: -200...200),
+                            y: animate ? -geometry.size.height : geometry.size.height
+                        )
+                        .opacity(0.3)
+                        .animation(
+                            Animation.linear(duration: Double.random(in: 10...20))
+                                .repeatForever(autoreverses: false)
+                                .delay(Double.random(in: 0...5)),
+                            value: animate
+                        )
+                }
             }
         }
         .onAppear {

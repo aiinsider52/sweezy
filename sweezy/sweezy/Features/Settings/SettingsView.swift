@@ -462,7 +462,6 @@ private extension SettingsView {
                 )
                 .onChange(of: analyticsEnabled) { _, enabled in
                     appContainer.analytics.setEnabled(enabled)
-                    appContainer.telemetry.consentDidChange()
                 }
                 editorialSettingsDivider
                 editorialSettingsRow(icon: "internaldrive", title: "settings.data_management".localized) {
@@ -1101,7 +1100,7 @@ private extension SettingsView {
     
     func requestAppReview() {
         if let scene = UIApplication.shared.connectedScenes.first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene {
-            SKStoreReviewController.requestReview(in: scene)
+            AppStore.requestReview(in: scene)
         }
     }
 }

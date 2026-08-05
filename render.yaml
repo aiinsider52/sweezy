@@ -107,6 +107,21 @@ services:
         value: "48"
       - key: OPENAI_EMBEDDING_MODEL
         value: text-embedding-3-small
+      # Incident storage is enabled without Telegram; add credentials in Render to send alerts.
+      - key: INCIDENTS_ENABLED
+        value: "true"
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: TELEGRAM_CHAT_ID
+        sync: false
+      - key: INCIDENT_ALERT_DEDUPE_SECONDS
+        value: "900"
+      - key: INCIDENT_ALERT_MAX_CHARS
+        value: "3500"
+      - key: INCIDENT_TELEGRAM_TIMEOUT_SECONDS
+        value: "3"
+      - key: INCIDENT_CRITICAL_TELEMETRY_TYPES
+        value: app.crash,security.critical,data_loss
 
   - type: web
     name: sweezy_admin

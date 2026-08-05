@@ -12,6 +12,7 @@ from ..dependencies import CurrentUser, DBSession
 from ..core.database import db_session
 from ..models.user import User
 from ..services import stripe_service
+from ..services.telegram import send_telegram_message
 from ..core.config import get_settings
 from urllib.parse import urlparse
 
@@ -183,8 +184,6 @@ async def stripe_webhook(request: Request):
     if not secret:
         raise HTTPException(status_code=500, detail="Webhook not configured")
     import stripe  # type: ignore
-    import urllib.request
-    import json as _json
 
     try:
         event = stripe.Webhook.construct_event(payload=payload, sig_header=sig, secret=secret)  # type: ignore
@@ -213,20 +212,6 @@ async def stripe_webhook(request: Request):
 
             stripe_service.log_event(db, user.id if user else None, event_type, json.loads(payload.decode("utf-8")))
 
-            # Optional Telegram notification (only for key events)
-            def _notify_telegram(text: str) -> None:
-                token = os.getenv("TELEGRAM_BOT_TOKEN")
-                chat_id = os.getenv("TELEGRAM_CHAT_ID")
-                if not token or not chat_id:
-                    return
-                try:
-                    url = f"https://api.telegram.org/bot{token}/sendMessage"
-                    data_body = _json.dumps({"chat_id": chat_id, "text": text}).encode("utf-8")
-                    req = urllib.request.Request(url, data=data_body, headers={"Content-Type": "application/json"})
-                    urllib.request.urlopen(req, timeout=3)  # nosec B310
-                except Exception:
-                    pass
-
             # Handle events
             if event_type == "checkout.session.completed":
                 # nothing to do; wait for invoice.payment_succeeded
@@ -248,7 +233,7 @@ async def stripe_webhook(request: Request):
                 except Exception:
                     period_end = None
                 stripe_service.apply_premium(db, user, subscription_id=str(subscription_id), current_period_end=period_end)
-                _notify_telegram(
+                send_telegram_message(
                     f"✅ Subscription active for {user.email} (until {period_end.isoformat() if period_end else 'n/a'})"
                 )
                 return {"ok": True}
@@ -256,7 +241,7 @@ async def stripe_webhook(request: Request):
             if event_type in {"customer.subscription.deleted"}:
                 if user:
                     stripe_service.apply_free(db, user)
-                    _notify_telegram(f"⚠️ Subscription canceled for {user.email}")
+                    send_telegram_message(f"⚠️ Subscription canceled for {user.email}")
                 return {"ok": True}
 
             return {"ok": True}

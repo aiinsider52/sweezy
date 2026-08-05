@@ -516,8 +516,12 @@ struct PlaceBottomSheet: View {
         isCalculating = true
         defer { isCalculating = false }
         let request = MKDirections.Request()
-        request.source = MKMapItem(placemark: MKPlacemark(coordinate: userLoc.coordinate))
-        request.destination = MKMapItem(placemark: MKPlacemark(coordinate: place.coordinate.clLocationCoordinate))
+        request.source = MKMapItem(location: userLoc, address: nil)
+        let destination = place.coordinate.clLocationCoordinate
+        request.destination = MKMapItem(
+            location: CLLocation(latitude: destination.latitude, longitude: destination.longitude),
+            address: nil
+        )
         request.transportType = .automobile
         do {
             let result = try await MKDirections(request: request).calculateETA()
@@ -655,7 +659,10 @@ struct PlaceCard: View {
                     Button(action: {
                         // Open in Maps app
                         let coordinate = place.coordinate.clLocationCoordinate
-                        let mapItem = MKMapItem(placemark: MKPlacemark(coordinate: coordinate))
+                        let mapItem = MKMapItem(
+                            location: CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude),
+                            address: nil
+                        )
                         mapItem.name = place.name
                         mapItem.openInMaps()
                     }) {
@@ -1044,7 +1051,10 @@ struct WinterPlaceCard: View {
                 
                 WinterActionButton(icon: "arrow.triangle.turn.up.right.diamond.fill", title: "map.directions".localized, isPrimary: true) {
                     let coordinate = place.coordinate.clLocationCoordinate
-                    let mapItem = MKMapItem(placemark: MKPlacemark(coordinate: coordinate))
+                    let mapItem = MKMapItem(
+                        location: CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude),
+                        address: nil
+                    )
                     mapItem.name = place.name
                     mapItem.openInMaps()
                 }
@@ -1354,8 +1364,12 @@ struct WinterPlaceBottomSheet: View {
         isCalculating = true
         defer { isCalculating = false }
         let request = MKDirections.Request()
-        request.source = MKMapItem(placemark: MKPlacemark(coordinate: userLoc.coordinate))
-        request.destination = MKMapItem(placemark: MKPlacemark(coordinate: place.coordinate.clLocationCoordinate))
+        request.source = MKMapItem(location: userLoc, address: nil)
+        let destination = place.coordinate.clLocationCoordinate
+        request.destination = MKMapItem(
+            location: CLLocation(latitude: destination.latitude, longitude: destination.longitude),
+            address: nil
+        )
         request.transportType = .automobile
         do {
             let result = try await MKDirections(request: request).calculateETA()

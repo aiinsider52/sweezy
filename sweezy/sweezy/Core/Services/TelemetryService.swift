@@ -10,6 +10,19 @@ import SwiftUI
 
 @MainActor
 final class TelemetryService {
+    enum ProductEvent: String {
+        case sessionStarted = "session_started"
+        case sessionHeartbeat = "session_heartbeat"
+        case sessionBackgrounded = "session_backgrounded"
+        case onboardingStepCompleted = "onboarding_step_completed"
+        case onboardingCompleted = "onboarding_completed"
+        case analyticsConsentUpdated = "analytics_consent_updated"
+        case dailyOpen = "daily_open"
+        case guideRead = "guide_read"
+        case checklistStepCompleted = "checklist_step_completed"
+        case checklistCompleted = "checklist_completed"
+    }
+
     enum RetentionEvent: String {
         case onboardingProfileSaved = "retention_onboarding_profile_saved"
         case roadmapSeeded = "retention_roadmap_seeded"
@@ -43,12 +56,27 @@ final class TelemetryService {
     
     private var buffer: [Event] = []
     private var isFlushScheduled = false
+    private var heartbeatTimer: Timer?
+    private var sessionID: String?
+    private var sessionStartedAt: Date?
+    private let installID: String
     private let encoder = JSONEncoder()
     private let iso: ISO8601DateFormatter = {
         let f = ISO8601DateFormatter()
         f.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         return f
     }()
+
+    init(defaults: UserDefaults = .standard) {
+        let key = "privacy.analytics.install_id"
+        if let existing = defaults.string(forKey: key), UUID(uuidString: existing) != nil {
+            installID = existing
+        } else {
+            let generated = UUID().uuidString
+            defaults.set(generated, forKey: key)
+            installID = generated
+        }
+    }
     
     func info(_ type: String, source: String, message: String? = nil, meta: [String: String] = [:]) {
         log(level: "info", type: type, source: source, message: message, meta: meta)
@@ -56,6 +84,53 @@ final class TelemetryService {
 
     func retention(_ event: RetentionEvent, source: String, message: String? = nil, meta: [String: String] = [:]) {
         info(event.rawValue, source: source, message: message, meta: meta)
+    }
+
+    func track(_ event: ProductEvent, source: String, meta: [String: String] = [:]) {
+        info(event.rawValue, source: source, meta: meta)
+    }
+
+    func track(_ event: String, source: String = "app", properties: [String: Any]? = nil) {
+        let meta = properties?.reduce(into: [String: String]()) { result, item in
+            guard let value = Self.safeString(item.value) else { return }
+            result[item.key] = value
+        } ?? [:]
+        info(Self.normalizedName(event), source: source, meta: meta)
+    }
+
+    func appDidBecomeActive() {
+        guard AnalyticsConsentStore.isGranted else { return }
+        if sessionID == nil {
+            sessionID = UUID().uuidString
+            sessionStartedAt = Date()
+            track(.sessionStarted, source: "lifecycle")
+        }
+        heartbeatTimer?.invalidate()
+        heartbeatTimer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in
+            Task { @MainActor in
+                guard let self, let started = self.sessionStartedAt else { return }
+                self.track(
+                    .sessionHeartbeat,
+                    source: "lifecycle",
+                    meta: ["elapsed_seconds": String(Int(Date().timeIntervalSince(started)))]
+                )
+            }
+        }
+    }
+
+    func appDidEnterBackground() {
+        heartbeatTimer?.invalidate()
+        heartbeatTimer = nil
+        if let started = sessionStartedAt {
+            track(
+                .sessionBackgrounded,
+                source: "lifecycle",
+                meta: ["duration_seconds": String(Int(Date().timeIntervalSince(started)))]
+            )
+        }
+        Task { await flush() }
+        sessionID = nil
+        sessionStartedAt = nil
     }
     
     func warn(_ type: String, source: String, message: String? = nil, meta: [String: String] = [:]) {
@@ -68,14 +143,19 @@ final class TelemetryService {
     
     private func log(level: String, type: String, source: String, message: String?, meta: [String: String]) {
         guard AnalyticsConsentStore.isGranted else { return }
+        var safeMeta = Self.sanitizedMetadata(meta)
+        safeMeta["install_id"] = installID
+        if let sessionID {
+            safeMeta["session_id"] = sessionID
+        }
         let event = Event(
             id: UUID().uuidString,
             ts: iso.string(from: Date()),
             level: level,
             source: source,
-            type: type,
-            message: message,
-            meta: meta.isEmpty ? nil : meta
+            type: Self.normalizedName(type),
+            message: message.map { String($0.prefix(256)) },
+            meta: safeMeta.isEmpty ? nil : safeMeta
         )
         buffer.append(event)
         // Cap buffer to avoid memory growth
@@ -122,10 +202,43 @@ final class TelemetryService {
 
     func consentDidChange() {
         if AnalyticsConsentStore.isGranted {
+            appDidBecomeActive()
             scheduleFlush()
         } else {
+            heartbeatTimer?.invalidate()
+            heartbeatTimer = nil
+            sessionID = nil
+            sessionStartedAt = nil
             buffer.removeAll(keepingCapacity: false)
             isFlushScheduled = false
+        }
+    }
+
+    static func normalizedName(_ value: String) -> String {
+        value.lowercased()
+            .replacingOccurrences(of: " ", with: "_")
+            .filter { $0.isLetter || $0.isNumber || $0 == "_" || $0 == "." }
+            .prefix(80)
+            .description
+    }
+
+    static func sanitizedMetadata(_ meta: [String: String]) -> [String: String] {
+        let blocked = ["email", "name", "phone", "address", "token", "password", "message"]
+        return meta.reduce(into: [:]) { result, item in
+            let key = normalizedName(item.key)
+            guard !blocked.contains(where: { key.contains($0) }) else { return }
+            result[key] = String(item.value.prefix(256))
+        }
+    }
+
+    private static func safeString(_ value: Any) -> String? {
+        switch value {
+        case let value as String: return String(value.prefix(256))
+        case let value as Bool: return String(value)
+        case let value as Int: return String(value)
+        case let value as Double where value.isFinite: return String(value)
+        case let value as Float where value.isFinite: return String(value)
+        default: return nil
         }
     }
 }

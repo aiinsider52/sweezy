@@ -3,10 +3,11 @@ import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
-import { LayoutDashboard, Users, BookOpenText, FileText, Activity, CheckSquare, Calendar, SlidersHorizontal, Newspaper, Rss, ListChecks, Languages, Briefcase, CreditCard, Store, CalendarDays, Sparkles, MessageCircleQuestion, ShieldAlert } from 'lucide-react'
+import { LayoutDashboard, Users, BookOpenText, FileText, Activity, CheckSquare, Calendar, SlidersHorizontal, Newspaper, Rss, ListChecks, Languages, Briefcase, CreditCard, Store, CalendarDays, Sparkles, MessageCircleQuestion, ShieldAlert, Siren, BarChart3 } from 'lucide-react'
 
 const items = [
   { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
   { href: '/admin/users', label: 'Users', icon: Users },
   { href: '/admin/guides', label: 'Guides', icon: BookOpenText },
   { href: '/admin/templates', label: 'Templates', icon: FileText },
@@ -15,6 +16,7 @@ const items = [
   { href: '/admin/rss-feeds', label: 'RSS Feeds', icon: Rss },
   { href: '/admin/subscriptions', label: 'Subscriptions', icon: CreditCard },
   { href: '/admin/audit-logs', label: 'Audit', icon: ListChecks },
+  { href: '/admin/incidents', label: 'Incidents', icon: Siren },
   { href: '/admin/translations', label: 'Translations', icon: Languages },
   { href: '/admin/glossary', label: 'Glossary', icon: Languages },
   { href: '/admin/jobs', label: 'Jobs', icon: Briefcase },
@@ -74,17 +76,17 @@ export default function Sidebar() {
   const marketplacePendingCount = useMemo(() => pendingMarketplaceIds.length, [pendingMarketplaceIds])
 
   return (
-    <aside className="w-72 p-6 space-y-4 sticky top-0 h-screen">
-      <div className="glass p-5">
+    <aside className="w-full space-y-3 p-4 lg:sticky lg:top-0 lg:h-screen lg:w-72 lg:space-y-4 lg:p-6">
+      <div className="glass hidden p-5 lg:block">
         <div className="text-lg font-semibold">Sweezy Admin</div>
         <div className="text-xs opacity-60">Swiss minimal</div>
       </div>
-      <nav className="glass p-2 flex flex-col gap-1">
+      <nav className="glass flex gap-1 overflow-x-auto p-2 lg:flex-col lg:overflow-x-visible">
         {items.map(it => (
           <Link
             key={it.href}
             href={it.href}
-            className={cn('flex items-center gap-2 rounded-lg px-3 py-2 hover:bg-white/10 transition', pathname?.startsWith(it.href) && 'bg-white/15')}
+            className={cn('flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 transition hover:bg-white/10', pathname?.startsWith(it.href) && 'bg-white/15')}
           >
             <it.icon size={16} aria-hidden="true" />
             <span className="flex flex-1 items-center justify-between gap-2">

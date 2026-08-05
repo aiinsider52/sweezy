@@ -29,7 +29,16 @@ def get_current_admin(
         return payload
     except HTTPException:
         raise
-    except Exception:
+    except Exception as exc:
+        from .services.incidents import record_incident
+
+        record_incident(
+            source="auth",
+            title="Admin authentication processing failed",
+            severity="warning",
+            message=type(exc).__name__,
+            dedupe_key=type(exc).__name__,
+        )
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication")
 
 
@@ -73,6 +82,27 @@ def get_current_user(
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication")
 
 CurrentUser = Annotated[object, Depends(get_current_user)]
+
+
+def get_optional_current_user(
+    credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(optional_security_scheme)],
+    db: Session = Depends(get_db),
+):
+    if credentials is None:
+        return None
+    try:
+        payload = decode_token(credentials.credentials)
+        user = UserService.get_by_id(db, payload.get("sub"))
+        if not user or not user.is_active:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid user")
+        return user
+    except HTTPException:
+        raise
+    except Exception:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication")
+
+
+OptionalCurrentUser = Annotated[object | None, Depends(get_optional_current_user)]
 
 
 def require_roles(*roles: str):

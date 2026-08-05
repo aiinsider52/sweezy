@@ -11,6 +11,7 @@ import MapKit
 
 struct JobsView: View {
     @EnvironmentObject private var appContainer: AppContainer
+    @EnvironmentObject private var lockManager: AppLockManager
     @EnvironmentObject private var sessionManager: SessionManager
     @Environment(\.dismiss) private var dismiss
     
@@ -180,6 +181,10 @@ struct JobsView: View {
             AuthEntryView(showsCloseButton: true) {
                 showAuthEntry = false
             }
+            .environment(\.locale, appContainer.currentLocale)
+            .environmentObject(appContainer)
+            .environmentObject(lockManager)
+            .environmentObject(sessionManager)
         }
         .onChange(of: sessionManager.isAuthenticated) { _, authenticated in
             if authenticated {

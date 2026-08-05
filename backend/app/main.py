@@ -31,6 +31,7 @@ from .routers.media import public_router as media_public_router
 from .routers.media import router as media_router
 from .routers.news import router as news_router
 from .routers.admin import router as admin_router
+from .routers.admin_analytics import router as admin_analytics_router
 from .routers.ai import router as ai_router
 from .routers.jobs import admin_router as jobs_admin_router
 from .routers.jobs import router as jobs_router
@@ -52,6 +53,7 @@ from .routers.chat import admin_router as chat_admin_router
 from .routers.chat import devices_router
 from .routers.discovery import router as discovery_router
 from .routers.discovery import admin_router as discovery_admin_router
+from .routers.incidents import router as incidents_router
 
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
@@ -272,6 +274,18 @@ class RequestIDMiddleware(BaseHTTPMiddleware):
         try:
             response = await call_next(request)
             return response
+        except Exception as exc:
+            from .services.incidents import record_incident
+
+            record_incident(
+                source="http",
+                title="Unhandled server exception",
+                severity="critical",
+                message=type(exc).__name__,
+                context={"method": request.method, "path": request.url.path, "request_id": request_id},
+                dedupe_key=f"{request.method}:{request.url.path}:{type(exc).__name__}",
+            )
+            raise
         finally:
             duration_ms = int((time.perf_counter() - start) * 1000)
             status_code = getattr(response, "status_code", 500) if response is not None else 500
@@ -293,6 +307,16 @@ class RequestIDMiddleware(BaseHTTPMiddleware):
                 duration_ms=duration_ms,
                 client_ip=client_host,
             )
+            if response is not None and status_code >= 500:
+                from .services.incidents import record_incident
+
+                record_incident(
+                    source="http",
+                    title=f"HTTP {status_code} response",
+                    severity="error",
+                    context={"method": request.method, "path": request.url.path, "request_id": request_id},
+                    dedupe_key=f"{request.method}:{request.url.path}:{status_code}",
+                )
 
             # Clear contextvars for this request
             structlog.contextvars.clear_contextvars()
@@ -375,6 +399,15 @@ def ready() -> dict:
         return {"status": "ready"}
     except Exception as exc:
         log.warning("readiness_failed", error=str(exc))
+        from .services.incidents import record_incident
+
+        record_incident(
+            source="readiness",
+            title="Readiness check failed",
+            severity="critical",
+            message=type(exc).__name__,
+            dedupe_key=type(exc).__name__,
+        )
         raise HTTPException(status_code=503, detail="not ready") from exc
 
 
@@ -393,6 +426,8 @@ app.include_router(templates_router, prefix=f"{API_PREFIX}/templates", tags=["te
 app.include_router(appointments_router, prefix=f"{API_PREFIX}/appointments", tags=["appointments"])
 app.include_router(remote_config_router, prefix=f"{API_PREFIX}/remote-config", tags=["remote-config"])
 app.include_router(admin_router, prefix=f"{API_PREFIX}/admin", tags=["admin"])
+app.include_router(admin_analytics_router, prefix=f"{API_PREFIX}/admin/analytics", tags=["admin-analytics"])
+app.include_router(incidents_router, prefix=f"{API_PREFIX}/admin", tags=["admin", "incidents"])
 app.include_router(media_router, prefix=f"{API_PREFIX}/media", tags=["media"])
 app.include_router(news_router, prefix=f"{API_PREFIX}/news", tags=["news"])
 app.include_router(ai_router, prefix=f"{API_PREFIX}/ai", tags=["ai"])

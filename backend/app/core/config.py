@@ -89,6 +89,15 @@ class Settings(BaseSettings):
     SECRET_KEY: Optional[str] = None
     STRIPE_REDIRECT_ORIGINS: str | None = None
 
+    # Incident management / Telegram operations channel
+    INCIDENTS_ENABLED: bool = True
+    TELEGRAM_BOT_TOKEN: str | None = None
+    TELEGRAM_CHAT_ID: str | None = None
+    INCIDENT_ALERT_DEDUPE_SECONDS: int = Field(default=900, ge=30, le=86400)
+    INCIDENT_ALERT_MAX_CHARS: int = Field(default=3500, ge=200, le=4000)
+    INCIDENT_TELEGRAM_TIMEOUT_SECONDS: float = Field(default=3.0, ge=0.5, le=10)
+    INCIDENT_CRITICAL_TELEMETRY_TYPES: str = "app.crash,security.critical,data_loss"
+
     # Sentry
     SENTRY_DSN: Optional[str] = None
     SENTRY_TRACES_SAMPLE_RATE: float = 0.1

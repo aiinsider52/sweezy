@@ -72,6 +72,15 @@ def _send_email(
             )
             configuration_error = EmailDeliveryError("Transactional email provider is not configured")
             sentry_sdk.capture_exception(configuration_error)
+            from .incidents import record_incident
+
+            record_incident(
+                source="email",
+                title="Transactional email configuration error",
+                severity="critical",
+                context={"email_type": email_type, "recipient_id": recipient_id},
+                dedupe_key=f"configuration:{email_type}",
+            )
             raise configuration_error
         logger.info("email_delivery_skipped_in_development", email_type=email_type, recipient_id=recipient_id)
         return
@@ -140,6 +149,16 @@ def _send_email(
         error_type=type(last_error).__name__ if last_error else None,
     )
     sentry_sdk.capture_exception(delivery_error)
+    from .incidents import record_incident
+
+    record_incident(
+        source="email",
+        title="Transactional email delivery failed",
+        severity="error",
+        message=type(last_error).__name__ if last_error else None,
+        context={"email_type": email_type, "recipient_id": recipient_id, "attempts": attempt},
+        dedupe_key=f"delivery:{email_type}",
+    )
     raise delivery_error from last_error
 
 

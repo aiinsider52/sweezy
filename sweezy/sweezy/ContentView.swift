@@ -132,6 +132,9 @@ struct MainAppContent: View {
                 }
             )
             .environment(\.locale, appContainer.currentLocale)
+            .environmentObject(appContainer)
+            .environmentObject(lockManager)
+            .environmentObject(sessionManager)
         }
         .fullScreenCover(item: $deepLinkedConversation) { conversation in
             ChatConversationView(conversation: conversation)

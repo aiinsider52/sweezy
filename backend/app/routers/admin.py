@@ -1,11 +1,16 @@
 from typing import Any, Dict, List
+import csv
+import hashlib
+import io
+import json
 import re
 import time
-from datetime import datetime
+from datetime import date, datetime
 from urllib.parse import urlparse, urljoin
 
-from fastapi import APIRouter, HTTPException, status
-from sqlalchemy import func, select
+from fastapi import APIRouter, HTTPException, Query, status
+from fastapi.responses import StreamingResponse
+from sqlalchemy import func, or_, select
 
 from ..dependencies import DBSession, CurrentAdmin
 from ..models import User, Guide, Template, Checklist, Appointment
@@ -47,24 +52,201 @@ def stats(_: CurrentAdmin, db: DBSession) -> Dict[str, Any]:
     }
 
 
+def _filtered_users_query(
+    db: DBSession,
+    search: str | None,
+    role: str | None,
+    user_status: str | None,
+    subscription: str | None,
+    created_from: date | None = None,
+    created_to: date | None = None,
+):
+    query = db.query(User)
+    if search:
+        term = f"%{search.strip()}%"
+        query = query.filter(or_(User.email.ilike(term), User.id.ilike(term)))
+    if role:
+        query = query.filter(User.role == role)
+    if user_status == "active":
+        query = query.filter(User.is_active.is_(True))
+    elif user_status == "inactive":
+        query = query.filter(User.is_active.is_(False))
+    if subscription:
+        query = query.filter(User.subscription_status == subscription)
+    if created_from:
+        query = query.filter(User.created_at >= datetime.combine(created_from, datetime.min.time()))
+    if created_to:
+        query = query.filter(User.created_at < datetime.combine(created_to + timedelta(days=1), datetime.min.time()))
+    return query
+
+
+def _serialize_user(r: User) -> Dict[str, Any]:
+    return {
+        "id": r.id,
+        "email": r.email,
+        "is_superuser": bool(r.is_superuser),
+        "is_active": bool(r.is_active),
+        "email_verified": bool(r.email_verified),
+        "role": r.role,
+        "subscription_status": r.subscription_status,
+        "created_at": r.created_at.isoformat() if r.created_at else None,
+    }
+
+
 @router.get("/users")
-def list_users(_: CurrentAdmin, db: DBSession) -> List[Dict[str, Any]]:
-    rows = (
-        db.query(User.id, User.email, User.is_superuser, User.role, User.created_at)
-        .order_by(User.created_at.desc())
-        .limit(100)
-        .all()
+def list_users(
+    _: CurrentAdmin,
+    db: DBSession,
+    page: int | None = Query(default=None, ge=1),
+    page_size: int = Query(default=25, ge=1, le=100),
+    search: str | None = Query(default=None, max_length=255),
+    role: str | None = Query(default=None),
+    status: str | None = Query(default=None),
+    subscription: str | None = Query(default=None),
+    created_from: date | None = Query(default=None),
+    created_to: date | None = Query(default=None),
+) -> Any:
+    if created_from and created_to and created_from > created_to:
+        raise HTTPException(status_code=422, detail="created_from must not be after created_to")
+    query = _filtered_users_query(
+        db, search, role, status, subscription, created_from, created_to
     )
-    return [
-        {
-            "id": r.id,
-            "email": r.email,
-            "is_superuser": bool(r.is_superuser),
-            "role": r.role,
-            "created_at": r.created_at.isoformat() if r.created_at else None,
-        }
-        for r in rows
-    ]
+    # Preserve the original array response for callers that do not request pagination.
+    if page is None and not any((search, role, status, subscription, created_from, created_to)):
+        return [_serialize_user(r) for r in query.order_by(User.created_at.desc()).limit(100).all()]
+    current_page = page or 1
+    total = query.count()
+    rows = query.order_by(User.created_at.desc()).offset((current_page - 1) * page_size).limit(page_size).all()
+    return {
+        "items": [_serialize_user(r) for r in rows],
+        "page": current_page,
+        "page_size": page_size,
+        "total": total,
+        "pages": (total + page_size - 1) // page_size,
+    }
+
+
+@router.get("/users/stats")
+def user_stats(_: CurrentAdmin, db: DBSession) -> Dict[str, int]:
+    since = datetime.now(timezone.utc) - timedelta(days=30)
+    return {
+        "total": db.query(User).count(),
+        "active": db.query(User).filter(User.is_active.is_(True)).count(),
+        "verified": db.query(User).filter(User.email_verified.is_(True)).count(),
+        "premium": db.query(User).filter(User.subscription_status == "premium").count(),
+        "admins": db.query(User).filter(User.is_superuser.is_(True)).count(),
+        "new_30d": db.query(User).filter(User.created_at >= since).count(),
+    }
+
+
+def _csv_safe(value: Any) -> str:
+    text = "" if value is None else str(value)
+    return f"'{text}" if text.startswith(("=", "+", "-", "@")) else text
+
+
+def _meta_email_hash(email: str) -> str:
+    normalized = email.strip().lower()
+    return hashlib.sha256(normalized.encode("utf-8")).hexdigest()
+
+
+def _record_user_export_audit(
+    db: DBSession,
+    *,
+    admin: Dict[str, Any],
+    filters: Dict[str, Any],
+    purpose: str,
+    row_count: int,
+    outcome: str,
+) -> None:
+    actor = db.query(User).filter(User.id == admin.get("sub")).first()
+    entry = AuditLog(
+        user_email=actor.email if actor else f"user:{admin.get('sub', 'unknown')}",
+        action="export",
+        entity="users",
+        entity_id="meta_custom_audience",
+        changes=json.dumps({
+            "filters": filters,
+            "purpose": purpose,
+            "format": "meta_custom_audience_sha256",
+            "row_count": row_count,
+            "outcome": outcome,
+        }, sort_keys=True),
+    )
+    db.add(entry)
+    db.commit()
+
+
+@router.post("/users/export")
+def export_users(
+    admin: CurrentAdmin,
+    db: DBSession,
+    search: str | None = Query(default=None, max_length=255),
+    role: str | None = Query(default=None),
+    status: str | None = Query(default=None),
+    subscription: str | None = Query(default=None),
+    created_from: date | None = Query(default=None),
+    created_to: date | None = Query(default=None),
+    purpose: str = Query(default="meta_custom_audience", pattern="^meta_custom_audience$"),
+) -> StreamingResponse:
+    if created_from and created_to and created_from > created_to:
+        raise HTTPException(status_code=422, detail="created_from must not be after created_to")
+    filters = {
+        key: value.isoformat() if isinstance(value, (date, datetime)) else value
+        for key, value in {
+            "search": search,
+            "role": role,
+            "status": status,
+            "subscription": subscription,
+            "created_from": created_from,
+            "created_to": created_to,
+        }.items()
+        if value is not None
+    }
+    try:
+        rows = (
+            _filtered_users_query(
+                db, search, role, status, subscription, created_from, created_to
+            )
+            .filter(User.email_verified.is_(True))
+            .order_by(User.created_at.desc())
+            .all()
+        )
+        output = io.StringIO(newline="")
+        writer = csv.writer(output, lineterminator="\n")
+        writer.writerow(["email"])
+        for row in rows:
+            # A fixed-width lowercase hex digest cannot trigger spreadsheet formulas.
+            writer.writerow([_meta_email_hash(row.email)])
+        _record_user_export_audit(
+            db,
+            admin=admin,
+            filters=filters,
+            purpose=purpose,
+            row_count=len(rows),
+            outcome="success",
+        )
+    except Exception:
+        db.rollback()
+        try:
+            _record_user_export_audit(
+                db,
+                admin=admin,
+                filters=filters,
+                purpose=purpose,
+                row_count=0,
+                outcome="failed",
+            )
+        except Exception:
+            db.rollback()
+        raise
+    return StreamingResponse(
+        iter([output.getvalue()]),
+        media_type="text/csv",
+        headers={
+            "Content-Disposition": 'attachment; filename="meta-custom-audience-sha256.csv"',
+            "X-Export-Row-Count": str(len(rows)),
+        },
+    )
 
 
 @router.get("/activity")
@@ -192,6 +374,24 @@ def list_audit_logs(_: CurrentAdmin, db: DBSession, limit: int = 100) -> List[Di
         }
         for r in rows
     ]
+
+
+@router.get("/audit-logs/export")
+def export_audit_logs(_: CurrentAdmin, db: DBSession, limit: int = Query(default=1000, ge=1, le=10000)) -> StreamingResponse:
+    rows = db.query(AuditLog).order_by(AuditLog.created_at.desc()).limit(limit).all()
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["created_at", "user_email", "action", "entity", "entity_id", "changes"])
+    for row in rows:
+        writer.writerow([
+            row.created_at.isoformat(), _csv_safe(row.user_email), _csv_safe(row.action),
+            _csv_safe(row.entity), _csv_safe(row.entity_id), _csv_safe(row.changes),
+        ])
+    return StreamingResponse(
+        iter([output.getvalue()]),
+        media_type="text/csv",
+        headers={"Content-Disposition": 'attachment; filename="audit-logs.csv"'},
+    )
  
  
 @router.get("/subscriptions")

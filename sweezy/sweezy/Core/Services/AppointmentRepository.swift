@@ -47,7 +47,11 @@ final class AppointmentRepository: ObservableObject {
         self.decoder = decoder
 
         loadFromLocal()
-        syncFromiCloud()
+        // `NSUbiquitousKeyValueStore.synchronize()` can block the main thread for
+        // several seconds on devices with a slow or unhealthy iCloud account.
+        // Read the already-cached snapshot immediately; external changes arrive
+        // through `didChangeExternallyNotification`.
+        mergeCachedCloudSnapshot()
         observeiCloudChanges()
         observeAccountScopeChanges()
     }
@@ -109,10 +113,6 @@ final class AppointmentRepository: ObservableObject {
         do {
             let data = try encoder.encode(sortedAppointments(appointments))
             iCloudStore.set(data, forKey: iCloudKey)
-            let didSynchronize = iCloudStore.synchronize()
-            if !didSynchronize {
-                AppLogger.warning("iCloud sync unavailable, keeping local appointments only")
-            }
         } catch {
             AppLogger.error("Failed to mirror appointments to iCloud: \(error)")
         }
@@ -134,9 +134,7 @@ final class AppointmentRepository: ObservableObject {
         }
     }
 
-    private func syncFromiCloud() {
-        let didSynchronize = iCloudStore.synchronize()
-        guard didSynchronize else { return }
+    private func mergeCachedCloudSnapshot() {
         guard let data = iCloudStore.data(forKey: iCloudKey) else { return }
 
         do {
@@ -161,7 +159,7 @@ final class AppointmentRepository: ObservableObject {
         .sink { [weak self] _ in
             guard let self else { return }
             Task { @MainActor in
-                self.syncFromiCloud()
+                self.mergeCachedCloudSnapshot()
             }
         }
         .store(in: &cancellables)
@@ -189,7 +187,7 @@ final class AppointmentRepository: ObservableObject {
         appointments = []
         previousAppointments.forEach { notificationService.cancelAppointmentNotifications(for: $0.id) }
         loadFromLocal()
-        syncFromiCloud()
+        mergeCachedCloudSnapshot()
         appointments.forEach { rescheduleNotifications(for: $0) }
     }
 

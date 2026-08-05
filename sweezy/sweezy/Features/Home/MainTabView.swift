@@ -1614,7 +1614,10 @@ struct PlaceDetailSheet: View {
     // MARK: - Helpers
     private func openInMaps() {
         let coordinate = place.coordinate.clLocationCoordinate
-        let mapItem = MKMapItem(placemark: MKPlacemark(coordinate: coordinate))
+        let mapItem = MKMapItem(
+            location: CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude),
+            address: nil
+        )
         mapItem.name = place.name
         mapItem.openInMaps()
     }
@@ -1767,7 +1770,10 @@ struct PlaceLiteRow: View {
     
     private func openInMaps() {
         let coordinate = place.coordinate.clLocationCoordinate
-        let mapItem = MKMapItem(placemark: MKPlacemark(coordinate: coordinate))
+        let mapItem = MKMapItem(
+            location: CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude),
+            address: nil
+        )
         mapItem.name = place.name
         mapItem.openInMaps()
     }

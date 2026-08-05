@@ -8,6 +8,7 @@
 import Foundation
 import CoreLocation
 import Combine
+import MapKit
 import UIKit
 
 /// Protocol for location services
@@ -203,32 +204,12 @@ extension LocationService {
     
     /// Get approximate address from coordinates
     func reverseGeocode(coordinate: CLLocationCoordinate2D) async -> String? {
-        let geocoder = CLGeocoder()
         let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
         
         do {
-            let placemarks = try await geocoder.reverseGeocodeLocation(location)
-            guard let placemark = placemarks.first else { return nil }
-            
-            var addressComponents: [String] = []
-            
-            if let street = placemark.thoroughfare {
-                addressComponents.append(street)
-            }
-            
-            if let houseNumber = placemark.subThoroughfare {
-                addressComponents.append(houseNumber)
-            }
-            
-            if let city = placemark.locality {
-                addressComponents.append(city)
-            }
-            
-            if let postalCode = placemark.postalCode {
-                addressComponents.append(postalCode)
-            }
-            
-            return addressComponents.joined(separator: ", ")
+            guard let request = MKReverseGeocodingRequest(location: location),
+                  let mapItem = try await request.mapItems.first else { return nil }
+            return mapItem.address?.fullAddress ?? mapItem.name
         } catch {
             AppLogger.location("Reverse geocoding failed: \(error)", isError: true)
             return nil
@@ -237,11 +218,9 @@ extension LocationService {
     
     /// Get coordinates from address string
     func geocode(address: String) async -> CLLocationCoordinate2D? {
-        let geocoder = CLGeocoder()
-        
         do {
-            let placemarks = try await geocoder.geocodeAddressString(address)
-            return placemarks.first?.location?.coordinate
+            guard let request = MKGeocodingRequest(addressString: address) else { return nil }
+            return try await request.mapItems.first?.location.coordinate
         } catch {
             AppLogger.location("Geocoding failed: \(error)", isError: true)
             return nil

@@ -34,13 +34,29 @@ enum KeychainStore {
             kSecAttrService as String: service,
             kSecAttrAccount as String: key,
             kSecReturnData as String: true,
+            kSecReturnAttributes as String: true,
             kSecMatchLimit as String: kSecMatchLimitOne
         ]
         var item: CFTypeRef?
         let status = SecItemCopyMatching(query as CFDictionary, &item)
-        guard status == errSecSuccess, let data = item as? Data else { return nil }
-        // Existing items remain readable, then are upgraded in-place without logging out.
-        try? save(String(decoding: data, as: UTF8.self), for: key)
+        guard status == errSecSuccess,
+              let result = item as? [String: Any],
+              let data = result[kSecValueData as String] as? Data else { return nil }
+
+        // Upgrade legacy items once. Previously every read performed a Keychain
+        // write, multiplying launch latency across session and account lookups.
+        let currentAccessibility = result[kSecAttrAccessible as String] as CFTypeRef?
+        if currentAccessibility == nil || !CFEqual(currentAccessibility, accessibility) {
+            let updateQuery: [String: Any] = [
+                kSecClass as String: kSecClassGenericPassword,
+                kSecAttrService as String: service,
+                kSecAttrAccount as String: key
+            ]
+            let attributes: [String: Any] = [
+                kSecAttrAccessible as String: accessibility
+            ]
+            SecItemUpdate(updateQuery as CFDictionary, attributes as CFDictionary)
+        }
         return String(data: data, encoding: .utf8)
     }
 

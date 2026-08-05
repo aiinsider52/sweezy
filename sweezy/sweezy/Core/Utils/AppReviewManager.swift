@@ -37,7 +37,9 @@ enum AppReviewManager {
         if shouldRequest {
             UserDefaults.standard.set(true, forKey: hasRequestedReviewKey)
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                requestReview()
+                Task { @MainActor in
+                    requestReview()
+                }
             }
         }
     }
@@ -47,9 +49,10 @@ enum AppReviewManager {
         return Calendar.current.dateComponents([.day], from: firstLaunch, to: Date()).day ?? 0
     }
     
+    @MainActor
     private static func requestReview() {
         if let scene = UIApplication.shared.connectedScenes.first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene {
-            SKStoreReviewController.requestReview(in: scene)
+            AppStore.requestReview(in: scene)
         }
     }
 }

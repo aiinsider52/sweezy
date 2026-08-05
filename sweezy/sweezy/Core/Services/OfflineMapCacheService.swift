@@ -29,12 +29,17 @@ final class OfflineMapCacheService: ObservableObject {
         return UIImage(data: data)
     }
     
-    func saveSnapshot(center: CLLocationCoordinate2D, span: MKCoordinateSpan, size: CGSize = CGSize(width: 1200, height: 1200)) async {
+    func saveSnapshot(
+        center: CLLocationCoordinate2D,
+        span: MKCoordinateSpan,
+        size: CGSize = CGSize(width: 1200, height: 1200),
+        scale: CGFloat = 2
+    ) async {
         let region = MKCoordinateRegion(center: center, span: span)
         let options = MKMapSnapshotter.Options()
         options.region = region
         options.size = size
-        options.scale = UIScreen.main.scale
+        options.scale = scale
         let snapshotter = MKMapSnapshotter(options: options)
         do {
             let snap = try await snapshotter.start()

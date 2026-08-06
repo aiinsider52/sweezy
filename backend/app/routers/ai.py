@@ -9,7 +9,7 @@ from pydantic import BaseModel, Field
 from typing import List, Optional
 import os
 
-from ..dependencies import get_db, require_premium
+from ..dependencies import CurrentUser, get_db, require_premium
 from ..core.config import get_settings
 from ..core.rate_limit import limiter
 from ..models import Guide
@@ -319,9 +319,9 @@ def _fallback_translation(payload: CVResumePayload) -> CVTranslationResponse:
     return CVTranslationResponse(**payload.model_dump(), generated_by_ai=False)
 
 
-@router.post("/cv-improve", response_model=CVImproveResponse, dependencies=[require_premium()])
+@router.post("/cv-improve", response_model=CVImproveResponse)
 @limiter.limit("10/minute")
-def cv_improve(request: Request, payload: CVImproveRequest) -> CVImproveResponse:
+def cv_improve(request: Request, payload: CVImproveRequest, _user: CurrentUser) -> CVImproveResponse:
     source = _target_source(payload)
     if not source:
         return CVImproveResponse(text="", generated_by_ai=False)
@@ -351,9 +351,9 @@ def cv_improve(request: Request, payload: CVImproveRequest) -> CVImproveResponse
         return CVImproveResponse(text=_fallback_improve(payload), generated_by_ai=False)
 
 
-@router.post("/cv-translate", response_model=CVTranslationResponse, dependencies=[require_premium()])
+@router.post("/cv-translate", response_model=CVTranslationResponse)
 @limiter.limit("4/minute")
-def cv_translate(request: Request, payload: CVResumePayload) -> CVTranslationResponse:
+def cv_translate(request: Request, payload: CVResumePayload, _user: CurrentUser) -> CVTranslationResponse:
     settings = get_settings()
     if not settings.OPENAI_API_KEY:
         return _fallback_translation(payload)

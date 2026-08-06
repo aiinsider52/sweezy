@@ -1230,7 +1230,7 @@ struct CVBuilderView: View {
         let nsError = error as NSError
         switch nsError.code {
         case 401: return "Сесія завершилась. Увійдіть знову."
-        case 402: return "Ця AI-функція доступна з Premium."
+        case 402: return "Ця AI-функція тимчасово обмежена. Спробуйте пізніше."
         case 422: return "Перевірте заповнені поля CV та спробуйте ще раз."
         default:
             if nsError.domain == NSURLErrorDomain {

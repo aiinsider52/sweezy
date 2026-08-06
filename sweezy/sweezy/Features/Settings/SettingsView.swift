@@ -1997,7 +1997,7 @@ struct ProfileEditView: View {
     private var cantonPickerSheet: some View {
         NavigationStack {
             List {
-                ForEach(Canton.allCases, id: \.self) { canton in
+                ForEach(Canton.sortedByName, id: \.self) { canton in
                     Button {
                         selectedCanton = canton
                         showCantonPicker = false

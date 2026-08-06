@@ -218,21 +218,22 @@ enum Canton: String, CaseIterable, Codable, Hashable {
     case schwyz = "SZ"
     case zug = "ZG"
     case baselLand = "BL"
-    
+
+    /// Official German names (with GR as Graubünden) for pickers and profile UI.
     var localizedName: String {
         switch self {
         case .zurich: return "Zürich"
         case .bern: return "Bern"
-        case .geneva: return "Geneva"
+        case .geneva: return "Genève"
         case .basel: return "Basel-Stadt"
         case .vaud: return "Vaud"
         case .aargau: return "Aargau"
         case .stGallen: return "St. Gallen"
-        case .grisons: return "Grisons"
+        case .grisons: return "Graubünden"
         case .ticino: return "Ticino"
         case .valais: return "Valais"
         case .fribourg: return "Fribourg"
-        case .lucerne: return "Lucerne"
+        case .lucerne: return "Luzern"
         case .thurgau: return "Thurgau"
         case .solothurn: return "Solothurn"
         case .neuchatel: return "Neuchâtel"
@@ -247,6 +248,13 @@ enum Canton: String, CaseIterable, Codable, Hashable {
         case .schwyz: return "Schwyz"
         case .zug: return "Zug"
         case .baselLand: return "Basel-Landschaft"
+        }
+    }
+
+    /// Alphabetized by display name so cantons like Graubünden are easy to find.
+    static var sortedByName: [Canton] {
+        allCases.sorted {
+            $0.localizedName.localizedStandardCompare($1.localizedName) == .orderedAscending
         }
     }
 }

@@ -763,8 +763,8 @@ private struct ProfileDetailsPage: View {
                     VStack(spacing: 12) {
                         OnboardingFieldCard(title: "onboarding.canton".localized, icon: "mappin.and.ellipse", delay: 0.15) {
                             Menu {
-                                ForEach(Canton.allCases, id: \.self) { canton in
-                                    Button(canton.localizedName) {
+                                ForEach(Canton.sortedByName, id: \.self) { canton in
+                                    Button("\(canton.localizedName) (\(canton.rawValue))") {
                                         selectedCanton = canton
                                     }
                                 }

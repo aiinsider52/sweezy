@@ -108,8 +108,8 @@ struct BenefitsCalculatorView: View {
                     .foregroundColor(Theme.Colors.textPrimary)
                 
                 Picker("Canton", selection: $selectedCanton) {
-                    ForEach(Canton.allCases, id: \.self) { canton in
-                        Text(canton.localizedName).tag(canton)
+                    ForEach(Canton.sortedByName, id: \.self) { canton in
+                        Text("\(canton.localizedName) (\(canton.rawValue))").tag(canton)
                     }
                 }
                 .pickerStyle(MenuPickerStyle())

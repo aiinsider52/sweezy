@@ -12,9 +12,7 @@ import LocalAuthentication
 final class AppLockManager: ObservableObject {
     @AppStorage("userName") var userName: String = ""
     @AppStorage("userEmail") var userEmail: String = ""
-    @AppStorage("isRegistered") var isRegistered: Bool = false {
-        didSet { objectWillChange.send() }
-    }
+    @AppStorage("isRegistered") var isRegistered: Bool = false
     @AppStorage("biometricsEnabled") var biometricsEnabled: Bool = false
     @Published var isLocked: Bool = false
     @Published var lastAuthErrorDescription: String?

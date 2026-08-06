@@ -26,10 +26,16 @@ struct JourneyMarketplaceView: View {
     var body: some View {
         NavigationStack {
             ZStack(alignment: .bottomTrailing) {
-                JourneyVisual.black.ignoresSafeArea()
-
-                marketOverscrollBackdrop
-                    .allowsHitTesting(false)
+                LinearGradient(
+                    colors: [
+                        Color(red: 0.12, green: 0.10, blue: 0.08),
+                        JourneyVisual.black,
+                        JourneyVisual.black
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .ignoresSafeArea()
 
                 ScrollView(showsIndicators: false) {
                     LazyVStack(alignment: .leading, spacing: 0) {
@@ -119,7 +125,20 @@ struct JourneyMarketplaceView: View {
                 #endif
             }
             .onChange(of: sessionManager.isAuthenticated) { _, authenticated in
-                guard authenticated else { return }
+                guard authenticated else {
+                    let wasCreating = showCreateListing || showCreateItem || showCreateEvent
+                    if wasCreating {
+                        pendingCreate = true
+                        showCreateListing = false
+                        showCreateItem = false
+                        showCreateEvent = false
+                        Task { @MainActor in
+                            try? await Task.sleep(nanoseconds: 250_000_000)
+                            showAuth = true
+                        }
+                    }
+                    return
+                }
                 if pendingCreate {
                     pendingCreate = false
                     showAuth = false
@@ -144,35 +163,6 @@ struct JourneyMarketplaceView: View {
         }
         .featureOnboarding(.marketplace)
         .accessibilityIdentifier("marketplace.screen")
-    }
-
-    /// Continues the hero photo above the fold so pull-to-refresh never reveals a flat black slab.
-    private var marketOverscrollBackdrop: some View {
-        VStack(spacing: 0) {
-            ZStack {
-                Image(heroImageName)
-                    .resizable()
-                    .scaledToFill()
-                    .frame(height: 300)
-                    .frame(maxWidth: .infinity)
-                    .clipped()
-
-                LinearGradient(
-                    colors: [
-                        Color.black.opacity(0.38),
-                        Color.black.opacity(0.18),
-                        JourneyVisual.black
-                    ],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-            }
-            .frame(height: 300)
-            .frame(maxWidth: .infinity)
-
-            Spacer(minLength: 0)
-        }
-        .ignoresSafeArea(edges: .top)
     }
 
     private var marketHero: some View {
@@ -548,7 +538,7 @@ struct JourneyMarketplaceView: View {
 
     private var heroImageName: String {
         switch selectedMode {
-        case .services: return "cityhub-zurich-oldtown"
+        case .services: return "journey-market-consultant"
         case .items: return "cityhub-zurich-viadukt"
         case .events: return "cityhub-zurich-sechselaeutenplatz"
         }

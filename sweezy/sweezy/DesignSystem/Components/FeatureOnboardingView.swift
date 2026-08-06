@@ -31,7 +31,6 @@ struct FeatureOnboardingView: View {
             }
         }
         .preferredColorScheme(.dark)
-        .interactiveDismissDisabled()
         .onAppear {
             guard !appeared else { return }
             if reduceMotion {
@@ -65,6 +64,7 @@ struct FeatureOnboardingView: View {
                 )
         }
         .ignoresSafeArea()
+        .allowsHitTesting(false)
     }
 
     private var header: some View {
@@ -156,6 +156,7 @@ struct FeatureOnboardingView: View {
                 startPoint: .top,
                 endPoint: .bottom
             )
+            .allowsHitTesting(false)
 
             VStack(alignment: .leading, spacing: 14) {
                 HStack {
@@ -331,10 +332,12 @@ struct FeatureOnboardingModifier: ViewModifier {
                     }
                 }
             }
-            .fullScreenCover(isPresented: $showOnboarding) {
+            .sheet(isPresented: $showOnboarding) {
                 FeatureOnboardingView(content: content) {
                     showOnboarding = false
                 }
+                .presentationDetents([.large])
+                .presentationDragIndicator(.visible)
             }
     }
 }

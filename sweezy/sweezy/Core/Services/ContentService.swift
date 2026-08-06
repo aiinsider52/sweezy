@@ -59,15 +59,23 @@ class ContentService: ContentServiceProtocol {
     // Флаг: guides были успешно загружены з бекенду (Render). Если true — не перезаписываем их локальними JSON.
     private var didLoadRemoteGuides: Bool = false
     private let errorHandler: any ErrorHandlingServiceProtocol
+    private let remoteConfigService: RemoteConfigService
+    private var safetyPolicy = ContentSafetyPolicy()
     
     private var cacheDirectory: URL {
         let urls = fileManager.urls(for: .cachesDirectory, in: .userDomainMask)
         return urls[0].appendingPathComponent("SweezyContent")
     }
     
-    init(bundle: Bundle = .main, errorHandler: (any ErrorHandlingServiceProtocol)? = nil, autoLoad: Bool = true) {
+    init(
+        bundle: Bundle = .main,
+        errorHandler: (any ErrorHandlingServiceProtocol)? = nil,
+        remoteConfigService: RemoteConfigService? = nil,
+        autoLoad: Bool = true
+    ) {
         self.bundle = bundle
         self.errorHandler = errorHandler ?? ErrorHandlingService()
+        self.remoteConfigService = remoteConfigService ?? RemoteConfigService()
         setupDecoder()
         createCacheDirectoryIfNeeded()
         if autoLoad {
@@ -91,6 +99,12 @@ class ContentService: ContentServiceProtocol {
     
     func loadContent() async {
         isLoading = true
+        if let config = await remoteConfigService.getRemoteConfig() {
+            safetyPolicy = ContentSafetyPolicy(
+                hiddenSlugs: config.hiddenContentSlugs ?? [],
+                hiddenCategories: config.hiddenContentCategories ?? []
+            )
+        }
         // Load content in parallel for better startup time
         await withTaskGroup(of: Void.self) { group in
             group.addTask { await self.loadGuides() }
@@ -101,6 +115,7 @@ class ContentService: ContentServiceProtocol {
             group.addTask { await self.loadNews() }
             await group.waitForAll()
         }
+        enforceSafetyPolicy()
         lastUpdated = Date()
         isLoading = false
     }
@@ -241,6 +256,11 @@ class ContentService: ContentServiceProtocol {
             AppLogger.content("Error loading guides: \(error)", isError: true)
             guides = []
         }
+    }
+
+    private func enforceSafetyPolicy() {
+        guides = guides.filter(safetyPolicy.allows)
+        places = places.filter(safetyPolicy.allows)
     }
     
     private func loadChecklists() async {
@@ -782,6 +802,7 @@ class ContentService: ContentServiceProtocol {
             
             self.guides = allGuides
         }
+        enforceSafetyPolicy()
         self.preferredLanguage = lang
 
         // Load locale-specific checklists

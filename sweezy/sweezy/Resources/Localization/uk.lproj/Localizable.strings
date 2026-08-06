@@ -2542,3 +2542,12 @@
 "swiss.discovery.bern_region.season" = "Цілий рік";
 "swiss.discovery.bern_region.duration" = "3–5 днів";
 "swiss.discovery.bern_region.route" = "Берн → Тун або Шпіц → Інтерлакен → Гріндельвальд";
+
+"profile.loading" = "Завантажуємо профіль…";
+"profile.error.title" = "Профіль недоступний";
+"profile.verified" = "Перевірений профіль";
+"profile.community" = "Спільнота Sweezy";
+"profile.member_since.format" = "У Sweezy з %@";
+"profile.listings.title" = "Активні оголошення";
+"profile.listings.empty.title" = "Немає активних оголошень";
+"profile.listings.empty.body" = "Зараз у цього користувача немає схвалених оголошень.";

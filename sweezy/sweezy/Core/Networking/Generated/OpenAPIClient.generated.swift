@@ -2,7 +2,7 @@
 import Foundation
 
 enum GeneratedOpenAPIContract {
-    static let sha256 = "b490a32f6a8c889522e91b14283c117da6e1aef9c1f4a5303db0dc99499330cb"
+    static let sha256 = "5092894f66fc1f71b8b9813da60d5ec3439b841e51c081bb4feca1bdebb1af86"
 
     struct Operation: Sendable {
         let method: String
@@ -12,7 +12,16 @@ enum GeneratedOpenAPIContract {
 
     static let operations: [String: Operation] = [
         "activity_api_v1_admin_activity_get": Operation(method: "GET", path: "/api/v1/admin/activity", requiresAuthentication: true),
+        "active_users_api_v1_admin_analytics_active_users_get": Operation(method: "GET", path: "/api/v1/admin/analytics/active-users", requiresAuthentication: true),
+        "app_versions_api_v1_admin_analytics_app_versions_get": Operation(method: "GET", path: "/api/v1/admin/analytics/app-versions", requiresAuthentication: true),
+        "errors_api_v1_admin_analytics_errors_get": Operation(method: "GET", path: "/api/v1/admin/analytics/errors", requiresAuthentication: true),
+        "funnels_api_v1_admin_analytics_funnels_get": Operation(method: "GET", path: "/api/v1/admin/analytics/funnels", requiresAuthentication: true),
+        "overview_api_v1_admin_analytics_overview_get": Operation(method: "GET", path: "/api/v1/admin/analytics/overview", requiresAuthentication: true),
+        "realtime_api_v1_admin_analytics_realtime_get": Operation(method: "GET", path: "/api/v1/admin/analytics/realtime", requiresAuthentication: true),
+        "retention_api_v1_admin_analytics_retention_get": Operation(method: "GET", path: "/api/v1/admin/analytics/retention", requiresAuthentication: true),
+        "top_actions_api_v1_admin_analytics_top_actions_get": Operation(method: "GET", path: "/api/v1/admin/analytics/top-actions", requiresAuthentication: true),
         "list_audit_logs_api_v1_admin_audit_logs_get": Operation(method: "GET", path: "/api/v1/admin/audit-logs", requiresAuthentication: true),
+        "export_audit_logs_api_v1_admin_audit_logs_export_get": Operation(method: "GET", path: "/api/v1/admin/audit-logs/export", requiresAuthentication: true),
         "list_brave_news_queries_api_v1_admin_brave_news_queries_get": Operation(method: "GET", path: "/api/v1/admin/brave-news/queries", requiresAuthentication: true),
         "create_brave_news_query_api_v1_admin_brave_news_queries_post": Operation(method: "POST", path: "/api/v1/admin/brave-news/queries", requiresAuthentication: true),
         "delete_brave_news_query_api_v1_admin_brave_news_queries__query_id__delete": Operation(method: "DELETE", path: "/api/v1/admin/brave-news/queries/{query_id}", requiresAuthentication: true),
@@ -37,6 +46,9 @@ enum GeneratedOpenAPIContract {
         "import_news_api_v1_admin_import_news_post": Operation(method: "POST", path: "/api/v1/admin/import/news", requiresAuthentication: true),
         "import_news_rss_api_v1_admin_import_news_rss_post": Operation(method: "POST", path: "/api/v1/admin/import/news/rss", requiresAuthentication: true),
         "import_templates_api_v1_admin_import_templates_post": Operation(method: "POST", path: "/api/v1/admin/import/templates", requiresAuthentication: true),
+        "list_incidents_api_v1_admin_incidents_get": Operation(method: "GET", path: "/api/v1/admin/incidents", requiresAuthentication: true),
+        "test_incident_alert_api_v1_admin_incidents_test_alert_post": Operation(method: "POST", path: "/api/v1/admin/incidents/test-alert", requiresAuthentication: true),
+        "update_incident_api_v1_admin_incidents__incident_id__patch": Operation(method: "PATCH", path: "/api/v1/admin/incidents/{incident_id}", requiresAuthentication: true),
         "employers_api_v1_admin_jobs_employers_get": Operation(method: "GET", path: "/api/v1/admin/jobs/employers", requiresAuthentication: true),
         "verify_employer_api_v1_admin_jobs_employers__user_id__verify_post": Operation(method: "POST", path: "/api/v1/admin/jobs/employers/{user_id}/verify", requiresAuthentication: true),
         "pending_jobs_api_v1_admin_jobs_pending_get": Operation(method: "GET", path: "/api/v1/admin/jobs/pending", requiresAuthentication: true),
@@ -65,10 +77,13 @@ enum GeneratedOpenAPIContract {
         "subscriptions_analytics_api_v1_admin_subscriptions_analytics_get": Operation(method: "GET", path: "/api/v1/admin/subscriptions/analytics", requiresAuthentication: true),
         "list_subscription_events_api_v1_admin_subscriptions_events_get": Operation(method: "GET", path: "/api/v1/admin/subscriptions/events", requiresAuthentication: true),
         "list_users_api_v1_admin_users_get": Operation(method: "GET", path: "/api/v1/admin/users", requiresAuthentication: true),
+        "export_users_api_v1_admin_users_export_post": Operation(method: "POST", path: "/api/v1/admin/users/export", requiresAuthentication: true),
+        "user_stats_api_v1_admin_users_stats_get": Operation(method: "GET", path: "/api/v1/admin/users/stats", requiresAuthentication: true),
         "update_user_role_api_v1_admin_users__user_id__role_put": Operation(method: "PUT", path: "/api/v1/admin/users/{user_id}/role", requiresAuthentication: true),
         "set_user_subscription_api_v1_admin_users__user_id__subscription_post": Operation(method: "POST", path: "/api/v1/admin/users/{user_id}/subscription", requiresAuthentication: true),
         "ask_sweezy_api_v1_ai_ask_sweezy_post": Operation(method: "POST", path: "/api/v1/ai/ask-sweezy", requiresAuthentication: true),
-        "cv_suggest_api_v1_ai_cv_suggest_post": Operation(method: "POST", path: "/api/v1/ai/cv-suggest", requiresAuthentication: true),
+        "cv_improve_api_v1_ai_cv_improve_post": Operation(method: "POST", path: "/api/v1/ai/cv-improve", requiresAuthentication: true),
+        "cv_translate_api_v1_ai_cv_translate_post": Operation(method: "POST", path: "/api/v1/ai/cv-translate", requiresAuthentication: true),
         "job_apply_api_v1_ai_job_apply_post": Operation(method: "POST", path: "/api/v1/ai/job-apply", requiresAuthentication: true),
         "log_paywall_event_api_v1_analytics_paywall_post": Operation(method: "POST", path: "/api/v1/analytics/paywall", requiresAuthentication: false),
         "list_appointments_api_v1_appointments__get": Operation(method: "GET", path: "/api/v1/appointments/", requiresAuthentication: true),
@@ -165,6 +180,7 @@ enum GeneratedOpenAPIContract {
         "blocked_authors_api_v1_marketplace_blocked_get": Operation(method: "GET", path: "/api/v1/marketplace/blocked", requiresAuthentication: true),
         "unblock_author_api_v1_marketplace_blocked__author_id__delete": Operation(method: "DELETE", path: "/api/v1/marketplace/blocked/{author_id}", requiresAuthentication: true),
         "my_listings_api_v1_marketplace_my_get": Operation(method: "GET", path: "/api/v1/marketplace/my", requiresAuthentication: true),
+        "public_profile_api_v1_marketplace_profiles__profile_user_id__get": Operation(method: "GET", path: "/api/v1/marketplace/profiles/{profile_user_id}", requiresAuthentication: true),
         "delete_listing_api_v1_marketplace__listing_id__delete": Operation(method: "DELETE", path: "/api/v1/marketplace/{listing_id}", requiresAuthentication: true),
         "get_listing_api_v1_marketplace__listing_id__get": Operation(method: "GET", path: "/api/v1/marketplace/{listing_id}", requiresAuthentication: false),
         "update_listing_api_v1_marketplace__listing_id__patch": Operation(method: "PATCH", path: "/api/v1/marketplace/{listing_id}", requiresAuthentication: true),
@@ -187,7 +203,6 @@ enum GeneratedOpenAPIContract {
         "stream_api_v1_subscriptions_stream_get": Operation(method: "GET", path: "/api/v1/subscriptions/stream", requiresAuthentication: true),
         "stripe_webhook_api_v1_subscriptions_stripe_webhook_post": Operation(method: "POST", path: "/api/v1/subscriptions/stripe/webhook", requiresAuthentication: false),
         "start_trial_api_v1_subscriptions_trial_post": Operation(method: "POST", path: "/api/v1/subscriptions/trial", requiresAuthentication: true),
-        "list_telemetry_api_v1_telemetry_admin_get": Operation(method: "GET", path: "/api/v1/telemetry/admin", requiresAuthentication: true),
         "ingest_batch_api_v1_telemetry_batch_post": Operation(method: "POST", path: "/api/v1/telemetry/batch", requiresAuthentication: true),
         "list_templates_api_v1_templates__get": Operation(method: "GET", path: "/api/v1/templates/", requiresAuthentication: true),
         "create_template_api_v1_templates__post": Operation(method: "POST", path: "/api/v1/templates/", requiresAuthentication: true),

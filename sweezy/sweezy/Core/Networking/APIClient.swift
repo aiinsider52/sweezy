@@ -288,15 +288,27 @@ enum APIClient {
                     _ = try await refreshAccessToken()
                     var retryReq = request
                     attachAuth(&retryReq)
-                    return try await timedData(for: retryReq, context: "\(context)-retry")
+                    let retryResult = try await timedData(for: retryReq, context: "\(context)-retry")
+                    if let retryHTTP = retryResult.1 as? HTTPURLResponse, retryHTTP.statusCode == 401 {
+                        invalidateSession()
+                    }
+                    return retryResult
                 } catch {
-                    KeychainStore.delete("access_token")
-                    KeychainStore.delete("refresh_token")
+                    let apiError = error as NSError
+                    if apiError.domain == "API" && (apiError.code == 401 || apiError.code == 403) {
+                        invalidateSession()
+                    }
                     throw error
                 }
             }
         }
         return result
+    }
+
+    private static func invalidateSession() {
+        KeychainStore.delete("access_token")
+        KeychainStore.delete("refresh_token")
+        NotificationCenter.default.post(name: .authenticationDidExpire, object: nil)
     }
 
     // MARK: - Content
@@ -337,7 +349,7 @@ enum APIClient {
     
     // MARK: - AI
     // Narrow payloads to avoid large/unsupported fields (e.g., photoData)
-    private struct CVPersonalPayload: Encodable {
+    private struct CVPersonalPayload: Codable {
         let fullName: String
         let title: String
         let email: String
@@ -345,9 +357,9 @@ enum APIClient {
         let location: String
         let summary: String
     }
-    private struct CVEducationPayload: Encodable { let school: String; let degree: String; let period: String; let details: String }
-    private struct CVExperiencePayload: Encodable { let id: String; let role: String; let company: String; let period: String; let location: String; let achievements: String }
-    private struct CVLanguagePayload: Encodable { let name: String; let level: String }
+    private struct CVEducationPayload: Codable { let school: String; let degree: String; let period: String; let details: String }
+    private struct CVExperiencePayload: Codable { let id: String; let role: String; let company: String; let period: String; let location: String; let achievements: String }
+    private struct CVLanguagePayload: Codable { let name: String; let level: String }
     private struct CVAIRequest: Encodable {
         let personal: CVPersonalPayload
         let education: [CVEducationPayload]
@@ -357,7 +369,27 @@ enum APIClient {
         let hobbies: [String]
         let target: String
     }
-    struct CVAIResponse: Decodable { let text: String }
+    private struct CVResumePayload: Codable {
+        let personal: CVPersonalPayload
+        let education: [CVEducationPayload]
+        let experience: [CVExperiencePayload]
+        let languages: [CVLanguagePayload]
+        let skills: [String]
+        let hobbies: [String]
+    }
+    private struct CVAIResponse: Decodable {
+        let text: String
+        let generated_by_ai: Bool
+    }
+    private struct CVTranslationResponse: Decodable {
+        let personal: CVPersonalPayload
+        let education: [CVEducationPayload]
+        let experience: [CVExperiencePayload]
+        let languages: [CVLanguagePayload]
+        let skills: [String]
+        let hobbies: [String]
+        let generated_by_ai: Bool
+    }
     
     enum CVGenerationTarget {
         case summary
@@ -370,11 +402,10 @@ enum APIClient {
         case .summary: targetKey = "summary"
         case .experience(let id): targetKey = "experience:\(id.uuidString)"
         }
-        let url = url("ai/cv-suggest")
+        let url = url("ai/cv-improve")
         var req = URLRequest(url: url)
         req.httpMethod = "POST"
         req.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        attachAuth(&req)
         let payload = CVAIRequest(
             personal: .init(
                 fullName: resume.personal.fullName,
@@ -392,12 +423,68 @@ enum APIClient {
             target: targetKey
         )
         req.httpBody = try JSONEncoder().encode(payload)
-        let (data, resp) = try await URLSession.shared.data(for: req)
+        let (data, resp) = try await authorizedData(for: req, context: "cv-improve")
         guard let http = resp as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
-            throw URLError(.badServerResponse)
+            throw makeAPIError(data: data, response: resp as? HTTPURLResponse, fallback: "CV improvement unavailable")
         }
         let decoded = try JSONDecoder().decode(CVAIResponse.self, from: data)
         return decoded.text
+    }
+
+    static func translateCVToGerman(resume: CVResume) async throws -> CVResume {
+        let url = url("ai/cv-translate")
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        let payload = CVResumePayload(
+            personal: .init(
+                fullName: resume.personal.fullName,
+                title: resume.personal.title,
+                email: resume.personal.email,
+                phone: resume.personal.phone,
+                location: resume.personal.location,
+                summary: resume.personal.summary
+            ),
+            education: resume.education.map { .init(school: $0.school, degree: $0.degree, period: $0.period, details: $0.details) },
+            experience: resume.experience.map { .init(id: $0.id.uuidString, role: $0.role, company: $0.company, period: $0.period, location: $0.location, achievements: $0.achievements) },
+            languages: resume.languages.map { .init(name: $0.name, level: $0.level) },
+            skills: resume.skills,
+            hobbies: resume.hobbies
+        )
+        request.httpBody = try JSONEncoder().encode(payload)
+        let (data, response) = try await authorizedData(for: request, context: "cv-translate")
+        guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+            throw makeAPIError(data: data, response: response as? HTTPURLResponse, fallback: "CV translation unavailable")
+        }
+        let translated = try JSONDecoder().decode(CVTranslationResponse.self, from: data)
+        guard translated.education.count == resume.education.count,
+              translated.experience.count == resume.experience.count,
+              translated.languages.count == resume.languages.count else {
+            throw NSError(
+                domain: "API",
+                code: 422,
+                userInfo: [NSLocalizedDescriptionKey: "Translation returned an incomplete CV"]
+            )
+        }
+        var result = resume
+        result.personal.fullName = translated.personal.fullName
+        result.personal.title = translated.personal.title
+        result.personal.email = translated.personal.email
+        result.personal.phone = translated.personal.phone
+        result.personal.location = translated.personal.location
+        result.personal.summary = translated.personal.summary
+        result.education = zip(resume.education, translated.education).map { original, value in
+            CVEducation(id: original.id, school: value.school, degree: value.degree, period: value.period, details: value.details)
+        }
+        result.experience = zip(resume.experience, translated.experience).map { original, value in
+            CVExperience(id: original.id, role: value.role, company: value.company, period: value.period, location: value.location, achievements: value.achievements)
+        }
+        result.languages = zip(resume.languages, translated.languages).map { original, value in
+            CVLanguage(id: original.id, name: value.name, level: value.level)
+        }
+        result.skills = translated.skills
+        result.hobbies = translated.hobbies
+        return result
     }
     
     // MARK: - Jobs
@@ -508,20 +595,29 @@ enum APIClient {
         }
     }
     
-    static func draftJobApplication(title: String, company: String?, description: String?, language: String?) async -> String? {
+    static func draftJobApplication(
+        title: String,
+        company: String?,
+        description: String?,
+        language: String?,
+        candidateSummary: String?
+    ) async -> String? {
+        guard KeychainStore.get("access_token")?.isEmpty == false else { return nil }
         let url = url("ai/job-apply")
         var req = URLRequest(url: url)
         req.httpMethod = "POST"
         req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        attachAuth(&req)
         let body: [String: Any?] = [
             "jobTitle": title,
             "company": company,
             "description": description,
-            "language": language
+            "language": language,
+            "candidateSummary": candidateSummary
         ]
         req.httpBody = try? JSONSerialization.data(withJSONObject: body.compactMapValues { $0 })
         do {
-            let (data, resp) = try await URLSession.shared.data(for: req)
+            let (data, resp) = try await authorizedData(for: req, context: "job_application_draft")
             guard let http = resp as? HTTPURLResponse, (200..<300).contains(http.statusCode) else { return nil }
             let decoded = try JSONDecoder().decode(CVAIResponse.self, from: data)
             return decoded.text
@@ -1481,6 +1577,8 @@ extension APIClient {
 struct BackendRemoteConfig: Decodable {
     let app_version: String
     let flags: [String: Bool]
+    let hidden_content_slugs: [String]?
+    let hidden_content_categories: [String]?
 }
 
 // MARK: - Network helpers (timing + lightweight retry/backoff)

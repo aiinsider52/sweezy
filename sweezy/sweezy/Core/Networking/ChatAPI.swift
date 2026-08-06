@@ -91,6 +91,16 @@ enum ChatAPI {
         return try await request(path, as: ChatMessagePage.self)
     }
 
+    static func publicProfile(userID: String, listingID: String? = nil, conversationID: String? = nil) async throws -> PublicUserProfile {
+        var components = URLComponents()
+        components.queryItems = [
+            listingID.map { URLQueryItem(name: "listing_id", value: $0) },
+            conversationID.map { URLQueryItem(name: "conversation_id", value: $0) }
+        ].compactMap { $0 }
+        let query = components.percentEncodedQuery.map { "?\($0)" } ?? ""
+        return try await request("marketplace/profiles/\(userID)\(query)", as: PublicUserProfile.self)
+    }
+
     static func send(conversationID: String, clientMessageID: String, body: String) async throws -> ChatMessage {
         try await request(
             "chat/conversations/\(conversationID)/messages",
@@ -184,6 +194,11 @@ enum ChatAPI {
         request.timeoutInterval = 30
         APIClient.attachAuth(&request)
         return request
+    }
+
+    static func refreshedWebSocketRequest() async -> URLRequest? {
+        _ = try? await APIClient.refreshAccessToken()
+        return webSocketRequest()
     }
 }
 

@@ -168,6 +168,11 @@ final class LifeAdminService: ObservableObject {
         defaults.set(Array(completedDeadlineIDs), forKey: completedKey)
     }
 
+    static func firstWeekTaskID(from deadlineID: String) -> UUID? {
+        guard deadlineID.hasPrefix("task.") else { return nil }
+        return UUID(uuidString: String(deadlineID.dropFirst("task.".count)))
+    }
+
     func deadlines(
         profile: UserProfile?,
         firstWeekTasks: [FirstWeekChecklistService.TaskItem],
@@ -252,17 +257,18 @@ final class LifeAdminService: ObservableObject {
             sourceURL: "https://www.estv.admin.ch/estv/en/home.html"
         )
 
-        for task in firstWeekTasks where !task.isDone {
+        for task in firstWeekTasks {
+            let deadlineID = "task.\(task.id.uuidString)"
             result.append(
                 LifeDeadline(
-                    id: "task.\(task.id.uuidString)",
+                    id: deadlineID,
                     title: task.title,
                     detail: task.details ?? "Наступний крок персонального плану.",
                     dueDate: task.dueDate,
                     category: .personal,
                     sourceTitle: "Sweezy My Plan",
                     sourceURL: nil,
-                    isCompleted: false
+                    isCompleted: task.isDone || completedDeadlineIDs.contains(deadlineID)
                 )
             )
         }

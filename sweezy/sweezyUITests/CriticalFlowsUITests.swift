@@ -147,6 +147,33 @@ final class CriticalFlowsUITests: XCTestCase {
     }
 
     @MainActor
+    func testCVKeyboardDismissalAndPreviewRemainUsable() throws {
+        let app = launchCVBuilder()
+        let phone = app.textFields["cv.field.Телефон"]
+        XCTAssertTrue(phone.waitForExistence(timeout: 10))
+        phone.tap()
+        phone.typeText("+41791234567")
+        XCTAssertTrue(app.buttons["cv.keyboard.done"].waitForExistence(timeout: 5))
+        app.buttons["cv.keyboard.done"].tap()
+
+        let next = app.buttons["cv.navigation.next"]
+        XCTAssertTrue(next.isHittable)
+        next.tap()
+        let summary = app.textViews["cv.textarea.Про мене"]
+        XCTAssertTrue(summary.waitForExistence(timeout: 10))
+        summary.tap()
+        summary.typeText("Керувала 4 проєктами.")
+        app.swipeDown()
+        XCTAssertTrue(next.isHittable)
+
+        for _ in 0..<4 {
+            next.tap()
+        }
+        XCTAssertTrue(app.descendants(matching: .any)["cv.preview.card"].waitForExistence(timeout: 10))
+        XCTAssertTrue(next.isHittable)
+    }
+
+    @MainActor
     private func launchCVBuilder() -> XCUIApplication {
         let app = XCUIApplication()
         app.launchArguments = [

@@ -126,4 +126,48 @@ final class ContentServiceTests: XCTestCase {
         // This is tested implicitly by loading; if it doesn't crash, migration worked
         XCTAssertTrue(true, "Migration of invalid UUIDs succeeded without crash")
     }
+
+    func testSafetyPolicyHonorsRemoteSlugAndEmergencyCategory() {
+        let hidden = makeGuide(title: "Safe title", tags: ["slug:remove-me"])
+        let visible = makeGuide(title: "Municipal registration")
+        let policy = ContentSafetyPolicy(hiddenSlugs: ["remove-me"], hiddenCategories: [])
+
+        XCTAssertFalse(policy.allows(hidden))
+        XCTAssertTrue(policy.allows(visible))
+        XCTAssertTrue(policy.hiddenCategories.contains("refugee_center"))
+    }
+
+    func testSafetyPolicySuppressesDisputedAdvicePatterns() {
+        let travel = makeGuide(title: "Travel with Ausweis S", body: "Where you may travel")
+        let tax = makeGuide(title: "Tax deadline", body: "The deadline is fixed for everyone")
+        let insurance = makeGuide(title: "Insurance", body: "You must enroll in the first week")
+
+        XCTAssertFalse(ContentSafetyPolicy().allows(travel))
+        XCTAssertFalse(ContentSafetyPolicy().allows(tax))
+        XCTAssertFalse(ContentSafetyPolicy().allows(insurance))
+    }
+
+    func testFutureVerificationIsUnverifiedAndEstablishedTopicsAreSeparated() {
+        let future = Date(timeIntervalSince1970: 4_102_444_800)
+        let guide = makeGuide(title: "Pillar 3a pension", verifiedAt: future)
+
+        XCTAssertEqual(guide.freshness(asOf: Date(timeIntervalSince1970: 1_700_000_000)), .unverified)
+        XCTAssertEqual(guide.audienceStage, .established)
+    }
+
+    private func makeGuide(
+        title: String,
+        body: String = "General information",
+        tags: [String] = [],
+        verifiedAt: Date? = nil
+    ) -> Guide {
+        Guide(
+            title: title,
+            bodyMarkdown: body,
+            tags: tags,
+            category: .documents,
+            verifiedAt: verifiedAt,
+            source: "https://www.ch.ch/en/"
+        )
+    }
 }

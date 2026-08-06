@@ -192,7 +192,10 @@ struct MainAppContent: View {
                 await scheduleRetentionLoopsOnBackground()
             }
         case .inactive:
-            lockManager.appDidEnterBackground()
+            // Temporary interruptions (Control Center, system alerts, biometric
+            // prompts) must not lock or disable the app. A subsequent real
+            // background transition is the only event that arms app lock.
+            break
         case .active:
             lockManager.appDidBecomeActive()
             Task {

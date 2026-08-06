@@ -16,6 +16,20 @@ struct JourneyGuideArticleView: View {
         return URL(string: source)
     }
 
+    private var freshness: ContentFreshness { guide.freshness() }
+
+    private var isOfficialSource: Bool {
+        guard let host = sourceURL?.host()?.lowercased() else { return false }
+        return host == "ch.ch" || host.hasSuffix(".ch.ch") ||
+            host == "admin.ch" || host.hasSuffix(".admin.ch") ||
+            host.hasSuffix(".zh.ch") || host.hasSuffix(".be.ch") ||
+            host.hasSuffix(".ge.ch") || host.hasSuffix(".vd.ch")
+    }
+
+    private var cantonScope: String {
+        guide.cantonCodes.isEmpty ? "All cantons — local procedures may differ" : guide.cantonCodes.sorted().joined(separator: ", ")
+    }
+
     private var relatedChecklist: Checklist? {
         if let raw = guide.relatedChecklistId, let id = UUID(uuidString: raw),
            let checklist = appContainer.contentService.getChecklist(by: id) {
@@ -47,6 +61,7 @@ struct JourneyGuideArticleView: View {
 
                     VStack(alignment: .leading, spacing: 22) {
                         officialSourceCard
+                        contentScopeNotice
 
                         if let summary = guide.summary, !summary.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                             summaryCard(summary)
@@ -168,7 +183,7 @@ struct JourneyGuideArticleView: View {
                         .clipShape(Capsule())
                         .overlay(Capsule().stroke(.white.opacity(0.2), lineWidth: 1))
 
-                    if guide.isNew {
+                    if guide.isNew, case .verified = freshness {
                         Text("NEW")
                             .font(.system(size: 10, weight: .black))
                             .foregroundColor(.black)
@@ -188,7 +203,7 @@ struct JourneyGuideArticleView: View {
 
                 HStack(spacing: 16) {
                     Label("guides.reading_time".localized(with: guide.estimatedReadingTime), systemImage: "clock")
-                    if let verifiedAt = guide.verifiedAt {
+                    if case .verified(let verifiedAt) = freshness {
                         Label(verifiedAt.formatted(date: .abbreviated, time: .omitted), systemImage: "checkmark.seal.fill")
                     }
                 }
@@ -209,19 +224,19 @@ struct JourneyGuideArticleView: View {
         if let sourceURL {
             Link(destination: sourceURL) {
                 HStack(spacing: 12) {
-                    Image(systemName: "checkmark.seal.fill")
+                    Image(systemName: isOfficialSource ? "checkmark.seal.fill" : "link")
                         .font(.system(size: 18, weight: .bold))
                         .foregroundColor(JourneyVisual.lime)
 
                     VStack(alignment: .leading, spacing: 3) {
-                        Text("journey.guide.official_source".localized)
+                        Text(isOfficialSource ? "OFFICIAL SOURCE" : "SOURCE")
                             .font(.system(size: 9, weight: .black))
                             .foregroundColor(JourneyVisual.lime)
                         Text(guide.sourceTitle ?? sourceURL.host() ?? "journey.guide.official_portal".localized)
                             .font(.system(size: 13, weight: .bold))
                             .foregroundColor(.white)
                             .lineLimit(2)
-                        if let date = guide.verifiedAt {
+                        if case .verified(let date) = freshness {
                             Text("journey.guide.verified".localized(with: date.formatted(date: .long, time: .omitted)))
                                 .font(.system(size: 10, weight: .medium))
                                 .foregroundColor(.white.opacity(0.48))
@@ -255,6 +270,30 @@ struct JourneyGuideArticleView: View {
             .background(Color.white.opacity(0.055))
             .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
         }
+    }
+
+    private var contentScopeNotice: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Label(cantonScope, systemImage: "map")
+            switch freshness {
+            case .verified:
+                Label("Current as of the verification date shown above", systemImage: "checkmark.circle")
+            case .expired:
+                Label("Verification expired — confirm with the linked authority", systemImage: "clock.badge.exclamationmark")
+                    .foregroundColor(.orange)
+            case .unverified:
+                Label("Unverified — do not rely on this as current guidance", systemImage: "exclamationmark.triangle")
+                    .foregroundColor(.orange)
+            }
+            Text("Educational information only — not legal advice. Requirements and deadlines can vary by canton and personal situation.")
+                .foregroundColor(.white.opacity(0.58))
+        }
+        .font(.system(size: 11, weight: .semibold))
+        .foregroundColor(.white.opacity(0.76))
+        .padding(14)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.white.opacity(0.055))
+        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
     }
 
     private func summaryCard(_ summary: String) -> some View {

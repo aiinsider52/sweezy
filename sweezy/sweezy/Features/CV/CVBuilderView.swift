@@ -14,6 +14,7 @@ struct CVBuilderView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var appContainer: AppContainer
     @EnvironmentObject private var lockManager: AppLockManager
+    @EnvironmentObject private var sessionManager: SessionManager
     private let onClose: (() -> Void)?
 
     init(onClose: (() -> Void)? = nil) {
@@ -29,20 +30,26 @@ struct CVBuilderView: View {
     // Translation
     @State private var previewLanguage: PreviewLanguage = .ukrainian
     @State private var germanCV: CVResume?
+    @State private var germanCVSource: CVResume?
     @State private var isTranslating = false
     @State private var translationError: String?
     
     // AI Enhancement
     @State private var isAIProcessing = false
+    @State private var processingSection: String?
     @State private var aiError: String?
+    @State private var aiSuccess: String?
     
     // UI State
     @State private var showTips = false
     @State private var copiedFeedback = false
     @State private var selectedPhotoItem: PhotosPickerItem?
     @State private var selectedPhotoData: Data?
-    
-    // TEMPORARY (App Store review): IAP removed — everything is unlocked.
+    @State private var exportError: String?
+    @State private var showAuthPrompt = false
+    @State private var showPrivacyDisclosure = false
+    @State private var pendingPrivateAction: (() -> Void)?
+    @FocusState private var isInputFocused: Bool
     
     enum PreviewLanguage: String, CaseIterable {
         case ukrainian = "uk"
@@ -94,9 +101,6 @@ struct CVBuilderView: View {
         }
     }
     
-    private let hasPremiumAccess: Bool = true
-    private let hasAIAccess: Bool = true
-    
     var body: some View {
         ZStack {
                 Color(red: 0.025, green: 0.03, blue: 0.028)
@@ -116,10 +120,13 @@ struct CVBuilderView: View {
                         previewStepView.tag(CVStep.preview)
                     }
                     .tabViewStyle(.page(indexDisplayMode: .never))
+                    .scrollDismissesKeyboard(.interactively)
                     .animation(.easeInOut(duration: 0.3), value: currentStep)
 
-                    navigationButtons
                 }
+        }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            navigationButtons
         }
         .navigationBarHidden(true)
         .interactiveSwipeBackEnabled()
@@ -134,6 +141,20 @@ struct CVBuilderView: View {
         )
         .sheet(isPresented: $showTips) {
             swissCVTipsSheet
+        }
+        .sheet(isPresented: $showAuthPrompt) {
+            AuthEntryView(showsCloseButton: true) { showAuthPrompt = false }
+        }
+        .alert("Приватність CV", isPresented: $showPrivacyDisclosure) {
+            Button("Скасувати", role: .cancel) { pendingPrivateAction = nil }
+            Button("Продовжити") {
+                UserDefaults.standard.set(true, forKey: "cv_ai_privacy_disclosed")
+                let action = pendingPrivateAction
+                pendingPrivateAction = nil
+                action?()
+            }
+        } message: {
+            Text("Лише після вашої дії текст CV надсилається захищеним з’єднанням для покращення або перекладу. Текст CV не журналюється і не зберігається на сервері.")
         }
         .onAppear {
             loadSavedCV()
@@ -152,6 +173,25 @@ struct CVBuilderView: View {
                         saveSelectedPhoto(data)
                     }
                 }
+            }
+        }
+        .onChange(of: cv) { _, _ in
+            if CVTranslationCachePolicy.shouldInvalidate(cachedSource: germanCVSource, currentSource: cv) {
+                germanCV = nil
+                germanCVSource = nil
+                if previewLanguage == .german { previewLanguage = .ukrainian }
+                translationError = nil
+            }
+        }
+        .onChange(of: currentStep) { _, step in
+            dismissKeyboard()
+            if step == .preview { isInputFocused = false }
+        }
+        .toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button("Готово") { dismissKeyboard() }
+                    .accessibilityIdentifier("cv.keyboard.done")
             }
         }
         .preferredColorScheme(.dark)
@@ -208,6 +248,7 @@ struct CVBuilderView: View {
     }
 
     private func closeScreen() {
+        dismissKeyboard()
         if let onClose {
             onClose()
         } else {
@@ -221,7 +262,7 @@ struct CVBuilderView: View {
                 .resizable()
                 .scaledToFill()
                 .frame(maxWidth: .infinity)
-                .frame(height: 208)
+                .frame(height: isInputFocused ? 96 : 208)
                 .clipped()
 
             LinearGradient(
@@ -249,7 +290,9 @@ struct CVBuilderView: View {
             .padding(.horizontal, 18)
             .padding(.bottom, 12)
         }
-        .frame(height: 208)
+        .frame(height: isInputFocused ? 96 : 208)
+        .clipped()
+        .animation(.easeInOut(duration: 0.2), value: isInputFocused)
     }
 
     // MARK: - Progress Bar
@@ -317,7 +360,7 @@ struct CVBuilderView: View {
                         placeholder: "Олена Коваленко",
                         text: $cv.personal.fullName
                     )
-                    
+
                     CVInputField(
                         icon: "briefcase.fill",
                         title: "Бажана посада",
@@ -357,7 +400,8 @@ struct CVBuilderView: View {
                         title: "Телефон",
                         placeholder: "+41 79 123 45 67",
                         text: $cv.personal.phone,
-                        keyboard: .phonePad
+                        keyboard: .phonePad,
+                        focus: $isInputFocused
                     )
                 }
 
@@ -392,7 +436,7 @@ struct CVBuilderView: View {
                     Text(selectedPhotoData == nil ? "Додай фото профілю" : "Змінити фото")
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundColor(.white)
-                    Text("Необов’язково · JPG або PNG")
+                    Text("Необов’язково · фото не входить до ATS PDF")
                         .font(.system(size: 11, weight: .medium))
                         .foregroundColor(.white.opacity(0.5))
                 }
@@ -415,7 +459,7 @@ struct CVBuilderView: View {
         .buttonStyle(.plain)
         .accessibilityLabel(selectedPhotoData == nil ? "Додати фото профілю" : "Змінити фото профілю")
     }
-    
+
     // MARK: - Step 2: Summary
     private var summaryStepView: some View {
         ScrollView(showsIndicators: false) {
@@ -431,7 +475,8 @@ struct CVBuilderView: View {
                         title: "Про мене",
                         placeholder: "Наприклад:\nДосвідчений маркетолог з 5+ роками досвіду в digital-маркетингу. Спеціалізуюсь на B2B-кампаніях та аналітиці.",
                         text: $cv.personal.summary,
-                        minHeight: 100
+                        minHeight: 100,
+                        focus: $isInputFocused
                     )
                 }
                 
@@ -466,7 +511,8 @@ struct CVBuilderView: View {
                             title: "Досягнення",
                             placeholder: "• Збільшив конверсію на 25%\n• Керував бюджетом 50K CHF",
                             text: $cv.experience[index].achievements,
-                            minHeight: 70
+                            minHeight: 70,
+                            focus: $isInputFocused
                         )
                         
                         // AI improve for this experience
@@ -539,6 +585,7 @@ struct CVBuilderView: View {
                             get: { cv.skills.joined(separator: ", ") },
                             set: { cv.skills = $0.components(separatedBy: ", ").map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty } }
                         ))
+                        .focused($isInputFocused)
                         .font(.subheadline)
                         .foregroundColor(Theme.Colors.textOnPrimary)
                         .padding(12)
@@ -557,6 +604,7 @@ struct CVBuilderView: View {
                         ForEach($cv.languages.indices, id: \.self) { index in
                             HStack(spacing: 12) {
                                 TextField("Мова", text: $cv.languages[index].name)
+                                    .focused($isInputFocused)
                                     .font(.subheadline)
                                     .foregroundColor(.white)
                                     .padding(10)
@@ -596,7 +644,7 @@ struct CVBuilderView: View {
                 stepHeader(
                     icon: "doc.text.magnifyingglass",
                     title: "Перегляд резюме",
-                    subtitle: "Перевірте, перекладіть та скопіюйте"
+                    subtitle: "ATS PDF без фото або текст для онлайн-форми"
                 )
                 
                 // Language Switch
@@ -620,14 +668,25 @@ struct CVBuilderView: View {
                         .foregroundColor(.red)
                         .padding()
                 }
+
+                Text("Німецька версія охоплює профіль, досвід, освіту, навички та мови. Після будь-якої зміни вихідного CV переклад оновлюється.")
+                    .font(.caption2)
+                    .foregroundColor(.white.opacity(0.5))
                 
                 // Generated CV preview
                 cvPreviewCard
                 
                 // Action buttons
-                HStack(spacing: 12) {
+                if let exportError {
+                    Text(exportError)
+                        .font(.caption)
+                        .foregroundColor(.red)
+                }
+
+                VStack(spacing: 12) {
                     Button {
-                        let text = previewLanguage == .ukrainian ? generateCVText(from: cv) : generateCVText(from: germanCV ?? cv)
+                        let resume = previewLanguage == .ukrainian ? cv : (germanCV ?? cv)
+                        let text = CVDocumentFormatter().text(from: resume, language: documentLanguage)
                         UIPasteboard.general.string = text
                         copiedFeedback = true
                         DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
@@ -636,7 +695,7 @@ struct CVBuilderView: View {
                     } label: {
                         HStack {
                             Image(systemName: copiedFeedback ? "checkmark" : "doc.on.doc")
-                            Text(copiedFeedback ? "Скопійовано!" : "Копіювати")
+                            Text(copiedFeedback ? "Скопійовано!" : "Копіювати для онлайн-форми")
                         }
                         .font(.subheadline.bold())
                         .frame(maxWidth: .infinity)
@@ -647,11 +706,11 @@ struct CVBuilderView: View {
                     }
                     
                     Button {
-                        saveCV()
+                        exportATSPDF()
                     } label: {
                         HStack {
-                            Image(systemName: "square.and.arrow.down")
-                            Text("Зберегти")
+                            Image(systemName: "doc.richtext")
+                            Text("Експортувати ATS PDF")
                         }
                         .font(.subheadline.bold())
                         .frame(maxWidth: .infinity)
@@ -665,6 +724,9 @@ struct CVBuilderView: View {
                         )
                     }
                 }
+                Text("PDF — для завантаження файлу роботодавцю. Одноколонковий макет без фото з виділюваним текстом.")
+                    .font(.caption)
+                    .foregroundColor(.white.opacity(0.58))
             }
             .padding(20)
         }
@@ -681,8 +743,8 @@ struct CVBuilderView: View {
                     
                     // Trigger translation if switching to German and no translation yet
                     if lang == .german && germanCV == nil && !isTranslating {
-                        Task {
-                            await translateToGerman()
+                        requestPrivateAIAction {
+                            Task { await translateToGerman() }
                         }
                     }
                 } label: {
@@ -806,6 +868,7 @@ struct CVBuilderView: View {
             }
         }
         .padding(20)
+        .accessibilityIdentifier("cv.preview.card")
         .background(
             RoundedRectangle(cornerRadius: 20)
                 .fill(Color.white.opacity(0.05))
@@ -836,41 +899,46 @@ struct CVBuilderView: View {
     
     // MARK: - AI Enhancement Button
     private func aiEnhanceButton(for section: String, action: @escaping () async -> Void) -> some View {
-        Button {
-            Task { await action() }
-        } label: {
-            HStack(spacing: 8) {
-                if isAIProcessing {
-                    ProgressView()
-                        .tint(.purple)
-                        .scaleEffect(0.8)
-                } else {
-                    Image(systemName: "sparkles")
+        VStack(spacing: 6) {
+            Button {
+                requestPrivateAIAction { Task { await action() } }
+            } label: {
+                HStack(spacing: 8) {
+                    if processingSection == section {
+                        ProgressView()
+                            .tint(.purple)
+                            .scaleEffect(0.8)
+                    } else {
+                        Image(systemName: "sparkles")
+                            .foregroundColor(.purple)
+                    }
+
+                    Text("Покращити з AI")
+                        .font(.caption.bold())
                         .foregroundColor(.purple)
                 }
-                
-                Text("Покращити з AI")
-                    .font(.caption.bold())
-                    .foregroundColor(.purple)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 10)
+                .frame(maxWidth: .infinity)
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color.purple.opacity(0.15))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color.purple.opacity(0.4), lineWidth: 1)
+                        )
+                )
             }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 10)
-            .frame(maxWidth: .infinity)
-            .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(Color.purple.opacity(0.15))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color.purple.opacity(0.4), lineWidth: 1)
-                    )
-            )
+            .disabled(isAIProcessing)
+            .accessibilityIdentifier("cv.ai.\(section)")
+
+            if let aiError {
+                Text(aiError).font(.caption).foregroundColor(.red)
+            } else if let aiSuccess {
+                Text(aiSuccess).font(.caption).foregroundColor(JourneyVisual.lime)
+            }
         }
-        .disabled(isAIProcessing)
     }
-    
-    // MARK: - Premium Prompt Sheet (removed)
-    // TEMPORARY (App Store review): IAP removed, so there is no premium upsell UI.
-    private var premiumPromptSheet: some View { EmptyView() }
     
     // MARK: - Navigation Buttons
     private var navigationButtons: some View {
@@ -916,6 +984,7 @@ struct CVBuilderView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                 .shadow(color: JourneyVisual.lime.opacity(0.18), radius: 12, y: 5)
             }
+            .accessibilityIdentifier("cv.navigation.next")
         }
         .padding(.horizontal, 16)
         .padding(.top, 10)
@@ -929,6 +998,7 @@ struct CVBuilderView: View {
     }
 
     private func moveToPreviousStep() {
+        dismissKeyboard()
         withAnimation(.easeInOut(duration: 0.24)) {
             if let index = CVStep.allCases.firstIndex(of: currentStep), index > 0 {
                 currentStep = CVStep.allCases[index - 1]
@@ -937,6 +1007,7 @@ struct CVBuilderView: View {
     }
 
     private func moveToNextStep() {
+        dismissKeyboard()
         withAnimation(.easeInOut(duration: 0.24)) {
             if let index = CVStep.allCases.firstIndex(of: currentStep), index < CVStep.allCases.count - 1 {
                 currentStep = CVStep.allCases[index + 1]
@@ -1070,36 +1141,32 @@ struct CVBuilderView: View {
         isTranslating = true
         translationError = nil
         
-        // Use backend AI / deterministic translation via API.
-        // If backend translation is not available, we gracefully fall back to original content.
-        var translated = cv
-
-        // Translate summary by asking backend to re-generate it in German (if possible)
-        if !cv.personal.summary.isEmpty {
-            if let deSummary = try? await APIClient.generateCVText(resume: cv, target: .summary) {
-                translated.personal.summary = deSummary
+        let source = cv
+        do {
+            let translated = try await APIClient.translateCVToGerman(resume: source)
+            await MainActor.run {
+                guard cv == source else {
+                    translationError = "CV змінився під час перекладу. Запустіть переклад ще раз."
+                    isTranslating = false
+                    return
+                }
+                germanCV = translated
+                germanCVSource = source
+                translationError = nil
+                isTranslating = false
             }
-        }
-
-        // Experience: reuse backend generator per experience entry when possible
-        for i in cv.experience.indices {
-            let exp = cv.experience[i]
-            guard !exp.achievements.isEmpty else { continue }
-            if let text = try? await APIClient.generateCVText(resume: cv, target: .experience(id: exp.id)) {
-                translated.experience[i].achievements = text
+        } catch {
+            await MainActor.run {
+                translationError = cvAIErrorMessage(error)
+                previewLanguage = .ukrainian
+                isTranslating = false
             }
-        }
-
-        await MainActor.run {
-            germanCV = translated
-            isTranslating = false
         }
     }
     
     private func enhanceSummaryWithAI() async {
-        guard hasAIAccess else { return }
-        
         isAIProcessing = true
+        processingSection = "summary"
         aiError = nil
         
         do {
@@ -1107,20 +1174,24 @@ struct CVBuilderView: View {
             let improved = try await APIClient.generateCVText(resume: cv, target: .summary)
             await MainActor.run {
                 cv.personal.summary = improved
+                aiSuccess = "Профіль покращено без додавання нових фактів."
                 isAIProcessing = false
+                processingSection = nil
             }
         } catch {
             await MainActor.run {
-                aiError = "Помилка AI. Спробуйте пізніше."
+                aiError = cvAIErrorMessage(error)
                 isAIProcessing = false
+                processingSection = nil
             }
         }
     }
     
     private func enhanceExperienceWithAI(at index: Int) async {
-        guard hasAIAccess, index < cv.experience.count else { return }
+        guard index < cv.experience.count else { return }
         
         isAIProcessing = true
+        processingSection = "досвід"
         aiError = nil
         
         do {
@@ -1128,67 +1199,77 @@ struct CVBuilderView: View {
             let improved = try await APIClient.generateCVText(resume: cv, target: .experience(id: exp.id))
             await MainActor.run {
                 cv.experience[index].achievements = improved
+                aiSuccess = "Досягнення оформлено у швейцарському стилі без нових фактів."
                 isAIProcessing = false
+                processingSection = nil
             }
         } catch {
             await MainActor.run {
-                aiError = "Помилка AI. Спробуйте пізніше."
+                aiError = cvAIErrorMessage(error)
                 isAIProcessing = false
+                processingSection = nil
             }
         }
     }
     
-    // TEMPORARY: subscription/entitlement code removed.
-    
-    // MARK: - CV Text Generation
-    private func generateCVText(from resume: CVResume) -> String {
-        var lines: [String] = []
-        
-        lines.append(resume.personal.fullName)
-        if !resume.personal.title.isEmpty { lines.append(resume.personal.title) }
-        
-        let contacts = [resume.personal.location, resume.personal.phone, resume.personal.email].filter { !$0.isEmpty }
-        if !contacts.isEmpty { lines.append(contacts.joined(separator: " • ")) }
-        lines.append("")
-        
-        if !resume.personal.summary.isEmpty {
-            lines.append(previewLanguage == .german ? "PROFIL" : "ПРО МЕНЕ")
-            lines.append(resume.personal.summary)
-            lines.append("")
+    private func requestPrivateAIAction(_ action: @escaping () -> Void) {
+        dismissKeyboard()
+        guard sessionManager.isAuthenticated else {
+            showAuthPrompt = true
+            return
         }
-        
-        let validExperience = resume.experience.filter { !$0.company.isEmpty }
-        if !validExperience.isEmpty {
-            lines.append(previewLanguage == .german ? "BERUFSERFAHRUNG" : "ДОСВІД РОБОТИ")
-            for exp in validExperience {
-                lines.append("\(exp.period) — \(exp.role), \(exp.company), \(exp.location)")
-                if !exp.achievements.isEmpty { lines.append(exp.achievements) }
+        guard UserDefaults.standard.bool(forKey: "cv_ai_privacy_disclosed") else {
+            pendingPrivateAction = action
+            showPrivacyDisclosure = true
+            return
+        }
+        action()
+    }
+
+    private func cvAIErrorMessage(_ error: Error) -> String {
+        let nsError = error as NSError
+        switch nsError.code {
+        case 401: return "Сесія завершилась. Увійдіть знову."
+        case 402: return "Ця AI-функція доступна з Premium."
+        case 422: return "Перевірте заповнені поля CV та спробуйте ще раз."
+        default:
+            if nsError.domain == NSURLErrorDomain {
+                return "Немає з’єднання. Перевірте інтернет і повторіть."
             }
-            lines.append("")
+            return "Сервіс AI тимчасово недоступний. Спробуйте пізніше."
         }
-        
-        let validEducation = resume.education.filter { !$0.school.isEmpty }
-        if !validEducation.isEmpty {
-            lines.append(previewLanguage == .german ? "AUSBILDUNG" : "ОСВІТА")
-            for edu in validEducation {
-                lines.append("\(edu.period) — \(edu.degree), \(edu.school)")
-            }
-            lines.append("")
+    }
+
+    private func dismissKeyboard() {
+        isInputFocused = false
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+    }
+
+    private var documentLanguage: CVDocumentLanguage {
+        previewLanguage == .german ? .german : .ukrainian
+    }
+
+    private func exportATSPDF() {
+        let resume = previewLanguage == .ukrainian ? cv : (germanCV ?? cv)
+        let formatter = CVDocumentFormatter()
+        do {
+            let url = try PaginatedTextPDFExporter().export(
+                text: formatter.text(from: resume, language: documentLanguage),
+                filename: formatter.filename(for: resume, language: documentLanguage),
+                title: "CV — \(resume.personal.fullName)"
+            )
+            exportError = nil
+            saveCV()
+            presentActivityVC(UIActivityViewController(activityItems: [url], applicationActivities: nil))
+        } catch {
+            exportError = "Не вдалося створити PDF. Перевірте, чи CV містить текст."
         }
-        
-        if !resume.skills.isEmpty {
-            lines.append(previewLanguage == .german ? "FÄHIGKEITEN" : "НАВИЧКИ")
-            lines.append(resume.skills.joined(separator: ", "))
-            lines.append("")
-        }
-        
-        let validLanguages = resume.languages.filter { !$0.name.isEmpty }
-        if !validLanguages.isEmpty {
-            lines.append(previewLanguage == .german ? "SPRACHEN" : "МОВИ")
-            lines.append(validLanguages.map { "\($0.name): \($0.level)" }.joined(separator: ", "))
-        }
-        
-        return lines.joined(separator: "\n")
+    }
+
+    private func presentActivityVC(_ controller: UIActivityViewController) {
+        guard let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let presenter = scene.windows.first?.rootViewController else { return }
+        presenter.present(controller, animated: true)
     }
     
     private func saveCV() {
@@ -1281,6 +1362,8 @@ private struct CVInputField: View {
     let placeholder: String
     @Binding var text: String
     var keyboard: UIKeyboardType = .default
+    var focus: FocusState<Bool>.Binding?
+    @FocusState private var localFocus: Bool
     
     var body: some View {
         HStack(spacing: 11) {
@@ -1302,6 +1385,8 @@ private struct CVInputField: View {
                     .keyboardType(keyboard)
                     .textInputAutocapitalization(keyboard == .emailAddress ? .never : .sentences)
                     .autocorrectionDisabled(keyboard == .emailAddress)
+                    .focused(focus ?? $localFocus)
+                    .accessibilityIdentifier("cv.field.\(title)")
             }
         }
         .padding(.horizontal, 10)
@@ -1320,6 +1405,7 @@ private struct CVTextArea: View {
     let placeholder: String
     @Binding var text: String
     var minHeight: CGFloat = 100
+    var focus: FocusState<Bool>.Binding
     
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -1329,6 +1415,8 @@ private struct CVTextArea: View {
             
             ZStack(alignment: .topLeading) {
                 TextEditor(text: $text)
+                    .focused(focus)
+                    .accessibilityIdentifier("cv.textarea.\(title)")
                     .font(.subheadline)
                     .foregroundColor(.white)
                     .scrollContentBackground(.hidden)

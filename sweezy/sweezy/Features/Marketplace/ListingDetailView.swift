@@ -20,6 +20,7 @@ struct ListingDetailView: View {
     @State private var safetyMessage: String?
     @State private var selectedConversation: ChatConversation?
     @State private var pendingChatAfterAuth = false
+    @State private var showPublicProfile = false
 
     init(listingId: String, initialListing: ServiceListing? = nil) {
         self.listingId = listingId
@@ -61,6 +62,12 @@ struct ListingDetailView: View {
         .fullScreenCover(item: $selectedConversation) { conversation in
             ChatConversationView(conversation: conversation)
                 .environmentObject(appContainer)
+        }
+        .fullScreenCover(isPresented: $showPublicProfile) {
+            if let authorID = listing?.authorID {
+                PublicProfileView(userID: authorID, listingID: listingId, conversationID: nil)
+                    .environmentObject(appContainer)
+            }
         }
         .confirmationDialog("Чому ви скаржитеся?", isPresented: $showReportReasons, titleVisibility: .visible) {
             Button("Шахрайство") { submitReport(reason: "fraud") }
@@ -258,31 +265,31 @@ struct ListingDetailView: View {
 
     private func providerPriceRow(_ listing: ServiceListing) -> some View {
         HStack(spacing: 14) {
-            ZStack {
-                Circle()
-                    .fill(Color.white.opacity(0.1))
-                Circle()
-                    .stroke(Color.white.opacity(0.22), lineWidth: 1)
-                Text(String(listing.authorName.prefix(1)).uppercased())
-                    .font(.system(size: 21, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
+            Button { if listing.authorID != nil { showPublicProfile = true } } label: {
+                HStack(spacing: 14) {
+                    ZStack {
+                        Circle().fill(Color.white.opacity(0.1))
+                        Circle().stroke(Color.white.opacity(0.22), lineWidth: 1)
+                        Text(String(listing.authorName.prefix(1)).uppercased())
+                            .font(.system(size: 21, weight: .bold, design: .rounded))
+                            .foregroundColor(.white)
+                    }
+                    .frame(width: 56, height: 56)
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text(listing.authorName)
+                            .font(.system(size: 18, weight: .bold, design: .rounded))
+                            .foregroundColor(.white).lineLimit(1)
+                        Label(
+                            listing.isVerified ? "profile.verified".localized : "profile.community".localized,
+                            systemImage: listing.isVerified ? "checkmark.seal.fill" : "person.2.fill"
+                        )
+                        .font(.caption.weight(.semibold))
+                        .foregroundColor(listing.isVerified ? JourneyVisual.lime : .white.opacity(0.58))
+                    }
+                }
             }
-            .frame(width: 56, height: 56)
-
-            VStack(alignment: .leading, spacing: 5) {
-                Text(listing.authorName)
-                    .font(.system(size: 18, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
-                    .lineLimit(1)
-
-                Label(
-                    listing.isVerified ? "Перевірений профіль" : "Спільнота Sweezy",
-                    systemImage: listing.isVerified ? "checkmark.seal.fill" : "person.2.fill"
-                )
-                .font(.caption.weight(.semibold))
-                .foregroundColor(listing.isVerified ? JourneyVisual.lime : .white.opacity(0.58))
-                .lineLimit(1)
-            }
+            .buttonStyle(.plain)
+            .disabled(listing.authorID == nil)
 
             Spacer(minLength: 8)
 

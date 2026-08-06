@@ -8,7 +8,7 @@
 import Foundation
 import SwiftUI
 
-struct CVResume: Codable {
+struct CVResume: Codable, Equatable {
     var personal: CVPersonal = CVPersonal()
     var education: [CVEducation] = []
     var experience: [CVExperience] = []
@@ -20,7 +20,7 @@ struct CVResume: Codable {
     static let empty = CVResume()
 }
 
-struct CVPersonal: Codable {
+struct CVPersonal: Codable, Equatable {
     var fullName: String = ""
     var title: String = ""
     var email: String = ""
@@ -31,7 +31,7 @@ struct CVPersonal: Codable {
     var photoData: Data? = nil
 }
 
-struct CVEducation: Codable, Identifiable {
+struct CVEducation: Codable, Identifiable, Equatable {
     var id: UUID
     var school: String
     var degree: String
@@ -52,7 +52,7 @@ struct CVEducation: Codable, Identifiable {
     }
 }
 
-struct CVExperience: Codable, Identifiable {
+struct CVExperience: Codable, Identifiable, Equatable {
     var id: UUID
     var role: String
     var company: String
@@ -75,7 +75,7 @@ struct CVExperience: Codable, Identifiable {
     }
 }
 
-struct CVLanguage: Codable, Identifiable {
+struct CVLanguage: Codable, Identifiable, Equatable {
     var id: UUID
     var name: String
     var level: String
@@ -92,7 +92,7 @@ struct CVLanguage: Codable, Identifiable {
     }
 }
 
-struct CVLink: Codable, Identifiable {
+struct CVLink: Codable, Identifiable, Equatable {
     var id: UUID
     var label: String
     var url: String
@@ -109,4 +109,10 @@ struct CVLink: Codable, Identifiable {
     }
 }
 
+enum CVTranslationCachePolicy {
+    static func shouldInvalidate(cachedSource: CVResume?, currentSource: CVResume) -> Bool {
+        guard let cachedSource else { return false }
+        return cachedSource != currentSource
+    }
+}
 

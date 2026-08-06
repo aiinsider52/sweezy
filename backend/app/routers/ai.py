@@ -275,89 +275,117 @@ class CVLanguage(BaseModel):
     level: str = ""
 
 
-class CVSuggestRequest(BaseModel):
+class CVResumePayload(BaseModel):
     personal: CVPersonal
-    education: List[CVEducation] = []
-    experience: List[CVExperience] = []
-    languages: List[CVLanguage] = []
-    skills: List[str] = []
-    hobbies: List[str] = []
+    education: List[CVEducation] = Field(default_factory=list)
+    experience: List[CVExperience] = Field(default_factory=list)
+    languages: List[CVLanguage] = Field(default_factory=list)
+    skills: List[str] = Field(default_factory=list)
+    hobbies: List[str] = Field(default_factory=list)
+
+
+class CVImproveRequest(CVResumePayload):
     target: str = Field(..., description="summary or experience:<uuid>")
 
 
-class CVSuggestResponse(BaseModel):
+class CVImproveResponse(BaseModel):
     text: str
+    generated_by_ai: bool
 
 
-def _fallback_generate(payload: CVSuggestRequest) -> str:
-    # Deterministic, simple Swiss-style phrasing (no external AI required)
+class CVTranslationResponse(CVResumePayload):
+    generated_by_ai: bool
+
+
+def _target_source(payload: CVImproveRequest) -> str:
     if payload.target.startswith("experience"):
-        # pick first relevant exp
         target_id = payload.target.split(":", 1)[1] if ":" in payload.target else None
-        exp = payload.experience[0] if not target_id else next((e for e in payload.experience if str(e.id) == target_id), None)
-        if not exp:
-            return ""
-        parts = []
-        if exp.role:
-            parts.append(f"{exp.role} у {exp.company}".strip())
-        if exp.period:
-            parts.append(f"({exp.period})")
-        header = " ".join(p for p in parts if p)
-        bullets = [
-            "Відповідав(-ла) за якісне та своєчасне виконання задач.",
-            "Покращив(-ла) процеси та взаємодію в команді, дотримуючись принципів прозорої комунікації.",
-            "Досяг(-ла) вимірюваних результатів і регулярно звітував(-ла) перед стейкхолдерами."
-        ]
-        return header + "\n• " + "\n• ".join(bullets)
-    else:
-        # summary
-        name = payload.personal.fullName or "Фахівець"
-        title = payload.personal.title or "Спеціаліст"
-        loc = payload.personal.location
-        skills = ", ".join(payload.skills[:6])
-        base = f"{name} — {title} у Швейцарії"
-        if loc:
-            base += f" ({loc})"
-        tail = ". Досвід адаптації до швейцарських стандартів, відповідальність, орієнтація на результат."
-        if skills:
-            tail = f". Ключові навички: {skills}." + tail
-        return base + tail
+        experience = next((item for item in payload.experience if str(item.id) == target_id), None)
+        return experience.achievements.strip() if experience else ""
+    return payload.personal.summary.strip()
 
 
-@router.post("/cv-suggest", response_model=CVSuggestResponse, dependencies=[require_premium()])
-def cv_suggest(payload: CVSuggestRequest, db: Session = Depends(get_db)) -> CVSuggestResponse:
-    """
-    Suggest HR-style text based on CV data.
-    Uses OpenAI if OPENAI_API_KEY is set, otherwise deterministic fallback.
-    """
-    api_key = os.getenv("OPENAI_API_KEY")
-    if not api_key:
-        return CVSuggestResponse(text=_fallback_generate(payload))
+def _fallback_improve(payload: CVImproveRequest) -> str:
+    """Never invent content when an external model is unavailable."""
+    source = _target_source(payload)
+    if not source or not payload.target.startswith("experience"):
+        return source
+    lines = [line.strip().lstrip("•-* ").strip() for line in source.splitlines() if line.strip()]
+    return "\n".join(f"• {line}" for line in lines)
+
+
+def _fallback_translation(payload: CVResumePayload) -> CVTranslationResponse:
+    """Return the complete source structure rather than partial or invented text."""
+    return CVTranslationResponse(**payload.model_dump(), generated_by_ai=False)
+
+
+@router.post("/cv-improve", response_model=CVImproveResponse, dependencies=[require_premium()])
+@limiter.limit("10/minute")
+def cv_improve(request: Request, payload: CVImproveRequest) -> CVImproveResponse:
+    source = _target_source(payload)
+    if not source:
+        return CVImproveResponse(text="", generated_by_ai=False)
+    settings = get_settings()
+    if not settings.OPENAI_API_KEY:
+        return CVImproveResponse(text=_fallback_improve(payload), generated_by_ai=False)
 
     try:
         from openai import OpenAI
-        client = OpenAI(api_key=api_key)
-        prompt = (
-            "You are an HR assistant in Switzerland. Write concise, professional text.\n"
-            f"Target: {payload.target}\n"
-            f"Personal: {payload.personal.model_dump()}\n"
-            f"Education: {[e.model_dump() for e in payload.education]}\n"
-            f"Experience: {[e.model_dump() for e in payload.experience]}\n"
-            f"Languages: {[language.model_dump() for language in payload.languages]}\n"
-            f"Skills: {payload.skills}\n"
-            "Rules: 1) Avoid buzzwords; 2) Use neutral tone; 3) Keep it under 90 words; "
-            "4) For experience target, produce 3 bullet points starting with verbs."
+
+        client = OpenAI(api_key=settings.OPENAI_API_KEY)
+        instructions = (
+            "Rewrite only the supplied SOURCE for a Swiss employer. Preserve every fact, number, "
+            "employer, date, qualification and scope exactly; never infer or invent credentials or metrics. "
+            "Use concise professional de-CH conventions (including ss rather than ß). For experience, "
+            "use verb-led bullets and retain measurable results only where SOURCE contains them. "
+            "Return only the rewritten text, in the source language, under 90 words."
         )
-        chat = client.chat.completions.create(
-            model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.2,
-            max_tokens=220,
+        response = client.responses.create(
+            model=settings.OPENAI_MODEL,
+            instructions=instructions,
+            input=f"TARGET: {payload.target}\nSOURCE:\n{source}",
         )
-        text = (chat.choices[0].message.content or "").strip()
-        return CVSuggestResponse(text=text or _fallback_generate(payload))
+        text = response.output_text.strip()
+        return CVImproveResponse(text=text or _fallback_improve(payload), generated_by_ai=bool(text))
     except Exception:
-        return CVSuggestResponse(text=_fallback_generate(payload))
+        return CVImproveResponse(text=_fallback_improve(payload), generated_by_ai=False)
+
+
+@router.post("/cv-translate", response_model=CVTranslationResponse, dependencies=[require_premium()])
+@limiter.limit("4/minute")
+def cv_translate(request: Request, payload: CVResumePayload) -> CVTranslationResponse:
+    settings = get_settings()
+    if not settings.OPENAI_API_KEY:
+        return _fallback_translation(payload)
+    try:
+        from openai import OpenAI
+
+        client = OpenAI(api_key=settings.OPENAI_API_KEY)
+        instructions = (
+            "Translate every user-entered textual CV field into professional German for Switzerland (de-CH). "
+            "Translate title, summary, role, company only when it is a translatable name, location, achievements, "
+            "school only when appropriate, degree, education details, skills, hobbies, and language names/labels. "
+            "Keep names, emails, phone numbers, dates, IDs, company/proper names and CEFR levels unchanged. "
+            "Preserve list lengths and IDs. Never add, remove, infer or improve facts. Use ss, never ß. "
+            "Return only the required JSON structure."
+        )
+        response = client.responses.create(
+            model=settings.OPENAI_MODEL,
+            instructions=instructions,
+            input=json.dumps(payload.model_dump(), ensure_ascii=False),
+            text={
+                "format": {
+                    "type": "json_schema",
+                    "name": "translated_cv",
+                    "strict": True,
+                    "schema": CVResumePayload.model_json_schema(),
+                }
+            },
+        )
+        translated = CVResumePayload.model_validate(json.loads(response.output_text))
+        return CVTranslationResponse(**translated.model_dump(), generated_by_ai=True)
+    except Exception:
+        return _fallback_translation(payload)
 
 
 # --- Job application helper ---

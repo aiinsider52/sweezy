@@ -159,3 +159,32 @@ class MarketplaceReportCreate(BaseModel):
 class MarketplaceSafetyResponse(BaseModel):
     ok: bool = True
     message: str
+
+
+class PublicProfileListing(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    listing_type: str
+    title: str
+    category: str
+    canton: str
+    price_info: Optional[str] = None
+    price_chf: Optional[int] = None
+    is_free: bool = False
+    image_urls: list[str] = Field(default_factory=list)
+    is_verified: bool = False
+
+
+class PublicUserProfileResponse(BaseModel):
+    user_id: str
+    display_name: str
+    initials: str
+    avatar_url: Optional[str] = None
+    registered_month: str
+    is_verified: bool
+    trust_badges: list[str] = Field(default_factory=list)
+    average_rating: Optional[float] = None
+    review_count: int = 0
+    active_listings: list[PublicProfileListing] = Field(default_factory=list)
+    viewer_has_blocked: bool = False

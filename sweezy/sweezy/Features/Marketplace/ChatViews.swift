@@ -282,6 +282,7 @@ struct ChatConversationView: View {
     @State private var showReportDialog = false
     @State private var showBlockConfirmation = false
     @State private var showReview = false
+    @State private var showProfile = false
     @State private var actionMessage: String?
 
     private var currentConversation: ChatConversation {
@@ -340,6 +341,14 @@ struct ChatConversationView: View {
                 .environmentObject(appContainer)
                 .presentationDetents([.medium])
         }
+        .fullScreenCover(isPresented: $showProfile) {
+            PublicProfileView(
+                userID: currentConversation.otherUserID,
+                listingID: currentConversation.listingID,
+                conversationID: currentConversation.id
+            )
+            .environmentObject(appContainer)
+        }
         .alert("Sweezy", isPresented: Binding(
             get: { actionMessage != nil },
             set: { if !$0 { actionMessage = nil } }
@@ -360,16 +369,22 @@ struct ChatConversationView: View {
                     .clipShape(Circle())
             }
             .buttonStyle(.plain)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(currentConversation.otherUserName)
-                    .font(.system(size: 18, weight: .bold, design: .rounded))
-                    .lineLimit(1)
+            Button { showProfile = true } label: {
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack(spacing: 5) {
+                        Text(currentConversation.otherUserName)
+                            .font(.system(size: 18, weight: .bold, design: .rounded))
+                            .lineLimit(1)
+                        Image(systemName: "chevron.right").font(.caption2)
+                    }
                 Text(appContainer.chatStore.typingConversationIDs.contains(conversation.id)
                      ? "chat.status.typing".localized
                      : (appContainer.chatStore.isConnected ? "chat.status.secure".localized : "chat.status.connecting".localized))
                     .font(.caption)
                     .foregroundColor(appContainer.chatStore.typingConversationIDs.contains(conversation.id) ? JourneyVisual.lime : .white.opacity(0.48))
+                }
             }
+            .buttonStyle(.plain)
             Spacer()
             Menu {
                 Button {
@@ -476,6 +491,10 @@ struct ChatConversationView: View {
                                 } label: { Label("chat.action.report".localized, systemImage: "exclamationmark.bubble") }
                             }
                         }
+                    }
+                    if appContainer.chatStore.typingConversationIDs.contains(conversation.id) {
+                        TypingBubble()
+                            .transition(.opacity.combined(with: .scale))
                     }
                 }
                 .padding(.horizontal, 14)
@@ -641,8 +660,7 @@ private struct ChatMessageBubble: View {
                     HStack(spacing: 5) {
                         Text(message.createdAt.formatted(date: .omitted, time: .shortened))
                         if isMine {
-                            Image(systemName: message.deliveryState == .failed ? "exclamationmark.circle.fill" :
-                                    (message.deliveryState == .sending ? "clock" : "checkmark"))
+                            deliveryIndicator
                         }
                     }
                     .font(.caption2)
@@ -658,6 +676,48 @@ private struct ChatMessageBubble: View {
                 .background(isMine ? JourneyVisual.lime : Color.white.opacity(0.09))
                 .clipShape(RoundedRectangle(cornerRadius: 19, style: .continuous))
                 if !isMine { Spacer(minLength: 54) }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var deliveryIndicator: some View {
+        switch message.deliveryState {
+        case .sending:
+            ProgressView().controlSize(.mini).tint(.black.opacity(0.52))
+        case .sent:
+            Image(systemName: "checkmark").foregroundStyle(.black.opacity(0.52))
+        case .delivered:
+            Image(systemName: "checkmark.checkmark").foregroundStyle(.black.opacity(0.52))
+        case .read:
+            Image(systemName: "checkmark.checkmark").foregroundStyle(JourneyVisual.lime)
+        case .failed:
+            Image(systemName: "exclamationmark.circle.fill").foregroundStyle(.red)
+        }
+    }
+}
+
+private struct TypingBubble: View {
+    @State private var activeDot = 0
+
+    var body: some View {
+        HStack {
+            HStack(spacing: 5) {
+                ForEach(0..<3) { index in
+                    Circle()
+                        .fill(Color.white.opacity(activeDot == index ? 0.9 : 0.3))
+                        .frame(width: 7, height: 7)
+                        .offset(y: activeDot == index ? -2 : 0)
+                }
+            }
+            .padding(.horizontal, 15).frame(height: 38)
+            .background(Color.white.opacity(0.09)).clipShape(Capsule())
+            Spacer()
+        }
+        .task {
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .milliseconds(280))
+                withAnimation(.easeInOut(duration: 0.2)) { activeDot = (activeDot + 1) % 3 }
             }
         }
     }

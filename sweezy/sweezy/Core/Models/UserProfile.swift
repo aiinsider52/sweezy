@@ -69,6 +69,25 @@ struct UserProfile: Codable, Identifiable {
         (tenureMonths ?? 0) >= 12
     }
 
+    /// One shared completion score for every profile surface.
+    ///
+    /// Canton, permit, family size and language are collected during onboarding,
+    /// while the remaining fields represent the details a user can add later.
+    var completionPercentage: Int {
+        var completedFields = 4
+        if !fullName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { completedFields += 1 }
+        if arrivalDate != nil { completedFields += 1 }
+        if !goals.isEmpty { completedFields += 1 }
+        if address != nil { completedFields += 1 }
+        if !(phoneNumber?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true) {
+            completedFields += 1
+        }
+        if !(email?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true) {
+            completedFields += 1
+        }
+        return min(100, completedFields * 10)
+    }
+
     private enum CodingKeys: String, CodingKey {
         case id, fullName, canton, permitType, arrivalDate, permitExpiryDate
         case goals, familySize, hasChildren, familyStatus, preferredLanguage

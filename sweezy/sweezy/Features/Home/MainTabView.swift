@@ -13,40 +13,41 @@ struct MainTabView: View {
     @StateObject private var router = MainTabRouter()
     
     var body: some View {
-        GeometryReader { geometry in
-            ZStack(alignment: .bottom) {
-                Group {
-                    switch router.selectedTab {
-                    case 1:
-                        JourneyDirectoryView(
-                            requestedSection: router.requestedDirectorySection,
-                            routeID: router.requestedDirectoryRouteID
-                        )
-                        .featureOnboarding(.dovidnyk)
-                    case 2:
-                        JourneyMapView()
-                            .featureOnboarding(.map)
-                    case 3:
-                        JourneyMarketplaceView()
-                    case 4:
-                        SettingsView()
-                    default:
-                        JourneyHomeView()
-                    }
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-
-                if !router.isBottomBarHidden {
-                    JourneyBottomBar(selection: Binding(
-                        get: { router.selectedTab },
-                        set: { router.select(tab: $0) }
-                    ))
-                        .padding(.horizontal, 14)
-                        .padding(.bottom, max(6, geometry.safeAreaInsets.bottom - 2))
-                        .transition(.move(edge: .bottom).combined(with: .opacity))
-                }
+        Group {
+            switch router.selectedTab {
+            case 1:
+                JourneyDirectoryView(
+                    requestedSection: router.requestedDirectorySection,
+                    routeID: router.requestedDirectoryRouteID
+                )
+                .featureOnboarding(.dovidnyk)
+            case 2:
+                JourneyMapView()
+                    .featureOnboarding(.map)
+            case 3:
+                JourneyMarketplaceView()
+            case 4:
+                SettingsView()
+            default:
+                JourneyHomeView()
             }
-            .ignoresSafeArea(edges: .bottom)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            if !router.isBottomBarHidden {
+                JourneyBottomBar(selection: Binding(
+                    get: { router.selectedTab },
+                    set: { router.select(tab: $0) }
+                ))
+                    .padding(.horizontal, 14)
+                    .padding(.top, 6)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .background {
+                        Color.clear
+                            .contentShape(Rectangle())
+                            .allowsHitTesting(false)
+                    }
+            }
         }
         .preferredColorScheme(.dark)
         .onAppear {

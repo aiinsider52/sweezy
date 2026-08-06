@@ -25,6 +25,7 @@ final class ChatStore: ObservableObject {
     private var nextMessageCursor: [String: String] = [:]
     private var nextConversationCursor: [Bool: String] = [:]
     private var typingExpiryTasks: [String: Task<Void, Never>] = [:]
+    private var fallbackPollingTask: Task<Void, Never>?
 
     init() {
         socket.onConnectionChange = { [weak self] connected in self?.isConnected = connected }
@@ -66,6 +67,8 @@ final class ChatStore: ObservableObject {
         typingConversationIDs = []
         typingExpiryTasks.values.forEach { $0.cancel() }
         typingExpiryTasks = [:]
+        fallbackPollingTask?.cancel()
+        fallbackPollingTask = nil
     }
 
     func reconnect() {
@@ -145,13 +148,25 @@ final class ChatStore: ObservableObject {
 
     func setActiveConversation(_ id: String?) {
         activeConversationID = id
+        fallbackPollingTask?.cancel()
+        fallbackPollingTask = nil
+        guard let id else { return }
+        fallbackPollingTask = Task { [weak self] in
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(self?.isConnected == true ? 8 : 2))
+                guard !Task.isCancelled else { return }
+                await self?.loadMessages(conversationID: id, force: true)
+            }
+        }
     }
 
     func loadMessages(conversationID: String, force: Bool = false) async {
         if !force, messages[conversationID]?.isEmpty == false { return }
         do {
             let page = try await ChatAPI.messages(conversationID: conversationID)
-            let pending = messages[conversationID, default: []].filter { $0.deliveryState != .sent }
+            let pending = messages[conversationID, default: []].filter {
+                $0.deliveryState == .sending || $0.deliveryState == .failed
+            }
             messages[conversationID] = mergedMessages(page.items + pending)
             setNextMessageCursor(page.nextCursor, conversationID: conversationID)
             errorMessage = nil
@@ -290,6 +305,34 @@ final class ChatStore: ObservableObject {
 
     private func handle(_ event: ChatSocketEvent) {
         guard event.type != "connected" else { return }
+        if let conversationID = event.conversationID,
+           let messageID = event.messageID,
+           event.type == "message.delivered" || event.type == "message.read" {
+            var items = messages[conversationID, default: []]
+            guard let receiptIndex = items.firstIndex(where: { $0.id == messageID }) else { return }
+            let receiptDate = event.readAt ?? event.deliveredAt ?? Date()
+            let cutoff = items[receiptIndex].createdAt
+            for index in items.indices where items[index].senderID == activeUserID && items[index].createdAt <= cutoff {
+                let old = items[index]
+                items[index] = ChatMessage(
+                    id: old.id,
+                    conversationID: old.conversationID,
+                    senderID: old.senderID,
+                    clientMessageID: old.clientMessageID,
+                    kind: old.kind,
+                    body: old.body,
+                    createdAt: old.createdAt,
+                    deliveredAt: event.type == "message.read" ? (old.deliveredAt ?? receiptDate) : receiptDate,
+                    readAt: event.type == "message.read" ? receiptDate : old.readAt,
+                    editedAt: old.editedAt,
+                    deletedAt: old.deletedAt,
+                    deliveryState: event.type == "message.read" ? .read : .delivered
+                )
+            }
+            messages[conversationID] = items
+            persist()
+            return
+        }
         if let conversationID = event.conversationID, event.type == "typing" {
             typingExpiryTasks[conversationID]?.cancel()
             if event.isTyping == true {
@@ -364,8 +407,9 @@ final class ChatStore: ObservableObject {
         var byIdentity: [String: ChatMessage] = [:]
         for message in values {
             let key = "\(message.senderID):\(message.clientMessageID)"
-            if let existing = byIdentity[key], existing.deliveryState == .sent, message.deliveryState != .sent {
-                continue
+            if let existing = byIdentity[key] {
+                let rank: [ChatDeliveryState: Int] = [.failed: 0, .sending: 1, .sent: 2, .delivered: 3, .read: 4]
+                if rank[existing.deliveryState, default: 0] > rank[message.deliveryState, default: 0] { continue }
             }
             byIdentity[key] = message
         }

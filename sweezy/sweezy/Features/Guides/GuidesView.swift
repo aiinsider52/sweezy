@@ -13,6 +13,7 @@ struct GuidesView: View {
     @EnvironmentObject private var lockManager: AppLockManager
     @State private var searchText = ""
     @State private var selectedCategory: GuideCategory?
+    @State private var selectedAudience: GuideAudienceStage?
     @Namespace private var animation
     
     // Optional initial category for deep-linking
@@ -30,7 +31,9 @@ struct GuidesView: View {
     private let freeGuidesLimit: Int = .max
     
     private var allGuides: [Guide] {
-        appContainer.contentService.searchGuides(query: "", category: nil, canton: appContainer.userProfile?.canton)
+        let guides = appContainer.contentService.searchGuides(query: "", category: nil, canton: appContainer.userProfile?.canton)
+        guard let selectedAudience else { return guides }
+        return guides.filter { $0.audienceStage == selectedAudience }
     }
     
     private var filteredGuides: [Guide] {
@@ -71,6 +74,7 @@ struct GuidesView: View {
                         searchBar
                         
                         // Category chips
+                        audienceChips
                         categoryChips
                         
                         if searchText.isEmpty && selectedCategory == nil {
@@ -127,6 +131,35 @@ struct GuidesView: View {
     }
     
     // MARK: - Category Chips
+    private var audienceChips: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 10) {
+                audienceChip(nil, title: "All stages")
+                ForEach(GuideAudienceStage.allCases) { stage in
+                    audienceChip(stage, title: stage.title)
+                }
+            }
+            .padding(.horizontal, Theme.Spacing.md)
+        }
+        .accessibilityLabel("Life stage")
+    }
+
+    private func audienceChip(_ stage: GuideAudienceStage?, title: String) -> some View {
+        Button {
+            withAnimation(.spring(response: 0.3)) { selectedAudience = stage }
+        } label: {
+            Text(title)
+                .font(Theme.Typography.subheadline)
+                .fontWeight(selectedAudience == stage ? .semibold : .regular)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 10)
+                .background(selectedAudience == stage ? Theme.Colors.accent.opacity(0.18) : Color.clear)
+                .foregroundColor(selectedAudience == stage ? Theme.Colors.accent : Theme.Colors.textSecondary)
+                .overlay(Capsule().stroke(selectedAudience == stage ? Theme.Colors.accent : Theme.Colors.chipBorder))
+        }
+        .buttonStyle(.plain)
+    }
+
     private var categoryChips: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 10) {

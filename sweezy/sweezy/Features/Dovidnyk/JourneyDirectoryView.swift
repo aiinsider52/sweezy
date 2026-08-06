@@ -561,12 +561,14 @@ private enum JourneyToolRoute: String, Identifiable, CaseIterable {
 
     var imageName: String {
         switch self {
-        case .myPlan, .deadlines: return "swiss-moment-grindelwald"
-        case .documents: return "cityhub-zurich-landesmuseum"
-        case .ask: return "cityhub-zurich-oldtown"
+        case .myPlan: return "swiss-moment-grindelwald"
+        case .documents: return "journey-tool-documents"
+        case .ask: return "journey-tool-ask"
+        case .deadlines: return "journey-tool-deadlines"
         case .appointments: return "cityhub-zurich-fraumuenster"
         case .digest: return "cityhub-zurich-lake"
-        case .jobs, .cv: return "cityhub-zurich-oldtown"
+        case .jobs: return "journey-tool-jobs"
+        case .cv: return "journey-tool-cv"
         case .templates, .calculator: return "cityhub-zurich-landesmuseum"
         case .cityHub: return "cityhub-zurich-lake"
         case .passport: return "swiss-moment-zurich"

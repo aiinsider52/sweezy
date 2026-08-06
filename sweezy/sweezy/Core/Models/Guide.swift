@@ -188,6 +188,92 @@ struct Guide: Codable, Identifiable, Hashable {
         
         return score
     }
+
+    var contentSlug: String {
+        tags.first(where: { $0.lowercased().hasPrefix("slug:") })
+            .map { String($0.dropFirst(5)).lowercased() }
+            ?? id.uuidString.lowercased()
+    }
+
+    func freshness(asOf now: Date = Date(), calendar: Calendar = .current) -> ContentFreshness {
+        guard let verifiedAt else { return .unverified }
+        guard verifiedAt <= now else { return .unverified }
+        let expiry = calendar.date(byAdding: .month, value: 12, to: verifiedAt) ?? verifiedAt
+        return expiry < now ? .expired : .verified(verifiedAt)
+    }
+
+    var audienceStage: GuideAudienceStage {
+        let searchable = ([title, subtitle ?? "", bodyMarkdown] + tags).joined(separator: " ").lowercased()
+        if searchable.contains("3a") || searchable.contains("pension") || searchable.contains("пенсі") ||
+            searchable.contains("tax return") || searchable.contains("steuererklärung") ||
+            searchable.contains("податков") || searchable.contains("switch insurance") ||
+            searchable.contains("змінити страхов") {
+            return .established
+        }
+        if searchable.contains("first week") || searchable.contains("newcom") ||
+            searchable.contains("прибут") || searchable.contains("arrival") ||
+            searchable.contains("реєстрац") {
+            return .newlyArrived
+        }
+        return .settlingIn
+    }
+}
+
+enum ContentFreshness: Equatable {
+    case verified(Date)
+    case expired
+    case unverified
+}
+
+enum GuideAudienceStage: String, CaseIterable, Identifiable {
+    case newlyArrived
+    case settlingIn
+    case established
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .newlyArrived: return "Newly arrived"
+        case .settlingIn: return "Settling in"
+        case .established: return "Established resident"
+        }
+    }
+}
+
+struct ContentSafetyPolicy: Equatable {
+    static let emergencyHiddenCategories: Set<String> = ["refugee_center"]
+
+    let hiddenSlugs: Set<String>
+    let hiddenCategories: Set<String>
+
+    init(hiddenSlugs: [String] = [], hiddenCategories: [String] = []) {
+        self.hiddenSlugs = Set(hiddenSlugs.map { $0.lowercased() })
+        self.hiddenCategories = Self.emergencyHiddenCategories.union(hiddenCategories.map { $0.lowercased() })
+    }
+
+    func allows(_ guide: Guide) -> Bool {
+        guard !hiddenSlugs.contains(guide.contentSlug),
+              !hiddenCategories.contains(guide.category.rawValue.lowercased()) else { return false }
+
+        let text = ([guide.title, guide.subtitle ?? "", guide.bodyMarkdown] + guide.tags)
+            .joined(separator: " ")
+            .lowercased()
+        let mentionsSPermit = text.contains("ausweis s") || text.contains("s permit") || text.contains("status s")
+        let travelAdvice = text.contains("travel") || text.contains("reisen") || text.contains("подорож")
+        let integrationDuty = (text.contains("integration") || text.contains("інтеграц")) &&
+            (text.contains("duty") || text.contains("obligation") || text.contains("pflicht") || text.contains("обов'яз"))
+        let taxDeadline = (text.contains("tax") || text.contains("steuer") || text.contains("подат")) &&
+            (text.contains("deadline") || text.contains("frist") || text.contains("термін"))
+        let firstWeekInsurance = (text.contains("insurance") || text.contains("versicherung") || text.contains("страхув")) &&
+            (text.contains("7 days") || text.contains("7 tagen") || text.contains("7 днів") || text.contains("first week"))
+
+        return !(mentionsSPermit && travelAdvice) && !integrationDuty && !taxDeadline && !firstWeekInsurance
+    }
+
+    func allows(_ place: Place) -> Bool {
+        !hiddenCategories.contains(place.category.rawValue.lowercased())
+    }
 }
 
 /// Guide categories for organization

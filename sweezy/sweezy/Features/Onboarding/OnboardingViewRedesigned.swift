@@ -601,12 +601,14 @@ private struct ThemePickerPage: View {
     var body: some View {
         ZStack {
             JourneyPhotoBackground(imageName: JourneyBackdrop.alpine.rawValue, blurRadius: 2, darkness: 0.62)
+                .allowsHitTesting(false)
             LinearGradient(
                 colors: [.clear, Color.black.opacity(0.26), Color.black.opacity(0.96)],
                 startPoint: .top,
                 endPoint: .bottom
             )
             .ignoresSafeArea()
+            .allowsHitTesting(false)
             
             VStack(alignment: .leading, spacing: 0) {
                 Spacer(minLength: 170)
@@ -948,6 +950,7 @@ private struct OnboardingDetailsBackground<Content: View>: View {
     var body: some View {
         ZStack {
             JourneyPhotoBackground(imageName: JourneyBackdrop.alpine.rawValue, blurRadius: 2, darkness: 0.64)
+                .allowsHitTesting(false)
             LinearGradient(
                 colors: [
                     Color.black.opacity(0.10),
@@ -958,6 +961,7 @@ private struct OnboardingDetailsBackground<Content: View>: View {
                 endPoint: .bottom
             )
             .ignoresSafeArea()
+            .allowsHitTesting(false)
 
             RadialGradient(
                 colors: [JourneyVisual.lime.opacity(0.11), .clear],
@@ -966,6 +970,7 @@ private struct OnboardingDetailsBackground<Content: View>: View {
                 endRadius: 360
             )
             .ignoresSafeArea()
+            .allowsHitTesting(false)
 
             content
         }
@@ -1127,6 +1132,7 @@ private struct OnboardingV2PageView: View {
     var body: some View {
         ZStack {
             JourneyPhotoBackground(imageName: backdrop.rawValue, blurRadius: 1.5, darkness: 0.46)
+                .allowsHitTesting(false)
 
             LinearGradient(
                 colors: [.clear, Color.black.opacity(0.18), Color.black.opacity(0.94)],
@@ -1134,6 +1140,7 @@ private struct OnboardingV2PageView: View {
                 endPoint: .bottom
             )
             .ignoresSafeArea()
+            .allowsHitTesting(false)
 
             VStack(alignment: .leading, spacing: 0) {
                 Spacer(minLength: 190)
@@ -1229,6 +1236,7 @@ private struct LanguageSelectionSheetV2: View {
         NavigationStack {
             ZStack {
                 JourneyPhotoBackground(imageName: JourneyBackdrop.city.rawValue, blurRadius: 6, darkness: 0.68)
+                    .allowsHitTesting(false)
                 
                 VStack(spacing: Theme.Spacing.lg) {
                     // Header
@@ -1291,12 +1299,14 @@ private struct LanguagePickerPage: View {
     var body: some View {
         ZStack {
             JourneyPhotoBackground(imageName: JourneyBackdrop.city.rawValue, blurRadius: 2, darkness: 0.56)
+                .allowsHitTesting(false)
             LinearGradient(
                 colors: [.clear, Color.black.opacity(0.22), Color.black.opacity(0.94)],
                 startPoint: .top,
                 endPoint: .bottom
             )
             .ignoresSafeArea()
+            .allowsHitTesting(false)
             
             VStack(alignment: .leading, spacing: 0) {
                 Spacer(minLength: 180)
@@ -1375,22 +1385,26 @@ private struct SuccessPageView: View {
     var body: some View {
         ZStack {
             JourneyPhotoBackground(imageName: JourneyBackdrop.zurich.rawValue, blurRadius: 2, darkness: 0.58)
+                .allowsHitTesting(false)
             LinearGradient(
                 colors: [.clear, Color.black.opacity(0.32), Color.black.opacity(0.96)],
                 startPoint: .top,
                 endPoint: .bottom
             )
             .ignoresSafeArea()
+            .allowsHitTesting(false)
 
             // Decorative background blobs
             Circle()
                 .fill(JourneyVisual.lime.opacity(0.07))
                 .frame(width: 320, height: 320)
                 .offset(x: 120, y: -240)
+                .allowsHitTesting(false)
             Circle()
                 .fill(JourneyVisual.lime.opacity(0.04))
                 .frame(width: 220, height: 220)
                 .offset(x: -100, y: 280)
+                .allowsHitTesting(false)
 
             VStack(spacing: 0) {
                 Spacer().frame(height: 128)

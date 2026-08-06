@@ -12,7 +12,7 @@ from .job import (
 from .checklist import Checklist
 from .template import Template
 from .appointment import Appointment
-from .user import User
+from .user import PublicUserProfile, User
 from .subscription import Subscription, SubscriptionEvent
 from .marketplace import MarketplaceBlock, MarketplaceReport, ServiceListing
 from .event_listing import EventListing, EventReport
@@ -41,6 +41,7 @@ __all__ = [
     "Template",
     "Appointment",
     "User",
+    "PublicUserProfile",
     "Subscription",
     "SubscriptionEvent",
     "ServiceListing",

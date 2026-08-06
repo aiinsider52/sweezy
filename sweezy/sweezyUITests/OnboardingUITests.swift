@@ -27,7 +27,10 @@ final class OnboardingUITests: XCTestCase {
         tapNext()
         XCTAssertTrue(app.descendants(matching: .any)["onboarding.familyDetailsPage"].waitForExistence(timeout: 10))
         tapNext() // theme
-        tapNext() // notification permission
+        tapNext() // analytics consent
+        let declineAnalytics = app.buttons["onboarding.analytics.declineButton"]
+        XCTAssertTrue(declineAnalytics.waitForExistence(timeout: 10))
+        declineAnalytics.tap()
 
         XCTAssertTrue(app.descendants(matching: .any)["onboarding.notificationPermissionPage"].waitForExistence(timeout: 10))
         let later = app.buttons["onboarding.notifications.laterButton"]
@@ -49,6 +52,26 @@ final class OnboardingUITests: XCTestCase {
         XCTAssertTrue(skip.isHittable)
         skip.tap()
         XCTAssertTrue(app.buttons["auth.entry.continueAsGuest"].waitForExistence(timeout: 10))
+    }
+
+    @MainActor
+    func testProfilePageScrollAndPagingControlsRemainInteractive() throws {
+        XCTAssertTrue(app.staticTexts["onboarding.page.title.1"].waitForExistence(timeout: 15))
+        tapNext()
+        tapNext()
+        tapNext()
+
+        let profilePage = app.scrollViews["onboarding.profileDetailsPage"]
+        XCTAssertTrue(profilePage.waitForExistence(timeout: 10))
+        profilePage.swipeUp()
+        profilePage.swipeDown()
+
+        let back = app.buttons["onboarding.backButton"]
+        let next = app.buttons["onboarding.nextButton"]
+        XCTAssertTrue(back.isHittable)
+        XCTAssertTrue(next.isHittable)
+        back.tap()
+        XCTAssertTrue(app.staticTexts["onboarding.page.title.2"].waitForExistence(timeout: 10))
     }
 
     @MainActor

@@ -2,18 +2,23 @@ import math
 from datetime import datetime, timezone
 from typing import Any, Dict, Optional
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from sqlalchemy import func, or_, select
+from sqlalchemy import and_, func, or_, select
 
 from ..core.security import decode_token
+from ..core.rate_limit import limiter
 from ..dependencies import CurrentAdmin, CurrentUser, DBSession
+from ..models.chat import ChatConversation, MarketplaceReview
 from ..models.marketplace import MarketplaceBlock, MarketplaceReport, ServiceListing
+from ..models.user import PublicUserProfile, User
 from ..schemas.marketplace import (
     AdminServiceListingDetail,
     ListingType,
     MarketplaceReportCreate,
     MarketplaceSafetyResponse,
+    PublicProfileListing,
+    PublicUserProfileResponse,
     ServiceListingCreate,
     ServiceListingDetail,
     ServiceListingPage,
@@ -168,6 +173,101 @@ def blocked_authors(db: DBSession, user: CurrentUser) -> list[str]:
     )
 
 
+@router.get("/profiles/{profile_user_id}", response_model=PublicUserProfileResponse)
+@limiter.limit("30/minute")
+def public_profile(
+    request: Request,
+    profile_user_id: str,
+    db: DBSession,
+    user: CurrentUser,
+    listing_id: str | None = None,
+    conversation_id: str | None = None,
+) -> PublicUserProfileResponse:
+    target = db.get(User, profile_user_id)
+    blocked = db.scalar(
+        select(func.count()).select_from(MarketplaceBlock).where(
+            or_(
+                and_(MarketplaceBlock.user_id == user.id, MarketplaceBlock.blocked_author_id == profile_user_id),
+                and_(MarketplaceBlock.user_id == profile_user_id, MarketplaceBlock.blocked_author_id == user.id),
+            )
+        )
+    ) or 0
+    legitimate = False
+    if listing_id:
+        legitimate = (db.scalar(
+            select(func.count()).select_from(ServiceListing).where(
+                ServiceListing.id == listing_id,
+                ServiceListing.author_id == profile_user_id,
+                ServiceListing.status == "approved",
+            )
+        ) or 0) > 0
+    if conversation_id:
+        legitimate = legitimate or (db.scalar(
+            select(func.count()).select_from(ChatConversation).where(
+                ChatConversation.id == conversation_id,
+                or_(
+                    and_(ChatConversation.buyer_id == user.id, ChatConversation.seller_id == profile_user_id),
+                    and_(ChatConversation.seller_id == user.id, ChatConversation.buyer_id == profile_user_id),
+                ),
+            )
+        ) or 0) > 0
+    if not target or not target.is_active or blocked or not legitimate:
+        raise HTTPException(status_code=404, detail="Profile not found")
+
+    profile = db.get(PublicUserProfile, profile_user_id)
+    if not profile:
+        latest = db.execute(
+            select(ServiceListing).where(
+                ServiceListing.author_id == profile_user_id,
+                ServiceListing.status == "approved",
+            ).order_by(ServiceListing.updated_at.desc())
+        ).scalars().first()
+        if not latest:
+            raise HTTPException(status_code=404, detail="Profile not found")
+        profile = PublicUserProfile(
+            user_id=profile_user_id,
+            display_name=latest.author_name.strip()[:100] or "Sweezy user",
+            is_verified=target.email_verified,
+        )
+        db.add(profile)
+        db.commit()
+        db.refresh(profile)
+
+    listings = db.execute(
+        select(ServiceListing).where(
+            ServiceListing.author_id == profile_user_id,
+            ServiceListing.status == "approved",
+        ).order_by(ServiceListing.is_featured.desc(), ServiceListing.created_at.desc()).limit(20)
+    ).scalars().all()
+    average, review_count = db.execute(
+        select(func.avg(MarketplaceReview.rating), func.count(MarketplaceReview.id)).where(
+            MarketplaceReview.reviewed_user_id == profile_user_id
+        )
+    ).one()
+    words = [word for word in profile.display_name.split() if word]
+    initials = "".join(word[0].upper() for word in words[:2]) or "S"
+    badges = []
+    if profile.is_verified:
+        badges.append("verified")
+    if profile.trust_badge:
+        badges.append(profile.trust_badge)
+    if any(item.is_expert for item in listings):
+        badges.append("expert")
+    return PublicUserProfileResponse(
+        user_id=profile_user_id,
+        display_name=profile.display_name,
+        initials=initials,
+        avatar_url=profile.avatar_url,
+        registered_month=target.created_at.strftime("%Y-%m"),
+        is_verified=profile.is_verified,
+        trust_badges=badges,
+        average_rating=round(float(average), 2) if average is not None else None,
+        review_count=review_count,
+        active_listings=[PublicProfileListing.model_validate(item) for item in listings],
+        viewer_has_blocked=False,
+    )
+
+
 @router.get("/{listing_id}", response_model=ServiceListingResponse)
 def get_listing(listing_id: str, db: DBSession) -> ServiceListingResponse:
     listing = db.get(ServiceListing, listing_id)
@@ -285,6 +385,15 @@ def create_listing(
         status="pending",
     )
     db.add(listing)
+    profile = db.get(PublicUserProfile, user.id)
+    if profile is None:
+        db.add(PublicUserProfile(
+            user_id=user.id,
+            display_name=payload.author_name.strip()[:100],
+            is_verified=user.email_verified,
+        ))
+    elif profile.display_name != payload.author_name.strip():
+        listing.author_name = profile.display_name
     db.commit()
     db.refresh(listing)
 

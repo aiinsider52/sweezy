@@ -675,15 +675,7 @@ private extension SettingsView {
     }
 
     var profileCompletion: Int {
-        guard let profile = appContainer.userProfile else { return 20 }
-        var completed = 4
-        if !profile.fullName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { completed += 1 }
-        if profile.arrivalDate != nil { completed += 1 }
-        if !profile.goals.isEmpty { completed += 1 }
-        if profile.address != nil { completed += 1 }
-        if !(profile.phoneNumber?.isEmpty ?? true) { completed += 1 }
-        if !(profile.email?.isEmpty ?? true) { completed += 1 }
-        return min(100, completed * 10)
+        appContainer.userProfile?.completionPercentage ?? 20
     }
 
     var gamificationPanel: some View {
@@ -1360,15 +1352,7 @@ struct ProfileEditView: View {
     
     // Profile completion
     private var completionPercentage: Double {
-        var filled = 0
-        let total = 8
-        if !fullName.isEmpty { filled += 1 }
-        if !email.isEmpty { filled += 1 }
-        if !phoneNumber.isEmpty { filled += 1 }
-        if familySize > 0 { filled += 1 }
-        if !selectedGoals.isEmpty { filled += 2 }
-        filled += 2 // dates always set
-        return Double(filled) / Double(total)
+        Double(appContainer.userProfile?.completionPercentage ?? 20) / 100
     }
     
     // Permit time remaining

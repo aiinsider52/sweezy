@@ -13,6 +13,7 @@ import Combine
 
 extension Notification.Name {
     static let accountScopeDidChange = Notification.Name("account.scope.didChange")
+    static let authenticationDidExpire = Notification.Name("authentication.didExpire")
 }
 
 enum AccountScopedStorage {
@@ -148,13 +149,14 @@ final class SessionManager: ObservableObject {
         // Default to guest unless an existing authenticated session is found.
         recomputeStateFromStorage()
 
-        // Keep session state in sync with existing auth persistence used throughout the app.
-        // `AppLockManager.isRegistered` is already the single source of truth used by the old flow.
-        lockManager.objectWillChange
+        // Authentication failures are delivered explicitly by APIClient. Observing
+        // this narrow signal avoids the former objectWillChange feedback loop.
+        NotificationCenter.default.publisher(for: .authenticationDidExpire)
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
-                guard let self else { return }
                 Task { @MainActor in
-                    self.recomputeStateFromStorage()
+                    await Task.yield()
+                    self?.expireLocalSession()
                 }
             }
             .store(in: &cancellables)
@@ -262,15 +264,37 @@ final class SessionManager: ObservableObject {
             }
             if KeychainStore.get("user_email") == nil, !email.isEmpty { try? KeychainStore.save(email, for: "user_email") }
             if KeychainStore.get("user_name") == nil, !name.isEmpty { try? KeychainStore.save(name, for: "user_name") }
-            lockManager.isRegistered = true
+            if !lockManager.isRegistered {
+                lockManager.isRegistered = true
+            }
             let user = User(
                 id: backendID,
                 email: email.isEmpty ? "user@local" : email,
                 name: name.isEmpty ? nil : name
             )
-            state = .authenticated(user)
+            let restoredState = UserSessionState.authenticated(user)
+            if state != restoredState {
+                state = restoredState
+            }
         } else {
             // IMPORTANT: default to guest so general content is accessible without an account.
+            if state != .guest {
+                state = .guest
+            }
+        }
+        currentScope = AccountScopedStorage.currentAccountKey()
+        AccountScopedStorage.notifyScopeChange(from: previousScope)
+    }
+
+    private func expireLocalSession() {
+        let previousScope = currentScope
+        KeychainStore.delete("user_id")
+        KeychainStore.delete("user_email")
+        KeychainStore.delete("user_name")
+        if lockManager.isRegistered {
+            lockManager.isRegistered = false
+        }
+        if state != .guest {
             state = .guest
         }
         currentScope = AccountScopedStorage.currentAccountKey()

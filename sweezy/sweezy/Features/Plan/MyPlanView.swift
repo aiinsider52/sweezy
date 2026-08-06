@@ -109,7 +109,7 @@ struct MyPlanView: View {
             } else {
                 ForEach(deadlines.prefix(7)) { deadline in
                     DeadlineRow(deadline: deadline) {
-                        appContainer.lifeAdmin.setDeadlineCompleted(deadline.id, completed: true)
+                        complete(deadline)
                     }
                 }
             }
@@ -155,6 +155,14 @@ struct MyPlanView: View {
         Task { @MainActor in
             let count = await appContainer.lifeAdmin.scheduleReminders(for: deadlines, using: appContainer.notificationService)
             reminderMessage = count > 0 ? "Підключено нагадувань: \(count)" : "Дозволь сповіщення або перевір строки"
+        }
+    }
+
+    private func complete(_ deadline: LifeDeadline) {
+        if let taskID = LifeAdminService.firstWeekTaskID(from: deadline.id) {
+            appContainer.firstWeekService.toggle(taskID)
+        } else {
+            appContainer.lifeAdmin.setDeadlineCompleted(deadline.id, completed: true)
         }
     }
 }
@@ -241,7 +249,11 @@ struct DeadlineEngineView: View {
                         .foregroundColor(.white.opacity(0.68))
                     ForEach(deadlines) { deadline in
                         DeadlineRow(deadline: deadline) {
-                            appContainer.lifeAdmin.setDeadlineCompleted(deadline.id, completed: true)
+                            if let taskID = LifeAdminService.firstWeekTaskID(from: deadline.id) {
+                                appContainer.firstWeekService.toggle(taskID)
+                            } else {
+                                appContainer.lifeAdmin.setDeadlineCompleted(deadline.id, completed: true)
+                            }
                         }
                     }
                 }

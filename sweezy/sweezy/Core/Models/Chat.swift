@@ -3,6 +3,8 @@ import Foundation
 enum ChatDeliveryState: String, Codable {
     case sending
     case sent
+    case delivered
+    case read
     case failed
 }
 
@@ -58,6 +60,8 @@ struct ChatMessage: Codable, Identifiable, Equatable {
     let kind: String
     let body: String
     let createdAt: Date
+    let deliveredAt: Date?
+    let readAt: Date?
     let editedAt: Date?
     let deletedAt: Date?
     var deliveryState: ChatDeliveryState
@@ -70,6 +74,8 @@ struct ChatMessage: Codable, Identifiable, Equatable {
         kind: String = "text",
         body: String,
         createdAt: Date,
+        deliveredAt: Date? = nil,
+        readAt: Date? = nil,
         editedAt: Date? = nil,
         deletedAt: Date? = nil,
         deliveryState: ChatDeliveryState = .sent
@@ -81,6 +87,8 @@ struct ChatMessage: Codable, Identifiable, Equatable {
         self.kind = kind
         self.body = body
         self.createdAt = createdAt
+        self.deliveredAt = deliveredAt
+        self.readAt = readAt
         self.editedAt = editedAt
         self.deletedAt = deletedAt
         self.deliveryState = deliveryState
@@ -92,6 +100,8 @@ struct ChatMessage: Codable, Identifiable, Equatable {
         case senderID = "sender_id"
         case clientMessageID = "client_message_id"
         case createdAt = "created_at"
+        case deliveredAt = "delivered_at"
+        case readAt = "read_at"
         case editedAt = "edited_at"
         case deletedAt = "deleted_at"
         case deliveryState = "delivery_state"
@@ -106,9 +116,12 @@ struct ChatMessage: Codable, Identifiable, Equatable {
         kind = try container.decode(String.self, forKey: .kind)
         body = try container.decode(String.self, forKey: .body)
         createdAt = try container.decode(Date.self, forKey: .createdAt)
+        deliveredAt = try container.decodeIfPresent(Date.self, forKey: .deliveredAt)
+        readAt = try container.decodeIfPresent(Date.self, forKey: .readAt)
         editedAt = try container.decodeIfPresent(Date.self, forKey: .editedAt)
         deletedAt = try container.decodeIfPresent(Date.self, forKey: .deletedAt)
-        deliveryState = try container.decodeIfPresent(ChatDeliveryState.self, forKey: .deliveryState) ?? .sent
+        deliveryState = try container.decodeIfPresent(ChatDeliveryState.self, forKey: .deliveryState)
+            ?? (readAt != nil ? .read : (deliveredAt != nil ? .delivered : .sent))
     }
 }
 
@@ -138,6 +151,8 @@ struct ChatSocketEvent: Decodable {
     let message: ChatMessage?
     let messageID: String?
     let readerID: String?
+    let deliveredAt: Date?
+    let readAt: Date?
     let isTyping: Bool?
 
     private enum CodingKeys: String, CodingKey {
@@ -145,6 +160,8 @@ struct ChatSocketEvent: Decodable {
         case conversationID = "conversation_id"
         case messageID = "message_id"
         case readerID = "reader_id"
+        case deliveredAt = "delivered_at"
+        case readAt = "read_at"
         case isTyping = "is_typing"
     }
 }

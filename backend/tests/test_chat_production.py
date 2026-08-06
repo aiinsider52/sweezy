@@ -80,6 +80,24 @@ def test_chat_end_to_end_idempotency_read_close_review_and_report() -> None:
     conversation_id = conversation["id"]
     assert conversation["other_user_id"] == owner_id
     assert conversation["is_seller"] is False
+    assert conversation["other_user_name"] == "Owner"
+
+    owner_view = client.get(f"/api/v1/chat/conversations/{conversation_id}", headers=owner)
+    assert owner_view.status_code == 200
+    assert owner_view.json()["other_user_name"] == "Sweezy user"
+    assert "chat_" not in owner_view.json()["other_user_name"]
+
+    profile = client.get(
+        f"/api/v1/marketplace/profiles/{owner_id}?conversation_id={conversation_id}",
+        headers=buyer,
+    )
+    assert profile.status_code == 200, profile.text
+    profile_body = profile.json()
+    assert profile_body["display_name"] == "Owner"
+    assert profile_body["active_listings"][0]["id"] == listing_id
+    assert set(profile_body).isdisjoint({"email", "phone", "contact_value", "reviewer_id"})
+    no_context = client.get(f"/api/v1/marketplace/profiles/{owner_id}", headers=buyer)
+    assert no_context.status_code == 404
 
     fetched = client.get(f"/api/v1/chat/conversations/{conversation_id}", headers=buyer)
     assert fetched.status_code == 200, fetched.text
@@ -126,12 +144,17 @@ def test_chat_end_to_end_idempotency_read_close_review_and_report() -> None:
     messages = client.get(f"/api/v1/chat/conversations/{conversation_id}/messages", headers=owner)
     assert messages.status_code == 200
     assert [item["body"] for item in messages.json()["items"]] == ["Чи актуально?"]
+    assert messages.json()["items"][0]["delivered_at"] is not None
+    sender_copy = client.get(f"/api/v1/chat/conversations/{conversation_id}/messages", headers=buyer)
+    assert sender_copy.json()["items"][0]["delivered_at"] is not None
     read = client.post(
         f"/api/v1/chat/conversations/{conversation_id}/read",
         headers=owner,
         json={"message_id": sent.json()["id"]},
     )
     assert read.status_code == 200
+    read_copy = client.get(f"/api/v1/chat/conversations/{conversation_id}/messages", headers=buyer)
+    assert read_copy.json()["items"][0]["read_at"] is not None
     assert client.get("/api/v1/chat/conversations/unread-count", headers=owner).json()["count"] == 0
 
     reply = client.post(

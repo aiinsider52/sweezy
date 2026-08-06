@@ -91,7 +91,7 @@ def test_media_upload_rejects_unsafe_filename_and_validates_content() -> None:
     assert body["url"] == f"/media/{body['filename']}"
 
 
-def test_telemetry_requires_consent_and_authenticated_user() -> None:
+def test_telemetry_requires_consent_and_actor_identity() -> None:
     event = {
         "id": str(uuid.uuid4()),
         "ts": "2026-07-13T14:00:00Z",
@@ -100,12 +100,13 @@ def test_telemetry_requires_consent_and_authenticated_user() -> None:
         "type": "retention_next_action_viewed",
         "meta": {"destination": "roadmap"},
     }
-    no_auth = client.post(
+    unidentified_guest = client.post(
         "/api/v1/telemetry/batch",
         headers={"X-Analytics-Consent": "granted"},
         json={"events": [event]},
     )
-    assert no_auth.status_code in {401, 403}
+    assert unidentified_guest.status_code == 422
+    assert unidentified_guest.json()["detail"] == "guest_id required for guests"
 
     headers = _authenticated_headers()
     no_consent = client.post("/api/v1/telemetry/batch", headers=headers, json={"events": [event]})

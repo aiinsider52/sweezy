@@ -882,30 +882,13 @@ struct DocumentPreviewView: View {
     }
     
     private func createPDF(from text: String, title: String) -> URL? {
-        let pdfMetaData = [
-            kCGPDFContextTitle: title,
-            kCGPDFContextCreator: "Sweezy App"
-        ]
-        let format = UIGraphicsPDFRendererFormat()
-        format.documentInfo = pdfMetaData as [String: Any]
-        
-        let pageWidth = 8.5 * 72.0
-        let pageHeight = 11 * 72.0
-        let pageRect = CGRect(x: 0, y: 0, width: pageWidth, height: pageHeight)
-        let renderer = UIGraphicsPDFRenderer(bounds: pageRect, format: format)
-        
-        let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("\(title).pdf")
-        
         do {
-            try renderer.writePDF(to: tempURL) { context in
-                context.beginPage()
-                let attributes: [NSAttributedString.Key: Any] = [
-                    .font: UIFont.systemFont(ofSize: 12)
-                ]
-                let textRect = CGRect(x: 40, y: 40, width: pageWidth - 80, height: pageHeight - 80)
-                text.draw(in: textRect, withAttributes: attributes)
-            }
-            return tempURL
+            let safeTitle = title.map { $0.isLetter || $0.isNumber ? String($0) : "_" }.joined()
+            return try PaginatedTextPDFExporter().export(
+                text: text,
+                filename: "\(safeTitle).pdf",
+                title: title
+            )
         } catch {
             AppLogger.error("Failed to create PDF: \(error)")
             return nil

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import math
 import re
+import time
 from datetime import datetime, timedelta, timezone
 
 from fastapi import (
@@ -38,7 +39,7 @@ from ..models.chat import (
 )
 from ..models.job import Job
 from ..models.marketplace import MarketplaceBlock, ServiceListing
-from ..models.user import User
+from ..models.user import PublicUserProfile, User
 from ..schemas.chat import (
     AdminChatReportResponse,
     AdminChatReportUpdate,
@@ -71,6 +72,7 @@ admin_router = APIRouter()
 devices_router = APIRouter(dependencies=[Depends(_require_chat_enabled)])
 
 _URL_PATTERN = re.compile(r"(?:https?://|www\.)", re.IGNORECASE)
+_typing_last_sent: dict[tuple[str, str], float] = {}
 
 
 def _now() -> datetime:
@@ -129,7 +131,12 @@ def _ensure_not_blocked(db, conversation: ChatConversation) -> None:
 def _display_name(user: User | None) -> str:
     if not user:
         return "Sweezy user"
-    return user.email.split("@", 1)[0][:100]
+    return "Sweezy user"
+
+
+def _public_display_name(db, user_id: str, fallback: str = "Sweezy user") -> str:
+    profile = db.get(PublicUserProfile, user_id)
+    return profile.display_name if profile and profile.display_name.strip() else fallback
 
 
 def _conversation_response(db, conversation: ChatConversation, user_id: str) -> ConversationResponse:
@@ -140,8 +147,11 @@ def _conversation_response(db, conversation: ChatConversation, user_id: str) -> 
         )
     ).scalar_one()
     other_id = _other_user_id(conversation, user_id)
-    other_user = db.get(User, other_id)
-    other_name = conversation.seller_name if other_id == conversation.seller_id else _display_name(other_user)
+    other_name = _public_display_name(
+        db,
+        other_id,
+        conversation.seller_name if other_id == conversation.seller_id else "Sweezy user",
+    )
     unread_stmt = select(func.count()).select_from(ChatMessage).where(
         ChatMessage.conversation_id == conversation.id,
         ChatMessage.sender_id != user_id,
@@ -422,6 +432,7 @@ def get_conversation(conversation_id: str, db: DBSession, user: CurrentUser) -> 
 @router.get("/conversations/{conversation_id}/messages", response_model=MessagePage)
 def list_messages(
     conversation_id: str,
+    bg: BackgroundTasks,
     db: DBSession,
     user: CurrentUser,
     before: datetime | None = None,
@@ -440,6 +451,26 @@ def list_messages(
     rows = rows[:limit]
     next_cursor = rows[-1].created_at.isoformat() if has_more and rows else None
     rows.reverse()
+    newly_delivered = [
+        row for row in rows
+        if row.sender_id != user.id and row.delivered_at is None
+    ]
+    if newly_delivered:
+        delivered_at = _now()
+        for row in newly_delivered:
+            row.delivered_at = delivered_at
+        db.commit()
+        for row in newly_delivered:
+            bg.add_task(
+                chat_realtime.publish,
+                row.sender_id,
+                {
+                    "type": "message.delivered",
+                    "conversation_id": conversation.id,
+                    "message_id": row.id,
+                    "delivered_at": delivered_at.isoformat(),
+                },
+            )
     return MessagePage(
         items=[ChatMessageResponse.model_validate(row) for row in rows],
         next_cursor=next_cursor,
@@ -513,7 +544,11 @@ def send_message(
         elapsed = max(1, math.ceil((now - _utc(conversation.created_at)).total_seconds() / 3600))
         listing.response_time_hours = min(elapsed, 24 * 14)
 
-    sender_name = conversation.seller_name if user.id == conversation.seller_id else _display_name(user)
+    sender_name = _public_display_name(
+        db,
+        user.id,
+        conversation.seller_name if user.id == conversation.seller_id else "Sweezy user",
+    )
     if not recipient.muted:
         enqueue_chat_push(
             db,
@@ -562,6 +597,18 @@ def mark_read(
         raise HTTPException(status_code=404, detail="Message not found")
     current_read = _utc(participant.last_read_at) if participant.last_read_at else _utc(message.created_at)
     participant.last_read_at = max(current_read, _utc(message.created_at))
+    read_at = _now()
+    read_messages = db.execute(
+        select(ChatMessage).where(
+            ChatMessage.conversation_id == conversation.id,
+            ChatMessage.sender_id != user.id,
+            ChatMessage.created_at <= message.created_at,
+            ChatMessage.read_at.is_(None),
+        )
+    ).scalars().all()
+    for item in read_messages:
+        item.delivered_at = item.delivered_at or read_at
+        item.read_at = read_at
     db.commit()
     bg.add_task(
         chat_realtime.publish,
@@ -571,7 +618,7 @@ def mark_read(
             "conversation_id": conversation.id,
             "message_id": message.id,
             "reader_id": user.id,
-            "read_at": participant.last_read_at.isoformat(),
+            "read_at": read_at.isoformat(),
         },
     )
     return MarketplaceSafetyResponse(message="Read receipt updated")
@@ -799,6 +846,12 @@ async def chat_websocket(websocket: WebSocket) -> None:
             if event_type != "typing":
                 continue
             conversation_id = str(incoming.get("conversation_id", ""))
+            typing_key = (user_id, conversation_id)
+            now_monotonic = time.monotonic()
+            is_typing = bool(incoming.get("is_typing"))
+            if is_typing and now_monotonic - _typing_last_sent.get(typing_key, 0) < 0.75:
+                continue
+            _typing_last_sent[typing_key] = now_monotonic
             with SessionLocal() as db:
                 conversation = db.get(ChatConversation, conversation_id)
                 if not conversation or user_id not in _participant_ids(conversation):
@@ -812,7 +865,7 @@ async def chat_websocket(websocket: WebSocket) -> None:
                     "type": "typing",
                     "conversation_id": conversation_id,
                     "user_id": user_id,
-                    "is_typing": bool(incoming.get("is_typing")),
+                    "is_typing": is_typing,
                 },
             )
     except WebSocketDisconnect:

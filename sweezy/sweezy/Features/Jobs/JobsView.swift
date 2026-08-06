@@ -1137,7 +1137,10 @@ struct JobsView: View {
     }
     
     private func draftApply(_ job: APIClient.JobItem) async {
-        guard hasPremiumAccess else { return }
+        guard hasPremiumAccess, KeychainStore.get("access_token")?.isEmpty == false else {
+            showAuthEntry = true
+            return
+        }
         
         isDrafting = true
         draftedText = ""
@@ -1147,7 +1150,8 @@ struct JobsView: View {
             title: job.title,
             company: job.company,
             description: job.snippet,
-            language: appContainer.currentLocale.identifier
+            language: appContainer.currentLocale.identifier,
+            candidateSummary: savedCandidateSummary()
         )
         draftedText = text ?? "Не вдалося згенерувати відповідь."
         isDrafting = false
@@ -1155,6 +1159,19 @@ struct JobsView: View {
         if let text {
             _ = try? await APIClient.updateJobApplication(jobId: job.id, status: "prepared", coverLetter: text)
         }
+    }
+
+    private func savedCandidateSummary() -> String? {
+        guard !lockManager.userEmail.isEmpty else { return nil }
+        let key = "cv_saved_data_\(lockManager.userEmail.lowercased())"
+        guard let data = ProtectedLocalStore.data(for: key, migratingFrom: key),
+              let resume = try? JSONDecoder().decode(CVResume.self, from: data) else {
+            return nil
+        }
+        let language: CVDocumentLanguage = appContainer.currentLocale.language.languageCode?.identifier == "de"
+            ? .german
+            : .ukrainian
+        return CVDocumentFormatter().candidateSummary(from: resume, language: language)
     }
 
     private func markApplied(_ job: APIClient.JobItem) async {

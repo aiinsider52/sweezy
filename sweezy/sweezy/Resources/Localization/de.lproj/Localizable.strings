@@ -2324,3 +2324,12 @@
 "swiss.discovery.bern_region.season" = "Ganzjährig";
 "swiss.discovery.bern_region.duration" = "3–5 Tage";
 "swiss.discovery.bern_region.route" = "Bern → Thun oder Spiez → Interlaken → Grindelwald";
+
+"profile.loading" = "Profil wird geladen…";
+"profile.error.title" = "Profil nicht verfügbar";
+"profile.verified" = "Verifiziertes Profil";
+"profile.community" = "Sweezy Community";
+"profile.member_since.format" = "Mitglied seit %@";
+"profile.listings.title" = "Aktive Inserate";
+"profile.listings.empty.title" = "Keine aktiven Inserate";
+"profile.listings.empty.body" = "Dieses Mitglied hat derzeit keine genehmigten Inserate.";

@@ -132,7 +132,9 @@ class RemoteConfigService: RemoteConfigServiceProtocol {
                 maintenanceMode: false,
                 maintenanceMessage: nil,
                 announcements: [],
-                lastUpdated: Date()
+                lastUpdated: Date(),
+                hiddenContentSlugs: backend.hidden_content_slugs ?? [],
+                hiddenContentCategories: backend.hidden_content_categories ?? []
             )
         } catch {
             // Fallback to bundled file or mock
@@ -204,7 +206,9 @@ class RemoteConfigService: RemoteConfigServiceProtocol {
             lastUpdated: Date(),
             paywallDefaultPlan: "yearly",
             paywallBenefits: ["AI CV", "AI Letters", "Translations", "Unlimited saves", "PDF export"],
-            reengageDays: [7, 14, 30]
+            reengageDays: [7, 14, 30],
+            hiddenContentSlugs: [],
+            hiddenContentCategories: []
         )
     }
 }
@@ -227,6 +231,9 @@ struct RemoteConfig: Codable {
     let paywallBenefits: [String]?
     // Engagement config
     let reengageDays: [Int]?
+    /// Server-controlled kill switch. Values are stable guide slugs/IDs and raw category names.
+    let hiddenContentSlugs: [String]?
+    let hiddenContentCategories: [String]?
     
     init(
         version: String,
@@ -241,7 +248,9 @@ struct RemoteConfig: Codable {
         lastUpdated: Date? = nil,
         paywallDefaultPlan: String? = nil,
         paywallBenefits: [String]? = nil,
-        reengageDays: [Int]? = nil
+        reengageDays: [Int]? = nil,
+        hiddenContentSlugs: [String] = [],
+        hiddenContentCategories: [String] = []
     ) {
         self.version = version
         self.minSupportedVersion = minSupportedVersion
@@ -256,6 +265,8 @@ struct RemoteConfig: Codable {
         self.paywallDefaultPlan = paywallDefaultPlan
         self.paywallBenefits = paywallBenefits
         self.reengageDays = reengageDays
+        self.hiddenContentSlugs = hiddenContentSlugs
+        self.hiddenContentCategories = hiddenContentCategories
     }
     
     struct Announcement: Codable, Identifiable {

@@ -561,7 +561,7 @@ private enum JourneyToolRoute: String, Identifiable, CaseIterable {
 
     var imageName: String {
         switch self {
-        case .myPlan: return "swiss-moment-grindelwald"
+        case .myPlan: return "journey-tool-my-plan"
         case .documents: return "journey-tool-documents"
         case .ask: return "journey-tool-ask"
         case .deadlines: return "journey-tool-deadlines"

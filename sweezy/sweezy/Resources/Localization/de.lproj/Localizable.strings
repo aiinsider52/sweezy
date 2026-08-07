@@ -1397,6 +1397,7 @@
 "journey.marketplace.all_services" = "Alle Dienstleistungen";
 "journey.marketplace.calendar" = "Kalender";
 "journey.marketplace.clear_search" = "Suche löschen";
+"journey.marketplace.discover_title" = "Finde deinen\nSpezialisten";
 "journey.marketplace.coming_soon" = "Demnächst";
 "journey.marketplace.community" = "Community";
 "journey.marketplace.condition_unspecified" = "Zustand nicht angegeben";
@@ -1431,6 +1432,7 @@
 "journey.marketplace.negotiable_price" = "Verhandelbar";
 "journey.marketplace.no_date" = "Kein Datum";
 "journey.marketplace.offline_data" = "Offline-Daten";
+"journey.marketplace.popular_nearby" = "Beliebt in der Nähe";
 "journey.marketplace.organizer_verified" = "Veranstalter verifiziert";
 "journey.marketplace.recommended" = "Empfohlen";
 "journey.marketplace.remove_saved" = "Aus Gespeichert entfernen";
@@ -1450,6 +1452,7 @@
 "journey.marketplace.services.loading" = "Verifizierte Fachleute werden gesucht";
 "journey.marketplace.verified_organizer" = "Verifizierter Veranstalter · %@";
 "journey.marketplace.verified_profiles" = "Verifizierte Profile";
+"journey.marketplace.view_service" = "Ansehen";
 "journey.marketplace.verified_seller" = "Verifizierter Verkäufer";
 "settings.editorial.greeting_format" = "Hallo, %@";
 "settings.editorial.header" = "EINSTELLUNGEN";

@@ -76,7 +76,7 @@ struct InkSearchField: View {
             Image(systemName: "magnifyingglass")
                 .font(.system(size: 14, weight: .semibold))
                 .foregroundColor(.white.opacity(0.5))
-            TextField("", text: $text, prompt: Text(prompt).foregroundColor(.white.opacity(0.45)))
+            TextField("", text: $text, prompt: Text(prompt).foregroundColor(.white.opacity(0.88)))
                 .font(.system(size: 15))
                 .foregroundColor(.white)
                 .autocorrectionDisabled()

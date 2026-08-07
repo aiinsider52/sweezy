@@ -1617,6 +1617,7 @@
 "journey.marketplace.all_services" = "Усі послуги";
 "journey.marketplace.calendar" = "Календар";
 "journey.marketplace.clear_search" = "Очистити пошук";
+"journey.marketplace.discover_title" = "Знайди свого\nспеціаліста";
 "journey.marketplace.coming_soon" = "Незабаром";
 "journey.marketplace.community" = "Спільнота";
 "journey.marketplace.condition_unspecified" = "Стан не вказано";
@@ -1651,6 +1652,7 @@
 "journey.marketplace.negotiable_price" = "За домовленістю";
 "journey.marketplace.no_date" = "Без дати";
 "journey.marketplace.offline_data" = "Офлайн-дані";
+"journey.marketplace.popular_nearby" = "Популярне поруч";
 "journey.marketplace.organizer_verified" = "Організатор перевірений";
 "journey.marketplace.recommended" = "Рекомендуємо";
 "journey.marketplace.remove_saved" = "Прибрати зі збережених";
@@ -1670,6 +1672,7 @@
 "journey.marketplace.services.loading" = "Шукаємо перевірених фахівців";
 "journey.marketplace.verified_organizer" = "Перевірений організатор · %@";
 "journey.marketplace.verified_profiles" = "Перевірені профілі";
+"journey.marketplace.view_service" = "Переглянути";
 "journey.marketplace.verified_seller" = "Перевірений продавець";
 "settings.editorial.greeting_format" = "Привіт, %@";
 "settings.editorial.header" = "НАЛАШТУВАННЯ";

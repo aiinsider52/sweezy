@@ -79,6 +79,29 @@ final result: passed
 
 ---
 
+**Marketplace Services Discovery Redesign — 2026-08-07**
+- Source visual truth: user-selected marketplace services screenshot, dark photographic discovery layout with specialist hero, category rail, nearby grid, and persistent bottom navigation.
+- Implementation: `sweezy/sweezy/Features/Marketplace/JourneyMarketplaceView.swift` keeps live `ServiceListing` data, existing search/filter state, favorites, details, auth/create flow, chat, experts, goods, and events.
+- Localization: Ukrainian, English, and German discovery title, nearby section title, and service CTA added.
+- Static validation: `xcodebuild` Debug iOS Simulator build succeeded; `git diff --check` passed; all three `.strings` files passed `plutil -lint`.
+- Runtime validation: XCTest and manual launch were blocked by CoreSimulatorService instability. Test runner ended with `** TEST INTERRUPTED **`, `server died`; manual install later returned `Unable to lookup in current state: Shutdown`.
+- Existing unrelated working-tree changes were preserved.
+
+final result: blocked
+
+---
+
+**Marketplace Header And Filter Correction — 2026-08-07**
+- Restored the existing full-bleed photographic Marketplace hero for Services.
+- Kept the single `Послуги / Речі / Події` selector inside the same hero for every mode; selection now changes state once and relies on the screen-level mode observer to load content.
+- Removed the duplicate horizontal Services filter chips. The discovery category rail remains the only Services category filter; goods and events retain their own filters.
+- Static validation: Debug iOS Simulator build succeeded; `git diff --check` passed.
+- Runtime visual capture remains blocked by CoreSimulatorService instability (`Connection refused` / `server died`).
+
+final result: blocked
+
+---
+
 **Scroll Comfort, Sticky Actions, And Home Copy — 2026-08-02**
 - Scope: marketplace listing detail, guide article, Journey Home.
 - Marketplace detail: moved back/share/favorite outside `ScrollView`; controls remain sticky. Moved category badge into content sheet, removing hero/sheet collision. Added minimum scroll height and dark-pine root backdrop so bottom bounce no longer reveals a pure-black slab.

@@ -107,9 +107,10 @@ struct CVBuilderView: View {
                     .ignoresSafeArea()
 
                 VStack(spacing: 0) {
-                    cvTopBar
-                        .zIndex(20)
-                    cvHero
+                    ZStack(alignment: .top) {
+                        cvHero
+                        cvTopBar
+                    }
 
                     TabView(selection: $currentStep) {
                         personalStepView.tag(CVStep.personal)
@@ -124,6 +125,7 @@ struct CVBuilderView: View {
                     .animation(.easeInOut(duration: 0.3), value: currentStep)
 
                 }
+                .ignoresSafeArea(edges: .top)
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
             navigationButtons
@@ -207,9 +209,10 @@ struct CVBuilderView: View {
                     .font(.system(size: 17, weight: .bold))
                     .foregroundColor(.white)
                     .frame(width: 44, height: 44)
-                    .background(Color.white.opacity(0.07))
+                    .background(Color.black.opacity(0.42))
+                    .background(.ultraThinMaterial.opacity(0.55))
                     .clipShape(Circle())
-                    .overlay(Circle().stroke(Color.white.opacity(0.14), lineWidth: 1))
+                    .overlay(Circle().stroke(Color.white.opacity(0.18), lineWidth: 1))
             }
             .buttonStyle(.plain)
             .contentShape(Circle())
@@ -222,9 +225,11 @@ struct CVBuilderView: View {
                 Text("CV Builder")
                     .font(.system(size: 17, weight: .bold, design: .rounded))
                     .foregroundColor(.white)
+                    .shadow(color: .black.opacity(0.45), radius: 6, y: 1)
                 Text("Крок \(currentStep.rawValue + 1) із \(CVStep.allCases.count)")
                     .font(.system(size: 11, weight: .medium))
-                    .foregroundColor(.white.opacity(0.52))
+                    .foregroundColor(.white.opacity(0.82))
+                    .shadow(color: .black.opacity(0.4), radius: 4, y: 1)
             }
 
             Spacer()
@@ -236,15 +241,16 @@ struct CVBuilderView: View {
                     .font(.system(size: 17, weight: .semibold))
                     .foregroundColor(JourneyVisual.lime)
                     .frame(width: 44, height: 44)
-                    .background(Color.white.opacity(0.07))
+                    .background(Color.black.opacity(0.42))
+                    .background(.ultraThinMaterial.opacity(0.55))
                     .clipShape(Circle())
-                    .overlay(Circle().stroke(Color.white.opacity(0.14), lineWidth: 1))
+                    .overlay(Circle().stroke(Color.white.opacity(0.18), lineWidth: 1))
             }
             .accessibilityLabel("Поради для швейцарського CV")
         }
         .padding(.horizontal, 16)
-        .padding(.vertical, 8)
-        .background(Color.black.opacity(0.3))
+        .padding(.top, 58)
+        .padding(.bottom, 8)
     }
 
     private func closeScreen() {
@@ -258,17 +264,17 @@ struct CVBuilderView: View {
 
     private var cvHero: some View {
         ZStack(alignment: .bottomLeading) {
-            Image("journey-market-consultant")
+            Image("cv-builder-hero")
                 .resizable()
                 .scaledToFill()
                 .frame(maxWidth: .infinity)
-                .frame(height: isInputFocused ? 96 : 208)
+                .frame(height: isInputFocused ? 148 : 276)
                 .clipped()
 
             LinearGradient(
                 colors: [
-                    Color.black.opacity(0.1),
-                    Color.black.opacity(0.44),
+                    Color.black.opacity(0.28),
+                    Color.black.opacity(0.62),
                     Color(red: 0.025, green: 0.03, blue: 0.028)
                 ],
                 startPoint: .topTrailing,
@@ -276,21 +282,25 @@ struct CVBuilderView: View {
             )
 
             VStack(alignment: .leading, spacing: 10) {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("CV, який\nпомітять")
-                        .font(.system(size: 29, weight: .bold, design: .rounded))
-                        .foregroundColor(.white)
-                        .lineSpacing(-2)
-                    Text("Заповни основні дані — ми допоможемо решту.")
-                        .font(.system(size: 13, weight: .medium))
-                        .foregroundColor(.white.opacity(0.7))
+                if !isInputFocused {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("CV, який\nпомітять")
+                            .font(.system(size: 29, weight: .bold, design: .rounded))
+                            .foregroundColor(.white)
+                            .shadow(color: .black.opacity(0.55), radius: 8, y: 2)
+                            .lineSpacing(-2)
+                        Text("Заповни основні дані — ми допоможемо решту.")
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundColor(.white.opacity(0.92))
+                            .shadow(color: .black.opacity(0.5), radius: 6, y: 1)
+                    }
                 }
                 progressBar
             }
             .padding(.horizontal, 18)
             .padding(.bottom, 12)
         }
-        .frame(height: isInputFocused ? 96 : 208)
+        .frame(height: isInputFocused ? 148 : 276)
         .clipped()
         .animation(.easeInOut(duration: 0.2), value: isInputFocused)
     }

@@ -76,7 +76,13 @@ struct JourneySearchField: View {
         HStack(spacing: 11) {
             Image(systemName: "magnifyingglass")
                 .font(.system(size: 16, weight: .semibold))
-            TextField(prompt, text: $text)
+                .foregroundStyle(.white.opacity(0.92))
+            TextField(
+                "",
+                text: $text,
+                prompt: Text(prompt).foregroundColor(.white.opacity(0.88))
+            )
+                .foregroundStyle(.white)
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
         }

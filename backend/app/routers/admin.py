@@ -139,6 +139,60 @@ def user_stats(_: CurrentAdmin, db: DBSession) -> Dict[str, int]:
     }
 
 
+@router.get("/users/registrations")
+def user_registrations(
+    _: CurrentAdmin,
+    db: DBSession,
+    days: int = Query(default=30, ge=1, le=365),
+) -> Dict[str, Any]:
+    """Daily account-creation counts from User.created_at (not product telemetry)."""
+    today = datetime.now(timezone.utc).date()
+    since_date = today - timedelta(days=days - 1)
+    since = datetime.combine(since_date, datetime.min.time(), tzinfo=timezone.utc)
+    day_bucket = func.date_trunc("day", User.created_at)
+
+    rows = (
+        db.query(day_bucket.label("day"), func.count().label("count"))
+        .filter(User.created_at >= since)
+        .group_by(day_bucket)
+        .order_by(day_bucket.asc())
+        .all()
+    )
+    by_day = {
+        (row.day.date() if hasattr(row.day, "date") else row.day): int(row.count or 0)
+        for row in rows
+        if row.day is not None
+    }
+    trends = [
+        {
+            "date": (since_date + timedelta(days=offset)).isoformat(),
+            "count": by_day.get(since_date + timedelta(days=offset), 0),
+        }
+        for offset in range(days)
+    ]
+    total_in_range = sum(point["count"] for point in trends)
+    today_count = by_day.get(today, 0)
+    last_7 = sum(point["count"] for point in trends[-7:])
+    previous_7 = sum(point["count"] for point in trends[-14:-7]) if days >= 14 else 0
+    delta_7 = None
+    if days >= 14 and previous_7 > 0:
+        delta_7 = round(((last_7 - previous_7) / previous_7) * 100)
+    elif days >= 14 and last_7 > 0:
+        delta_7 = 100
+
+    return {
+        "days": days,
+        "since": since_date.isoformat(),
+        "total_in_range": total_in_range,
+        "today": today_count,
+        "last_7d": last_7,
+        "last_30d": sum(point["count"] for point in trends[-30:]),
+        "avg_per_day": round(total_in_range / days, 2) if days else 0,
+        "delta_7d_percent": delta_7,
+        "trends": trends,
+    }
+
+
 def _csv_safe(value: Any) -> str:
     text = "" if value is None else str(value)
     return f"'{text}" if text.startswith(("=", "+", "-", "@")) else text

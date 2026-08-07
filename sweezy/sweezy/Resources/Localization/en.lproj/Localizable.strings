@@ -1580,6 +1580,7 @@
 "journey.marketplace.all_services" = "All Services";
 "journey.marketplace.calendar" = "Calendar";
 "journey.marketplace.clear_search" = "Clear Search";
+"journey.marketplace.discover_title" = "Find your\nspecialist";
 "journey.marketplace.coming_soon" = "Coming Soon";
 "journey.marketplace.community" = "Community";
 "journey.marketplace.condition_unspecified" = "Condition not specified";
@@ -1614,6 +1615,7 @@
 "journey.marketplace.negotiable_price" = "Negotiable";
 "journey.marketplace.no_date" = "No date";
 "journey.marketplace.offline_data" = "Offline Data";
+"journey.marketplace.popular_nearby" = "Popular nearby";
 "journey.marketplace.organizer_verified" = "Organizer verified";
 "journey.marketplace.recommended" = "Recommended";
 "journey.marketplace.remove_saved" = "Remove from Saved";
@@ -1633,6 +1635,7 @@
 "journey.marketplace.services.loading" = "Finding verified specialists";
 "journey.marketplace.verified_organizer" = "Verified organizer · %@";
 "journey.marketplace.verified_profiles" = "Verified Profiles";
+"journey.marketplace.view_service" = "View service";
 "journey.marketplace.verified_seller" = "Verified Seller";
 "settings.editorial.greeting_format" = "Hi, %@";
 "settings.editorial.header" = "SETTINGS";

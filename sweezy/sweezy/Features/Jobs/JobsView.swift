@@ -630,9 +630,13 @@ struct JobsView: View {
             HStack(spacing: 10) {
                 Image(systemName: "magnifyingglass")
                     .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(.white.opacity(0.62))
+                    .foregroundColor(.white.opacity(0.9))
 
-                TextField("Посада, навичка або компанія", text: $keyword)
+                TextField(
+                    "",
+                    text: $keyword,
+                    prompt: Text("Посада, навичка або компанія").foregroundColor(.white.opacity(0.88))
+                )
                     .foregroundColor(.white)
                     .autocorrectionDisabled()
                     .textInputAutocapitalization(.never)

@@ -3,15 +3,22 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import json
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from backend.app.core.database import SessionLocal
 from backend.app.models.audit_log import AuditLog
 from backend.app.models.user import User
-from backend.app.routers.admin import _csv_safe, export_audit_logs, export_users, list_users, user_stats
+from backend.app.routers.admin import _csv_safe, export_audit_logs, export_users, list_users, user_registrations, user_stats
 
 
-def _user(email: str, *, role: str = "viewer", active: bool = True, subscription: str = "free") -> User:
+def _user(
+    email: str,
+    *,
+    role: str = "viewer",
+    active: bool = True,
+    subscription: str = "free",
+    created_at: datetime | None = None,
+) -> User:
     return User(
         email=email,
         hashed_password="test",
@@ -20,7 +27,7 @@ def _user(email: str, *, role: str = "viewer", active: bool = True, subscription
         is_active=active,
         email_verified=active,
         subscription_status=subscription,
-        created_at=datetime.now(timezone.utc),
+        created_at=created_at or datetime.now(timezone.utc),
     )
 
 
@@ -89,5 +96,33 @@ def test_admin_user_pagination_filters_stats_and_csv() -> None:
                 AuditLog.entity == "users",
                 AuditLog.entity_id == "meta_custom_audience",
             ).delete(synchronize_session=False)
+            db.query(User).filter(User.email.in_(emails)).delete(synchronize_session=False)
+            db.commit()
+
+
+def test_admin_user_registrations_daily_series() -> None:
+    with SessionLocal() as db:
+        now = datetime.now(timezone.utc)
+        emails = [
+            "admin-reg-today-a@example.test",
+            "admin-reg-today-b@example.test",
+            "admin-reg-old@example.test",
+        ]
+        db.add_all([
+            _user(emails[0], created_at=now),
+            _user(emails[1], created_at=now),
+            _user(emails[2], created_at=now - timedelta(days=3)),
+        ])
+        db.commit()
+        try:
+            payload = user_registrations(object(), db, days=7)
+            assert payload["days"] == 7
+            assert len(payload["trends"]) == 7
+            assert payload["today"] >= 2
+            assert payload["total_in_range"] >= 3
+            assert payload["trends"][-1]["date"] == now.date().isoformat()
+            assert payload["trends"][-1]["count"] >= 2
+            assert payload["trends"][-4]["count"] >= 1
+        finally:
             db.query(User).filter(User.email.in_(emails)).delete(synchronize_session=False)
             db.commit()

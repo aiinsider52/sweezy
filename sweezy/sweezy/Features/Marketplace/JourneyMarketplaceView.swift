@@ -39,7 +39,7 @@ struct JourneyMarketplaceView: View {
 
                 ScrollView(showsIndicators: false) {
                     LazyVStack(alignment: .leading, spacing: 0) {
-                        marketHero
+                        marketplaceHeader
 
                         VStack(alignment: .leading, spacing: 16) {
                             MarketSearchField(text: searchBinding, prompt: searchPrompt)
@@ -51,6 +51,7 @@ struct JourneyMarketplaceView: View {
                         .padding(.bottom, 132)
                     }
                 }
+                .ignoresSafeArea(edges: .top)
                 .refreshable {
                     await refreshSelectedMode()
                 }
@@ -165,35 +166,41 @@ struct JourneyMarketplaceView: View {
         .accessibilityIdentifier("marketplace.screen")
     }
 
+    private var marketplaceHeader: some View { marketHero }
+
     private var marketHero: some View {
         ZStack(alignment: .bottomLeading) {
             Image(heroImageName)
                 .resizable()
                 .scaledToFill()
-                .frame(height: 258)
                 .frame(maxWidth: .infinity)
+                .frame(height: 312)
                 .clipped()
+                .allowsHitTesting(false)
 
             LinearGradient(
                 colors: [.black.opacity(0.14), .black.opacity(0.26), JourneyVisual.black],
                 startPoint: .top,
                 endPoint: .bottom
             )
+            .allowsHitTesting(false)
 
-            VStack(alignment: .leading, spacing: 15) {
+            VStack(alignment: .leading, spacing: 12) {
                 Text(heroTitle)
                     .font(.system(size: 32, weight: .bold, design: .rounded))
                     .foregroundColor(.white)
                     .lineSpacing(-2)
                     .fixedSize(horizontal: false, vertical: true)
                     .shadow(color: .black.opacity(0.5), radius: 12, y: 4)
+                    .allowsHitTesting(false)
 
-                MarketModeSelector(selection: $selectedMode) { loadSelectedModeIfNeeded() }
+                MarketModeSelector(selection: $selectedMode)
+                    .zIndex(5)
             }
             .padding(.horizontal, 18)
             .padding(.bottom, 12)
         }
-        .frame(height: 258)
+        .frame(height: 312)
         .overlay(alignment: .topTrailing) {
             HStack(spacing: 10) {
                 Button { showExperts = true } label: {
@@ -240,7 +247,7 @@ struct JourneyMarketplaceView: View {
                 .buttonStyle(.plain)
                 .accessibilityLabel("chat.accessibility.inbox".localized(with: appContainer.chatStore.unreadCount))
             }
-            .padding(.top, 52)
+            .padding(.top, 58)
             .padding(.trailing, 18)
         }
         .accessibilityElement(children: .contain)
@@ -250,20 +257,7 @@ struct JourneyMarketplaceView: View {
     private var filters: some View {
         switch selectedMode {
         case .services:
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 8) {
-                    MarketFilterChip(title: "common.all".localized, icon: nil, selected: servicesVM.selectedCategory == nil) {
-                        servicesVM.selectedCategory = nil
-                        Task { await servicesVM.applyFilters() }
-                    }
-                    ForEach(serviceFilters, id: \.0) { category, title in
-                        MarketFilterChip(title: title, icon: category.icon, selected: servicesVM.selectedCategory == category) {
-                            servicesVM.selectedCategory = category
-                            Task { await servicesVM.applyFilters() }
-                        }
-                    }
-                }
-            }
+            EmptyView()
         case .items:
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
@@ -319,32 +313,55 @@ struct JourneyMarketplaceView: View {
                     action: handleCreateTap
                 )
             } else {
+                if let featuredService {
+                    JourneyServiceDiscoveryHeroCard(
+                        listing: featuredService,
+                        isSaved: appContainer.savedItems.isListingSaved(featuredService.id),
+                        openAction: { selectedListing = featuredService },
+                        saveAction: { appContainer.savedItems.toggleListing(featuredService.id) }
+                    )
+                }
+
+                serviceDiscoveryCategoryRail
+
                 sectionHeader(
-                    "journey.marketplace.recommended".localized,
-                    trailing: servicesVM.isShowingStaleData ? "journey.marketplace.offline_data".localized : "journey.marketplace.verified_profiles".localized
+                    "journey.marketplace.popular_nearby".localized,
+                    trailing: servicesVM.isShowingStaleData ? "journey.marketplace.offline_data".localized : nil
                 )
 
-                ScrollView(.horizontal, showsIndicators: false) {
-                    LazyHStack(spacing: 12) {
-                        ForEach(spotlightServices) { listing in
-                            JourneyServiceSpotlightCard(
-                                listing: listing,
-                                isSaved: appContainer.savedItems.isListingSaved(listing.id),
-                                openAction: { selectedListing = listing },
-                                saveAction: { appContainer.savedItems.toggleListing(listing.id) }
-                            )
-                            .containerRelativeFrame(.horizontal, count: 10, span: 8, spacing: 12)
-                        }
+                LazyVGrid(
+                    columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)],
+                    spacing: 12
+                ) {
+                    ForEach(remainingServices.prefix(8)) { listing in
+                        JourneyServiceDiscoveryCard(
+                            listing: listing,
+                            isSaved: appContainer.savedItems.isListingSaved(listing.id),
+                            openAction: { selectedListing = listing },
+                            saveAction: { appContainer.savedItems.toggleListing(listing.id) }
+                        )
                     }
-                    .scrollTargetLayout()
                 }
-                .scrollTargetBehavior(.viewAligned)
-
-                sectionHeader("journey.marketplace.all_services".localized, trailing: "\(servicesVM.filteredListings.count)")
-
-                serviceMosaic(Array(servicesVM.filteredListings.prefix(12)))
             }
         }
+    }
+
+    private var serviceDiscoveryCategoryRail: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 10) {
+                ForEach(discoveryServiceFilters) { filter in
+                    MarketDiscoveryCategoryTile(
+                        title: filter.title,
+                        icon: filter.icon,
+                        selected: servicesVM.selectedCategory == filter.category
+                    ) {
+                        servicesVM.selectedCategory = filter.category
+                        Task { await servicesVM.applyFilters() }
+                    }
+                }
+            }
+        }
+        .scrollClipDisabled()
     }
 
     private func serviceMosaic(_ listings: [ServiceListing]) -> some View {
@@ -552,12 +569,15 @@ struct JourneyMarketplaceView: View {
         }
     }
 
-    private let serviceFilters: [(ServiceCategory, String)] = [
-        (.documents, "journey.marketplace.filter.documents".localized),
-        (.translation, "journey.marketplace.filter.translation".localized),
-        (.legal, "journey.marketplace.filter.legal".localized),
-        (.moving, "journey.marketplace.filter.moving".localized)
-    ]
+    private var discoveryServiceFilters: [DiscoveryServiceFilter] {
+        [
+            DiscoveryServiceFilter(category: nil, title: "journey.marketplace.all_services".localized, icon: "square.grid.2x2.fill"),
+            DiscoveryServiceFilter(category: .moving, title: "marketplace.category.moving".localized, icon: "house.fill"),
+            DiscoveryServiceFilter(category: .documents, title: "marketplace.category.documents".localized, icon: "doc.text.fill"),
+            DiscoveryServiceFilter(category: .beauty, title: "marketplace.category.beauty".localized, icon: "sparkles"),
+            DiscoveryServiceFilter(category: .it, title: "marketplace.category.it".localized, icon: "laptopcomputer")
+        ]
+    }
     private let itemFilters: [(ItemCategory, String)] = [
         (.furniture, "journey.marketplace.filter.furniture".localized),
         (.electronics, "journey.marketplace.filter.electronics".localized),
@@ -639,32 +659,36 @@ private enum JourneyMarketMode: String, CaseIterable, Identifiable {
 
 private struct MarketModeSelector: View {
     @Binding var selection: JourneyMarketMode
-    let onChange: () -> Void
 
     var body: some View {
-        HStack(spacing: 6) {
+        HStack(spacing: 4) {
             ForEach(JourneyMarketMode.allCases) { mode in
+                let isSelected = selection == mode
                 Button {
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.84)) { selection = mode }
-                    onChange()
+                    guard selection != mode else { return }
+                    selection = mode
                 } label: {
                     Text(mode.title)
                         .font(.system(size: 12, weight: .bold))
-                        .foregroundColor(selection == mode ? .black : .white.opacity(0.76))
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 38)
-                        .background(selection == mode ? JourneyVisual.lime : Color.black.opacity(0.5))
-                        .clipShape(Capsule())
+                        .foregroundStyle(isSelected ? Color.black : Color.white.opacity(0.8))
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .background {
+                            Capsule()
+                                .fill(isSelected ? JourneyVisual.lime : Color.clear)
+                        }
+                        // Full cell must be tappable — not only the text glyphs.
+                        .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
-                .accessibilityAddTraits(selection == mode ? .isSelected : [])
+                .accessibilityLabel(mode.title)
+                .accessibilityAddTraits(isSelected ? .isSelected : [])
             }
         }
         .padding(4)
-        .background(Color.black.opacity(0.48))
-        .background(.ultraThinMaterial.opacity(0.55))
-        .clipShape(Capsule())
+        .frame(height: 48)
+        .background(Capsule().fill(Color.black.opacity(0.55)))
         .overlay(Capsule().stroke(.white.opacity(0.18), lineWidth: 1))
+        .compositingGroup()
     }
 }
 
@@ -675,15 +699,19 @@ private struct MarketSearchField: View {
     var body: some View {
         HStack(spacing: 10) {
             Image(systemName: "magnifyingglass")
-                .foregroundColor(.white.opacity(0.58))
-            TextField(prompt, text: $text)
+                .foregroundColor(.white.opacity(0.9))
+            TextField(
+                "",
+                text: $text,
+                prompt: Text(prompt).foregroundColor(.white.opacity(0.88))
+            )
                 .foregroundColor(.white)
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
             if !text.isEmpty {
                 Button { text = "" } label: {
                     Image(systemName: "xmark.circle.fill")
-                        .foregroundColor(.white.opacity(0.45))
+                        .foregroundColor(.white.opacity(0.55))
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel("journey.marketplace.clear_search".localized)
@@ -720,6 +748,207 @@ private struct MarketFilterChip: View {
         }
         .buttonStyle(.plain)
         .accessibilityAddTraits(selected ? .isSelected : [])
+    }
+}
+
+private struct DiscoveryServiceFilter: Identifiable {
+    let category: ServiceCategory?
+    let title: String
+    let icon: String
+
+    var id: String { category?.rawValue ?? "all" }
+}
+
+private struct MarketDiscoveryCategoryTile: View {
+    let title: String
+    let icon: String
+    let selected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 9) {
+                Image(systemName: icon)
+                    .font(.system(size: 23, weight: .medium))
+                Text(title)
+                    .font(.system(size: 12, weight: .semibold, design: .rounded))
+                    .lineLimit(2)
+                    .multilineTextAlignment(.center)
+            }
+            .foregroundStyle(selected ? JourneyVisual.lime : .white.opacity(0.82))
+            .frame(width: 86, height: 92)
+            .background(Color.white.opacity(selected ? 0.08 : 0.045))
+            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .stroke(selected ? JourneyVisual.lime : .white.opacity(0.16), lineWidth: selected ? 1.5 : 1)
+            )
+        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(selected ? .isSelected : [])
+    }
+}
+
+private struct JourneyServiceDiscoveryHeroCard: View {
+    let listing: ServiceListing
+    let isSaved: Bool
+    let openAction: () -> Void
+    let saveAction: () -> Void
+
+    var body: some View {
+        ZStack(alignment: .bottomLeading) {
+            Button(action: openAction) {
+                ZStack(alignment: .bottomLeading) {
+                    JourneyRemoteImage(url: listing.primaryImageURL, fallbackAsset: listing.marketplaceFallbackAsset)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 312)
+                        .clipped()
+
+                    LinearGradient(
+                        colors: [.clear, .black.opacity(0.16), .black.opacity(0.94)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+
+                    VStack(alignment: .leading, spacing: 10) {
+                        Spacer()
+
+                        Text(listing.title)
+                            .font(.system(size: 30, weight: .black, design: .rounded))
+                            .foregroundStyle(.white)
+                            .lineLimit(2)
+                            .multilineTextAlignment(.leading)
+
+                        HStack(spacing: 8) {
+                            if listing.isVerified {
+                                Label("map.verified".localized, systemImage: "checkmark.seal.fill")
+                                    .foregroundStyle(JourneyVisual.lime)
+                            }
+
+                            Label(listing.canton == "all" ? "CH" : listing.canton, systemImage: "mappin")
+                                .foregroundStyle(.white.opacity(0.82))
+
+                            Spacer(minLength: 4)
+
+                            Text(listing.priceDisplay ?? "journey.marketplace.negotiable_price".localized)
+                                .fontWeight(.bold)
+                                .foregroundStyle(.white)
+                        }
+                        .font(.system(size: 12, weight: .semibold, design: .rounded))
+
+                        HStack(spacing: 8) {
+                            Text(listing.authorName)
+                                .foregroundStyle(.white.opacity(0.74))
+                            Text("·")
+                                .foregroundStyle(.white.opacity(0.42))
+                            Text(listing.freshnessText)
+                                .foregroundStyle(.white.opacity(0.58))
+                                .lineLimit(1)
+                        }
+                        .font(.system(size: 11, weight: .medium, design: .rounded))
+
+                        HStack {
+                            Text("journey.marketplace.view_service".localized)
+                            Spacer()
+                            Image(systemName: "arrow.right")
+                        }
+                        .font(.system(size: 15, weight: .bold, design: .rounded))
+                        .foregroundStyle(.black)
+                        .padding(.horizontal, 18)
+                        .frame(height: 52)
+                        .background(JourneyVisual.lime)
+                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    }
+                    .padding(16)
+                }
+            }
+            .buttonStyle(.plain)
+            .accessibilityElement(children: .combine)
+            .accessibilityHint("marketplace.open".localized)
+
+            Button(action: saveAction) {
+                Image(systemName: isSaved ? "heart.fill" : "heart")
+                    .font(.system(size: 17, weight: .bold))
+                    .foregroundStyle(isSaved ? .black : .white)
+                    .frame(width: 46, height: 46)
+                    .background(isSaved ? JourneyVisual.lime : Color.black.opacity(0.56))
+                    .clipShape(Circle())
+                    .overlay(Circle().stroke(.white.opacity(0.24), lineWidth: 1))
+            }
+            .buttonStyle(.plain)
+            .padding(14)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+            .accessibilityLabel(isSaved ? "journey.marketplace.remove_saved".localized : "journey.marketplace.save".localized)
+        }
+        .frame(height: 312)
+        .clipShape(RoundedRectangle(cornerRadius: 27, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 27, style: .continuous).stroke(.white.opacity(0.25), lineWidth: 1))
+        .shadow(color: .black.opacity(0.32), radius: 20, y: 10)
+    }
+}
+
+private struct JourneyServiceDiscoveryCard: View {
+    let listing: ServiceListing
+    let isSaved: Bool
+    let openAction: () -> Void
+    let saveAction: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            ZStack(alignment: .topTrailing) {
+                Button(action: openAction) {
+                    JourneyRemoteImage(url: listing.primaryImageURL, fallbackAsset: listing.marketplaceFallbackAsset)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 142)
+                        .clipped()
+                }
+                .buttonStyle(.plain)
+
+                Button(action: saveAction) {
+                    Image(systemName: isSaved ? "heart.fill" : "heart")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundStyle(isSaved ? .black : .white)
+                        .frame(width: 38, height: 38)
+                        .background(isSaved ? JourneyVisual.lime : Color.black.opacity(0.54))
+                        .clipShape(Circle())
+                }
+                .buttonStyle(.plain)
+                .padding(8)
+                .accessibilityLabel(isSaved ? "journey.marketplace.remove_saved".localized : "journey.marketplace.save".localized)
+            }
+
+            VStack(alignment: .leading, spacing: 7) {
+                Text(listing.title)
+                    .font(.system(size: 16, weight: .bold, design: .rounded))
+                    .foregroundStyle(.white)
+                    .lineLimit(2)
+
+                Text(listing.authorName)
+                    .font(.system(size: 12, weight: .medium, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.62))
+                    .lineLimit(1)
+
+                HStack(spacing: 5) {
+                    if listing.isVerified {
+                        Image(systemName: "checkmark.seal.fill")
+                            .foregroundStyle(JourneyVisual.lime)
+                    }
+                    Text(listing.canton == "all" ? "CH" : listing.canton)
+                    Spacer(minLength: 4)
+                    Text(listing.priceDisplay ?? "journey.marketplace.negotiable_price".localized)
+                        .fontWeight(.bold)
+                        .foregroundStyle(.white)
+                }
+                .font(.system(size: 11, weight: .semibold, design: .rounded))
+                .foregroundStyle(.white.opacity(0.62))
+            }
+            .padding(12)
+        }
+        .background(Color.white.opacity(0.06))
+        .clipShape(RoundedRectangle(cornerRadius: 21, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 21, style: .continuous).stroke(.white.opacity(0.16), lineWidth: 1))
+        .shadow(color: .black.opacity(0.22), radius: 12, y: 6)
+        .accessibilityElement(children: .contain)
     }
 }
 

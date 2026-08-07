@@ -20,7 +20,7 @@ struct MyPlanView: View {
 
     var body: some View {
         ZStack {
-            JourneyPhotoBackground(imageName: "swiss-moment-grindelwald", blurRadius: 2, darkness: 0.58)
+            JourneyPhotoBackground(imageName: "journey-tool-my-plan", blurRadius: 2, darkness: 0.58)
 
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 18) {

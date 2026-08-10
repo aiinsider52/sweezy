@@ -762,8 +762,9 @@ struct ProfessionalNetworkView: View {
                     .scaledToFill()
                     .frame(width: proxy.size.width, height: proxy.size.height)
                     .clipped()
+                    .ignoresSafeArea()
                     .accessibilityHidden(true)
-                Color.black.opacity(0.66)
+                Color.black.opacity(0.66).ignoresSafeArea()
 
                 VStack(alignment: .leading, spacing: 16) {
                     Button { dismiss() } label: {
@@ -801,16 +802,14 @@ struct ProfessionalNetworkView: View {
                 }
                 .frame(
                     width: max(0, proxy.size.width - 40),
-                    height: max(0, proxy.size.height - proxy.safeAreaInsets.top - proxy.safeAreaInsets.bottom - 24),
+                    height: max(0, proxy.size.height - 24),
                     alignment: .leading
                 )
                 .padding(.horizontal, 20)
-                .padding(.top, proxy.safeAreaInsets.top + 12)
-                .padding(.bottom, proxy.safeAreaInsets.bottom + 12)
+                .padding(.vertical, 12)
             }
             .frame(width: proxy.size.width, height: proxy.size.height)
         }
-        .ignoresSafeArea()
     }
 
     private func openChat(_ connection: ProfessionalConnection) async {

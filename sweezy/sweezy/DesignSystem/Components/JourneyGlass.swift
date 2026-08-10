@@ -5,8 +5,26 @@ enum JourneyVisual {
     static let lime = Color(red: 0.78, green: 1.0, blue: 0.02)
     static let coral = Color(red: 1.0, green: 0.39, blue: 0.31)
     static let black = Color(red: 0.025, green: 0.03, blue: 0.025)
-    static let glassFill = Color.black.opacity(0.34)
-    static let glassBorder = Color.white.opacity(0.32)
+    static let glassFill = Color(UIColor { traits in
+        traits.userInterfaceStyle == .dark
+            ? UIColor(white: 0.0, alpha: 0.34)
+            : UIColor(white: 1.0, alpha: 0.68)
+    })
+    static let glassBorder = Color(UIColor { traits in
+        traits.userInterfaceStyle == .dark
+            ? UIColor(white: 1.0, alpha: 0.32)
+            : UIColor(red: 0.10, green: 0.20, blue: 0.12, alpha: 0.14)
+    })
+    static let chrome = Color(UIColor { traits in
+        traits.userInterfaceStyle == .dark
+            ? UIColor(red: 0.025, green: 0.03, blue: 0.025, alpha: 0.96)
+            : UIColor(red: 0.975, green: 0.985, blue: 0.965, alpha: 0.96)
+    })
+    static let chromeText = Color(UIColor { traits in
+        traits.userInterfaceStyle == .dark
+            ? UIColor(white: 1.0, alpha: 0.62)
+            : UIColor(red: 0.10, green: 0.18, blue: 0.11, alpha: 0.68)
+    })
 }
 
 struct JourneyPhotoBackground: View {
@@ -40,6 +58,7 @@ struct JourneyPhotoBackground: View {
 }
 
 struct JourneyGlassPanel<Content: View>: View {
+    @Environment(\.colorScheme) private var colorScheme
     let cornerRadius: CGFloat
     let content: Content
 
@@ -57,14 +76,16 @@ struct JourneyGlassPanel<Content: View>: View {
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                     .stroke(
                         LinearGradient(
-                            colors: [Color.white.opacity(0.62), Color.white.opacity(0.12)],
+                            colors: colorScheme == .dark
+                                ? [Color.white.opacity(0.62), Color.white.opacity(0.12)]
+                                : [Color.white.opacity(0.92), Color.black.opacity(0.08)],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         ),
                         lineWidth: 1
                     )
             )
-            .shadow(color: Color.black.opacity(0.28), radius: 20, y: 10)
+            .shadow(color: Color.black.opacity(colorScheme == .dark ? 0.28 : 0.10), radius: 20, y: 10)
     }
 }
 
@@ -155,6 +176,7 @@ struct JourneyPrimaryButton: View {
 }
 
 struct JourneyBottomBar: View {
+    @Environment(\.colorScheme) private var colorScheme
     @Binding var selection: Int
 
     private let items: [(String, String)] = [
@@ -181,11 +203,11 @@ struct JourneyBottomBar: View {
                                 .frame(width: 34, height: 34)
                             Image(systemName: iconName(for: index, baseName: item.0))
                                 .font(.system(size: 16, weight: .semibold))
-                                .foregroundColor(selection == index ? .black : .white.opacity(0.62))
+                                .foregroundColor(selection == index ? .black : JourneyVisual.chromeText)
                         }
                         Text(item.1)
                             .font(.system(size: 8, weight: .medium))
-                            .foregroundColor(selection == index ? JourneyVisual.lime : .white.opacity(0.48))
+                            .foregroundColor(selection == index ? (colorScheme == .dark ? JourneyVisual.lime : Theme.Colors.primaryDark) : JourneyVisual.chromeText)
                             .lineLimit(1)
                             .minimumScaleFactor(0.72)
                     }
@@ -201,13 +223,13 @@ struct JourneyBottomBar: View {
         .padding(.horizontal, 8)
         .padding(.top, 7)
         .padding(.bottom, 8)
-        .background(JourneyVisual.black.opacity(0.96))
+        .background(JourneyVisual.chrome)
         .clipShape(RoundedRectangle(cornerRadius: 27, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 27, style: .continuous)
-                .stroke(Color.white.opacity(0.12), lineWidth: 1)
+                .stroke(colorScheme == .dark ? Color.white.opacity(0.12) : Color.black.opacity(0.08), lineWidth: 1)
         )
-        .shadow(color: .black.opacity(0.45), radius: 22, y: 10)
+        .shadow(color: .black.opacity(colorScheme == .dark ? 0.45 : 0.14), radius: 22, y: 10)
     }
 
     private func iconName(for index: Int, baseName: String) -> String {
@@ -245,6 +267,7 @@ enum JourneyBackdrop: String, CaseIterable {
 }
 
 private struct JourneyScreenModifier: ViewModifier {
+    @Environment(\.colorScheme) private var colorScheme
     let backdrop: JourneyBackdrop
     let darkness: Double
 
@@ -260,19 +283,19 @@ private struct JourneyScreenModifier: ViewModifier {
             .scrollContentBackground(.hidden)
             .tint(JourneyVisual.lime)
             .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
-            .toolbarBackground(Color.black.opacity(0.34), for: .navigationBar)
-            .toolbarColorScheme(.dark, for: .navigationBar)
-            .preferredColorScheme(.dark)
+            .toolbarBackground(colorScheme == .dark ? Color.black.opacity(0.34) : Color.white.opacity(0.72), for: .navigationBar)
+            .toolbarColorScheme(colorScheme, for: .navigationBar)
     }
 }
 
 private struct JourneyFormModifier: ViewModifier {
+    @Environment(\.colorScheme) private var colorScheme
     func body(content: Content) -> some View {
         content
             .scrollContentBackground(.hidden)
-            .listRowBackground(Color.black.opacity(0.34))
-            .listRowSeparatorTint(Color.white.opacity(0.12))
-            .foregroundStyle(.white)
+            .listRowBackground(colorScheme == .dark ? Color.black.opacity(0.34) : Color.white.opacity(0.82))
+            .listRowSeparatorTint(colorScheme == .dark ? Color.white.opacity(0.12) : Color.black.opacity(0.08))
+            .foregroundStyle(Theme.Colors.textPrimary)
             .tint(JourneyVisual.lime)
     }
 }

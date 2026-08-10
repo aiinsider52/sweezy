@@ -49,7 +49,6 @@ struct MainTabView: View {
                     }
             }
         }
-        .preferredColorScheme(.dark)
         .onAppear {
             AppLogger.ui("MainTabView appeared")
             #if DEBUG
@@ -2084,7 +2083,15 @@ struct GuideRow: View {
                             .cornerRadius(4)
                     }
                     
-                    // TEMPORARY: IAP removed; do not show subscription-related badges.
+                    if guide.isPremium {
+                        Text("PLUS")
+                            .font(.caption2.bold())
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(Theme.Colors.accent.opacity(0.18))
+                            .foregroundColor(Theme.Colors.accent)
+                            .cornerRadius(4)
+                    }
                 }
             }
             

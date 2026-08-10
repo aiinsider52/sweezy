@@ -310,7 +310,6 @@ private struct BookExpertAppointmentView: View {
                 ToolbarItem(placement: .cancellationAction) { Button("common.close".localized) { dismiss() } }
             }
         }
-        .preferredColorScheme(.dark)
     }
 
     private func saveAppointment() {

@@ -14,6 +14,8 @@ class ChatConversation(Base):
     __table_args__ = (
         UniqueConstraint("listing_id", "buyer_id", "seller_id", name="uq_chat_listing_participants"),
         UniqueConstraint("job_id", "buyer_id", "seller_id", name="uq_chat_job_participants"),
+        UniqueConstraint("network_profile_id", "buyer_id", "seller_id", name="uq_chat_network_participants"),
+        UniqueConstraint("social_profile_id", "buyer_id", "seller_id", name="uq_chat_social_participants"),
         Index("ix_chat_conversations_buyer_last", "buyer_id", "last_message_at"),
         Index("ix_chat_conversations_seller_last", "seller_id", "last_message_at"),
     )
@@ -23,6 +25,12 @@ class ChatConversation(Base):
         ForeignKey("service_listings.id", ondelete="SET NULL"), nullable=True, index=True
     )
     job_id: Mapped[str | None] = mapped_column(ForeignKey("jobs.id", ondelete="SET NULL"), nullable=True, index=True)
+    network_profile_id: Mapped[str | None] = mapped_column(
+        ForeignKey("professional_profiles.user_id", ondelete="SET NULL"), nullable=True, index=True
+    )
+    social_profile_id: Mapped[str | None] = mapped_column(
+        ForeignKey("social_profiles.user_id", ondelete="SET NULL"), nullable=True, index=True
+    )
     buyer_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
     seller_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
     listing_type: Mapped[str] = mapped_column(String(20), nullable=False)

@@ -435,7 +435,7 @@
 "privacy.data_usage.title" = "Data Usage";
 "privacy.data_usage.content" = "Your data is used exclusively for app functionality. We do not sell or share your data with third parties.";
 "privacy.data_storage.title" = "Data Storage";
-"privacy.data_storage.content" = "Most of your personal data is stored locally on your device. Account information is stored securely on Sweezy servers for sync. The current build has no in-app purchases.";
+"privacy.data_storage.content" = "Most personal data is stored locally on your device. Account information is stored securely on Sweezy servers for sync. Apple processes subscription payments; Sweezy receives purchase status needed to unlock Plus.";
 "privacy.data_storage.local" = "We only send data to our own backend and trusted providers (such as crash reporting and analytics) to improve the app.";
 "privacy.third_parties.title" = "Third Parties";
 "privacy.third_parties.content" = "With your consent, Sweezy sends pseudonymous usage events to its first-party service using random install and session identifiers. Events exclude names, email addresses, messages, precise location, and account identifiers. We do not use this data for advertising or cross-app tracking.";
@@ -499,7 +499,7 @@
 "privacy.data_usage.title" = "Data Usage";
 "privacy.data_usage.content" = "Your data is used exclusively for app functionality. We do not sell or share your data with third parties.";
 "privacy.data_storage.title" = "Data Storage";
-"privacy.data_storage.content" = "Most of your personal data is stored locally on your device. Account information is stored securely on Sweezy servers for sync. The current build has no in-app purchases.";
+"privacy.data_storage.content" = "Most personal data is stored locally on your device. Account information is stored securely on Sweezy servers for sync. Apple processes subscription payments; Sweezy receives purchase status needed to unlock Plus.";
 "privacy.data_storage.local" = "We only send data to our own backend and trusted providers (such as crash reporting and analytics) to improve the app.";
 "privacy.third_parties.title" = "Third Parties";
 "privacy.third_parties.content" = "With your consent, Sweezy sends pseudonymous usage events to its first-party service using random install and session identifiers. Events exclude names, email addresses, messages, precise location, and account identifiers. We do not use this data for advertising or cross-app tracking.";
@@ -1683,7 +1683,7 @@
 "common.unit.kilometers" = "km";
 "language.ukrainian" = "Ukrainian";
 "legal.terms.title" = "Terms of Use";
-"legal.terms.body" = "By using the app, you agree to the Terms of Use and are responsible for how you use the content. Content is informational and is not legal advice. The current Sweezy build is free, with no in-app purchases.";
+"legal.terms.body" = "By using the app, you agree to the Terms of Use and are responsible for how you use the content. Content is informational and is not legal advice. Sweezy Plus subscriptions are processed by Apple, renew automatically unless canceled, and can be managed in Apple Account settings.";
 
 /* roadmap chrome */
 "roadmap.chrome.full_route" = "Full route";

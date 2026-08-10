@@ -1,3 +1,48 @@
+**Sweezy Plus Conversion Redesign — 2026-08-10**
+- Source visual truth: `/var/folders/h0/856jbdbx62dc4n9mfh_35k540000gn/T/TemporaryItems/NSIRD_screencaptureui_93vNIg/Bildschirmfoto 2026-08-10 um 10.07.45.png`.
+- Implementation screenshot: `/private/tmp/sweezy-plus-wow-final.png`.
+- Combined comparison input: `/private/tmp/sweezy-plus-before-after-final.png`.
+- Viewport: iPhone 16 simulator, Ukrainian locale, dark appearance, monthly trial selected.
+- Pixels: source 946 × 1880 including simulator frame; implementation 1179 × 2556 at 3× density. Source app region was cropped to 816 × 1813 and normalized to 1179 × 2556 for combined comparison.
+
+**Full-View Comparison Evidence**
+- Original and final captures were opened in one normalized side-by-side input.
+- Final keeps Swiss lake photography, black/lime palette, restore and close controls, rounded typography, plans, and primary action while strengthening hierarchy with trial badge, larger value statement, function count, and always-visible purchase CTA.
+- Monthly 4.95 CHF plan is now default and visually primary. Yearly 49.50 CHF remains visible as optional saving plan.
+
+**Focused Region Comparison Evidence**
+- Hero: trial promise, product name, and outcome-oriented subtitle remain readable over a controlled dark image fade without clipping.
+- Benefits: horizontal cards expose six real app capabilities while preserving manageable vertical density; partial next card signals horizontal scrolling.
+- Conversion region: selected monthly card, free-trial badge, and sticky lime CTA remain visible together. CTA includes `сьогодні 0 CHF` and keeps a 58-point tap target.
+
+**Required Fidelity Surfaces**
+- Fonts and typography: SF Rounded hierarchy, weights, wrapping, and small supporting copy remain readable with no primary truncation.
+- Spacing and layout rhythm: 22-point page margins, compact section spacing, 19-point cards, and sticky bottom action produce clearer scan order than source.
+- Colors and visual tokens: existing `JourneyVisual.lime`, near-black surfaces, muted secondary text, and restrained white keylines remain consistent.
+- Image quality and asset fidelity: existing high-resolution `cityhub-zurich-lake` asset remains sharp and correctly cropped; SF Symbols provide standard icons.
+- Copy and content: six benefits map to existing AI, roadmap, CV, translation, reminder, and checklist features. StoreKit price replaces fallback after App Store catalog loads.
+
+**Comparison History**
+- Iteration 1 [P2]: six benefits and two plans pushed purchase CTA below first viewport. Fix: moved purchase action into a safe-area sticky bar and added selected-plan/trial context. Post-fix evidence: `/private/tmp/sweezy-plus-wow-final.png`.
+
+**Findings**
+- No actionable P0, P1, or P2 visual issues remain.
+
+**Open Questions**
+- Production free-trial visibility depends on configuring a one-month introductory offer for `sweezy_plus_monthly` in App Store Connect.
+- Backend entitlement verification remains production hardening work after App Store Server credentials exist; it does not block this visual QA pass.
+
+**Implementation Checklist**
+- [x] Monthly plan defaults to 4.95 CHF fallback and StoreKit localized price.
+- [x] One-month trial appears only when StoreKit confirms it; DEBUG capture uses explicit screenshot flag.
+- [x] Six useful app capabilities are presented without false unsupported promises.
+- [x] Restore, plan selection, purchase, dismissal, and legal controls stay connected.
+- [x] Debug iOS Simulator build succeeds and `git diff --check` passes.
+
+final result: passed
+
+---
+
 **Chat Archive, Marketplace Mosaic And Feature Onboarding v3 — 2026-07-31**
 - Source visual truth: `/Users/vladyslav.katash/Library/Containers/ru.keepcoder.Telegram/Data/tmp/IMAGE 2026-07-31 13:20:43.jpg` through `IMAGE 2026-07-31 13:20:52.jpg`.
 - Runtime screenshot: `/private/tmp/sweezy-marketplace-qa.png`.

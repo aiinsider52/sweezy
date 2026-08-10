@@ -97,8 +97,10 @@ struct JourneyMarketplaceView: View {
                     .environmentObject(sessionManager)
             }
             .fullScreenCover(isPresented: $showExperts) {
-                NavigationStack { ExpertsDirectoryView() }
+                ProfessionalNetworkView()
                     .environmentObject(appContainer)
+                    .environmentObject(lockManager)
+                    .environmentObject(sessionManager)
             }
             .fullScreenCover(isPresented: $showInbox) {
                 ChatInboxView()
@@ -204,7 +206,7 @@ struct JourneyMarketplaceView: View {
         .overlay(alignment: .topTrailing) {
             HStack(spacing: 10) {
                 Button { showExperts = true } label: {
-                    Image(systemName: "person.badge.shield.checkmark.fill")
+                    Image(systemName: "person.3.sequence.fill")
                         .font(.system(size: 17, weight: .bold))
                         .foregroundColor(.white)
                         .frame(width: 48, height: 48)
@@ -214,7 +216,7 @@ struct JourneyMarketplaceView: View {
                         .overlay(Circle().stroke(.white.opacity(0.24), lineWidth: 1))
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("experts.section.title".localized)
+                .accessibilityLabel("Swiss Network")
 
                 Button {
                     guard sessionManager.isAuthenticated else {

@@ -47,7 +47,6 @@ struct RegistrationView: View {
             }
             .toolbar(.hidden, for: .navigationBar)
         }
-        .preferredColorScheme(.dark)
         .onAppear {
             name = lockManager.userName
             email = lockManager.userEmail

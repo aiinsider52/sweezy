@@ -204,7 +204,6 @@ struct OnboardingViewRedesigned: View {
             }
         }
         .animation(Theme.Animation.smooth, value: currentPage)
-        .preferredColorScheme(.dark)
         .onAppear {
             seedProfileStateIfNeeded()
             syncAppLocaleWithPreferredLanguage()

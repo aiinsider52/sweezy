@@ -88,6 +88,17 @@ class Settings(BaseSettings):
     # Fallback for setups that already use SECRET_KEY
     SECRET_KEY: Optional[str] = None
     STRIPE_REDIRECT_ORIGINS: str | None = None
+    STRIPE_SUBSCRIPTIONS_ENABLED: bool = False
+
+    # App Store subscriptions. Signed transactions and notifications are verified
+    # with Apple's official App Store Server Library. Keep secrets in environment.
+    APPLE_IAP_ENABLED: bool = False
+    APPLE_IAP_BUNDLE_ID: str = "com.sweezy.mobile"
+    APPLE_IAP_APP_APPLE_ID: int | None = None
+    APPLE_IAP_ROOT_CERTIFICATES_BASE64: str | None = None
+    APPLE_IAP_ENABLE_ONLINE_CHECKS: bool = True
+    APPLE_IAP_ALLOW_SANDBOX: bool = True
+    APPLE_IAP_PRODUCT_IDS: str = "sweezy_plus_monthly,sweezy_plus_yearly"
 
     # Incident management / Telegram operations channel
     INCIDENTS_ENABLED: bool = True
@@ -201,6 +212,15 @@ class Settings(BaseSettings):
                         raise ValueError("APNs key must use P-256")
                 except Exception as exc:
                     raise RuntimeError("APNS_PRIVATE_KEY must contain a valid Apple AuthKey .p8 key") from exc
+            if self.APPLE_IAP_ENABLED:
+                if not self.APPLE_IAP_BUNDLE_ID or not re.fullmatch(r"[A-Za-z0-9.-]+", self.APPLE_IAP_BUNDLE_ID):
+                    raise RuntimeError("APPLE_IAP_BUNDLE_ID is invalid")
+                if not self.APPLE_IAP_APP_APPLE_ID:
+                    raise RuntimeError("APPLE_IAP_APP_APPLE_ID is required when Apple IAP is enabled")
+                if not self.APPLE_IAP_ROOT_CERTIFICATES_BASE64:
+                    raise RuntimeError("APPLE_IAP_ROOT_CERTIFICATES_BASE64 is required when Apple IAP is enabled")
+                if not self.parsed_apple_iap_product_ids():
+                    raise RuntimeError("APPLE_IAP_PRODUCT_IDS must contain at least one product")
 
     def parsed_google_client_ids(self) -> List[str]:
         raw = (self.GOOGLE_CLIENT_IDS or "").strip()
@@ -213,6 +233,9 @@ class Settings(BaseSettings):
         if not raw:
             return []
         return [part.strip() for part in raw.split(",") if part.strip()]
+
+    def parsed_apple_iap_product_ids(self) -> List[str]:
+        return [part.strip() for part in self.APPLE_IAP_PRODUCT_IDS.split(",") if part.strip()]
 
 
 

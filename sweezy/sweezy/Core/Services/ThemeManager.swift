@@ -32,7 +32,7 @@ enum AppTheme: String, CaseIterable, Identifiable {
 }
 
 final class ThemeManager: ObservableObject {
-    @AppStorage("selectedTheme") var selectedTheme: AppTheme = .dark {
+    @AppStorage("selectedTheme") var selectedTheme: AppTheme = .system {
         didSet { objectWillChange.send() }
     }
     
@@ -44,4 +44,3 @@ final class ThemeManager: ObservableObject {
         }
     }
 }
-

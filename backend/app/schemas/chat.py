@@ -43,6 +43,8 @@ class ConversationResponse(BaseModel):
     id: str
     listing_id: str | None
     job_id: str | None = None
+    network_profile_id: str | None = None
+    social_profile_id: str | None = None
     listing_type: str
     listing_title: str
     listing_image_url: str | None

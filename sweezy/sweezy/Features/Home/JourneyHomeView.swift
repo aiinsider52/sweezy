@@ -3,8 +3,10 @@ import SwiftUI
 struct JourneyHomeView: View {
     @EnvironmentObject private var appContainer: AppContainer
     @EnvironmentObject private var lockManager: AppLockManager
+    @StateObject private var subscriptionManager = SubscriptionManager.shared
     @State private var showRoadmap = false
     @State private var showMyPlan = false
+    @State private var showSubscription = false
 
     private let actions: [(String, String, DovidnykRouteSection?)] = [
         ("doc.text", "journey.home.action.documents".localized, .checklists),
@@ -38,6 +40,14 @@ struct JourneyHomeView: View {
                             quickActions
                             nextStepCard
                                 .padding(.top, 20)
+
+                            if !subscriptionManager.isPremium {
+                                SweezyPlusHomeCard {
+                                    showSubscription = true
+                                    APIClient.logPaywall(eventType: "cta_click", context: SubscriptionSource.home.rawValue)
+                                }
+                                .padding(.top, 20)
+                            }
                         }
                         .padding(.horizontal, 20)
                         .padding(.bottom, 126)
@@ -55,6 +65,9 @@ struct JourneyHomeView: View {
                 MyPlanView()
                     .environmentObject(appContainer)
             }
+            .fullScreenCover(isPresented: $showSubscription) {
+                SubscriptionView(source: .home)
+            }
             .onAppear {
                 appContainer.telemetry.retention(
                     .nextActionViewed,
@@ -68,6 +81,9 @@ struct JourneyHomeView: View {
                     }
                 }
                 #endif
+            }
+            .task {
+                await subscriptionManager.load()
             }
         }
         .accessibilityIdentifier("home.screen")

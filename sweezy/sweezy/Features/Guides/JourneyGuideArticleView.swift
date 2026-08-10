@@ -52,52 +52,62 @@ struct JourneyGuideArticleView: View {
     }
 
     var body: some View {
-        ZStack(alignment: .top) {
-            overscrollBackdrop
+        GeometryReader { viewport in
+            let viewportWidth = max(1, viewport.size.width)
+            let contentWidth = min(720, max(1, viewportWidth - 40))
+            let horizontalInset = max(20, (viewportWidth - contentWidth) / 2)
 
-            ScrollView(showsIndicators: false) {
-                VStack(spacing: 0) {
-                    hero
+            ZStack(alignment: .top) {
+                overscrollBackdrop
+                    .frame(width: viewportWidth)
+                    .clipped()
 
-                    VStack(alignment: .leading, spacing: 22) {
-                        officialSourceCard
-                        contentScopeNotice
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 0) {
+                        hero(width: viewportWidth, horizontalInset: horizontalInset, contentWidth: contentWidth)
 
-                        if let summary = guide.summary, !summary.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                            summaryCard(summary)
+                        VStack(alignment: .leading, spacing: 22) {
+                            officialSourceCard
+                            contentScopeNotice
+
+                            if let summary = guide.summary, !summary.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                                summaryCard(summary)
+                            }
+
+                            JourneyArticleMarkdown(markdown: guide.bodyMarkdown)
+
+                            if !guide.links.isEmpty {
+                                usefulLinks
+                            }
+
+                            if let relatedChecklist {
+                                nextStepCard(relatedChecklist)
+                            }
                         }
-
-                        JourneyArticleMarkdown(markdown: guide.bodyMarkdown)
-
-                        if !guide.links.isEmpty {
-                            usefulLinks
-                        }
-
-                        if let relatedChecklist {
-                            nextStepCard(relatedChecklist)
-                        }
+                        .frame(width: contentWidth, alignment: .leading)
+                        .padding(.horizontal, horizontalInset)
+                        .padding(.top, 20)
+                        .padding(.bottom, 72)
+                        .background(JourneyVisual.black)
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 20)
-                    .padding(.bottom, 72)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(JourneyVisual.black)
+                    .frame(width: viewportWidth)
+                    .background(
+                        GeometryReader { geometry in
+                            Color.clear.preference(
+                                key: JourneyArticleOffsetKey.self,
+                                value: -geometry.frame(in: .named("journeyArticleScroll")).minY
+                            )
+                        }
+                    )
                 }
-                .background(
-                    GeometryReader { geometry in
-                        Color.clear.preference(
-                            key: JourneyArticleOffsetKey.self,
-                            value: -geometry.frame(in: .named("journeyArticleScroll")).minY
-                        )
-                    }
-                )
-            }
-            .coordinateSpace(name: "journeyArticleScroll")
-            .onPreferenceChange(JourneyArticleOffsetKey.self) { scrollOffset = max(0, $0) }
-            .scrollBounceBehavior(.basedOnSize, axes: .vertical)
+                .coordinateSpace(name: "journeyArticleScroll")
+                .onPreferenceChange(JourneyArticleOffsetKey.self) { scrollOffset = max(0, $0) }
+                .scrollBounceBehavior(.basedOnSize, axes: .vertical)
 
-            readingProgress
-            stickyHeader
+                readingProgress
+                stickyHeader
+            }
+            .frame(width: viewportWidth)
         }
         .toolbar(.hidden, for: .navigationBar)
         .interactiveSwipeBackEnabled()
@@ -160,11 +170,10 @@ struct JourneyGuideArticleView: View {
             .shadow(color: .black.opacity(0.24), radius: 12, y: 5)
     }
 
-    private var hero: some View {
-        GeometryReader { geometry in
-            ZStack(alignment: .bottomLeading) {
-                Color.clear
-                    .frame(width: geometry.size.width, height: 408)
+    private func hero(width: CGFloat, horizontalInset: CGFloat, contentWidth: CGFloat) -> some View {
+        ZStack(alignment: .bottomLeading) {
+            Color.clear
+                .frame(width: width, height: 408)
 
             LinearGradient(
                 colors: [.black.opacity(0.12), .black.opacity(0.12), JourneyVisual.black],
@@ -198,7 +207,10 @@ struct JourneyGuideArticleView: View {
                     .font(.system(size: 34, weight: .bold, design: .rounded))
                     .foregroundColor(.white)
                     .lineSpacing(-2)
+                    .lineLimit(4)
+                    .minimumScaleFactor(0.78)
                     .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: contentWidth, alignment: .leading)
                     .shadow(color: .black.opacity(0.48), radius: 12, y: 4)
 
                 HStack(spacing: 16) {
@@ -210,13 +222,11 @@ struct JourneyGuideArticleView: View {
                 .font(.system(size: 11, weight: .semibold))
                 .foregroundColor(.white.opacity(0.74))
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, horizontalInset)
             .padding(.bottom, 18)
-
-            }
-            .frame(width: geometry.size.width, height: 408)
         }
-        .frame(height: 408)
+        .frame(width: width, height: 408)
+        .clipped()
     }
 
     @ViewBuilder
@@ -274,19 +284,20 @@ struct JourneyGuideArticleView: View {
 
     private var contentScopeNotice: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Label(cantonScope, systemImage: "map")
+            scopeRow(cantonScope, systemImage: "map")
             switch freshness {
             case .verified:
-                Label("Current as of the verification date shown above", systemImage: "checkmark.circle")
+                scopeRow("Current as of the verification date shown above", systemImage: "checkmark.circle")
             case .expired:
-                Label("Verification expired — confirm with the linked authority", systemImage: "clock.badge.exclamationmark")
+                scopeRow("Verification expired — confirm with the linked authority", systemImage: "clock.badge.exclamationmark")
                     .foregroundColor(.orange)
             case .unverified:
-                Label("Unverified — do not rely on this as current guidance", systemImage: "exclamationmark.triangle")
+                scopeRow("Unverified — do not rely on this as current guidance", systemImage: "exclamationmark.triangle")
                     .foregroundColor(.orange)
             }
             Text("Educational information only — not legal advice. Requirements and deadlines can vary by canton and personal situation.")
                 .foregroundColor(.white.opacity(0.58))
+                .fixedSize(horizontal: false, vertical: true)
         }
         .font(.system(size: 11, weight: .semibold))
         .foregroundColor(.white.opacity(0.76))
@@ -294,6 +305,16 @@ struct JourneyGuideArticleView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color.white.opacity(0.055))
         .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+    }
+
+    private func scopeRow(_ text: String, systemImage: String) -> some View {
+        HStack(alignment: .top, spacing: 8) {
+            Image(systemName: systemImage)
+                .frame(width: 14)
+            Text(text)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
     }
 
     private func summaryCard(_ summary: String) -> some View {
@@ -471,6 +492,7 @@ private struct JourneyArticleMarkdown: View {
                 }
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private func heading(_ text: String, size: CGFloat) -> some View {
@@ -479,6 +501,8 @@ private struct JourneyArticleMarkdown: View {
                 .font(.system(size: size, weight: .bold, design: .rounded))
                 .foregroundColor(.white)
                 .lineSpacing(-1)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .leading)
             Capsule()
                 .fill(JourneyVisual.lime)
                 .frame(width: 44, height: 4)
@@ -492,6 +516,7 @@ private struct JourneyArticleMarkdown: View {
             .foregroundColor(.white.opacity(0.84))
             .lineSpacing(7)
             .fixedSize(horizontal: false, vertical: true)
+            .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private func bullet(_ text: String) -> some View {
@@ -501,7 +526,9 @@ private struct JourneyArticleMarkdown: View {
                 .frame(width: 6, height: 6)
                 .padding(.top, 8)
             paragraph(text)
+                .layoutPriority(1)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private func callout(_ text: String) -> some View {

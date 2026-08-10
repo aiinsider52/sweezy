@@ -1502,7 +1502,7 @@
 "common.unit.kilometers" = "km";
 "language.ukrainian" = "Ukrainisch";
 "legal.terms.title" = "Nutzungsbedingungen";
-"legal.terms.body" = "Mit der Nutzung der App akzeptieren Sie die Nutzungsbedingungen und sind für die Verwendung der Inhalte verantwortlich. Inhalte dienen der Information und sind keine Rechtsberatung. Die aktuelle Sweezy-Version ist kostenlos und ohne In-App-Käufe.";
+"legal.terms.body" = "Mit der Nutzung der App akzeptieren Sie die Nutzungsbedingungen und sind für die Verwendung der Inhalte verantwortlich. Inhalte dienen der Information und sind keine Rechtsberatung. Sweezy Plus wird über Apple abgerechnet, verlängert sich automatisch, sofern es nicht gekündigt wird, und kann in den Apple-Account-Einstellungen verwaltet werden.";
 
 /* roadmap chrome */
 "roadmap.chrome.full_route" = "Gesamte Route";

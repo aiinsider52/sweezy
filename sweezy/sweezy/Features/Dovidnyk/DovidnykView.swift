@@ -117,9 +117,6 @@ struct GuidesContentView: View {
     
     @State private var guides: [Guide] = []
     @State private var selectedCategory: GuideCategory?
-    // TEMPORARY (App Store review): IAP removed, all content is unlocked.
-    private let hasPremiumAccess: Bool = true
-    
     private func haptic(_ style: UIImpactFeedbackGenerator.FeedbackStyle) {
         UIImpactFeedbackGenerator(style: style).impactOccurred()
     }

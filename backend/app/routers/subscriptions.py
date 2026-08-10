@@ -10,7 +10,9 @@ from pydantic import BaseModel
 
 from ..dependencies import CurrentUser, DBSession
 from ..core.database import db_session
+from ..models.subscription import PremiumUsage
 from ..models.user import User
+from ..services import apple_iap_service
 from ..services import stripe_service
 from ..services.telegram import send_telegram_message
 from ..core.config import get_settings
@@ -25,7 +27,13 @@ class CurrentOut(BaseModel):
 
 
 @router.get("/current", response_model=CurrentOut)
-def current(user: CurrentUser) -> CurrentOut:
+def current(db: DBSession, user: CurrentUser) -> CurrentOut:
+    if not _compute_is_premium(user.subscription_status or "free", user.subscription_expire_at):
+        if user.subscription_status in {"trial", "premium"}:
+            user.subscription_status = "free"
+            user.subscription_expire_at = None
+            db.add(user)
+            db.commit()
     return CurrentOut(status=user.subscription_status, expire_at=user.subscription_expire_at)
 
 class EntitlementsOut(BaseModel):
@@ -36,23 +44,38 @@ class EntitlementsOut(BaseModel):
     favorites_limit: int | None  # None means unlimited
     guides_full_access: bool
     pdf_download: bool
+    cv_free_uses_remaining: int
 
 def _compute_is_premium(status: str, expire_at: Optional[datetime]) -> bool:
     if status in {"trial", "premium"}:
         if expire_at is None:
             return True
         try:
-            return expire_at > datetime.now(timezone.utc)
+            comparable = expire_at if expire_at.tzinfo else expire_at.replace(tzinfo=timezone.utc)
+            return comparable > datetime.now(timezone.utc)
         except Exception:
             return True
     return False
 
 @router.get("/entitlements", response_model=EntitlementsOut)
-def entitlements(user: CurrentUser) -> EntitlementsOut:
+def entitlements(db: DBSession, user: CurrentUser) -> EntitlementsOut:
     status = user.subscription_status or "free"
     expire_at = user.subscription_expire_at
     is_premium = _compute_is_premium(status, expire_at)
+    if not is_premium and status in {"trial", "premium"}:
+        user.subscription_status = "free"
+        user.subscription_expire_at = None
+        db.add(user)
+        db.commit()
+        status = "free"
+        expire_at = None
     favorites_limit = None if is_premium else 3
+    usage = (
+        db.query(PremiumUsage)
+        .filter(PremiumUsage.user_id == user.id, PremiumUsage.feature == "cv_tools")
+        .one_or_none()
+    )
+    cv_free_uses_remaining = 3 if is_premium else max(0, 3 - (usage.free_uses if usage else 0))
     return EntitlementsOut(
         status=status,
         expire_at=expire_at,
@@ -61,6 +84,7 @@ def entitlements(user: CurrentUser) -> EntitlementsOut:
         favorites_limit=favorites_limit,
         guides_full_access=is_premium,
         pdf_download=is_premium,
+        cv_free_uses_remaining=cv_free_uses_remaining,
     )
 
 
@@ -136,6 +160,8 @@ def _validate_redirect_url(value: str) -> None:
 
 @router.post("/checkout", response_model=CheckoutOut)
 def create_checkout(payload: CheckoutIn, db: DBSession, user: CurrentUser) -> CheckoutOut:
+    if not get_settings().STRIPE_SUBSCRIPTIONS_ENABLED:
+        raise HTTPException(status_code=410, detail="Stripe subscription checkout is disabled for the iOS product")
     if payload.plan not in {"monthly", "yearly"}:
         raise HTTPException(status_code=400, detail="Invalid plan")
     _validate_redirect_url(payload.success_url)
@@ -156,17 +182,66 @@ def create_checkout(payload: CheckoutIn, db: DBSession, user: CurrentUser) -> Ch
 
 @router.post("/trial", response_model=CurrentOut)
 def start_trial(db: DBSession, user: CurrentUser) -> CurrentOut:
-    # Allow trial only once (if already premium/trial then reject)
-    if user.subscription_status in {"trial", "premium"}:
-        raise HTTPException(status_code=400, detail="Trial already used or active subscription")
-    user = stripe_service.apply_trial(db, user, days=7)
-    return CurrentOut(status=user.subscription_status, expire_at=user.subscription_expire_at)
+    raise HTTPException(
+        status_code=410,
+        detail="Legacy backend trial is disabled. Introductory offers are managed by App Store Connect.",
+    )
+
+
+class AppleTransactionIn(BaseModel):
+    signed_transaction: str
+
+
+class AppleSyncOut(BaseModel):
+    status: str
+    expire_at: Optional[datetime] = None
+    product_id: str
+    environment: str
+
+
+@router.post("/apple/transactions", response_model=AppleSyncOut)
+def sync_apple_transaction(payload: AppleTransactionIn, db: DBSession, user: CurrentUser) -> AppleSyncOut:
+    if len(payload.signed_transaction) > 100_000:
+        raise HTTPException(status_code=413, detail="Signed transaction is too large")
+    try:
+        row = apple_iap_service.sync_signed_transaction(db, user, payload.signed_transaction)
+    except apple_iap_service.AppleIAPNotConfigured as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    except apple_iap_service.AppleIAPConflict as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    except apple_iap_service.AppleIAPError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    return AppleSyncOut(
+        status=user.subscription_status,
+        expire_at=user.subscription_expire_at,
+        product_id=row.product_id or "",
+        environment=row.environment or "",
+    )
+
+
+class AppleNotificationIn(BaseModel):
+    signedPayload: str
+
+
+@router.post("/apple/notifications", status_code=200)
+def apple_notifications(payload: AppleNotificationIn, db: DBSession) -> dict:
+    if len(payload.signedPayload) > 250_000:
+        raise HTTPException(status_code=413, detail="Signed notification is too large")
+    try:
+        result, _user_id = apple_iap_service.process_notification(db, payload.signedPayload)
+    except apple_iap_service.AppleIAPNotConfigured as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    except apple_iap_service.AppleIAPError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return {"ok": True, "result": result}
 
 class ReferralOut(BaseModel):
     code: str
 
 @router.post("/referral/create", response_model=ReferralOut)
 def create_referral_code(user: CurrentUser) -> ReferralOut:
+    if not get_settings().STRIPE_SUBSCRIPTIONS_ENABLED:
+        raise HTTPException(status_code=410, detail="Stripe subscription referrals are disabled")
     try:
         code = stripe_service.create_referral_promotion_code(user, prefix="SWZ")
         return ReferralOut(code=code)
@@ -176,6 +251,8 @@ def create_referral_code(user: CurrentUser) -> ReferralOut:
 
 @router.post("/stripe/webhook", status_code=200)
 async def stripe_webhook(request: Request):
+    if not get_settings().STRIPE_SUBSCRIPTIONS_ENABLED:
+        raise HTTPException(status_code=410, detail="Stripe subscription webhook is disabled")
     from asyncio import to_thread
 
     payload = await request.body()

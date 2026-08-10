@@ -63,7 +63,6 @@ struct EmailVerificationSheet: View {
             }
             .toolbar(.hidden, for: .navigationBar)
         }
-        .preferredColorScheme(.dark)
         .interactiveDismissDisabled(isLoading)
         .onAppear {
             refreshResendCountdown()

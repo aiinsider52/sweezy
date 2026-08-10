@@ -64,7 +64,6 @@ struct PublicProfileView: View {
         .fullScreenCover(item: $selectedListing) { listing in
             ListingDetailView(listingId: listing.id)
         }
-        .preferredColorScheme(.dark)
     }
 
     private func profileHeader(_ profile: PublicUserProfile) -> some View {

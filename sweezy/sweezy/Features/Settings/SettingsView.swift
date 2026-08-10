@@ -14,12 +14,14 @@ struct SettingsView: View {
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var lockManager: AppLockManager
     @EnvironmentObject private var sessionManager: SessionManager
+    @StateObject private var subscriptionManager = SubscriptionManager.shared
     @Environment(\.scenePhase) private var scenePhase
     
     @State private var showingLanguageSelection = false
     @State private var showingProfileEdit = false
     @State private var showingNotificationSettings = false
     @State private var showingChatInbox = false
+    @State private var showingSubscription = false
     
     @State private var regName: String = ""
     @State private var regEmail: String = ""
@@ -47,7 +49,7 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color(red: 0.025, green: 0.03, blue: 0.028)
+                Theme.Colors.primaryBackground
                     .ignoresSafeArea()
 
                 ScrollView(showsIndicators: false) {
@@ -93,6 +95,12 @@ struct SettingsView: View {
         // Removed heavy .id(refreshKey) and .onReceive that caused constant redraws
         .sheet(isPresented: $showingPrivacy) {
             PrivacyPolicyView()
+        }
+        .fullScreenCover(isPresented: $showingSubscription) {
+            SubscriptionView(source: .profile)
+        }
+        .task {
+            await subscriptionManager.load()
         }
         // Export JSON file
         .fileExporter(isPresented: $showingExporter, document: exportDocument, contentType: .json, defaultFilename: defaultBackupFilename) { _ in }
@@ -242,7 +250,7 @@ private extension SettingsView {
                 colors: [
                     Color.black.opacity(0.18),
                     Color.black.opacity(0.3),
-                    Color(red: 0.025, green: 0.03, blue: 0.028)
+                    Theme.Colors.primaryBackground
                 ],
                 startPoint: .top,
                 endPoint: .bottom
@@ -281,23 +289,23 @@ private extension SettingsView {
             HStack(spacing: 14) {
                 ZStack {
                     Circle()
-                        .fill(Color.white.opacity(0.08))
+                        .fill(Theme.Colors.adaptiveSurface)
                     Circle()
                         .stroke(JourneyVisual.lime.opacity(0.7), lineWidth: 1)
                     Text(profileInitials)
                         .font(.system(size: 20, weight: .bold, design: .rounded))
-                        .foregroundColor(.white)
+                        .foregroundColor(Theme.Colors.textPrimary)
                 }
                 .frame(width: 58, height: 58)
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(profileName)
                         .font(.system(size: 17, weight: .semibold, design: .rounded))
-                        .foregroundColor(.white)
+                        .foregroundColor(Theme.Colors.textPrimary)
                         .lineLimit(1)
                     Label(editorialProfileLocation, systemImage: "mappin")
                         .font(.system(size: 12, weight: .medium))
-                        .foregroundColor(.white.opacity(0.58))
+                        .foregroundColor(Theme.Colors.textSecondary)
                 }
 
                 Spacer(minLength: 10)
@@ -306,7 +314,7 @@ private extension SettingsView {
                     .font(.system(size: 15, weight: .bold))
                     .foregroundColor(JourneyVisual.lime)
                     .frame(width: 42, height: 42)
-                    .background(Color.black.opacity(0.32))
+                    .background(Theme.Colors.adaptiveSurface)
                     .clipShape(Circle())
                     .overlay(Circle().stroke(JourneyVisual.lime.opacity(0.48), lineWidth: 1))
             }
@@ -327,10 +335,10 @@ private extension SettingsView {
                     VStack(alignment: .leading, spacing: 5) {
                         Text("settings.editorial.complete_profile_title".localized)
                             .font(.system(size: 18, weight: .bold, design: .rounded))
-                            .foregroundColor(.white)
+                            .foregroundColor(Theme.Colors.textPrimary)
                         Text("settings.editorial.complete_profile_subtitle".localized)
                             .font(.system(size: 13, weight: .medium))
-                            .foregroundColor(.white.opacity(0.6))
+                            .foregroundColor(Theme.Colors.textSecondary)
                             .fixedSize(horizontal: false, vertical: true)
                     }
 
@@ -338,14 +346,14 @@ private extension SettingsView {
 
                     ZStack {
                         Circle()
-                            .stroke(Color.white.opacity(0.12), lineWidth: 5)
+                            .stroke(Theme.Colors.adaptiveBorder, lineWidth: 5)
                         Circle()
                             .trim(from: 0, to: CGFloat(profileCompletion) / 100)
                             .stroke(JourneyVisual.lime, style: StrokeStyle(lineWidth: 5, lineCap: .round))
                             .rotationEffect(.degrees(-90))
                         Text("\(profileCompletion)%")
                             .font(.system(size: 14, weight: .bold, design: .rounded))
-                            .foregroundColor(.white)
+                            .foregroundColor(Theme.Colors.textPrimary)
                     }
                     .frame(width: 58, height: 58)
                 }
@@ -386,6 +394,14 @@ private extension SettingsView {
         VStack(alignment: .leading, spacing: 18) {
             editorialSectionTitle("settings.account".localized)
             VStack(spacing: 0) {
+                editorialSettingsRow(
+                    icon: "star.circle.fill",
+                    title: "Sweezy Plus",
+                    value: subscriptionManager.isPremium ? "Активна" : "Відкрити"
+                ) {
+                    showingSubscription = true
+                }
+                editorialSettingsDivider
                 editorialSettingsRow(icon: "globe", title: "settings.language".localized, value: currentLanguageName) {
                     showingLanguageSelection = true
                 }
@@ -523,12 +539,12 @@ private extension SettingsView {
                 Image(systemName: icon)
                     .foregroundColor(JourneyVisual.lime)
                 Text(value)
-                    .foregroundColor(.white)
+                    .foregroundColor(Theme.Colors.textPrimary)
             }
             .font(.system(size: 14, weight: .bold, design: .rounded))
             Text(label)
                 .font(.system(size: 10, weight: .medium))
-                .foregroundColor(.white.opacity(0.5))
+                .foregroundColor(Theme.Colors.textTertiary)
         }
         .frame(maxWidth: .infinity)
         .accessibilityElement(children: .combine)
@@ -536,14 +552,14 @@ private extension SettingsView {
 
     var editorialActivityDivider: some View {
         Rectangle()
-            .fill(Color.white.opacity(0.1))
+            .fill(Theme.Colors.adaptiveBorder)
             .frame(width: 1, height: 34)
     }
 
     func editorialSectionTitle(_ title: String) -> some View {
         Text(title)
             .font(.system(size: 18, weight: .bold, design: .rounded))
-            .foregroundColor(.white)
+            .foregroundColor(Theme.Colors.textPrimary)
             .padding(.horizontal, 2)
     }
 
@@ -577,22 +593,22 @@ private extension SettingsView {
         HStack(spacing: 13) {
             Image(systemName: icon)
                 .font(.system(size: 16, weight: .semibold))
-                .foregroundColor(.white.opacity(0.86))
+                .foregroundColor(Theme.Colors.textSecondary)
                 .frame(width: 22)
             Text(title)
                 .font(.system(size: 15, weight: .medium))
-                .foregroundColor(.white)
+                .foregroundColor(Theme.Colors.textPrimary)
             Spacer()
             if let value {
                 Text(value)
                     .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.white.opacity(0.54))
+                    .foregroundColor(Theme.Colors.textSecondary)
                     .lineLimit(1)
             }
             if showsChevron {
                 Image(systemName: "chevron.right")
                     .font(.system(size: 12, weight: .bold))
-                    .foregroundColor(.white.opacity(0.36))
+                    .foregroundColor(Theme.Colors.textTertiary)
             }
         }
         .padding(.horizontal, 16)
@@ -610,15 +626,15 @@ private extension SettingsView {
         HStack(spacing: 13) {
             Image(systemName: icon)
                 .font(.system(size: 16, weight: .semibold))
-                .foregroundColor(isEnabled ? .white.opacity(0.86) : .white.opacity(0.32))
+                .foregroundColor(isEnabled ? Theme.Colors.textSecondary : Theme.Colors.textTertiary)
                 .frame(width: 22)
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                     .font(.system(size: 15, weight: .medium))
-                    .foregroundColor(isEnabled ? .white : .white.opacity(0.44))
+                    .foregroundColor(isEnabled ? Theme.Colors.textPrimary : Theme.Colors.textTertiary)
                 Text(subtitle)
                     .font(.system(size: 11, weight: .medium))
-                    .foregroundColor(.white.opacity(0.45))
+                    .foregroundColor(Theme.Colors.textTertiary)
                     .lineLimit(2)
             }
             Spacer(minLength: 8)
@@ -633,7 +649,7 @@ private extension SettingsView {
 
     var editorialSettingsDivider: some View {
         Rectangle()
-            .fill(Color.white.opacity(0.09))
+            .fill(Theme.Colors.adaptiveBorder)
             .frame(height: 1)
             .padding(.leading, 51)
     }
@@ -2869,26 +2885,29 @@ private struct ThemeSelectionButton: View {
 }
 
 private struct EditorialSettingsPanelModifier: ViewModifier {
+    @Environment(\.colorScheme) private var colorScheme
     let cornerRadius: CGFloat
 
     func body(content: Content) -> some View {
         content
             .background(
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .fill(Color(red: 0.075, green: 0.082, blue: 0.078).opacity(0.96))
+                    .fill(Theme.Colors.adaptiveCard)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                     .stroke(
                         LinearGradient(
-                            colors: [Color.white.opacity(0.19), Color.white.opacity(0.06)],
+                            colors: colorScheme == .dark
+                                ? [Color.white.opacity(0.19), Color.white.opacity(0.06)]
+                                : [Color.white.opacity(0.92), Color.black.opacity(0.07)],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         ),
                         lineWidth: 1
                     )
             )
-            .shadow(color: .black.opacity(0.24), radius: 14, y: 8)
+            .shadow(color: .black.opacity(colorScheme == .dark ? 0.24 : 0.09), radius: 14, y: 8)
     }
 }
 

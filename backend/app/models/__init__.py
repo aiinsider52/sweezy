@@ -13,8 +13,10 @@ from .checklist import Checklist
 from .template import Template
 from .appointment import Appointment
 from .user import PublicUserProfile, User
-from .subscription import Subscription, SubscriptionEvent
+from .subscription import PremiumUsage, Subscription, SubscriptionEvent
 from .marketplace import MarketplaceBlock, MarketplaceReport, ServiceListing
+from .network import ProfessionalConnection, ProfessionalProfile, ProfessionalProfileReport
+from .social import EventAttendance, FriendConnection, SocialProfile, SocialProfileReport
 from .event_listing import EventListing, EventReport
 from .swiss_moment import SwissMoment
 from .expert_question import ExpertQuestion
@@ -44,9 +46,17 @@ __all__ = [
     "PublicUserProfile",
     "Subscription",
     "SubscriptionEvent",
+    "PremiumUsage",
     "ServiceListing",
     "MarketplaceReport",
     "MarketplaceBlock",
+    "ProfessionalProfile",
+    "ProfessionalConnection",
+    "ProfessionalProfileReport",
+    "SocialProfile",
+    "FriendConnection",
+    "EventAttendance",
+    "SocialProfileReport",
     "JobFavorite",
     "JobSearchEvent",
     "Job",

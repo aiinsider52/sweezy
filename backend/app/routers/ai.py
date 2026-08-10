@@ -9,7 +9,7 @@ from pydantic import BaseModel, Field
 from typing import List, Optional
 import os
 
-from ..dependencies import CurrentUser, get_db, require_premium
+from ..dependencies import CurrentUser, get_db, require_premium, require_premium_or_free_uses
 from ..core.config import get_settings
 from ..core.rate_limit import limiter
 from ..models import Guide
@@ -319,7 +319,11 @@ def _fallback_translation(payload: CVResumePayload) -> CVTranslationResponse:
     return CVTranslationResponse(**payload.model_dump(), generated_by_ai=False)
 
 
-@router.post("/cv-improve", response_model=CVImproveResponse)
+@router.post(
+    "/cv-improve",
+    response_model=CVImproveResponse,
+    dependencies=[require_premium_or_free_uses("cv_tools", 3)],
+)
 @limiter.limit("10/minute")
 def cv_improve(request: Request, payload: CVImproveRequest, _user: CurrentUser) -> CVImproveResponse:
     source = _target_source(payload)
@@ -351,7 +355,11 @@ def cv_improve(request: Request, payload: CVImproveRequest, _user: CurrentUser) 
         return CVImproveResponse(text=_fallback_improve(payload), generated_by_ai=False)
 
 
-@router.post("/cv-translate", response_model=CVTranslationResponse)
+@router.post(
+    "/cv-translate",
+    response_model=CVTranslationResponse,
+    dependencies=[require_premium_or_free_uses("cv_tools", 3)],
+)
 @limiter.limit("4/minute")
 def cv_translate(request: Request, payload: CVResumePayload, _user: CurrentUser) -> CVTranslationResponse:
     settings = get_settings()

@@ -38,6 +38,8 @@ from ..models.chat import (
     PushDevice,
 )
 from ..models.job import Job
+from ..models.network import ProfessionalProfile
+from ..models.social import SocialProfile
 from ..models.marketplace import MarketplaceBlock, ServiceListing
 from ..models.user import PublicUserProfile, User
 from ..schemas.chat import (
@@ -162,15 +164,19 @@ def _conversation_response(db, conversation: ChatConversation, user_id: str) -> 
     unread = db.scalar(unread_stmt) or 0
     listing = db.get(ServiceListing, conversation.listing_id) if conversation.listing_id else None
     job = db.get(Job, conversation.job_id) if conversation.job_id else None
+    network_profile = db.get(ProfessionalProfile, conversation.network_profile_id) if conversation.network_profile_id else None
+    social_profile = db.get(SocialProfile, conversation.social_profile_id) if conversation.social_profile_id else None
     return ConversationResponse(
         id=conversation.id,
         listing_id=conversation.listing_id,
         job_id=conversation.job_id,
+        network_profile_id=conversation.network_profile_id,
+        social_profile_id=conversation.social_profile_id,
         listing_type=conversation.listing_type,
         listing_title=conversation.listing_title,
         listing_image_url=conversation.listing_image_url,
         listing_price=conversation.listing_price,
-        listing_status=listing.status if listing else (job.status if job else "removed"),
+        listing_status=listing.status if listing else (job.status if job else ("approved" if network_profile or social_profile else "removed")),
         other_user_id=other_id,
         other_user_name=other_name,
         is_seller=user_id == conversation.seller_id,

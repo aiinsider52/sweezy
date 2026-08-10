@@ -82,7 +82,7 @@ def terms_of_use() -> HTMLResponse:
     </p>
     <h2>Pricing</h2>
     <p>
-      The current App Store build of Sweezy is free and does not offer in‑app purchases or auto‑renewing subscriptions.
+      Sweezy may offer auto-renewing subscriptions through Apple In-App Purchase. Payment is charged to the user's Apple Account. Subscriptions renew automatically unless canceled at least 24 hours before the end of the current period and can be managed in Apple Account settings.
     </p>
     <h2>Contact</h2>
     <p>Support: <a href="mailto:support@sweezy.app">support@sweezy.app</a>.</p>
@@ -113,4 +113,3 @@ def support() -> HTMLResponse:
 </html>
 """
     return HTMLResponse(content=html, status_code=200)
-

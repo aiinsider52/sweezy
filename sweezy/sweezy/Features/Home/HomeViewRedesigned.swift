@@ -48,6 +48,7 @@ struct HomeViewRedesigned: View {
     @State private var selectedNews: NewsItem?
     @State private var cachedFeaturedGuides: [Guide] = []
     @StateObject private var roadmapService = RoadmapService()
+    @StateObject private var subscriptionManager = SubscriptionManager.shared
     
     // Live stats mirrors (lightweight, avoid deep dependencies)
     @State private var statXP: Int = 0
@@ -187,8 +188,10 @@ struct HomeViewRedesigned: View {
             try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 sec
             
             EventBus.shared.emit(GamEvent(type: .appDailyOpen))
-            // TEMPORARY (App Store review): IAP removed, app is fully unlocked.
-            appContainer.analytics.track("daily_open", properties: ["entitlement": "unlocked"])
+            appContainer.analytics.track(
+                "daily_open",
+                properties: ["entitlement": subscriptionManager.isPremium ? "plus" : "free"]
+            )
             
             // Seed stats mirrors once UI is visible
             await MainActor.run {
@@ -1608,8 +1611,6 @@ struct HomeViewRedesigned: View {
     private func daysSince(_ date: Date) -> Int {
         Calendar.current.dateComponents([.day], from: date, to: Date()).day ?? 0
     }
-    
-    // TEMPORARY (App Store review): no subscription-based gating in this build.
     
     private var estimatedHoursSaved: Int {
         max(1, appContainer.userStats.guidesReadCount * 2 + appContainer.userStats.activeChecklistsCount)
@@ -5070,4 +5071,3 @@ private struct KnowledgeMindMapView: View {
         .environmentObject(ThemeManager())
         .preferredColorScheme(.dark)
 }
-

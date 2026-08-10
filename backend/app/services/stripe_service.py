@@ -90,10 +90,15 @@ def apply_premium(db: Session, user: User, subscription_id: str, current_period_
     user.subscription_expire_at = current_period_end
     user.stripe_subscription_id = subscription_id
     # Upsert subscriptions table
-    sub = db.query(Subscription).filter(Subscription.user_id == user.id).one_or_none()
+    sub = (
+        db.query(Subscription)
+        .filter(Subscription.user_id == user.id, Subscription.provider == "stripe")
+        .one_or_none()
+    )
     if sub is None:
         sub = Subscription(
             user_id=user.id,
+            provider="stripe",
             stripe_customer_id=user.stripe_customer_id,
             stripe_subscription_id=subscription_id,
             plan=None,
@@ -110,8 +115,42 @@ def apply_premium(db: Session, user: User, subscription_id: str, current_period_
 
 
 def apply_free(db: Session, user: User) -> None:
-    user.subscription_status = "free"
-    user.subscription_expire_at = None
+    now = datetime.now(timezone.utc)
+    stripe_rows = db.query(Subscription).filter(
+        Subscription.user_id == user.id,
+        Subscription.provider == "stripe",
+    ).all()
+    for row in stripe_rows:
+        row.status = "canceled"
+        db.add(row)
+    other_active = db.query(Subscription).filter(
+        Subscription.user_id == user.id,
+        Subscription.provider != "stripe",
+        Subscription.status.in_(["active", "trial"]),
+    ).all()
+    valid_other = [
+        row
+        for row in other_active
+        if row.revocation_date is None
+        and (
+            row.current_period_end is None
+            or (row.current_period_end.replace(tzinfo=timezone.utc) if row.current_period_end.tzinfo is None else row.current_period_end)
+            > now
+        )
+    ]
+    if valid_other:
+        user.subscription_status = "premium" if any(row.status == "active" for row in valid_other) else "trial"
+        expirations = [
+            row.current_period_end.replace(tzinfo=timezone.utc)
+            if row.current_period_end and row.current_period_end.tzinfo is None
+            else row.current_period_end
+            for row in valid_other
+            if row.current_period_end
+        ]
+        user.subscription_expire_at = max(expirations) if expirations else None
+    else:
+        user.subscription_status = "free"
+        user.subscription_expire_at = None
     db.add(user)
     db.commit()
 
@@ -139,4 +178,3 @@ def create_referral_promotion_code(user: User, prefix: Optional[str] = None) -> 
     except Exception as exc:
         raise RuntimeError(f"Failed to create referral code: {exc}") from exc
     return code or ""
-

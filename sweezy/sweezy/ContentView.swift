@@ -79,7 +79,19 @@ struct MainAppContent: View {
     
     var body: some View {
         ZStack {
-            if isEmailVerificationUITest {
+            if isArticleLayoutUITest {
+                JourneyGuideArticleView(guide: Self.articleLayoutFixture)
+            } else if isCareerHubUITest {
+                JobsView()
+            } else if isNetworkUITest || isNetworkGateUITest {
+                ProfessionalNetworkView()
+            } else if isPaywallScreenshot {
+                SubscriptionView(source: .profile)
+            } else if isCVGateScreenshot {
+                Color(red: 0.025, green: 0.03, blue: 0.028).ignoresSafeArea()
+                CVPlusGateSheet(freeActionsUsed: 3, openPlus: {}, dismiss: {})
+                    .frame(maxHeight: .infinity, alignment: .bottom)
+            } else if isEmailVerificationUITest {
                 EmailVerificationSheet(initialEmail: "olena.kovalenko@email.com")
             } else {
                 Group {
@@ -183,6 +195,84 @@ struct MainAppContent: View {
         false
         #endif
     }
+
+    private var isPaywallScreenshot: Bool {
+        #if DEBUG
+        UserDefaults.standard.bool(forKey: "screenshotPaywall")
+        #else
+        false
+        #endif
+    }
+
+    private var isCVGateScreenshot: Bool {
+        #if DEBUG
+        UserDefaults.standard.bool(forKey: "screenshotCVGate")
+        #else
+        false
+        #endif
+    }
+
+    private var isArticleLayoutUITest: Bool {
+        #if DEBUG
+        ProcessInfo.processInfo.arguments.contains("--ui-test-article-layout")
+        #else
+        false
+        #endif
+    }
+
+    private var isCareerHubUITest: Bool {
+        #if DEBUG
+        ProcessInfo.processInfo.environment["UITESTS"] == "1" &&
+            ProcessInfo.processInfo.arguments.contains("--ui-test-career-hub")
+        #else
+        false
+        #endif
+    }
+
+    private var isNetworkUITest: Bool {
+        #if DEBUG
+        ProcessInfo.processInfo.environment["UITESTS"] == "1" &&
+            ProcessInfo.processInfo.arguments.contains("--ui-test-network")
+        #else
+        false
+        #endif
+    }
+
+    private var isNetworkGateUITest: Bool {
+        #if DEBUG
+        ProcessInfo.processInfo.environment["UITESTS"] == "1" &&
+            ProcessInfo.processInfo.arguments.contains("--ui-test-network-gate")
+        #else
+        false
+        #endif
+    }
+
+    private static let articleLayoutFixture = Guide(
+        title: "Grundlagen der Krankenversicherung in der Schweiz",
+        summary: "Verständliche Orientierung zu Versicherung, Franchise und kantonalen Verfahren.",
+        bodyMarkdown: """
+        # Krankenversicherung verstehen
+
+        Die Grundversicherung ist obligatorisch. Wählen Sie eine Franchise, die zu Ihrem Budget passt, und prüfen Sie auf der Kantonsseite, ob Sie Anspruch auf Prämienverbilligung haben.
+
+        ## Education System in Switzerland
+
+        Education is free and compulsory for children aged 4–15. Requirements and procedures may differ between cantons and personal situations.
+
+        > Important: Check current requirements with your canton before submitting documents.
+
+        - Krankenversicherung: Auswahl und Optimierung
+        - Kindergarten und Primarschule
+        """,
+        category: .insurance,
+        isNew: true,
+        estimatedReadingTime: 6,
+        language: "de",
+        verifiedAt: Date(),
+        source: "https://www.ch.ch/en/insurance/health-insurance/",
+        sourceTitle: "ch.ch — Health insurance",
+        heroImage: "swiss-moment-luzern"
+    )
     
     private func handleScenePhaseChange(_ phase: ScenePhase) {
         switch phase {
@@ -226,6 +316,7 @@ struct MainAppContent: View {
 
     private func startAccountServicesIfNeeded() async {
         guard sessionManager.isAuthenticated else { return }
+        await SubscriptionManager.shared.load()
         await appContainer.chatStore.start()
         if NotificationPreference.isEnabled {
             await SweezyAppDelegate.registerForChatPush()

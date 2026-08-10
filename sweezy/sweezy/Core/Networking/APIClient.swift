@@ -639,6 +639,14 @@ enum APIClient {
         let favorites_limit: Int?
         let guides_full_access: Bool
         let pdf_download: Bool
+        let cv_free_uses_remaining: Int
+    }
+
+    struct AppleSubscriptionSync: Decodable {
+        let status: String
+        let expire_at: String?
+        let product_id: String
+        let environment: String
     }
     
     static func subscriptionCurrent() async -> SubscriptionCurrent? {
@@ -663,45 +671,18 @@ enum APIClient {
         }
     }
     
-    static func startTrial() async -> SubscriptionCurrent? {
-        let url = url("subscriptions/trial")
-        var req = URLRequest(url: url)
-        req.httpMethod = "POST"
-        attachAuth(&req)
-        do {
-            let (data, resp) = try await URLSession.shared.data(for: req)
-            guard let http = resp as? HTTPURLResponse, (200..<300).contains(http.statusCode) else { return nil }
-            return try JSONDecoder().decode(SubscriptionCurrent.self, from: data)
-        } catch {
-            return nil
-        }
-    }
-    
-    static func createCheckout(plan: String, promotionCode: String? = nil) async -> URL? {
-        let url = url("subscriptions/checkout")
+    static func syncAppleTransaction(_ signedTransaction: String) async throws -> AppleSubscriptionSync {
+        let url = url("subscriptions/apple/transactions")
         var req = URLRequest(url: url)
         req.httpMethod = "POST"
         req.setValue("application/json", forHTTPHeaderField: "Content-Type")
         attachAuth(&req)
-        // Use backend base URL as success/cancel for browser flow
-        let success = baseURL.appendingPathComponent("ready").absoluteString
-        let cancel = baseURL.appendingPathComponent("ready").absoluteString
-        var body: [String: Any] = ["plan": plan, "success_url": success, "cancel_url": cancel]
-        if let promotionCode, !promotionCode.isEmpty {
-            body["promotion_code"] = promotionCode
+        req.httpBody = try JSONEncoder().encode(["signed_transaction": signedTransaction])
+        let (data, response) = try await authorizedData(for: req, context: "apple_subscription_sync")
+        guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+            throw makeAPIError(data: data, response: response as? HTTPURLResponse, fallback: "Subscription sync failed")
         }
-        req.httpBody = try? JSONSerialization.data(withJSONObject: body)
-        do {
-            let (data, resp) = try await URLSession.shared.data(for: req)
-            guard let http = resp as? HTTPURLResponse, (200..<300).contains(http.statusCode) else { return nil }
-            if let dict = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-               let urlStr = dict["url"] as? String, let u = URL(string: urlStr) {
-                return u
-            }
-            return nil
-        } catch {
-            return nil
-        }
+        return try JSONDecoder().decode(AppleSubscriptionSync.self, from: data)
     }
     
     // MARK: - Job Favorites

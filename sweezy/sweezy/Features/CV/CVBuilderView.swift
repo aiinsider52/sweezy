@@ -15,6 +15,7 @@ struct CVBuilderView: View {
     @EnvironmentObject private var appContainer: AppContainer
     @EnvironmentObject private var lockManager: AppLockManager
     @EnvironmentObject private var sessionManager: SessionManager
+    @StateObject private var subscriptionManager = SubscriptionManager.shared
     private let onClose: (() -> Void)?
 
     init(onClose: (() -> Void)? = nil) {
@@ -48,6 +49,9 @@ struct CVBuilderView: View {
     @State private var exportError: String?
     @State private var showAuthPrompt = false
     @State private var showPrivacyDisclosure = false
+    @State private var showCVPlusGate = false
+    @State private var showSubscription = false
+    @State private var cvFreeActionsUsed = 0
     @State private var pendingPrivateAction: (() -> Void)?
     @FocusState private var isInputFocused: Bool
     
@@ -147,6 +151,24 @@ struct CVBuilderView: View {
         .sheet(isPresented: $showAuthPrompt) {
             AuthEntryView(showsCloseButton: true) { showAuthPrompt = false }
         }
+        .sheet(isPresented: $showCVPlusGate) {
+            CVPlusGateSheet(
+                freeActionsUsed: cvFreeActionsUsed,
+                openPlus: {
+                    showCVPlusGate = false
+                    APIClient.logPaywall(eventType: "cta_click", context: SubscriptionSource.cv.rawValue)
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+                        showSubscription = true
+                    }
+                },
+                dismiss: { showCVPlusGate = false }
+            )
+            .presentationDetents([.large])
+            .presentationDragIndicator(.hidden)
+        }
+        .fullScreenCover(isPresented: $showSubscription) {
+            SubscriptionView(source: .cv)
+        }
         .alert("Приватність CV", isPresented: $showPrivacyDisclosure) {
             Button("Скасувати", role: .cancel) { pendingPrivateAction = nil }
             Button("Продовжити") {
@@ -161,9 +183,19 @@ struct CVBuilderView: View {
         .onAppear {
             loadSavedCV()
             loadSavedPhoto()
+            cvFreeActionsUsed = UserDefaults.standard.integer(forKey: cvPlusUsageKey)
             NotificationCenter.default.post(name: .setJourneyBottomBarHidden, object: true)
         }
+        .task {
+            await subscriptionManager.load()
+            if let entitlements = await APIClient.fetchEntitlements(), !entitlements.is_premium {
+                let backendUses = max(0, 3 - entitlements.cv_free_uses_remaining)
+                cvFreeActionsUsed = max(cvFreeActionsUsed, backendUses)
+                UserDefaults.standard.set(cvFreeActionsUsed, forKey: cvPlusUsageKey)
+            }
+        }
         .onDisappear {
+            saveCV()
             NotificationCenter.default.post(name: .setJourneyBottomBarHidden, object: false)
         }
         .onChange(of: selectedPhotoItem) { _, item in
@@ -196,7 +228,6 @@ struct CVBuilderView: View {
                     .accessibilityIdentifier("cv.keyboard.done")
             }
         }
-        .preferredColorScheme(.dark)
         .featureOnboarding(.cvBuilder)
     }
 
@@ -716,7 +747,9 @@ struct CVBuilderView: View {
                     }
                     
                     Button {
-                        exportATSPDF()
+                        requestPlusProtectedLocalAction {
+                            exportATSPDF()
+                        }
                     } label: {
                         HStack {
                             Image(systemName: "doc.richtext")
@@ -753,7 +786,7 @@ struct CVBuilderView: View {
                     
                     // Trigger translation if switching to German and no translation yet
                     if lang == .german && germanCV == nil && !isTranslating {
-                        requestPrivateAIAction {
+                        requestPlusProtectedAIAction {
                             Task { await translateToGerman() }
                         }
                     }
@@ -911,7 +944,7 @@ struct CVBuilderView: View {
     private func aiEnhanceButton(for section: String, action: @escaping () async -> Void) -> some View {
         VStack(spacing: 6) {
             Button {
-                requestPrivateAIAction { Task { await action() } }
+                requestPlusProtectedAIAction { Task { await action() } }
             } label: {
                 HStack(spacing: 8) {
                     if processingSection == section {
@@ -1236,11 +1269,55 @@ struct CVBuilderView: View {
         action()
     }
 
+    private var cvPlusUsageKey: String {
+        let identity = lockManager.userEmail.isEmpty ? "guest" : lockManager.userEmail.lowercased()
+        return "cv_plus_free_actions_used_\(identity)"
+    }
+
+    private func requestPlusProtectedAIAction(_ action: @escaping () -> Void) {
+        guard subscriptionManager.isPremium else {
+            guard cvFreeActionsUsed < 3 else {
+                showCVPlusGate = true
+                APIClient.logPaywall(eventType: "view", context: SubscriptionSource.cv.rawValue)
+                return
+            }
+            requestPrivateAIAction {
+                consumeFreeCVAction()
+                action()
+            }
+            return
+        }
+        requestPrivateAIAction(action)
+    }
+
+    private func requestPlusProtectedLocalAction(_ action: @escaping () -> Void) {
+        guard subscriptionManager.isPremium else {
+            guard cvFreeActionsUsed < 3 else {
+                showCVPlusGate = true
+                APIClient.logPaywall(eventType: "view", context: SubscriptionSource.cv.rawValue)
+                return
+            }
+            consumeFreeCVAction()
+            action()
+            return
+        }
+        action()
+    }
+
+    private func consumeFreeCVAction() {
+        cvFreeActionsUsed = min(3, cvFreeActionsUsed + 1)
+        UserDefaults.standard.set(cvFreeActionsUsed, forKey: cvPlusUsageKey)
+    }
+
     private func cvAIErrorMessage(_ error: Error) -> String {
         let nsError = error as NSError
         switch nsError.code {
         case 401: return "Сесія завершилась. Увійдіть знову."
-        case 402: return "Ця AI-функція тимчасово обмежена. Спробуйте пізніше."
+        case 402:
+            cvFreeActionsUsed = 3
+            UserDefaults.standard.set(3, forKey: cvPlusUsageKey)
+            showCVPlusGate = true
+            return "Безкоштовний ліміт використано. Відкрий Sweezy Plus для продовження."
         case 422: return "Перевірте заповнені поля CV та спробуйте ще раз."
         default:
             if nsError.domain == NSURLErrorDomain {

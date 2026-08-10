@@ -11,13 +11,13 @@ struct MountainRoadmapView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var appContainer: AppContainer
     @StateObject private var roadmapService = RoadmapService()
+    @StateObject private var subscriptionManager = SubscriptionManager.shared
     
     @State private var selectedLevel: RoadmapLevel?
     @State private var showSkipConfirmation = false
     @State private var levelToSkip: RoadmapLevel?
     
-    // TEMPORARY (App Store review): IAP removed — roadmap is fully unlocked.
-    private var isPremium: Bool { true }
+    private var isPremium: Bool { subscriptionManager.isPremium }
     
     var body: some View {
         ZStack {
@@ -53,7 +53,6 @@ struct MountainRoadmapView: View {
         }
         .navigationBarBackButtonHidden(true)
         .interactiveSwipeBackEnabled()
-        .preferredColorScheme(.dark)
         .sheet(item: $selectedLevel) { level in
             LevelDetailSheet(
                 level: level,
@@ -86,6 +85,7 @@ struct MountainRoadmapView: View {
             roadmapService.refreshFromStorage()
             NotificationCenter.default.post(name: .setJourneyBottomBarHidden, object: true)
         }
+        .task { await subscriptionManager.load() }
         .onDisappear {
             NotificationCenter.default.post(name: .setJourneyBottomBarHidden, object: false)
         }
@@ -598,7 +598,7 @@ struct LevelDetailSheet: View {
                 TaskCard(
                     task: task,
                     isCompleted: isTaskCompleted(task),
-                    isLocked: false,
+                    isLocked: task.isPremiumOnly && !isPremium,
                     onTap: {
                         handleTaskTap(task)
                     }
@@ -611,7 +611,6 @@ struct LevelDetailSheet: View {
     }
     
     private var availableTasks: [LevelTask] {
-        // TEMPORARY: no subscription-based filtering.
         level.tasks
     }
     
@@ -741,7 +740,11 @@ struct LevelDetailSheet: View {
                         .font(.caption)
                         .foregroundColor(.secondary)
                     
-                    // TEMPORARY: no subscription labels.
+                    if level.tasks.contains(where: { $0.isPremiumOnly }) {
+                        Text("PLUS")
+                            .font(.caption2.bold())
+                            .foregroundColor(Theme.Colors.accent)
+                    }
                 }
                 
                 Text(level.subtitle.localized)
@@ -948,7 +951,11 @@ struct TaskCard: View {
                             .strikethrough(isCompleted, color: .green)
                             .lineLimit(2)
                         
-                        // TEMPORARY: no subscription markers.
+                        if task.isPremiumOnly {
+                            Image(systemName: "star.fill")
+                                .font(.caption2)
+                                .foregroundColor(Theme.Colors.accent)
+                        }
                     }
                     
                     Text(task.description.localized)

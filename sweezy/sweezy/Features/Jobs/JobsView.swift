@@ -47,6 +47,10 @@ struct JobsView: View {
     @State private var draftedText: String?
     @State private var isDrafting: Bool = false
     @State private var showAuthEntry: Bool = false
+    @State private var showSubscription: Bool = false
+    @State private var showCVBuilder: Bool = false
+    @State private var savedCV: CVResume?
+    @StateObject private var subscriptionManager = SubscriptionManager.shared
     
     // AI Match
     @State private var showAIMatchProfile: Bool = false
@@ -164,13 +168,50 @@ struct JobsView: View {
         return counts.sorted { $0.value > $1.value }.prefix(6).map { $0.key }
     }
     
-    // TEMPORARY (App Store review): IAP removed, all features are fully unlocked.
-    private let hasPremiumAccess: Bool = true
+    private var hasPremiumAccess: Bool { subscriptionManager.isPremium }
+    private var careerProfile: CareerProfileSnapshot { CareerProfileSnapshot(resume: savedCV) }
+    private var activeApplications: [APIClient.JobApplication] {
+        applications.filter { !["rejected", "withdrawn"].contains($0.status) }
+    }
+    private var careerMatchCount: Int {
+        #if DEBUG
+        if isCareerHubUITest { return 12 }
+        #endif
+        return matchedItems.count
+    }
+
+    private var isCareerHubUITest: Bool {
+        #if DEBUG
+        ProcessInfo.processInfo.environment["UITESTS"] == "1" &&
+            ProcessInfo.processInfo.arguments.contains("--ui-test-career-hub")
+        #else
+        false
+        #endif
+    }
+
+    private enum CareerNextAction {
+        case createCV
+        case completeCV
+        case findMatches
+        case reviewMatches
+        case reviewApplications
+    }
+
+    private var careerNextAction: CareerNextAction {
+        if !careerProfile.hasResume { return .createCV }
+        if careerProfile.completion < 70 || !careerProfile.canMatchJobs { return .completeCV }
+        if activeApplications.contains(where: { $0.status == "interview" || $0.status == "offer" }) {
+            return .reviewApplications
+        }
+        if careerMatchCount == 0 { return .findMatches }
+        if activeApplications.isEmpty { return .reviewMatches }
+        return .reviewApplications
+    }
     
     // MARK: - Body
     var body: some View {
         Group {
-            if sessionManager.isAuthenticated {
+            if sessionManager.isAuthenticated || isCareerHubUITest {
                 jobsContent
             } else {
                 jobsAccessGate
@@ -190,6 +231,18 @@ struct JobsView: View {
             if authenticated {
                 showAuthEntry = false
             }
+        }
+        .task { await subscriptionManager.load() }
+        .fullScreenCover(isPresented: $showCVBuilder, onDismiss: {
+            reloadCareerProfile(syncMatchProfile: true)
+        }) {
+            CVBuilderView(onClose: { showCVBuilder = false })
+                .environmentObject(appContainer)
+                .environmentObject(lockManager)
+                .environmentObject(sessionManager)
+        }
+        .fullScreenCover(isPresented: $showSubscription) {
+            SubscriptionView(source: .profile)
         }
     }
 
@@ -219,9 +272,8 @@ struct JobsView: View {
                     heroSection
 
                     VStack(spacing: 13) {
-                        aiMatchSection
+                        careerHubSection
                         smartFiltersSection
-                        dashboardSection
 
                         if showAdvancedFilters {
                             advancedFiltersSection
@@ -327,8 +379,13 @@ struct JobsView: View {
         .task {
             if !didLoadScopedState {
                 loadScopedState()
+                reloadCareerProfile(syncMatchProfile: true)
                 applyJobsPresetIfNeeded()
                 didLoadScopedState = true
+            }
+            if isCareerHubUITest {
+                didSearchOnce = true
+                return
             }
             if !didSearchOnce {
                 await performSearch()
@@ -487,12 +544,12 @@ struct JobsView: View {
 
             Spacer(minLength: 12)
 
-            Text("РОБОТА У ШВЕЙЦАРІЇ")
+            Text("CAREER HUB · ШВЕЙЦАРІЯ")
                 .font(.system(size: 13, weight: .bold))
                 .tracking(2.2)
                 .foregroundColor(JourneyVisual.lime)
 
-            Text("Знайди роботу,\nяка підходить тобі")
+            Text("Від сильного CV\nдо першого оферу")
                 .font(.system(size: 36, weight: .bold, design: .rounded))
                 .foregroundColor(.white)
                 .minimumScaleFactor(0.82)
@@ -503,6 +560,272 @@ struct JobsView: View {
         .padding(.horizontal, 22)
         .padding(.top, 10)
         .padding(.bottom, 16)
+    }
+
+    // MARK: - Career Hub
+    private var careerHubSection: some View {
+        VStack(alignment: .leading, spacing: 18) {
+            HStack(alignment: .top, spacing: 14) {
+                CareerReadinessRing(progress: careerProfile.completion)
+
+                VStack(alignment: .leading, spacing: 5) {
+                    Text("КАР’ЄРНИЙ ПРОФІЛЬ")
+                        .font(.system(size: 10, weight: .black, design: .rounded))
+                        .tracking(1.6)
+                        .foregroundColor(JourneyVisual.lime)
+
+                    Text(careerProfile.desiredPosition.isEmpty ? "Твій наступний крок" : careerProfile.desiredPosition)
+                        .font(.system(size: 22, weight: .bold, design: .rounded))
+                        .foregroundColor(.white)
+                        .lineLimit(2)
+
+                    Text(careerProfile.hasResume ? "CV автоматично живить пошук і AI Match" : "Створи CV — решту Career Hub збере сам")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(.white.opacity(0.58))
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                Spacer(minLength: 4)
+
+                Button {
+                    showCVBuilder = true
+                } label: {
+                    Image(systemName: careerProfile.hasResume ? "pencil" : "plus")
+                        .font(.system(size: 15, weight: .bold))
+                        .foregroundColor(.white)
+                        .frame(width: 40, height: 40)
+                        .background(Color.white.opacity(0.08))
+                        .clipShape(Circle())
+                        .overlay(Circle().stroke(Color.white.opacity(0.16), lineWidth: 1))
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(careerProfile.hasResume ? "Редагувати CV" : "Створити CV")
+            }
+
+            careerRoute
+
+            HStack(spacing: 8) {
+                CareerHubMetric(
+                    value: "\(careerProfile.completion)%",
+                    label: "готовність CV",
+                    icon: "doc.text.fill"
+                )
+                CareerHubMetric(
+                    value: "\(careerMatchCount)",
+                    label: "AI збігів",
+                    icon: "sparkles"
+                )
+                CareerHubMetric(
+                    value: "\(activeApplications.count)",
+                    label: "активні заявки",
+                    icon: "paperplane.fill"
+                )
+            }
+
+            HStack(alignment: .top, spacing: 12) {
+                Image(systemName: careerNextIcon)
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundColor(.black)
+                    .frame(width: 38, height: 38)
+                    .background(JourneyVisual.lime)
+                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("НАСТУПНА ДІЯ")
+                        .font(.system(size: 9, weight: .black, design: .rounded))
+                        .tracking(1.2)
+                        .foregroundColor(JourneyVisual.lime)
+                    Text(careerNextTitle)
+                        .font(.system(size: 15, weight: .bold, design: .rounded))
+                        .foregroundColor(.white)
+                    Text(careerNextSubtitle)
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundColor(.white.opacity(0.56))
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: 0)
+            }
+            .padding(13)
+            .background(Color.black.opacity(0.24))
+            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.white.opacity(0.1)))
+
+            Button {
+                handleCareerPrimaryAction()
+            } label: {
+                HStack(spacing: 10) {
+                    if isAIMatching {
+                        ProgressView().tint(.black)
+                    } else {
+                        Image(systemName: careerPrimaryIcon)
+                    }
+                    Text(careerPrimaryTitle)
+                        .font(.system(size: 16, weight: .bold, design: .rounded))
+                    Spacer()
+                    Image(systemName: "arrow.right")
+                        .font(.system(size: 16, weight: .black))
+                }
+                .foregroundColor(.black)
+                .padding(.horizontal, 18)
+                .frame(maxWidth: .infinity, minHeight: 54)
+                .background(JourneyVisual.lime)
+                .clipShape(RoundedRectangle(cornerRadius: 17, style: .continuous))
+            }
+            .buttonStyle(.plain)
+            .disabled(isAIMatching)
+            .accessibilityIdentifier("careerHub.primaryAction")
+
+            HStack(spacing: 10) {
+                careerUtilityButton(icon: "slider.horizontal.3", title: "Профіль AI") {
+                    showAIMatchProfile = true
+                }
+                careerUtilityButton(icon: alerts.isEmpty ? "bell" : "bell.fill", title: "Сповіщення") {
+                    showAlerts = true
+                }
+                careerUtilityButton(icon: "rectangle.stack", title: "Трекер") {
+                    showApplicationTracker = true
+                }
+            }
+        }
+        .padding(17)
+        .background(
+            ZStack {
+                RoundedRectangle(cornerRadius: 28, style: .continuous)
+                    .fill(Color(red: 0.045, green: 0.062, blue: 0.051).opacity(0.97))
+                RadialGradient(
+                    colors: [JourneyVisual.lime.opacity(0.14), .clear],
+                    center: .topTrailing,
+                    startRadius: 0,
+                    endRadius: 220
+                )
+                .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+            }
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 28, style: .continuous)
+                .stroke(
+                    LinearGradient(
+                        colors: [JourneyVisual.lime.opacity(0.72), Color.white.opacity(0.08)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    lineWidth: 1.2
+                )
+        )
+        .shadow(color: JourneyVisual.lime.opacity(0.08), radius: 28, y: 12)
+        .accessibilityIdentifier("careerHub.dashboard")
+    }
+
+    private var careerRoute: some View {
+        HStack(spacing: 0) {
+            CareerRouteNode(title: "CV", icon: "doc.text.fill", state: careerProfile.hasResume ? .complete : .current)
+            CareerRouteConnector(isComplete: careerMatchCount > 0)
+            CareerRouteNode(title: "Збіги", icon: "sparkles", state: careerMatchCount > 0 ? .complete : (careerProfile.hasResume ? .current : .locked))
+            CareerRouteConnector(isComplete: !activeApplications.isEmpty)
+            CareerRouteNode(title: "Заявки", icon: "paperplane.fill", state: !activeApplications.isEmpty ? .complete : (careerMatchCount > 0 ? .current : .locked))
+            CareerRouteConnector(isComplete: applications.contains(where: { $0.status == "offer" }))
+            CareerRouteNode(title: "Офер", icon: "checkmark.seal.fill", state: applications.contains(where: { $0.status == "offer" }) ? .complete : .locked)
+        }
+        .frame(maxWidth: .infinity)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Кар'єрний маршрут: CV, збіги, заявки, офер")
+    }
+
+    private func careerUtilityButton(icon: String, title: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            VStack(spacing: 6) {
+                Image(systemName: icon)
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundColor(JourneyVisual.lime)
+                Text(title)
+                    .font(.system(size: 9, weight: .bold))
+                    .foregroundColor(.white.opacity(0.68))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.72)
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 54)
+            .background(Color.white.opacity(0.055))
+            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.white.opacity(0.09)))
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var careerNextIcon: String {
+        switch careerNextAction {
+        case .createCV: return "doc.badge.plus"
+        case .completeCV: return "pencil.and.list.clipboard"
+        case .findMatches: return "sparkles"
+        case .reviewMatches: return "rectangle.stack.fill"
+        case .reviewApplications: return "arrow.triangle.2.circlepath"
+        }
+    }
+
+    private var careerNextTitle: String {
+        switch careerNextAction {
+        case .createCV: return "Створи швейцарське CV"
+        case .completeCV:
+            return "Додай \(careerProfile.nextMissingSection ?? "дані CV")"
+        case .findMatches: return "Запусти пошук за своїм CV"
+        case .reviewMatches: return "Обери першу відповідну вакансію"
+        case .reviewApplications:
+            if applications.contains(where: { $0.status == "interview" }) { return "Підготуйся до співбесіди" }
+            if applications.contains(where: { $0.status == "offer" }) { return "Переглянь свій офер" }
+            return "Онови статус активних заявок"
+        }
+    }
+
+    private var careerNextSubtitle: String {
+        switch careerNextAction {
+        case .createCV: return "Профіль, досвід, навички та ATS PDF в одному процесі."
+        case .completeCV: return "Повніший профіль дає точніші AI-рекомендації."
+        case .findMatches: return "Посада й навички вже готові для персонального підбору."
+        case .reviewMatches: return "Відкрий збіг, перевір вимоги та підготуй заявку."
+        case .reviewApplications: return "Career Hub збереже етапи й наступні дії в одному місці."
+        }
+    }
+
+    private var careerPrimaryTitle: String {
+        switch careerNextAction {
+        case .createCV: return "Створити CV"
+        case .completeCV: return "Завершити CV"
+        case .findMatches: return "Знайти роботу за моїм CV"
+        case .reviewMatches: return "Переглянути AI-збіги"
+        case .reviewApplications: return "Відкрити трекер заявок"
+        }
+    }
+
+    private var careerPrimaryIcon: String {
+        switch careerNextAction {
+        case .createCV, .completeCV: return "doc.text.fill"
+        case .findMatches: return "sparkles"
+        case .reviewMatches: return "briefcase.fill"
+        case .reviewApplications: return "rectangle.stack.fill"
+        }
+    }
+
+    private func handleCareerPrimaryAction() {
+        switch careerNextAction {
+        case .createCV, .completeCV:
+            showCVBuilder = true
+        case .findMatches:
+            Task { await findJobsUsingSavedCV() }
+        case .reviewMatches:
+            withAnimation(.easeInOut(duration: 0.2)) { showMatchResults = true }
+        case .reviewApplications:
+            showApplicationTracker = true
+        }
+        haptic(.medium)
+    }
+
+    private func findJobsUsingSavedCV() async {
+        reloadCareerProfile(syncMatchProfile: true)
+        guard careerProfile.canMatchJobs else {
+            showCVBuilder = true
+            return
+        }
+        await performAIMatch()
     }
 
     // MARK: - AI Match
@@ -985,6 +1308,68 @@ struct JobsView: View {
         aiExperienceLevel = defaults.string(forKey: aiExperienceLevelKey) ?? ""
         favoritesCount = favoriteIds.count
     }
+
+    private func reloadCareerProfile(syncMatchProfile: Bool) {
+        #if DEBUG
+        if isCareerHubUITest {
+            applyCareerResume(Self.careerHubFixture, syncMatchProfile: syncMatchProfile)
+            return
+        }
+        #endif
+
+        guard !lockManager.userEmail.isEmpty else {
+            savedCV = nil
+            return
+        }
+
+        let key = "cv_saved_data_\(lockManager.userEmail.lowercased())"
+        guard let data = ProtectedLocalStore.data(for: key, migratingFrom: key),
+              let resume = try? JSONDecoder().decode(CVResume.self, from: data) else {
+            savedCV = nil
+            return
+        }
+
+        applyCareerResume(resume, syncMatchProfile: syncMatchProfile)
+    }
+
+    private func applyCareerResume(_ resume: CVResume, syncMatchProfile: Bool) {
+        savedCV = resume
+        guard syncMatchProfile else { return }
+
+        let snapshot = CareerProfileSnapshot(resume: resume)
+        if !snapshot.desiredPosition.isEmpty {
+            aiDesiredPosition = snapshot.desiredPosition
+        }
+        if !snapshot.normalizedSkills.isEmpty {
+            aiSkills = snapshot.normalizedSkills.joined(separator: ", ")
+        }
+        if aiPreferredCanton.isEmpty, let profileCanton = appContainer.userProfile?.canton.rawValue {
+            aiPreferredCanton = profileCanton
+        }
+        if aiExperienceLevel.isEmpty, let inferredLevel = snapshot.inferredExperienceLevel {
+            aiExperienceLevel = inferredLevel
+        }
+        persistAIMatchProfile()
+    }
+
+    #if DEBUG
+    private static var careerHubFixture: CVResume {
+        var resume = CVResume.empty
+        resume.personal = CVPersonal(
+            fullName: "Anna Kovalenko",
+            title: "Product Designer",
+            email: "anna@example.com",
+            phone: "+41 79 123 45 67",
+            location: "Zürich",
+            summary: "Product designer building clear, accessible services for international teams in Switzerland."
+        )
+        resume.experience = [
+            CVExperience(role: "Product Designer", company: "Digital Solutions AG", period: "2022–сьогодні", location: "Zürich", achievements: "Запустила дизайн-систему та покращила ключові user flows.")
+        ]
+        resume.skills = ["Figma", "UX Research", "Design Systems", "Prototyping"]
+        return resume
+    }
+    #endif
     
     private func persistJobsScopedState() {
         defaults.set(Array(favoriteIds), forKey: favoriteIdsKey)
@@ -1141,8 +1526,13 @@ struct JobsView: View {
     }
     
     private func draftApply(_ job: APIClient.JobItem) async {
-        guard hasPremiumAccess, KeychainStore.get("access_token")?.isEmpty == false else {
+        guard KeychainStore.get("access_token")?.isEmpty == false else {
             showAuthEntry = true
+            return
+        }
+        guard hasPremiumAccess else {
+            showSubscription = true
+            APIClient.logPaywall(eventType: "view", context: "jobs")
             return
         }
         
@@ -1287,6 +1677,120 @@ struct JobsView: View {
         if !CHHapticEngine.capabilitiesForHardware().supportsHaptics { return }
         UINotificationFeedbackGenerator().notificationOccurred(type)
         #endif
+    }
+}
+
+private enum CareerRouteState {
+    case complete
+    case current
+    case locked
+}
+
+private struct CareerReadinessRing: View {
+    let progress: Int
+
+    var body: some View {
+        ZStack {
+            Circle()
+                .stroke(Color.white.opacity(0.1), lineWidth: 6)
+            Circle()
+                .trim(from: 0, to: CGFloat(max(0, min(progress, 100))) / 100)
+                .stroke(JourneyVisual.lime, style: StrokeStyle(lineWidth: 6, lineCap: .round))
+                .rotationEffect(.degrees(-90))
+            VStack(spacing: -1) {
+                Text("\(progress)%")
+                    .font(.system(size: 17, weight: .black, design: .rounded))
+                    .foregroundColor(.white)
+                Text("CV")
+                    .font(.system(size: 8, weight: .bold, design: .rounded))
+                    .foregroundColor(.white.opacity(0.48))
+            }
+        }
+        .frame(width: 66, height: 66)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Готовність CV \(progress) відсотків")
+    }
+}
+
+private struct CareerHubMetric: View {
+    let value: String
+    let label: String
+    let icon: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 5) {
+            HStack(spacing: 5) {
+                Image(systemName: icon)
+                    .font(.system(size: 10, weight: .bold))
+                    .foregroundColor(JourneyVisual.lime)
+                Text(value)
+                    .font(.system(size: 17, weight: .black, design: .rounded))
+                    .foregroundColor(.white)
+            }
+            Text(label)
+                .font(.system(size: 8, weight: .bold))
+                .foregroundColor(.white.opacity(0.48))
+                .lineLimit(1)
+                .minimumScaleFactor(0.68)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 10)
+        .frame(height: 58)
+        .background(Color.white.opacity(0.05))
+        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.white.opacity(0.08)))
+        .accessibilityElement(children: .combine)
+    }
+}
+
+private struct CareerRouteNode: View {
+    let title: String
+    let icon: String
+    let state: CareerRouteState
+
+    private var fill: Color {
+        switch state {
+        case .complete: return JourneyVisual.lime
+        case .current: return JourneyVisual.lime.opacity(0.16)
+        case .locked: return Color.white.opacity(0.055)
+        }
+    }
+
+    private var foreground: Color {
+        switch state {
+        case .complete: return .black
+        case .current: return JourneyVisual.lime
+        case .locked: return .white.opacity(0.32)
+        }
+    }
+
+    var body: some View {
+        VStack(spacing: 6) {
+            Image(systemName: state == .complete ? "checkmark" : icon)
+                .font(.system(size: 11, weight: .black))
+                .foregroundColor(foreground)
+                .frame(width: 28, height: 28)
+                .background(fill)
+                .clipShape(Circle())
+                .overlay(Circle().stroke(state == .current ? JourneyVisual.lime.opacity(0.62) : Color.clear, lineWidth: 1))
+            Text(title)
+                .font(.system(size: 8, weight: .bold))
+                .foregroundColor(state == .locked ? .white.opacity(0.32) : .white.opacity(0.72))
+                .lineLimit(1)
+        }
+        .frame(width: 48)
+    }
+}
+
+private struct CareerRouteConnector: View {
+    let isComplete: Bool
+
+    var body: some View {
+        Capsule()
+            .fill(isComplete ? JourneyVisual.lime : Color.white.opacity(0.1))
+            .frame(maxWidth: .infinity)
+            .frame(height: 2)
+            .offset(y: -10)
     }
 }
 
@@ -2658,7 +3162,6 @@ private struct JobApplicationTrackerSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Готово") { dismiss() } } }
         }
-        .preferredColorScheme(.dark)
     }
 }
 
@@ -2746,7 +3249,6 @@ private struct JobAlertsSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Готово") { dismiss() } } }
         }
-        .preferredColorScheme(.dark)
     }
 }
 
@@ -2956,7 +3458,6 @@ private struct JobEmployerHubSheet: View {
             .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Готово") { dismiss() } } }
             .task { await load() }
         }
-        .preferredColorScheme(.dark)
     }
 
     private func load() async {

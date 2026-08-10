@@ -17,6 +17,7 @@ cryptography>=46.0.7,<51.0
 feedparser>=6.0,<7.0
 openai>=1.0,<2.0
 stripe>=5.0,<10.0
+app-store-server-library>=3.1,<4.0
 slowapi>=0.1.7,<0.2.0
 structlog>=24.0,<25.0
 prometheus-fastapi-instrumentator>=8.0.2,<9.0.0

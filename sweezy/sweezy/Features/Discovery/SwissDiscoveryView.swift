@@ -118,7 +118,6 @@ struct SwissDiscoveryView: View {
             guard let summaries = try? await APIClient.fetchDiscoveryRatings() else { return }
             ratingSummaries = Dictionary(uniqueKeysWithValues: summaries.map { ($0.placeID, $0) })
         }
-        .preferredColorScheme(.dark)
         .accessibilityIdentifier("swiss.discovery.screen")
     }
 
@@ -739,7 +738,6 @@ struct SwissDiscoveryDetailView: View {
                 }
             )
         }
-        .preferredColorScheme(.dark)
         .accessibilityIdentifier("swiss.discovery.detail.\(place.id)")
     }
 
@@ -1381,7 +1379,6 @@ private struct SwissDiscoveryReviewEditor: View {
                 Text("swiss.discovery.reviews.delete_confirm.body".localized)
             }
         }
-        .preferredColorScheme(.dark)
     }
 
     private func submit() {

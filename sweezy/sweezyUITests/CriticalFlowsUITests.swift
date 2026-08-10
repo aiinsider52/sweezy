@@ -174,6 +174,38 @@ final class CriticalFlowsUITests: XCTestCase {
     }
 
     @MainActor
+    func testCareerHubConnectsCVToJobMatches() throws {
+        let app = XCUIApplication()
+        app.launchArguments = ["--ui-test-career-hub"]
+        app.launchEnvironment["UITESTS"] = "1"
+        app.launch()
+
+        XCTAssertTrue(app.descendants(matching: .any)["careerHub.dashboard"].waitForExistence(timeout: 15))
+        let primaryAction = app.buttons["careerHub.primaryAction"]
+        XCTAssertTrue(primaryAction.exists)
+        XCTAssertTrue(primaryAction.isHittable)
+        XCTAssertTrue(app.staticTexts["12"].exists)
+        XCTAssertTrue(app.staticTexts["AI збігів"].exists)
+
+        keepScreenshot(app, name: "career-hub-dashboard")
+    }
+
+    @MainActor
+    func testProfessionalNetworkShowsIntentionalDiscoveryExperience() throws {
+        let app = XCUIApplication()
+        app.launchArguments = ["--ui-test-network"]
+        app.launchEnvironment["UITESTS"] = "1"
+        app.launch()
+
+        XCTAssertTrue(app.descendants(matching: .any)["network.screen"].waitForExistence(timeout: 20))
+        XCTAssertTrue(app.staticTexts["Знайомства\nз наміром"].exists)
+        XCTAssertTrue(app.staticTexts["3 нових контактів"].exists)
+        XCTAssertTrue(app.staticTexts["Oleksandr Melnyk"].waitForExistence(timeout: 10))
+
+        keepScreenshot(app, name: "professional-network")
+    }
+
+    @MainActor
     private func launchCVBuilder() -> XCUIApplication {
         let app = XCUIApplication()
         app.launchArguments = [

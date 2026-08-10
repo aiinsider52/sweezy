@@ -30,7 +30,6 @@ struct FeatureOnboardingView: View {
                 footer
             }
         }
-        .preferredColorScheme(.dark)
         .onAppear {
             guard !appeared else { return }
             if reduceMotion {

@@ -9,6 +9,8 @@ from sqlalchemy.orm import Session
 from .core.database import get_db
 from .core.security import decode_token
 from .services.users import UserService
+from .models.subscription import PremiumUsage
+from .models.user import User
 from datetime import datetime, timezone
 
 
@@ -125,25 +127,56 @@ def require_roles(*roles: str):
 
 
 def require_premium():
-    def dependency(user=Depends(get_current_user)):
-        # Expire trial/premium if past date
+    def dependency(user=Depends(get_current_user), db: Session = Depends(get_db)):
         expire_at = getattr(user, "subscription_expire_at", None)
         entitlement_status = getattr(user, "subscription_status", "free") or "free"
         if entitlement_status in {"trial", "premium"} and expire_at is not None:
-            try:
-                if expire_at < datetime.now(timezone.utc):
-                    # downgrade
-                    user.subscription_status = "free"
-                    user.subscription_expire_at = None
-                    # We do not have db session here; silently rely on next write to persist, or ignore.
-                    entitlement_status = "free"
-            except Exception:
-                pass
+            comparable = expire_at if expire_at.tzinfo else expire_at.replace(tzinfo=timezone.utc)
+            if comparable <= datetime.now(timezone.utc):
+                user.subscription_status = "free"
+                user.subscription_expire_at = None
+                db.add(user)
+                db.commit()
+                entitlement_status = "free"
         if entitlement_status not in {"trial", "premium"}:
             raise HTTPException(
                 status_code=status.HTTP_402_PAYMENT_REQUIRED,
                 detail="Premium required. Subscribe to continue.",
             )
         return user
+
+    return Depends(dependency)
+
+
+def require_premium_or_free_uses(feature: str, free_limit: int):
+    """Server-authoritative quota for costly Plus endpoints."""
+    def dependency(user=Depends(get_current_user), db: Session = Depends(get_db)):
+        locked_user = db.query(User).filter(User.id == user.id).with_for_update().one()
+        expire_at = locked_user.subscription_expire_at
+        if expire_at is not None and expire_at.tzinfo is None:
+            expire_at = expire_at.replace(tzinfo=timezone.utc)
+        premium = locked_user.subscription_status in {"trial", "premium"} and (
+            expire_at is None or expire_at > datetime.now(timezone.utc)
+        )
+        if premium:
+            return locked_user
+
+        usage = (
+            db.query(PremiumUsage)
+            .filter(PremiumUsage.user_id == locked_user.id, PremiumUsage.feature == feature)
+            .one_or_none()
+        )
+        if usage is None:
+            usage = PremiumUsage(user_id=locked_user.id, feature=feature, free_uses=0)
+        if usage.free_uses >= free_limit:
+            db.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_402_PAYMENT_REQUIRED,
+                detail={"code": "plus_required", "feature": feature, "free_limit": free_limit},
+            )
+        usage.free_uses += 1
+        db.add(usage)
+        db.commit()
+        return locked_user
 
     return Depends(dependency)

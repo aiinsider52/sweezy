@@ -1,0 +1,221 @@
+from __future__ import annotations
+
+from datetime import datetime, timedelta, timezone
+
+from fastapi import APIRouter, HTTPException, Query, status
+from sqlalchemy import String, and_, cast, func, or_, select
+from sqlalchemy.exc import IntegrityError
+
+from ..dependencies import CurrentUser, DBSession
+from ..models.chat import ChatConversation, ChatParticipant
+from ..models.event_listing import EventListing
+from ..models.marketplace import MarketplaceBlock
+from ..models.social import EventAttendance, FriendConnection, SocialProfile, SocialProfileReport
+from ..models.user import PublicUserProfile, User
+from ..schemas.social import (
+    AttendanceResponse, AttendanceUpsert, FriendConnectionResponse, FriendDecision, FriendRequestCreate,
+    SocialActionResponse, SocialEventResponse, SocialProfilePage, SocialProfileResponse, SocialProfileUpsert,
+    SocialReportCreate,
+)
+
+router = APIRouter()
+
+
+def _now() -> datetime: return datetime.now(timezone.utc)
+
+
+def _utc(value: datetime) -> datetime:
+    return value if value.tzinfo else value.replace(tzinfo=timezone.utc)
+
+
+def _blocked_ids(db: DBSession, user_id: str):
+    return (
+        select(MarketplaceBlock.blocked_author_id).where(MarketplaceBlock.user_id == user_id),
+        select(MarketplaceBlock.user_id).where(MarketplaceBlock.blocked_author_id == user_id),
+    )
+
+
+def _pair(db: DBSession, first: str, second: str) -> FriendConnection | None:
+    return db.execute(select(FriendConnection).where(FriendConnection.pair_key == ":".join(sorted((first, second))))).scalar_one_or_none()
+
+
+def _response(profile: SocialProfile, viewer: SocialProfile | None, connection: FriendConnection | None = None) -> SocialProfileResponse:
+    shared = sorted(set(viewer.interests if viewer else []) & set(profile.interests))
+    score = min(98, len(shared) * 16 + (18 if viewer and viewer.canton == profile.canton else 0) + (8 if viewer and set(viewer.languages) & set(profile.languages) else 0))
+    state = "none"
+    if connection:
+        state = connection.status if connection.status == "accepted" else ("incoming" if connection.target_id == viewer.user_id else "outgoing")
+    return SocialProfileResponse.model_validate(profile).model_copy(update={
+        "match_score": score, "shared_interests": shared, "connection_state": state,
+        "connection_id": connection.id if connection else None,
+        "conversation_id": connection.conversation_id if connection else None,
+        "context_event_id": connection.context_event_id if connection else None,
+    })
+
+
+def _connection_response(db: DBSession, item: FriendConnection, viewer_id: str) -> FriendConnectionResponse:
+    other_id = item.requester_id if item.target_id == viewer_id else item.target_id
+    profile = db.get(SocialProfile, other_id)
+    viewer = db.get(SocialProfile, viewer_id)
+    if not profile: raise HTTPException(404, "Social profile not found")
+    return FriendConnectionResponse(
+        id=item.id, direction="incoming" if item.target_id == viewer_id else "outgoing", status=item.status,
+        message=item.message, context_event_id=item.context_event_id, conversation_id=item.conversation_id,
+        shared_interests=item.shared_interests, other_profile=_response(profile, viewer, item),
+        created_at=item.created_at, updated_at=item.updated_at,
+    )
+
+
+@router.get("/profiles", response_model=SocialProfilePage)
+def profiles(db: DBSession, user: CurrentUser, q: str | None = Query(None, max_length=100), canton: str | None = None,
+             interest: str | None = None, event_id: str | None = None, page: int = Query(1, ge=1), per_page: int = Query(20, ge=1, le=50)):
+    own = db.get(SocialProfile, user.id)
+    blocked, blocked_by = _blocked_ids(db, user.id)
+    conditions = [SocialProfile.user_id != user.id, SocialProfile.is_visible.is_(True), SocialProfile.open_to_friends.is_(True),
+                  User.is_active.is_(True), SocialProfile.user_id.not_in(blocked), SocialProfile.user_id.not_in(blocked_by)]
+    if q:
+        pattern = f"%{q.strip()}%"
+        conditions.append(or_(SocialProfile.display_name.ilike(pattern), SocialProfile.city.ilike(pattern), SocialProfile.bio.ilike(pattern), cast(SocialProfile.interests, String).ilike(pattern)))
+    if canton: conditions.append(SocialProfile.canton == canton.strip().upper())
+    if interest: conditions.append(cast(SocialProfile.interests, String).ilike(f'%"{interest}"%'))
+    base = select(SocialProfile).join(User, User.id == SocialProfile.user_id).where(*conditions)
+    if event_id:
+        if not db.execute(select(EventAttendance).where(EventAttendance.event_id == event_id, EventAttendance.user_id == user.id)).scalar_one_or_none():
+            raise HTTPException(403, "Join event before viewing attendees")
+        base = base.join(EventAttendance, EventAttendance.user_id == SocialProfile.user_id).where(
+            EventAttendance.event_id == event_id, EventAttendance.visible_to_attendees.is_(True))
+    rows = db.execute(base).scalars().all()
+    ids = [p.user_id for p in rows]
+    connections = db.execute(select(FriendConnection).where(or_(
+        and_(FriendConnection.requester_id == user.id, FriendConnection.target_id.in_(ids)),
+        and_(FriendConnection.target_id == user.id, FriendConnection.requester_id.in_(ids))
+    ))).scalars().all() if ids else []
+    by_other = {(c.target_id if c.requester_id == user.id else c.requester_id): c for c in connections}
+    items = [_response(p, own, by_other.get(p.user_id)) for p in rows]
+    items.sort(key=lambda p: (p.match_score, p.is_verified, p.updated_at), reverse=True)
+    total = len(items); start = (page - 1) * per_page
+    return SocialProfilePage(items=items[start:start + per_page], total=total, page=page, per_page=per_page, pages=max(1, (total + per_page - 1) // per_page))
+
+
+@router.get("/profile/me", response_model=SocialProfileResponse)
+def my_profile(db: DBSession, user: CurrentUser):
+    profile = db.get(SocialProfile, user.id)
+    if not profile: raise HTTPException(404, "Social profile not created")
+    return _response(profile, profile)
+
+
+@router.put("/profile/me", response_model=SocialProfileResponse)
+def save_profile(payload: SocialProfileUpsert, db: DBSession, user: CurrentUser):
+    if not user.email_verified: raise HTTPException(403, "Verify your email before publishing")
+    if not payload.guidelines_accepted: raise HTTPException(422, "Community guidelines must be accepted")
+    values = payload.model_dump(exclude={"guidelines_accepted"})
+    values.update(guidelines_accepted=True, is_verified=user.email_verified)
+    profile = db.get(SocialProfile, user.id)
+    if profile is None: profile = SocialProfile(user_id=user.id, **values)
+    else:
+        for key, value in values.items(): setattr(profile, key, value)
+    db.add(profile)
+    public = db.get(PublicUserProfile, user.id)
+    if public is None: db.add(PublicUserProfile(user_id=user.id, display_name=payload.display_name, is_verified=user.email_verified))
+    else: public.display_name = payload.display_name
+    db.commit(); db.refresh(profile)
+    return _response(profile, profile)
+
+
+@router.post("/profiles/{target_id}/connect", response_model=FriendConnectionResponse, status_code=201)
+def connect(target_id: str, payload: FriendRequestCreate, db: DBSession, user: CurrentUser):
+    own, target = db.get(SocialProfile, user.id), db.get(SocialProfile, target_id)
+    if not user.email_verified: raise HTTPException(403, "Verify your email before connecting")
+    if target_id == user.id: raise HTTPException(400, "Cannot connect with yourself")
+    if not own: raise HTTPException(409, "Create your friend profile first")
+    if not target or not target.is_visible or not target.open_to_friends: raise HTTPException(404, "Profile unavailable")
+    if db.scalar(select(func.count()).select_from(MarketplaceBlock).where(or_(and_(MarketplaceBlock.user_id == user.id, MarketplaceBlock.blocked_author_id == target_id), and_(MarketplaceBlock.user_id == target_id, MarketplaceBlock.blocked_author_id == user.id)))): raise HTTPException(404, "Profile unavailable")
+    if _pair(db, user.id, target_id): raise HTTPException(409, "Friend connection already exists")
+    sent = db.scalar(select(func.count()).select_from(FriendConnection).where(FriendConnection.requester_id == user.id, FriendConnection.created_at >= _now() - timedelta(days=1))) or 0
+    if sent >= 15: raise HTTPException(429, "Daily friend request limit reached")
+    if payload.event_id:
+        event = db.get(EventListing, payload.event_id)
+        if not event or event.status != "approved": raise HTTPException(404, "Event not found")
+    item = FriendConnection(pair_key=":".join(sorted((user.id, target_id))), requester_id=user.id, target_id=target_id,
+                            context_event_id=payload.event_id, message=payload.message.strip() if payload.message else None,
+                            shared_interests=sorted(set(own.interests) & set(target.interests)))
+    db.add(item)
+    try: db.commit()
+    except IntegrityError:
+        db.rollback(); raise HTTPException(409, "Friend connection already exists") from None
+    db.refresh(item); return _connection_response(db, item, user.id)
+
+
+@router.get("/connections", response_model=list[FriendConnectionResponse])
+def connections(db: DBSession, user: CurrentUser):
+    rows = db.execute(select(FriendConnection).where(or_(FriendConnection.requester_id == user.id, FriendConnection.target_id == user.id)).order_by(FriendConnection.updated_at.desc())).scalars().all()
+    return [_connection_response(db, row, user.id) for row in rows]
+
+
+@router.patch("/connections/{connection_id}", response_model=FriendConnectionResponse)
+def decide(connection_id: str, payload: FriendDecision, db: DBSession, user: CurrentUser):
+    item = db.get(FriendConnection, connection_id)
+    if not item or item.target_id != user.id or item.status != "pending": raise HTTPException(404, "Pending request not found")
+    item.status = payload.status; item.responded_at = _now()
+    if payload.status == "accepted":
+        requester, target = db.get(SocialProfile, item.requester_id), db.get(SocialProfile, item.target_id)
+        conversation = ChatConversation(social_profile_id=requester.user_id, buyer_id=item.requester_id, seller_id=item.target_id,
+            listing_type="friend", listing_title=f"Друзі · {requester.display_name}"[:100], listing_image_url=requester.avatar_url,
+            listing_price="Спільні інтереси", seller_name=target.display_name[:100])
+        db.add(conversation); db.flush()
+        db.add_all([ChatParticipant(conversation_id=conversation.id, user_id=item.requester_id), ChatParticipant(conversation_id=conversation.id, user_id=item.target_id)])
+        item.conversation_id = conversation.id
+    db.add(item); db.commit(); db.refresh(item)
+    return _connection_response(db, item, user.id)
+
+
+@router.delete("/connections/{connection_id}", status_code=204)
+def cancel(connection_id: str, db: DBSession, user: CurrentUser):
+    item = db.get(FriendConnection, connection_id)
+    if not item or item.requester_id != user.id or item.status != "pending": raise HTTPException(404, "Pending request not found")
+    db.delete(item); db.commit()
+
+
+@router.get("/events", response_model=list[SocialEventResponse])
+def social_events(db: DBSession, user: CurrentUser, canton: str | None = None):
+    stmt = select(EventListing).where(EventListing.status == "approved", EventListing.starts_at >= _now())
+    if canton: stmt = stmt.where(EventListing.canton == canton.upper())
+    events = db.execute(stmt.order_by(EventListing.starts_at).limit(30)).scalars().all()
+    attendance = {a.event_id: a for a in db.execute(select(EventAttendance).where(EventAttendance.user_id == user.id)).scalars().all()}
+    counts = dict(db.execute(select(EventAttendance.event_id, func.count()).where(EventAttendance.visible_to_attendees.is_(True)).group_by(EventAttendance.event_id)).all())
+    return [SocialEventResponse(event_id=e.id, title=e.title, category=e.category, canton=e.canton, city=e.city, starts_at=e.starts_at,
+        is_free=e.is_free, attendee_count=counts.get(e.id, 0), my_status=attendance[e.id].status if e.id in attendance else None) for e in events]
+
+
+@router.put("/events/{event_id}/attendance", response_model=AttendanceResponse)
+def attend(event_id: str, payload: AttendanceUpsert, db: DBSession, user: CurrentUser):
+    if not db.get(SocialProfile, user.id): raise HTTPException(409, "Create your friend profile first")
+    event = db.get(EventListing, event_id)
+    if not event or event.status != "approved" or _utc(event.starts_at) < _now(): raise HTTPException(404, "Upcoming event not found")
+    item = db.execute(select(EventAttendance).where(EventAttendance.event_id == event_id, EventAttendance.user_id == user.id)).scalar_one_or_none()
+    if item is None: item = EventAttendance(event_id=event_id, user_id=user.id, status=payload.status, visible_to_attendees=payload.visible_to_attendees)
+    else: item.status, item.visible_to_attendees = payload.status, payload.visible_to_attendees
+    db.add(item); db.commit()
+    return AttendanceResponse(event_id=event_id, status=item.status, visible_to_attendees=item.visible_to_attendees)
+
+
+@router.delete("/events/{event_id}/attendance", status_code=204)
+def leave_event(event_id: str, db: DBSession, user: CurrentUser):
+    item = db.execute(select(EventAttendance).where(EventAttendance.event_id == event_id, EventAttendance.user_id == user.id)).scalar_one_or_none()
+    if item: db.delete(item); db.commit()
+
+
+@router.post("/profiles/{target_id}/report", response_model=SocialActionResponse)
+def report(target_id: str, payload: SocialReportCreate, db: DBSession, user: CurrentUser):
+    if target_id == user.id or not db.get(SocialProfile, target_id): raise HTTPException(404, "Profile not found")
+    existing = db.execute(select(SocialProfileReport).where(SocialProfileReport.profile_user_id == target_id, SocialProfileReport.reporter_id == user.id)).scalar_one_or_none()
+    if not existing: db.add(SocialProfileReport(profile_user_id=target_id, reporter_id=user.id, reason=payload.reason, details=payload.details)); db.commit()
+    return SocialActionResponse(message="Report received")
+
+
+@router.post("/profiles/{target_id}/block", response_model=SocialActionResponse)
+def block(target_id: str, db: DBSession, user: CurrentUser):
+    if target_id == user.id: raise HTTPException(400, "Cannot block yourself")
+    existing = db.execute(select(MarketplaceBlock).where(MarketplaceBlock.user_id == user.id, MarketplaceBlock.blocked_author_id == target_id)).scalar_one_or_none()
+    if not existing: db.add(MarketplaceBlock(user_id=user.id, blocked_author_id=target_id)); db.commit()
+    return SocialActionResponse(message="Profile blocked")

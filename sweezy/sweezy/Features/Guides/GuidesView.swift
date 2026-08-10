@@ -14,6 +14,7 @@ struct GuidesView: View {
     @State private var searchText = ""
     @State private var selectedCategory: GuideCategory?
     @State private var selectedAudience: GuideAudienceStage?
+    @StateObject private var subscriptionManager = SubscriptionManager.shared
     @Namespace private var animation
     
     // Optional initial category for deep-linking
@@ -24,10 +25,8 @@ struct GuidesView: View {
         _selectedCategory = State(initialValue: initialCategory)
     }
     
-    // TEMPORARY (App Store review): IAP removed, all features/content are unlocked.
-    private var isPremium: Bool { true }
+    private var isPremium: Bool { subscriptionManager.isPremium }
     
-    // Keep quota-related code paths harmless for now (always unlocked).
     private let freeGuidesLimit: Int = .max
     
     private var allGuides: [Guide] {
@@ -105,6 +104,7 @@ struct GuidesView: View {
                 haptic(.light)
             }
         }
+        .task { await subscriptionManager.load() }
         .journeyScreen(.alpine, darkness: 0.66)
     }
     
@@ -548,21 +548,15 @@ struct GuideDetailView: View {
     @State private var timerActive: Bool = false
     @State private var selectedTemplateFilter: RelatedTemplateFilter?
     @State private var selectedMarketplaceCategory: ServiceCategory?
+    @State private var showSubscription = false
+    @StateObject private var subscriptionManager = SubscriptionManager.shared
     
-    // Для теперішнього релізу повністю відкриваємо всі гайди:
-    // - немає ліміту "безкоштовних" гайдів
-    // - блоку немає навіть для не‑преміум користувачів
-    // Якщо в майбутньому з'явиться окремий платний контент, можна
-    // повернути логіку через guide.isPremium.
     private let freeGuidesLimit: Int = .max
-    
-    // TEMPORARY (App Store review): fully unlocked.
-    private var isPremium: Bool { true }
+
+    private var isPremium: Bool { subscriptionManager.isPremium }
     
     private var isLocked: Bool {
-        // Наразі **жоден** гайд не блокується для безкоштовних користувачів.
-        // Можна змінити на `(guide.isPremium && !isPremium)`, якщо з'являться платні гайди.
-        return false
+        guide.isPremium && !isPremium
     }
     
     private var calculatedReadingMinutes: Int {
@@ -656,7 +650,42 @@ struct GuideDetailView: View {
     }
     
     var body: some View {
-        JourneyGuideArticleView(guide: guide)
+        Group {
+            if isLocked {
+                guidePremiumGate
+            } else {
+                JourneyGuideArticleView(guide: guide)
+            }
+        }
+        .task { await subscriptionManager.load() }
+        .fullScreenCover(isPresented: $showSubscription) {
+            SubscriptionView(source: .profile)
+        }
+    }
+
+    private var guidePremiumGate: some View {
+        ZStack {
+            JourneyPhotoBackground(imageName: JourneyBackdrop.alpine.rawValue, blurRadius: 4, darkness: 0.72)
+            VStack(spacing: 18) {
+                Image(systemName: "lock.shield.fill")
+                    .font(.system(size: 34, weight: .bold))
+                    .foregroundColor(JourneyVisual.lime)
+                Text(guide.title)
+                    .font(.system(size: 28, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
+                    .multilineTextAlignment(.center)
+                Text("Цей матеріал входить до Sweezy Plus")
+                    .foregroundColor(.white.opacity(0.64))
+                Button("Відкрити Plus") { showSubscription = true }
+                    .font(.system(size: 17, weight: .bold))
+                    .foregroundColor(.black)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 56)
+                    .background(JourneyVisual.lime)
+                    .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+            }
+            .padding(24)
+        }
     }
 
     private var legacyBody: some View {
@@ -1024,8 +1053,11 @@ struct GuideDetailView: View {
     // MARK: - Content Section
     @ViewBuilder
     private var contentSection: some View {
-        // TEMPORARY (App Store review): fully unlocked — no paywall/locked preview.
-        MarkdownContentView(content: guide.bodyMarkdown)
+        if isLocked {
+            Text("Цей матеріал доступний у Sweezy Plus.")
+        } else {
+            MarkdownContentView(content: guide.bodyMarkdown)
+        }
     }
     
     // MARK: - Template Steps Section

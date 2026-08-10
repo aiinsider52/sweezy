@@ -19,9 +19,9 @@ struct MountainRoadmapPreviewCard: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var appContainer: AppContainer
     @StateObject private var roadmapService = RoadmapService()
+    @StateObject private var subscriptionManager = SubscriptionManager.shared
 
-    // TEMPORARY (App Store review): IAP removed — roadmap is fully unlocked.
-    private var isPremium: Bool { true }
+    private var isPremium: Bool { subscriptionManager.isPremium }
 
     private let cardCornerRadius: CGFloat = 28
 
@@ -166,6 +166,7 @@ struct MountainRoadmapPreviewCard: View {
             .padding(.horizontal, 22)
             .padding(.vertical, 20)
         }
+        .task { await subscriptionManager.load() }
         .frame(height: 180)
         .clipShape(RoundedRectangle(cornerRadius: cardCornerRadius, style: .continuous))
         .overlay(

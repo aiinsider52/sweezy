@@ -143,9 +143,27 @@ class UserService:
         from ..models.event_listing import EventListing, EventReport
         from ..models.job import JobFavorite
         from ..models.marketplace import MarketplaceBlock, MarketplaceReport, ServiceListing
-        from ..models.subscription import Subscription, SubscriptionEvent
+        from ..models.network import ProfessionalConnection, ProfessionalProfile, ProfessionalProfileReport
+        from ..models.social import EventAttendance, FriendConnection, SocialProfile, SocialProfileReport
+        from ..models.subscription import PremiumUsage, Subscription, SubscriptionEvent
 
         user_id = user.id
+
+        db.query(SocialProfileReport).filter(or_(SocialProfileReport.reporter_id == user_id, SocialProfileReport.profile_user_id == user_id)).delete(synchronize_session=False)
+        db.query(FriendConnection).filter(or_(FriendConnection.requester_id == user_id, FriendConnection.target_id == user_id)).delete(synchronize_session=False)
+        db.query(EventAttendance).filter(EventAttendance.user_id == user_id).delete(synchronize_session=False)
+        db.query(SocialProfile).filter(SocialProfile.user_id == user_id).delete(synchronize_session=False)
+
+        db.query(ProfessionalProfileReport).filter(
+            or_(
+                ProfessionalProfileReport.reporter_id == user_id,
+                ProfessionalProfileReport.profile_user_id == user_id,
+            )
+        ).delete(synchronize_session=False)
+        db.query(ProfessionalConnection).filter(
+            or_(ProfessionalConnection.requester_id == user_id, ProfessionalConnection.target_id == user_id)
+        ).delete(synchronize_session=False)
+        db.query(ProfessionalProfile).filter(ProfessionalProfile.user_id == user_id).delete(synchronize_session=False)
 
         def delete_conversations(conversation_ids: list[str]) -> None:
             if not conversation_ids:
@@ -235,6 +253,7 @@ class UserService:
             )
         db.query(Subscription).filter(Subscription.user_id == user_id).delete(synchronize_session=False)
         db.query(SubscriptionEvent).filter(SubscriptionEvent.user_id == user_id).delete(synchronize_session=False)
+        db.query(PremiumUsage).filter(PremiumUsage.user_id == user_id).delete(synchronize_session=False)
         db.query(JobFavorite).filter(JobFavorite.user_id == uuid.UUID(user_id)).delete(synchronize_session=False)
 
         # Anonymize + deactivate

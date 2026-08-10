@@ -97,7 +97,6 @@ struct ListingDetailView: View {
         }
         .presentationDragIndicator(.hidden)
         .interactiveSwipeBackEnabled()
-        .preferredColorScheme(.dark)
     }
 
     private func detailContent(_ listing: ServiceListing) -> some View {

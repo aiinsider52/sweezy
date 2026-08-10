@@ -509,9 +509,19 @@ def set_user_subscription(user_id: str, payload: Dict[str, Any], db: DBSession, 
         period = timedelta(days=365 if plan == "yearly" else 30)
         expire_at = datetime.now(timezone.utc) + period
         # Ensure subscriptions row
-        sub = db.query(Subscription).filter(Subscription.user_id == user.id).one_or_none()
+        sub = (
+            db.query(Subscription)
+            .filter(Subscription.user_id == user.id, Subscription.provider == "manual")
+            .one_or_none()
+        )
         if sub is None:
-            sub = Subscription(user_id=user.id, status="active", plan=plan, current_period_end=expire_at)
+            sub = Subscription(
+                user_id=user.id,
+                provider="manual",
+                status="active",
+                plan=plan,
+                current_period_end=expire_at,
+            )
         else:
             sub.status = "active"
             sub.plan = plan

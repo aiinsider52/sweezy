@@ -1,6 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  turbopack: {
+    root: process.cwd(),
+  },
   async headers() {
     const apiOrigin = process.env.NEXT_PUBLIC_API_URL
       ? new URL(process.env.NEXT_PUBLIC_API_URL).origin
@@ -37,4 +40,3 @@ const nextConfig = {
 }
 
 export default nextConfig
-

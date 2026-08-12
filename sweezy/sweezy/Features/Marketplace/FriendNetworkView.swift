@@ -174,7 +174,11 @@ struct FriendNetworkView: View {
         tab = 3
         editor = true
       }
-      if !isUITestPreview { await vm.load() }
+      if isPeopleCatalogPreview {
+        loadPeopleCatalogPreview()
+      } else if !isUITestPreview {
+        await vm.load()
+      }
     }
     .accessibilityIdentifier("friends.screen")
     .fullScreenCover(item: $selected) {
@@ -242,11 +246,31 @@ struct FriendNetworkView: View {
   }
   private var isUITestPreview: Bool {
     #if DEBUG
-      ProcessInfo.processInfo.environment["UITESTS"] == "1"
+      ProcessInfo.processInfo.arguments.contains("--preview-friends-people")
+        || (ProcessInfo.processInfo.environment["UITESTS"] == "1"
         && (ProcessInfo.processInfo.arguments.contains("--ui-test-friends")
           || ProcessInfo.processInfo.arguments.contains("--ui-test-friends-profile"))
+        )
     #else
       false
+    #endif
+  }
+  private var isPeopleCatalogPreview: Bool {
+    #if DEBUG
+      ProcessInfo.processInfo.arguments.contains("--preview-friends-people")
+        || (ProcessInfo.processInfo.environment["UITESTS"] == "1"
+        && ProcessInfo.processInfo.arguments.contains("--ui-test-friends"))
+    #else
+      false
+    #endif
+  }
+  private func loadPeopleCatalogPreview() {
+    #if DEBUG
+      vm.profiles = SocialFriendPreviewFixtures.profiles
+      vm.searchMeta = SocialProfilePage(
+        items: vm.profiles, total: vm.profiles.count, page: 1, perPage: 40, pages: 1,
+        isLimited: false, visibleLimit: nil, advancedFiltersAvailable: true,
+        requestsRemaining: 5)
     #endif
   }
   private var isProfileUITestPreview: Bool {
@@ -305,7 +329,9 @@ struct FriendNetworkView: View {
               selected = p
             } label: {
               FriendCard(profile: p, accent: limeAccent)
-            }.buttonStyle(.plain)
+            }
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("friends.profile.\(p.id)")
           }
         }
       }
@@ -725,12 +751,22 @@ private struct FriendProfileDetail: View {
             Spacer()
             Menu {
               Button("Поскаржитися", role: .destructive) {
-                Task { try? await FriendsAPI.report(profile.id) }
+                Task {
+                  do {
+                    try await FriendsAPI.report(profile.id)
+                  } catch {
+                    vm.error = error.localizedDescription
+                  }
+                }
               }
               Button("Заблокувати", role: .destructive) {
                 Task {
-                  try? await FriendsAPI.block(profile.id)
-                  dismiss()
+                  do {
+                    try await FriendsAPI.block(profile.id)
+                    dismiss()
+                  } catch {
+                    vm.error = error.localizedDescription
+                  }
                 }
               }
             } label: {

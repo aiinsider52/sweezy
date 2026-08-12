@@ -4,14 +4,28 @@ from datetime import datetime, timedelta, timezone
 import uuid
 
 from fastapi.testclient import TestClient
+import pytest
 
 from backend.app.core.database import SessionLocal
+from backend.app.core.config import get_settings
 from backend.app.core.security import create_access_token
 from backend.app.main import app
 from backend.app.models.event_listing import EventListing
+from backend.app.models.chat import NotificationOutbox
 from backend.app.services.users import UserService
 
 client = TestClient(app)
+
+
+@pytest.fixture(autouse=True)
+def enable_push_outbox_for_social_flow():
+    settings = get_settings()
+    previous = settings.PUSH_NOTIFICATIONS_ENABLED
+    settings.PUSH_NOTIFICATIONS_ENABLED = True
+    try:
+        yield
+    finally:
+        settings.PUSH_NOTIFICATIONS_ENABLED = previous
 
 
 def identity() -> tuple[dict[str, str], str]:
@@ -69,6 +83,33 @@ def test_interest_match_event_privacy_friend_acceptance_and_chat() -> None:
     assert conversation.status_code == 200
     assert conversation.json()["listing_type"] == "friend"
     assert conversation.json()["social_profile_id"] == first_id
+
+    sent = client.post(
+        f"/api/v1/chat/conversations/{conversation_id}/messages",
+        headers=first,
+        json={"client_message_id": str(uuid.uuid4()), "body": "Зустрінемось у суботу?"},
+    )
+    assert sent.status_code == 201, sent.text
+    message_id = sent.json()["id"]
+    with SessionLocal() as db:
+        outbox = db.query(NotificationOutbox).filter_by(event_key=f"chat:{message_id}").one()
+        assert outbox.recipient_id == second_id
+
+    unread = client.get("/api/v1/chat/conversations/unread-count", headers=second)
+    assert unread.status_code == 200 and unread.json()["count"] == 1
+    delivered = client.get(f"/api/v1/chat/conversations/{conversation_id}/messages", headers=second)
+    assert delivered.status_code == 200
+    assert delivered.json()["items"][0]["delivered_at"] is not None
+
+    read = client.post(
+        f"/api/v1/chat/conversations/{conversation_id}/read",
+        headers=second,
+        json={"message_id": message_id},
+    )
+    assert read.status_code == 200
+    sender_copy = client.get(f"/api/v1/chat/conversations/{conversation_id}/messages", headers=first)
+    assert sender_copy.json()["items"][0]["read_at"] is not None
+    assert client.get("/api/v1/chat/conversations/unread-count", headers=second).json()["count"] == 0
 
 
 def test_guidelines_required_and_private_attendance_hidden() -> None:

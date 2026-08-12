@@ -28,9 +28,13 @@ struct JourneyMarketplaceView: View {
             ZStack(alignment: .bottomTrailing) {
                 LinearGradient(
                     colors: [
-                        Color(red: 0.12, green: 0.10, blue: 0.08),
-                        JourneyVisual.black,
-                        JourneyVisual.black
+                        Color(UIColor { traits in
+                            traits.userInterfaceStyle == .dark
+                                ? UIColor(red: 0.12, green: 0.10, blue: 0.08, alpha: 1)
+                                : UIColor(red: 0.94, green: 0.91, blue: 0.84, alpha: 1)
+                        }),
+                        JourneyVisual.pageBackground,
+                        JourneyVisual.pageBackground
                     ],
                     startPoint: .top,
                     endPoint: .bottom
@@ -479,7 +483,7 @@ struct JourneyMarketplaceView: View {
         HStack {
             Text(title)
                 .font(.system(size: 18, weight: .bold, design: .rounded))
-                .foregroundColor(.white)
+                .foregroundColor(JourneyVisual.primaryText)
             Spacer()
             if let trailing {
                 Text(trailing)
@@ -701,19 +705,19 @@ private struct MarketSearchField: View {
     var body: some View {
         HStack(spacing: 10) {
             Image(systemName: "magnifyingglass")
-                .foregroundColor(.white.opacity(0.9))
+                .foregroundColor(JourneyVisual.primaryText.opacity(0.82))
             TextField(
                 "",
                 text: $text,
-                prompt: Text(prompt).foregroundColor(.white.opacity(0.88))
+                prompt: Text(prompt).foregroundColor(JourneyVisual.secondaryText)
             )
-                .foregroundColor(.white)
+                .foregroundColor(JourneyVisual.primaryText)
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
             if !text.isEmpty {
                 Button { text = "" } label: {
                     Image(systemName: "xmark.circle.fill")
-                        .foregroundColor(.white.opacity(0.55))
+                        .foregroundColor(JourneyVisual.secondaryText)
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel("journey.marketplace.clear_search".localized)
@@ -722,9 +726,9 @@ private struct MarketSearchField: View {
         .font(.system(size: 15, weight: .medium))
         .padding(.horizontal, 15)
         .frame(height: 46)
-        .background(Color.white.opacity(0.08))
+        .background(JourneyVisual.softSurface)
         .clipShape(Capsule())
-        .overlay(Capsule().stroke(.white.opacity(0.18), lineWidth: 1))
+        .overlay(Capsule().stroke(JourneyVisual.softBorder, lineWidth: 1))
     }
 }
 
@@ -741,12 +745,12 @@ private struct MarketFilterChip: View {
                 Text(title)
             }
             .font(.system(size: 12, weight: .semibold))
-            .foregroundColor(selected ? .black : .white.opacity(0.74))
+            .foregroundColor(selected ? .black : JourneyVisual.secondaryText)
             .padding(.horizontal, 13)
             .frame(height: 36)
-            .background(selected ? JourneyVisual.lime : Color.white.opacity(0.07))
+            .background(selected ? JourneyVisual.lime : JourneyVisual.softSurface)
             .clipShape(Capsule())
-            .overlay(Capsule().stroke(.white.opacity(selected ? 0 : 0.14), lineWidth: 1))
+            .overlay(Capsule().stroke(selected ? Color.clear : JourneyVisual.softBorder, lineWidth: 1))
         }
         .buttonStyle(.plain)
         .accessibilityAddTraits(selected ? .isSelected : [])
@@ -1483,11 +1487,11 @@ private struct MarketLoadingView: View {
             ProgressView().tint(JourneyVisual.lime)
             Text(title)
                 .font(.system(size: 13, weight: .semibold))
-                .foregroundColor(.white.opacity(0.66))
+                .foregroundColor(JourneyVisual.secondaryText)
         }
         .frame(maxWidth: .infinity)
         .frame(height: 120)
-        .background(Color.white.opacity(0.05))
+        .background(JourneyVisual.softSurface)
         .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
     }
 }
@@ -1506,10 +1510,10 @@ private struct MarketEmptyCard: View {
                 .foregroundColor(JourneyVisual.lime)
             Text(title)
                 .font(.system(size: 19, weight: .bold, design: .rounded))
-                .foregroundColor(.white)
+                .foregroundColor(JourneyVisual.primaryText)
             Text(subtitle)
                 .font(.system(size: 13, weight: .medium))
-                .foregroundColor(.white.opacity(0.58))
+                .foregroundColor(JourneyVisual.secondaryText)
                 .multilineTextAlignment(.center)
             Button(actionTitle, action: action)
                 .font(.system(size: 13, weight: .bold))
@@ -1521,9 +1525,9 @@ private struct MarketEmptyCard: View {
         }
         .padding(24)
         .frame(maxWidth: .infinity)
-        .background(Color.white.opacity(0.055))
+        .background(JourneyVisual.softSurface)
         .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous).stroke(.white.opacity(0.12), lineWidth: 1))
+        .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous).stroke(JourneyVisual.softBorder, lineWidth: 1))
     }
 }
 

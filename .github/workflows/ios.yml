@@ -16,7 +16,7 @@ permissions:
 jobs:
   build:
     runs-on: macos-15
-    timeout-minutes: 35
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       - name: Select Xcode
@@ -29,12 +29,39 @@ jobs:
         run: |
           set -eo pipefail
           xcodebuild -scheme sweezy -project sweezy/sweezy.xcodeproj -configuration Debug -sdk iphonesimulator -destination "platform=iOS Simulator,name=iPhone 16 Pro,OS=18.5" build | xcpretty
-      - name: Run tests
+      - uses: actions/setup-python@42375524e23c412d93fb67b49958b491fce71c38 # v5
+        with:
+          python-version: '3.12'
+      - name: Start local backend for iOS auth contract
+        env:
+          APP_ENV: test
+          CHAT_ENABLED: 'false'
+          DATABASE_URL: sqlite:///./ios-auth-e2e.db
+          AUTH_E2E_EMAIL: ios-ci@example.com
+          AUTH_E2E_PASSWORD: StrongPass1!
+        run: |
+          python -m pip install -r backend/requirements.txt
+          python backend/scripts/seed_ci_auth_user.py
+          python -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8765 --lifespan off > /tmp/sweezy-backend.log 2>&1 &
+          for attempt in {1..30}; do
+            curl --fail --silent http://127.0.0.1:8765/health && exit 0
+            sleep 1
+          done
+          cat /tmp/sweezy-backend.log
+          exit 1
+      - name: Run unit tests
+        env:
+          AUTH_E2E_BASE_URL: http://127.0.0.1:8765
+          AUTH_E2E_EMAIL: ios-ci@example.com
+          AUTH_E2E_PASSWORD: StrongPass1!
         run: |
           set -eo pipefail
           xcodebuild -scheme sweezy -project sweezy/sweezy.xcodeproj -configuration Debug -sdk iphonesimulator -destination "platform=iOS Simulator,name=iPhone 16 Pro,OS=18.5" -skip-testing:sweezyUITests test | xcpretty
+      - name: Run UI tests
+        run: |
+          set -eo pipefail
+          xcodebuild -scheme sweezy -project sweezy/sweezy.xcodeproj -configuration Debug -sdk iphonesimulator -destination "platform=iOS Simulator,name=iPhone 16 Pro,OS=18.5" -only-testing:sweezyUITests test | xcpretty
       - name: Release build
         run: |
           set -eo pipefail
           xcodebuild -scheme sweezy -project sweezy/sweezy.xcodeproj -configuration Release -sdk iphonesimulator -destination "generic/platform=iOS Simulator" build CODE_SIGNING_ALLOWED=NO | xcpretty
-

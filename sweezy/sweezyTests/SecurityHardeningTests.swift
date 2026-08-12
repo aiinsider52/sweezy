@@ -26,4 +26,14 @@ struct SecurityHardeningTests {
         #expect(service.parse(url: URL(string: "sweezy://chat/conversation.1")!) == nil)
         #expect(service.parse(url: URL(string: "ftp://sweezy.app/chat/conversation_1")!) == nil)
     }
+
+    @Test func supportedDeepLinksSelectTheirOwningTab() {
+        #expect(DeepLink.guide(id: "guide-1").rootTabIndex == 1)
+        #expect(DeepLink.cvBuilder.rootTabIndex == 1)
+        #expect(DeepLink.map(filter: "nature").rootTabIndex == 2)
+        #expect(DeepLink.place(id: "zurich").rootTabIndex == 2)
+        #expect(DeepLink.profile.rootTabIndex == 4)
+        #expect(DeepLink.news.rootTabIndex == 0)
+        #expect(DeepLink.chat(id: "conversation_1").rootTabIndex == nil)
+    }
 }

@@ -10,7 +10,20 @@ import MapKit
 import UserNotifications
 
 struct MainTabView: View {
+    @EnvironmentObject private var appContainer: AppContainer
     @StateObject private var router = MainTabRouter()
+    @State private var deepLinkedGuide: Guide?
+    @State private var deepLinkedChecklist: Checklist?
+    @State private var deepLinkedTemplate: DocumentTemplate?
+    @State private var deepLinkedPlace: SwissDiscoveryPlace?
+    @State private var deepLinkedNews: NewsItem?
+    @State private var showCalculator = false
+    @State private var showAppointments = false
+    @State private var showCVBuilder = false
+    @State private var showProfile = false
+    @State private var showPrivacy = false
+    @State private var showLanguage = false
+    @State private var showWhatsNew = false
     
     var body: some View {
         Group {
@@ -70,6 +83,66 @@ struct MainTabView: View {
                 router.setBottomBarHidden(output.object as? Bool ?? false)
             }
         }
+        .onReceive(NotificationCenter.default.publisher(for: .openDeepLinkDestination)) { output in
+            guard let link = output.object as? DeepLink else { return }
+            router.open(link)
+            Task { await resolve(link) }
+        }
+        .sheet(item: $deepLinkedGuide) { GuideDetailView(guide: $0).environmentObject(appContainer) }
+        .sheet(item: $deepLinkedChecklist) { ChecklistDetailView(checklist: $0).environmentObject(appContainer) }
+        .sheet(item: $deepLinkedTemplate) { TemplateDetailView(template: $0).environmentObject(appContainer) }
+        .sheet(item: $deepLinkedPlace) {
+            SwissDiscoveryDetailView(place: $0, isSaved: false, toggleSaved: {})
+                .environmentObject(appContainer)
+        }
+        .sheet(item: $deepLinkedNews) { NewsDetailView(news: $0) }
+        .sheet(isPresented: $showCalculator) { NavigationStack { BenefitsCalculatorView() }.environmentObject(appContainer) }
+        .sheet(isPresented: $showAppointments) { NavigationStack { AppointmentsView() }.environmentObject(appContainer.appointmentRepository) }
+        .fullScreenCover(isPresented: $showCVBuilder) { CVBuilderView().environmentObject(appContainer) }
+        .sheet(isPresented: $showProfile) { ProfileEditView().environmentObject(appContainer) }
+        .sheet(isPresented: $showPrivacy) { PrivacyPolicyView() }
+        .sheet(isPresented: $showLanguage) { LanguageSelectionSheet().environmentObject(appContainer) }
+        .sheet(isPresented: $showWhatsNew) { WhatsNewView() }
+    }
+
+    @MainActor
+    private func resolve(_ link: DeepLink) async {
+        if appContainer.contentService.guides.isEmpty || appContainer.contentService.checklists.isEmpty {
+            await appContainer.contentService.refreshContent()
+        }
+        switch link {
+        case .guide(let id):
+            deepLinkedGuide = appContainer.contentService.guides.first { matches($0.id, id) }
+        case .checklist(let id):
+            deepLinkedChecklist = appContainer.contentService.checklists.first { matches($0.id, id) }
+        case .template(let id):
+            deepLinkedTemplate = appContainer.contentService.templates.first { matches($0.id, id) }
+        case .place(let id):
+            deepLinkedPlace = SwissDiscoveryCatalog.places.first { $0.id.caseInsensitiveCompare(id) == .orderedSame }
+        case .map(let filter):
+            if let filter, let type = PlaceType(rawValue: filter.lowercased()) {
+                MapDeepLinkRouter.pendingFilter = type
+            }
+        case .calculator: showCalculator = true
+        case .appointments: showAppointments = true
+        case .news:
+            deepLinkedNews = appContainer.contentService.latestNews(limit: 1, language: appContainer.currentLocale.language.languageCode?.identifier).first
+        case .cvBuilder: showCVBuilder = true
+        case .settings: break
+        case .profile: showProfile = true
+        case .privacy: showPrivacy = true
+        case .language: showLanguage = true
+        case .whatsNew: showWhatsNew = true
+        case .onboarding:
+            appContainer.restartOnboarding()
+        case .passwordReset, .chat:
+            break
+        }
+        router.consumeDeepLink()
+    }
+
+    private func matches(_ uuid: UUID, _ raw: String) -> Bool {
+        uuid.uuidString.caseInsensitiveCompare(raw) == .orderedSame
     }
 }
 
@@ -103,6 +176,10 @@ struct MapFocusTarget {
 /// `OptimizedMapView` consumes it on appear (survives lazy map loading).
 enum MapFocusRouter {
     static var pending: MapFocusTarget?
+}
+
+enum MapDeepLinkRouter {
+    static var pendingFilter: PlaceType?
 }
 
 // MARK: - Tab Icon

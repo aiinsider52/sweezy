@@ -76,12 +76,13 @@ struct MainAppContent: View {
     @State private var resetToken: String? = nil
     @State private var showPostOnboardingAuthEntry: Bool = false
     @State private var deepLinkedConversation: ChatConversation?
+    @State private var pendingAuthenticatedDeepLink: DeepLink?
     
     var body: some View {
         ZStack {
             if isArticleLayoutUITest {
                 JourneyGuideArticleView(guide: Self.articleLayoutFixture)
-            } else if isCareerHubUITest {
+            } else if isCareerHubUITest || isJobsGateUITest {
                 JobsView()
             } else if isCareerToolsUITest {
                 JourneyDirectoryView(requestedSection: .tools, routeID: UUID())
@@ -181,8 +182,15 @@ struct MainAppContent: View {
         .onChange(of: sessionManager.isAuthenticated) { _, authenticated in
             updatePostOnboardingAuthPresentation()
             Task {
-                if authenticated { await startAccountServicesIfNeeded() }
-                else { appContainer.chatStore.stop() }
+                if authenticated {
+                    await startAccountServicesIfNeeded()
+                    if let pendingLink = pendingAuthenticatedDeepLink {
+                        pendingAuthenticatedDeepLink = nil
+                        handleDeepLink(pendingLink)
+                    }
+                } else {
+                    appContainer.chatStore.stop()
+                }
             }
         }
     }
@@ -233,6 +241,15 @@ struct MainAppContent: View {
         #endif
     }
 
+    private var isJobsGateUITest: Bool {
+        #if DEBUG
+        ProcessInfo.processInfo.environment["UITESTS"] == "1" &&
+            ProcessInfo.processInfo.arguments.contains("--ui-test-jobs-gate")
+        #else
+        false
+        #endif
+    }
+
     private var isNetworkUITest: Bool {
         #if DEBUG
         ProcessInfo.processInfo.environment["UITESTS"] == "1" &&
@@ -262,10 +279,11 @@ struct MainAppContent: View {
 
     private var isFriendsUITest: Bool {
         #if DEBUG
-        ProcessInfo.processInfo.environment["UITESTS"] == "1" &&
+        ProcessInfo.processInfo.arguments.contains("--preview-friends-people") ||
+            (ProcessInfo.processInfo.environment["UITESTS"] == "1" &&
             (ProcessInfo.processInfo.arguments.contains("--ui-test-friends") ||
              ProcessInfo.processInfo.arguments.contains("--ui-test-friends-profile") ||
-             ProcessInfo.processInfo.arguments.contains("--ui-test-friends-editor"))
+             ProcessInfo.processInfo.arguments.contains("--ui-test-friends-editor")))
         #else
         false
         #endif
@@ -328,13 +346,17 @@ struct MainAppContent: View {
             resetToken = token
             showGlobalReset = true
         case .chat(let id):
-            guard sessionManager.isAuthenticated else { return }
+            guard sessionManager.isAuthenticated else {
+                pendingAuthenticatedDeepLink = link
+                showPostOnboardingAuthEntry = true
+                return
+            }
             Task {
                 await appContainer.chatStore.start()
                 deepLinkedConversation = await appContainer.chatStore.conversation(id: id)
             }
         default:
-            break
+            NotificationCenter.default.post(name: .openDeepLinkDestination, object: link)
         }
     }
 

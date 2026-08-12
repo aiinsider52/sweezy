@@ -71,6 +71,12 @@ jobs:
           APP_ENV: test
           CHAT_ENABLED: 'true'
         run: pytest -q backend/tests
+      - name: Full integration suite (PostgreSQL)
+        env:
+          DATABASE_URL: postgresql+psycopg2://postgres:postgres@localhost:5432/sweezy_ci
+          APP_ENV: test
+          CHAT_ENABLED: 'true'
+        run: pytest -q backend/tests
       - name: Verify PostgreSQL migrations and production preflight
         env:
           DATABASE_URL: postgresql+psycopg2://postgres:postgres@localhost:5432/sweezy_ci

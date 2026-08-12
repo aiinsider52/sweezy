@@ -37,6 +37,25 @@ enum DeepLink: Equatable {
     // Special
     case onboarding
     case whatsNew
+
+    var rootTabIndex: Int? {
+        switch self {
+        case .news, .whatsNew:
+            return 0
+        case .guide, .checklist, .template, .calculator, .appointments, .cvBuilder:
+            return 1
+        case .map, .place:
+            return 2
+        case .settings, .profile, .privacy, .language:
+            return 4
+        case .onboarding, .passwordReset, .chat:
+            return nil
+        }
+    }
+}
+
+extension Notification.Name {
+    static let openDeepLinkDestination = Notification.Name("openDeepLinkDestination")
 }
 
 // MARK: - Deep Link Service
@@ -340,5 +359,3 @@ struct DeepLinkShareSheet: UIViewControllerRepresentable {
     
     func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
 }
-
-

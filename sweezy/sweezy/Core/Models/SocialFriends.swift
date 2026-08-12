@@ -110,6 +110,45 @@ struct SocialProfile: Codable, Identifiable, Equatable {
     case updatedAt = "updated_at"
   }
 
+  init(
+    userID: String, displayName: String, canton: String, city: String, bio: String,
+    interests: [SocialInterest], languages: [String], meetupFormats: [MeetupFormat],
+    availability: [SocialAvailability] = [.flexible], ageBand: String? = nil,
+    arrivalYear: Int? = nil, avatarURL: String? = nil, isVisible: Bool = true,
+    openToFriends: Bool = true, isVerified: Bool = false, matchScore: Int = 0,
+    matchReasons: [String] = [], distanceKM: Int? = nil, residencyStage: String = "established",
+    sharedInterests: [SocialInterest] = [], connectionState: String = "none",
+    connectionID: String? = nil, conversationID: String? = nil, contextEventID: String? = nil,
+    createdAt: Date = Date(), updatedAt: Date = Date()
+  ) {
+    self.userID = userID
+    self.displayName = displayName
+    self.canton = canton
+    self.city = city
+    self.bio = bio
+    self.interests = interests
+    self.languages = languages
+    self.meetupFormats = meetupFormats
+    self.availability = availability
+    self.ageBand = ageBand
+    self.arrivalYear = arrivalYear
+    self.avatarURL = avatarURL
+    self.isVisible = isVisible
+    self.openToFriends = openToFriends
+    self.isVerified = isVerified
+    self.matchScore = matchScore
+    self.matchReasons = matchReasons
+    self.distanceKM = distanceKM
+    self.residencyStage = residencyStage
+    self.sharedInterests = sharedInterests
+    self.connectionState = connectionState
+    self.connectionID = connectionID
+    self.conversationID = conversationID
+    self.contextEventID = contextEventID
+    self.createdAt = createdAt
+    self.updatedAt = updatedAt
+  }
+
   init(from decoder: Decoder) throws {
     let c = try decoder.container(keyedBy: CodingKeys.self)
     userID = try c.decode(String.self, forKey: .userID)
@@ -140,6 +179,36 @@ struct SocialProfile: Codable, Identifiable, Equatable {
     updatedAt = try c.decode(Date.self, forKey: .updatedAt)
   }
 }
+
+#if DEBUG
+enum SocialFriendPreviewFixtures {
+  static let profiles: [SocialProfile] = [
+    profile("anna", "Anna Keller", "ZH", "Zürich", "Люблю ранкові прогулянки біля озера, каву та камерні концерти.", [.hiking, .music, .food], ["DE", "UK", "EN"], [.coffee, .walk], 96, 4, true, 2021),
+    profile("dmytro", "Dmytro Melnyk", "ZH", "Winterthur", "Працюю в IT, граю у теніс і шукаю компанію для хайкінгу на вихідних.", [.technology, .sports, .hiking], ["UK", "DE", "EN"], [.activity, .event], 91, 18, true, 2023),
+    profile("sofia", "Sofia Rossi", "TI", "Lugano", "Фотографую міста, вчу українську й організовую невеликі культурні зустрічі.", [.photography, .art, .languages], ["IT", "EN", "UK"], [.coffee, .event], 88, 42, false, 2019),
+    profile("markus", "Markus Frei", "BE", "Bern", "Молодий батько, велосипедист і волонтер. Завжди за сімейну прогулянку.", [.family, .sports, .volunteering], ["DE", "FR", "EN"], [.family, .walk], 84, 7, true, 2017),
+    profile("olena", "Olena Hrytsenko", "VD", "Lausanne", "Нещодавно переїхала. Цікавлять французька, книжкові клуби та подорожі Швейцарією.", [.books, .languages, .travel], ["UK", "FR", "EN"], [.coffee, .event], 82, 29, false, 2026),
+    profile("lucas", "Lucas Meier", "BS", "Basel", "Дизайнер, музикант і фанат музеїв. Шукаю людей для творчих проєктів.", [.art, .music, .technology], ["DE", "EN", "FR"], [.event, .online], 79, 51, true, 2020),
+    profile("iryna", "Iryna Bondar", "LU", "Luzern", "Обожнюю гори, йогу та неспішні розмови за кавою.", [.hiking, .wellness, .travel], ["UK", "DE"], [.walk, .coffee], 77, 12, false, 2024),
+    profile("nicolas", "Nicolas Dubois", "GE", "Genève", "Підприємець у сфері sustainability. Відкритий до спорту, нетворкінгу й волонтерства.", [.business, .sports, .volunteering], ["FR", "EN", "DE"], [.activity, .event], 73, 66, true, 2016),
+  ]
+
+  private static func profile(
+    _ id: String, _ name: String, _ canton: String, _ city: String, _ bio: String,
+    _ interests: [SocialInterest], _ languages: [String], _ formats: [MeetupFormat],
+    _ score: Int, _ distance: Int, _ verified: Bool, _ arrivalYear: Int
+  ) -> SocialProfile {
+    SocialProfile(
+      userID: "preview-\(id)", displayName: name, canton: canton, city: city, bio: bio,
+      interests: interests, languages: languages, meetupFormats: formats,
+      availability: [.weekdayEvening, .weekend], ageBand: "25-34", arrivalYear: arrivalYear,
+      isVerified: verified, matchScore: score,
+      matchReasons: ["Спільні інтереси", "Зручна відстань", "Спільна мова"],
+      distanceKM: distance, residencyStage: arrivalYear >= 2025 ? "newcomer" : "established",
+      sharedInterests: Array(interests.prefix(3)))
+  }
+}
+#endif
 
 struct SocialProfilePage: Codable {
   let items: [SocialProfile]

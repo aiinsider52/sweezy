@@ -1,3 +1,42 @@
+**Jobs Guest Gate Redesign — 2026-08-12**
+- Source visual truth: `/Users/vladyslav.katash/.codex/generated_images/019fdb22-7dc6-70c3-9979-1d72f10c376f/exec-a136a202-aa25-4845-a3c6-11f3a73afef3.png`.
+- Implementation screenshot: `/private/tmp/sweezy-jobs-gate-iphone16.png`.
+- Combined comparison input: `/private/tmp/sweezy-jobs-gate-qa/side-by-side.png`.
+- Viewport: iPhone 16 simulator, Ukrainian locale, dark appearance, unauthenticated Jobs gate.
+- Pixels: source 853 × 1844; implementation 1179 × 2556 at 3× density, normalized to 853 × 1844 for comparison.
+
+**Full-View Comparison Evidence**
+- Source and implementation were opened together in one normalized side-by-side image.
+- Implementation preserves selected hierarchy: Zurich workplace hero, lime eyebrow, two-line outcome headline, profile-readiness preview, three benefit rows, dominant lime authentication CTA, and secondary action.
+- Existing `jobs-zurich-hero` asset and SF Symbols provide all visible imagery and icons; no placeholders or fake assets were introduced.
+
+**Focused Region Comparison Evidence**
+- Hero no longer leaves an empty upper half. Content begins inside the photographic transition and remains readable over controlled black fade.
+- Title, body, readiness bar, and benefit subtitles fit compact width without horizontal clipping.
+- CTA and secondary action remain reachable through vertical scrolling and reserve 116 points for the app bottom navigation in normal routing.
+
+**Required Fidelity Surfaces**
+- Typography: SF Rounded hierarchy follows selected mock; long Ukrainian CTA and headings use adaptive scaling without truncation.
+- Layout: 22-point horizontal margins, 52-point back target, 58-point primary CTA, compact benefit rows, and scroll-safe bottom padding.
+- Color: existing `JourneyVisual.lime`, black base, muted white text, and restrained graphite icon surfaces.
+- Data integrity: readiness shows the real `CareerProfileSnapshot.completion` value. Guest capture correctly renders 0%, rather than mock-only 82%.
+- Behavior: back action still dismisses; both visible actions open the existing `AuthEntryView`; authenticated Jobs and Career Hub flow remains unchanged.
+
+**Verification**
+- [x] Debug iOS Simulator build succeeds.
+- [x] Direct iPhone 16 simulator launch succeeds.
+- [x] Unauthenticated gate screenshot captured and visually compared with selected source.
+- [x] `git diff --check` passes.
+- [x] Existing unrelated working-tree changes preserved.
+
+**Findings**
+- No actionable P0, P1, or P2 visual issues remain in captured compact state.
+- [P3] iPhone 16e CoreSimulator install returned `Mach error -308`; fresh iPhone 16 simulator completed launch and capture.
+
+final result: passed
+
+---
+
 **Tools Editorial Redesign — 2026-08-12**
 - Source visual truth: `/Users/vladyslav.katash/.codex/generated_images/019fdb22-7dc6-70c3-9979-1d72f10c376f/exec-fa380d34-f4c5-4912-a61b-2ededc185a9d.png`.
 - Implementation screenshot: `/private/tmp/sweezy-tools-16e-fixed.png`.

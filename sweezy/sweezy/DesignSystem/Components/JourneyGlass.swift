@@ -25,6 +25,31 @@ enum JourneyVisual {
             ? UIColor(white: 1.0, alpha: 0.62)
             : UIColor(red: 0.10, green: 0.18, blue: 0.11, alpha: 0.68)
     })
+    static let pageBackground = Color(UIColor { traits in
+        traits.userInterfaceStyle == .dark
+            ? UIColor(red: 0.025, green: 0.03, blue: 0.025, alpha: 1)
+            : UIColor(red: 0.955, green: 0.97, blue: 0.945, alpha: 1)
+    })
+    static let primaryText = Color(UIColor { traits in
+        traits.userInterfaceStyle == .dark
+            ? UIColor(white: 1, alpha: 0.96)
+            : UIColor(red: 0.055, green: 0.09, blue: 0.06, alpha: 0.96)
+    })
+    static let secondaryText = Color(UIColor { traits in
+        traits.userInterfaceStyle == .dark
+            ? UIColor(white: 1, alpha: 0.62)
+            : UIColor(red: 0.10, green: 0.16, blue: 0.11, alpha: 0.64)
+    })
+    static let softSurface = Color(UIColor { traits in
+        traits.userInterfaceStyle == .dark
+            ? UIColor(white: 1, alpha: 0.065)
+            : UIColor(white: 1, alpha: 0.82)
+    })
+    static let softBorder = Color(UIColor { traits in
+        traits.userInterfaceStyle == .dark
+            ? UIColor(white: 1, alpha: 0.14)
+            : UIColor(red: 0.10, green: 0.18, blue: 0.11, alpha: 0.12)
+    })
 }
 
 struct JourneyPhotoBackground: View {
@@ -97,24 +122,24 @@ struct JourneySearchField: View {
         HStack(spacing: 11) {
             Image(systemName: "magnifyingglass")
                 .font(.system(size: 16, weight: .semibold))
-                .foregroundStyle(.white.opacity(0.92))
+                .foregroundStyle(JourneyVisual.primaryText.opacity(0.78))
             TextField(
                 "",
                 text: $text,
-                prompt: Text(prompt).foregroundColor(.white.opacity(0.88))
+                prompt: Text(prompt).foregroundColor(JourneyVisual.secondaryText)
             )
-                .foregroundStyle(.white)
+                .foregroundStyle(JourneyVisual.primaryText)
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
         }
         .font(.system(size: 15, weight: .medium))
-        .foregroundColor(.white)
+        .foregroundColor(JourneyVisual.primaryText)
         .padding(.horizontal, 17)
         .frame(height: 48)
         .background(.ultraThinMaterial.opacity(0.78))
-        .background(Color.black.opacity(0.18))
+        .background(JourneyVisual.softSurface)
         .clipShape(Capsule())
-        .overlay(Capsule().stroke(Color.white.opacity(0.34), lineWidth: 1))
+        .overlay(Capsule().stroke(JourneyVisual.softBorder, lineWidth: 1))
     }
 }
 
@@ -141,13 +166,13 @@ struct JourneyFilterChip: View {
                     .lineLimit(1)
             }
             .font(.system(size: 13, weight: .semibold))
-            .foregroundColor(isSelected ? .black : .white)
+            .foregroundColor(isSelected ? .black : JourneyVisual.primaryText)
             .padding(.horizontal, 15)
             .frame(height: 38)
-            .background(isSelected ? JourneyVisual.lime : Color.black.opacity(0.28))
+            .background(isSelected ? JourneyVisual.lime : JourneyVisual.softSurface)
             .background(.ultraThinMaterial.opacity(isSelected ? 0 : 0.72))
             .clipShape(Capsule())
-            .overlay(Capsule().stroke(Color.white.opacity(isSelected ? 0 : 0.28), lineWidth: 1))
+            .overlay(Capsule().stroke(isSelected ? Color.clear : JourneyVisual.softBorder, lineWidth: 1))
         }
         .buttonStyle(.plain)
     }

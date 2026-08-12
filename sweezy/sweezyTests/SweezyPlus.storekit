@@ -1,0 +1,109 @@
+{
+  "identifier" : "A98E7C61",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+
+  ],
+  "settings" : {
+    "_askToBuyEnabled" : false,
+    "_billingGracePeriodEnabled" : false,
+    "_disableDialogs" : true,
+    "_failTransactionsEnabled" : false,
+    "_locale" : "de_CH",
+    "_renewalBillingIssuesEnabled" : false,
+    "_storefront" : "CHE",
+    "_storeKitErrors" : [
+
+    ],
+    "_timeRate" : 0
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "7DA5E2B1",
+      "localizations" : [
+
+      ],
+      "name" : "Sweezy Plus",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "4.95",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "6749800001",
+          "introductoryOffer" : {
+            "displayPrice" : "0",
+            "internalID" : "6749800101",
+            "numberOfPeriods" : 1,
+            "paymentMode" : "free",
+            "subscriptionPeriod" : "P1M"
+          },
+          "localizations" : [
+            {
+              "description" : "Alle Sweezy Plus Funktionen mit einem kostenlosen Probemonat.",
+              "displayName" : "Sweezy Plus Monatlich",
+              "locale" : "de_CH"
+            },
+            {
+              "description" : "Усі можливості Sweezy Plus із безкоштовним пробним місяцем.",
+              "displayName" : "Sweezy Plus щомісяця",
+              "locale" : "uk"
+            }
+          ],
+          "productID" : "sweezy_plus_monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Sweezy Plus Monthly",
+          "subscriptionGroupID" : "7DA5E2B1",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "49.50",
+          "familyShareable" : false,
+          "groupNumber" : 2,
+          "internalID" : "6749800002",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Sweezy Plus Jahresabo.",
+              "displayName" : "Sweezy Plus Jährlich",
+              "locale" : "de_CH"
+            },
+            {
+              "description" : "Річна підписка Sweezy Plus.",
+              "displayName" : "Sweezy Plus щороку",
+              "locale" : "uk"
+            }
+          ],
+          "productID" : "sweezy_plus_yearly",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "Sweezy Plus Yearly",
+          "subscriptionGroupID" : "7DA5E2B1",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 4,
+    "minor" : 0
+  }
+}

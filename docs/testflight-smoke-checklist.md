@@ -79,12 +79,34 @@ bundle exec fastlane metadata
 | 7 | Chat: two users, message, unread badge | |
 | 8 | Language uk/en/de | |
 | 9 | Delete account | |
-| 10 | (If push on) background app → receive chat push → deep link | |
+| 10 | Background app → receive chat push → deep link opens exact conversation | |
+| 11 | Universal links open guide, checklist, template, map filter, place, CV, profile, privacy, language and What's New | |
+| 12 | Light mode: Directory and Marketplace search, filters, empty/loading states remain readable | |
+| 13 | Job search: change query quickly; older response never replaces latest results | |
+| 14 | Large external image (>12 MB or >8192 px) is rejected without memory spike/crash | |
+
+## Subscription release gate
+
+Local StoreKit tests cover product contract, purchase, restore, forced renewal,
+billing grace period and refund. Before every App Store release, repeat these
+flows through Sandbox/TestFlight on a real device because local StoreKit tests
+do not validate App Store Connect configuration, Apple server delivery or the
+production receipt chain.
+
+- [ ] Monthly product shows localized `4.95 CHF` and one-month free trial
+- [ ] New purchase updates backend entitlement for signed-in Sweezy account
+- [ ] Restore after reinstall and sign-in restores same account entitlement
+- [ ] Renewal keeps Plus; expiration removes Plus
+- [ ] Billing retry + enabled grace period keeps Plus until grace ends
+- [ ] Refund/revocation removes Plus after Server Notification V2 delivery
+- [ ] Notification replay is idempotent
+- [ ] Second Sweezy account cannot claim same original Apple transaction
+- [ ] Ask Sweezy, job application and CV API enforce backend entitlement
 
 ## 5) ASC submit readiness
 
 - [ ] Screenshots uploaded for en-US (+ uk/de if shipping those storefronts)
 - [ ] App Privacy filled from `docs/asc-app-privacy-answers.md`
-- [ ] Review notes say free / no IAP
+- [ ] Review notes describe Sweezy Plus, free trial, restore path and account binding
 - [ ] Export compliance / encryption answers completed
 - [ ] Age rating completed

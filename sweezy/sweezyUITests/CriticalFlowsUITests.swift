@@ -232,7 +232,18 @@ final class CriticalFlowsUITests: XCTestCase {
         XCTAssertTrue(title.exists)
         XCTAssertGreaterThanOrEqual(title.frame.minX, 0)
         XCTAssertLessThanOrEqual(title.frame.maxX, app.frame.maxX)
+        XCTAssertTrue(app.staticTexts["8 збігів поруч"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Anna Keller"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["96%"].exists)
         keepScreenshot(app, name: "friends-responsive")
+
+        let firstProfile = app.buttons["friends.profile.preview-anna"]
+        XCTAssertTrue(firstProfile.waitForExistence(timeout: 5))
+        firstProfile.tap()
+        XCTAssertTrue(app.staticTexts["Anna Keller"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["96% збіг"].exists)
+        XCTAssertTrue(app.buttons["Запропонувати дружбу"].exists)
+        keepScreenshot(app, name: "friends-filled-profile")
     }
 
     @MainActor

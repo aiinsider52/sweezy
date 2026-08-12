@@ -7,6 +7,7 @@
 
 import SwiftUI
 import UIKit
+import ImageIO
 
 // MARK: - In-Memory Image Cache
 
@@ -25,8 +26,8 @@ final class ImageMemoryCache {
     }
     
     func insert(_ image: UIImage, for url: URL) {
-        let pixels = image.size.width * image.size.height
-        let cost = Int(pixels)
+        let pixels = image.size.width * image.scale * image.size.height * image.scale
+        let cost = Int(pixels * 4)
         cache.setObject(image, forKey: url as NSURL, cost: cost)
     }
 }
@@ -34,6 +35,8 @@ final class ImageMemoryCache {
 // MARK: - Loader
 
 final class CachedImageLoader: ObservableObject {
+    private static let maximumDownloadBytes = 12 * 1024 * 1024
+    private static let maximumPixelDimension: CGFloat = 8_192
     @Published var image: UIImage?
     @Published var isLoading: Bool = false
     
@@ -60,14 +63,43 @@ final class CachedImageLoader: ObservableObject {
         isLoading = true
         task = Task {
             do {
-                let (data, response) = try await URLSession.shared.data(from: url)
+                let (bytes, response) = try await URLSession.shared.bytes(from: url)
                 guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
                     await MainActor.run {
                         self.isLoading = false
                     }
                     return
                 }
-                if let img = UIImage(data: data) {
+                guard http.expectedContentLength <= 0 || http.expectedContentLength <= Int64(Self.maximumDownloadBytes) else {
+                    await MainActor.run { self.isLoading = false }
+                    return
+                }
+
+                var data = Data()
+                if http.expectedContentLength > 0 {
+                    data.reserveCapacity(Int(http.expectedContentLength))
+                }
+                for try await byte in bytes {
+                    try Task.checkCancellation()
+                    guard data.count < Self.maximumDownloadBytes else {
+                        await MainActor.run { self.isLoading = false }
+                        return
+                    }
+                    data.append(byte)
+                }
+
+                guard
+                      let source = CGImageSourceCreateWithData(data as CFData, nil),
+                      let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any],
+                      let width = properties[kCGImagePropertyPixelWidth] as? CGFloat,
+                      let height = properties[kCGImagePropertyPixelHeight] as? CGFloat,
+                      width <= Self.maximumPixelDimension,
+                      height <= Self.maximumPixelDimension,
+                      let img = UIImage(data: data) else {
+                    await MainActor.run { self.isLoading = false }
+                    return
+                }
+                if !Task.isCancelled {
                     ImageMemoryCache.shared.insert(img, for: url)
                     await MainActor.run {
                         self.image = img
@@ -122,5 +154,3 @@ struct CachedAsyncImage<Placeholder: View>: View {
         }
     }
 }
-
-

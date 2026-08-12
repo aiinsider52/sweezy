@@ -149,7 +149,12 @@ def user_registrations(
     today = datetime.now(timezone.utc).date()
     since_date = today - timedelta(days=days - 1)
     since = datetime.combine(since_date, datetime.min.time(), tzinfo=timezone.utc)
-    day_bucket = func.date_trunc("day", User.created_at)
+    dialect = db.get_bind().dialect.name
+    day_bucket = (
+        func.date(User.created_at)
+        if dialect == "sqlite"
+        else func.date_trunc("day", User.created_at)
+    )
 
     rows = (
         db.query(day_bucket.label("day"), func.count().label("count"))
@@ -158,11 +163,14 @@ def user_registrations(
         .order_by(day_bucket.asc())
         .all()
     )
-    by_day = {
-        (row.day.date() if hasattr(row.day, "date") else row.day): int(row.count or 0)
-        for row in rows
-        if row.day is not None
-    }
+    by_day: Dict[Any, int] = {}
+    for row in rows:
+        if row.day is None:
+            continue
+        value = row.day.date() if hasattr(row.day, "date") else row.day
+        if isinstance(value, str):
+            value = date.fromisoformat(value)
+        by_day[value] = int(row.count or 0)
     trends = [
         {
             "date": (since_date + timedelta(days=offset)).isoformat(),

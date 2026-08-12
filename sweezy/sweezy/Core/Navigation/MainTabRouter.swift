@@ -6,6 +6,7 @@ final class MainTabRouter: ObservableObject {
     @Published private(set) var isBottomBarHidden = false
     @Published private(set) var requestedDirectorySection: DovidnykRouteSection?
     @Published private(set) var requestedDirectoryRouteID = UUID()
+    @Published private(set) var activeDeepLink: DeepLink?
 
     func select(tab: Int) {
         selectedTab = min(max(tab, 0), 4)
@@ -20,5 +21,16 @@ final class MainTabRouter: ObservableObject {
 
     func setBottomBarHidden(_ hidden: Bool) {
         isBottomBarHidden = hidden
+    }
+
+    func open(_ deepLink: DeepLink) {
+        if let tab = deepLink.rootTabIndex {
+            selectedTab = tab
+        }
+        activeDeepLink = deepLink
+    }
+
+    func consumeDeepLink() {
+        activeDeepLink = nil
     }
 }

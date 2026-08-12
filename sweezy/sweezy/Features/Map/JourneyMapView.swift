@@ -79,6 +79,7 @@ struct JourneyMapView: View {
         }
         .onAppear {
             applyPendingMapFocus()
+            applyPendingDeepLinkFilter()
         }
         .onChange(of: appContainer.locationService.authorizationStatus) { _, status in
             if status == .authorizedWhenInUse || status == .authorizedAlways {
@@ -109,6 +110,14 @@ struct JourneyMapView: View {
             }
         }
         .accessibilityIdentifier("map.screen")
+    }
+
+    private func applyPendingDeepLinkFilter() {
+        guard let type = MapDeepLinkRouter.pendingFilter else { return }
+        MapDeepLinkRouter.pendingFilter = nil
+        selectedType = type
+        showsDiscoveryOnly = false
+        selectFirstVisiblePlace()
     }
 
     private var mapLayer: some View {

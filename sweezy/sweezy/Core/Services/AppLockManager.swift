@@ -21,6 +21,7 @@ final class AppLockManager: ObservableObject {
     
     // Cached biometry type to avoid repeated LAContext calls during body evaluation
     private var _cachedBiometryType: LABiometryType?
+    private var didInitializeLockState = false
     
     var biometryDisplayName: String {
         // Return cached value if available to avoid blocking main thread
@@ -54,6 +55,16 @@ final class AppLockManager: ObservableObject {
         if biometricsEnabled && !isBiometryAvailable {
             biometricsEnabled = false
             isLocked = false
+        }
+
+        // A persisted lock must also protect a cold launch, not only a return
+        // from background. Run once so later view refreshes do not re-lock an
+        // already authenticated session.
+        guard !didInitializeLockState else { return }
+        didInitializeLockState = true
+        if biometricsEnabled && isBiometryAvailable {
+            isLocked = true
+            Task { _ = await authenticate(reason: "Unlock Sweezy") }
         }
     }
     

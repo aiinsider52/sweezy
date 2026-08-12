@@ -23,6 +23,7 @@ struct JobsView: View {
     @State private var sources: [String: Int] = [:]
     @State private var catalogStatus: String = "ready"
     @State private var loadErrorMessage: String?
+    @State private var searchGeneration = 0
     @State private var favoriteIds: Set<String> = []
     @State private var didSearchOnce: Bool = false
     @State private var selectedJob: APIClient.JobItem?
@@ -189,6 +190,15 @@ struct JobsView: View {
         #endif
     }
 
+    private var isJobsGateUITest: Bool {
+        #if DEBUG
+        ProcessInfo.processInfo.environment["UITESTS"] == "1" &&
+            ProcessInfo.processInfo.arguments.contains("--ui-test-jobs-gate")
+        #else
+        false
+        #endif
+    }
+
     private enum CareerNextAction {
         case createCV
         case completeCV
@@ -211,7 +221,7 @@ struct JobsView: View {
     // MARK: - Body
     var body: some View {
         Group {
-            if sessionManager.isAuthenticated || isCareerHubUITest {
+            if sessionManager.isAuthenticated || isCareerHubUITest, !isJobsGateUITest {
                 jobsContent
             } else {
                 jobsAccessGate
@@ -423,107 +433,199 @@ struct JobsView: View {
     }
 
     private var jobsAccessGate: some View {
-        ZStack {
-            Image("jobs-zurich-hero")
-                .resizable()
-                .scaledToFill()
-                .ignoresSafeArea()
-                .overlay(Color.black.opacity(0.58))
-                .overlay(
-                    LinearGradient(
-                        colors: [.clear, .black.opacity(0.42), .black],
-                        startPoint: .top,
-                        endPoint: .bottom
+        GeometryReader { proxy in
+            ZStack(alignment: .top) {
+                Color.black.ignoresSafeArea()
+
+                Image("jobs-zurich-hero")
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: proxy.size.width, height: max(430, proxy.size.height * 0.54))
+                    .clipped()
+                    .overlay(Color.black.opacity(0.3))
+                    .overlay(
+                        LinearGradient(
+                            colors: [.black.opacity(0.08), .black.opacity(0.16), .black.opacity(0.92), .black],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
                     )
-                )
+                    .ignoresSafeArea(edges: .top)
 
-            VStack(alignment: .leading, spacing: 0) {
-                Button { dismiss() } label: {
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 22, weight: .semibold))
-                        .foregroundColor(.white)
-                        .frame(width: 52, height: 52)
-                        .background(.ultraThinMaterial.opacity(0.78))
-                        .background(Color.black.opacity(0.34))
-                        .clipShape(Circle())
-                        .overlay(Circle().stroke(Color.white.opacity(0.24), lineWidth: 1))
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel("Назад")
+                ScrollView(showsIndicators: false) {
+                    VStack(alignment: .leading, spacing: 0) {
+                        jobsGateBackButton
 
-                Spacer()
+                        Spacer(minLength: max(150, proxy.size.height * 0.18))
 
-                Text("РОБОТА У ШВЕЙЦАРІЇ")
-                    .font(.system(size: 13, weight: .bold))
-                    .tracking(2.2)
-                    .foregroundColor(JourneyVisual.lime)
+                        Text("РОБОТА У ШВЕЙЦАРІЇ")
+                            .font(.system(size: 12, weight: .black, design: .rounded))
+                            .tracking(2.2)
+                            .foregroundColor(JourneyVisual.lime)
 
-                Text("Твій пошук роботи\nпочинається тут")
-                    .font(.system(size: 38, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
-                    .lineSpacing(-2)
-                    .padding(.top, 12)
+                        Text("Знайди роботу,\nяка тобі підходить")
+                            .font(.system(size: 39, weight: .bold, design: .rounded))
+                            .foregroundColor(.white)
+                            .minimumScaleFactor(0.78)
+                            .lineSpacing(-2)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .padding(.top, 11)
 
-                Text("Створи акаунт, щоб бачити вакансії, зберігати пропозиції, отримувати AI Match і стежити за заявками.")
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(.white.opacity(0.72))
-                    .lineSpacing(4)
-                    .padding(.top, 16)
+                        Text("AI Match, збережені вакансії та весь шлях заявки — в одному місці.")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(.white.opacity(0.68))
+                            .lineSpacing(4)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .padding(.top, 13)
 
-                JourneyGlassPanel(cornerRadius: 25) {
-                    VStack(spacing: 14) {
-                        accessBenefit(icon: "sparkles", title: "Персональний AI Match")
-                        accessBenefit(icon: "bookmark.fill", title: "Збережені вакансії")
-                        accessBenefit(icon: "paperplane.fill", title: "Трекер відгуків")
+                        jobsGateReadiness
+                            .padding(.top, 22)
+
+                        VStack(spacing: 4) {
+                            accessBenefit(
+                                icon: "sparkles",
+                                title: "Персональний AI Match",
+                                subtitle: "Рекомендації під твій досвід і цілі"
+                            )
+                            accessBenefit(
+                                icon: "bookmark.fill",
+                                title: "Збережені вакансії",
+                                subtitle: "Усі цікаві пропозиції завжди під рукою"
+                            )
+                            accessBenefit(
+                                icon: "paperplane.fill",
+                                title: "Трекер заявок",
+                                subtitle: "Статуси й наступні кроки в одному місці"
+                            )
+                        }
+                        .padding(.top, 16)
 
                         Button {
-                            showAuthEntry = true
-                            haptic(.medium)
+                            openJobsAuthentication()
                         } label: {
-                            HStack(spacing: 10) {
-                                Image(systemName: "person.crop.circle.badge.plus")
-                                Text("Зареєструватися або увійти")
-                                Spacer()
+                            HStack(spacing: 12) {
+                                Spacer(minLength: 0)
+                                Text("Увійти та знайти вакансії")
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.78)
                                 Image(systemName: "arrow.right")
+                                Spacer(minLength: 0)
                             }
-                            .font(.system(size: 16, weight: .bold))
+                            .font(.system(size: 17, weight: .black, design: .rounded))
                             .foregroundColor(.black)
-                            .padding(.horizontal, 20)
                             .frame(maxWidth: .infinity, minHeight: 58)
                             .background(JourneyVisual.lime)
                             .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
                         }
                         .buttonStyle(.plain)
+                        .padding(.top, 18)
                         .accessibilityHint("Відкриває вхід або створення акаунта")
+
+                        Button {
+                            openJobsAuthentication()
+                        } label: {
+                            Text("Переглянути можливості")
+                                .font(.system(size: 15, weight: .bold, design: .rounded))
+                                .foregroundColor(.white.opacity(0.88))
+                                .frame(maxWidth: .infinity, minHeight: 44)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityHint("Відкриває вхід для перегляду вакансій")
                     }
-                    .padding(18)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 22)
+                    .padding(.top, 8)
+                    .padding(.bottom, 116)
                 }
-                .padding(.top, 24)
             }
-            .padding(.horizontal, 22)
-            .padding(.top, 12)
-            .padding(.bottom, 28)
         }
         .toolbar(.hidden, for: .navigationBar)
         .navigationBarBackButtonHidden(true)
     }
 
-    private func accessBenefit(icon: String, title: String) -> some View {
-        HStack(spacing: 12) {
-            Image(systemName: icon)
-                .font(.system(size: 15, weight: .bold))
-                .foregroundColor(JourneyVisual.lime)
-                .frame(width: 34, height: 34)
-                .background(JourneyVisual.lime.opacity(0.12))
-                .clipShape(RoundedRectangle(cornerRadius: 11, style: .continuous))
-            Text(title)
-                .font(.system(size: 15, weight: .semibold))
+    private var jobsGateBackButton: some View {
+        Button { dismiss() } label: {
+            Image(systemName: "chevron.left")
+                .font(.system(size: 22, weight: .semibold))
                 .foregroundColor(.white)
-            Spacer()
-            Image(systemName: "checkmark.circle.fill")
-                .foregroundColor(.white.opacity(0.38))
+                .frame(width: 52, height: 52)
+                .background(.ultraThinMaterial.opacity(0.74))
+                .background(Color.black.opacity(0.34))
+                .clipShape(Circle())
+                .overlay(Circle().stroke(Color.white.opacity(0.24), lineWidth: 1))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Назад")
+    }
+
+    private var jobsGateReadiness: some View {
+        HStack(spacing: 15) {
+            ZStack {
+                Circle()
+                    .stroke(Color.white.opacity(0.12), lineWidth: 6)
+                Circle()
+                    .trim(from: 0, to: max(0.03, Double(careerProfile.completion) / 100))
+                    .stroke(
+                        JourneyVisual.lime,
+                        style: StrokeStyle(lineWidth: 6, lineCap: .round)
+                    )
+                    .rotationEffect(.degrees(-90))
+                Image(systemName: "person.crop.circle")
+                    .font(.system(size: 19, weight: .semibold))
+                    .foregroundColor(.white)
+            }
+            .frame(width: 60, height: 60)
+
+            VStack(alignment: .leading, spacing: 5) {
+                Text("Кар’єрний профіль")
+                    .font(.system(size: 16, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
+                Text("\(careerProfile.completion)% готово")
+                    .font(.system(size: 15, weight: .bold, design: .rounded))
+                    .foregroundColor(JourneyVisual.lime)
+
+                GeometryReader { geometry in
+                    ZStack(alignment: .leading) {
+                        Capsule().fill(Color.white.opacity(0.1))
+                        Capsule()
+                            .fill(JourneyVisual.lime)
+                            .frame(width: geometry.size.width * max(0.03, Double(careerProfile.completion) / 100))
+                    }
+                }
+                .frame(height: 5)
+            }
         }
         .accessibilityElement(children: .combine)
+        .accessibilityLabel("Кар’єрний профіль готовий на \(careerProfile.completion) відсотків")
+    }
+
+    private func accessBenefit(icon: String, title: String, subtitle: String) -> some View {
+        HStack(spacing: 14) {
+            Image(systemName: icon)
+                .font(.system(size: 17, weight: .bold))
+                .foregroundColor(JourneyVisual.lime)
+                .frame(width: 48, height: 48)
+                .background(Color.white.opacity(0.055))
+                .clipShape(RoundedRectangle(cornerRadius: 15, style: .continuous))
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text(title)
+                    .font(.system(size: 15, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
+                Text(subtitle)
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(.white.opacity(0.54))
+                    .lineLimit(2)
+            }
+            Spacer()
+        }
+        .padding(.vertical, 6)
+        .accessibilityElement(children: .combine)
+    }
+
+    private func openJobsAuthentication() {
+        showAuthEntry = true
+        haptic(.medium)
     }
     
     // MARK: - Hero
@@ -1391,10 +1493,14 @@ struct JobsView: View {
     
     // MARK: - Actions
     private func performSearch() async {
+        searchGeneration &+= 1
+        let generation = searchGeneration
         isLoading = true
         loadErrorMessage = nil
         didSearchOnce = true
-        defer { isLoading = false }
+        defer {
+            if generation == searchGeneration { isLoading = false }
+        }
         
         do {
             page = 1
@@ -1409,6 +1515,7 @@ struct JobsView: View {
                 page: page,
                 perPage: perPage
             )
+            guard generation == searchGeneration, !Task.isCancelled else { return }
             items = resp.items
             sources = resp.sources ?? [:]
             catalogStatus = resp.catalog_status ?? "ready"
@@ -1428,6 +1535,7 @@ struct JobsView: View {
                 "q": keyword, "canton": canton, "results": String(items.count)
             ])
         } catch {
+            guard generation == searchGeneration, !Task.isCancelled else { return }
             items = []
             sources = [:]
             catalogStatus = "ready"

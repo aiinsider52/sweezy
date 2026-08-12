@@ -246,6 +246,11 @@ class AppContainer: ObservableObject {
         _ = roadmapSync
     }
 
+    func restartOnboarding() {
+        isOnboardingCompleted = false
+        UserDefaults.standard.set(false, forKey: "onboarding_completed")
+    }
+
     func markInitialAuthChoiceCompleted() {
         hasCompletedInitialAuthChoice = true
         UserDefaults.standard.set(true, forKey: "initial_auth_choice_completed")

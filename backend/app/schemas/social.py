@@ -7,6 +7,8 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 Interest = Literal["hiking", "sports", "books", "music", "art", "food", "travel", "languages", "technology", "business", "family", "photography", "gaming", "wellness", "volunteering"]
 MeetupFormat = Literal["coffee", "walk", "activity", "event", "online", "family"]
+Availability = Literal["weekday_morning", "weekday_evening", "weekend", "flexible"]
+AgeBand = Literal["18-24", "25-34", "35-44", "45-54", "55+"]
 
 
 class SocialProfileUpsert(BaseModel):
@@ -18,6 +20,11 @@ class SocialProfileUpsert(BaseModel):
     interests: list[Interest] = Field(min_length=2, max_length=10)
     languages: list[str] = Field(min_length=1, max_length=6)
     meetup_formats: list[MeetupFormat] = Field(min_length=1, max_length=5)
+    availability: list[Availability] = Field(default_factory=lambda: ["flexible"], min_length=1, max_length=4)
+    age_band: AgeBand | None = None
+    arrival_year: int | None = Field(default=None, ge=1950, le=2100)
+    latitude: float | None = Field(default=None, ge=45.7, le=47.9)
+    longitude: float | None = Field(default=None, ge=5.9, le=10.6)
     avatar_url: str | None = Field(default=None, max_length=1000)
     is_visible: bool = True
     open_to_friends: bool = True
@@ -39,8 +46,10 @@ class SocialProfileUpsert(BaseModel):
     @classmethod
     def secure_avatar(cls, value: str | None) -> str | None:
         if not value or not value.strip(): return None
-        if not value.strip().startswith("https://"): raise ValueError("Avatar URL must use HTTPS")
-        return value.strip()
+        clean = value.strip()
+        if not (clean.startswith("https://") or clean.startswith("/media/")):
+            raise ValueError("Avatar URL must use HTTPS or managed media storage")
+        return clean
 
 
 class SocialProfileResponse(BaseModel):
@@ -53,11 +62,17 @@ class SocialProfileResponse(BaseModel):
     interests: list[str]
     languages: list[str]
     meetup_formats: list[str]
+    availability: list[str] = []
+    age_band: str | None = None
+    arrival_year: int | None = None
     avatar_url: str | None
     is_visible: bool
     open_to_friends: bool
     is_verified: bool
     match_score: int = 0
+    match_reasons: list[str] = []
+    distance_km: int | None = None
+    residency_stage: str = "established"
     shared_interests: list[str] = []
     connection_state: str = "none"
     connection_id: str | None = None
@@ -73,6 +88,10 @@ class SocialProfilePage(BaseModel):
     page: int
     per_page: int
     pages: int
+    is_limited: bool = False
+    visible_limit: int | None = None
+    advanced_filters_available: bool = False
+    requests_remaining: int | None = None
 
 
 class FriendRequestCreate(BaseModel):
@@ -118,6 +137,28 @@ class SocialEventResponse(BaseModel):
     is_free: bool
     attendee_count: int
     my_status: str | None = None
+    is_private: bool = False
+    is_recommended: bool = False
+    recommendation_reason: str | None = None
+    group_chat_available: bool = False
+    can_invite: bool = False
+
+
+class SocialEventInviteCreate(BaseModel):
+    friend_user_id: str = Field(min_length=1, max_length=36)
+
+
+class SocialEventMessageCreate(BaseModel):
+    body: str = Field(min_length=1, max_length=1000)
+
+
+class SocialEventMessageResponse(BaseModel):
+    id: str
+    event_id: str
+    sender_id: str
+    sender_name: str
+    body: str
+    created_at: datetime
 
 
 class SocialReportCreate(BaseModel):

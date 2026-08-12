@@ -30,6 +30,14 @@ admin_router = APIRouter()
 _optional_bearer = HTTPBearer(auto_error=False)
 
 
+def _is_premium(user) -> bool:
+    if (user.subscription_status or "free") not in {"trial", "premium"}: return False
+    expires = user.subscription_expire_at
+    if expires is None: return True
+    now = datetime.now(expires.tzinfo) if expires.tzinfo else datetime.utcnow()
+    return expires > now
+
+
 def _get_optional_user_id(
     db: DBSession,
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(_optional_bearer),
@@ -59,8 +67,9 @@ def list_events(
     upcoming_only: bool = Query(True),
     user_id: str | None = Depends(_get_optional_user_id),
 ) -> EventListingPage:
-    stmt = select(EventListing).where(EventListing.status == "approved")
-    count_stmt = select(func.count()).select_from(EventListing).where(EventListing.status == "approved")
+    stmt = select(EventListing).where(EventListing.status == "approved", EventListing.is_private.is_(False))
+    count_stmt = select(func.count()).select_from(EventListing).where(
+        EventListing.status == "approved", EventListing.is_private.is_(False))
 
     if category:
         stmt = stmt.where(EventListing.category == category.value)
@@ -164,6 +173,8 @@ def create_event(
 ) -> EventListingResponse:
     if not user.email_verified:
         raise HTTPException(status_code=403, detail="Verify your email before creating an event")
+    if payload.is_private and not _is_premium(user):
+        raise HTTPException(status_code=402, detail={"code": "plus_required", "feature": "private_events"})
     event = EventListing(
         title=payload.title,
         description=payload.description,
@@ -175,6 +186,7 @@ def create_event(
         starts_at=payload.starts_at,
         ends_at=payload.ends_at,
         is_free=payload.is_free,
+        is_private=payload.is_private,
         price_info=payload.price_info,
         contact_type=payload.contact_type.value,
         contact_value=payload.contact_value,
@@ -209,7 +221,9 @@ def update_event(
     if not data:
         return EventListingDetail.model_validate(event)
 
-    for field in ["title", "description", "venue_name", "address", "starts_at", "ends_at", "is_free", "price_info"]:
+    if data.get("is_private") and not _is_premium(user):
+        raise HTTPException(status_code=402, detail={"code": "plus_required", "feature": "private_events"})
+    for field in ["title", "description", "venue_name", "address", "starts_at", "ends_at", "is_free", "is_private", "price_info"]:
         if field in data:
             setattr(event, field, data[field])
 

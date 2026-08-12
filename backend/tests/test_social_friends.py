@@ -78,3 +78,75 @@ def test_guidelines_required_and_private_attendance_hidden() -> None:
     client.put(f"/api/v1/friends/events/{event_id}/attendance", headers=second, json={"status": "going", "visible_to_attendees": False})
     people = client.get(f"/api/v1/friends/profiles?event_id={event_id}", headers=first)
     assert people.status_code == 200 and people.json()["total"] == 0
+
+
+def test_managed_media_avatar_is_allowed() -> None:
+    headers, _ = identity()
+    response = client.put("/api/v1/friends/profile/me", headers=headers, json={
+        "display_name": "Photo User", "canton": "ZH", "city": "Zürich",
+        "bio": "Люблю безпечні зустрічі, події та знайомства у Швейцарії.",
+        "interests": ["music", "travel"], "languages": ["UK"],
+        "meetup_formats": ["coffee"], "availability": ["weekend"],
+        "avatar_url": "/media/1234567890abcdef1234567890abcdef.jpg",
+        "guidelines_accepted": True,
+    })
+    assert response.status_code == 200, response.text
+    assert response.json()["avatar_url"].startswith("/media/")
+
+
+def test_free_search_limits_advanced_filters_and_weekly_requests() -> None:
+    viewer, viewer_id = identity()
+    profile(viewer, "Viewer", ["music", "travel"])
+    advanced = client.get("/api/v1/friends/profiles?language=DE", headers=viewer)
+    assert advanced.status_code == 402
+    assert advanced.json()["detail"]["feature"] == "advanced_friend_search"
+
+    for index in range(5):
+        target, target_id = identity()
+        profile(target, f"Target {index}", ["music", "travel"])
+        sent = client.post(
+            f"/api/v1/friends/profiles/{target_id}/connect", headers=viewer, json={"message": "Hello"}
+        )
+        assert sent.status_code == 201
+    extra, extra_id = identity()
+    profile(extra, "Extra target", ["music", "travel"])
+    limited = client.post(
+        f"/api/v1/friends/profiles/{extra_id}/connect", headers=viewer, json={"message": "Hello"}
+    )
+    assert limited.status_code == 402
+    assert limited.json()["detail"]["feature"] == "friend_requests"
+
+
+def test_plus_advanced_search_event_invite_and_group_chat() -> None:
+    first, first_id = identity(); second, second_id = identity(); event_id = event()
+    profile(first, "First", ["music", "travel"]); profile(second, "Second", ["music", "travel"])
+    from backend.app.core.database import SessionLocal
+    from backend.app.models.user import User
+    with SessionLocal() as db:
+        user = db.get(User, first_id)
+        user.subscription_status = "premium"
+        db.add(user); db.commit()
+    filtered = client.get("/api/v1/friends/profiles?language=UK&residency=established", headers=first)
+    assert filtered.status_code == 200
+    assert filtered.json()["advanced_filters_available"] is True
+
+    connection = client.post(
+        f"/api/v1/friends/profiles/{second_id}/connect", headers=first, json={"message": "Meet there"}
+    ).json()
+    accepted = client.patch(
+        f"/api/v1/friends/connections/{connection['id']}", headers=second, json={"status": "accepted"}
+    )
+    assert accepted.status_code == 200
+    assert client.put(
+        f"/api/v1/friends/events/{event_id}/attendance", headers=first, json={"status": "going"}
+    ).status_code == 200
+    invite = client.post(
+        f"/api/v1/friends/events/{event_id}/invite", headers=first, json={"friend_user_id": second_id}
+    )
+    assert invite.status_code == 201
+    message = client.post(
+        f"/api/v1/friends/events/{event_id}/messages", headers=first, json={"body": "See you there"}
+    )
+    assert message.status_code == 201
+    messages = client.get(f"/api/v1/friends/events/{event_id}/messages", headers=first)
+    assert messages.status_code == 200 and messages.json()[0]["body"] == "See you there"

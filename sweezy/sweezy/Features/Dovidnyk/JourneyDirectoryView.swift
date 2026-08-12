@@ -228,6 +228,54 @@ struct JourneyDirectoryView: View {
                 .font(.system(size: 14, weight: .medium))
                 .foregroundColor(.white.opacity(0.72))
 
+            Button { selectedTool = .jobs } label: {
+                GeometryReader { geometry in
+                    ZStack(alignment: .bottomLeading) {
+                        Image("journey-tool-jobs")
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: geometry.size.width, height: 176)
+                            .clipped()
+                        LinearGradient(
+                            colors: [Color.black.opacity(0.08), Color.black.opacity(0.88)],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                        HStack(alignment: .bottom, spacing: 14) {
+                            VStack(alignment: .leading, spacing: 5) {
+                                Text("CAREER HUB")
+                                    .font(.system(size: 11, weight: .black, design: .rounded))
+                                    .tracking(1.8)
+                                    .foregroundColor(JourneyVisual.lime)
+                                Text("Кар’єра у Швейцарії")
+                                    .font(.system(size: 24, weight: .black, design: .rounded))
+                                    .foregroundColor(.white)
+                                    .minimumScaleFactor(0.8)
+                                    .lineLimit(1)
+                                Text("CV · вакансії · заявки · AI Match")
+                                    .font(.system(size: 12, weight: .semibold))
+                                    .foregroundColor(.white.opacity(0.7))
+                                    .minimumScaleFactor(0.75)
+                                    .lineLimit(1)
+                            }
+                            Spacer(minLength: 8)
+                            Image(systemName: "arrow.right")
+                                .font(.system(size: 16, weight: .black))
+                                .foregroundColor(.black)
+                                .frame(width: 44, height: 44)
+                                .background(JourneyVisual.lime)
+                                .clipShape(Circle())
+                        }
+                        .padding(18)
+                    }
+                    .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 26).stroke(JourneyVisual.lime.opacity(0.32)))
+                }
+            }
+            .frame(height: 176)
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("journey.tool.careerHub")
+
             JourneyToolCard(route: .discoverSwitzerland, height: 178, titleSize: 22) {
                 selectedTool = .discoverSwitzerland
             }

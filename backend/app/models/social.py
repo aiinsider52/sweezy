@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from uuid import uuid4
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Index, JSON, String, Text, UniqueConstraint, func
+from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Index, Integer, JSON, String, Text, UniqueConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from ..core.database import Base
@@ -20,11 +20,19 @@ class SocialProfile(Base):
     interests: Mapped[list[str]] = mapped_column(JSON, default=list, nullable=False)
     languages: Mapped[list[str]] = mapped_column(JSON, default=list, nullable=False)
     meetup_formats: Mapped[list[str]] = mapped_column(JSON, default=list, nullable=False)
+    availability: Mapped[list[str]] = mapped_column(JSON, default=list, nullable=False)
+    age_band: Mapped[str | None] = mapped_column(String(12), nullable=True, index=True)
+    arrival_year: Mapped[int | None] = mapped_column(Integer, nullable=True, index=True)
+    latitude: Mapped[float | None] = mapped_column(Float, nullable=True)
+    longitude: Mapped[float | None] = mapped_column(Float, nullable=True)
     avatar_url: Mapped[str | None] = mapped_column(String(1000), nullable=True)
     is_visible: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False, index=True)
     open_to_friends: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False, index=True)
     guidelines_accepted: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     is_verified: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False, index=True)
+    moderation_status: Mapped[str] = mapped_column(String(20), default="approved", nullable=False, index=True)
+    moderation_reason: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    boosted_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
@@ -74,4 +82,27 @@ class SocialProfileReport(Base):
     reason: Mapped[str] = mapped_column(String(40), nullable=False)
     details: Mapped[str | None] = mapped_column(Text, nullable=True)
     status: Mapped[str] = mapped_column(String(20), default="open", nullable=False, index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+
+class SocialEventInvite(Base):
+    __tablename__ = "social_event_invites"
+    __table_args__ = (UniqueConstraint("event_id", "invitee_id", name="uq_social_event_invitee"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid4()))
+    event_id: Mapped[str] = mapped_column(ForeignKey("event_listings.id", ondelete="CASCADE"), nullable=False, index=True)
+    inviter_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    invitee_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    status: Mapped[str] = mapped_column(String(20), default="pending", nullable=False, index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+
+class SocialEventMessage(Base):
+    __tablename__ = "social_event_messages"
+    __table_args__ = (Index("ix_social_event_messages_event_created", "event_id", "created_at"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid4()))
+    event_id: Mapped[str] = mapped_column(ForeignKey("event_listings.id", ondelete="CASCADE"), nullable=False, index=True)
+    sender_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    body: Mapped[str] = mapped_column(String(1000), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)

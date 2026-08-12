@@ -83,6 +83,10 @@ struct MainAppContent: View {
                 JourneyGuideArticleView(guide: Self.articleLayoutFixture)
             } else if isCareerHubUITest {
                 JobsView()
+            } else if isCareerToolsUITest {
+                JourneyDirectoryView(requestedSection: .tools, routeID: UUID())
+            } else if isFriendsUITest {
+                FriendNetworkView()
             } else if isNetworkUITest || isNetworkGateUITest {
                 ProfessionalNetworkView()
             } else if isPaywallScreenshot {
@@ -242,6 +246,26 @@ struct MainAppContent: View {
         #if DEBUG
         ProcessInfo.processInfo.environment["UITESTS"] == "1" &&
             ProcessInfo.processInfo.arguments.contains("--ui-test-network-gate")
+        #else
+        false
+        #endif
+    }
+
+    private var isCareerToolsUITest: Bool {
+        #if DEBUG
+        ProcessInfo.processInfo.environment["UITESTS"] == "1" &&
+            ProcessInfo.processInfo.arguments.contains("--ui-test-career-tools")
+        #else
+        false
+        #endif
+    }
+
+    private var isFriendsUITest: Bool {
+        #if DEBUG
+        ProcessInfo.processInfo.environment["UITESTS"] == "1" &&
+            (ProcessInfo.processInfo.arguments.contains("--ui-test-friends") ||
+             ProcessInfo.processInfo.arguments.contains("--ui-test-friends-profile") ||
+             ProcessInfo.processInfo.arguments.contains("--ui-test-friends-editor"))
         #else
         false
         #endif

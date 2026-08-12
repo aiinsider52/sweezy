@@ -17,6 +17,9 @@ struct CreateEventView: View {
     @State private var startsAt = Date().addingTimeInterval(3600 * 24)
     @State private var endsAt = Date().addingTimeInterval(3600 * 26)
     @State private var isFree = true
+    @State private var isPrivate = false
+    @State private var showPaywall = false
+    @StateObject private var subscriptionManager = SubscriptionManager.shared
     @State private var priceInfo = ""
     @State private var contactType: ContactType = .telegram
     @State private var contactValue = ""
@@ -68,6 +71,7 @@ struct CreateEventView: View {
             }
             .sheet(isPresented: $showSuccess) { successSheet }
             .sheet(isPresented: $showMyEvents) { MyEventsView() }
+            .fullScreenCover(isPresented: $showPaywall) { SubscriptionView(source: .profile) }
             .alert("marketplace.error_title".localized, isPresented: .init(
                 get: { errorMessage != nil },
                 set: { if !$0 { errorMessage = nil } }
@@ -78,6 +82,7 @@ struct CreateEventView: View {
             }
         }
         .journeyScreen(.city, darkness: 0.72)
+        .task { await subscriptionManager.load() }
     }
 
     private var infoCard: some View {
@@ -172,6 +177,18 @@ struct CreateEventView: View {
                         .background(fieldBackground)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
+                Toggle(isOn: Binding(
+                    get: { isPrivate },
+                    set: { enabled in
+                        if enabled && !subscriptionManager.isPremium { showPaywall = true }
+                        else { isPrivate = enabled }
+                    }
+                )) {
+                    VStack(alignment: .leading, spacing: 3) {
+                        HStack { Text("Закрита подія"); Text("PLUS").font(.caption2.bold()).padding(.horizontal, 7).padding(.vertical, 3).background(JourneyVisual.lime).foregroundColor(.black).clipShape(Capsule()) }
+                        Text("Видима лише запрошеним людям").font(.caption).foregroundColor(Theme.Colors.textSecondary)
+                    }
+                }.tint(JourneyVisual.lime)
             }
         }
     }
@@ -374,6 +391,7 @@ struct CreateEventView: View {
                 startsAt: startsAt,
                 endsAt: endsAt,
                 isFree: isFree,
+                isPrivate: isPrivate,
                 priceInfo: isFree ? nil : priceInfo.nilIfBlank,
                 contactType: contactType,
                 contactValue: contactValue.trimmingCharacters(in: .whitespacesAndNewlines),

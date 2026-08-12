@@ -206,6 +206,36 @@ final class CriticalFlowsUITests: XCTestCase {
     }
 
     @MainActor
+    func testCareerHubIsVisibleFromTools() throws {
+        let app = XCUIApplication()
+        app.launchArguments = ["--ui-test-career-tools"]
+        app.launchEnvironment["UITESTS"] = "1"
+        app.launch()
+
+        let careerHub = app.buttons["journey.tool.careerHub"]
+        XCTAssertTrue(careerHub.waitForExistence(timeout: 15))
+        XCTAssertTrue(careerHub.isHittable)
+        XCTAssertTrue(app.staticTexts["Кар’єра у Швейцарії"].exists)
+        keepScreenshot(app, name: "career-hub-tools-entry")
+    }
+
+    @MainActor
+    func testFriendsHubFitsPhoneViewport() throws {
+        let app = XCUIApplication()
+        app.launchArguments = ["--ui-test-friends"]
+        app.launchEnvironment["UITESTS"] = "1"
+        app.launch()
+
+        let screen = app.descendants(matching: .any)["friends.screen"]
+        XCTAssertTrue(screen.waitForExistence(timeout: 15))
+        let title = app.descendants(matching: .any)["friends.heroTitle"]
+        XCTAssertTrue(title.exists)
+        XCTAssertGreaterThanOrEqual(title.frame.minX, 0)
+        XCTAssertLessThanOrEqual(title.frame.maxX, app.frame.maxX)
+        keepScreenshot(app, name: "friends-responsive")
+    }
+
+    @MainActor
     private func launchCVBuilder() -> XCUIApplication {
         let app = XCUIApplication()
         app.launchArguments = [

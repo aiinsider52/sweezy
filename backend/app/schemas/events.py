@@ -38,6 +38,7 @@ class EventListingCreate(BaseModel):
     starts_at: datetime
     ends_at: Optional[datetime] = None
     is_free: bool = True
+    is_private: bool = False
     price_info: Optional[str] = Field(None, max_length=100)
     contact_type: EventContactType
     contact_value: str = Field(..., min_length=1, max_length=255)
@@ -52,6 +53,7 @@ class EventListingUpdate(BaseModel):
     starts_at: Optional[datetime] = None
     ends_at: Optional[datetime] = None
     is_free: Optional[bool] = None
+    is_private: Optional[bool] = None
     price_info: Optional[str] = Field(None, max_length=100)
 
 
@@ -69,6 +71,7 @@ class EventListingResponse(BaseModel):
     starts_at: datetime
     ends_at: Optional[datetime] = None
     is_free: bool
+    is_private: bool = False
     price_info: Optional[str] = None
     contact_type: str
     organizer_name: str

@@ -68,6 +68,7 @@ struct EventListing: Codable, Identifiable, Equatable {
     let startsAt: Date?
     let endsAt: Date?
     let isFree: Bool
+    let isPrivate: Bool
     let priceInfo: String?
     let contactType: ContactType
     let contactValue: String?
@@ -87,6 +88,7 @@ struct EventListing: Codable, Identifiable, Equatable {
         case startsAt = "starts_at"
         case endsAt = "ends_at"
         case isFree = "is_free"
+        case isPrivate = "is_private"
         case priceInfo = "price_info"
         case contactType = "contact_type"
         case contactValue = "contact_value"
@@ -111,6 +113,7 @@ struct EventListing: Codable, Identifiable, Equatable {
         venueName = try? c.decode(String.self, forKey: .venueName)
         address = try? c.decode(String.self, forKey: .address)
         isFree = (try? c.decode(Bool.self, forKey: .isFree)) ?? true
+        isPrivate = (try? c.decode(Bool.self, forKey: .isPrivate)) ?? false
         priceInfo = try? c.decode(String.self, forKey: .priceInfo)
         contactType = (try? c.decode(ContactType.self, forKey: .contactType)) ?? .telegram
         contactValue = try? c.decode(String.self, forKey: .contactValue)
@@ -182,6 +185,7 @@ struct EventListingCreate: Codable {
     var startsAt: Date
     var endsAt: Date?
     var isFree: Bool
+    var isPrivate: Bool = false
     var priceInfo: String?
     var contactType: ContactType
     var contactValue: String
@@ -193,6 +197,7 @@ struct EventListingCreate: Codable {
         case startsAt = "starts_at"
         case endsAt = "ends_at"
         case isFree = "is_free"
+        case isPrivate = "is_private"
         case priceInfo = "price_info"
         case contactType = "contact_type"
         case contactValue = "contact_value"
@@ -208,6 +213,7 @@ struct EventListingUpdate: Codable {
     var startsAt: Date?
     var endsAt: Date?
     var isFree: Bool?
+    var isPrivate: Bool?
     var priceInfo: String?
 
     private enum CodingKeys: String, CodingKey {
@@ -216,6 +222,7 @@ struct EventListingUpdate: Codable {
         case startsAt = "starts_at"
         case endsAt = "ends_at"
         case isFree = "is_free"
+        case isPrivate = "is_private"
         case priceInfo = "price_info"
     }
 }

@@ -7,10 +7,11 @@ struct JourneyHomeView: View {
     @State private var showRoadmap = false
     @State private var showMyPlan = false
     @State private var showSubscription = false
+    @State private var showCareerHub = false
 
     private let actions: [(String, String, DovidnykRouteSection?)] = [
         ("doc.text", "journey.home.action.documents".localized, .checklists),
-        ("briefcase", "journey.home.action.jobs".localized, .tools),
+        ("briefcase.fill", "Career Hub", .tools),
         ("house", "journey.home.action.housing".localized, .guides),
         ("cross.case", "journey.home.action.health".localized, .guides)
     ]
@@ -63,6 +64,10 @@ struct JourneyHomeView: View {
             }
             .navigationDestination(isPresented: $showMyPlan) {
                 MyPlanView()
+                    .environmentObject(appContainer)
+            }
+            .navigationDestination(isPresented: $showCareerHub) {
+                JobsView()
                     .environmentObject(appContainer)
             }
             .fullScreenCover(isPresented: $showSubscription) {
@@ -171,10 +176,14 @@ struct JourneyHomeView: View {
         HStack(spacing: 10) {
             ForEach(Array(actions.enumerated()), id: \.offset) { index, action in
                 Button {
-                    NotificationCenter.default.post(
-                        name: .switchTab,
-                        object: SwitchTabPayload(tab: 1, section: action.2)
-                    )
+                    if index == 1 {
+                        showCareerHub = true
+                    } else {
+                        NotificationCenter.default.post(
+                            name: .switchTab,
+                            object: SwitchTabPayload(tab: 1, section: action.2)
+                        )
+                    }
                 } label: {
                     VStack(spacing: 9) {
                         ZStack {

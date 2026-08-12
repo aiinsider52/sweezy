@@ -23,6 +23,7 @@ class EventListing(Base):
     starts_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, index=True)
     ends_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     is_free: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    is_private: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, index=True)
     price_info: Mapped[str | None] = mapped_column(String(100), nullable=True)
     contact_type: Mapped[str] = mapped_column(String(20), nullable=False)
     contact_value: Mapped[str] = mapped_column(String(255), nullable=False)

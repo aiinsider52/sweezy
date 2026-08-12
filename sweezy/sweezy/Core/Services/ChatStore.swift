@@ -13,6 +13,7 @@ final class ChatStore: ObservableObject {
     @Published private(set) var hasMoreActiveConversations = false
     @Published private(set) var hasMoreArchivedConversations = false
     @Published private(set) var isLoadingMoreConversations = false
+    @Published private(set) var conversationLoadError: String?
     @Published var typingConversationIDs: Set<String> = []
     @Published var errorMessage: String?
     /// Currently visible conversation — suppresses in-app banners for that thread.
@@ -63,6 +64,7 @@ final class ChatStore: ObservableObject {
         hasMoreActiveConversations = false
         hasMoreArchivedConversations = false
         isLoadingMoreConversations = false
+        conversationLoadError = nil
         unreadCount = 0
         typingConversationIDs = []
         typingExpiryTasks.values.forEach { $0.cancel() }
@@ -80,21 +82,25 @@ final class ChatStore: ObservableObject {
         guard activeUserID != nil else { return }
         isLoading = conversations.isEmpty
         defer { isLoading = false }
+        var failed = false
         do {
-            async let activePage = ChatAPI.conversations()
-            async let archivedPage = ChatAPI.conversations(archived: true)
-            let active = try await activePage
-            let archived = try await archivedPage
+            let active = try await ChatAPI.conversations()
             setNextConversationCursor(active.nextCursor, archived: false)
-            setNextConversationCursor(archived.nextCursor, archived: true)
-            let combined = active.items + archived.items
-            conversations = combined.sorted { ($0.lastMessageAt ?? $0.createdAt) > ($1.lastMessageAt ?? $1.createdAt) }
-            unreadCount = conversations.reduce(0) { $0 + $1.unreadCount }
-            errorMessage = nil
-            persist()
+            replaceConversations(with: active.items, archived: false)
         } catch {
-            errorMessage = error.localizedDescription
+            failed = true
         }
+        do {
+            let archived = try await ChatAPI.conversations(archived: true)
+            setNextConversationCursor(archived.nextCursor, archived: true)
+            replaceConversations(with: archived.items, archived: true)
+        } catch {
+            failed = true
+        }
+        conversations.sort { ($0.lastMessageAt ?? $0.createdAt) > ($1.lastMessageAt ?? $1.createdAt) }
+        unreadCount = conversations.reduce(0) { $0 + $1.unreadCount }
+        conversationLoadError = failed ? "chat.error.partial_load".localized : nil
+        persist()
     }
 
     func loadMoreConversations(archived: Bool) async {
@@ -426,6 +432,11 @@ final class ChatStore: ObservableObject {
         nextConversationCursor[archived] = cursor
         if archived { hasMoreArchivedConversations = cursor != nil }
         else { hasMoreActiveConversations = cursor != nil }
+    }
+
+    private func replaceConversations(with values: [ChatConversation], archived: Bool) {
+        conversations.removeAll { $0.archived == archived }
+        conversations.append(contentsOf: values)
     }
 
     private func upsert(_ conversation: ChatConversation) {

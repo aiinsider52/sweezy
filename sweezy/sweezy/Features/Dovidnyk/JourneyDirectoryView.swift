@@ -12,8 +12,7 @@ struct JourneyDirectoryView: View {
     @State private var selectedChecklist: Checklist?
     @State private var selectedWorkspace: JourneyDirectoryWorkspace = .guides
     @State private var selectedTool: JourneyToolRoute?
-    @State private var selectedNextActionID: String? = JourneyToolRoute.experts.id
-    @State private var showsAllTools = false
+    @State private var selectedToolCategory: JourneyToolkitCategory = .all
     @State private var isSchedulingReminders = false
     @State private var reminderMessage: String?
     @State private var contentRevision = 0
@@ -37,12 +36,23 @@ struct JourneyDirectoryView: View {
                 ScrollViewReader { proxy in
                     ScrollView(showsIndicators: false) {
                         VStack(alignment: .leading, spacing: 18) {
-                        HStack(alignment: .top) {
-                            Text(workspaceTitle)
-                                .font(.system(size: 38, weight: .bold, design: .rounded))
-                                .foregroundColor(.white)
-                                .lineSpacing(-3)
-                                .shadow(color: .black.opacity(0.36), radius: 8, y: 4)
+                        HStack(alignment: .top, spacing: 14) {
+                            VStack(alignment: .leading, spacing: 5) {
+                                Text(workspaceTitle)
+                                    .font(.system(size: selectedWorkspace == .tools ? 34 : 38, weight: .bold, design: .rounded))
+                                    .foregroundColor(.white)
+                                    .lineSpacing(-3)
+                                    .lineLimit(selectedWorkspace == .tools ? 2 : 3)
+                                    .minimumScaleFactor(0.76)
+                                    .fixedSize(horizontal: false, vertical: true)
+                                    .shadow(color: .black.opacity(0.36), radius: 8, y: 4)
+
+                                if selectedWorkspace == .tools {
+                                    Text("journey.directory.toolkit.hero.subtitle".localized)
+                                        .font(.system(size: 14, weight: .medium, design: .rounded))
+                                        .foregroundColor(.white.opacity(0.7))
+                                }
+                            }
 
                             Spacer()
 
@@ -56,22 +66,35 @@ struct JourneyDirectoryView: View {
                         }
                         .padding(.top, 16)
 
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: 8) {
-                                ForEach(JourneyDirectoryWorkspace.allCases) { workspace in
-                                    JourneyFilterChip(
-                                        title: workspace.title,
-                                        icon: workspace.icon,
-                                        isSelected: selectedWorkspace == workspace
-                                    ) {
-                                        withAnimation(.easeInOut(duration: 0.2)) {
-                                            selectedWorkspace = workspace
-                                        }
+                        HStack(spacing: 7) {
+                            ForEach(JourneyDirectoryWorkspace.allCases) { workspace in
+                                Button {
+                                    withAnimation(.easeInOut(duration: 0.2)) {
+                                        selectedWorkspace = workspace
                                     }
+                                } label: {
+                                    VStack(spacing: 5) {
+                                        Image(systemName: workspace.icon)
+                                            .font(.system(size: 13, weight: .bold))
+                                        Text(workspace.title)
+                                            .font(.system(size: 11, weight: .bold, design: .rounded))
+                                            .lineLimit(1)
+                                            .minimumScaleFactor(0.7)
+                                    }
+                                    .foregroundColor(selectedWorkspace == workspace ? .black : .white)
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 58)
+                                    .background(selectedWorkspace == workspace ? JourneyVisual.lime : Color.black.opacity(0.34))
+                                    .background(.ultraThinMaterial.opacity(selectedWorkspace == workspace ? 0 : 0.62))
+                                    .clipShape(RoundedRectangle(cornerRadius: 19, style: .continuous))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 19, style: .continuous)
+                                            .stroke(Color.white.opacity(selectedWorkspace == workspace ? 0 : 0.24), lineWidth: 1)
+                                    )
                                 }
+                                .buttonStyle(.plain)
                             }
                         }
-                        .contentMargins(.horizontal, 0, for: .scrollContent)
 
                         workspaceContent
                         }
@@ -223,64 +246,8 @@ struct JourneyDirectoryView: View {
     }
 
     private var toolsWorkspace: some View {
-        VStack(alignment: .leading, spacing: 18) {
-            Text("journey.directory.tools_subtitle".localized)
-                .font(.system(size: 14, weight: .medium))
-                .foregroundColor(.white.opacity(0.72))
-
-            Button { selectedTool = .jobs } label: {
-                GeometryReader { geometry in
-                    ZStack(alignment: .bottomLeading) {
-                        Image("journey-tool-jobs")
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: geometry.size.width, height: 176)
-                            .clipped()
-                        LinearGradient(
-                            colors: [Color.black.opacity(0.08), Color.black.opacity(0.88)],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
-                        HStack(alignment: .bottom, spacing: 14) {
-                            VStack(alignment: .leading, spacing: 5) {
-                                Text("CAREER HUB")
-                                    .font(.system(size: 11, weight: .black, design: .rounded))
-                                    .tracking(1.8)
-                                    .foregroundColor(JourneyVisual.lime)
-                                Text("Кар’єра у Швейцарії")
-                                    .font(.system(size: 24, weight: .black, design: .rounded))
-                                    .foregroundColor(.white)
-                                    .minimumScaleFactor(0.8)
-                                    .lineLimit(1)
-                                Text("CV · вакансії · заявки · AI Match")
-                                    .font(.system(size: 12, weight: .semibold))
-                                    .foregroundColor(.white.opacity(0.7))
-                                    .minimumScaleFactor(0.75)
-                                    .lineLimit(1)
-                            }
-                            Spacer(minLength: 8)
-                            Image(systemName: "arrow.right")
-                                .font(.system(size: 16, weight: .black))
-                                .foregroundColor(.black)
-                                .frame(width: 44, height: 44)
-                                .background(JourneyVisual.lime)
-                                .clipShape(Circle())
-                        }
-                        .padding(18)
-                    }
-                    .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
-                    .overlay(RoundedRectangle(cornerRadius: 26).stroke(JourneyVisual.lime.opacity(0.32)))
-                }
-            }
-            .frame(height: 176)
-            .buttonStyle(.plain)
-            .accessibilityIdentifier("journey.tool.careerHub")
-
-            JourneyToolCard(route: .discoverSwitzerland, height: 178, titleSize: 22) {
-                selectedTool = .discoverSwitzerland
-            }
-
-            JourneyPlanHeroCard(
+        VStack(alignment: .leading, spacing: 20) {
+            JourneyEditorialPlanCard(
                 completedCount: completedPlanTaskCount,
                 totalCount: totalPlanTaskCount,
                 nextAction: nextPlanAction
@@ -288,76 +255,106 @@ struct JourneyDirectoryView: View {
                 selectedTool = .myPlan
             }
 
-            GeometryReader { geometry in
-                let cardWidth = max(0, (geometry.size.width - 16) / 3)
+            VStack(alignment: .leading, spacing: 11) {
+                Text("journey.directory.toolkit.choose_task".localized)
+                    .font(.system(size: 21, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
 
-                HStack(spacing: 8) {
-                    ForEach(JourneyToolRoute.quickUtilities) { route in
-                        JourneyToolCard(route: route, width: cardWidth, height: 154, titleSize: 14) {
-                            selectedTool = route
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        ForEach(JourneyToolkitCategory.allCases) { category in
+                            Button {
+                                withAnimation(.easeInOut(duration: 0.2)) {
+                                    selectedToolCategory = category
+                                }
+                            } label: {
+                                Label(category.title, systemImage: category.icon)
+                                    .font(.system(size: 12, weight: .semibold, design: .rounded))
+                                    .foregroundColor(selectedToolCategory == category ? JourneyVisual.lime : .white.opacity(0.62))
+                                    .padding(.horizontal, 13)
+                                    .frame(height: 42)
+                                    .background(Color.black.opacity(0.62))
+                                    .clipShape(Capsule())
+                                    .overlay(
+                                        Capsule().stroke(
+                                            selectedToolCategory == category ? JourneyVisual.lime : Color.white.opacity(0.16),
+                                            lineWidth: selectedToolCategory == category ? 1.4 : 1
+                                        )
+                                    )
+                            }
+                            .buttonStyle(.plain)
                         }
                     }
                 }
+                .contentMargins(.horizontal, 0, for: .scrollContent)
             }
-            .frame(height: 154)
 
-            LazyVGrid(
-                columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible())],
-                spacing: 10
-            ) {
-                ForEach(JourneyToolRoute.careerUtilities) { route in
-                    JourneyToolCard(route: route, height: 116, titleSize: 15) {
+            Group {
+                if selectedToolCategory == .all {
+                    JourneyEditorialBento { route in
                         selectedTool = route
                     }
-                }
-            }
-
-            Text("journey.directory.whats_next".localized)
-                .font(.system(size: 22, weight: .bold, design: .rounded))
-                .foregroundColor(.white)
-                .padding(.top, 4)
-                .id("tools-next-actions")
-
-            JourneyNextActionCarousel(
-                selectedID: $selectedNextActionID,
-                routes: JourneyToolRoute.nextActions
-            ) { route in
-                selectedTool = route
-            }
-
-            JourneyDigestStrip {
-                selectedTool = .digest
-            }
-
-            Button {
-                withAnimation(.spring(response: 0.38, dampingFraction: 0.86)) {
-                    showsAllTools.toggle()
-                }
-            } label: {
-                HStack(spacing: 9) {
-                    Image(systemName: "square.grid.2x2.fill")
-                    Text(showsAllTools ? "journey.directory.hide_tools".localized : "journey.directory.show_all_tools".localized)
-                    Image(systemName: showsAllTools ? "chevron.up" : "chevron.right")
-                }
-                .font(.system(size: 14, weight: .semibold, design: .rounded))
-                .foregroundColor(JourneyVisual.lime)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 4)
-            }
-            .buttonStyle(.plain)
-
-            if showsAllTools {
-                LazyVGrid(
-                    columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible())],
-                    spacing: 10
-                ) {
-                    ForEach(JourneyToolRoute.moreUtilities) { route in
-                        JourneyToolCard(route: route, height: 120, titleSize: 14) {
-                            selectedTool = route
+                } else {
+                    LazyVGrid(
+                        columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible())],
+                        spacing: 10
+                    ) {
+                        ForEach(selectedToolCategory.routes) { route in
+                            JourneyEditorialToolCard(route: route, height: 154) {
+                                selectedTool = route
+                            }
                         }
                     }
                 }
-                .transition(.opacity.combined(with: .move(edge: .top)))
+            }
+
+            if selectedToolCategory == .all || selectedToolCategory == .organize {
+                VStack(alignment: .leading, spacing: 12) {
+                    JourneyToolSectionHeader(
+                        eyebrow: "journey.directory.toolkit.plan.eyebrow".localized,
+                        title: "journey.directory.toolkit.plan.title".localized
+                    )
+                    .id("tools-next-actions")
+
+                    VStack(spacing: 8) {
+                        ForEach(JourneyToolRoute.planningUtilities) { route in
+                            JourneyToolActionRow(
+                                route: route,
+                                badge: route == .myPlan ? planProgressLabel : nil
+                            ) {
+                                selectedTool = route
+                            }
+                        }
+
+                        JourneyToolActionRow(route: .roadmap) {
+                            selectedTool = .roadmap
+                        }
+                    }
+                }
+            }
+
+            if selectedToolCategory == .all || selectedToolCategory == .switzerland {
+                VStack(alignment: .leading, spacing: 12) {
+                    JourneyToolSectionHeader(
+                        eyebrow: "journey.directory.toolkit.swiss.eyebrow".localized,
+                        title: "journey.directory.toolkit.swiss.title".localized
+                    )
+
+                    JourneyToolCard(route: .discoverSwitzerland, height: 174, titleSize: 22) {
+                        selectedTool = .discoverSwitzerland
+                    }
+
+                    LazyVGrid(
+                        columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible())],
+                        spacing: 10
+                    ) {
+                        ForEach(JourneyToolRoute.swissUtilities) { route in
+                            JourneyCompactToolTile(route: route, compact: true) {
+                                selectedTool = route
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -373,6 +370,11 @@ struct JourneyDirectoryView: View {
     private var nextPlanAction: String {
         appContainer.firstWeekService.tasks.first(where: { !$0.isDone })?.title
             ?? "journey.directory.pick_next_step".localized
+    }
+
+    private var planProgressLabel: String {
+        guard totalPlanTaskCount > 0 else { return "journey.directory.toolkit.plan.ready".localized }
+        return "\(completedPlanTaskCount)/\(totalPlanTaskCount)"
     }
 
     private var tasksWorkspace: some View {
@@ -515,6 +517,42 @@ private enum JourneyDirectoryWorkspace: String, CaseIterable, Identifiable {
     }
 }
 
+private enum JourneyToolkitCategory: String, CaseIterable, Identifiable {
+    case all
+    case prepare
+    case organize
+    case switzerland
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .all: return "journey.directory.toolkit.category.all".localized
+        case .prepare: return "journey.directory.toolkit.category.prepare".localized
+        case .organize: return "journey.directory.toolkit.category.organize".localized
+        case .switzerland: return "journey.directory.toolkit.category.switzerland".localized
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .all: return "square.grid.2x2"
+        case .prepare: return "doc.text"
+        case .organize: return "checklist.checked"
+        case .switzerland: return "mountain.2"
+        }
+    }
+
+    var routes: [JourneyToolRoute] {
+        switch self {
+        case .all: return JourneyToolRoute.editorialUtilities
+        case .prepare: return [.documents, .templates, .ask]
+        case .organize: return [.myPlan, .deadlines, .appointments, .digest, .roadmap]
+        case .switzerland: return [.discoverSwitzerland, .cityHub, .passport, .experts, .moments, .language]
+        }
+    }
+}
+
 private enum JourneyToolRoute: String, Identifiable, CaseIterable {
     case myPlan
     case documents
@@ -536,10 +574,12 @@ private enum JourneyToolRoute: String, Identifiable, CaseIterable {
 
     var id: String { rawValue }
 
-    static let quickUtilities: [JourneyToolRoute] = [.documents, .ask, .deadlines]
-    static let careerUtilities: [JourneyToolRoute] = [.jobs, .cv]
+    static let quickUtilities: [JourneyToolRoute] = [.documents, .templates, .ask, .language]
+    static let editorialUtilities: [JourneyToolRoute] = [.documents, .templates, .ask, .language]
+    static let planningUtilities: [JourneyToolRoute] = [.myPlan, .deadlines, .appointments, .digest]
+    static let swissUtilities: [JourneyToolRoute] = [.cityHub, .passport, .experts, .moments]
     static let nextActions: [JourneyToolRoute] = [.appointments, .experts, .moments]
-    static let moreUtilities: [JourneyToolRoute] = [.templates, .calculator, .cityHub, .language, .passport, .roadmap]
+    static let moreUtilities: [JourneyToolRoute] = [.roadmap]
 
     var title: String {
         switch self {
@@ -634,6 +674,411 @@ private struct JourneyActivationStage: Identifiable {
     let title: String
     let icon: String
     let isComplete: Bool
+}
+
+private struct JourneyToolkitStatusBoard: View {
+    let completedCount: Int
+    let totalCount: Int
+    let nextAction: String
+    let planAction: () -> Void
+    let askAction: () -> Void
+
+    private var progress: Double {
+        guard totalCount > 0 else { return 0 }
+        return Double(completedCount) / Double(totalCount)
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 17) {
+            HStack(alignment: .top, spacing: 12) {
+                VStack(alignment: .leading, spacing: 5) {
+                    Text("journey.directory.toolkit.board.eyebrow".localized)
+                        .font(.system(size: 10, weight: .black, design: .rounded))
+                        .tracking(2.1)
+                        .foregroundColor(JourneyVisual.lime)
+
+                    Text("journey.directory.toolkit.board.title".localized)
+                        .font(.system(size: 28, weight: .black, design: .rounded))
+                        .foregroundColor(.white)
+                }
+
+                Spacer(minLength: 8)
+
+                ZStack {
+                    Circle()
+                        .stroke(Color.white.opacity(0.14), lineWidth: 5)
+                    Circle()
+                        .trim(from: 0, to: max(progress, 0.08))
+                        .stroke(JourneyVisual.lime, style: StrokeStyle(lineWidth: 5, lineCap: .round))
+                        .rotationEffect(.degrees(-90))
+                    Text(totalCount > 0 ? "\(completedCount)/\(totalCount)" : "—")
+                        .font(.system(size: 11, weight: .black, design: .rounded))
+                        .foregroundColor(.white)
+                }
+                .frame(width: 52, height: 52)
+            }
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text("journey.directory.toolkit.board.next".localized)
+                    .font(.system(size: 10, weight: .bold, design: .rounded))
+                    .tracking(1.3)
+                    .foregroundColor(.white.opacity(0.48))
+                Text(nextAction)
+                    .font(.system(size: 17, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
+                    .lineLimit(2)
+            }
+
+            HStack(spacing: 9) {
+                Button(action: planAction) {
+                    Label("journey.directory.toolkit.board.open_plan".localized, systemImage: "checklist.checked")
+                        .font(.system(size: 13, weight: .bold, design: .rounded))
+                        .foregroundColor(.black)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 46)
+                        .background(JourneyVisual.lime)
+                        .clipShape(Capsule())
+                }
+                .buttonStyle(.plain)
+
+                Button(action: askAction) {
+                    Image(systemName: "sparkles")
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(JourneyVisual.lime)
+                        .frame(width: 48, height: 46)
+                        .background(Color.white.opacity(0.08))
+                        .clipShape(Circle())
+                        .overlay(Circle().stroke(Color.white.opacity(0.16)))
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("journey.tool.ask.title".localized)
+            }
+        }
+        .padding(20)
+        .background {
+            ZStack {
+                RoundedRectangle(cornerRadius: 28, style: .continuous)
+                    .fill(Color.black.opacity(0.62))
+                LinearGradient(
+                    colors: [JourneyVisual.lime.opacity(0.12), Color.clear, Color.white.opacity(0.04)],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+            }
+        }
+        .overlay(
+            RoundedRectangle(cornerRadius: 28, style: .continuous)
+                .stroke(JourneyVisual.lime.opacity(0.38), lineWidth: 1)
+        )
+        .shadow(color: JourneyVisual.lime.opacity(0.12), radius: 24, y: 10)
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("journey.toolkit.status")
+    }
+}
+
+private struct JourneyEditorialPlanCard: View {
+    let completedCount: Int
+    let totalCount: Int
+    let nextAction: String
+    let action: () -> Void
+
+    private var progress: Double {
+        guard totalCount > 0 else { return 0 }
+        return Double(completedCount) / Double(totalCount)
+    }
+
+    var body: some View {
+        Button(action: action) {
+            GeometryReader { geometry in
+                ZStack(alignment: .bottomLeading) {
+                    Image("journey-tool-my-plan")
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: geometry.size.width, height: 224)
+                        .clipped()
+
+                    LinearGradient(
+                        colors: [.black.opacity(0.08), .black.opacity(0.5), .black.opacity(0.94)],
+                        startPoint: .topTrailing,
+                        endPoint: .bottomLeading
+                    )
+
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("journey.directory.toolkit.recommended".localized)
+                            .font(.system(size: 9, weight: .black, design: .rounded))
+                            .tracking(1.8)
+                            .foregroundColor(JourneyVisual.lime)
+
+                        Text("journey.tool.my_plan.title".localized)
+                            .font(.system(size: 27, weight: .black, design: .rounded))
+                            .foregroundColor(.white)
+
+                        Text(nextAction)
+                            .font(.system(size: 13, weight: .medium, design: .rounded))
+                            .foregroundColor(.white.opacity(0.72))
+                            .lineLimit(2)
+                            .frame(maxWidth: min(230, geometry.size.width * 0.7), alignment: .leading)
+
+                        HStack(alignment: .bottom, spacing: 12) {
+                            VStack(alignment: .leading, spacing: 7) {
+                                Text(totalCount > 0 ? "\(completedCount) / \(totalCount)" : "journey.directory.toolkit.plan.ready".localized)
+                                    .font(.system(size: 13, weight: .black, design: .rounded))
+                                    .foregroundColor(JourneyVisual.lime)
+
+                                ProgressView(value: progress)
+                                    .tint(JourneyVisual.lime)
+                                    .frame(maxWidth: 180)
+                            }
+
+                            Spacer(minLength: 10)
+
+                            Image(systemName: "arrow.right")
+                                .font(.system(size: 18, weight: .black))
+                                .foregroundColor(.black)
+                                .frame(width: 48, height: 48)
+                                .background(JourneyVisual.lime)
+                                .clipShape(Circle())
+                        }
+                    }
+                    .padding(20)
+                }
+                .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 28, style: .continuous)
+                        .stroke(Color.white.opacity(0.32), lineWidth: 1)
+                )
+            }
+        }
+        .frame(height: 224)
+        .buttonStyle(.plain)
+        .accessibilityLabel("journey.directory.plan_hero.accessibility".localized(with: completedCount, totalCount, nextAction))
+        .accessibilityIdentifier("journey.tool.myPlan")
+    }
+}
+
+private struct JourneyEditorialBento: View {
+    let action: (JourneyToolRoute) -> Void
+
+    var body: some View {
+        VStack(spacing: 10) {
+            HStack(alignment: .top, spacing: 10) {
+                JourneyEditorialToolCard(route: .documents, height: 250, prominent: true) {
+                    action(.documents)
+                }
+
+                VStack(spacing: 10) {
+                    JourneyEditorialToolCard(route: .templates, height: 120) {
+                        action(.templates)
+                    }
+                    JourneyEditorialToolCard(route: .ask, height: 120) {
+                        action(.ask)
+                    }
+                }
+            }
+
+            JourneyEditorialToolCard(route: .language, height: 118, horizontal: true) {
+                action(.language)
+            }
+        }
+    }
+}
+
+private struct JourneyEditorialToolCard: View {
+    let route: JourneyToolRoute
+    let height: CGFloat
+    var prominent = false
+    var horizontal = false
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            GeometryReader { geometry in
+                ZStack(alignment: .bottomLeading) {
+                    Image(route.imageName)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: geometry.size.width, height: height)
+                        .clipped()
+
+                LinearGradient(
+                    colors: [.black.opacity(horizontal ? 0.32 : 0.12), .black.opacity(0.94)],
+                    startPoint: horizontal ? .trailing : .top,
+                    endPoint: horizontal ? .leading : .bottom
+                )
+
+                VStack(alignment: .leading, spacing: prominent ? 8 : 5) {
+                    Image(systemName: route.icon)
+                        .font(.system(size: prominent ? 18 : 15, weight: .bold))
+                        .foregroundColor(JourneyVisual.lime)
+                        .frame(width: prominent ? 42 : 34, height: prominent ? 42 : 34)
+                        .background(Color.black.opacity(0.48))
+                        .clipShape(RoundedRectangle(cornerRadius: 11, style: .continuous))
+
+                    Text(route.title)
+                        .font(.system(size: prominent ? 21 : 15, weight: .bold, design: .rounded))
+                        .foregroundColor(.white)
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.78)
+
+                    if prominent || horizontal {
+                        Text(route.subtitle)
+                            .font(.system(size: 10, weight: .medium))
+                            .foregroundColor(.white.opacity(0.62))
+                            .lineLimit(2)
+                    }
+                }
+                .padding(prominent ? 17 : 13)
+
+                VStack {
+                    Spacer()
+                    HStack {
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 11, weight: .black))
+                            .foregroundColor(JourneyVisual.lime)
+                            .frame(width: 30, height: 30)
+                            .background(Color.black.opacity(0.62))
+                            .clipShape(Circle())
+                    }
+                }
+                .padding(11)
+                }
+                .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 22, style: .continuous)
+                        .stroke(Color.white.opacity(0.19), lineWidth: 1)
+                )
+            }
+        }
+        .frame(height: height)
+        .buttonStyle(.plain)
+        .accessibilityLabel("\(route.title). \(route.subtitle)")
+        .accessibilityIdentifier("journey.tool.\(route.rawValue)")
+    }
+}
+
+private struct JourneyToolSectionHeader: View {
+    let eyebrow: String
+    let title: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(eyebrow)
+                .font(.system(size: 9, weight: .black, design: .rounded))
+                .tracking(1.8)
+                .foregroundColor(JourneyVisual.lime)
+            Text(title)
+                .font(.system(size: 21, weight: .bold, design: .rounded))
+                .foregroundColor(.white)
+        }
+    }
+}
+
+private struct JourneyCompactToolTile: View {
+    let route: JourneyToolRoute
+    var compact = false
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            VStack(alignment: .leading, spacing: compact ? 8 : 12) {
+                HStack {
+                    Image(systemName: route.icon)
+                        .font(.system(size: compact ? 15 : 18, weight: .bold))
+                        .foregroundColor(JourneyVisual.lime)
+                        .frame(width: compact ? 34 : 40, height: compact ? 34 : 40)
+                        .background(JourneyVisual.lime.opacity(0.1))
+                        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+
+                    Spacer()
+
+                    Image(systemName: "arrow.up.right")
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundColor(.white.opacity(0.42))
+                }
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(route.title)
+                        .font(.system(size: compact ? 14 : 16, weight: .bold, design: .rounded))
+                        .foregroundColor(.white)
+                        .lineLimit(2)
+                    Text(route.subtitle)
+                        .font(.system(size: 10, weight: .medium))
+                        .foregroundColor(.white.opacity(0.55))
+                        .lineLimit(compact ? 1 : 2)
+                }
+            }
+            .padding(compact ? 13 : 15)
+            .frame(maxWidth: .infinity, minHeight: compact ? 112 : 132, alignment: .topLeading)
+            .background(Color.black.opacity(0.5))
+            .background(.ultraThinMaterial.opacity(0.2))
+            .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 22, style: .continuous)
+                    .stroke(Color.white.opacity(0.14), lineWidth: 1)
+            )
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("\(route.title). \(route.subtitle)")
+        .accessibilityIdentifier("journey.tool.\(route.rawValue)")
+    }
+}
+
+private struct JourneyToolActionRow: View {
+    let route: JourneyToolRoute
+    var badge: String? = nil
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 13) {
+                Image(systemName: route.icon)
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundColor(JourneyVisual.lime)
+                    .frame(width: 42, height: 42)
+                    .background(JourneyVisual.lime.opacity(0.1))
+                    .clipShape(RoundedRectangle(cornerRadius: 13, style: .continuous))
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(route.title)
+                        .font(.system(size: 15, weight: .bold, design: .rounded))
+                        .foregroundColor(.white)
+                    Text(route.subtitle)
+                        .font(.system(size: 10, weight: .medium))
+                        .foregroundColor(.white.opacity(0.52))
+                        .lineLimit(1)
+                }
+
+                Spacer(minLength: 8)
+
+                if let badge {
+                    Text(badge)
+                        .font(.system(size: 10, weight: .black, design: .rounded))
+                        .foregroundColor(JourneyVisual.lime)
+                        .padding(.horizontal, 9)
+                        .frame(height: 26)
+                        .background(JourneyVisual.lime.opacity(0.1))
+                        .clipShape(Capsule())
+                } else {
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundColor(.white.opacity(0.38))
+                }
+            }
+            .padding(.horizontal, 13)
+            .frame(minHeight: 68)
+            .background(Color.black.opacity(0.48))
+            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .stroke(Color.white.opacity(0.12), lineWidth: 1)
+            )
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("\(route.title). \(route.subtitle)")
+        .accessibilityIdentifier("journey.tool.\(route.rawValue)")
+    }
 }
 
 private struct JourneyPlanHeroCard: View {

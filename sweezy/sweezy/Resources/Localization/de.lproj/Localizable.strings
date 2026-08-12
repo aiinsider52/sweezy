@@ -34,6 +34,11 @@
 "common.loading" = "Laden...";
 "common.error" = "Fehler";
 "common.retry" = "Erneut versuchen";
+"friends.error.request" = "Anfrage fehlgeschlagen. Bitte erneut versuchen.";
+"friends.error.people" = "Personen konnten nicht geladen werden.";
+"friends.error.partial" = "Einige Daten konnten nicht geladen werden. Verfügbare Bereiche funktionieren weiter.";
+"chat.error.request" = "Anfrage fehlgeschlagen. Bitte erneut versuchen.";
+"chat.error.partial_load" = "Einige Unterhaltungen konnten nicht geladen werden. Gespeicherte Nachrichten bleiben verfügbar.";
 "common.share" = "Teilen";
 "common.copy" = "Kopieren";
 "common.settings" = "Einstellungen";
@@ -1281,7 +1286,14 @@
 "journey.directory.workspace.tools" = "Tools";
 "journey.directory.workspace_title.guides" = "Guides";
 "journey.directory.workspace_title.tasks" = "Checklisten";
-"journey.directory.workspace_title.tools" = "Tools";
+"journey.directory.workspace_title.tools" = "Werkzeuge fürs Leben";
+"journey.directory.toolkit.hero.subtitle" = "Schweiz ohne unnötigen Stress";
+"journey.directory.toolkit.choose_task" = "Aufgabe wählen";
+"journey.directory.toolkit.recommended" = "EMPFOHLEN";
+"journey.directory.toolkit.category.all" = "Alle";
+"journey.directory.toolkit.category.prepare" = "Vorbereiten";
+"journey.directory.toolkit.category.organize" = "Organisieren";
+"journey.directory.toolkit.category.switzerland" = "Schweiz";
 "journey.home.action.documents" = "Dokumente";
 "journey.home.action.health" = "Gesundheit";
 "journey.home.action.housing" = "Wohnen";
@@ -2336,3 +2348,15 @@
 "profile.listings.title" = "Aktive Inserate";
 "profile.listings.empty.title" = "Keine aktiven Inserate";
 "profile.listings.empty.body" = "Dieses Mitglied hat derzeit keine genehmigten Inserate.";
+
+"journey.directory.toolkit.board.eyebrow" = "DEINE ZENTRALE";
+"journey.directory.toolkit.board.title" = "Was jetzt wichtig ist";
+"journey.directory.toolkit.board.next" = "NÄCHSTER SCHRITT";
+"journey.directory.toolkit.board.open_plan" = "Meinen Plan öffnen";
+"journey.directory.toolkit.quick.eyebrow" = "SCHNELLSTART";
+"journey.directory.toolkit.quick.title" = "In wenigen Minuten erledigt";
+"journey.directory.toolkit.plan.eyebrow" = "ALLES IM BLICK";
+"journey.directory.toolkit.plan.title" = "Planung";
+"journey.directory.toolkit.plan.ready" = "BEREIT";
+"journey.directory.toolkit.swiss.eyebrow" = "NAH UND NÜTZLICH";
+"journey.directory.toolkit.swiss.title" = "Die Schweiz für dich";

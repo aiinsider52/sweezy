@@ -39,6 +39,11 @@
 "common.loading" = "Loading...";
 "common.error" = "Error";
 "common.retry" = "Retry";
+"friends.error.request" = "Request failed. Please try again.";
+"friends.error.people" = "People could not be loaded.";
+"friends.error.partial" = "Some data could not be loaded. Available sections still work.";
+"chat.error.request" = "Request failed. Please try again.";
+"chat.error.partial_load" = "Some conversations could not be loaded. Saved messages remain available.";
 "common.share" = "Share";
 "common.copy" = "Copy";
 "common.settings" = "Settings";
@@ -1472,7 +1477,14 @@
 "journey.directory.workspace.tools" = "Tools";
 "journey.directory.workspace_title.guides" = "Guides";
 "journey.directory.workspace_title.tasks" = "Checklists";
-"journey.directory.workspace_title.tools" = "Tools";
+"journey.directory.workspace_title.tools" = "Tools for life";
+"journey.directory.toolkit.hero.subtitle" = "Switzerland without needless stress";
+"journey.directory.toolkit.choose_task" = "Choose a task";
+"journey.directory.toolkit.recommended" = "RECOMMENDED";
+"journey.directory.toolkit.category.all" = "All";
+"journey.directory.toolkit.category.prepare" = "Prepare";
+"journey.directory.toolkit.category.organize" = "Organize";
+"journey.directory.toolkit.category.switzerland" = "Switzerland";
 "journey.home.action.documents" = "Documents";
 "journey.home.action.health" = "Health";
 "journey.home.action.housing" = "Housing";
@@ -2517,3 +2529,15 @@
 "profile.listings.title" = "Active listings";
 "profile.listings.empty.title" = "No active listings";
 "profile.listings.empty.body" = "This member has no approved listings right now.";
+
+"journey.directory.toolkit.board.eyebrow" = "YOUR CONTROL DESK";
+"journey.directory.toolkit.board.title" = "What matters now";
+"journey.directory.toolkit.board.next" = "NEXT STEP";
+"journey.directory.toolkit.board.open_plan" = "Open my plan";
+"journey.directory.toolkit.quick.eyebrow" = "QUICK START";
+"journey.directory.toolkit.quick.title" = "Done in a few minutes";
+"journey.directory.toolkit.plan.eyebrow" = "STAY IN CONTROL";
+"journey.directory.toolkit.plan.title" = "Planning";
+"journey.directory.toolkit.plan.ready" = "READY";
+"journey.directory.toolkit.swiss.eyebrow" = "NEARBY AND USEFUL";
+"journey.directory.toolkit.swiss.title" = "Switzerland for you";

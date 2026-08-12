@@ -9,6 +9,7 @@ import UIKit
   @Published var myProfile: SocialProfile?
   @Published var loading = false
   @Published var error: String?
+  @Published var loadError: String?
   @Published var query = ""
   @Published var interest: SocialInterest?
   @Published var canton: String?
@@ -22,33 +23,39 @@ import UIKit
     connections.filter { $0.direction == "incoming" && $0.status == "pending" }
   }
   var friends: [FriendConnection] { connections.filter { $0.status == "accepted" } }
+  private func friendResult<T>(_ operation: () async throws -> T) async -> Result<T, Error> {
+    do { return .success(try await operation()) }
+    catch { return .failure(error) }
+  }
   func load() async {
     guard !loading else { return }
     loading = true
     defer { loading = false }
-    do {
-      async let p = FriendsAPI.profiles(query: query, canton: canton, interest: interest)
-      async let c = FriendsAPI.connections()
-      async let e = FriendsAPI.events(canton: canton)
-      async let m = own()
-      let values = try await (p, c, e, m)
-      profiles = values.0.items
-      connections = values.1
-      events = values.2
-      myProfile = values.3
-      error = nil
-    } catch { self.error = error.localizedDescription }
+    async let p = friendResult { try await FriendsAPI.profiles(query: self.query, canton: self.canton, interest: self.interest) }
+    async let c = friendResult { try await FriendsAPI.connections() }
+    async let e = friendResult { try await FriendsAPI.events(canton: self.canton) }
+    async let m = friendResult { try await self.own() }
+    let values = await (p, c, e, m)
+    var failures: [Error] = []
+    switch values.0 { case .success(let page): profiles = page.items; searchMeta = page; case .failure(let issue): failures.append(issue) }
+    switch values.1 { case .success(let value): connections = value; case .failure(let issue): failures.append(issue) }
+    switch values.2 { case .success(let value): events = value; case .failure(let issue): failures.append(issue) }
+    switch values.3 { case .success(let value): myProfile = value; case .failure(let issue): failures.append(issue) }
+    loadError = failures.isEmpty ? nil : "friends.error.partial".localized
   }
   func reload() async {
-    do {
-      let page = try await FriendsAPI.profiles(
-        query: query, canton: canton, interest: interest,
-        language: language, ageBand: ageBand, residency: residency,
-        maxDistanceKM: maxDistanceKM, nearby: nearby)
-      profiles = page.items
-      searchMeta = page
-      events = try await FriendsAPI.events(canton: canton)
-    } catch { self.error = error.localizedDescription }
+    async let page = friendResult {
+      try await FriendsAPI.profiles(
+        query: self.query, canton: self.canton, interest: self.interest,
+        language: self.language, ageBand: self.ageBand, residency: self.residency,
+        maxDistanceKM: self.maxDistanceKM, nearby: self.nearby)
+    }
+    async let eventPage = friendResult { try await FriendsAPI.events(canton: self.canton) }
+    let values = await (page, eventPage)
+    var failed = false
+    switch values.0 { case .success(let value): profiles = value.items; searchMeta = value; case .failure: failed = true }
+    switch values.1 { case .success(let value): events = value; case .failure: failed = true }
+    loadError = failed ? "friends.error.partial".localized : nil
   }
   func own() async throws -> SocialProfile? {
     do { return try await FriendsAPI.myProfile() } catch  where (error as NSError).code == 404 {
@@ -139,6 +146,11 @@ struct FriendNetworkView: View {
           LazyVStack(spacing: 0) {
             hero
             tabs
+            if let loadError = vm.loadError {
+              networkIssue(message: loadError)
+                .padding(.horizontal, 20)
+                .padding(.top, 14)
+            }
             Group {
               switch tab {
               case 1: events
@@ -185,6 +197,18 @@ struct FriendNetworkView: View {
     } message: {
       Text(vm.error ?? "")
     }
+  }
+  private func networkIssue(message: String) -> some View {
+    HStack(spacing: 12) {
+      Image(systemName: "wifi.exclamationmark").foregroundColor(limeAccent)
+      Text(message).font(.footnote.weight(.medium)).foregroundColor(.white.opacity(0.75))
+      Spacer(minLength: 8)
+      Button("common.retry".localized) { Task { await vm.load() } }
+        .font(.footnote.bold()).foregroundColor(.black)
+        .padding(.horizontal, 12).frame(height: 34).background(limeAccent).clipShape(Capsule())
+    }
+    .padding(12).background(Color.white.opacity(0.07))
+    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
   }
   private var hero: some View {
     VStack(alignment: .leading, spacing: 10) {

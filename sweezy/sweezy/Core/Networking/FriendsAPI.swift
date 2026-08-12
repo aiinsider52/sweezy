@@ -1,6 +1,20 @@
 import Foundation
 
 enum FriendsAPI {
+  private static func responseError(_ data: Data, response: URLResponse?, fallback: String) -> NSError {
+    let status = (response as? HTTPURLResponse)?.statusCode ?? 0
+    if let payload = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+      let detail = payload["detail"]
+    {
+      if let message = detail as? String {
+        return NSError(domain: "FriendsAPI", code: status, userInfo: [NSLocalizedDescriptionKey: message])
+      }
+      if let object = detail as? [String: Any], let message = object["message"] as? String {
+        return NSError(domain: "FriendsAPI", code: status, userInfo: [NSLocalizedDescriptionKey: message])
+      }
+    }
+    return NSError(domain: "FriendsAPI", code: status, userInfo: [NSLocalizedDescriptionKey: fallback])
+  }
   private struct RequestPayload: Encodable {
     let message: String?
     let eventID: String?
@@ -41,11 +55,7 @@ enum FriendsAPI {
     let (data, response) = try await APIClient.authorizedData(
       for: request, context: "friends_\(method.lowercased())")
     guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
-      let detail =
-        (try? JSONSerialization.jsonObject(with: data) as? [String: Any])?["detail"] as? String
-      throw NSError(
-        domain: "FriendsAPI", code: (response as? HTTPURLResponse)?.statusCode ?? 0,
-        userInfo: [NSLocalizedDescriptionKey: detail ?? "Запит не виконано"])
+      throw responseError(data, response: response, fallback: "friends.error.request".localized)
     }
     return try ChatAPI.decoder.decode(T.self, from: data)
   }
@@ -73,9 +83,7 @@ enum FriendsAPI {
     let r = URLRequest(url: c.url!)
     let (d, res) = try await APIClient.authorizedData(for: r, context: "friends_profiles")
     guard let h = res as? HTTPURLResponse, (200..<300).contains(h.statusCode) else {
-      throw NSError(
-        domain: "FriendsAPI", code: (res as? HTTPURLResponse)?.statusCode ?? 0,
-        userInfo: [NSLocalizedDescriptionKey: "Не вдалося завантажити людей"])
+      throw responseError(d, response: res, fallback: "friends.error.people".localized)
     }
     return try ChatAPI.decoder.decode(SocialProfilePage.self, from: d)
   }

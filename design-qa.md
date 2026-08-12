@@ -1,3 +1,49 @@
+**Tools Editorial Redesign — 2026-08-12**
+- Source visual truth: `/Users/vladyslav.katash/.codex/generated_images/019fdb22-7dc6-70c3-9979-1d72f10c376f/exec-fa380d34-f4c5-4912-a61b-2ededc185a9d.png`.
+- Implementation screenshot: `/private/tmp/sweezy-tools-16e-fixed.png`.
+- Combined comparison input: `/private/tmp/sweezy-design-qa/side-by-side.png`.
+- Viewport: iPhone 16e simulator, 390 × 844 points, Ukrainian locale, dark appearance, Tools selected.
+- Pixels: source 853 × 1844; implementation 1170 × 2532 at 3× density, normalized to 853 × 1844 for comparison.
+- State: empty plan, all tool categories, guest-safe local data.
+
+**Full-View Comparison Evidence**
+- Source and implementation were opened together in one normalized side-by-side image.
+- Implementation preserves target hierarchy: compact photographic hero, three-part workspace control, large editorial recommendation card, horizontal task categories, asymmetric photo grid, and floating bottom navigation.
+- Mock-only calculator, letter checker, checklist creator, and translation tools were replaced with current routes: My Plan, Document Readiness, Templates, Ask Sweezy, Daily German, planning utilities, Swiss Discovery, City Hub, Digital Passport, Experts, Moments, and Roadmap.
+
+**Focused Region Comparison Evidence**
+- Header and tabs remain fully inside compact iPhone bounds; title wraps intentionally to two lines.
+- Featured card uses live plan state and existing raster asset; no fake progress, deadline, or financial data.
+- Bento cards use existing asset-catalog photography and SF Symbols; category strip alone scrolls horizontally by design.
+
+**Required Fidelity Surfaces**
+- Fonts and typography: native SF Rounded weights and scale follow mock hierarchy; no primary text truncation in captured compact viewport.
+- Spacing and layout rhythm: 20-point page margins, 10-point bento gaps, 22–28 point radii, and fixed-width GeometryReader image frames prevent horizontal overflow.
+- Colors and visual tokens: existing `JourneyVisual.lime`, black surfaces, white text, and restrained keylines match source palette.
+- Image quality and asset fidelity: existing high-resolution Sweezy raster assets replace mock imagery without placeholders or code-drawn illustrations.
+- Copy and content: Ukrainian labels now map to actual destinations; stale cross-wired subtitles were corrected. No calculator, CV, job search, translation, or letter-checking card appears.
+
+**Comparison History**
+- Iteration 1 [P1]: intrinsic image width expanded vertical ScrollView and clipped page left edge. Fix: constrained featured and bento images to measured container width with GeometryReader. Post-fix evidence: `/private/tmp/sweezy-tools-16e-fixed.png`.
+- Iteration 1 [P2]: single-line tools title exceeded compact width. Fix: enabled two-line wrapping and adaptive scale. Post-fix evidence: same capture.
+
+**Findings**
+- No actionable P0, P1, or P2 visual issues remain in captured compact state.
+
+**Implementation Checklist**
+- [x] Existing routes and navigation callbacks preserved.
+- [x] Current features only; stale calculator removed from visible tool sets.
+- [x] Task category filters work through local SwiftUI state.
+- [x] Debug iOS Simulator build succeeds.
+- [x] UK/EN/DE localization files and `git diff --check` pass.
+
+**Follow-up Polish**
+- [P3] Focused XCUI route test runner stalled while materializing simulator worker; direct simulator launch and rendered screen remain stable.
+
+final result: passed
+
+---
+
 **Sweezy Plus Conversion Redesign — 2026-08-10**
 - Source visual truth: `/var/folders/h0/856jbdbx62dc4n9mfh_35k540000gn/T/TemporaryItems/NSIRD_screencaptureui_93vNIg/Bildschirmfoto 2026-08-10 um 10.07.45.png`.
 - Implementation screenshot: `/private/tmp/sweezy-plus-wow-final.png`.

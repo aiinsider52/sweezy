@@ -16,6 +16,7 @@ struct ChatInboxView: View {
             VStack(spacing: 0) {
                 header
                 connectionStatus
+                loadIssue
                 if appContainer.chatStore.isLoading && visibleConversations.isEmpty {
                     loadingState
                 } else if visibleConversations.isEmpty {
@@ -39,6 +40,24 @@ struct ChatInboxView: View {
             Text(appContainer.chatStore.errorMessage ?? "")
         }
         .interactiveSwipeBackEnabled()
+    }
+
+    @ViewBuilder
+    private var loadIssue: some View {
+        if let message = appContainer.chatStore.conversationLoadError {
+            HStack(spacing: 10) {
+                Image(systemName: "wifi.exclamationmark").foregroundColor(JourneyVisual.lime)
+                Text(message).font(.caption).foregroundColor(.white.opacity(0.7))
+                Spacer(minLength: 6)
+                Button("common.retry".localized) {
+                    Task { await appContainer.chatStore.refresh() }
+                }
+                .font(.caption.bold()).foregroundColor(.black)
+                .padding(.horizontal, 10).frame(height: 32)
+                .background(JourneyVisual.lime).clipShape(Capsule())
+            }
+            .padding(.horizontal, 18).padding(.bottom, 10)
+        }
     }
 
     private var header: some View {

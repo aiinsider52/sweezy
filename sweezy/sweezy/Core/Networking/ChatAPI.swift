@@ -1,6 +1,19 @@
 import Foundation
 
 enum ChatAPI {
+    private static func responseError(_ data: Data, response: URLResponse?, fallback: String) -> NSError {
+        let status = (response as? HTTPURLResponse)?.statusCode ?? 0
+        if let payload = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+           let detail = payload["detail"] {
+            if let message = detail as? String {
+                return NSError(domain: "ChatAPI", code: status, userInfo: [NSLocalizedDescriptionKey: message])
+            }
+            if let object = detail as? [String: Any], let message = object["message"] as? String {
+                return NSError(domain: "ChatAPI", code: status, userInfo: [NSLocalizedDescriptionKey: message])
+            }
+        }
+        return NSError(domain: "ChatAPI", code: status, userInfo: [NSLocalizedDescriptionKey: fallback])
+    }
     private struct ConversationCreatePayload: Encodable { let listingID: String; enum CodingKeys: String, CodingKey { case listingID = "listing_id" } }
     private struct MessageCreatePayload: Encodable { let clientMessageID: String; let body: String; enum CodingKeys: String, CodingKey { case clientMessageID = "client_message_id"; case body } }
     private struct ReadPayload: Encodable { let messageID: String; enum CodingKeys: String, CodingKey { case messageID = "message_id" } }
@@ -40,9 +53,7 @@ enum ChatAPI {
         }
         let (data, response) = try await APIClient.authorizedData(for: request, context: "chat_\(method.lowercased())")
         guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
-            let status = (response as? HTTPURLResponse)?.statusCode ?? 0
-            let detail = (try? JSONSerialization.jsonObject(with: data) as? [String: Any])?["detail"] as? String
-            throw NSError(domain: "ChatAPI", code: status, userInfo: [NSLocalizedDescriptionKey: detail ?? "Не вдалося виконати запит"])
+            throw responseError(data, response: response, fallback: "chat.error.request".localized)
         }
         return try decoder.decode(type, from: data)
     }
@@ -57,9 +68,7 @@ enum ChatAPI {
         }
         let (data, response) = try await APIClient.authorizedData(for: request, context: "chat_\(method.lowercased())")
         guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
-            let detail = (try? JSONSerialization.jsonObject(with: data) as? [String: Any])?["detail"] as? String
-            throw NSError(domain: "ChatAPI", code: (response as? HTTPURLResponse)?.statusCode ?? 0,
-                          userInfo: [NSLocalizedDescriptionKey: detail ?? "Не вдалося виконати запит"])
+            throw responseError(data, response: response, fallback: "chat.error.request".localized)
         }
     }
 

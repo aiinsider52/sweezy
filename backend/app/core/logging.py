@@ -32,6 +32,9 @@ def configure_logging(level: str | None = None) -> None:
         stream=sys.stdout,
         level=getattr(logging, log_level, logging.INFO),
     )
+    # httpx INFO messages include full request URLs. Provider API keys may be
+    # embedded in URL paths, so production logs must never record them.
+    logging.getLogger("httpx").setLevel(logging.WARNING)
 
     processors: list[structlog.types.Processor] = [
         structlog.contextvars.merge_contextvars,
@@ -57,5 +60,4 @@ def get_logger(**kwargs: Any) -> structlog.BoundLogger:
     Convenience accessor for the shared structlog logger.
     """
     return structlog.get_logger(**kwargs)
-
 

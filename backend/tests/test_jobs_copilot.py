@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 import uuid
 from datetime import datetime, timezone
 
@@ -8,6 +9,7 @@ import httpx
 from fastapi.testclient import TestClient
 
 from backend.app.core.database import SessionLocal
+from backend.app.core.logging import configure_logging
 from backend.app.core.security import create_access_token
 from backend.app.main import app
 from backend.app.models.job import Job
@@ -21,6 +23,11 @@ from backend.app.services.jobs_aggregator import (
 from backend.app.services.users import UserService
 
 client = TestClient(app)
+
+
+def test_httpx_info_logs_are_disabled_to_protect_provider_keys() -> None:
+    configure_logging()
+    assert logging.getLogger("httpx").getEffectiveLevel() >= logging.WARNING
 
 
 def test_salary_currency_preserves_provider_currency() -> None:

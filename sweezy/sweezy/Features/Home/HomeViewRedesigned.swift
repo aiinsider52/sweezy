@@ -41,8 +41,11 @@ struct HomeViewRedesigned: View {
     @State private var showSettings = false
     @State private var showCVBuilder = false
     @State private var showTemplates = false
+    @State private var showJobs = false
+    @State private var showDocuments = false
+    @State private var showFriends = false
+    @State private var recommendedEvent: SocialEvent?
     @State private var showRoadmap = false
-    @State private var showSweezyPassport = false
     @State private var cityHubRoute: CityHubRoute?
     @State private var selectedGuide: Guide?
     @State private var selectedNews: NewsItem?
@@ -128,10 +131,6 @@ struct HomeViewRedesigned: View {
                 .navigationDestination(item: $selectedNews) { news in
                     NewsDetailView(news: news)
                 }
-                .navigationDestination(isPresented: $showSweezyPassport) {
-                    SweezyPassportView()
-                        .environmentObject(appContainer)
-                }
                 .navigationDestination(item: $cityHubRoute) { route in
                     if let hub = CityHubRegistry.hub(for: route.slug) {
                         CityHubView(hub: hub)
@@ -166,13 +165,20 @@ struct HomeViewRedesigned: View {
                     .environmentObject(lockManager)
             }
         }
+        .fullScreenCover(isPresented: $showJobs) { JobsView().environmentObject(appContainer).environmentObject(lockManager).environmentObject(sessionManager) }
+        .sheet(isPresented: $showDocuments) { NavigationStack { DocumentReadinessView() } }
+        .fullScreenCover(isPresented: $showFriends) {
+            FriendNetworkView()
+                .environmentObject(appContainer)
+                .environmentObject(lockManager)
+                .environmentObject(sessionManager)
+        }
         .onAppear {
             AppLogger.ui("HomeViewRedesigned onAppear")
             #if DEBUG
-            // Screenshot automation: pass "-screenshotRoute roadmap|passport" as a launch argument
+            // Screenshot automation: pass "-screenshotRoute roadmap" as a launch argument
             switch UserDefaults.standard.string(forKey: "screenshotRoute") {
             case "roadmap": showRoadmap = true
-            case "passport": showSweezyPassport = true
             default: break
             }
             #endif
@@ -188,6 +194,9 @@ struct HomeViewRedesigned: View {
             try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 sec
             
             EventBus.shared.emit(GamEvent(type: .appDailyOpen))
+            if subscriptionManager.isPremium, sessionManager.isAuthenticated {
+                recommendedEvent = (try? await FriendsAPI.events())?.first(where: { $0.isRecommended })
+            }
             appContainer.analytics.track(
                 "daily_open",
                 properties: ["entitlement": subscriptionManager.isPremium ? "plus" : "free"]
@@ -448,11 +457,44 @@ struct HomeViewRedesigned: View {
 
     private var focusTabContent: some View {
         VStack(spacing: Theme.Spacing.lg) {
+            if subscriptionManager.isPremium { plusTodaySection }
             todayFocusCardSection
             mockupQuickActionsSection
             swissMomentsGallerySection
         }
         .padding(.bottom, Theme.Spacing.xl)
+    }
+
+    private var plusTodaySection: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack { VStack(alignment: .leading, spacing: 4) { Text("SWEEZY PLUS · СЬОГОДНІ").font(.caption.bold()).tracking(1.6).foregroundStyle(JourneyVisual.lime); Text("Що важливо зараз").font(.title2.bold()).foregroundStyle(.white) }; Spacer(); Image(systemName: "sparkles").foregroundStyle(JourneyVisual.lime) }
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: 10) { plusTodayCards }
+                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) { plusTodayCards }
+            }
+            HStack(spacing: 12) { ProgressView(value: firstWeekProgress).tint(JourneyVisual.lime); Text("Адаптація \(Int(firstWeekProgress * 100))%").font(.caption.bold()).foregroundStyle(.white.opacity(0.7)) }
+            VStack(alignment: .leading, spacing: 5) { Text("ЩОТИЖНЕВИЙ SWEEZY BRIEF").font(.caption2.bold()).tracking(1.4).foregroundStyle(JourneyVisual.lime); Text(weeklyBriefText).font(.subheadline).foregroundStyle(.white.opacity(0.7)).fixedSize(horizontal: false, vertical: true) }
+        }.padding(18).background(LinearGradient(colors: [Color.black.opacity(0.9), JourneyVisual.lime.opacity(0.08)], startPoint: .topLeading, endPoint: .bottomTrailing)).clipShape(RoundedRectangle(cornerRadius: 24)).overlay(RoundedRectangle(cornerRadius: 24).stroke(JourneyVisual.lime.opacity(0.28))).padding(.horizontal, Theme.Spacing.lg)
+    }
+
+    @ViewBuilder private var plusTodayCards: some View {
+        plusTodayCard("Дедлайн", value: appContainer.firstWeekService.nextDueTask?.title ?? "Немає термінових", icon: "calendar.badge.clock") { NotificationCenter.default.post(name: .switchTab, object: 1) }
+        plusTodayCard("Вакансії", value: "AI Match", icon: "briefcase.fill") { showJobs = true }
+        plusTodayCard("Документи", value: "Перевірити", icon: "doc.text.fill") { showDocuments = true }
+        plusTodayCard("Подія", value: recommendedEvent?.title ?? "Знайти поруч", icon: "person.3.fill") { showFriends = true }
+    }
+
+    private func plusTodayCard(_ title: String, value: String, icon: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) { VStack(alignment: .leading, spacing: 7) { Image(systemName: icon).foregroundStyle(JourneyVisual.lime); Text(title).font(.caption.bold()).foregroundStyle(.white.opacity(0.5)); Text(value).font(.subheadline.bold()).foregroundStyle(.white).lineLimit(2) }.frame(maxWidth: .infinity, minHeight: 96, alignment: .leading).padding(12).background(.white.opacity(0.06)).clipShape(RoundedRectangle(cornerRadius: 17)) }.buttonStyle(.plain)
+    }
+
+    private var weeklyBriefText: String {
+        let remaining = checklistTasks.filter { !$0.isDone }.count
+        let unread = appContainer.chatStore.unreadCount
+        var parts = ["\(remaining) активних кроків"]
+        if unread > 0 { parts.append("\(unread) непрочитаних повідомлень") }
+        if let event = recommendedEvent { parts.append("подія: \(event.title)") }
+        return parts.joined(separator: " · ")
     }
 
     private var todayFocusCardSection: some View {
@@ -818,93 +860,6 @@ struct HomeViewRedesigned: View {
         EmptyView()
     }
     
-    // MARK: - Analytics Pinboard (Gamification)
-    private var analyticsPinboard: some View {
-        Button {
-            showSweezyPassport = true
-        } label: {
-            GamificationLevelCard(
-                currentXP: userXP,
-                xpForNextLevel: xpForNextLevel,
-                level: userLevel,
-                levelTitle: levelTitle,
-                hoursSaved: estimatedHoursSaved,
-                guidesRead: appContainer.userStats.guidesReadCount,
-                lastAward: appContainer.gamification.lastAwardedXP,
-                todayXP: appContainer.gamification.xpGainedToday(),
-                badges: earnedBadges
-            )
-        }
-        .buttonStyle(.plain)
-        .padding(.horizontal, Theme.Spacing.lg)
-    }
-    
-    // MARK: - Gamification Helpers
-    private var userXP: Int {
-        appContainer.gamification.totalXP
-    }
-    
-    private var userLevel: Int {
-        switch userXP {
-        case 0..<100: return 1
-        case 100..<300: return 2
-        case 300..<600: return 3
-        case 600..<1000: return 4
-        case 1000..<1500: return 5
-        case 1500..<2200: return 6
-        case 2200..<3000: return 7
-        default: return 8
-        }
-    }
-    
-    private var xpForNextLevel: Int {
-        switch userLevel {
-        case 1: return 100
-        case 2: return 300
-        case 3: return 600
-        case 4: return 1000
-        case 5: return 1500
-        case 6: return 2200
-        case 7: return 3000
-        default: return 4000
-        }
-    }
-    
-    private var levelTitle: String {
-        switch userLevel {
-        case 1: return "gamification.level.1".localized
-        case 2: return "gamification.level.2".localized
-        case 3: return "gamification.level.3".localized
-        case 4: return "gamification.level.4".localized
-        case 5: return "gamification.level.5".localized
-        case 6: return "gamification.level.6".localized
-        case 7: return "gamification.level.7".localized
-        default: return "gamification.level.default".localized
-        }
-    }
-    
-    private var earnedBadges: [GamificationBadge] {
-        var badges: [GamificationBadge] = []
-        
-        if appContainer.userStats.guidesReadCount >= 1 {
-            badges.append(GamificationBadge(icon: "book.fill", title: "gamification.badge.reader".localized, color: Theme.Colors.info))
-        }
-        if appContainer.userStats.guidesReadCount >= 5 {
-            badges.append(GamificationBadge(icon: "books.vertical.fill", title: "gamification.badge.bookworm".localized, color: Theme.Colors.accentTurquoise))
-        }
-        if appContainer.userStats.activeChecklistsCount >= 1 {
-            badges.append(GamificationBadge(icon: "checklist", title: "gamification.badge.organizer".localized, color: Theme.Colors.success))
-        }
-        if estimatedHoursSaved >= 5 {
-            badges.append(GamificationBadge(icon: "clock.fill", title: "gamification.badge.time_saver".localized, color: Theme.Colors.accent))
-        }
-        if estimatedHoursSaved >= 20 {
-            badges.append(GamificationBadge(icon: "star.fill", title: "gamification.badge.superstar".localized, color: Theme.Colors.accentCoral))
-        }
-        
-        return badges
-    }
-    
     // MARK: - Local Feed Chips
     private var localFeedChips: some View {
         VStack(spacing: Theme.Spacing.md) {
@@ -1014,73 +969,6 @@ struct HomeViewRedesigned: View {
         return visible
     }
     
-    private var compactProgressSection: some View {
-        Button {
-            showSweezyPassport = true
-        } label: {
-            compactProgressContent
-        }
-        .buttonStyle(.plain)
-        .padding(.horizontal, Theme.Spacing.lg)
-    }
-
-    private var embeddedPassportSection: some View {
-        Button {
-            showSweezyPassport = true
-        } label: {
-            compactProgressContent
-        }
-        .buttonStyle(.plain)
-    }
-
-    private var compactProgressContent: some View {
-        VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
-            HStack {
-                Label("Sweezy Passport", systemImage: "person.text.rectangle.fill")
-                    .font(.system(size: 14, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
-                Spacer()
-                Text("Open")
-                    .font(.system(size: 11, weight: .semibold))
-                    .foregroundColor(.white.opacity(0.55))
-            }
-
-            HStack(spacing: Theme.Spacing.md) {
-                CompactProgressPill(
-                    icon: "bolt.fill",
-                    value: "\(statXP)",
-                    label: "XP",
-                    color: Theme.Colors.primaryLight
-                )
-
-                CompactProgressPill(
-                    icon: "star.fill",
-                    value: "\(statLevel)",
-                    label: "Status",
-                    color: Theme.Colors.accent
-                )
-
-                CompactProgressPill(
-                    icon: "flame.fill",
-                    value: "\(appContainer.gamification.currentStreak())",
-                    label: "Streak",
-                    color: Theme.Colors.accentCoral
-                )
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(Theme.Spacing.md)
-        .background(
-            RoundedRectangle(cornerRadius: Theme.CornerRadius.xl, style: .continuous)
-                .fill(Theme.Colors.inkElevated)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: Theme.CornerRadius.xl, style: .continuous)
-                .stroke(Theme.Colors.inkBorder, lineWidth: 1)
-                .allowsHitTesting(false)
-        )
-    }
-
     private var homeTabEmptyState: some View {
         VStack(spacing: Theme.Spacing.sm) {
             Image(systemName: "checkmark.circle")

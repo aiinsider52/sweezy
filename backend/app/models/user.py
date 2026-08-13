@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from uuid import uuid4
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, String, func
+from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from ..core.database import Base
@@ -19,6 +19,9 @@ class User(Base):
     apple_sub: Mapped[str | None] = mapped_column(String(255), nullable=True, unique=True, index=True)
     google_sub: Mapped[str | None] = mapped_column(String(255), nullable=True, unique=True, index=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    safety_status: Mapped[str] = mapped_column(String(20), default="active", nullable=False, index=True)
+    safety_suspended_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True, index=True)
+    safety_strike_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     email_verified: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     email_verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     is_superuser: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
@@ -50,5 +53,3 @@ class PublicUserProfile(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
     )
-
-

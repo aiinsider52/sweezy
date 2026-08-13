@@ -164,6 +164,40 @@ def test_cross_provider_jobs_are_deduplicated_by_fingerprint() -> None:
         assert count == 1
 
 
+def test_provider_sync_tolerates_existing_cross_provider_duplicates() -> None:
+    suffix = uuid.uuid4().hex
+    canonical_url = f"https://example.com/duplicate/{suffix}"
+    with SessionLocal() as db:
+        for source in ("legacy:first", "legacy:second"):
+            db.add(
+                Job(
+                    source=source,
+                    source_job_id=f"{source}-{suffix}",
+                    canonical_url=canonical_url,
+                    apply_url=canonical_url,
+                    title=f"Legacy duplicate {suffix}",
+                )
+            )
+        db.commit()
+
+        count, _ = _upsert_jobs(
+            db,
+            [
+                NormalizedJob(
+                    source="jooble",
+                    source_job_id=f"jooble-{suffix}",
+                    title=f"Updated duplicate {suffix}",
+                    company="Sweezy AG",
+                    location="Zürich, ZH",
+                    apply_url=canonical_url,
+                )
+            ],
+            datetime.now(timezone.utc),
+        )
+
+        assert count == 1
+
+
 def test_server_favorite_tracker_alert_and_report() -> None:
     headers, _ = _identity()
     job_id = _catalog_job(suffix="copilot")

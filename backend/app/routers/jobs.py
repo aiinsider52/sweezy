@@ -24,6 +24,7 @@ from ..models.job import (
     JobSearchEvent,
 )
 from ..models.user import User
+from ..services.moderation import ensure_case
 from ..schemas.job import (
     EmployerApplicationOut,
     EmployerApplicationStatusUpdate,
@@ -444,7 +445,10 @@ def report_job(
     ).scalar_one_or_none()
     if existing:
         return {"ok": True, "message": "Report already received"}
-    db.add(JobReport(job_id=job_id, reporter_id=user.id, **payload.model_dump()))
+    report = JobReport(job_id=job_id, reporter_id=user.id, **payload.model_dump())
+    db.add(report); db.flush()
+    job = db.get(Job, job_id)
+    ensure_case(db, source_type="job", source_id=job_id, subject_user_id=job.employer_id if job else None, reporter_id=user.id, reason=payload.reason, details=payload.details, context={"legacy_report_id": report.id, "title": job.title if job else None, "company": job.company if job else None})
     db.commit()
     return {"ok": True, "message": "Report received"}
 

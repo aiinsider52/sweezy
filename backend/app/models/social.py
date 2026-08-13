@@ -30,8 +30,10 @@ class SocialProfile(Base):
     open_to_friends: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False, index=True)
     guidelines_accepted: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     is_verified: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False, index=True)
-    moderation_status: Mapped[str] = mapped_column(String(20), default="approved", nullable=False, index=True)
+    moderation_status: Mapped[str] = mapped_column(String(20), default="pending", nullable=False, index=True)
     moderation_reason: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    moderated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    moderated_by: Mapped[str | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
     boosted_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
@@ -106,3 +108,18 @@ class SocialEventMessage(Base):
     sender_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     body: Mapped[str] = mapped_column(String(1000), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+
+class SocialProfileVisit(Base):
+    __tablename__ = "social_profile_visits"
+    __table_args__ = (
+        UniqueConstraint("profile_user_id", "visitor_id", name="uq_social_profile_visit_pair"),
+        Index("ix_social_profile_visits_profile_last", "profile_user_id", "last_visited_at"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid4()))
+    profile_user_id: Mapped[str] = mapped_column(ForeignKey("social_profiles.user_id", ondelete="CASCADE"), nullable=False)
+    visitor_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    visit_count: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
+    first_visited_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    last_visited_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)

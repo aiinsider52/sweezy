@@ -22,6 +22,7 @@ from ..schemas.events import (
 )
 from ..services.events_moderation import moderate_event_listing
 from ..services.users import UserService
+from ..services.moderation import ensure_case
 
 
 router = APIRouter()
@@ -133,14 +134,15 @@ def report_event(
     if existing:
         return EventSafetyResponse(message="Report already received")
 
-    db.add(
-        EventReport(
+    report = EventReport(
             event_id=event_id,
             reporter_id=user.id,
             reason=payload.reason.strip().lower(),
             details=payload.details.strip() if payload.details else None,
         )
-    )
+    db.add(report)
+    db.flush()
+    ensure_case(db, source_type="event", source_id=event.id, subject_user_id=event.author_id, reporter_id=user.id, reason=payload.reason, details=payload.details, context={"legacy_report_id": report.id, "title": event.title, "starts_at": event.starts_at.isoformat()})
     event.report_count += 1
     if event.report_count >= 3:
         event.status = "pending"

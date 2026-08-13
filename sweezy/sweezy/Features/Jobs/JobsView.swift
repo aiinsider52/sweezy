@@ -537,6 +537,7 @@ struct JobsView: View {
                     .padding(.top, 8)
                     .padding(.bottom, 116)
                 }
+                .accessibilityIdentifier("careerHub.guestGate")
             }
         }
         .toolbar(.hidden, for: .navigationBar)
@@ -815,6 +816,7 @@ struct JobsView: View {
                 )
         )
         .shadow(color: JourneyVisual.lime.opacity(0.08), radius: 28, y: 12)
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier("careerHub.dashboard")
     }
 

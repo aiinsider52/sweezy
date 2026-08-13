@@ -41,6 +41,7 @@ enum FriendsAPI {
     enum CodingKeys: String, CodingKey { case friendUserID = "friend_user_id" }
   }
   private struct EventMessageBody: Encodable { let body: String }
+  private struct VisitBody: Encodable { let invisible: Bool }
 
   private static func call<T: Decodable>(_ path: String, method: String = "GET", body: Data? = nil)
     async throws -> T
@@ -131,6 +132,14 @@ enum FriendsAPI {
   }
   static func boostProfile() async throws -> SocialProfile {
     try await call("friends/profile/me/boost", method: "POST")
+  }
+  static func recordVisit(_ id: String, invisible: Bool) async throws {
+    let _: SocialAction = try await call(
+      "friends/profiles/\(id)/visit", method: "POST",
+      body: try JSONEncoder().encode(VisitBody(invisible: invisible)))
+  }
+  static func visitors() async throws -> [SocialProfileVisitor] {
+    try await call("friends/profile/me/visitors")
   }
   static func block(_ id: String) async throws {
     try await empty("friends/profiles/\(id)/block", method: "POST")

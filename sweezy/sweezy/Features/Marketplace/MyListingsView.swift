@@ -11,6 +11,10 @@ struct MyListingsView: View {
     @State private var selectedListing: ServiceListing?
     @State private var listingToEdit: ServiceListing?
     @State private var listingToDelete: ServiceListing?
+    @State private var proDashboard: MarketplaceProDashboard?
+    @State private var showPaywall = false
+    @State private var showProDashboard = false
+    @StateObject private var subscription = SubscriptionManager.shared
 
     var body: some View {
         NavigationStack {
@@ -23,6 +27,7 @@ struct MyListingsView: View {
                     ScrollView(showsIndicators: false) {
                         VStack(spacing: 16) {
                             summaryHero
+                            proEntry
 
                             if listings.isEmpty {
                                 emptyState
@@ -63,6 +68,8 @@ struct MyListingsView: View {
                     onListingsChanged?()
                 }
             }
+            .sheet(isPresented: $showProDashboard) { MarketplaceProDashboardView(dashboard: proDashboard, listings: listings) { updated in replaceListing(updated) } }
+            .fullScreenCover(isPresented: $showPaywall) { SubscriptionView(source: .profile) }
             .alert("marketplace.delete_title".localized, isPresented: .init(
                 get: { listingToDelete != nil },
                 set: { if !$0 { listingToDelete = nil } }
@@ -128,16 +135,37 @@ struct MyListingsView: View {
                         .foregroundColor(.white.opacity(0.92))
                 }
 
-                HStack(spacing: 10) {
-                    summaryPill(title: "marketplace.cabinet.total".localized, value: listings.count, tint: .white)
-                    summaryPill(title: "marketplace.status.approved".localized, value: approvedCount, tint: Theme.Colors.primaryLight)
-                    summaryPill(title: "marketplace.status.pending".localized, value: pendingCount, tint: .orange)
-                    summaryPill(title: "marketplace.status.rejected".localized, value: rejectedCount, tint: .red.opacity(0.9))
+                ViewThatFits(in: .horizontal) {
+                    HStack(spacing: 10) { summaryMetrics }
+                    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) { summaryMetrics }
                 }
             }
             .padding(18)
         }
         .shadow(color: Theme.Colors.primary.opacity(0.22), radius: 20, y: 10)
+    }
+
+    @ViewBuilder private var summaryMetrics: some View {
+        summaryPill(title: "marketplace.cabinet.total".localized, value: listings.count, tint: .white)
+        summaryPill(title: "marketplace.status.approved".localized, value: approvedCount, tint: Theme.Colors.primaryLight)
+        summaryPill(title: "marketplace.status.pending".localized, value: pendingCount, tint: .orange)
+        summaryPill(title: "marketplace.status.rejected".localized, value: rejectedCount, tint: .red.opacity(0.9))
+    }
+
+    private var proEntry: some View {
+        Button {
+            guard subscription.isPremium else { showPaywall = true; return }
+            Task {
+                do { proDashboard = try await APIClient.fetchMarketplaceProDashboard(); showProDashboard = true }
+                catch { errorMessage = error.localizedDescription }
+            }
+        } label: {
+            HStack(spacing: 14) {
+                Image(systemName: "chart.line.uptrend.xyaxis").font(.title2.bold()).foregroundStyle(.black).frame(width: 48, height: 48).background(JourneyVisual.lime).clipShape(RoundedRectangle(cornerRadius: 15))
+                VStack(alignment: .leading, spacing: 3) { HStack { Text("Marketplace Pro").font(.headline); Text("PLUS PRO").font(.caption2.bold()).foregroundStyle(.black).padding(.horizontal, 7).padding(.vertical, 3).background(JourneyVisual.lime).clipShape(Capsule()) }; Text("Перегляди · клієнти · просування · швидкі відповіді").font(.caption).foregroundStyle(.white.opacity(0.58)).multilineTextAlignment(.leading) }
+                Spacer(); Image(systemName: "arrow.right")
+            }.foregroundStyle(.white).padding(16).background(.black.opacity(0.48)).clipShape(RoundedRectangle(cornerRadius: 22)).overlay(RoundedRectangle(cornerRadius: 22).stroke(JourneyVisual.lime.opacity(0.3)))
+        }.buttonStyle(.plain)
     }
 
     private func summaryPill(title: String, value: Int, tint: Color) -> some View {

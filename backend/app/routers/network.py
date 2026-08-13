@@ -11,6 +11,7 @@ from ..models.chat import ChatConversation, ChatParticipant
 from ..models.marketplace import MarketplaceBlock
 from ..models.network import ProfessionalConnection, ProfessionalProfile, ProfessionalProfileReport
 from ..models.user import PublicUserProfile, User
+from ..services.moderation import ensure_case, ensure_profile_review_case
 from ..schemas.network import (
     ConnectionCreate,
     ConnectionDecision,
@@ -112,6 +113,7 @@ def list_profiles(
     blocked_by_ids = select(MarketplaceBlock.user_id).where(MarketplaceBlock.blocked_author_id == user.id)
     conditions = [
         ProfessionalProfile.is_visible.is_(True),
+        ProfessionalProfile.moderation_status == "approved",
         ProfessionalProfile.user_id != user.id,
         User.is_active.is_(True),
         ProfessionalProfile.user_id.not_in(blocked_ids),
@@ -190,6 +192,12 @@ def upsert_profile(
         raise HTTPException(status_code=403, detail="Verify your email before publishing a professional profile")
     profile = db.get(ProfessionalProfile, user.id)
     values = payload.model_dump()
+    values.update(
+        moderation_status="pending",
+        moderation_reason=None,
+        moderated_at=None,
+        moderated_by=None,
+    )
     if profile is None:
         profile = ProfessionalProfile(user_id=user.id, **values)
     else:
@@ -205,6 +213,8 @@ def upsert_profile(
         if payload.avatar_url:
             public.avatar_url = payload.avatar_url
     db.add(public)
+    db.flush()
+    ensure_profile_review_case(db, kind="professional", user_id=user.id, context={"display_name": profile.display_name, "headline": profile.headline, "company_name": profile.company_name, "canton": profile.canton, "city": profile.city, "bio": profile.bio, "avatar_url": profile.avatar_url})
     db.commit()
     db.refresh(profile)
     return _profile_response(profile, user.id)
@@ -219,6 +229,7 @@ def profile_detail(profile_user_id: str, db: DBSession, user: CurrentUser) -> Pr
         or not target
         or not target.is_active
         or (not profile.is_visible and profile_user_id != user.id)
+        or (profile.moderation_status != "approved" and profile_user_id != user.id)
         or _blocked(db, user.id, profile_user_id)
     ):
         raise HTTPException(status_code=404, detail="Professional profile not found")
@@ -244,7 +255,7 @@ def request_connection(
     target = db.get(ProfessionalProfile, profile_user_id)
     if not own_profile:
         raise HTTPException(status_code=409, detail="Create your professional profile first")
-    if not target or not target.is_visible or not target.open_to_connections or _blocked(db, user.id, profile_user_id):
+    if not target or target.moderation_status != "approved" or not target.is_visible or not target.open_to_connections or _blocked(db, user.id, profile_user_id):
         raise HTTPException(status_code=404, detail="Professional profile unavailable")
 
     existing = _pair_connection(db, user.id, profile_user_id)
@@ -400,14 +411,15 @@ def report_profile(
         )
     ).scalar_one_or_none()
     if not existing:
-        db.add(
-            ProfessionalProfileReport(
+        existing = ProfessionalProfileReport(
                 profile_user_id=profile_user_id,
                 reporter_id=user.id,
                 reason=payload.reason,
                 details=payload.details.strip() if payload.details else None,
             )
-        )
+        db.add(existing)
+        db.flush()
+        ensure_case(db, source_type="professional_profile", source_id=profile_user_id, subject_user_id=profile_user_id, reporter_id=user.id, reason=payload.reason, details=payload.details, context={"legacy_report_id": existing.id})
         db.commit()
     return NetworkActionResponse(message="Report received for moderation")
 

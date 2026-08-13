@@ -85,7 +85,13 @@ def apply_trial(db: Session, user: User, days: int = 7) -> User:
     return user
 
 
-def apply_premium(db: Session, user: User, subscription_id: str, current_period_end: Optional[datetime]) -> None:
+def apply_premium(
+    db: Session,
+    user: User,
+    subscription_id: str,
+    current_period_end: Optional[datetime],
+    purchased_at: Optional[datetime] = None,
+) -> None:
     user.subscription_status = "premium"
     user.subscription_expire_at = current_period_end
     user.stripe_subscription_id = subscription_id
@@ -103,11 +109,13 @@ def apply_premium(db: Session, user: User, subscription_id: str, current_period_
             stripe_subscription_id=subscription_id,
             plan=None,
             status="active",
+            purchased_at=purchased_at or datetime.now(timezone.utc),
             current_period_end=current_period_end,
         )
     else:
         sub.stripe_subscription_id = subscription_id
         sub.status = "active"
+        sub.purchased_at = sub.purchased_at or purchased_at or datetime.now(timezone.utc)
         sub.current_period_end = current_period_end
     db.add(sub)
     db.add(user)

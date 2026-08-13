@@ -45,4 +45,20 @@ final class SwissDiscoveryCatalogTests: XCTestCase {
         XCTAssertEqual(SwissDiscoveryProgressStore.savedPlaceIDs(defaults: defaults), saved)
         XCTAssertEqual(SwissDiscoveryProgressStore.visitedPlaceIDs(defaults: defaults), visited)
     }
+
+    func testTripPlannerHonorsFamilyTransitAndWeather() throws {
+        let plan = try XCTUnwrap(SwissTripPlanner.plan(
+            origin: "Zürich", budget: 80, transport: .publicTransit, family: true, weather: .rain
+        ))
+        XCTAssertEqual(plan.budgetCHF, 80)
+        XCTAssertEqual(plan.transport, .publicTransit)
+        XCTAssertTrue(plan.place.filters.contains(.family) || plan.place.filters.contains(.easy))
+        XCTAssertTrue(plan.place.filters.contains(.culture) || plan.place.settings.contains(.city))
+    }
+
+    func testTripPlannerIsStableForSameDailyInput() throws {
+        let first = try XCTUnwrap(SwissTripPlanner.plan(origin: "Bern", budget: 120, transport: .car, family: false, weather: .sun))
+        let second = try XCTUnwrap(SwissTripPlanner.plan(origin: "Bern", budget: 120, transport: .car, family: false, weather: .sun))
+        XCTAssertEqual(first.place.id, second.place.id)
+    }
 }

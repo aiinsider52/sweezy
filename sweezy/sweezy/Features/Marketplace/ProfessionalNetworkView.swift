@@ -13,6 +13,7 @@ final class ProfessionalNetworkViewModel: ObservableObject {
     @Published var selectedCanton: String?
     @Published var selectedRole: ProfessionalRole?
     @Published var selectedGoal: ProfessionalGoal?
+    @Published var isShowingDemoProfiles = false
 
     var incoming: [ProfessionalConnection] { connections.filter { $0.direction == "incoming" && $0.status == "pending" } }
     var outgoing: [ProfessionalConnection] { connections.filter { $0.direction == "outgoing" && $0.status == "pending" } }
@@ -38,8 +39,16 @@ final class ProfessionalNetworkViewModel: ObservableObject {
             myProfile = loadedOwn
             events = Array(loadedEvents.items.prefix(4))
             errorMessage = nil
+            isShowingDemoProfiles = false
+            #if DEBUG
+            if profiles.isEmpty { applyDemoProfiles() }
+            #endif
         } catch {
             errorMessage = error.localizedDescription
+            #if DEBUG
+            applyDemoProfiles()
+            errorMessage = nil
+            #endif
         }
     }
 
@@ -54,8 +63,16 @@ final class ProfessionalNetworkViewModel: ObservableObject {
                 goal: selectedGoal
             ).items
             errorMessage = nil
+            isShowingDemoProfiles = false
+            #if DEBUG
+            if profiles.isEmpty { applyDemoProfiles() }
+            #endif
         } catch {
             errorMessage = error.localizedDescription
+            #if DEBUG
+            applyDemoProfiles()
+            errorMessage = nil
+            #endif
         }
     }
 
@@ -132,6 +149,21 @@ final class ProfessionalNetworkViewModel: ObservableObject {
         guard let index = profiles.firstIndex(where: { $0.userID == connection.otherProfile.userID }) else { return }
         profiles[index] = connection.otherProfile
     }
+
+    #if DEBUG
+    func applyDemoProfiles() {
+        let normalizedQuery = searchText.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        profiles = ProfessionalProfile.previewProfiles.filter { profile in
+            let matchesQuery = normalizedQuery.isEmpty || [profile.displayName, profile.headline, profile.industry, profile.city]
+                .joined(separator: " ").lowercased().contains(normalizedQuery)
+            let matchesCanton = selectedCanton == nil || profile.canton == selectedCanton
+            let matchesRole = selectedRole == nil || profile.role == selectedRole
+            let matchesGoal = selectedGoal.map { profile.goals.contains($0) } ?? true
+            return matchesQuery && matchesCanton && matchesRole && matchesGoal
+        }
+        isShowingDemoProfiles = true
+    }
+    #endif
 }
 
 struct ProfessionalNetworkView: View {
@@ -174,7 +206,12 @@ struct ProfessionalNetworkView: View {
         }
         .toolbar(.hidden, for: .navigationBar)
         .fullScreenCover(item: $selectedProfile) { profile in
-            NetworkProfileDetailView(profile: profile, vm: vm, selectedConversation: $selectedConversation)
+            NetworkProfileDetailView(
+                profile: profile,
+                vm: vm,
+                selectedConversation: $selectedConversation,
+                isDemo: vm.isShowingDemoProfiles || isUITestPreview
+            )
                 .environmentObject(appContainer)
         }
         .fullScreenCover(item: $selectedConversation) { conversation in
@@ -193,7 +230,10 @@ struct ProfessionalNetworkView: View {
                 .environmentObject(appContainer)
         }
         .fullScreenCover(isPresented: $showFriends) {
-            FriendNetworkView().environmentObject(appContainer)
+            FriendNetworkView()
+                .environmentObject(appContainer)
+                .environmentObject(lockManager)
+                .environmentObject(sessionManager)
         }
         .sheet(isPresented: $showAuth) {
             AuthEntryView(showsCloseButton: true) { showAuth = false }
@@ -343,6 +383,21 @@ struct ProfessionalNetworkView: View {
 
     private var discoverSection: some View {
         VStack(alignment: .leading, spacing: 18) {
+            if vm.isShowingDemoProfiles {
+                HStack(spacing: 10) {
+                    Image(systemName: "sparkles")
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Демо-каталог").font(.subheadline.bold())
+                        Text("Тестові профілі для перегляду дизайну").font(.caption)
+                    }
+                    Spacer()
+                }
+                .foregroundColor(JourneyVisual.lime)
+                .padding(13)
+                .background(JourneyVisual.lime.opacity(0.09))
+                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: 16).stroke(JourneyVisual.lime.opacity(0.22)))
+            }
             cantonConstellation
             friendsBridge
             verifiedExpertsBridge
@@ -381,6 +436,7 @@ struct ProfessionalNetworkView: View {
                             NetworkProfileCard(profile: profile)
                         }
                         .buttonStyle(.plain)
+                        .accessibilityIdentifier("network.profile.\(profile.userID)")
                     }
                 }
             }
@@ -653,6 +709,7 @@ struct ProfessionalNetworkView: View {
     private var myProfileSection: some View {
         VStack(alignment: .leading, spacing: 18) {
             if let profile = vm.myProfile {
+                moderationBanner(profile)
                 NetworkProfileCard(profile: profile, expanded: true)
                 Button { showEditor = true } label: {
                     Label("Редагувати професійний профіль", systemImage: "pencil.line")
@@ -684,6 +741,23 @@ struct ProfessionalNetworkView: View {
             }
         }
         .padding(.horizontal, 18)
+    }
+
+    private func moderationBanner(_ profile: ProfessionalProfile) -> some View {
+        let status = profile.moderationStatus ?? "approved"
+        let pending = status == "pending"
+        let rejected = status == "rejected"
+        return HStack(alignment: .top, spacing: 11) {
+            Image(systemName: pending ? "clock.badge.checkmark" : rejected ? "exclamationmark.shield.fill" : "checkmark.shield.fill")
+            VStack(alignment: .leading, spacing: 3) {
+                Text(pending ? "Профіль на перевірці" : rejected ? "Профіль потребує змін" : "Профіль схвалено").font(.system(size: 14, weight: .bold))
+                Text(rejected ? (profile.moderationReason ?? "Відредагуй профіль і надішли повторно.") : pending ? "Після схвалення профіль з’явиться у професійному каталозі." : "Профіль видимий іншим користувачам.").font(.system(size: 12, weight: .medium))
+            }
+            Spacer()
+        }
+        .foregroundColor(rejected ? .orange : JourneyVisual.lime)
+        .padding(14).background((rejected ? Color.orange : JourneyVisual.lime).opacity(0.09))
+        .clipShape(RoundedRectangle(cornerRadius: 16))
     }
 
     private var verifiedExpertsBridge: some View {
@@ -830,6 +904,7 @@ struct ProfessionalNetworkView: View {
         vm.profiles = ProfessionalProfile.previewProfiles
         vm.myProfile = ProfessionalProfile.previewOwn
         vm.events = []
+        vm.isShowingDemoProfiles = true
     }
 }
 
@@ -982,6 +1057,7 @@ private struct NetworkProfileDetailView: View {
     let profile: ProfessionalProfile
     @ObservedObject var vm: ProfessionalNetworkViewModel
     @Binding var selectedConversation: ChatConversation?
+    let isDemo: Bool
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var appContainer: AppContainer
     @State private var showConnect = false
@@ -999,7 +1075,9 @@ private struct NetworkProfileDetailView: View {
                     HStack {
                         Button { dismiss() } label: { Image(systemName: "xmark").font(.title3.bold()).foregroundColor(.white).frame(width: 46, height: 46).background(Color.white.opacity(0.08)).clipShape(Circle()) }
                         Spacer()
-                        Button { showSafety = true } label: { Image(systemName: "ellipsis").foregroundColor(.white).frame(width: 46, height: 46).background(Color.white.opacity(0.08)).clipShape(Circle()) }
+                        if !isDemo {
+                            Button { showSafety = true } label: { Image(systemName: "ellipsis").foregroundColor(.white).frame(width: 46, height: 46).background(Color.white.opacity(0.08)).clipShape(Circle()) }
+                        }
                     }
                     .padding(.top, 8)
 
@@ -1036,18 +1114,27 @@ private struct NetworkProfileDetailView: View {
     }
 
     @ViewBuilder private var actionArea: some View {
-        switch current.connectionState {
-        case "accepted":
-            primaryButton("Відкрити чат", icon: "bubble.left.and.bubble.right.fill") { Task { await openChat() } }
-        case "incoming":
-            HStack(spacing: 10) {
-                primaryButton("Прийняти", icon: "checkmark") { Task { await respond(true) } }
-                secondaryButton("Відхилити", icon: "xmark") { Task { await respond(false) } }
+        if isDemo {
+            Label("Демо-профіль · дії вимкнені", systemImage: "sparkles")
+                .font(.system(size: 14, weight: .bold))
+                .foregroundColor(JourneyVisual.lime)
+                .frame(maxWidth: .infinity, minHeight: 54)
+                .background(JourneyVisual.lime.opacity(0.09))
+                .clipShape(RoundedRectangle(cornerRadius: 17))
+        } else {
+            switch current.connectionState {
+            case "accepted":
+                primaryButton("Відкрити чат", icon: "bubble.left.and.bubble.right.fill") { Task { await openChat() } }
+            case "incoming":
+                HStack(spacing: 10) {
+                    primaryButton("Прийняти", icon: "checkmark") { Task { await respond(true) } }
+                    secondaryButton("Відхилити", icon: "xmark") { Task { await respond(false) } }
+                }
+            case "outgoing":
+                secondaryButton("Запит надіслано", icon: "clock") {}
+            default:
+                primaryButton("Запропонувати знайомство", icon: "person.badge.plus") { showConnect = true }
             }
-        case "outgoing":
-            secondaryButton("Запит надіслано", icon: "clock") {}
-        default:
-            primaryButton("Запропонувати знайомство", icon: "person.badge.plus") { showConnect = true }
         }
     }
 

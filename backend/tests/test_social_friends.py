@@ -12,6 +12,7 @@ from backend.app.core.security import create_access_token
 from backend.app.main import app
 from backend.app.models.event_listing import EventListing
 from backend.app.models.chat import NotificationOutbox
+from backend.app.models.social import SocialProfile
 from backend.app.services.users import UserService
 
 client = TestClient(app)
@@ -42,6 +43,10 @@ def profile(headers: dict[str, str], name: str, interests: list[str], canton: st
     })
     assert response.status_code == 200, response.text
     assert "email" not in response.json()
+    with SessionLocal() as db:
+        saved = db.get(SocialProfile, response.json()["user_id"])
+        saved.moderation_status = "approved"
+        db.add(saved); db.commit()
     return response.json()
 
 
@@ -191,3 +196,28 @@ def test_plus_advanced_search_event_invite_and_group_chat() -> None:
     assert message.status_code == 201
     messages = client.get(f"/api/v1/friends/events/{event_id}/messages", headers=first)
     assert messages.status_code == 200 and messages.json()[0]["body"] == "See you there"
+
+
+def test_profile_visitors_and_invisible_browsing_are_plus() -> None:
+    viewer, viewer_id = identity(); owner, owner_id = identity()
+    profile(viewer, "Visitor", ["hiking", "travel"])
+    profile(owner, "Owner", ["hiking", "books"])
+    recorded = client.post(f"/api/v1/friends/profiles/{owner_id}/visit", headers=viewer, json={"invisible": False})
+    assert recorded.status_code == 200
+    assert client.get("/api/v1/friends/profile/me/visitors", headers=owner).status_code == 402
+    assert client.post(f"/api/v1/friends/profiles/{owner_id}/visit", headers=viewer, json={"invisible": True}).status_code == 402
+
+    from backend.app.core.database import SessionLocal
+    from backend.app.models.user import User
+    with SessionLocal() as db:
+        for user_id in (viewer_id, owner_id):
+            user = db.get(User, user_id)
+            user.subscription_status = "premium"
+            db.add(user)
+        db.commit()
+
+    visitors = client.get("/api/v1/friends/profile/me/visitors", headers=owner)
+    assert visitors.status_code == 200
+    assert visitors.json()[0]["profile"]["user_id"] == viewer_id
+    invisible = client.post(f"/api/v1/friends/profiles/{owner_id}/visit", headers=viewer, json={"invisible": True})
+    assert invisible.status_code == 200

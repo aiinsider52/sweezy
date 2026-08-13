@@ -247,14 +247,6 @@ struct JourneyDirectoryView: View {
 
     private var toolsWorkspace: some View {
         VStack(alignment: .leading, spacing: 20) {
-            JourneyEditorialPlanCard(
-                completedCount: completedPlanTaskCount,
-                totalCount: totalPlanTaskCount,
-                nextAction: nextPlanAction
-            ) {
-                selectedTool = .myPlan
-            }
-
             VStack(alignment: .leading, spacing: 11) {
                 Text("journey.directory.toolkit.choose_task".localized)
                     .font(.system(size: 21, weight: .bold, design: .rounded))
@@ -308,47 +300,19 @@ struct JourneyDirectoryView: View {
                 }
             }
 
-            if selectedToolCategory == .all || selectedToolCategory == .organize {
+            if selectedToolCategory == .all {
                 VStack(alignment: .leading, spacing: 12) {
                     JourneyToolSectionHeader(
-                        eyebrow: "journey.directory.toolkit.plan.eyebrow".localized,
-                        title: "journey.directory.toolkit.plan.title".localized
+                        eyebrow: "journey.directory.toolkit.current.eyebrow".localized,
+                        title: "journey.directory.toolkit.current.title".localized
                     )
                     .id("tools-next-actions")
-
-                    VStack(spacing: 8) {
-                        ForEach(JourneyToolRoute.planningUtilities) { route in
-                            JourneyToolActionRow(
-                                route: route,
-                                badge: route == .myPlan ? planProgressLabel : nil
-                            ) {
-                                selectedTool = route
-                            }
-                        }
-
-                        JourneyToolActionRow(route: .roadmap) {
-                            selectedTool = .roadmap
-                        }
-                    }
-                }
-            }
-
-            if selectedToolCategory == .all || selectedToolCategory == .switzerland {
-                VStack(alignment: .leading, spacing: 12) {
-                    JourneyToolSectionHeader(
-                        eyebrow: "journey.directory.toolkit.swiss.eyebrow".localized,
-                        title: "journey.directory.toolkit.swiss.title".localized
-                    )
-
-                    JourneyToolCard(route: .discoverSwitzerland, height: 174, titleSize: 22) {
-                        selectedTool = .discoverSwitzerland
-                    }
 
                     LazyVGrid(
                         columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible())],
                         spacing: 10
                     ) {
-                        ForEach(JourneyToolRoute.swissUtilities) { route in
+                        ForEach(JourneyToolRoute.secondaryUtilities) { route in
                             JourneyCompactToolTile(route: route, compact: true) {
                                 selectedTool = route
                             }
@@ -445,17 +409,15 @@ struct JourneyDirectoryView: View {
         case .deadlines: DeadlineEngineView()
         case .appointments: AppointmentsView()
         case .digest: WeeklyDigestView()
-        case .jobs: JobsView()
+        case .careerHub: JobsView()
         case .cv: CVBuilderView {
             selectedTool = nil
         }
         case .templates: TemplatesView()
-        case .calculator: BenefitsCalculatorView()
         case .cityHub: CityHubView(hub: CityHubData.zurich)
         case .experts: ExpertsDirectoryView()
         case .moments: JourneyMomentsView(profile: appContainer.userProfile)
         case .language: DailyGermanGameView(service: germanGame)
-        case .passport: SweezyPassportView()
         case .roadmap: MountainRoadmapView()
         case .discoverSwitzerland: SwissDiscoveryView()
         }
@@ -519,36 +481,40 @@ private enum JourneyDirectoryWorkspace: String, CaseIterable, Identifiable {
 
 private enum JourneyToolkitCategory: String, CaseIterable, Identifiable {
     case all
-    case prepare
-    case organize
+    case career
+    case everyday
     case switzerland
+    case community
 
     var id: String { rawValue }
 
     var title: String {
         switch self {
         case .all: return "journey.directory.toolkit.category.all".localized
-        case .prepare: return "journey.directory.toolkit.category.prepare".localized
-        case .organize: return "journey.directory.toolkit.category.organize".localized
+        case .career: return "journey.directory.toolkit.category.career".localized
+        case .everyday: return "journey.directory.toolkit.category.everyday".localized
         case .switzerland: return "journey.directory.toolkit.category.switzerland".localized
+        case .community: return "journey.directory.toolkit.category.community".localized
         }
     }
 
     var icon: String {
         switch self {
         case .all: return "square.grid.2x2"
-        case .prepare: return "doc.text"
-        case .organize: return "checklist.checked"
+        case .career: return "briefcase.fill"
+        case .everyday: return "checklist.checked"
         case .switzerland: return "mountain.2"
+        case .community: return "person.2.fill"
         }
     }
 
     var routes: [JourneyToolRoute] {
         switch self {
         case .all: return JourneyToolRoute.editorialUtilities
-        case .prepare: return [.documents, .templates, .ask]
-        case .organize: return [.myPlan, .deadlines, .appointments, .digest, .roadmap]
-        case .switzerland: return [.discoverSwitzerland, .cityHub, .passport, .experts, .moments, .language]
+        case .career: return [.careerHub]
+        case .everyday: return [.myPlan, .documents, .ask, .deadlines, .appointments, .digest, .templates]
+        case .switzerland: return [.discoverSwitzerland, .cityHub, .language, .roadmap]
+        case .community: return [.experts, .moments]
         }
     }
 }
@@ -560,12 +526,10 @@ private enum JourneyToolRoute: String, Identifiable, CaseIterable {
     case deadlines
     case appointments
     case digest
-    case jobs
+    case careerHub
     case cv
     case templates
-    case calculator
     case cityHub
-    case passport
     case experts
     case moments
     case language
@@ -574,10 +538,11 @@ private enum JourneyToolRoute: String, Identifiable, CaseIterable {
 
     var id: String { rawValue }
 
-    static let quickUtilities: [JourneyToolRoute] = [.documents, .templates, .ask, .language]
-    static let editorialUtilities: [JourneyToolRoute] = [.documents, .templates, .ask, .language]
-    static let planningUtilities: [JourneyToolRoute] = [.myPlan, .deadlines, .appointments, .digest]
-    static let swissUtilities: [JourneyToolRoute] = [.cityHub, .passport, .experts, .moments]
+    static let quickUtilities: [JourneyToolRoute] = [.careerHub, .discoverSwitzerland, .myPlan, .ask]
+    static let editorialUtilities: [JourneyToolRoute] = [.careerHub, .discoverSwitzerland, .myPlan, .documents, .ask, .language, .experts, .moments]
+    static let secondaryUtilities: [JourneyToolRoute] = [.deadlines, .appointments, .digest, .templates, .cityHub, .experts, .moments, .roadmap]
+    static let planningUtilities: [JourneyToolRoute] = [.myPlan, .documents, .deadlines, .appointments, .digest]
+    static let swissUtilities: [JourneyToolRoute] = [.cityHub, .language, .experts, .moments]
     static let nextActions: [JourneyToolRoute] = [.appointments, .experts, .moments]
     static let moreUtilities: [JourneyToolRoute] = [.roadmap]
 
@@ -589,12 +554,10 @@ private enum JourneyToolRoute: String, Identifiable, CaseIterable {
         case .deadlines: return "journey.tool.deadlines.title".localized
         case .appointments: return "journey.tool.appointments.title".localized
         case .digest: return "journey.tool.digest.title".localized
-        case .jobs: return "journey.tool.jobs.title".localized
+        case .careerHub: return "journey.tool.jobs.title".localized
         case .cv: return "journey.tool.cv.title".localized
         case .templates: return "journey.tool.templates.title".localized
-        case .calculator: return "journey.tool.calculator.title".localized
         case .cityHub: return "journey.tool.city_hub.title".localized
-        case .passport: return "journey.tool.passport.title".localized
         case .experts: return "journey.tool.experts.title".localized
         case .moments: return "journey.tool.moments.title".localized
         case .language: return "journey.tool.language.title".localized
@@ -611,12 +574,10 @@ private enum JourneyToolRoute: String, Identifiable, CaseIterable {
         case .deadlines: return "journey.tool.deadlines.subtitle".localized
         case .appointments: return "journey.tool.appointments.subtitle".localized
         case .digest: return "journey.tool.digest.subtitle".localized
-        case .jobs: return "journey.tool.jobs.subtitle".localized
+        case .careerHub: return "journey.tool.jobs.subtitle".localized
         case .cv: return "journey.tool.cv.subtitle".localized
         case .templates: return "journey.tool.templates.subtitle".localized
-        case .calculator: return "journey.tool.calculator.subtitle".localized
         case .cityHub: return "journey.tool.city_hub.subtitle".localized
-        case .passport: return "journey.tool.passport.subtitle".localized
         case .experts: return "journey.tool.experts.subtitle".localized
         case .moments: return "journey.tool.moments.subtitle".localized
         case .language: return "journey.tool.language.subtitle".localized
@@ -633,12 +594,10 @@ private enum JourneyToolRoute: String, Identifiable, CaseIterable {
         case .deadlines: return "calendar.badge.exclamationmark"
         case .appointments: return "calendar.badge.plus"
         case .digest: return "newspaper.fill"
-        case .jobs: return "briefcase.fill"
+        case .careerHub: return "briefcase.fill"
         case .cv: return "person.text.rectangle.fill"
         case .templates: return "doc.on.doc.fill"
-        case .calculator: return "function"
         case .cityHub: return "building.2.fill"
-        case .passport: return "seal.fill"
         case .experts: return "person.2.fill"
         case .moments: return "calendar.badge.clock"
         case .language: return "character.book.closed.fill"
@@ -655,11 +614,10 @@ private enum JourneyToolRoute: String, Identifiable, CaseIterable {
         case .deadlines: return "journey-tool-deadlines"
         case .appointments: return "cityhub-zurich-fraumuenster"
         case .digest: return "cityhub-zurich-lake"
-        case .jobs: return "journey-tool-jobs"
+        case .careerHub: return "journey-tool-jobs"
         case .cv: return "journey-tool-cv"
-        case .templates, .calculator: return "cityhub-zurich-landesmuseum"
+        case .templates: return "cityhub-zurich-landesmuseum"
         case .cityHub: return "cityhub-zurich-lake"
-        case .passport: return "swiss-moment-zurich"
         case .experts: return "journey-market-consultant"
         case .moments: return "swiss-moment-luzern"
         case .language: return "swiss-moment-grindelwald"
@@ -862,23 +820,32 @@ private struct JourneyEditorialBento: View {
 
     var body: some View {
         VStack(spacing: 10) {
+            JourneyEditorialToolCard(route: .careerHub, height: 214, prominent: true, horizontal: true) {
+                action(.careerHub)
+            }
+
             HStack(alignment: .top, spacing: 10) {
-                JourneyEditorialToolCard(route: .documents, height: 250, prominent: true) {
-                    action(.documents)
+                JourneyEditorialToolCard(route: .discoverSwitzerland, height: 204, prominent: true) {
+                    action(.discoverSwitzerland)
                 }
 
                 VStack(spacing: 10) {
-                    JourneyEditorialToolCard(route: .templates, height: 120) {
-                        action(.templates)
+                    JourneyEditorialToolCard(route: .myPlan, height: 97) {
+                        action(.myPlan)
                     }
-                    JourneyEditorialToolCard(route: .ask, height: 120) {
+                    JourneyEditorialToolCard(route: .ask, height: 97) {
                         action(.ask)
                     }
                 }
             }
 
-            JourneyEditorialToolCard(route: .language, height: 118, horizontal: true) {
-                action(.language)
+            HStack(spacing: 10) {
+                JourneyEditorialToolCard(route: .documents, height: 126) {
+                    action(.documents)
+                }
+                JourneyEditorialToolCard(route: .language, height: 126) {
+                    action(.language)
+                }
             }
         }
     }

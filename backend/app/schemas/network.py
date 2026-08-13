@@ -82,6 +82,8 @@ class ProfessionalProfileResponse(BaseModel):
     is_verified: bool
     is_featured: bool
     open_to_connections: bool
+    moderation_status: str
+    moderation_reason: str | None = None
     connection_state: str = "none"
     connection_id: str | None = None
     conversation_id: str | None = None

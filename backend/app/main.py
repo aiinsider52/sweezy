@@ -56,6 +56,7 @@ from .routers.discovery import admin_router as discovery_admin_router
 from .routers.incidents import router as incidents_router
 from .routers.network import router as network_router
 from .routers.social import router as social_router
+from .routers.moderation import admin_router as moderation_admin_router, router as moderation_router
 
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
@@ -455,6 +456,8 @@ app.include_router(discovery_router, prefix=f"{API_PREFIX}/discovery", tags=["di
 app.include_router(discovery_admin_router, prefix=f"{API_PREFIX}/admin", tags=["admin", "discovery"])
 app.include_router(network_router, prefix=f"{API_PREFIX}/network", tags=["network"])
 app.include_router(social_router, prefix=f"{API_PREFIX}/friends", tags=["friends"])
+app.include_router(moderation_admin_router, prefix=f"{API_PREFIX}/admin", tags=["admin", "reports-safety"])
+app.include_router(moderation_router, prefix=f"{API_PREFIX}", tags=["moderation"])
 app.include_router(media_public_router)
 
 # Public pages (App Store / legal)

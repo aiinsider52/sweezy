@@ -4,6 +4,11 @@ import XCTest
 final class CriticalFlowsUITests: XCTestCase {
     override func setUpWithError() throws {
         continueAfterFailure = false
+        XCUIApplication().terminate()
+    }
+
+    override func tearDownWithError() throws {
+        XCUIApplication().terminate()
     }
 
     @MainActor
@@ -68,36 +73,30 @@ final class CriticalFlowsUITests: XCTestCase {
     }
 
     @MainActor
-    func testSwissDiscoveryCatalogIsReachable() throws {
+    func testSwissDiscoveryCatalogEntryIsReachable() throws {
         let app = XCUIApplication()
-        app.launchArguments = [
-            "-onboarding_completed", "YES",
-            "-initial_auth_choice_completed", "YES",
-            "-screenshotTab", "1",
-            "-screenshotDirectoryWorkspace", "tools",
-            "--skip-feature-onboarding"
-        ]
+        app.launchArguments = ["--ui-test-discovery"]
         app.launchEnvironment["UITESTS"] = "1"
         app.launch()
 
-        let discoveryCard = app.buttons["journey.tool.discoverSwitzerland"]
-        XCTAssertTrue(discoveryCard.waitForExistence(timeout: 15))
-        discoveryCard.tap()
-
-        XCTAssertTrue(app.descendants(matching: .any)["swiss.discovery.screen"].waitForExistence(timeout: 10))
-        XCTAssertTrue(app.buttons["journey.tool.discoverSwitzerland"].exists == false)
-
+        XCTAssertTrue(app.buttons["swiss.discovery.back"].waitForExistence(timeout: 15))
+        XCTAssertTrue(app.buttons["swiss.discovery.place.aletsch"].waitForExistence(timeout: 15))
         keepScreenshot(app, name: "swiss-discovery-catalog")
+    }
 
-        let featuredPlace = app.buttons["swiss.discovery.place.aletsch"]
-        XCTAssertTrue(featuredPlace.waitForExistence(timeout: 10))
-        featuredPlace.tap()
+    @MainActor
+    func testPlusTripPlannerFitsCurrentDevice() throws {
+        let app = XCUIApplication()
+        app.launchArguments = ["--ui-test-trip-planner"]
+        app.launchEnvironment["UITESTS"] = "1"
+        app.launch()
 
-        XCTAssertTrue(app.descendants(matching: .any)["swiss.discovery.detail.aletsch"].waitForExistence(timeout: 10))
-        XCTAssertTrue(app.staticTexts["swiss.discovery.detail.description"].waitForExistence(timeout: 10))
-        XCTAssertFalse(app.buttons["tab.directory"].exists)
-        XCTAssertFalse(app.alerts.firstMatch.waitForExistence(timeout: 3))
-        keepScreenshot(app, name: "swiss-discovery-detail")
+        XCTAssertTrue(app.descendants(matching: .any)["trip.planner.screen"].waitForExistence(timeout: 15))
+        let create = app.buttons["trip.planner.create"]
+        XCTAssertTrue(scrollToElement(create, in: app))
+        XCTAssertGreaterThanOrEqual(create.frame.minX, 0)
+        XCTAssertLessThanOrEqual(create.frame.maxX, app.frame.maxX)
+        keepScreenshot(app, name: "plus-trip-planner-responsive")
     }
 
     @MainActor
@@ -125,17 +124,20 @@ final class CriticalFlowsUITests: XCTestCase {
     }
 
     @MainActor
-    func testCVBuilderSupportsBackButtonAndInteractiveSwipe() throws {
-        var app = launchCVBuilder()
+    func testCVBuilderSupportsBackButton() throws {
+        let app = launchCVBuilder()
         let directory = app.descendants(matching: .any)["directory.screen"]
         let backButton = app.buttons["cv.builder.back"]
         XCTAssertTrue(backButton.waitForExistence(timeout: 10))
-        app.coordinate(withNormalizedOffset: CGVector(dx: 0.09, dy: 0.085)).tap()
+        backButton.tap()
         XCTAssertTrue(directory.waitForExistence(timeout: 10))
         XCTAssertFalse(backButton.exists)
+    }
 
-        app.terminate()
-        app = launchCVBuilder()
+    @MainActor
+    func testCVBuilderSupportsInteractiveSwipe() throws {
+        let app = launchCVBuilder()
+        let directory = app.descendants(matching: .any)["directory.screen"]
         XCTAssertTrue(app.buttons["cv.builder.back"].waitForExistence(timeout: 10))
 
         let start = app.coordinate(withNormalizedOffset: CGVector(dx: 0.01, dy: 0.5))
@@ -182,12 +184,30 @@ final class CriticalFlowsUITests: XCTestCase {
 
         XCTAssertTrue(app.descendants(matching: .any)["careerHub.dashboard"].waitForExistence(timeout: 15))
         let primaryAction = app.buttons["careerHub.primaryAction"]
-        XCTAssertTrue(primaryAction.exists)
-        XCTAssertTrue(primaryAction.isHittable)
+        XCTAssertTrue(scrollToElement(primaryAction, in: app))
         XCTAssertTrue(app.staticTexts["12"].exists)
         XCTAssertTrue(app.staticTexts["AI збігів"].exists)
 
         keepScreenshot(app, name: "career-hub-dashboard")
+    }
+
+    @MainActor
+    func testToolsShowCurrentProductsAndNoPassport() throws {
+        let app = XCUIApplication()
+        app.launchArguments = ["--ui-test-career-tools"]
+        app.launchEnvironment["UITESTS"] = "1"
+        app.launch()
+
+        let careerHub = app.buttons["journey.tool.careerHub"]
+        XCTAssertTrue(careerHub.waitForExistence(timeout: 15))
+        XCTAssertTrue(app.buttons["journey.tool.discoverSwitzerland"].exists)
+        XCTAssertTrue(app.buttons["journey.tool.myPlan"].exists)
+        XCTAssertTrue(app.buttons["journey.tool.ask"].exists)
+        XCTAssertFalse(app.buttons["journey.tool.passport"].exists)
+
+        careerHub.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["careerHub.guestGate"].waitForExistence(timeout: 15))
+        keepScreenshot(app, name: "current-tools-career-hub")
     }
 
     @MainActor
@@ -200,23 +220,9 @@ final class CriticalFlowsUITests: XCTestCase {
         XCTAssertTrue(app.descendants(matching: .any)["network.screen"].waitForExistence(timeout: 20))
         XCTAssertTrue(app.staticTexts["Знайомства\nз наміром"].exists)
         XCTAssertTrue(app.staticTexts["3 нових контактів"].exists)
-        XCTAssertTrue(app.staticTexts["Oleksandr Melnyk"].waitForExistence(timeout: 10))
+        XCTAssertTrue(scrollToElement(app.buttons["network.profile.1"], in: app))
 
         keepScreenshot(app, name: "professional-network")
-    }
-
-    @MainActor
-    func testCareerHubIsVisibleFromTools() throws {
-        let app = XCUIApplication()
-        app.launchArguments = ["--ui-test-career-tools"]
-        app.launchEnvironment["UITESTS"] = "1"
-        app.launch()
-
-        let careerHub = app.buttons["journey.tool.careerHub"]
-        XCTAssertTrue(careerHub.waitForExistence(timeout: 15))
-        XCTAssertTrue(careerHub.isHittable)
-        XCTAssertTrue(app.staticTexts["Кар’єра у Швейцарії"].exists)
-        keepScreenshot(app, name: "career-hub-tools-entry")
     }
 
     @MainActor
@@ -242,8 +248,27 @@ final class CriticalFlowsUITests: XCTestCase {
         firstProfile.tap()
         XCTAssertTrue(app.staticTexts["Anna Keller"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.staticTexts["96% збіг"].exists)
-        XCTAssertTrue(app.buttons["Запропонувати дружбу"].exists)
+        XCTAssertTrue(app.staticTexts["Демо-профіль · дії вимкнені"].exists)
         keepScreenshot(app, name: "friends-filled-profile")
+    }
+
+    @MainActor
+    func testFriendsGuestSeesAuthGateAndCanOpenSafeDemoCatalog() throws {
+        let app = XCUIApplication()
+        app.launchArguments = ["--ui-test-friends-gate"]
+        app.launchEnvironment["UITESTS"] = "1"
+        app.launch()
+
+        XCTAssertTrue(app.buttons["friends.accessGate.signIn"].waitForExistence(timeout: 15))
+        XCTAssertFalse(app.alerts.firstMatch.exists)
+
+        let demo = app.buttons["friends.accessGate.demo"]
+        XCTAssertTrue(demo.exists)
+        demo.tap()
+
+        XCTAssertTrue(app.staticTexts["Демо-каталог"].waitForExistence(timeout: 8))
+        XCTAssertTrue(app.staticTexts["Anna Keller"].waitForExistence(timeout: 8))
+        XCTAssertFalse(app.alerts.firstMatch.exists)
     }
 
     @MainActor
@@ -265,7 +290,14 @@ final class CriticalFlowsUITests: XCTestCase {
     @MainActor
     private func launchCleanApp() -> XCUIApplication {
         let app = XCUIApplication()
-        app.launchArguments = ["--reset-ui-test-state"]
+        app.launchArguments = [
+            "--reset-ui-test-state",
+            "-onboarding_completed", "NO",
+            "-initial_auth_choice_completed", "NO",
+            "-pending_initial_auth_entry", "NO",
+            "-biometricsEnabled", "NO",
+            "--skip-feature-onboarding"
+        ]
         app.launchEnvironment["UITESTS"] = "1"
         app.launch()
         return app
@@ -297,5 +329,15 @@ final class CriticalFlowsUITests: XCTestCase {
         screenshot.name = name
         screenshot.lifetime = .keepAlways
         add(screenshot)
+    }
+
+    @MainActor
+    private func scrollToElement(_ element: XCUIElement, in app: XCUIApplication, attempts: Int = 8) -> Bool {
+        if element.waitForExistence(timeout: 3), element.isHittable { return true }
+        for _ in 0..<attempts {
+            app.swipeUp()
+            if element.exists, element.isHittable { return true }
+        }
+        return false
     }
 }

@@ -9,6 +9,7 @@ from sqlalchemy.exc import IntegrityError
 from ..core.rate_limit import limiter
 from ..dependencies import CurrentAdmin, CurrentUser, DBSession
 from ..models.discovery_review import DiscoveryReview, DiscoveryReviewReport
+from ..services.moderation import ensure_case
 from ..schemas.discovery import (
     DiscoveryRatingSummary,
     DiscoveryReportResponse,
@@ -173,7 +174,9 @@ def report_review(
     existing = db.query(DiscoveryReviewReport).filter_by(review_id=review_id, reporter_id=user.id).first()
     if existing:
         return DiscoveryReportResponse(status="already_reported")
-    db.add(DiscoveryReviewReport(review_id=review_id, reporter_id=user.id, reason=payload.reason))
+    report = DiscoveryReviewReport(review_id=review_id, reporter_id=user.id, reason=payload.reason)
+    db.add(report); db.flush()
+    ensure_case(db, source_type="discovery_review", source_id=review_id, subject_user_id=review.user_id, reporter_id=user.id, reason=payload.reason, context={"legacy_report_id": report.id, "place_id": review.place_id, "comment": review.comment[:500]})
     review.report_count += 1
     if review.report_count >= 3:
         review.status = "hidden"

@@ -223,6 +223,9 @@ def apply_verified_transaction(
     row.environment = decoded.environment.value if decoded.environment else decoded.rawEnvironment
     row.plan = "monthly" if decoded.productId.endswith("monthly") else "yearly"
     row.status = "trial" if active and is_trial else "active" if active else "revoked" if revoked_at else "expired"
+    original_purchase_at = _utc_from_milliseconds(getattr(decoded, "originalPurchaseDate", None))
+    purchase_at = _utc_from_milliseconds(getattr(decoded, "purchaseDate", None))
+    row.purchased_at = original_purchase_at or row.purchased_at or purchase_at
     row.current_period_end = effective_expiry
     row.revocation_date = revoked_at
     row.last_verified_at = now

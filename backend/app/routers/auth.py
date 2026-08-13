@@ -60,6 +60,13 @@ def _send_verification_email(email: str, code: str) -> None:
 
 
 def _issue_token_pair(user: User) -> TokenPair:
+    if user.safety_status == "banned":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail={"code": "ACCOUNT_BANNED", "message": "Account blocked"})
+    suspended_until = user.safety_suspended_until
+    if suspended_until is not None and suspended_until.tzinfo is None:
+        suspended_until = suspended_until.replace(tzinfo=timezone.utc)
+    if user.safety_status == "suspended" and suspended_until and suspended_until > datetime.now(timezone.utc):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail={"code": "ACCOUNT_SUSPENDED", "until": suspended_until.isoformat()})
     settings = get_settings()
     access_minutes = settings.ACCESS_TOKEN_EXPIRE_MINUTES
     access = create_access_token(

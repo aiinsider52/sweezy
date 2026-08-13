@@ -69,6 +69,8 @@ class SocialProfileResponse(BaseModel):
     is_visible: bool
     open_to_friends: bool
     is_verified: bool
+    moderation_status: str
+    moderation_reason: str | None = None
     match_score: int = 0
     match_reasons: list[str] = []
     distance_km: int | None = None
@@ -169,3 +171,13 @@ class SocialReportCreate(BaseModel):
 class SocialActionResponse(BaseModel):
     ok: bool = True
     message: str
+
+
+class SocialProfileVisitCreate(BaseModel):
+    invisible: bool = False
+
+
+class SocialProfileVisitorResponse(BaseModel):
+    profile: SocialProfileResponse
+    visit_count: int
+    last_visited_at: datetime

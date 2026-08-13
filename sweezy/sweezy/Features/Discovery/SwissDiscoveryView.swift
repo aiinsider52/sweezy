@@ -21,14 +21,19 @@ struct SwissDiscoveryView: View {
     @State private var selectedPlace: SwissDiscoveryPlace?
     @State private var savedPlaceIDs = Set<String>()
     @State private var showsSavedOnly = false
+    @State private var showsHiddenOnly = false
     @State private var presentation: SwissDiscoveryPresentation = .list
     @State private var ratingSummaries: [String: APIClient.DiscoveryRatingSummary] = [:]
+    @State private var showPlanner = false
+    @State private var showPaywall = false
+    @StateObject private var subscription = SubscriptionManager.shared
 
     private var filteredPlaces: [SwissDiscoveryPlace] {
         SwissDiscoveryCatalog.places.filter { place in
             place.matches(query: query, filter: selectedFilter)
                 && place.matches(setting: selectedSetting)
                 && (!showsSavedOnly || savedPlaceIDs.contains(place.id))
+                && (!showsHiddenOnly || Self.hiddenPlaceIDs.contains(place.id))
         }
     }
 
@@ -44,6 +49,8 @@ struct SwissDiscoveryView: View {
                 LazyVStack(alignment: .leading, spacing: 18) {
                     header
                     searchAndFilters
+
+                    plusTravelCard
 
                     if presentation == .map, !filteredPlaces.isEmpty {
                         SwissDiscoveryMapView(places: filteredPlaces, ratings: ratingSummaries) { selectedPlace = $0 }
@@ -106,6 +113,8 @@ struct SwissDiscoveryView: View {
                 toggleSaved: { toggleSaved(place) }
             )
         }
+        .sheet(isPresented: $showPlanner) { SwissTripPlannerView() }
+        .fullScreenCover(isPresented: $showPaywall) { SubscriptionView(source: .profile) }
         .onAppear {
             savedPlaceIDs = SwissDiscoveryProgressStore.savedPlaceIDs()
             appContainer.telemetry.retention(
@@ -133,6 +142,7 @@ struct SwissDiscoveryView: View {
                         .clipShape(Circle())
                         .overlay(Circle().stroke(Color.white.opacity(0.28), lineWidth: 1))
                 }
+                .accessibilityIdentifier("swiss.discovery.back")
                 .accessibilityLabel("common.back".localized)
 
                 Spacer()
@@ -240,6 +250,41 @@ struct SwissDiscoveryView: View {
         }
     }
 
+    private var plusTravelCard: some View {
+        VStack(spacing: 10) {
+            Button {
+                if subscription.isPremium { showPlanner = true } else { showPaywall = true }
+            } label: {
+                HStack(spacing: 14) {
+                Image(systemName: "sparkles").font(.title2.bold()).foregroundStyle(.black).frame(width: 48, height: 48).background(JourneyVisual.lime).clipShape(RoundedRectangle(cornerRadius: 15))
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack { Text("AI-план поїздки").font(.headline); Text("PLUS").font(.caption2.bold()).foregroundStyle(.black).padding(.horizontal, 8).padding(.vertical, 4).background(JourneyVisual.lime).clipShape(Capsule()) }
+                    Text("Бюджет · транспорт · сім’я · погода · спільний план").font(.caption).foregroundStyle(.white.opacity(0.58)).multilineTextAlignment(.leading)
+                }
+                Spacer(minLength: 4)
+                Image(systemName: "arrow.right").font(.headline.bold())
+                }.foregroundStyle(.white).padding(16).background(Color.black.opacity(0.5)).clipShape(RoundedRectangle(cornerRadius: 22)).overlay(RoundedRectangle(cornerRadius: 22).stroke(JourneyVisual.lime.opacity(0.35)))
+            }.buttonStyle(.plain)
+
+            Button {
+                guard subscription.isPremium else { showPaywall = true; return }
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    showsHiddenOnly.toggle()
+                    showsSavedOnly = false
+                    presentation = .list
+                }
+            } label: {
+                Label(showsHiddenOnly ? "Показати всі місця" : "Приховані місця Sweezy", systemImage: showsHiddenOnly ? "square.grid.2x2" : "eye.slash.fill")
+                    .font(.system(size: 14, weight: .bold, design: .rounded))
+                    .foregroundStyle(showsHiddenOnly ? .black : JourneyVisual.lime)
+                    .frame(maxWidth: .infinity, minHeight: 46)
+                    .background(showsHiddenOnly ? JourneyVisual.lime : Color.black.opacity(0.5))
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                    .overlay(RoundedRectangle(cornerRadius: 16).stroke(JourneyVisual.lime.opacity(0.45)))
+            }.buttonStyle(.plain)
+        }
+    }
+
     private var settingCollections: some View {
         VStack(alignment: .leading, spacing: 11) {
             Text("swiss.discovery.collections.title".localized)
@@ -304,6 +349,7 @@ struct SwissDiscoveryView: View {
                     selectedFilter = .all
                     selectedSetting = .all
                     showsSavedOnly = false
+                    showsHiddenOnly = false
                 }
                 .font(.system(size: 14, weight: .bold))
                 .foregroundStyle(.black)
@@ -334,10 +380,16 @@ struct SwissDiscoveryView: View {
         if savedPlaceIDs.contains(place.id) {
             savedPlaceIDs.remove(place.id)
         } else {
+            if !subscription.isPremium && savedPlaceIDs.count >= 5 {
+                showPaywall = true
+                return
+            }
             savedPlaceIDs.insert(place.id)
         }
         SwissDiscoveryProgressStore.save(savedPlaceIDs)
     }
+
+    private static let hiddenPlaceIDs: Set<String> = ["creux-du-van", "ruinaulta", "monte-generoso", "st-gallen-abbey"]
 }
 
 private struct SwissDiscoveryMapView: View {
@@ -461,6 +513,7 @@ private struct SwissDiscoveryFeaturedCard: View {
             SwissDiscoverySaveButton(isSaved: isSaved, action: toggleSaved)
                 .padding(14)
         }
+        .accessibilityElement(children: .contain)
     }
 
     private var featuredVisual: some View {
@@ -681,6 +734,11 @@ struct SwissDiscoveryDetailView: View {
     @State private var pendingReviewAfterAuth = false
     @State private var reviewNotice: String?
     @State private var reviewLoadError: String?
+    @State private var offlineNotice: String?
+    @State private var downloadingOffline = false
+    @StateObject private var offlineCache = OfflineMapCacheService()
+    @StateObject private var subscription = SubscriptionManager.shared
+    @State private var showPaywall = false
 
     private var isVisited: Bool { visitedPlaceIDs.contains(place.id) }
 
@@ -738,6 +796,8 @@ struct SwissDiscoveryDetailView: View {
                 }
             )
         }
+        .fullScreenCover(isPresented: $showPaywall) { SubscriptionView(source: .profile) }
+        .alert("Offline route", isPresented: Binding(get: { offlineNotice != nil }, set: { if !$0 { offlineNotice = nil } })) { Button("OK") {} } message: { Text(offlineNotice ?? "") }
         .accessibilityIdentifier("swiss.discovery.detail.\(place.id)")
     }
 
@@ -748,6 +808,7 @@ struct SwissDiscoveryDetailView: View {
                     .frame(width: 46, height: 46)
             }
             .accessibilityLabel("common.back".localized)
+            .accessibilityIdentifier("swiss.discovery.detail.back")
 
             Spacer()
 
@@ -915,6 +976,21 @@ struct SwissDiscoveryDetailView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
             }
             .buttonStyle(.plain)
+
+            Button {
+                guard subscription.isPremium else { showPaywall = true; return }
+                Task {
+                    downloadingOffline = true
+                    defer { downloadingOffline = false }
+                    do {
+                        try await offlineCache.saveSnapshot(for: place.id, center: place.coordinate, span: MKCoordinateSpan(latitudeDelta: 0.22, longitudeDelta: 0.22))
+                        offlineNotice = "Маршрут і карта-знімок збережені на цьому пристрої."
+                    } catch { offlineNotice = "Не вдалося зберегти карту. Перевір з’єднання й спробуй ще раз." }
+                }
+            } label: {
+                HStack { Image(systemName: offlineCache.hasSnapshot(for: place.id) ? "checkmark.circle.fill" : "arrow.down.circle.fill"); Text(offlineCache.hasSnapshot(for: place.id) ? "Доступно офлайн" : "Зберегти офлайн"); Spacer(); Text("PLUS").font(.caption.bold()) }
+                    .font(.headline).foregroundStyle(JourneyVisual.lime).padding(.horizontal, 18).frame(height: 54).background(JourneyVisual.lime.opacity(0.09)).clipShape(RoundedRectangle(cornerRadius: 18)).overlay(RoundedRectangle(cornerRadius: 18).stroke(JourneyVisual.lime.opacity(0.25)))
+            }.buttonStyle(.plain).disabled(downloadingOffline)
 
             Link(destination: place.officialURL) {
                 JourneyGlassPanel(cornerRadius: 23) {

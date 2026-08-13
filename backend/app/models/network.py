@@ -30,6 +30,10 @@ class ProfessionalProfile(Base):
     is_verified: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False, index=True)
     is_featured: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False, index=True)
     open_to_connections: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False, index=True)
+    moderation_status: Mapped[str] = mapped_column(String(20), default="pending", nullable=False, index=True)
+    moderation_reason: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    moderated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    moderated_by: Mapped[str | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False

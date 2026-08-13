@@ -180,6 +180,18 @@
             ],
             "title": "Expert Specialty"
           },
+          "featured_until": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Featured Until"
+          },
           "id": {
             "title": "Id",
             "type": "string"
@@ -344,6 +356,89 @@
         "title": "AdminServiceListingDetail",
         "type": "object"
       },
+      "AdminSubscriptionUpdate": {
+        "properties": {
+          "duration_days": {
+            "anyOf": [
+              {
+                "maximum": 3660.0,
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Days"
+          },
+          "expire_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expire At"
+          },
+          "plan": {
+            "anyOf": [
+              {
+                "pattern": "^(monthly|yearly)$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plan"
+          },
+          "purchased_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Purchased At"
+          },
+          "reason": {
+            "maxLength": 500,
+            "minLength": 3,
+            "title": "Reason",
+            "type": "string"
+          },
+          "status": {
+            "pattern": "^(free|trial|premium)$",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "reason"
+        ],
+        "title": "AdminSubscriptionUpdate",
+        "type": "object"
+      },
+      "AppleNotificationIn": {
+        "properties": {
+          "signedPayload": {
+            "title": "Signedpayload",
+            "type": "string"
+          }
+        },
+        "required": [
+          "signedPayload"
+        ],
+        "title": "AppleNotificationIn",
+        "type": "object"
+      },
       "AppleOAuthRequest": {
         "properties": {
           "authorization_code": {
@@ -390,6 +485,54 @@
           "id_token"
         ],
         "title": "AppleOAuthRequest",
+        "type": "object"
+      },
+      "AppleSyncOut": {
+        "properties": {
+          "environment": {
+            "title": "Environment",
+            "type": "string"
+          },
+          "expire_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expire At"
+          },
+          "product_id": {
+            "title": "Product Id",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "product_id",
+          "environment"
+        ],
+        "title": "AppleSyncOut",
+        "type": "object"
+      },
+      "AppleTransactionIn": {
+        "properties": {
+          "signed_transaction": {
+            "title": "Signed Transaction",
+            "type": "string"
+          }
+        },
+        "required": [
+          "signed_transaction"
+        ],
+        "title": "AppleTransactionIn",
         "type": "object"
       },
       "AppointmentCreate": {
@@ -758,6 +901,51 @@
           "generated_by_ai"
         ],
         "title": "AskSweezyResponse",
+        "type": "object"
+      },
+      "AttendanceResponse": {
+        "properties": {
+          "event_id": {
+            "title": "Event Id",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "visible_to_attendees": {
+            "title": "Visible To Attendees",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "event_id",
+          "status",
+          "visible_to_attendees"
+        ],
+        "title": "AttendanceResponse",
+        "type": "object"
+      },
+      "AttendanceUpsert": {
+        "properties": {
+          "status": {
+            "enum": [
+              "interested",
+              "going"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "visible_to_attendees": {
+            "default": true,
+            "title": "Visible To Attendees",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "title": "AttendanceUpsert",
         "type": "object"
       },
       "AudienceFilters": {
@@ -1240,6 +1428,40 @@
           "generated_by_ai"
         ],
         "title": "CVTranslationResponse",
+        "type": "object"
+      },
+      "CaseUpdate": {
+        "properties": {
+          "priority": {
+            "anyOf": [
+              {
+                "enum": [
+                  "low",
+                  "normal",
+                  "high",
+                  "critical"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Priority"
+          },
+          "status": {
+            "enum": [
+              "open",
+              "reviewing"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "title": "CaseUpdate",
         "type": "object"
       },
       "ChatMessageCreate": {
@@ -1729,6 +1951,41 @@
         "title": "CheckoutOut",
         "type": "object"
       },
+      "ConnectionCreate": {
+        "properties": {
+          "message": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          }
+        },
+        "title": "ConnectionCreate",
+        "type": "object"
+      },
+      "ConnectionDecision": {
+        "properties": {
+          "status": {
+            "enum": [
+              "accepted",
+              "declined"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "title": "ConnectionDecision",
+        "type": "object"
+      },
       "ContactType": {
         "enum": [
           "telegram",
@@ -1894,6 +2151,17 @@
             "title": "Muted",
             "type": "boolean"
           },
+          "network_profile_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Network Profile Id"
+          },
           "other_user_id": {
             "title": "Other User Id",
             "type": "string"
@@ -1901,6 +2169,17 @@
           "other_user_name": {
             "title": "Other User Name",
             "type": "string"
+          },
+          "social_profile_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Social Profile Id"
           },
           "status": {
             "title": "Status",
@@ -2718,6 +2997,10 @@
             "title": "Ai Access",
             "type": "boolean"
           },
+          "cv_free_uses_remaining": {
+            "title": "Cv Free Uses Remaining",
+            "type": "integer"
+          },
           "expire_at": {
             "anyOf": [
               {
@@ -2764,7 +3047,8 @@
           "ai_access",
           "favorites_limit",
           "guides_full_access",
-          "pdf_download"
+          "pdf_download",
+          "cv_free_uses_remaining"
         ],
         "title": "EntitlementsOut",
         "type": "object"
@@ -2854,6 +3138,11 @@
           "is_free": {
             "default": true,
             "title": "Is Free",
+            "type": "boolean"
+          },
+          "is_private": {
+            "default": false,
+            "title": "Is Private",
             "type": "boolean"
           },
           "organizer_name": {
@@ -2983,6 +3272,11 @@
           },
           "is_free": {
             "title": "Is Free",
+            "type": "boolean"
+          },
+          "is_private": {
+            "default": false,
+            "title": "Is Private",
             "type": "boolean"
           },
           "is_verified": {
@@ -3192,6 +3486,11 @@
             "title": "Is Free",
             "type": "boolean"
           },
+          "is_private": {
+            "default": false,
+            "title": "Is Private",
+            "type": "boolean"
+          },
           "is_verified": {
             "default": false,
             "title": "Is Verified",
@@ -3342,6 +3641,17 @@
               }
             ],
             "title": "Is Free"
+          },
+          "is_private": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Private"
           },
           "price_info": {
             "anyOf": [
@@ -3590,6 +3900,140 @@
         ],
         "title": "ExpertSpecialty",
         "type": "string"
+      },
+      "FriendConnectionResponse": {
+        "properties": {
+          "context_event_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Context Event Id"
+          },
+          "conversation_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conversation Id"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "direction": {
+            "enum": [
+              "incoming",
+              "outgoing"
+            ],
+            "title": "Direction",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          },
+          "other_profile": {
+            "$ref": "#/components/schemas/SocialProfileResponse"
+          },
+          "shared_interests": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Shared Interests",
+            "type": "array"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "direction",
+          "status",
+          "message",
+          "context_event_id",
+          "conversation_id",
+          "shared_interests",
+          "other_profile",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "FriendConnectionResponse",
+        "type": "object"
+      },
+      "FriendDecision": {
+        "properties": {
+          "status": {
+            "enum": [
+              "accepted",
+              "declined"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "title": "FriendDecision",
+        "type": "object"
+      },
+      "FriendRequestCreate": {
+        "properties": {
+          "event_id": {
+            "anyOf": [
+              {
+                "maxLength": 36,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Event Id"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          }
+        },
+        "title": "FriendRequestCreate",
+        "type": "object"
       },
       "GoogleOAuthRequest": {
         "properties": {
@@ -5342,6 +5786,97 @@
         "title": "ListingType",
         "type": "string"
       },
+      "MarketplaceProClient": {
+        "properties": {
+          "conversation_id": {
+            "title": "Conversation Id",
+            "type": "string"
+          },
+          "display_name": {
+            "title": "Display Name",
+            "type": "string"
+          },
+          "last_message_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Message At"
+          },
+          "last_message_preview": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Message Preview"
+          },
+          "listing_title": {
+            "title": "Listing Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "conversation_id",
+          "display_name",
+          "listing_title"
+        ],
+        "title": "MarketplaceProClient",
+        "type": "object"
+      },
+      "MarketplaceProDashboard": {
+        "properties": {
+          "active_listings": {
+            "title": "Active Listings",
+            "type": "integer"
+          },
+          "clients": {
+            "items": {
+              "$ref": "#/components/schemas/MarketplaceProClient"
+            },
+            "title": "Clients",
+            "type": "array"
+          },
+          "inquiries": {
+            "title": "Inquiries",
+            "type": "integer"
+          },
+          "pro_badge": {
+            "default": true,
+            "title": "Pro Badge",
+            "type": "boolean"
+          },
+          "publication_limit": {
+            "title": "Publication Limit",
+            "type": "integer"
+          },
+          "total_listings": {
+            "title": "Total Listings",
+            "type": "integer"
+          },
+          "total_views": {
+            "title": "Total Views",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "total_listings",
+          "active_listings",
+          "total_views",
+          "inquiries",
+          "publication_limit"
+        ],
+        "title": "MarketplaceProDashboard",
+        "type": "object"
+      },
       "MarketplaceReportCreate": {
         "properties": {
           "details": {
@@ -5414,6 +5949,48 @@
         "title": "MessagePage",
         "type": "object"
       },
+      "ModerationDecision": {
+        "properties": {
+          "action": {
+            "enum": [
+              "approve",
+              "reject",
+              "dismiss",
+              "warn",
+              "hide",
+              "suspend",
+              "ban"
+            ],
+            "title": "Action",
+            "type": "string"
+          },
+          "comment": {
+            "maxLength": 1000,
+            "minLength": 3,
+            "title": "Comment",
+            "type": "string"
+          },
+          "suspension_days": {
+            "anyOf": [
+              {
+                "maximum": 365.0,
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Suspension Days"
+          }
+        },
+        "required": [
+          "action",
+          "comment"
+        ],
+        "title": "ModerationDecision",
+        "type": "object"
+      },
       "MomentCtaKind": {
         "enum": [
           "link",
@@ -5432,6 +6009,24 @@
         ],
         "title": "MomentRecurrence",
         "type": "string"
+      },
+      "NetworkActionResponse": {
+        "properties": {
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "message"
+        ],
+        "title": "NetworkActionResponse",
+        "type": "object"
       },
       "NewsCreate": {
         "properties": {
@@ -5835,6 +6430,485 @@
           "updated_at"
         ],
         "title": "PlaceLiveStatus",
+        "type": "object"
+      },
+      "ProfessionalConnectionResponse": {
+        "properties": {
+          "conversation_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conversation Id"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "direction": {
+            "enum": [
+              "incoming",
+              "outgoing"
+            ],
+            "title": "Direction",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          },
+          "other_profile": {
+            "$ref": "#/components/schemas/ProfessionalProfileResponse"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "direction",
+          "status",
+          "message",
+          "conversation_id",
+          "other_profile",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "ProfessionalConnectionResponse",
+        "type": "object"
+      },
+      "ProfessionalProfilePage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ProfessionalProfileResponse"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "page": {
+            "title": "Page",
+            "type": "integer"
+          },
+          "pages": {
+            "title": "Pages",
+            "type": "integer"
+          },
+          "per_page": {
+            "title": "Per Page",
+            "type": "integer"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "page",
+          "per_page",
+          "pages"
+        ],
+        "title": "ProfessionalProfilePage",
+        "type": "object"
+      },
+      "ProfessionalProfileResponse": {
+        "properties": {
+          "avatar_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avatar Url"
+          },
+          "bio": {
+            "title": "Bio",
+            "type": "string"
+          },
+          "canton": {
+            "title": "Canton",
+            "type": "string"
+          },
+          "city": {
+            "title": "City",
+            "type": "string"
+          },
+          "company_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Company Name"
+          },
+          "connection_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Connection Id"
+          },
+          "connection_state": {
+            "default": "none",
+            "title": "Connection State",
+            "type": "string"
+          },
+          "conversation_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conversation Id"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "display_name": {
+            "title": "Display Name",
+            "type": "string"
+          },
+          "goals": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Goals",
+            "type": "array"
+          },
+          "headline": {
+            "title": "Headline",
+            "type": "string"
+          },
+          "industry": {
+            "title": "Industry",
+            "type": "string"
+          },
+          "is_featured": {
+            "title": "Is Featured",
+            "type": "boolean"
+          },
+          "is_verified": {
+            "title": "Is Verified",
+            "type": "boolean"
+          },
+          "is_visible": {
+            "title": "Is Visible",
+            "type": "boolean"
+          },
+          "languages": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Languages",
+            "type": "array"
+          },
+          "moderation_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Moderation Reason"
+          },
+          "moderation_status": {
+            "title": "Moderation Status",
+            "type": "string"
+          },
+          "open_to_connections": {
+            "title": "Open To Connections",
+            "type": "boolean"
+          },
+          "role": {
+            "title": "Role",
+            "type": "string"
+          },
+          "skills": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Skills",
+            "type": "array"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          },
+          "user_id": {
+            "title": "User Id",
+            "type": "string"
+          },
+          "website_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Website Url"
+          }
+        },
+        "required": [
+          "user_id",
+          "display_name",
+          "headline",
+          "company_name",
+          "role",
+          "industry",
+          "canton",
+          "city",
+          "bio",
+          "skills",
+          "languages",
+          "goals",
+          "avatar_url",
+          "website_url",
+          "is_visible",
+          "is_verified",
+          "is_featured",
+          "open_to_connections",
+          "moderation_status",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "ProfessionalProfileResponse",
+        "type": "object"
+      },
+      "ProfessionalProfileUpsert": {
+        "properties": {
+          "avatar_url": {
+            "anyOf": [
+              {
+                "maxLength": 1000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avatar Url"
+          },
+          "bio": {
+            "maxLength": 800,
+            "minLength": 30,
+            "title": "Bio",
+            "type": "string"
+          },
+          "canton": {
+            "maxLength": 10,
+            "minLength": 2,
+            "title": "Canton",
+            "type": "string"
+          },
+          "city": {
+            "maxLength": 80,
+            "minLength": 2,
+            "title": "City",
+            "type": "string"
+          },
+          "company_name": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Company Name"
+          },
+          "display_name": {
+            "maxLength": 100,
+            "minLength": 2,
+            "title": "Display Name",
+            "type": "string"
+          },
+          "goals": {
+            "items": {
+              "enum": [
+                "clients",
+                "partners",
+                "cofounder",
+                "hiring",
+                "investing",
+                "mentoring",
+                "events"
+              ],
+              "type": "string"
+            },
+            "maxItems": 5,
+            "minItems": 1,
+            "title": "Goals",
+            "type": "array"
+          },
+          "headline": {
+            "maxLength": 140,
+            "minLength": 3,
+            "title": "Headline",
+            "type": "string"
+          },
+          "industry": {
+            "maxLength": 60,
+            "minLength": 2,
+            "title": "Industry",
+            "type": "string"
+          },
+          "is_visible": {
+            "default": true,
+            "title": "Is Visible",
+            "type": "boolean"
+          },
+          "languages": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 6,
+            "minItems": 1,
+            "title": "Languages",
+            "type": "array"
+          },
+          "open_to_connections": {
+            "default": true,
+            "title": "Open To Connections",
+            "type": "boolean"
+          },
+          "role": {
+            "enum": [
+              "founder",
+              "freelancer",
+              "specialist",
+              "investor",
+              "mentor"
+            ],
+            "title": "Role",
+            "type": "string"
+          },
+          "skills": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 12,
+            "title": "Skills",
+            "type": "array"
+          },
+          "website_url": {
+            "anyOf": [
+              {
+                "maxLength": 1000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Website Url"
+          }
+        },
+        "required": [
+          "display_name",
+          "headline",
+          "role",
+          "industry",
+          "canton",
+          "city",
+          "bio"
+        ],
+        "title": "ProfessionalProfileUpsert",
+        "type": "object"
+      },
+      "ProfileModerationDecision": {
+        "properties": {
+          "reason": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "title": "ProfileModerationDecision",
+        "type": "object"
+      },
+      "ProfileReportCreate": {
+        "properties": {
+          "details": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Details"
+          },
+          "reason": {
+            "enum": [
+              "fake",
+              "spam",
+              "harassment",
+              "unsafe",
+              "other"
+            ],
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "title": "ProfileReportCreate",
         "type": "object"
       },
       "ProviderHealth": {
@@ -6338,6 +7412,18 @@
             ],
             "title": "Expert Specialty"
           },
+          "featured_until": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Featured Until"
+          },
           "id": {
             "title": "Id",
             "type": "string"
@@ -6605,6 +7691,18 @@
             ],
             "title": "Expert Specialty"
           },
+          "featured_until": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Featured Until"
+          },
           "id": {
             "title": "Id",
             "type": "string"
@@ -6861,6 +7959,24 @@
         "title": "ServiceListingUpdate",
         "type": "object"
       },
+      "SocialActionResponse": {
+        "properties": {
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "message"
+        ],
+        "title": "SocialActionResponse",
+        "type": "object"
+      },
       "SocialAuthResponse": {
         "properties": {
           "access_token": {
@@ -6979,6 +8095,166 @@
         "title": "SocialAuthResponse",
         "type": "object"
       },
+      "SocialEventInviteCreate": {
+        "properties": {
+          "friend_user_id": {
+            "maxLength": 36,
+            "minLength": 1,
+            "title": "Friend User Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "friend_user_id"
+        ],
+        "title": "SocialEventInviteCreate",
+        "type": "object"
+      },
+      "SocialEventMessageCreate": {
+        "properties": {
+          "body": {
+            "maxLength": 1000,
+            "minLength": 1,
+            "title": "Body",
+            "type": "string"
+          }
+        },
+        "required": [
+          "body"
+        ],
+        "title": "SocialEventMessageCreate",
+        "type": "object"
+      },
+      "SocialEventMessageResponse": {
+        "properties": {
+          "body": {
+            "title": "Body",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "event_id": {
+            "title": "Event Id",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "sender_id": {
+            "title": "Sender Id",
+            "type": "string"
+          },
+          "sender_name": {
+            "title": "Sender Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "event_id",
+          "sender_id",
+          "sender_name",
+          "body",
+          "created_at"
+        ],
+        "title": "SocialEventMessageResponse",
+        "type": "object"
+      },
+      "SocialEventResponse": {
+        "properties": {
+          "attendee_count": {
+            "title": "Attendee Count",
+            "type": "integer"
+          },
+          "can_invite": {
+            "default": false,
+            "title": "Can Invite",
+            "type": "boolean"
+          },
+          "canton": {
+            "title": "Canton",
+            "type": "string"
+          },
+          "category": {
+            "title": "Category",
+            "type": "string"
+          },
+          "city": {
+            "title": "City",
+            "type": "string"
+          },
+          "event_id": {
+            "title": "Event Id",
+            "type": "string"
+          },
+          "group_chat_available": {
+            "default": false,
+            "title": "Group Chat Available",
+            "type": "boolean"
+          },
+          "is_free": {
+            "title": "Is Free",
+            "type": "boolean"
+          },
+          "is_private": {
+            "default": false,
+            "title": "Is Private",
+            "type": "boolean"
+          },
+          "is_recommended": {
+            "default": false,
+            "title": "Is Recommended",
+            "type": "boolean"
+          },
+          "my_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "My Status"
+          },
+          "recommendation_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recommendation Reason"
+          },
+          "starts_at": {
+            "format": "date-time",
+            "title": "Starts At",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "event_id",
+          "title",
+          "category",
+          "canton",
+          "city",
+          "starts_at",
+          "is_free",
+          "attendee_count"
+        ],
+        "title": "SocialEventResponse",
+        "type": "object"
+      },
       "SocialLinkConfirmRequest": {
         "properties": {
           "email": {
@@ -7003,6 +8279,547 @@
           "link_token"
         ],
         "title": "SocialLinkConfirmRequest",
+        "type": "object"
+      },
+      "SocialProfilePage": {
+        "properties": {
+          "advanced_filters_available": {
+            "default": false,
+            "title": "Advanced Filters Available",
+            "type": "boolean"
+          },
+          "is_limited": {
+            "default": false,
+            "title": "Is Limited",
+            "type": "boolean"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/SocialProfileResponse"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "page": {
+            "title": "Page",
+            "type": "integer"
+          },
+          "pages": {
+            "title": "Pages",
+            "type": "integer"
+          },
+          "per_page": {
+            "title": "Per Page",
+            "type": "integer"
+          },
+          "requests_remaining": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requests Remaining"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          },
+          "visible_limit": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Visible Limit"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "page",
+          "per_page",
+          "pages"
+        ],
+        "title": "SocialProfilePage",
+        "type": "object"
+      },
+      "SocialProfileResponse": {
+        "properties": {
+          "age_band": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Age Band"
+          },
+          "arrival_year": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Arrival Year"
+          },
+          "availability": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Availability",
+            "type": "array"
+          },
+          "avatar_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avatar Url"
+          },
+          "bio": {
+            "title": "Bio",
+            "type": "string"
+          },
+          "canton": {
+            "title": "Canton",
+            "type": "string"
+          },
+          "city": {
+            "title": "City",
+            "type": "string"
+          },
+          "connection_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Connection Id"
+          },
+          "connection_state": {
+            "default": "none",
+            "title": "Connection State",
+            "type": "string"
+          },
+          "context_event_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Context Event Id"
+          },
+          "conversation_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conversation Id"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "display_name": {
+            "title": "Display Name",
+            "type": "string"
+          },
+          "distance_km": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Distance Km"
+          },
+          "interests": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Interests",
+            "type": "array"
+          },
+          "is_verified": {
+            "title": "Is Verified",
+            "type": "boolean"
+          },
+          "is_visible": {
+            "title": "Is Visible",
+            "type": "boolean"
+          },
+          "languages": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Languages",
+            "type": "array"
+          },
+          "match_reasons": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Match Reasons",
+            "type": "array"
+          },
+          "match_score": {
+            "default": 0,
+            "title": "Match Score",
+            "type": "integer"
+          },
+          "meetup_formats": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Meetup Formats",
+            "type": "array"
+          },
+          "moderation_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Moderation Reason"
+          },
+          "moderation_status": {
+            "title": "Moderation Status",
+            "type": "string"
+          },
+          "open_to_friends": {
+            "title": "Open To Friends",
+            "type": "boolean"
+          },
+          "residency_stage": {
+            "default": "established",
+            "title": "Residency Stage",
+            "type": "string"
+          },
+          "shared_interests": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Shared Interests",
+            "type": "array"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          },
+          "user_id": {
+            "title": "User Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "user_id",
+          "display_name",
+          "canton",
+          "city",
+          "bio",
+          "interests",
+          "languages",
+          "meetup_formats",
+          "avatar_url",
+          "is_visible",
+          "open_to_friends",
+          "is_verified",
+          "moderation_status",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "SocialProfileResponse",
+        "type": "object"
+      },
+      "SocialProfileUpsert": {
+        "properties": {
+          "age_band": {
+            "anyOf": [
+              {
+                "enum": [
+                  "18-24",
+                  "25-34",
+                  "35-44",
+                  "45-54",
+                  "55+"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Age Band"
+          },
+          "arrival_year": {
+            "anyOf": [
+              {
+                "maximum": 2100.0,
+                "minimum": 1950.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Arrival Year"
+          },
+          "availability": {
+            "items": {
+              "enum": [
+                "weekday_morning",
+                "weekday_evening",
+                "weekend",
+                "flexible"
+              ],
+              "type": "string"
+            },
+            "maxItems": 4,
+            "minItems": 1,
+            "title": "Availability",
+            "type": "array"
+          },
+          "avatar_url": {
+            "anyOf": [
+              {
+                "maxLength": 1000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avatar Url"
+          },
+          "bio": {
+            "maxLength": 600,
+            "minLength": 30,
+            "title": "Bio",
+            "type": "string"
+          },
+          "canton": {
+            "maxLength": 2,
+            "minLength": 2,
+            "title": "Canton",
+            "type": "string"
+          },
+          "city": {
+            "maxLength": 80,
+            "minLength": 2,
+            "title": "City",
+            "type": "string"
+          },
+          "display_name": {
+            "maxLength": 100,
+            "minLength": 2,
+            "title": "Display Name",
+            "type": "string"
+          },
+          "guidelines_accepted": {
+            "title": "Guidelines Accepted",
+            "type": "boolean"
+          },
+          "interests": {
+            "items": {
+              "enum": [
+                "hiking",
+                "sports",
+                "books",
+                "music",
+                "art",
+                "food",
+                "travel",
+                "languages",
+                "technology",
+                "business",
+                "family",
+                "photography",
+                "gaming",
+                "wellness",
+                "volunteering"
+              ],
+              "type": "string"
+            },
+            "maxItems": 10,
+            "minItems": 2,
+            "title": "Interests",
+            "type": "array"
+          },
+          "is_visible": {
+            "default": true,
+            "title": "Is Visible",
+            "type": "boolean"
+          },
+          "languages": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 6,
+            "minItems": 1,
+            "title": "Languages",
+            "type": "array"
+          },
+          "latitude": {
+            "anyOf": [
+              {
+                "maximum": 47.9,
+                "minimum": 45.7,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latitude"
+          },
+          "longitude": {
+            "anyOf": [
+              {
+                "maximum": 10.6,
+                "minimum": 5.9,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Longitude"
+          },
+          "meetup_formats": {
+            "items": {
+              "enum": [
+                "coffee",
+                "walk",
+                "activity",
+                "event",
+                "online",
+                "family"
+              ],
+              "type": "string"
+            },
+            "maxItems": 5,
+            "minItems": 1,
+            "title": "Meetup Formats",
+            "type": "array"
+          },
+          "open_to_friends": {
+            "default": true,
+            "title": "Open To Friends",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "display_name",
+          "canton",
+          "city",
+          "bio",
+          "interests",
+          "languages",
+          "meetup_formats",
+          "guidelines_accepted"
+        ],
+        "title": "SocialProfileUpsert",
+        "type": "object"
+      },
+      "SocialProfileVisitCreate": {
+        "properties": {
+          "invisible": {
+            "default": false,
+            "title": "Invisible",
+            "type": "boolean"
+          }
+        },
+        "title": "SocialProfileVisitCreate",
+        "type": "object"
+      },
+      "SocialProfileVisitorResponse": {
+        "properties": {
+          "last_visited_at": {
+            "format": "date-time",
+            "title": "Last Visited At",
+            "type": "string"
+          },
+          "profile": {
+            "$ref": "#/components/schemas/SocialProfileResponse"
+          },
+          "visit_count": {
+            "title": "Visit Count",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "profile",
+          "visit_count",
+          "last_visited_at"
+        ],
+        "title": "SocialProfileVisitorResponse",
+        "type": "object"
+      },
+      "SocialReportCreate": {
+        "properties": {
+          "details": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Details"
+          },
+          "reason": {
+            "enum": [
+              "fake",
+              "spam",
+              "harassment",
+              "unsafe",
+              "other"
+            ],
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "title": "SocialReportCreate",
         "type": "object"
       },
       "SwissMomentCreate": {
@@ -7578,6 +9395,146 @@
           "email"
         ],
         "title": "TokenPair",
+        "type": "object"
+      },
+      "TripCandidate": {
+        "properties": {
+          "id": {
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "region": {
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Region",
+            "type": "string"
+          },
+          "route": {
+            "maxLength": 1500,
+            "minLength": 1,
+            "title": "Route",
+            "type": "string"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 12,
+            "title": "Tags",
+            "type": "array"
+          },
+          "title": {
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "region",
+          "route"
+        ],
+        "title": "TripCandidate",
+        "type": "object"
+      },
+      "TripPlanRequest": {
+        "properties": {
+          "available_hours": {
+            "maximum": 24.0,
+            "minimum": 2.0,
+            "title": "Available Hours",
+            "type": "integer"
+          },
+          "budget_chf": {
+            "maximum": 3000.0,
+            "minimum": 20.0,
+            "title": "Budget Chf",
+            "type": "integer"
+          },
+          "candidates": {
+            "items": {
+              "$ref": "#/components/schemas/TripCandidate"
+            },
+            "maxItems": 30,
+            "minItems": 1,
+            "title": "Candidates",
+            "type": "array"
+          },
+          "family": {
+            "default": false,
+            "title": "Family",
+            "type": "boolean"
+          },
+          "language": {
+            "default": "uk",
+            "maxLength": 8,
+            "minLength": 2,
+            "title": "Language",
+            "type": "string"
+          },
+          "origin": {
+            "maxLength": 120,
+            "minLength": 2,
+            "title": "Origin",
+            "type": "string"
+          },
+          "transport": {
+            "pattern": "^(publicTransit|car|walking)$",
+            "title": "Transport",
+            "type": "string"
+          },
+          "weather": {
+            "pattern": "^(any|sun|rain|snow)$",
+            "title": "Weather",
+            "type": "string"
+          }
+        },
+        "required": [
+          "origin",
+          "budget_chf",
+          "transport",
+          "weather",
+          "available_hours",
+          "candidates"
+        ],
+        "title": "TripPlanRequest",
+        "type": "object"
+      },
+      "TripPlanResponse": {
+        "properties": {
+          "generated_by_ai": {
+            "title": "Generated By Ai",
+            "type": "boolean"
+          },
+          "itinerary": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 6,
+            "minItems": 1,
+            "title": "Itinerary",
+            "type": "array"
+          },
+          "rationale": {
+            "title": "Rationale",
+            "type": "string"
+          },
+          "selected_place_id": {
+            "title": "Selected Place Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "selected_place_id",
+          "rationale",
+          "itinerary",
+          "generated_by_ai"
+        ],
+        "title": "TripPlanResponse",
         "type": "object"
       },
       "UserCreate": {
@@ -10563,6 +12520,590 @@
         ]
       }
     },
+    "/api/v1/admin/profile-moderation": {
+      "get": {
+        "operationId": "profile_moderation_queue_api_v1_admin_profile_moderation_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "pattern": "^(pending|approved|rejected)$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "kind",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "pattern": "^(social|professional)$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Kind"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Response Profile Moderation Queue Api V1 Admin Profile Moderation Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Profile Moderation Queue",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/v1/admin/profile-moderation/{kind}/{user_id}/approve": {
+      "patch": {
+        "operationId": "approve_profile_api_v1_admin_profile_moderation__kind___user_id__approve_patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "kind",
+            "required": true,
+            "schema": {
+              "title": "Kind",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "schema": {
+              "title": "User Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfileModerationDecision"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Approve Profile Api V1 Admin Profile Moderation  Kind   User Id  Approve Patch",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Approve Profile",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/v1/admin/profile-moderation/{kind}/{user_id}/reject": {
+      "patch": {
+        "operationId": "reject_profile_api_v1_admin_profile_moderation__kind___user_id__reject_patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "kind",
+            "required": true,
+            "schema": {
+              "title": "Kind",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "schema": {
+              "title": "User Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfileModerationDecision"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Reject Profile Api V1 Admin Profile Moderation  Kind   User Id  Reject Patch",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Reject Profile",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/v1/admin/reports-safety": {
+      "get": {
+        "operationId": "cases_api_v1_admin_reports_safety_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "pattern": "^(open|reviewing|resolved|dismissed)$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "source_type",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Source Type"
+            }
+          },
+          {
+            "in": "query",
+            "name": "priority",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "pattern": "^(low|normal|high|critical)$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Priority"
+            }
+          },
+          {
+            "in": "query",
+            "name": "subject_user_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Subject User Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 120,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Search"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "maximum": 500,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Cases",
+        "tags": [
+          "admin",
+          "reports-safety"
+        ]
+      }
+    },
+    "/api/v1/admin/reports-safety/sanctions/{sanction_id}/revoke": {
+      "post": {
+        "operationId": "revoke_api_v1_admin_reports_safety_sanctions__sanction_id__revoke_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "sanction_id",
+            "required": true,
+            "schema": {
+              "title": "Sanction Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModerationDecision"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Revoke",
+        "tags": [
+          "admin",
+          "reports-safety"
+        ]
+      }
+    },
+    "/api/v1/admin/reports-safety/stats": {
+      "get": {
+        "operationId": "stats_api_v1_admin_reports_safety_stats_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Stats",
+        "tags": [
+          "admin",
+          "reports-safety"
+        ]
+      }
+    },
+    "/api/v1/admin/reports-safety/users/{user_id}/history": {
+      "get": {
+        "operationId": "user_history_api_v1_admin_reports_safety_users__user_id__history_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "schema": {
+              "title": "User Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "User History",
+        "tags": [
+          "admin",
+          "reports-safety"
+        ]
+      }
+    },
+    "/api/v1/admin/reports-safety/{case_id}": {
+      "patch": {
+        "operationId": "update_case_api_v1_admin_reports_safety__case_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "title": "Case Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CaseUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Update Case",
+        "tags": [
+          "admin",
+          "reports-safety"
+        ]
+      }
+    },
+    "/api/v1/admin/reports-safety/{case_id}/decision": {
+      "post": {
+        "operationId": "decide_api_v1_admin_reports_safety__case_id__decision_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "title": "Case Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModerationDecision"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Decide",
+        "tags": [
+          "admin",
+          "reports-safety"
+        ]
+      }
+    },
     "/api/v1/admin/rss-feeds": {
       "get": {
         "operationId": "list_rss_feeds_api_v1_admin_rss_feeds_get",
@@ -11295,6 +13836,59 @@
         ]
       }
     },
+    "/api/v1/admin/users/registrations": {
+      "get": {
+        "description": "Daily account-creation counts from User.created_at (not product telemetry).",
+        "operationId": "user_registrations_api_v1_admin_users_registrations_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "days",
+            "required": false,
+            "schema": {
+              "default": 30,
+              "maximum": 365,
+              "minimum": 1,
+              "title": "Days",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response User Registrations Api V1 Admin Users Registrations Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "User Registrations",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
     "/api/v1/admin/users/stats": {
       "get": {
         "operationId": "user_stats_api_v1_admin_users_stats_get",
@@ -11404,9 +13998,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "additionalProperties": true,
-                "title": "Payload",
-                "type": "object"
+                "$ref": "#/components/schemas/AdminSubscriptionUpdate"
               }
             }
           },
@@ -11626,6 +14218,52 @@
           }
         ],
         "summary": "Job Apply",
+        "tags": [
+          "ai"
+        ]
+      }
+    },
+    "/api/v1/ai/trip-plan": {
+      "post": {
+        "operationId": "trip_plan_api_v1_ai_trip_plan_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TripPlanRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TripPlanResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Trip Plan",
         "tags": [
           "ai"
         ]
@@ -14346,6 +16984,993 @@
         ]
       }
     },
+    "/api/v1/friends/connections": {
+      "get": {
+        "operationId": "connections_api_v1_friends_connections_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FriendConnectionResponse"
+                  },
+                  "title": "Response Connections Api V1 Friends Connections Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Connections",
+        "tags": [
+          "friends"
+        ]
+      }
+    },
+    "/api/v1/friends/connections/{connection_id}": {
+      "delete": {
+        "operationId": "cancel_api_v1_friends_connections__connection_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "connection_id",
+            "required": true,
+            "schema": {
+              "title": "Connection Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Cancel",
+        "tags": [
+          "friends"
+        ]
+      },
+      "patch": {
+        "operationId": "decide_api_v1_friends_connections__connection_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "connection_id",
+            "required": true,
+            "schema": {
+              "title": "Connection Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FriendDecision"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FriendConnectionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Decide",
+        "tags": [
+          "friends"
+        ]
+      }
+    },
+    "/api/v1/friends/events": {
+      "get": {
+        "operationId": "social_events_api_v1_friends_events_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "canton",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Canton"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SocialEventResponse"
+                  },
+                  "title": "Response Social Events Api V1 Friends Events Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Social Events",
+        "tags": [
+          "friends"
+        ]
+      }
+    },
+    "/api/v1/friends/events/{event_id}/attendance": {
+      "delete": {
+        "operationId": "leave_event_api_v1_friends_events__event_id__attendance_delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "event_id",
+            "required": true,
+            "schema": {
+              "title": "Event Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Leave Event",
+        "tags": [
+          "friends"
+        ]
+      },
+      "put": {
+        "operationId": "attend_api_v1_friends_events__event_id__attendance_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "event_id",
+            "required": true,
+            "schema": {
+              "title": "Event Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttendanceUpsert"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttendanceResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Attend",
+        "tags": [
+          "friends"
+        ]
+      }
+    },
+    "/api/v1/friends/events/{event_id}/invite": {
+      "post": {
+        "operationId": "invite_friend_api_v1_friends_events__event_id__invite_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "event_id",
+            "required": true,
+            "schema": {
+              "title": "Event Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SocialEventInviteCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SocialActionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Invite Friend",
+        "tags": [
+          "friends"
+        ]
+      }
+    },
+    "/api/v1/friends/events/{event_id}/messages": {
+      "get": {
+        "operationId": "event_messages_api_v1_friends_events__event_id__messages_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "event_id",
+            "required": true,
+            "schema": {
+              "title": "Event Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SocialEventMessageResponse"
+                  },
+                  "title": "Response Event Messages Api V1 Friends Events  Event Id  Messages Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Event Messages",
+        "tags": [
+          "friends"
+        ]
+      },
+      "post": {
+        "operationId": "send_event_message_api_v1_friends_events__event_id__messages_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "event_id",
+            "required": true,
+            "schema": {
+              "title": "Event Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SocialEventMessageCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SocialEventMessageResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Send Event Message",
+        "tags": [
+          "friends"
+        ]
+      }
+    },
+    "/api/v1/friends/profile/me": {
+      "get": {
+        "operationId": "my_profile_api_v1_friends_profile_me_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SocialProfileResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "My Profile",
+        "tags": [
+          "friends"
+        ]
+      },
+      "put": {
+        "operationId": "save_profile_api_v1_friends_profile_me_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SocialProfileUpsert"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SocialProfileResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Save Profile",
+        "tags": [
+          "friends"
+        ]
+      }
+    },
+    "/api/v1/friends/profile/me/boost": {
+      "post": {
+        "operationId": "boost_profile_api_v1_friends_profile_me_boost_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SocialProfileResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Boost Profile",
+        "tags": [
+          "friends"
+        ]
+      }
+    },
+    "/api/v1/friends/profile/me/visitors": {
+      "get": {
+        "operationId": "profile_visitors_api_v1_friends_profile_me_visitors_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SocialProfileVisitorResponse"
+                  },
+                  "title": "Response Profile Visitors Api V1 Friends Profile Me Visitors Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Profile Visitors",
+        "tags": [
+          "friends"
+        ]
+      }
+    },
+    "/api/v1/friends/profiles": {
+      "get": {
+        "operationId": "profiles_api_v1_friends_profiles_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 100,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Q"
+            }
+          },
+          {
+            "in": "query",
+            "name": "canton",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Canton"
+            }
+          },
+          {
+            "in": "query",
+            "name": "interest",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Interest"
+            }
+          },
+          {
+            "in": "query",
+            "name": "language",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Language"
+            }
+          },
+          {
+            "in": "query",
+            "name": "age_band",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Age Band"
+            }
+          },
+          {
+            "in": "query",
+            "name": "residency",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Residency"
+            }
+          },
+          {
+            "in": "query",
+            "name": "max_distance_km",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maximum": 250,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Max Distance Km"
+            }
+          },
+          {
+            "in": "query",
+            "name": "nearby",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Nearby",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "event_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Event Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 50,
+              "minimum": 1,
+              "title": "Per Page",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SocialProfilePage"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Profiles",
+        "tags": [
+          "friends"
+        ]
+      }
+    },
+    "/api/v1/friends/profiles/{target_id}/block": {
+      "post": {
+        "operationId": "block_api_v1_friends_profiles__target_id__block_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "target_id",
+            "required": true,
+            "schema": {
+              "title": "Target Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SocialActionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Block",
+        "tags": [
+          "friends"
+        ]
+      }
+    },
+    "/api/v1/friends/profiles/{target_id}/connect": {
+      "post": {
+        "operationId": "connect_api_v1_friends_profiles__target_id__connect_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "target_id",
+            "required": true,
+            "schema": {
+              "title": "Target Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FriendRequestCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FriendConnectionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Connect",
+        "tags": [
+          "friends"
+        ]
+      }
+    },
+    "/api/v1/friends/profiles/{target_id}/report": {
+      "post": {
+        "operationId": "report_api_v1_friends_profiles__target_id__report_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "target_id",
+            "required": true,
+            "schema": {
+              "title": "Target Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SocialReportCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SocialActionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Report",
+        "tags": [
+          "friends"
+        ]
+      }
+    },
+    "/api/v1/friends/profiles/{target_id}/visit": {
+      "post": {
+        "operationId": "record_profile_visit_api_v1_friends_profiles__target_id__visit_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "target_id",
+            "required": true,
+            "schema": {
+              "title": "Target Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SocialProfileVisitCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SocialActionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Record Profile Visit",
+        "tags": [
+          "friends"
+        ]
+      }
+    },
     "/api/v1/guides/": {
       "get": {
         "operationId": "list_guides_api_v1_guides__get",
@@ -16324,6 +19949,32 @@
         ]
       }
     },
+    "/api/v1/marketplace/pro/dashboard": {
+      "get": {
+        "operationId": "pro_dashboard_api_v1_marketplace_pro_dashboard_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MarketplaceProDashboard"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Pro Dashboard",
+        "tags": [
+          "marketplace"
+        ]
+      }
+    },
     "/api/v1/marketplace/profiles/{profile_user_id}": {
       "get": {
         "operationId": "public_profile_api_v1_marketplace_profiles__profile_user_id__get",
@@ -16585,6 +20236,53 @@
         ]
       }
     },
+    "/api/v1/marketplace/{listing_id}/promote": {
+      "post": {
+        "operationId": "promote_listing_api_v1_marketplace__listing_id__promote_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "listing_id",
+            "required": true,
+            "schema": {
+              "title": "Listing Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceListingDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Promote Listing",
+        "tags": [
+          "marketplace"
+        ]
+      }
+    },
     "/api/v1/marketplace/{listing_id}/report": {
       "post": {
         "operationId": "report_listing_api_v1_marketplace__listing_id__report_post",
@@ -16689,6 +20387,97 @@
         "summary": "Upload Media",
         "tags": [
           "media"
+        ]
+      }
+    },
+    "/api/v1/moderation/notifications": {
+      "get": {
+        "operationId": "notifications_api_v1_moderation_notifications_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "unread_only",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Unread Only",
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Notifications",
+        "tags": [
+          "moderation"
+        ]
+      }
+    },
+    "/api/v1/moderation/notifications/{notification_id}/read": {
+      "patch": {
+        "operationId": "read_notification_api_v1_moderation_notifications__notification_id__read_patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "notification_id",
+            "required": true,
+            "schema": {
+              "title": "Notification Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Read Notification",
+        "tags": [
+          "moderation"
         ]
       }
     },
@@ -16946,6 +20735,578 @@
         "summary": "Get Moment",
         "tags": [
           "moments"
+        ]
+      }
+    },
+    "/api/v1/network/connections": {
+      "get": {
+        "operationId": "list_connections_api_v1_network_connections_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "box",
+            "required": false,
+            "schema": {
+              "default": "all",
+              "pattern": "^(all|incoming|outgoing|accepted)$",
+              "title": "Box",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ProfessionalConnectionResponse"
+                  },
+                  "title": "Response List Connections Api V1 Network Connections Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Connections",
+        "tags": [
+          "network"
+        ]
+      }
+    },
+    "/api/v1/network/connections/{connection_id}": {
+      "delete": {
+        "operationId": "remove_pending_connection_api_v1_network_connections__connection_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "connection_id",
+            "required": true,
+            "schema": {
+              "title": "Connection Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Remove Pending Connection",
+        "tags": [
+          "network"
+        ]
+      },
+      "patch": {
+        "operationId": "respond_to_connection_api_v1_network_connections__connection_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "connection_id",
+            "required": true,
+            "schema": {
+              "title": "Connection Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConnectionDecision"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfessionalConnectionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Respond To Connection",
+        "tags": [
+          "network"
+        ]
+      }
+    },
+    "/api/v1/network/profile/me": {
+      "get": {
+        "operationId": "my_profile_api_v1_network_profile_me_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfessionalProfileResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "My Profile",
+        "tags": [
+          "network"
+        ]
+      },
+      "put": {
+        "operationId": "upsert_profile_api_v1_network_profile_me_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfessionalProfileUpsert"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfessionalProfileResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Upsert Profile",
+        "tags": [
+          "network"
+        ]
+      }
+    },
+    "/api/v1/network/profiles": {
+      "get": {
+        "operationId": "list_profiles_api_v1_network_profiles_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 100,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Q"
+            }
+          },
+          {
+            "in": "query",
+            "name": "canton",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 10,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Canton"
+            }
+          },
+          {
+            "in": "query",
+            "name": "role",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 30,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Role"
+            }
+          },
+          {
+            "in": "query",
+            "name": "industry",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 60,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Industry"
+            }
+          },
+          {
+            "in": "query",
+            "name": "goal",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 30,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Goal"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 50,
+              "minimum": 1,
+              "title": "Per Page",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfessionalProfilePage"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Profiles",
+        "tags": [
+          "network"
+        ]
+      }
+    },
+    "/api/v1/network/profiles/{profile_user_id}": {
+      "get": {
+        "operationId": "profile_detail_api_v1_network_profiles__profile_user_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "profile_user_id",
+            "required": true,
+            "schema": {
+              "title": "Profile User Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfessionalProfileResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Profile Detail",
+        "tags": [
+          "network"
+        ]
+      }
+    },
+    "/api/v1/network/profiles/{profile_user_id}/block": {
+      "post": {
+        "operationId": "block_profile_api_v1_network_profiles__profile_user_id__block_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "profile_user_id",
+            "required": true,
+            "schema": {
+              "title": "Profile User Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NetworkActionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Block Profile",
+        "tags": [
+          "network"
+        ]
+      }
+    },
+    "/api/v1/network/profiles/{profile_user_id}/connect": {
+      "post": {
+        "operationId": "request_connection_api_v1_network_profiles__profile_user_id__connect_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "profile_user_id",
+            "required": true,
+            "schema": {
+              "title": "Profile User Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConnectionCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfessionalConnectionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Request Connection",
+        "tags": [
+          "network"
+        ]
+      }
+    },
+    "/api/v1/network/profiles/{profile_user_id}/report": {
+      "post": {
+        "operationId": "report_profile_api_v1_network_profiles__profile_user_id__report_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "profile_user_id",
+            "required": true,
+            "schema": {
+              "title": "Profile User Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfileReportCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NetworkActionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Report Profile",
+        "tags": [
+          "network"
         ]
       }
     },
@@ -17307,6 +21668,95 @@
         "summary": "Update Remote Config",
         "tags": [
           "remote-config"
+        ]
+      }
+    },
+    "/api/v1/subscriptions/apple/notifications": {
+      "post": {
+        "operationId": "apple_notifications_api_v1_subscriptions_apple_notifications_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AppleNotificationIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Apple Notifications Api V1 Subscriptions Apple Notifications Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Apple Notifications",
+        "tags": [
+          "subscriptions"
+        ]
+      }
+    },
+    "/api/v1/subscriptions/apple/transactions": {
+      "post": {
+        "operationId": "sync_apple_transaction_api_v1_subscriptions_apple_transactions_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AppleTransactionIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppleSyncOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Sync Apple Transaction",
+        "tags": [
+          "subscriptions"
         ]
       }
     },

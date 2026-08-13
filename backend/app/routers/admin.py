@@ -10,6 +10,7 @@ from urllib.parse import urlparse, urljoin
 
 from fastapi import APIRouter, HTTPException, Query, status
 from fastapi.responses import StreamingResponse
+from pydantic import BaseModel, Field, model_validator
 from sqlalchemy import func, or_, select
 
 from ..dependencies import DBSession, CurrentAdmin
@@ -26,13 +27,131 @@ from ..core.url_security import validate_public_http_url
 from ..services.brave_search_importer import BraveSearchImporter
 from ..models.subscription import Subscription, SubscriptionEvent
 from ..models.analytics import PaywallEvent
+from ..models.network import ProfessionalProfile
+from ..models.social import SocialProfile
 from ..services import stripe_service
+from ..services.audit import log_audit
+from ..models.moderation import ModerationAction, ModerationCase
+from ..services.moderation import notify_user, utcnow
 from datetime import timedelta, timezone
 import feedparser
 import httpx
 
 
 router = APIRouter()
+
+
+class ProfileModerationDecision(BaseModel):
+    reason: str | None = Field(default=None, max_length=500)
+
+
+def _profile_moderation_item(kind: str, profile: SocialProfile | ProfessionalProfile) -> Dict[str, Any]:
+    return {
+        "kind": kind,
+        "user_id": profile.user_id,
+        "display_name": profile.display_name,
+        "canton": profile.canton,
+        "city": profile.city,
+        "bio": profile.bio,
+        "avatar_url": profile.avatar_url,
+        "moderation_status": profile.moderation_status,
+        "moderation_reason": profile.moderation_reason,
+        "created_at": profile.created_at.isoformat() if profile.created_at else None,
+        "updated_at": profile.updated_at.isoformat() if profile.updated_at else None,
+        "moderated_at": profile.moderated_at.isoformat() if profile.moderated_at else None,
+        "details": {
+            "interests": profile.interests,
+            "languages": profile.languages,
+            "meetup_formats": profile.meetup_formats,
+        } if kind == "social" else {
+            "headline": profile.headline,
+            "company_name": profile.company_name,
+            "role": profile.role,
+            "industry": profile.industry,
+            "skills": profile.skills,
+            "languages": profile.languages,
+            "goals": profile.goals,
+            "website_url": profile.website_url,
+        },
+    }
+
+
+@router.get("/profile-moderation")
+def profile_moderation_queue(
+    _: CurrentAdmin,
+    db: DBSession,
+    moderation_status: str | None = Query(default=None, alias="status", pattern="^(pending|approved|rejected)$"),
+    kind: str | None = Query(default=None, pattern="^(social|professional)$"),
+) -> List[Dict[str, Any]]:
+    items: list[Dict[str, Any]] = []
+    if kind in (None, "social"):
+        query = db.query(SocialProfile)
+        if moderation_status: query = query.filter(SocialProfile.moderation_status == moderation_status)
+        items.extend(_profile_moderation_item("social", row) for row in query.all())
+    if kind in (None, "professional"):
+        query = db.query(ProfessionalProfile)
+        if moderation_status: query = query.filter(ProfessionalProfile.moderation_status == moderation_status)
+        items.extend(_profile_moderation_item("professional", row) for row in query.all())
+    return sorted(items, key=lambda item: item["updated_at"] or "", reverse=True)
+
+
+def _moderate_profile(kind: str, user_id: str, db: DBSession) -> SocialProfile | ProfessionalProfile:
+    model = SocialProfile if kind == "social" else ProfessionalProfile if kind == "professional" else None
+    if model is None: raise HTTPException(status_code=404, detail="Profile type not found")
+    profile = db.get(model, user_id)
+    if not profile: raise HTTPException(status_code=404, detail="Profile not found")
+    return profile
+
+
+@router.patch("/profile-moderation/{kind}/{user_id}/approve")
+def approve_profile(kind: str, user_id: str, payload: ProfileModerationDecision, admin: CurrentAdmin, db: DBSession) -> Dict[str, Any]:
+    profile = _moderate_profile(kind, user_id, db)
+    profile.moderation_status = "approved"
+    profile.moderation_reason = payload.reason
+    profile.moderated_at = datetime.now(timezone.utc)
+    profile.moderated_by = admin.get("sub")
+    case = db.scalar(select(ModerationCase).where(ModerationCase.source_key == f"{kind}_profile_review:{user_id}"))
+    if case:
+        case.status = "resolved"; case.decision = "approve"; case.moderator_comment = payload.reason or "Profile approved"; case.resolved_at = utcnow(); case.assigned_to = admin.get("sub")
+        db.add(ModerationAction(case_id=case.id, subject_user_id=user_id, moderator_id=admin.get("sub"), action="approve", comment=payload.reason or "Profile approved"))
+        notify_user(db, user_id=user_id, case_id=case.id, kind="profile_approved", title="Profile approved", body="Your profile is now visible in Sweezy.", event_key=f"moderation:profile:approved:{case.id}:{profile.updated_at}")
+    db.add(profile); db.commit(); db.refresh(profile)
+    return _profile_moderation_item(kind, profile)
+
+
+@router.patch("/profile-moderation/{kind}/{user_id}/reject")
+def reject_profile(kind: str, user_id: str, payload: ProfileModerationDecision, admin: CurrentAdmin, db: DBSession) -> Dict[str, Any]:
+    reason = (payload.reason or "").strip()
+    if not reason: raise HTTPException(status_code=400, detail="Rejection reason is required")
+    profile = _moderate_profile(kind, user_id, db)
+    profile.moderation_status = "rejected"
+    profile.moderation_reason = reason
+    profile.moderated_at = datetime.now(timezone.utc)
+    profile.moderated_by = admin.get("sub")
+    case = db.scalar(select(ModerationCase).where(ModerationCase.source_key == f"{kind}_profile_review:{user_id}"))
+    if case:
+        case.status = "resolved"; case.decision = "reject"; case.moderator_comment = reason; case.resolved_at = utcnow(); case.assigned_to = admin.get("sub")
+        db.add(ModerationAction(case_id=case.id, subject_user_id=user_id, moderator_id=admin.get("sub"), action="reject", comment=reason))
+        notify_user(db, user_id=user_id, case_id=case.id, kind="profile_rejected", title="Profile needs changes", body=reason, event_key=f"moderation:profile:rejected:{case.id}:{profile.updated_at}")
+    db.add(profile); db.commit(); db.refresh(profile)
+    return _profile_moderation_item(kind, profile)
+
+
+class AdminSubscriptionUpdate(BaseModel):
+    status: str = Field(pattern="^(free|trial|premium)$")
+    plan: str | None = Field(default=None, pattern="^(monthly|yearly)$")
+    purchased_at: datetime | None = None
+    expire_at: datetime | None = None
+    duration_days: int | None = Field(default=None, ge=1, le=3660)
+    reason: str = Field(min_length=3, max_length=500)
+
+    @model_validator(mode="after")
+    def validate_period(self):
+        if self.status == "premium" and not self.plan:
+            raise ValueError("Plan is required for premium")
+        if self.purchased_at and self.expire_at and self.expire_at <= self.purchased_at:
+            raise ValueError("Expiration must be after purchase date")
+        return self
 
 
 @router.get("/stats")
@@ -458,23 +577,48 @@ def export_audit_logs(_: CurrentAdmin, db: DBSession, limit: int = Query(default
  
 @router.get("/subscriptions")
 def list_subscriptions(_: CurrentAdmin, db: DBSession, limit: int = 200) -> List[Dict[str, Any]]:
-    rows = (
-        db.query(User.id, User.email, User.subscription_status, User.subscription_expire_at, User.stripe_customer_id, User.stripe_subscription_id)
-        .order_by(User.created_at.desc())
-        .limit(limit)
+    users = db.query(User).order_by(User.created_at.desc()).limit(limit).all()
+    user_ids = [user.id for user in users]
+    subscriptions = (
+        db.query(Subscription)
+        .filter(Subscription.user_id.in_(user_ids))
+        .order_by(Subscription.updated_at.desc())
         .all()
+        if user_ids else []
     )
-    return [
-        {
-            "user_id": r[0],
-            "email": r[1],
-            "status": r[2],
-            "expire_at": r[3].isoformat() if r[3] else None,
-            "stripe_customer_id": r[4],
-            "stripe_subscription_id": r[5],
-        }
-        for r in rows
-    ]
+    by_user: dict[str, list[Subscription]] = {}
+    for subscription in subscriptions:
+        by_user.setdefault(subscription.user_id, []).append(subscription)
+    result: list[dict[str, Any]] = []
+    for user in users:
+        records = by_user.get(user.id) or [None]
+        for subscription in records:
+            result.append({
+                "row_id": subscription.id if subscription else f"user:{user.id}",
+                "user_id": user.id,
+                "email": user.email,
+                "status": user.subscription_status,
+                "expire_at": user.subscription_expire_at.isoformat() if user.subscription_expire_at else None,
+                "subscription_id": subscription.id if subscription else None,
+                "provider": subscription.provider if subscription else "none",
+                "provider_status": subscription.status if subscription else "free",
+                "plan": subscription.plan if subscription else None,
+                "product_id": subscription.product_id if subscription else None,
+                "purchased_at": subscription.purchased_at.isoformat() if subscription and subscription.purchased_at else None,
+                "current_period_end": subscription.current_period_end.isoformat() if subscription and subscription.current_period_end else None,
+                "auto_renew_enabled": subscription.auto_renew_enabled if subscription else None,
+                "environment": subscription.environment if subscription else None,
+                "revocation_date": subscription.revocation_date.isoformat() if subscription and subscription.revocation_date else None,
+                "last_verified_at": subscription.last_verified_at.isoformat() if subscription and subscription.last_verified_at else None,
+                "original_transaction_id": subscription.original_transaction_id if subscription else None,
+                "latest_transaction_id": subscription.latest_transaction_id if subscription else None,
+                "stripe_customer_id": subscription.stripe_customer_id if subscription else user.stripe_customer_id,
+                "stripe_subscription_id": subscription.stripe_subscription_id if subscription else user.stripe_subscription_id,
+                "created_at": subscription.created_at.isoformat() if subscription and subscription.created_at else user.created_at.isoformat(),
+                "updated_at": subscription.updated_at.isoformat() if subscription and subscription.updated_at else user.updated_at.isoformat(),
+                "editable": subscription is None or subscription.provider == "manual",
+            })
+    return result
  
  
 @router.get("/subscriptions/events")
@@ -489,6 +633,7 @@ def list_subscription_events(_: CurrentAdmin, db: DBSession, limit: int = 200) -
         {
             "id": e.id,
             "user_id": e.user_id,
+            "provider": e.provider,
             "type": e.type,
             "payload": e.payload,
             "created_at": e.created_at.isoformat() if e.created_at else None,
@@ -498,48 +643,87 @@ def list_subscription_events(_: CurrentAdmin, db: DBSession, limit: int = 200) -
  
  
 @router.post("/users/{user_id}/subscription")
-def set_user_subscription(user_id: str, payload: Dict[str, Any], db: DBSession, _: CurrentAdmin) -> Dict[str, Any]:
+def set_user_subscription(user_id: str, payload: AdminSubscriptionUpdate, db: DBSession, admin: CurrentAdmin) -> Dict[str, Any]:
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
-    status_value = payload.get("status")
-    if status_value not in {"free", "trial", "premium"}:
-        raise HTTPException(status_code=400, detail="Invalid status")
-    if status_value == "free":
-        stripe_service.apply_free(db, user)
-    elif status_value == "trial":
-        stripe_service.apply_trial(db, user, days=7)
+    now = datetime.now(timezone.utc)
+    before = {
+        "status": user.subscription_status,
+        "expire_at": user.subscription_expire_at.isoformat() if user.subscription_expire_at else None,
+    }
+    manual = (
+        db.query(Subscription)
+        .filter(Subscription.user_id == user.id, Subscription.provider == "manual")
+        .one_or_none()
+    )
+    if manual is None:
+        manual = Subscription(user_id=user.id, provider="manual", status="canceled")
+    if payload.status == "free":
+        manual.status = "canceled"
+        manual.current_period_end = now
+        manual.auto_renew_enabled = False
     else:
-        # Manual premium with optional plan and duration
-        plan = payload.get("plan") or "monthly"  # 'monthly' | 'yearly'
-        if plan not in {"monthly", "yearly"}:
-            plan = "monthly"
-        period = timedelta(days=365 if plan == "yearly" else 30)
-        expire_at = datetime.now(timezone.utc) + period
-        # Ensure subscriptions row
-        sub = (
-            db.query(Subscription)
-            .filter(Subscription.user_id == user.id, Subscription.provider == "manual")
-            .one_or_none()
-        )
-        if sub is None:
-            sub = Subscription(
-                user_id=user.id,
-                provider="manual",
-                status="active",
-                plan=plan,
-                current_period_end=expire_at,
-            )
-        else:
-            sub.status = "active"
-            sub.plan = plan
-            sub.current_period_end = expire_at
-        user.subscription_status = "premium"
-        user.subscription_expire_at = expire_at
-        db.add(sub)
-        db.add(user)
-        db.commit()
-    return {"ok": True}
+        default_days = 30 if payload.status == "trial" or payload.plan == "monthly" else 365
+        purchased_at = payload.purchased_at or manual.purchased_at or now
+        expire_at = payload.expire_at or (now + timedelta(days=payload.duration_days or default_days))
+        if expire_at <= now:
+            raise HTTPException(status_code=400, detail="Expiration must be in the future")
+        manual.status = "trial" if payload.status == "trial" else "active"
+        manual.plan = payload.plan or ("monthly" if payload.status == "trial" else None)
+        manual.product_id = "sweezy_plus_manual"
+        manual.purchased_at = purchased_at
+        manual.current_period_end = expire_at
+        manual.auto_renew_enabled = False
+        manual.revocation_date = None
+        manual.last_verified_at = now
+    db.add(manual)
+    db.flush()
+
+    valid = db.query(Subscription).filter(
+        Subscription.user_id == user.id,
+        Subscription.status.in_(["active", "trial"]),
+        Subscription.revocation_date.is_(None),
+        or_(Subscription.current_period_end.is_(None), Subscription.current_period_end > now),
+    ).all()
+    user.subscription_status = "premium" if any(row.status == "active" for row in valid) else "trial" if valid else "free"
+    expirations = [row.current_period_end for row in valid if row.current_period_end]
+    user.subscription_expire_at = max(expirations) if expirations else None
+    db.add(user)
+    event = SubscriptionEvent(
+        user_id=user.id,
+        provider="manual",
+        type="admin.subscription.updated",
+        payload=json.dumps({
+            "status": payload.status,
+            "plan": payload.plan,
+            "expire_at": payload.expire_at.isoformat() if payload.expire_at else None,
+            "reason": payload.reason,
+            "admin_id": admin.get("sub"),
+        }),
+    )
+    db.add(event)
+    db.commit()
+    db.refresh(user)
+    actor = db.query(User).filter(User.id == admin.get("sub")).first()
+    log_audit(
+        db,
+        user_email=actor.email if actor else f"user:{admin.get('sub', 'unknown')}",
+        action="update",
+        entity="subscriptions",
+        entity_id=user.id,
+        before=before,
+        after={
+            "status": user.subscription_status,
+            "expire_at": user.subscription_expire_at.isoformat() if user.subscription_expire_at else None,
+            "reason": payload.reason,
+        },
+    )
+    return {
+        "ok": True,
+        "status": user.subscription_status,
+        "expire_at": user.subscription_expire_at.isoformat() if user.subscription_expire_at else None,
+    }
 
 @router.get("/subscriptions/analytics")
 def subscriptions_analytics(_: CurrentAdmin, db: DBSession, months: int = 6) -> Dict[str, Any]:

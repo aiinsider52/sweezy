@@ -611,20 +611,20 @@ def _upsert_jobs(
         job = db.execute(
             select(Job).where(
                 Job.source == item.source, Job.source_job_id == item.source_job_id
-            )
+            ).order_by(Job.updated_at.desc(), Job.id).limit(1)
         ).scalar_one_or_none()
         if job is None:
             # Cross-provider dedupe. Keep first canonical record and refresh it.
             job = db.execute(
                 select(Job).where(
                     Job.canonical_url == canonical, Job.employer_id.is_(None)
-                )
+                ).order_by(Job.updated_at.desc(), Job.id).limit(1)
             ).scalar_one_or_none()
         if job is None:
             job = db.execute(
                 select(Job).where(
                     Job.dedupe_key == dedupe_key, Job.employer_id.is_(None)
-                )
+                ).order_by(Job.updated_at.desc(), Job.id).limit(1)
             ).scalar_one_or_none()
         is_new = job is None
         if job is None:

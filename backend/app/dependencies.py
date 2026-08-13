@@ -77,6 +77,15 @@ def get_current_user(
         user = UserService.get_by_id(db, user_id)
         if not user or not user.is_active:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid user")
+        from .services.moderation import refresh_safety_state
+        refresh_safety_state(db, user)
+        if user.safety_status == "banned":
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail={"code": "account_banned"})
+        if user.safety_status == "suspended":
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail={"code": "account_suspended", "until": user.safety_suspended_until.isoformat() if user.safety_suspended_until else None},
+            )
         return user
     except HTTPException:
         raise

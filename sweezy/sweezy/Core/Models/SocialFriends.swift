@@ -73,6 +73,8 @@ struct SocialProfile: Codable, Identifiable, Equatable {
   let arrivalYear: Int?
   let avatarURL: String?
   let isVisible, openToFriends, isVerified: Bool
+  let moderationStatus: String
+  let moderationReason: String?
   let matchScore: Int
   let matchReasons: [String]
   let distanceKM: Int?
@@ -97,6 +99,8 @@ struct SocialProfile: Codable, Identifiable, Equatable {
     case isVisible = "is_visible"
     case openToFriends = "open_to_friends"
     case isVerified = "is_verified"
+    case moderationStatus = "moderation_status"
+    case moderationReason = "moderation_reason"
     case matchScore = "match_score"
     case matchReasons = "match_reasons"
     case distanceKM = "distance_km"
@@ -116,6 +120,7 @@ struct SocialProfile: Codable, Identifiable, Equatable {
     availability: [SocialAvailability] = [.flexible], ageBand: String? = nil,
     arrivalYear: Int? = nil, avatarURL: String? = nil, isVisible: Bool = true,
     openToFriends: Bool = true, isVerified: Bool = false, matchScore: Int = 0,
+    moderationStatus: String = "approved", moderationReason: String? = nil,
     matchReasons: [String] = [], distanceKM: Int? = nil, residencyStage: String = "established",
     sharedInterests: [SocialInterest] = [], connectionState: String = "none",
     connectionID: String? = nil, conversationID: String? = nil, contextEventID: String? = nil,
@@ -136,6 +141,8 @@ struct SocialProfile: Codable, Identifiable, Equatable {
     self.isVisible = isVisible
     self.openToFriends = openToFriends
     self.isVerified = isVerified
+    self.moderationStatus = moderationStatus
+    self.moderationReason = moderationReason
     self.matchScore = matchScore
     self.matchReasons = matchReasons
     self.distanceKM = distanceKM
@@ -166,6 +173,8 @@ struct SocialProfile: Codable, Identifiable, Equatable {
     isVisible = (try? c.decode(Bool.self, forKey: .isVisible)) ?? true
     openToFriends = (try? c.decode(Bool.self, forKey: .openToFriends)) ?? true
     isVerified = (try? c.decode(Bool.self, forKey: .isVerified)) ?? false
+    moderationStatus = (try? c.decode(String.self, forKey: .moderationStatus)) ?? "approved"
+    moderationReason = try? c.decode(String.self, forKey: .moderationReason)
     matchScore = (try? c.decode(Int.self, forKey: .matchScore)) ?? 0
     matchReasons = (try? c.decode([String].self, forKey: .matchReasons)) ?? []
     distanceKM = try? c.decode(Int.self, forKey: .distanceKM)
@@ -335,5 +344,17 @@ struct SocialEventMessage: Codable, Identifiable {
     case senderID = "sender_id"
     case senderName = "sender_name"
     case createdAt = "created_at"
+  }
+}
+
+struct SocialProfileVisitor: Codable, Identifiable {
+  let profile: SocialProfile
+  let visitCount: Int
+  let lastVisitedAt: Date
+  var id: String { profile.id }
+  enum CodingKeys: String, CodingKey {
+    case profile
+    case visitCount = "visit_count"
+    case lastVisitedAt = "last_visited_at"
   }
 }

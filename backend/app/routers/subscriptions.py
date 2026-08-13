@@ -309,7 +309,20 @@ async def stripe_webhook(request: Request):
                         period_end = datetime.fromtimestamp(ts, tz=timezone.utc)
                 except Exception:
                     period_end = None
-                stripe_service.apply_premium(db, user, subscription_id=str(subscription_id), current_period_end=period_end)
+                purchased_at = None
+                try:
+                    raw_purchase = data.get("created")
+                    if raw_purchase:
+                        purchased_at = datetime.fromtimestamp(int(raw_purchase), tz=timezone.utc)
+                except Exception:
+                    purchased_at = None
+                stripe_service.apply_premium(
+                    db,
+                    user,
+                    subscription_id=str(subscription_id),
+                    current_period_end=period_end,
+                    purchased_at=purchased_at,
+                )
                 send_telegram_message(
                     f"✅ Subscription active for {user.email} (until {period_end.isoformat() if period_end else 'n/a'})"
                 )

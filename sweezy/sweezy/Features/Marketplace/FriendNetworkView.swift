@@ -19,6 +19,8 @@ import UIKit
   @Published var maxDistanceKM: Int?
   @Published var nearby = false
   @Published var searchMeta: SocialProfilePage?
+  @Published var visitors: [SocialProfileVisitor] = []
+  @Published var isShowingDemoProfiles = false
   var incoming: [FriendConnection] {
     connections.filter { $0.direction == "incoming" && $0.status == "pending" }
   }
@@ -42,6 +44,9 @@ import UIKit
     switch values.2 { case .success(let value): events = value; case .failure(let issue): failures.append(issue) }
     switch values.3 { case .success(let value): myProfile = value; case .failure(let issue): failures.append(issue) }
     loadError = failures.isEmpty ? nil : "friends.error.partial".localized
+    #if DEBUG
+    if profiles.isEmpty { applyDemoProfiles() }
+    #endif
   }
   func reload() async {
     async let page = friendResult {
@@ -56,6 +61,9 @@ import UIKit
     switch values.0 { case .success(let value): profiles = value.items; searchMeta = value; case .failure: failed = true }
     switch values.1 { case .success(let value): events = value; case .failure: failed = true }
     loadError = failed ? "friends.error.partial".localized : nil
+    #if DEBUG
+    if failed || profiles.isEmpty { applyDemoProfiles() }
+    #endif
   }
   func own() async throws -> SocialProfile? {
     do { return try await FriendsAPI.myProfile() } catch  where (error as NSError).code == 404 {
@@ -108,11 +116,34 @@ import UIKit
       return false
     }
   }
+  func loadVisitors() async {
+    do { visitors = try await FriendsAPI.visitors() }
+    catch { self.error = error.localizedDescription }
+  }
+  #if DEBUG
+  func applyDemoProfiles() {
+    let normalizedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+    profiles = SocialFriendPreviewFixtures.profiles.filter { profile in
+      let matchesQuery = normalizedQuery.isEmpty || [profile.displayName, profile.city, profile.bio]
+        .joined(separator: " ").lowercased().contains(normalizedQuery)
+      let matchesCanton = canton == nil || profile.canton == canton
+      let matchesInterest = interest.map { profile.interests.contains($0) } ?? true
+      return matchesQuery && matchesCanton && matchesInterest
+    }
+    searchMeta = SocialProfilePage(
+      items: profiles, total: profiles.count, page: 1, perPage: 40, pages: 1,
+      isLimited: false, visibleLimit: nil, advancedFiltersAvailable: true,
+      requestsRemaining: 5)
+    isShowingDemoProfiles = true
+  }
+  #endif
 }
 
 struct FriendNetworkView: View {
   @Environment(\.dismiss) private var dismiss
   @EnvironmentObject private var appContainer: AppContainer
+  @EnvironmentObject private var lockManager: AppLockManager
+  @EnvironmentObject private var sessionManager: SessionManager
   @StateObject private var vm = FriendNetworkViewModel()
   @State private var tab = 0
   @State private var editor = false
@@ -122,11 +153,38 @@ struct FriendNetworkView: View {
   @State private var filters = false
   @State private var paywall = false
   @State private var eventChat: SocialEvent?
+  @State private var showVisitors = false
+  @State private var showAuth = false
+  @State private var showsDemoCatalog = false
+  @AppStorage("friends.invisibleBrowsing") private var invisibleBrowsing = false
   @StateObject private var subscription = SubscriptionManager.shared
   private let limeAccent = JourneyVisual.lime
   private let forest = Color(red: 0.035, green: 0.105, blue: 0.075)
   private let mintGlow = Color(red: 0.63, green: 0.93, blue: 0.62)
   var body: some View {
+    Group {
+      if sessionManager.isAuthenticated || isUITestPreview || showsDemoCatalog {
+        friendsContent
+      } else {
+        accessGate
+      }
+    }
+    .toolbar(.hidden, for: .navigationBar)
+    .sheet(isPresented: $showAuth) {
+      AuthEntryView(showsCloseButton: true) { showAuth = false }
+        .environmentObject(appContainer)
+        .environmentObject(lockManager)
+        .environmentObject(sessionManager)
+    }
+    .onChange(of: sessionManager.isAuthenticated) { _, authenticated in
+      if authenticated {
+        showAuth = false
+        showsDemoCatalog = false
+        Task { await vm.load() }
+      }
+    }
+  }
+  private var friendsContent: some View {
     GeometryReader { geometry in
       ZStack(alignment: .top) {
         JourneyVisual.black.ignoresSafeArea()
@@ -151,6 +209,11 @@ struct FriendNetworkView: View {
                 .padding(.horizontal, 20)
                 .padding(.top, 14)
             }
+            if let actionError = vm.error {
+              actionIssue(message: actionError)
+                .padding(.horizontal, 20)
+                .padding(.top, 10)
+            }
             Group {
               switch tab {
               case 1: events
@@ -168,15 +231,15 @@ struct FriendNetworkView: View {
       }
       .frame(width: geometry.size.width, height: geometry.size.height)
     }
-    .toolbar(.hidden, for: .navigationBar).task {
+    .task {
       if isProfileUITestPreview { tab = 3 }
       if isEditorUITestPreview {
         tab = 3
         editor = true
       }
-      if isPeopleCatalogPreview {
+      if isPeopleCatalogPreview || showsDemoCatalog {
         loadPeopleCatalogPreview()
-      } else if !isUITestPreview {
+      } else if !isUITestPreview && sessionManager.isAuthenticated {
         await vm.load()
       }
     }
@@ -193,13 +256,65 @@ struct FriendNetworkView: View {
     .fullScreenCover(isPresented: $paywall) { SubscriptionView(source: .profile) }
     .sheet(item: $eventChat) { SocialEventChatView(event: $0, friends: vm.friends, vm: vm) }
     .sheet(item: $event) { EventDetailView(eventId: $0.id) }
-    .alert(
-      "Sweezy Friends",
-      isPresented: Binding(get: { vm.error != nil }, set: { if !$0 { vm.error = nil } })
-    ) {
-      Button("OK", role: .cancel) {}
-    } message: {
-      Text(vm.error ?? "")
+    .sheet(isPresented: $showVisitors) { FriendVisitorsView(visitors: vm.visitors) }
+  }
+  private var accessGate: some View {
+    GeometryReader { geometry in
+      ZStack {
+        Image("journey-place-community")
+          .resizable()
+          .scaledToFill()
+          .frame(width: geometry.size.width, height: geometry.size.height)
+          .clipped()
+          .ignoresSafeArea()
+          .accessibilityHidden(true)
+        Color.black.opacity(0.68).ignoresSafeArea()
+        VStack(alignment: .leading, spacing: 16) {
+          Button { dismiss() } label: {
+            Image(systemName: "xmark")
+              .font(.title2.bold()).foregroundColor(.white)
+              .frame(width: 48, height: 48)
+              .background(Color.black.opacity(0.34)).clipShape(Circle())
+              .overlay(Circle().stroke(Color.white.opacity(0.18)))
+          }
+          Spacer(minLength: 24)
+          Text("SWEEZY CIRCLE · CH")
+            .font(.caption.bold()).tracking(2).foregroundColor(limeAccent)
+          Text("Знайди своїх\nу Швейцарії")
+            .font(.system(size: min(38, max(31, geometry.size.width * 0.095)), weight: .black, design: .rounded))
+            .foregroundColor(.white).lineSpacing(-3)
+          Text("Увійди, щоб створити social passport, надсилати заявки та спілкуватися без публікації контактів.")
+            .font(.system(size: 16, weight: .medium))
+            .foregroundColor(.white.opacity(0.72))
+            .fixedSize(horizontal: false, vertical: true)
+          Button { showAuth = true } label: {
+            Text("Увійти та продовжити")
+              .font(.headline).foregroundColor(.black)
+              .frame(maxWidth: .infinity, minHeight: 56)
+              .background(limeAccent).clipShape(RoundedRectangle(cornerRadius: 18))
+          }
+          .accessibilityIdentifier("friends.accessGate.signIn")
+          #if DEBUG
+          Button {
+            showsDemoCatalog = true
+            loadPeopleCatalogPreview()
+          } label: {
+            Text("Переглянути демо-профілі")
+              .font(.subheadline.bold()).foregroundColor(.white)
+              .frame(maxWidth: .infinity, minHeight: 50)
+              .background(Color.white.opacity(0.1)).clipShape(RoundedRectangle(cornerRadius: 17))
+              .overlay(RoundedRectangle(cornerRadius: 17).stroke(Color.white.opacity(0.16)))
+          }
+          .accessibilityIdentifier("friends.accessGate.demo")
+          #endif
+        }
+        .frame(
+          width: max(0, geometry.size.width - 40),
+          height: max(0, geometry.size.height - 24),
+          alignment: .leading)
+        .padding(.horizontal, 20).padding(.vertical, 12)
+      }
+      .frame(width: geometry.size.width, height: geometry.size.height)
     }
   }
   private func networkIssue(message: String) -> some View {
@@ -210,6 +325,21 @@ struct FriendNetworkView: View {
       Button("common.retry".localized) { Task { await vm.load() } }
         .font(.footnote.bold()).foregroundColor(.black)
         .padding(.horizontal, 12).frame(height: 34).background(limeAccent).clipShape(Capsule())
+    }
+    .padding(12).background(Color.white.opacity(0.07))
+    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+  }
+  private func actionIssue(message: String) -> some View {
+    HStack(spacing: 12) {
+      Image(systemName: "exclamationmark.triangle.fill").foregroundColor(limeAccent)
+      Text(message).font(.footnote.weight(.medium)).foregroundColor(.white.opacity(0.75))
+        .fixedSize(horizontal: false, vertical: true)
+      Spacer(minLength: 8)
+      Button { vm.error = nil } label: {
+        Image(systemName: "xmark").font(.footnote.bold()).foregroundColor(.white.opacity(0.7))
+          .frame(width: 32, height: 32).background(Color.white.opacity(0.08)).clipShape(Circle())
+      }
+      .accessibilityLabel("Закрити повідомлення")
     }
     .padding(12).background(Color.white.opacity(0.07))
     .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
@@ -266,11 +396,7 @@ struct FriendNetworkView: View {
   }
   private func loadPeopleCatalogPreview() {
     #if DEBUG
-      vm.profiles = SocialFriendPreviewFixtures.profiles
-      vm.searchMeta = SocialProfilePage(
-        items: vm.profiles, total: vm.profiles.count, page: 1, perPage: 40, pages: 1,
-        isLimited: false, visibleLimit: nil, advancedFiltersAvailable: true,
-        requestsRemaining: 5)
+      vm.applyDemoProfiles()
     #endif
   }
   private var isProfileUITestPreview: Bool {
@@ -315,6 +441,7 @@ struct FriendNetworkView: View {
   }
   private var discover: some View {
     VStack(alignment: .leading, spacing: 18) {
+      if vm.isShowingDemoProfiles { demoNotice }
       orbit
       search
       title("Твої люди", sub: "За інтересами, мовою та кантоном", count: vm.profiles.count)
@@ -326,6 +453,9 @@ struct FriendNetworkView: View {
         LazyVStack(spacing: 13) {
           ForEach(vm.profiles) { p in
             Button {
+              if !p.id.hasPrefix("preview-") {
+                Task { try? await FriendsAPI.recordVisit(p.id, invisible: subscription.isPremium && invisibleBrowsing) }
+              }
               selected = p
             } label: {
               FriendCard(profile: p, accent: limeAccent)
@@ -336,6 +466,21 @@ struct FriendNetworkView: View {
         }
       }
     }.padding(.horizontal, 18)
+  }
+  private var demoNotice: some View {
+    HStack(spacing: 10) {
+      Image(systemName: "sparkles")
+      VStack(alignment: .leading, spacing: 2) {
+        Text("Демо-каталог").font(.subheadline.bold())
+        Text("Тестові профілі для перегляду дизайну").font(.caption)
+      }
+      Spacer()
+    }
+    .foregroundColor(limeAccent)
+    .padding(13)
+    .background(limeAccent.opacity(0.09))
+    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+    .overlay(RoundedRectangle(cornerRadius: 16).stroke(limeAccent.opacity(0.22)))
   }
   private var orbit: some View {
     ZStack {
@@ -411,6 +556,22 @@ struct FriendNetworkView: View {
           .background(limeAccent).clipShape(RoundedRectangle(cornerRadius: 16))
         }
       }
+      HStack(spacing: 10) {
+        Button {
+          guard subscription.isPremium else { paywall = true; return }
+          vm.interest = .travel; vm.nearby = true
+          Task { await vm.reload() }
+        } label: {
+          Label("Travel buddy", systemImage: "airplane").frame(maxWidth: .infinity, minHeight: 44)
+        }
+        Button {
+          guard subscription.isPremium else { paywall = true; return }
+          vm.interest = .sports; vm.nearby = true
+          Task { await vm.reload() }
+        } label: {
+          Label("Activity buddy", systemImage: "figure.run").frame(maxWidth: .infinity, minHeight: 44)
+        }
+      }.font(.caption.bold()).foregroundColor(limeAccent).background(limeAccent.opacity(0.07)).clipShape(RoundedRectangle(cornerRadius: 15))
     }
   }
   private var events: some View {
@@ -510,6 +671,18 @@ struct FriendNetworkView: View {
           Image(systemName: "checkmark").foregroundColor(.black).frame(width: 40, height: 40)
             .background(limeAccent).clipShape(Circle())
         }
+        HStack(spacing: 10) {
+          Button {
+            guard subscription.isPremium else { paywall = true; return }
+            Task { await vm.loadVisitors(); showVisitors = true }
+          } label: {
+            Label("Гості профілю", systemImage: "eye.fill").frame(maxWidth: .infinity, minHeight: 50)
+          }
+          Toggle(isOn: Binding(get: { invisibleBrowsing }, set: { value in
+            if subscription.isPremium { invisibleBrowsing = value } else { paywall = true }
+          })) { Label("Невидимий", systemImage: "eye.slash.fill") }
+          .toggleStyle(.button).frame(maxWidth: .infinity, minHeight: 50)
+        }.font(.caption.bold()).foregroundColor(limeAccent)
       } else if let id = c.conversationID {
         Button {
           Task {
@@ -527,6 +700,7 @@ struct FriendNetworkView: View {
     VStack(alignment: .leading, spacing: 18) {
       if let p = vm.myProfile {
         VStack(alignment: .leading, spacing: 18) {
+          moderationBanner(status: p.moderationStatus, reason: p.moderationReason)
           HStack(spacing: 15) {
             avatar(p).scaleEffect(1.2)
             VStack(alignment: .leading, spacing: 4) {
@@ -589,6 +763,21 @@ struct FriendNetworkView: View {
         profileLaunchCard
       }
     }.padding(.horizontal, 18)
+  }
+  private func moderationBanner(status: String, reason: String?) -> some View {
+    let pending = status == "pending"
+    let rejected = status == "rejected"
+    return HStack(alignment: .top, spacing: 11) {
+      Image(systemName: pending ? "clock.badge.checkmark" : rejected ? "exclamationmark.shield.fill" : "checkmark.shield.fill")
+      VStack(alignment: .leading, spacing: 3) {
+        Text(pending ? "Профіль на перевірці" : rejected ? "Профіль потребує змін" : "Профіль схвалено").font(.subheadline.bold())
+        Text(rejected ? (reason ?? "Відредагуй дані та надішли профіль повторно.") : pending ? "Після схвалення профіль з’явиться у пошуку людей." : "Профіль видимий у каталозі.").font(.caption)
+      }
+      Spacer()
+    }
+    .foregroundColor(rejected ? .orange : limeAccent)
+    .padding(14).background((rejected ? Color.orange : limeAccent).opacity(0.09))
+    .clipShape(RoundedRectangle(cornerRadius: 16))
   }
   private var profileLaunchCard: some View {
     VStack(alignment: .leading, spacing: 20) {
@@ -697,6 +886,33 @@ struct FriendNetworkView: View {
   }
 }
 
+private struct FriendVisitorsView: View {
+  @Environment(\.dismiss) private var dismiss
+  let visitors: [SocialProfileVisitor]
+  var body: some View {
+    NavigationStack {
+      ZStack {
+        JourneyVisual.black.ignoresSafeArea()
+        ScrollView {
+          LazyVStack(spacing: 12) {
+            if visitors.isEmpty {
+              ContentUnavailableView("Гостей ще немає", systemImage: "eye", description: Text("Тут з’являться люди, які відкривали твій social passport."))
+            } else {
+              ForEach(visitors) { item in
+                HStack(spacing: 13) {
+                  Text(item.profile.initials).font(.headline.bold()).foregroundStyle(.black).frame(width: 48, height: 48).background(JourneyVisual.lime).clipShape(Circle())
+                  VStack(alignment: .leading, spacing: 3) { Text(item.profile.displayName).font(.headline).foregroundStyle(.white); Text("\(item.profile.city) · \(item.visitCount) переглядів").font(.caption).foregroundStyle(.white.opacity(0.55)) }
+                  Spacer(); Text(item.lastVisitedAt, style: .relative).font(.caption2).foregroundStyle(.white.opacity(0.45))
+                }.padding(14).background(.white.opacity(0.07)).clipShape(RoundedRectangle(cornerRadius: 18))
+              }
+            }
+          }.padding(18)
+        }
+      }.navigationTitle("Гості профілю").toolbar { ToolbarItem(placement: .cancellationAction) { Button("Закрити") { dismiss() } } }
+    }
+  }
+}
+
 private struct FriendCard: View {
   let profile: SocialProfile
   let accent: Color
@@ -736,6 +952,7 @@ private struct FriendProfileDetail: View {
   @ObservedObject var vm: FriendNetworkViewModel
   @Binding var conversation: ChatConversation?
   @State var message = ""
+  private var isDemo: Bool { profile.id.hasPrefix("preview-") }
   var body: some View {
     ZStack {
       JourneyVisual.black.ignoresSafeArea()
@@ -749,7 +966,7 @@ private struct FriendProfileDetail: View {
                 .background(.white.opacity(0.1)).clipShape(Circle())
             }
             Spacer()
-            Menu {
+            if !isDemo { Menu {
               Button("Поскаржитися", role: .destructive) {
                 Task {
                   do {
@@ -771,7 +988,7 @@ private struct FriendProfileDetail: View {
               }
             } label: {
               Image(systemName: "ellipsis").foregroundColor(.white)
-            }
+            } }
           }
           Text("\(profile.matchScore)% збіг").font(.caption.bold()).foregroundColor(
             JourneyVisual.lime)
@@ -788,7 +1005,13 @@ private struct FriendProfileDetail: View {
                 .overlay(Capsule().stroke(JourneyVisual.lime.opacity(0.2)))
             }
           }
-          if profile.connectionState == "accepted", let id = profile.conversationID {
+          if isDemo {
+            Label("Демо-профіль · дії вимкнені", systemImage: "sparkles")
+              .font(.subheadline.bold()).foregroundColor(JourneyVisual.lime)
+              .frame(maxWidth: .infinity, minHeight: 52)
+              .background(JourneyVisual.lime.opacity(0.1))
+              .clipShape(RoundedRectangle(cornerRadius: 17))
+          } else if profile.connectionState == "accepted", let id = profile.conversationID {
             Button {
               Task { conversation = try? await ChatAPI.conversation(id: id) }
             } label: {
@@ -1289,7 +1512,7 @@ private struct FriendProfileEditor: View {
           ).clipShape(Capsule())
         }
       }
-      Label("Профіль пройде автоматичну safety-перевірку", systemImage: "shield.lefthalf.filled")
+      Label("Профіль буде надіслано на перевірку адміністратору", systemImage: "shield.lefthalf.filled")
         .font(.caption).foregroundColor(.white.opacity(0.5))
     }.foregroundColor(.white).padding(20).background(
       LinearGradient(

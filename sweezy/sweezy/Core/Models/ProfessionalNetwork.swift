@@ -71,6 +71,8 @@ struct ProfessionalProfile: Codable, Identifiable, Equatable {
     let isVerified: Bool
     let isFeatured: Bool
     let openToConnections: Bool
+    var moderationStatus: String? = nil
+    var moderationReason: String? = nil
     let connectionState: String
     let connectionID: String?
     let conversationID: String?
@@ -94,6 +96,8 @@ struct ProfessionalProfile: Codable, Identifiable, Equatable {
         case isVerified = "is_verified"
         case isFeatured = "is_featured"
         case openToConnections = "open_to_connections"
+        case moderationStatus = "moderation_status"
+        case moderationReason = "moderation_reason"
         case connectionState = "connection_state"
         case connectionID = "connection_id"
         case conversationID = "conversation_id"

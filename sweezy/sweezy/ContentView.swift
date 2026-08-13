@@ -82,6 +82,10 @@ struct MainAppContent: View {
         ZStack {
             if isArticleLayoutUITest {
                 JourneyGuideArticleView(guide: Self.articleLayoutFixture)
+            } else if isDiscoveryUITest {
+                NavigationStack { SwissDiscoveryView() }
+            } else if isTripPlannerUITest {
+                SwissTripPlannerView()
             } else if isCareerHubUITest || isJobsGateUITest {
                 JobsView()
             } else if isCareerToolsUITest {
@@ -241,6 +245,24 @@ struct MainAppContent: View {
         #endif
     }
 
+    private var isDiscoveryUITest: Bool {
+        #if DEBUG
+        ProcessInfo.processInfo.environment["UITESTS"] == "1" &&
+            ProcessInfo.processInfo.arguments.contains("--ui-test-discovery")
+        #else
+        false
+        #endif
+    }
+
+    private var isTripPlannerUITest: Bool {
+        #if DEBUG
+        ProcessInfo.processInfo.environment["UITESTS"] == "1" &&
+            ProcessInfo.processInfo.arguments.contains("--ui-test-trip-planner")
+        #else
+        false
+        #endif
+    }
+
     private var isJobsGateUITest: Bool {
         #if DEBUG
         ProcessInfo.processInfo.environment["UITESTS"] == "1" &&
@@ -282,6 +304,7 @@ struct MainAppContent: View {
         ProcessInfo.processInfo.arguments.contains("--preview-friends-people") ||
             (ProcessInfo.processInfo.environment["UITESTS"] == "1" &&
             (ProcessInfo.processInfo.arguments.contains("--ui-test-friends") ||
+             ProcessInfo.processInfo.arguments.contains("--ui-test-friends-gate") ||
              ProcessInfo.processInfo.arguments.contains("--ui-test-friends-profile") ||
              ProcessInfo.processInfo.arguments.contains("--ui-test-friends-editor")))
         #else

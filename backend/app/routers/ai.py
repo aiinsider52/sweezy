@@ -69,6 +69,38 @@ class AskSweezyModelOutput(BaseModel):
     requires_professional: bool = False
 
 
+class TripCandidate(BaseModel):
+    id: str = Field(min_length=1, max_length=100)
+    title: str = Field(min_length=1, max_length=255)
+    region: str = Field(min_length=1, max_length=255)
+    route: str = Field(min_length=1, max_length=1500)
+    tags: list[str] = Field(default_factory=list, max_length=12)
+
+
+class TripPlanRequest(BaseModel):
+    origin: str = Field(min_length=2, max_length=120)
+    budget_chf: int = Field(ge=20, le=3000)
+    transport: str = Field(pattern="^(publicTransit|car|walking)$")
+    weather: str = Field(pattern="^(any|sun|rain|snow)$")
+    family: bool = False
+    available_hours: int = Field(ge=2, le=24)
+    language: str = Field(default="uk", min_length=2, max_length=8)
+    candidates: list[TripCandidate] = Field(min_length=1, max_length=30)
+
+
+class TripPlanResponse(BaseModel):
+    selected_place_id: str
+    rationale: str
+    itinerary: list[str] = Field(min_length=1, max_length=6)
+    generated_by_ai: bool
+
+
+class TripPlanModelOutput(BaseModel):
+    selected_place_id: str
+    rationale: str = Field(max_length=500)
+    itinerary: list[str] = Field(min_length=1, max_length=6)
+
+
 def _tokenize(value: str) -> set[str]:
     return {part for part in re.findall(r"[\wäöüßéèêàçіїєґ']+", value.lower(), flags=re.UNICODE) if len(part) > 2}
 
@@ -241,6 +273,48 @@ def ask_sweezy(request: Request, payload: AskSweezyRequest, db: Session = Depend
     if not documents:
         return _no_source_response(payload.language)
     return _generate_ask_answer(payload, documents)
+
+
+@router.post("/trip-plan", response_model=TripPlanResponse, dependencies=[require_premium()])
+@limiter.limit("6/minute")
+def trip_plan(request: Request, payload: TripPlanRequest) -> TripPlanResponse:
+    fallback = payload.candidates[0]
+    fallback_response = TripPlanResponse(
+        selected_place_id=fallback.id,
+        rationale=f"{fallback.title} fits your transport, time and budget filters.",
+        itinerary=[f"Travel from {payload.origin}", fallback.route, "Save route and share it with companions"],
+        generated_by_ai=False,
+    )
+    settings = get_settings()
+    if not settings.OPENAI_API_KEY:
+        return fallback_response
+    try:
+        from openai import OpenAI
+
+        candidates = "\n".join(
+            f"{item.id}: {item.title}, {item.region}; route={item.route}; tags={','.join(item.tags)}"
+            for item in payload.candidates
+        )
+        response = OpenAI(api_key=settings.OPENAI_API_KEY).responses.create(
+            model=settings.OPENAI_MODEL,
+            instructions=(
+                "Choose exactly one supplied Swiss destination. Respect budget, transport, weather, family and time. "
+                "Never invent a place or transport fact. Answer in requested language using required JSON."
+            ),
+            input=(
+                f"Language={payload.language}; origin={payload.origin}; budget CHF={payload.budget_chf}; "
+                f"transport={payload.transport}; weather={payload.weather}; family={payload.family}; "
+                f"hours={payload.available_hours}.\nCandidates:\n{candidates}"
+            ),
+            text={"format": {"type": "json_schema", "name": "trip_plan", "strict": True, "schema": TripPlanModelOutput.model_json_schema()}},
+        )
+        output = TripPlanModelOutput.model_validate(json.loads(response.output_text))
+        valid_ids = {item.id for item in payload.candidates}
+        if output.selected_place_id not in valid_ids:
+            return fallback_response
+        return TripPlanResponse(**output.model_dump(), generated_by_ai=True)
+    except Exception:
+        return fallback_response
 
 
 class CVPersonal(BaseModel):

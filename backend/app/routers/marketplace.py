@@ -1,5 +1,5 @@
 import math
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, Optional
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, Request, status
@@ -16,6 +16,8 @@ from ..schemas.marketplace import (
     AdminServiceListingDetail,
     ListingType,
     MarketplaceReportCreate,
+    MarketplaceProClient,
+    MarketplaceProDashboard,
     MarketplaceSafetyResponse,
     PublicProfileListing,
     PublicUserProfileResponse,
@@ -27,12 +29,24 @@ from ..schemas.marketplace import (
 )
 from ..services.marketplace_moderation import moderate_listing
 from ..services.users import UserService
+from ..services.moderation import ensure_case
 
 
 router = APIRouter()
 admin_router = APIRouter()
 
 _optional_bearer = HTTPBearer(auto_error=False)
+
+
+def _premium(user: User) -> bool:
+    if (user.subscription_status or "free") not in {"trial", "premium"}:
+        return False
+    expires = user.subscription_expire_at
+    if expires is None:
+        return True
+    if expires.tzinfo is None:
+        expires = expires.replace(tzinfo=timezone.utc)
+    return expires > datetime.now(timezone.utc)
 
 
 def _ensure_ai_metadata(listing: ServiceListing) -> bool:
@@ -115,6 +129,18 @@ def list_listings(
     page: int = Query(1, ge=1),
     per_page: int = Query(20, ge=1, le=100),
 ) -> ServiceListingPage:
+    now = datetime.now(timezone.utc)
+    expired = db.execute(select(ServiceListing).where(
+        ServiceListing.is_featured.is_(True),
+        ServiceListing.featured_until.is_not(None),
+        ServiceListing.featured_until <= now,
+    )).scalars().all()
+    if expired:
+        for item in expired:
+            item.is_featured = False
+            item.featured_until = None
+            if item.trust_level == "plus_pro": item.trust_level = "community"
+        db.commit()
     stmt = select(ServiceListing).where(ServiceListing.status == "approved")
     count_stmt = select(func.count()).select_from(ServiceListing).where(ServiceListing.status == "approved")
 
@@ -162,6 +188,54 @@ def my_listings(db: DBSession, user: CurrentUser) -> list[ServiceListingDetail]:
         .all()
     )
     return [ServiceListingDetail.model_validate(r) for r in rows]
+
+
+@router.get("/pro/dashboard", response_model=MarketplaceProDashboard)
+def pro_dashboard(db: DBSession, user: CurrentUser) -> MarketplaceProDashboard:
+    if not _premium(user):
+        raise HTTPException(status_code=402, detail={"code": "plus_required", "feature": "marketplace_pro"})
+    listings = db.execute(select(ServiceListing).where(ServiceListing.author_id == user.id)).scalars().all()
+    conversations = db.execute(select(ChatConversation).where(
+        ChatConversation.seller_id == user.id,
+        ChatConversation.listing_id.is_not(None),
+    ).order_by(ChatConversation.last_message_at.desc().nullslast(), ChatConversation.created_at.desc()).limit(50)).scalars().all()
+    buyer_ids = {item.buyer_id for item in conversations}
+    profiles = db.execute(
+        select(PublicUserProfile).where(PublicUserProfile.user_id.in_(buyer_ids))
+    ).scalars().all() if buyer_ids else []
+    display_names = {profile.user_id: profile.display_name for profile in profiles}
+    clients = [MarketplaceProClient(
+        conversation_id=item.id,
+        display_name=display_names.get(item.buyer_id, "Sweezy client"),
+        listing_title=item.listing_title,
+        last_message_preview=item.last_message_preview,
+        last_message_at=item.last_message_at,
+    ) for item in conversations]
+    return MarketplaceProDashboard(
+        total_listings=len(listings),
+        active_listings=sum(item.status == "approved" for item in listings),
+        total_views=sum(item.view_count for item in listings),
+        inquiries=len(conversations),
+        publication_limit=20,
+        clients=clients,
+    )
+
+
+@router.post("/{listing_id}/promote", response_model=ServiceListingDetail)
+def promote_listing(listing_id: str, db: DBSession, user: CurrentUser) -> ServiceListingDetail:
+    if not _premium(user):
+        raise HTTPException(status_code=402, detail={"code": "plus_required", "feature": "listing_promotion"})
+    listing = db.get(ServiceListing, listing_id)
+    if not listing or listing.author_id != user.id:
+        raise HTTPException(404, "Listing not found")
+    if listing.status != "approved":
+        raise HTTPException(409, "Only approved listings can be promoted")
+    listing.is_featured = True
+    listing.featured_until = datetime.now(timezone.utc) + timedelta(days=7)
+    if not listing.is_verified:
+        listing.trust_level = "plus_pro"
+    db.add(listing); db.commit(); db.refresh(listing)
+    return ServiceListingDetail.model_validate(listing)
 
 
 @router.get("/blocked", response_model=list[str])
@@ -306,14 +380,15 @@ def report_listing(
     if existing:
         return MarketplaceSafetyResponse(message="Report already received")
 
-    db.add(
-        MarketplaceReport(
+    report = MarketplaceReport(
             listing_id=listing_id,
             reporter_id=user.id,
             reason=payload.reason.strip().lower(),
             details=payload.details.strip() if payload.details else None,
         )
-    )
+    db.add(report)
+    db.flush()
+    ensure_case(db, source_type="marketplace_listing", source_id=listing.id, subject_user_id=listing.author_id, reporter_id=user.id, reason=payload.reason, details=payload.details, context={"legacy_report_id": report.id, "title": listing.title, "listing_type": listing.listing_type})
     listing.report_count += 1
     if listing.report_count >= 3:
         listing.is_featured = False
@@ -366,6 +441,15 @@ def create_listing(
 ) -> ServiceListingResponse:
     if not user.email_verified:
         raise HTTPException(status_code=403, detail="Verify your email before creating a listing")
+    current_count = db.scalar(select(func.count()).select_from(ServiceListing).where(
+        ServiceListing.author_id == user.id,
+        ServiceListing.status.in_(("pending", "approved")),
+    )) or 0
+    publication_limit = 20 if _premium(user) else 3
+    if current_count >= publication_limit:
+        code = "publication_limit" if _premium(user) else "plus_required"
+        raise HTTPException(status_code=409 if _premium(user) else 402,
+            detail={"code": code, "feature": "marketplace_publications", "limit": publication_limit})
     listing = ServiceListing(
         listing_type=payload.listing_type.value,
         title=payload.title,

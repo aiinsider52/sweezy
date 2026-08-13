@@ -1,5 +1,18 @@
 import Foundation
 
+private actor TokenRefreshCoordinator {
+    static let shared = TokenRefreshCoordinator()
+    private var task: Task<APIClient.TokenPair, Error>?
+
+    func refresh(_ operation: @escaping @Sendable () async throws -> APIClient.TokenPair) async throws -> APIClient.TokenPair {
+        if let task { return try await task.value }
+        let current = Task { try await operation() }
+        task = current
+        defer { task = nil }
+        return try await current.value
+    }
+}
+
 enum APIClient {
     /// Base URL for the backend. Defaults to local dev server.
     static var baseURL: URL = {
@@ -280,26 +293,18 @@ enum APIClient {
         attachAuth(&req)
         let result = try await timedData(for: req, context: context)
         if let http = result.1 as? HTTPURLResponse, http.statusCode == 401 {
-            let body = String(data: result.0, encoding: .utf8) ?? ""
-            if body.localizedCaseInsensitiveContains("invalid authentication")
-                || body.localizedCaseInsensitiveContains("invalid token")
-                || body.localizedCaseInsensitiveContains("invalid user") {
-                do {
-                    _ = try await refreshAccessToken()
-                    var retryReq = request
-                    attachAuth(&retryReq)
-                    let retryResult = try await timedData(for: retryReq, context: "\(context)-retry")
-                    if let retryHTTP = retryResult.1 as? HTTPURLResponse, retryHTTP.statusCode == 401 {
-                        invalidateSession()
-                    }
-                    return retryResult
-                } catch {
-                    let apiError = error as NSError
-                    if apiError.domain == "API" && (apiError.code == 401 || apiError.code == 403) {
-                        invalidateSession()
-                    }
-                    throw error
+            do {
+                _ = try await TokenRefreshCoordinator.shared.refresh { try await refreshAccessToken() }
+                var retryReq = request
+                attachAuth(&retryReq)
+                let retryResult = try await timedData(for: retryReq, context: "\(context)-retry")
+                if let retryHTTP = retryResult.1 as? HTTPURLResponse, retryHTTP.statusCode == 401 {
+                    invalidateSession()
                 }
+                return retryResult
+            } catch {
+                invalidateSession()
+                throw error
             }
         }
         return result
@@ -1109,6 +1114,31 @@ enum APIClient {
     }
 }
 
+struct TripPlanAPIResponse: Decodable {
+    let selectedPlaceID: String
+    let rationale: String
+    let itinerary: [String]
+    let generatedByAI: Bool
+    enum CodingKeys: String, CodingKey {
+        case rationale, itinerary
+        case selectedPlaceID = "selected_place_id"
+        case generatedByAI = "generated_by_ai"
+    }
+}
+
+extension APIClient {
+    static func createTripPlan(origin: String, budget: Int, transport: String, weather: String, family: Bool, availableHours: Int, candidates: [SwissDiscoveryPlace]) async throws -> TripPlanAPIResponse {
+        var request = URLRequest(url: url("ai/trip-plan"))
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        let candidatePayload = candidates.map { ["id": $0.id, "title": $0.title, "region": $0.region, "route": $0.route, "tags": $0.filters.map(\.rawValue)] as [String: Any] }
+        request.httpBody = try JSONSerialization.data(withJSONObject: ["origin": origin, "budget_chf": budget, "transport": transport, "weather": weather, "family": family, "available_hours": availableHours, "language": Locale.current.language.languageCode?.identifier ?? "uk", "candidates": candidatePayload])
+        let (data, response) = try await authorizedData(for: request, context: "ai_trip_plan")
+        guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else { throw httpError(data: data, response: response) }
+        return try JSONDecoder().decode(TripPlanAPIResponse.self, from: data)
+    }
+}
+
 // MARK: - Marketplace
 extension APIClient {
     private static func makeAPIError(data: Data, response: HTTPURLResponse?, fallback: String) -> NSError {
@@ -1216,7 +1246,9 @@ extension APIClient {
     }
 
     static func createListing(_ listing: ServiceListingCreate) async throws -> ServiceListing {
-        let endpoint = url("marketplace")
+        // Hit canonical trailing-slash route directly. Redirecting an authenticated
+        // POST may lose Authorization/body on some URLSession/edge combinations.
+        let endpoint = url("marketplace/")
         var req = URLRequest(url: endpoint)
         req.httpMethod = "POST"
         req.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -1240,6 +1272,24 @@ extension APIClient {
             throw httpError(data: data, response: resp)
         }
         return try JSONDecoder().decode([ServiceListing].self, from: data)
+    }
+
+    static func fetchMarketplaceProDashboard() async throws -> MarketplaceProDashboard {
+        let (data, response) = try await authorizedData(from: url("marketplace/pro/dashboard"))
+        guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+            throw httpError(data: data, response: response)
+        }
+        return try ChatAPI.decoder.decode(MarketplaceProDashboard.self, from: data)
+    }
+
+    static func promoteListing(id: String) async throws -> ServiceListing {
+        var request = URLRequest(url: url("marketplace/\(id)/promote"))
+        request.httpMethod = "POST"
+        let (data, response) = try await authorizedData(for: request, context: "marketplace_promote")
+        guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+            throw httpError(data: data, response: response)
+        }
+        return try ChatAPI.decoder.decode(ServiceListing.self, from: data)
     }
 
     static func updateListing(id: String, payload: ServiceListingUpdate) async throws -> ServiceListing {

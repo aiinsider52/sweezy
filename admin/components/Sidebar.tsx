@@ -37,7 +37,7 @@ const groups = [
       { href: '/admin/marketplace', label: 'Marketplace', icon: Store },
       { href: '/admin/appointments', label: 'Appointments', icon: Calendar },
       { href: '/admin/expert-questions', label: 'Expert Q&A', icon: MessageCircleQuestion },
-      { href: '/admin/chat-reports', label: 'Chat Safety', icon: ShieldAlert },
+      { href: '/admin/reports-safety', label: 'Reports & Safety', icon: ShieldAlert },
     ],
   },
   {
@@ -63,6 +63,7 @@ const groups = [
 export default function Sidebar() {
   const pathname = usePathname()
   const [pendingMarketplaceIds, setPendingMarketplaceIds] = useState<string[]>([])
+  const [openSafetyCount, setOpenSafetyCount] = useState(0)
   const [unseenMarketplaceCount, setUnseenMarketplaceCount] = useState(0)
   const [expanded, setExpanded] = useState<Set<string>>(() => {
     const activeGroup = groups.find(group => group.items.some(item => pathname?.startsWith(item.href)))?.id
@@ -74,14 +75,19 @@ export default function Sidebar() {
 
     async function loadMarketplacePending() {
       try {
-        const res = await fetch('/api/admin/marketplace', { cache: 'no-store' })
-        const data = await res.json().catch(() => [])
+        const [marketplaceRes, safetyRes] = await Promise.all([
+          fetch('/api/admin/marketplace', { cache: 'no-store' }),
+          fetch('/api/admin/reports-safety/stats', { cache: 'no-store' }),
+        ])
+        const data = await marketplaceRes.json().catch(() => [])
+        const safetyData = await safetyRes.json().catch(() => ({}))
         if (!Array.isArray(data) || cancelled) return
         const pendingIds = data
           .filter((item: { status?: string; id?: string }) => item?.status === 'pending' && item?.id)
           .map((item: { id: string }) => item.id)
 
         setPendingMarketplaceIds(pendingIds)
+        setOpenSafetyCount(Number(safetyData?.open || 0) + Number(safetyData?.reviewing || 0))
 
         if (typeof window !== 'undefined') {
           const seen = JSON.parse(localStorage.getItem('marketplace_seen_pending_ids') || '[]') as string[]
@@ -89,7 +95,7 @@ export default function Sidebar() {
           setUnseenMarketplaceCount(unseen.length)
         }
       } catch {
-        if (!cancelled) setPendingMarketplaceIds([])
+        if (!cancelled) { setPendingMarketplaceIds([]); setOpenSafetyCount(0) }
       }
     }
 
@@ -146,11 +152,11 @@ export default function Sidebar() {
                       <it.icon size={16} aria-hidden="true" />
                       <span className="flex flex-1 items-center justify-between gap-2">
                         <span>{it.label}</span>
-                        {it.href === '/admin/marketplace' && marketplacePendingCount > 0 && (
+                        {((it.href === '/admin/marketplace' && marketplacePendingCount > 0) || (it.href === '/admin/reports-safety' && openSafetyCount > 0)) && (
                           <span className="flex items-center gap-2">
-                            {unseenMarketplaceCount > 0 && <span className="h-2.5 w-2.5 rounded-full bg-red-500" />}
+                            {it.href === '/admin/marketplace' && unseenMarketplaceCount > 0 && <span className="h-2.5 w-2.5 rounded-full bg-red-500" />}
                             <span className="rounded-full bg-red-500/20 px-2 py-0.5 text-xs font-semibold text-red-200">
-                              {marketplacePendingCount}
+                              {it.href === '/admin/marketplace' ? marketplacePendingCount : openSafetyCount}
                             </span>
                           </span>
                         )}
@@ -166,4 +172,3 @@ export default function Sidebar() {
     </aside>
   )
 }
-

@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime, timedelta, timezone
 from math import atan2, cos, radians, sin, sqrt
 
-from fastapi import APIRouter, BackgroundTasks, HTTPException, Query, status
+from fastapi import APIRouter, HTTPException, Query, status
 from sqlalchemy import String, and_, cast, func, or_, select
 from sqlalchemy.exc import IntegrityError
 
@@ -13,14 +13,15 @@ from ..models.event_listing import EventListing
 from ..models.marketplace import MarketplaceBlock
 from ..models.social import (
     EventAttendance, FriendConnection, SocialEventInvite, SocialEventMessage, SocialProfile,
-    SocialProfileReport,
+    SocialProfileReport, SocialProfileVisit,
 )
 from ..models.user import PublicUserProfile, User
-from ..services.social_moderation import moderate_social_profile
+from ..services.moderation import ensure_case, ensure_profile_review_case
 from ..schemas.social import (
     AttendanceResponse, AttendanceUpsert, FriendConnectionResponse, FriendDecision, FriendRequestCreate,
     SocialActionResponse, SocialEventInviteCreate, SocialEventMessageCreate, SocialEventMessageResponse,
     SocialEventResponse, SocialProfilePage, SocialProfileResponse, SocialProfileUpsert, SocialReportCreate,
+    SocialProfileVisitCreate, SocialProfileVisitorResponse,
 )
 
 router = APIRouter()
@@ -167,16 +168,13 @@ def my_profile(db: DBSession, user: CurrentUser):
 
 
 @router.put("/profile/me", response_model=SocialProfileResponse)
-def save_profile(payload: SocialProfileUpsert, bg: BackgroundTasks, db: DBSession, user: CurrentUser):
+def save_profile(payload: SocialProfileUpsert, db: DBSession, user: CurrentUser):
     if not user.email_verified: raise HTTPException(403, "Verify your email before publishing")
     if not payload.guidelines_accepted: raise HTTPException(422, "Community guidelines must be accepted")
     values = payload.model_dump(exclude={"guidelines_accepted"})
-    suspicious = (payload.display_name + " " + payload.bio).lower()
-    blocked_terms = {"escort", "casino", "crypto investment", "loan guaranteed", "onlyfans"}
-    moderation_status = "pending" if any(term in suspicious for term in blocked_terms) else "approved"
     values.update(guidelines_accepted=True, is_verified=user.email_verified,
-                  moderation_status=moderation_status,
-                  moderation_reason="Automatic safety review" if moderation_status == "pending" else None)
+                  moderation_status="pending", moderation_reason=None,
+                  moderated_at=None, moderated_by=None)
     profile = db.get(SocialProfile, user.id)
     if profile is None: profile = SocialProfile(user_id=user.id, **values)
     else:
@@ -185,8 +183,9 @@ def save_profile(payload: SocialProfileUpsert, bg: BackgroundTasks, db: DBSessio
     public = db.get(PublicUserProfile, user.id)
     if public is None: db.add(PublicUserProfile(user_id=user.id, display_name=payload.display_name, is_verified=user.email_verified))
     else: public.display_name = payload.display_name
+    db.flush()
+    ensure_profile_review_case(db, kind="social", user_id=user.id, context={"display_name": profile.display_name, "canton": profile.canton, "city": profile.city, "bio": profile.bio, "avatar_url": profile.avatar_url})
     db.commit(); db.refresh(profile)
-    bg.add_task(moderate_social_profile, user.id)
     return _response(profile, profile)
 
 
@@ -199,6 +198,57 @@ def boost_profile(db: DBSession, user: CurrentUser):
     profile.boosted_until = _now() + timedelta(days=7)
     db.add(profile); db.commit(); db.refresh(profile)
     return _response(profile, profile)
+
+
+@router.post("/profiles/{target_id}/visit", response_model=SocialActionResponse)
+def record_profile_visit(target_id: str, payload: SocialProfileVisitCreate, db: DBSession, user: CurrentUser):
+    if target_id == user.id:
+        return SocialActionResponse(message="Own profile visit ignored")
+    target = db.get(SocialProfile, target_id)
+    if not target or target.moderation_status != "approved" or not target.is_visible:
+        raise HTTPException(404, "Profile unavailable")
+    blocked, blocked_by = _blocked_ids(db, user.id)
+    unavailable = db.scalar(select(func.count()).select_from(SocialProfile).where(
+        SocialProfile.user_id == target_id,
+        or_(SocialProfile.user_id.in_(blocked), SocialProfile.user_id.in_(blocked_by)),
+    )) or 0
+    if unavailable:
+        raise HTTPException(404, "Profile unavailable")
+    if payload.invisible:
+        if not _premium(user):
+            raise HTTPException(status_code=402, detail={"code": "plus_required", "feature": "invisible_browsing"})
+        return SocialActionResponse(message="Invisible visit")
+    item = db.execute(select(SocialProfileVisit).where(
+        SocialProfileVisit.profile_user_id == target_id,
+        SocialProfileVisit.visitor_id == user.id,
+    )).scalar_one_or_none()
+    if item is None:
+        item = SocialProfileVisit(profile_user_id=target_id, visitor_id=user.id)
+    else:
+        item.visit_count += 1
+        item.last_visited_at = _now()
+    db.add(item); db.commit()
+    return SocialActionResponse(message="Visit recorded")
+
+
+@router.get("/profile/me/visitors", response_model=list[SocialProfileVisitorResponse])
+def profile_visitors(db: DBSession, user: CurrentUser):
+    if not _premium(user):
+        raise HTTPException(status_code=402, detail={"code": "plus_required", "feature": "profile_visitors"})
+    own = db.get(SocialProfile, user.id)
+    if not own:
+        raise HTTPException(409, "Create your friend profile first")
+    rows = db.execute(select(SocialProfileVisit, SocialProfile).join(
+        SocialProfile, SocialProfile.user_id == SocialProfileVisit.visitor_id
+    ).where(
+        SocialProfileVisit.profile_user_id == user.id,
+        SocialProfile.moderation_status == "approved",
+    ).order_by(SocialProfileVisit.last_visited_at.desc()).limit(100)).all()
+    return [SocialProfileVisitorResponse(
+        profile=_response(profile, own, _pair(db, user.id, profile.user_id)),
+        visit_count=visit.visit_count,
+        last_visited_at=visit.last_visited_at,
+    ) for visit, profile in rows]
 
 
 @router.post("/profiles/{target_id}/connect", response_model=FriendConnectionResponse, status_code=201)
@@ -349,7 +399,11 @@ def send_event_message(event_id: str, payload: SocialEventMessageCreate, db: DBS
 def report(target_id: str, payload: SocialReportCreate, db: DBSession, user: CurrentUser):
     if target_id == user.id or not db.get(SocialProfile, target_id): raise HTTPException(404, "Profile not found")
     existing = db.execute(select(SocialProfileReport).where(SocialProfileReport.profile_user_id == target_id, SocialProfileReport.reporter_id == user.id)).scalar_one_or_none()
-    if not existing: db.add(SocialProfileReport(profile_user_id=target_id, reporter_id=user.id, reason=payload.reason, details=payload.details)); db.commit()
+    if not existing:
+        existing = SocialProfileReport(profile_user_id=target_id, reporter_id=user.id, reason=payload.reason, details=payload.details)
+        db.add(existing); db.flush()
+        ensure_case(db, source_type="social_profile", source_id=target_id, subject_user_id=target_id, reporter_id=user.id, reason=payload.reason, details=payload.details, context={"legacy_report_id": existing.id})
+        db.commit()
     return SocialActionResponse(message="Report received")
 
 

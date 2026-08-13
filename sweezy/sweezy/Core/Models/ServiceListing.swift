@@ -202,6 +202,7 @@ struct ServiceListing: Codable, Identifiable, Equatable {
     let rejectionReason: String?
     let isVerified: Bool
     let isFeatured: Bool
+    let featuredUntil: Date?
     let trustLevel: String
     let partnerLabel: String?
     let moderationNotes: String?
@@ -232,6 +233,7 @@ struct ServiceListing: Codable, Identifiable, Equatable {
         case rejectionReason = "rejection_reason"
         case isVerified = "is_verified"
         case isFeatured = "is_featured"
+        case featuredUntil = "featured_until"
         case trustLevel = "trust_level"
         case partnerLabel = "partner_label"
         case moderationNotes = "moderation_notes"
@@ -269,6 +271,11 @@ struct ServiceListing: Codable, Identifiable, Equatable {
         rejectionReason = try? c.decode(String.self, forKey: .rejectionReason)
         isVerified = (try? c.decode(Bool.self, forKey: .isVerified)) ?? false
         isFeatured = (try? c.decode(Bool.self, forKey: .isFeatured)) ?? false
+        if let raw = try? c.decode(String.self, forKey: .featuredUntil) {
+            featuredUntil = Self.parseDate(raw)
+        } else {
+            featuredUntil = nil
+        }
         trustLevel = (try? c.decode(String.self, forKey: .trustLevel)) ?? "community"
         partnerLabel = try? c.decode(String.self, forKey: .partnerLabel)
         moderationNotes = try? c.decode(String.self, forKey: .moderationNotes)
@@ -426,6 +433,37 @@ struct ServiceListingPage: Decodable {
         case items, total, page
         case perPage = "per_page"
         case pages
+    }
+}
+
+struct MarketplaceProClient: Decodable, Identifiable {
+    let conversationID: String
+    let displayName: String
+    let listingTitle: String
+    let lastMessagePreview: String?
+    let lastMessageAt: Date?
+    var id: String { conversationID }
+    enum CodingKeys: String, CodingKey {
+        case conversationID = "conversation_id"
+        case displayName = "display_name"
+        case listingTitle = "listing_title"
+        case lastMessagePreview = "last_message_preview"
+        case lastMessageAt = "last_message_at"
+    }
+}
+
+struct MarketplaceProDashboard: Decodable {
+    let totalListings, activeListings, totalViews, inquiries, publicationLimit: Int
+    let proBadge: Bool
+    let clients: [MarketplaceProClient]
+    enum CodingKeys: String, CodingKey {
+        case clients
+        case totalListings = "total_listings"
+        case activeListings = "active_listings"
+        case totalViews = "total_views"
+        case inquiries
+        case publicationLimit = "publication_limit"
+        case proBadge = "pro_badge"
     }
 }
 

@@ -42,6 +42,7 @@ from ..models.network import ProfessionalProfile
 from ..models.social import SocialProfile
 from ..models.marketplace import MarketplaceBlock, ServiceListing
 from ..models.user import PublicUserProfile, User
+from ..services.moderation import ensure_case
 from ..schemas.chat import (
     AdminChatReportResponse,
     AdminChatReportUpdate,
@@ -759,14 +760,15 @@ def report_message(
         )
     ).scalar_one_or_none()
     if not existing:
-        db.add(
-            ChatMessageReport(
+        report = ChatMessageReport(
                 message_id=message.id,
                 reporter_id=user.id,
                 reason=payload.reason,
                 details=payload.details.strip() if payload.details else None,
             )
-        )
+        db.add(report)
+        db.flush()
+        ensure_case(db, source_type="chat_message", source_id=message.id, subject_user_id=message.sender_id, reporter_id=user.id, reason=payload.reason, details=payload.details, context={"legacy_report_id": report.id, "conversation_id": message.conversation_id, "message": message.body[:500]})
         db.commit()
         CHAT_SAFETY_ACTIONS.labels(action="message_report").inc()
     return MarketplaceSafetyResponse(message="Report received for moderation")
@@ -836,6 +838,10 @@ async def chat_websocket(websocket: WebSocket) -> None:
             user = UserService.get_by_id(db, user_id)
             if not user or not user.is_active:
                 raise ValueError("Inactive user")
+            from ..services.moderation import refresh_safety_state
+            refresh_safety_state(db, user)
+            if user.safety_status in {"suspended", "banned"}:
+                raise ValueError("Restricted user")
     except Exception:  # noqa: BLE001 - websocket authentication rejects every malformed token variant
         await websocket.close(code=4401, reason="Invalid authentication")
         return

@@ -1,17 +1,10 @@
-"use server"
-import { NextRequest, NextResponse } from "next/server"
-import { cookies } from "next/headers"
+import { NextRequest } from "next/server"
+import { serverFetch } from "@/lib/server"
 
 export async function GET(req: NextRequest) {
-  const token = (await cookies()).get("access_token")?.value || ""
-  const base = process.env.NEXT_PUBLIC_API_URL || "https://sweezy-9xyk.onrender.com/api/v1"
   const months = req.nextUrl.searchParams.get("months") || "6"
-  const res = await fetch(`${base}/admin/subscriptions/analytics?months=${encodeURIComponent(months)}`, {
-    headers: { Authorization: `Bearer ${token}` },
-    cache: "no-store",
-  })
+  const res = await serverFetch(`/admin/subscriptions/analytics?months=${encodeURIComponent(months)}`)
   const text = await res.text()
-  return new NextResponse(text, { status: res.status, headers: { "Content-Type": res.headers.get("Content-Type") || "application/json" } })
+  return new Response(text, { status: res.status, headers: { "Content-Type": res.headers.get("Content-Type") || "application/json", "Cache-Control": "private, no-store" } })
 }
-
 

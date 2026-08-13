@@ -119,6 +119,7 @@ class ServiceListingResponse(BaseModel):
     rejection_reason: Optional[str] = None
     is_verified: bool = False
     is_featured: bool = False
+    featured_until: Optional[datetime] = None
     trust_level: str = "community"
     partner_label: Optional[str] = None
     is_expert: bool = False
@@ -159,6 +160,24 @@ class MarketplaceReportCreate(BaseModel):
 class MarketplaceSafetyResponse(BaseModel):
     ok: bool = True
     message: str
+
+
+class MarketplaceProClient(BaseModel):
+    conversation_id: str
+    display_name: str
+    listing_title: str
+    last_message_preview: Optional[str] = None
+    last_message_at: Optional[datetime] = None
+
+
+class MarketplaceProDashboard(BaseModel):
+    total_listings: int
+    active_listings: int
+    total_views: int
+    inquiries: int
+    publication_limit: int
+    pro_badge: bool = True
+    clients: list[MarketplaceProClient] = Field(default_factory=list)
 
 
 class PublicProfileListing(BaseModel):

@@ -8,6 +8,7 @@ from backend.app.core.database import SessionLocal
 from backend.app.core.security import create_access_token
 from backend.app.main import app
 from backend.app.services.users import UserService
+from backend.app.models.network import ProfessionalProfile
 
 
 client = TestClient(app)
@@ -47,6 +48,10 @@ def _profile(headers: dict[str, str], *, name: str, canton: str, role: str, goal
         },
     )
     assert response.status_code == 200, response.text
+    with SessionLocal() as db:
+        saved = db.get(ProfessionalProfile, response.json()["user_id"])
+        saved.moderation_status = "approved"
+        db.add(saved); db.commit()
     return response.json()
 
 

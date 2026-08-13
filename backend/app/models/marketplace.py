@@ -37,6 +37,7 @@ class ServiceListing(Base):
     ai_score_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
     is_verified: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False, index=True)
     is_featured: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False, index=True)
+    featured_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True, index=True)
     trust_level: Mapped[str] = mapped_column(String(30), default="community", nullable=False, index=True)
     partner_label: Mapped[str | None] = mapped_column(String(80), nullable=True)
     moderation_notes: Mapped[str | None] = mapped_column(Text, nullable=True)

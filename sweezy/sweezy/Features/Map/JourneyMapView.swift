@@ -60,6 +60,7 @@ struct JourneyMapView: View {
             .padding(.horizontal, 18)
             .padding(.top, 12)
             .padding(.bottom, 108)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .overlay(alignment: .trailing) {
             zoomRail

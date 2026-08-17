@@ -11,6 +11,7 @@ from pydantic import BaseModel
 from ..dependencies import CurrentUser, DBSession
 from ..core.database import db_session
 from ..models.subscription import PremiumUsage
+from ..models.subscription import Subscription
 from ..models.user import User
 from ..services import apple_iap_service
 from ..services import stripe_service
@@ -39,6 +40,8 @@ def current(db: DBSession, user: CurrentUser) -> CurrentOut:
 class EntitlementsOut(BaseModel):
     status: str
     expire_at: Optional[datetime] = None
+    plan: str | None = None
+    provider: str | None = None
     is_premium: bool
     ai_access: bool
     favorites_limit: int | None  # None means unlimited
@@ -76,9 +79,32 @@ def entitlements(db: DBSession, user: CurrentUser) -> EntitlementsOut:
         .one_or_none()
     )
     cv_free_uses_remaining = 3 if is_premium else max(0, 3 - (usage.free_uses if usage else 0))
+    active_subscription = None
+    if is_premium:
+        candidates = (
+            db.query(Subscription)
+            .filter(
+                Subscription.user_id == user.id,
+                Subscription.status.in_(["active", "trial"]),
+                Subscription.revocation_date.is_(None),
+            )
+            .order_by(Subscription.updated_at.desc())
+            .all()
+        )
+        for candidate in candidates:
+            period_end = candidate.current_period_end
+            if period_end is None:
+                active_subscription = candidate
+                break
+            comparable = period_end if period_end.tzinfo else period_end.replace(tzinfo=timezone.utc)
+            if comparable > datetime.now(timezone.utc):
+                active_subscription = candidate
+                break
     return EntitlementsOut(
         status=status,
         expire_at=expire_at,
+        plan=active_subscription.plan if active_subscription else None,
+        provider=active_subscription.provider if active_subscription else None,
         is_premium=is_premium,
         ai_access=is_premium,
         favorites_limit=favorites_limit,

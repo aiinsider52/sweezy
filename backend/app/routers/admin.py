@@ -29,7 +29,6 @@ from ..models.subscription import Subscription, SubscriptionEvent
 from ..models.analytics import PaywallEvent
 from ..models.network import ProfessionalProfile
 from ..models.social import SocialProfile
-from ..services import stripe_service
 from ..services.audit import log_audit
 from ..models.moderation import ModerationAction, ModerationCase
 from ..services.moderation import notify_user, utcnow
@@ -86,20 +85,24 @@ def profile_moderation_queue(
     items: list[Dict[str, Any]] = []
     if kind in (None, "social"):
         query = db.query(SocialProfile)
-        if moderation_status: query = query.filter(SocialProfile.moderation_status == moderation_status)
+        if moderation_status:
+            query = query.filter(SocialProfile.moderation_status == moderation_status)
         items.extend(_profile_moderation_item("social", row) for row in query.all())
     if kind in (None, "professional"):
         query = db.query(ProfessionalProfile)
-        if moderation_status: query = query.filter(ProfessionalProfile.moderation_status == moderation_status)
+        if moderation_status:
+            query = query.filter(ProfessionalProfile.moderation_status == moderation_status)
         items.extend(_profile_moderation_item("professional", row) for row in query.all())
     return sorted(items, key=lambda item: item["updated_at"] or "", reverse=True)
 
 
 def _moderate_profile(kind: str, user_id: str, db: DBSession) -> SocialProfile | ProfessionalProfile:
     model = SocialProfile if kind == "social" else ProfessionalProfile if kind == "professional" else None
-    if model is None: raise HTTPException(status_code=404, detail="Profile type not found")
+    if model is None:
+        raise HTTPException(status_code=404, detail="Profile type not found")
     profile = db.get(model, user_id)
-    if not profile: raise HTTPException(status_code=404, detail="Profile not found")
+    if not profile:
+        raise HTTPException(status_code=404, detail="Profile not found")
     return profile
 
 
@@ -112,17 +115,24 @@ def approve_profile(kind: str, user_id: str, payload: ProfileModerationDecision,
     profile.moderated_by = admin.get("sub")
     case = db.scalar(select(ModerationCase).where(ModerationCase.source_key == f"{kind}_profile_review:{user_id}"))
     if case:
-        case.status = "resolved"; case.decision = "approve"; case.moderator_comment = payload.reason or "Profile approved"; case.resolved_at = utcnow(); case.assigned_to = admin.get("sub")
+        case.status = "resolved"
+        case.decision = "approve"
+        case.moderator_comment = payload.reason or "Profile approved"
+        case.resolved_at = utcnow()
+        case.assigned_to = admin.get("sub")
         db.add(ModerationAction(case_id=case.id, subject_user_id=user_id, moderator_id=admin.get("sub"), action="approve", comment=payload.reason or "Profile approved"))
         notify_user(db, user_id=user_id, case_id=case.id, kind="profile_approved", title="Profile approved", body="Your profile is now visible in Sweezy.", event_key=f"moderation:profile:approved:{case.id}:{profile.updated_at}")
-    db.add(profile); db.commit(); db.refresh(profile)
+    db.add(profile)
+    db.commit()
+    db.refresh(profile)
     return _profile_moderation_item(kind, profile)
 
 
 @router.patch("/profile-moderation/{kind}/{user_id}/reject")
 def reject_profile(kind: str, user_id: str, payload: ProfileModerationDecision, admin: CurrentAdmin, db: DBSession) -> Dict[str, Any]:
     reason = (payload.reason or "").strip()
-    if not reason: raise HTTPException(status_code=400, detail="Rejection reason is required")
+    if not reason:
+        raise HTTPException(status_code=400, detail="Rejection reason is required")
     profile = _moderate_profile(kind, user_id, db)
     profile.moderation_status = "rejected"
     profile.moderation_reason = reason
@@ -130,10 +140,16 @@ def reject_profile(kind: str, user_id: str, payload: ProfileModerationDecision, 
     profile.moderated_by = admin.get("sub")
     case = db.scalar(select(ModerationCase).where(ModerationCase.source_key == f"{kind}_profile_review:{user_id}"))
     if case:
-        case.status = "resolved"; case.decision = "reject"; case.moderator_comment = reason; case.resolved_at = utcnow(); case.assigned_to = admin.get("sub")
+        case.status = "resolved"
+        case.decision = "reject"
+        case.moderator_comment = reason
+        case.resolved_at = utcnow()
+        case.assigned_to = admin.get("sub")
         db.add(ModerationAction(case_id=case.id, subject_user_id=user_id, moderator_id=admin.get("sub"), action="reject", comment=reason))
         notify_user(db, user_id=user_id, case_id=case.id, kind="profile_rejected", title="Profile needs changes", body=reason, event_key=f"moderation:profile:rejected:{case.id}:{profile.updated_at}")
-    db.add(profile); db.commit(); db.refresh(profile)
+    db.add(profile)
+    db.commit()
+    db.refresh(profile)
     return _profile_moderation_item(kind, profile)
 
 
@@ -727,29 +743,35 @@ def set_user_subscription(user_id: str, payload: AdminSubscriptionUpdate, db: DB
 
 @router.get("/subscriptions/analytics")
 def subscriptions_analytics(_: CurrentAdmin, db: DBSession, months: int = 6) -> Dict[str, Any]:
-    # Totals by plan
-    monthly = db.query(func.count()).select_from(Subscription).filter(Subscription.status == "active", Subscription.plan == "monthly").scalar() or 0
-    yearly = db.query(func.count()).select_from(Subscription).filter(Subscription.status == "active", Subscription.plan == "yearly").scalar() or 0
-    premium_users = db.query(func.count()).select_from(User).filter(User.subscription_status == "premium").scalar() or 0
-    trial_users = db.query(func.count()).select_from(User).filter(User.subscription_status == "trial").scalar() or 0
+    now = datetime.now(timezone.utc)
+    valid_period = or_(Subscription.current_period_end.is_(None), Subscription.current_period_end > now)
+    active_rows = db.query(Subscription).filter(
+        Subscription.status == "active",
+        Subscription.revocation_date.is_(None),
+        valid_period,
+    ).all()
+    monthly = sum(1 for row in active_rows if row.plan == "monthly")
+    yearly = sum(1 for row in active_rows if row.plan == "yearly")
+    premium_users = db.query(func.count()).select_from(User).filter(
+        User.subscription_status == "premium",
+        or_(User.subscription_expire_at.is_(None), User.subscription_expire_at > now),
+    ).scalar() or 0
+    trial_users = db.query(func.count()).select_from(User).filter(
+        User.subscription_status == "trial",
+        or_(User.subscription_expire_at.is_(None), User.subscription_expire_at > now),
+    ).scalar() or 0
     free_users = db.query(func.count()).select_from(User).filter(User.subscription_status == "free").scalar() or 0
-    # Last 6 months time series
-    rows = (
-        db.query(
-            func.date_trunc("month", Subscription.created_at).label("m"),
-            func.sum(func.case((Subscription.plan == "monthly", 1), else_=0)).label("monthly"),
-            func.sum(func.case((Subscription.plan == "yearly", 1), else_=0)).label("yearly"),
-        )
-        .filter(Subscription.status == "active")
-        .group_by(func.date_trunc("month", Subscription.created_at))
-        .order_by(func.date_trunc("month", Subscription.created_at).desc())
-        .limit(max(1, min(24, months)))
-        .all()
-    )
-    series = [
-        {"month": r[0].strftime("%Y-%m"), "monthly": int(r[1] or 0), "yearly": int(r[2] or 0)}
-        for r in reversed(rows)
-    ]
+    by_month: dict[str, dict[str, int]] = {}
+    for row in active_rows:
+        moment = row.purchased_at or row.created_at
+        if not moment:
+            continue
+        key = moment.strftime("%Y-%m")
+        bucket = by_month.setdefault(key, {"monthly": 0, "yearly": 0})
+        if row.plan in bucket:
+            bucket[row.plan] += 1
+    selected_months = sorted(by_month)[-max(1, min(24, months)):]
+    series = [{"month": key, **by_month[key]} for key in selected_months]
     return {
         "totals": {
             "monthly": int(monthly),

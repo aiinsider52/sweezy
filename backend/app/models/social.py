@@ -3,7 +3,20 @@ from __future__ import annotations
 from datetime import datetime
 from uuid import uuid4
 
-from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Index, Integer, JSON, String, Text, UniqueConstraint, func
+from sqlalchemy import (
+    JSON,
+    Boolean,
+    CheckConstraint,
+    DateTime,
+    Float,
+    ForeignKey,
+    Index,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
+    func,
+)
 from sqlalchemy.orm import Mapped, mapped_column
 
 from ..core.database import Base
@@ -57,6 +70,24 @@ class FriendConnection(Base):
     status: Mapped[str] = mapped_column(String(20), default="pending", nullable=False, index=True)
     conversation_id: Mapped[str | None] = mapped_column(ForeignKey("chat_conversations.id", ondelete="SET NULL"), nullable=True, index=True)
     responded_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+
+
+class SocialSwipe(Base):
+    __tablename__ = "social_swipes"
+    __table_args__ = (
+        UniqueConstraint("swiper_id", "target_id", name="uq_social_swipe_pair"),
+        CheckConstraint("decision IN ('like', 'pass')", name="ck_social_swipe_decision"),
+        Index("ix_social_swipes_swiper_created", "swiper_id", "created_at"),
+        Index("ix_social_swipes_target_decision", "target_id", "decision", "created_at"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid4()))
+    swiper_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    target_id: Mapped[str] = mapped_column(ForeignKey("social_profiles.user_id", ondelete="CASCADE"), nullable=False)
+    decision: Mapped[str] = mapped_column(String(10), nullable=False)
+    source: Mapped[str] = mapped_column(String(20), default="discovery", nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 

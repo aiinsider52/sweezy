@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
-import { LayoutDashboard, Users, BookOpenText, FileText, Activity, CheckSquare, Calendar, SlidersHorizontal, Newspaper, Rss, ListChecks, Languages, Briefcase, CreditCard, Store, CalendarDays, Sparkles, MessageCircleQuestion, ShieldAlert, Siren, BarChart3, ChevronDown } from 'lucide-react'
+import { LayoutDashboard, Users, BookOpenText, FileText, Activity, CheckSquare, Calendar, SlidersHorizontal, Newspaper, Rss, ListChecks, Languages, Briefcase, CreditCard, Store, CalendarDays, Sparkles, MessageCircleQuestion, ShieldAlert, Siren, BarChart3, ChevronDown, Building2, UserCheck } from 'lucide-react'
 
 const groups = [
   {
@@ -35,6 +35,8 @@ const groups = [
     items: [
       { href: '/admin/jobs', label: 'Jobs', icon: Briefcase },
       { href: '/admin/marketplace', label: 'Marketplace', icon: Store },
+      { href: '/admin/businesses', label: 'Sweezy Pro', icon: Building2 },
+      { href: '/admin/profile-moderation', label: 'Social Passports', icon: UserCheck },
       { href: '/admin/appointments', label: 'Appointments', icon: Calendar },
       { href: '/admin/expert-questions', label: 'Expert Q&A', icon: MessageCircleQuestion },
       { href: '/admin/reports-safety', label: 'Reports & Safety', icon: ShieldAlert },
@@ -64,6 +66,8 @@ export default function Sidebar() {
   const pathname = usePathname()
   const [pendingMarketplaceIds, setPendingMarketplaceIds] = useState<string[]>([])
   const [openSafetyCount, setOpenSafetyCount] = useState(0)
+  const [pendingBusinessCount, setPendingBusinessCount] = useState(0)
+  const [pendingProfileCount, setPendingProfileCount] = useState(0)
   const [unseenMarketplaceCount, setUnseenMarketplaceCount] = useState(0)
   const [expanded, setExpanded] = useState<Set<string>>(() => {
     const activeGroup = groups.find(group => group.items.some(item => pathname?.startsWith(item.href)))?.id
@@ -75,19 +79,25 @@ export default function Sidebar() {
 
     async function loadMarketplacePending() {
       try {
-        const [marketplaceRes, safetyRes] = await Promise.all([
+        const [marketplaceRes, safetyRes, businessRes, profilesRes] = await Promise.all([
           fetch('/api/admin/marketplace', { cache: 'no-store' }),
           fetch('/api/admin/reports-safety/stats', { cache: 'no-store' }),
+          fetch('/api/admin/businesses?status=pending', { cache: 'no-store' }),
+          fetch('/api/admin/profile-moderation?status=pending&kind=social', { cache: 'no-store' }),
         ])
         const data = await marketplaceRes.json().catch(() => [])
         const safetyData = await safetyRes.json().catch(() => ({}))
-        if (!Array.isArray(data) || cancelled) return
-        const pendingIds = data
+        const businessData = await businessRes.json().catch(() => [])
+        const profilesData = await profilesRes.json().catch(() => [])
+        if (cancelled) return
+        const pendingIds = (Array.isArray(data) ? data : [])
           .filter((item: { status?: string; id?: string }) => item?.status === 'pending' && item?.id)
           .map((item: { id: string }) => item.id)
 
         setPendingMarketplaceIds(pendingIds)
         setOpenSafetyCount(Number(safetyData?.open || 0) + Number(safetyData?.reviewing || 0))
+        setPendingBusinessCount(Array.isArray(businessData) ? businessData.length : 0)
+        setPendingProfileCount(Array.isArray(profilesData) ? profilesData.length : 0)
 
         if (typeof window !== 'undefined') {
           const seen = JSON.parse(localStorage.getItem('marketplace_seen_pending_ids') || '[]') as string[]
@@ -95,7 +105,7 @@ export default function Sidebar() {
           setUnseenMarketplaceCount(unseen.length)
         }
       } catch {
-        if (!cancelled) { setPendingMarketplaceIds([]); setOpenSafetyCount(0) }
+        if (!cancelled) { setPendingMarketplaceIds([]); setOpenSafetyCount(0); setPendingBusinessCount(0); setPendingProfileCount(0) }
       }
     }
 
@@ -152,11 +162,11 @@ export default function Sidebar() {
                       <it.icon size={16} aria-hidden="true" />
                       <span className="flex flex-1 items-center justify-between gap-2">
                         <span>{it.label}</span>
-                        {((it.href === '/admin/marketplace' && marketplacePendingCount > 0) || (it.href === '/admin/reports-safety' && openSafetyCount > 0)) && (
+                        {((it.href === '/admin/marketplace' && marketplacePendingCount > 0) || (it.href === '/admin/reports-safety' && openSafetyCount > 0) || (it.href === '/admin/businesses' && pendingBusinessCount > 0) || (it.href === '/admin/profile-moderation' && pendingProfileCount > 0)) && (
                           <span className="flex items-center gap-2">
                             {it.href === '/admin/marketplace' && unseenMarketplaceCount > 0 && <span className="h-2.5 w-2.5 rounded-full bg-red-500" />}
                             <span className="rounded-full bg-red-500/20 px-2 py-0.5 text-xs font-semibold text-red-200">
-                              {it.href === '/admin/marketplace' ? marketplacePendingCount : openSafetyCount}
+                              {it.href === '/admin/marketplace' ? marketplacePendingCount : it.href === '/admin/businesses' ? pendingBusinessCount : it.href === '/admin/profile-moderation' ? pendingProfileCount : openSafetyCount}
                             </span>
                           </span>
                         )}

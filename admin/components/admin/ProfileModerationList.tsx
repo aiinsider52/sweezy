@@ -16,10 +16,10 @@ type Profile = {
   details: Record<string, unknown>
 }
 
-export default function ProfileModerationList() {
+export default function ProfileModerationList({ initialKind = "all" }: { initialKind?: "all" | "social" | "professional" }) {
   const [items, setItems] = useState<Profile[]>([])
   const [status, setStatus] = useState("pending")
-  const [kind, setKind] = useState("all")
+  const [kind, setKind] = useState(initialKind)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const [busy, setBusy] = useState("")
@@ -73,7 +73,7 @@ export default function ProfileModerationList() {
         {value[0].toUpperCase() + value.slice(1)}{value === "pending" && pending > 0 ? ` (${pending})` : ""}
       </button>)}
       <span className="w-px bg-white/10" />
-      {["all", "social", "professional"].map(value => <button key={value} onClick={() => setKind(value)} className={`rounded-lg px-3 py-2 text-sm ${kind === value ? "bg-lime-400 text-black" : "bg-white/5"}`}>
+      {(["all", "social", "professional"] as const).map(value => <button key={value} onClick={() => setKind(value)} className={`rounded-lg px-3 py-2 text-sm ${kind === value ? "bg-lime-400 text-black" : "bg-white/5"}`}>
         {value === "all" ? "All profiles" : value === "social" ? "Social Passport" : "Professional"}
       </button>)}
     </div>

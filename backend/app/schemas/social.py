@@ -96,6 +96,27 @@ class SocialProfilePage(BaseModel):
     requests_remaining: int | None = None
 
 
+class SocialSwipeDeckResponse(BaseModel):
+    items: list[SocialProfileResponse]
+    likes_remaining: int | None = None
+    weekly_limit: int | None = None
+    is_premium: bool = False
+    reset_at: datetime | None = None
+
+
+class SocialSwipeCreate(BaseModel):
+    decision: Literal["like", "pass"]
+
+
+class SocialSwipeResponse(BaseModel):
+    target_id: str
+    decision: Literal["like", "pass"]
+    is_match: bool = False
+    connection_id: str | None = None
+    conversation_id: str | None = None
+    likes_remaining: int | None = None
+
+
 class FriendRequestCreate(BaseModel):
     message: str | None = Field(default=None, max_length=500)
     event_id: str | None = Field(default=None, max_length=36)

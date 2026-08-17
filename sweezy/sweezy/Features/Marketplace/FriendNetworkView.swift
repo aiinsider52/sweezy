@@ -9,7 +9,7 @@ import UIKit
   @Published var myProfile: SocialProfile?
   @Published var loading = false
   @Published var error: String?
-  @Published var loadError: String?
+  @Published var loadErrors: [Int: String] = [:]
   @Published var query = ""
   @Published var interest: SocialInterest?
   @Published var canton: String?
@@ -21,6 +21,11 @@ import UIKit
   @Published var searchMeta: SocialProfilePage?
   @Published var visitors: [SocialProfileVisitor] = []
   @Published var isShowingDemoProfiles = false
+  @Published var swipeProfiles: [SocialProfile] = []
+  @Published var swipeDeckMeta: SocialSwipeDeck?
+  @Published var swipeBusy = false
+  @Published var swipeNeedsPlus = false
+  @Published var lastPassedProfile: SocialProfile?
   var incoming: [FriendConnection] {
     connections.filter { $0.direction == "incoming" && $0.status == "pending" }
   }
@@ -28,6 +33,10 @@ import UIKit
   private func friendResult<T>(_ operation: () async throws -> T) async -> Result<T, Error> {
     do { return .success(try await operation()) }
     catch { return .failure(error) }
+  }
+  private func loadIssue(_ title: String, _ error: Error) -> String {
+    let detail = error.localizedDescription.trimmingCharacters(in: .whitespacesAndNewlines)
+    return detail.isEmpty ? title : "\(title) \(detail)"
   }
   func load() async {
     guard !loading else { return }
@@ -37,13 +46,21 @@ import UIKit
     async let c = friendResult { try await FriendsAPI.connections() }
     async let e = friendResult { try await FriendsAPI.events(canton: self.canton) }
     async let m = friendResult { try await self.own() }
-    let values = await (p, c, e, m)
-    var failures: [Error] = []
-    switch values.0 { case .success(let page): profiles = page.items; searchMeta = page; case .failure(let issue): failures.append(issue) }
-    switch values.1 { case .success(let value): connections = value; case .failure(let issue): failures.append(issue) }
-    switch values.2 { case .success(let value): events = value; case .failure(let issue): failures.append(issue) }
-    switch values.3 { case .success(let value): myProfile = value; case .failure(let issue): failures.append(issue) }
-    loadError = failures.isEmpty ? nil : "friends.error.partial".localized
+    async let s = friendResult { try await FriendsAPI.swipeDeck(canton: self.canton, interest: self.interest) }
+    let values = await (p, c, e, m, s)
+    var failures: [Int: String] = [:]
+    switch values.0 { case .success(let page): profiles = page.items; searchMeta = page; case .failure(let issue): failures[0] = loadIssue("Не вдалося завантажити людей.", issue) }
+    switch values.1 { case .success(let value): connections = value; case .failure(let issue): failures[2] = loadIssue("Не вдалося завантажити зв’язки.", issue) }
+    switch values.2 { case .success(let value): events = value; case .failure(let issue): failures[1] = loadIssue("Не вдалося завантажити події.", issue) }
+    switch values.3 { case .success(let value): myProfile = value; case .failure(let issue): failures[3] = loadIssue("Не вдалося завантажити твій Social Passport.", issue) }
+    switch values.4 {
+    case .success(let value): swipeProfiles = value.items; swipeDeckMeta = value
+    case .failure(let issue):
+      if myProfile?.moderationStatus == "approved" {
+        failures[0] = loadIssue("Не вдалося завантажити картки знайомств.", issue)
+      }
+    }
+    loadErrors = failures
     #if DEBUG
     if profiles.isEmpty { applyDemoProfiles() }
     #endif
@@ -56,13 +73,18 @@ import UIKit
         maxDistanceKM: self.maxDistanceKM, nearby: self.nearby)
     }
     async let eventPage = friendResult { try await FriendsAPI.events(canton: self.canton) }
-    let values = await (page, eventPage)
-    var failed = false
-    switch values.0 { case .success(let value): profiles = value.items; searchMeta = value; case .failure: failed = true }
-    switch values.1 { case .success(let value): events = value; case .failure: failed = true }
-    loadError = failed ? "friends.error.partial".localized : nil
+    async let deck = friendResult {
+      try await FriendsAPI.swipeDeck(
+        canton: self.canton, interest: self.interest, language: self.language, nearby: self.nearby)
+    }
+    let values = await (page, eventPage, deck)
+    var failures = loadErrors
+    switch values.0 { case .success(let value): profiles = value.items; searchMeta = value; failures[0] = nil; case .failure(let issue): failures[0] = loadIssue("Не вдалося оновити людей.", issue) }
+    switch values.1 { case .success(let value): events = value; failures[1] = nil; case .failure(let issue): failures[1] = loadIssue("Не вдалося оновити події.", issue) }
+    switch values.2 { case .success(let value): swipeProfiles = value.items; swipeDeckMeta = value; case .failure(let issue): failures[0] = loadIssue("Не вдалося оновити картки знайомств.", issue) }
+    loadErrors = failures
     #if DEBUG
-    if failed || profiles.isEmpty { applyDemoProfiles() }
+    if !failures.isEmpty || profiles.isEmpty { applyDemoProfiles() }
     #endif
   }
   func own() async throws -> SocialProfile? {
@@ -71,6 +93,7 @@ import UIKit
     }
   }
   func save(_ d: SocialProfileDraft) async -> Bool {
+    error = nil
     do {
       myProfile = try await FriendsAPI.save(d)
       await load()
@@ -120,6 +143,74 @@ import UIKit
     do { visitors = try await FriendsAPI.visitors() }
     catch { self.error = error.localizedDescription }
   }
+  func swipe(_ profile: SocialProfile, decision: String) async -> SocialSwipeResult? {
+    guard !swipeBusy else { return nil }
+    swipeBusy = true
+    swipeNeedsPlus = false
+    let originalIndex = swipeProfiles.firstIndex(where: { $0.id == profile.id }) ?? 0
+    withAnimation(.spring(response: 0.32, dampingFraction: 0.82)) {
+      swipeProfiles.removeAll { $0.id == profile.id }
+    }
+    defer { swipeBusy = false }
+    #if DEBUG
+    if profile.id.hasPrefix("preview-") {
+      if decision == "pass" { lastPassedProfile = profile }
+      return SocialSwipeResult(
+        targetID: profile.id, decision: decision, isMatch: false,
+        connectionID: nil, conversationID: nil, likesRemaining: swipeDeckMeta?.likesRemaining)
+    }
+    #endif
+    do {
+      let result = try await FriendsAPI.swipe(profile.id, decision: decision)
+      if decision == "pass" { lastPassedProfile = profile } else { lastPassedProfile = nil }
+      if let remaining = result.likesRemaining, let meta = swipeDeckMeta {
+        swipeDeckMeta = SocialSwipeDeck(
+          items: swipeProfiles, likesRemaining: remaining, weeklyLimit: meta.weeklyLimit,
+          isPremium: meta.isPremium, resetAt: meta.resetAt)
+      }
+      if result.isMatch {
+        connections = (try? await FriendsAPI.connections()) ?? connections
+      }
+      await refillSwipeDeckIfNeeded()
+      return result
+    } catch {
+      withAnimation(.spring(response: 0.32, dampingFraction: 0.82)) {
+        swipeProfiles.insert(profile, at: min(originalIndex, swipeProfiles.count))
+      }
+      swipeNeedsPlus = (error as NSError).code == 402
+      self.error = error.localizedDescription
+      return nil
+    }
+  }
+  func undoLastPass() async {
+    guard let profile = lastPassedProfile, !swipeBusy else { return }
+    swipeBusy = true
+    defer { swipeBusy = false }
+    #if DEBUG
+    if profile.id.hasPrefix("preview-") {
+      swipeProfiles.insert(profile, at: 0)
+      lastPassedProfile = nil
+      return
+    }
+    #endif
+    do {
+      try await FriendsAPI.undoPass(profile.id)
+      withAnimation(.spring(response: 0.34, dampingFraction: 0.78)) {
+        swipeProfiles.insert(profile, at: 0)
+      }
+      lastPassedProfile = nil
+    } catch { self.error = error.localizedDescription }
+  }
+  private func refillSwipeDeckIfNeeded() async {
+    guard swipeProfiles.count <= 4 else { return }
+    guard let deck = try? await FriendsAPI.swipeDeck(
+      canton: canton, interest: interest, language: language, nearby: nearby) else { return }
+    let known = Set(swipeProfiles.map(\.id))
+    swipeProfiles.append(contentsOf: deck.items.filter { !known.contains($0.id) })
+    swipeDeckMeta = SocialSwipeDeck(
+      items: swipeProfiles, likesRemaining: deck.likesRemaining, weeklyLimit: deck.weeklyLimit,
+      isPremium: deck.isPremium, resetAt: deck.resetAt)
+  }
   #if DEBUG
   func applyDemoProfiles() {
     let normalizedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
@@ -134,9 +225,388 @@ import UIKit
       items: profiles, total: profiles.count, page: 1, perPage: 40, pages: 1,
       isLimited: false, visibleLimit: nil, advancedFiltersAvailable: true,
       requestsRemaining: 5)
+    swipeProfiles = profiles
+    swipeDeckMeta = SocialSwipeDeck(
+      items: profiles, likesRemaining: 15, weeklyLimit: 15, isPremium: false,
+      resetAt: Calendar.current.date(byAdding: .day, value: 7, to: Date()))
     isShowingDemoProfiles = true
   }
   #endif
+}
+
+private struct FriendSwipeDeck: View {
+  private struct CardLayer: Identifiable {
+    let index: Int
+    let profile: SocialProfile
+    var id: String { profile.id }
+  }
+
+  let profiles: [SocialProfile]
+  let cardHeight: CGFloat
+  let busy: Bool
+  let canUndo: Bool
+  let onDecision: (SocialProfile, String) -> Void
+  let onUndo: () -> Void
+  let onDetails: (SocialProfile) -> Void
+
+  @Environment(\.accessibilityReduceMotion) private var reduceMotion
+  @State private var dragOffset: CGSize = .zero
+  @State private var committing = false
+
+  private var topProfile: SocialProfile? { profiles.first }
+  private var cardLayers: [CardLayer] {
+    Array(profiles.prefix(3).enumerated())
+      .map { CardLayer(index: $0.offset, profile: $0.element) }
+      .reversed()
+  }
+
+  var body: some View {
+    VStack(spacing: 16) {
+      cardStack
+      actionControls
+    }
+  }
+
+  private var cardStack: some View {
+    ZStack {
+      ForEach(cardLayers) { layer in
+        swipeCard(layer)
+      }
+    }
+    .frame(height: cardHeight + 24)
+  }
+
+  private func swipeCard(_ layer: CardLayer) -> some View {
+    let isTop = layer.index == 0
+    let profile = layer.profile
+    return FriendSwipeCard(
+      profile: profile,
+      dragProgress: isTop ? min(1, abs(dragOffset.width) / 120) : 0,
+      direction: isTop ? dragOffset.width : 0)
+      .frame(maxWidth: .infinity)
+      .frame(height: cardHeight)
+      .scaleEffect(isTop ? 1 : 1 - CGFloat(layer.index) * 0.035)
+      .offset(y: isTop ? dragOffset.height * 0.12 : CGFloat(layer.index) * 12)
+      .offset(x: isTop ? dragOffset.width : 0)
+      .rotationEffect(.degrees(isTop ? Double(dragOffset.width / 34) : 0))
+      .zIndex(Double(3 - layer.index))
+      .shadow(color: .black.opacity(isTop ? 0.42 : 0.2), radius: 24, y: 14)
+      .contentShape(RoundedRectangle(cornerRadius: 30, style: .continuous))
+      .onTapGesture { if isTop && !committing { onDetails(profile) } }
+      .gesture(swipeGesture, including: isTop ? .all : .none)
+      .accessibilityElement(children: .combine)
+      .accessibilityAddTraits(.isButton)
+      .accessibilityIdentifier("friends.profile.\(profile.id)")
+      .accessibilityLabel(accessibilityLabel(profile))
+      .accessibilityHint("Свайп праворуч — Like, ліворуч — пропустити")
+      .accessibilityAction(named: "Like") { commit(profile, decision: "like") }
+      .accessibilityAction(named: "Пропустити") { commit(profile, decision: "pass") }
+      .accessibilityAction(named: "Відкрити профіль") { onDetails(profile) }
+  }
+
+  private var actionControls: some View {
+    HStack(spacing: 14) {
+      actionButton(icon: "arrow.uturn.backward", size: 48, enabled: canUndo && !busy) {
+        onUndo()
+      }
+      actionButton(icon: "xmark", size: 62, enabled: topProfile != nil && !busy) {
+        if let topProfile { commit(topProfile, decision: "pass") }
+      }
+      actionButton(icon: "heart.fill", size: 74, primary: true, enabled: topProfile != nil && !busy) {
+        if let topProfile { commit(topProfile, decision: "like") }
+      }
+      actionButton(icon: "info", size: 48, enabled: topProfile != nil && !busy) {
+        if let topProfile { onDetails(topProfile) }
+      }
+    }
+    .frame(maxWidth: .infinity)
+  }
+
+  private var swipeGesture: some Gesture {
+    DragGesture(minimumDistance: 10, coordinateSpace: .local)
+      .onChanged { value in
+        guard !busy, !committing else { return }
+        guard abs(value.translation.width) > abs(value.translation.height) * 0.72 else { return }
+        dragOffset = CGSize(width: value.translation.width, height: value.translation.height)
+      }
+      .onEnded { value in
+        guard let topProfile, !busy, !committing else { resetDrag(); return }
+        let projected = value.predictedEndTranslation.width
+        let effective = abs(projected) > abs(value.translation.width) ? projected : value.translation.width
+        if abs(effective) >= 105 {
+          commit(topProfile, decision: effective > 0 ? "like" : "pass")
+        } else {
+          resetDrag()
+        }
+      }
+  }
+
+  private func commit(_ profile: SocialProfile, decision: String) {
+    guard !busy, !committing, profile.id == topProfile?.id else { return }
+    committing = true
+    UIImpactFeedbackGenerator(style: decision == "like" ? .medium : .light).impactOccurred()
+    let destination: CGFloat = decision == "like" ? 620 : -620
+    withAnimation(reduceMotion ? nil : .easeIn(duration: 0.18)) {
+      dragOffset = CGSize(width: destination, height: 18)
+    }
+    DispatchQueue.main.asyncAfter(deadline: .now() + (reduceMotion ? 0 : 0.16)) {
+      onDecision(profile, decision)
+      var transaction = Transaction()
+      transaction.disablesAnimations = true
+      withTransaction(transaction) { dragOffset = .zero }
+      committing = false
+    }
+  }
+
+  private func resetDrag() {
+    withAnimation(reduceMotion ? nil : .spring(response: 0.32, dampingFraction: 0.76)) {
+      dragOffset = .zero
+    }
+  }
+
+  private func actionButton(
+    icon: String, size: CGFloat, primary: Bool = false, enabled: Bool,
+    action: @escaping () -> Void
+  ) -> some View {
+    Button(action: action) {
+      Image(systemName: icon)
+        .font(.system(size: size * 0.31, weight: .bold))
+        .foregroundColor(primary ? .black : .white.opacity(enabled ? 0.9 : 0.28))
+        .frame(width: size, height: size)
+        .background(primary ? JourneyVisual.lime : Color.white.opacity(0.08))
+        .clipShape(Circle())
+        .overlay(Circle().stroke(primary ? JourneyVisual.lime : Color.white.opacity(0.14)))
+        .shadow(color: primary ? JourneyVisual.lime.opacity(0.24) : .clear, radius: 16)
+    }
+    .buttonStyle(.plain)
+    .disabled(!enabled)
+    .opacity(enabled ? 1 : 0.45)
+  }
+
+  private func accessibilityLabel(_ profile: SocialProfile) -> String {
+    let distance = profile.distanceKM.map { ", \($0) кілометрів" } ?? ""
+    return "\(profile.displayName), \(profile.city), \(profile.canton), \(profile.matchScore) відсотків збігу\(distance). \(profile.bio)"
+  }
+}
+
+private struct FriendSwipeCard: View {
+  let profile: SocialProfile
+  let dragProgress: CGFloat
+  let direction: CGFloat
+
+  private let lime = JourneyVisual.lime
+
+  var body: some View {
+    ZStack {
+      profileImage
+      LinearGradient(
+        colors: [.clear, .black.opacity(0.08), .black.opacity(0.94)],
+        startPoint: .top, endPoint: .bottom)
+      VStack(alignment: .leading, spacing: 0) {
+        HStack(alignment: .top) {
+          locationBadge
+          Spacer()
+          matchRing
+        }
+        Spacer()
+        if profile.residencyStage == "newcomer" {
+          Label("НОВИЙ У ШВЕЙЦАРІЇ", systemImage: "sparkles")
+            .font(.system(size: 10, weight: .black)).tracking(1.1)
+            .foregroundColor(.black).padding(.horizontal, 10).padding(.vertical, 7)
+            .background(lime).clipShape(Capsule())
+            .padding(.bottom, 10)
+        }
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
+          Text(profile.displayName)
+            .font(.system(size: 31, weight: .black, design: .rounded))
+            .foregroundColor(.white).lineLimit(1).minimumScaleFactor(0.72)
+          if profile.isVerified {
+            Image(systemName: "checkmark.seal.fill").foregroundColor(lime)
+          }
+        }
+        Text(profile.bio)
+          .font(.subheadline.weight(.medium)).foregroundColor(.white.opacity(0.76))
+          .lineLimit(2).fixedSize(horizontal: false, vertical: true)
+          .padding(.top, 5)
+        if let reason = profile.matchReasons.first {
+          Label(reason, systemImage: "link")
+            .font(.caption.bold()).foregroundColor(lime).padding(.top, 11)
+        }
+        HStack(spacing: 7) {
+          ForEach(Array(profile.sharedInterests.prefix(3))) { interest in
+            Label(interest.title, systemImage: interest.icon)
+              .font(.system(size: 10, weight: .bold)).foregroundColor(.white.opacity(0.86))
+              .padding(.horizontal, 9).padding(.vertical, 7)
+              .background(Color.black.opacity(0.4)).clipShape(Capsule())
+          }
+        }
+        .padding(.top, 12)
+      }
+      .padding(18)
+
+      if dragProgress > 0.08 {
+        swipeStamp
+          .opacity(Double(dragProgress))
+          .scaleEffect(0.86 + dragProgress * 0.14)
+      }
+    }
+    .clipShape(RoundedRectangle(cornerRadius: 30, style: .continuous))
+    .overlay(RoundedRectangle(cornerRadius: 30).stroke(lime.opacity(0.32), lineWidth: 1))
+  }
+
+  @ViewBuilder private var profileImage: some View {
+    if let raw = profile.avatarURL, let url = APIClient.resolveMediaURL(raw) {
+      CachedAsyncImage(url: url) { fallback }
+    } else {
+      fallback
+    }
+  }
+
+  private var fallback: some View {
+    ZStack {
+      LinearGradient(
+        colors: [Color(red: 0.04, green: 0.15, blue: 0.11), Color(red: 0.01, green: 0.025, blue: 0.022)],
+        startPoint: .topLeading, endPoint: .bottomTrailing)
+      Circle().stroke(lime.opacity(0.12), lineWidth: 1).frame(width: 330, height: 330).offset(x: 110, y: -160)
+      Circle().stroke(Color.white.opacity(0.08), lineWidth: 1).frame(width: 210, height: 210).offset(x: 90, y: -150)
+      Text(profile.initials)
+        .font(.system(size: 102, weight: .black, design: .rounded))
+        .foregroundStyle(LinearGradient(colors: [lime, Color.white.opacity(0.7)], startPoint: .top, endPoint: .bottom))
+        .offset(y: -55)
+    }
+  }
+
+  private var locationBadge: some View {
+    HStack(spacing: 6) {
+      Image(systemName: "mappin.and.ellipse")
+      Text("\(profile.city) · \(profile.canton)")
+      if let distance = profile.distanceKM { Text("· \(distance) км") }
+    }
+    .font(.caption.bold()).foregroundColor(.white)
+    .padding(.horizontal, 11).padding(.vertical, 8)
+    .background(.black.opacity(0.42)).clipShape(Capsule())
+    .overlay(Capsule().stroke(.white.opacity(0.16)))
+  }
+
+  private var matchRing: some View {
+    ZStack {
+      Circle().fill(.black.opacity(0.48))
+      Circle().stroke(.white.opacity(0.14), lineWidth: 4)
+      Circle().trim(from: 0, to: CGFloat(profile.matchScore) / 100)
+        .stroke(lime, style: StrokeStyle(lineWidth: 4, lineCap: .round))
+        .rotationEffect(.degrees(-90))
+      VStack(spacing: -1) {
+        Text("\(profile.matchScore)%").font(.caption.bold())
+        Text("збіг").font(.system(size: 8, weight: .bold))
+      }.foregroundColor(.white)
+    }
+    .frame(width: 58, height: 58)
+  }
+
+  private var swipeStamp: some View {
+    VStack {
+      HStack {
+        if direction > 0 { Spacer() }
+        Text(direction > 0 ? "ЦІКАВО" : "ДАЛІ")
+          .font(.system(size: 25, weight: .black, design: .rounded)).tracking(1.1)
+          .foregroundColor(direction > 0 ? .black : .white)
+          .padding(.horizontal, 18).padding(.vertical, 10)
+          .background(direction > 0 ? lime : Color.black.opacity(0.72))
+          .clipShape(RoundedRectangle(cornerRadius: 13))
+          .overlay(RoundedRectangle(cornerRadius: 13).stroke(direction > 0 ? lime : .white, lineWidth: 2))
+        if direction <= 0 { Spacer() }
+      }
+      Spacer()
+    }
+    .padding(24)
+  }
+}
+
+private struct FriendMatchCelebration: View {
+  let profile: SocialProfile
+  let canOpenChat: Bool
+  let close: () -> Void
+  let openChat: () -> Void
+  @Environment(\.accessibilityReduceMotion) private var reduceMotion
+  @State private var appeared = false
+
+  var body: some View {
+    ZStack {
+      JourneyVisual.black.ignoresSafeArea()
+      RadialGradient(
+        colors: [JourneyVisual.lime.opacity(0.19), .clear], center: .top, startRadius: 20, endRadius: 420)
+        .ignoresSafeArea()
+      VStack(spacing: 24) {
+        Spacer()
+        ZStack {
+          Circle().stroke(JourneyVisual.lime.opacity(0.18), lineWidth: 1).frame(width: 270, height: 270)
+          Circle().stroke(JourneyVisual.lime.opacity(0.34), lineWidth: 1).frame(width: 220, height: 220)
+          FriendMatchAvatar(profile: profile)
+            .frame(width: 174, height: 174)
+            .clipShape(Circle())
+            .overlay(Circle().stroke(JourneyVisual.lime, lineWidth: 3))
+          Image(systemName: "heart.fill")
+            .font(.title2).foregroundColor(.black).frame(width: 54, height: 54)
+            .background(JourneyVisual.lime).clipShape(Circle()).offset(x: 76, y: 70)
+        }
+        .scaleEffect(appeared ? 1 : 0.72)
+        .opacity(appeared ? 1 : 0)
+        VStack(spacing: 10) {
+          Text("ВЗАЄМНИЙ ВИБІР").font(.caption.bold()).tracking(2.2).foregroundColor(JourneyVisual.lime)
+          Text("Ви знайшли\nодне одного")
+            .font(.system(size: 39, weight: .black, design: .rounded)).foregroundColor(.white)
+            .multilineTextAlignment(.center).lineSpacing(-3)
+          Text("Ти та \(profile.displayName) обрали Like. Контакти залишаються приватними — почніть з чату Sweezy.")
+            .font(.subheadline).foregroundColor(.white.opacity(0.62)).multilineTextAlignment(.center)
+            .padding(.horizontal, 26)
+        }
+        Spacer()
+        if canOpenChat {
+          Button(action: openChat) {
+            HStack {
+              Image(systemName: "message.fill")
+              Text("Написати \(profile.displayName.split(separator: " ").first.map(String.init) ?? "")")
+              Spacer()
+              Image(systemName: "arrow.right")
+            }
+            .font(.headline).foregroundColor(.black).padding(.horizontal, 20)
+            .frame(maxWidth: .infinity, minHeight: 58).background(JourneyVisual.lime)
+            .clipShape(RoundedRectangle(cornerRadius: 19))
+          }
+        }
+        Button("Продовжити знайомства", action: close)
+          .font(.subheadline.bold()).foregroundColor(.white.opacity(0.72)).frame(minHeight: 48)
+      }
+      .padding(.horizontal, 22).padding(.bottom, 22)
+    }
+    .onAppear {
+      withAnimation(reduceMotion ? nil : .spring(response: 0.55, dampingFraction: 0.68)) { appeared = true }
+      UINotificationFeedbackGenerator().notificationOccurred(.success)
+    }
+  }
+}
+
+private struct FriendMatchAvatar: View {
+  let profile: SocialProfile
+  var body: some View {
+    Group {
+      if let raw = profile.avatarURL, let url = APIClient.resolveMediaURL(raw) {
+        CachedAsyncImage(url: url) { fallback }
+      } else { fallback }
+    }
+  }
+  private var fallback: some View {
+    ZStack {
+      LinearGradient(colors: [JourneyVisual.lime, Color(red: 0.14, green: 0.64, blue: 0.48)], startPoint: .topLeading, endPoint: .bottomTrailing)
+      Text(profile.initials).font(.system(size: 48, weight: .black, design: .rounded)).foregroundColor(.black)
+    }
+  }
+}
+
+private struct SocialMatchPresentation: Identifiable {
+  let profile: SocialProfile
+  let conversationID: String?
+  var id: String { profile.id }
 }
 
 struct FriendNetworkView: View {
@@ -156,6 +626,8 @@ struct FriendNetworkView: View {
   @State private var showVisitors = false
   @State private var showAuth = false
   @State private var showsDemoCatalog = false
+  @State private var showPeopleCatalog = false
+  @State private var activeMatch: SocialMatchPresentation?
   @AppStorage("friends.invisibleBrowsing") private var invisibleBrowsing = false
   @StateObject private var subscription = SubscriptionManager.shared
   private let limeAccent = JourneyVisual.lime
@@ -204,7 +676,7 @@ struct FriendNetworkView: View {
           LazyVStack(spacing: 0) {
             hero
             tabs
-            if let loadError = vm.loadError {
+            if let loadError = vm.loadErrors[tab] {
               networkIssue(message: loadError)
                 .padding(.horizontal, 20)
                 .padding(.top, 14)
@@ -219,7 +691,7 @@ struct FriendNetworkView: View {
               case 1: events
               case 2: connections
               case 3: profile
-              default: discover
+              default: discover(screenHeight: geometry.size.height)
               }
             }.padding(.top, 18)
           }
@@ -257,6 +729,17 @@ struct FriendNetworkView: View {
     .sheet(item: $eventChat) { SocialEventChatView(event: $0, friends: vm.friends, vm: vm) }
     .sheet(item: $event) { EventDetailView(eventId: $0.id) }
     .sheet(isPresented: $showVisitors) { FriendVisitorsView(visitors: vm.visitors) }
+    .fullScreenCover(item: $activeMatch) { match in
+      FriendMatchCelebration(profile: match.profile, canOpenChat: match.conversationID != nil) {
+        activeMatch = nil
+      } openChat: {
+        guard let id = match.conversationID else { activeMatch = nil; return }
+        Task {
+          conversation = try? await ChatAPI.conversation(id: id)
+          activeMatch = nil
+        }
+      }
+    }
   }
   private var accessGate: some View {
     GeometryReader { geometry in
@@ -439,33 +922,124 @@ struct FriendNetworkView: View {
       Capsule().stroke(.white.opacity(0.12))
     ).padding(.horizontal, 18)
   }
-  private var discover: some View {
+  private func discover(screenHeight: CGFloat) -> some View {
     VStack(alignment: .leading, spacing: 18) {
       if vm.isShowingDemoProfiles { demoNotice }
-      orbit
-      search
-      title("Твої люди", sub: "За інтересами, мовою та кантоном", count: vm.profiles.count)
-      if vm.loading && vm.profiles.isEmpty {
+      swipeHeader
+      if vm.loading && vm.swipeProfiles.isEmpty {
         ProgressView().tint(limeAccent).frame(maxWidth: .infinity).padding(60)
-      } else if vm.profiles.isEmpty {
-        empty("Немає збігів", "Зміни інтерес або кантон — нові люди з’являються щодня.")
+      } else if let own = vm.myProfile, own.moderationStatus != "approved", !vm.isShowingDemoProfiles {
+        swipeProfileGate(
+          title: "Профіль на перевірці",
+          text: "Після схвалення social passport тут з’являться персональні знайомства.",
+          icon: "checkmark.shield")
+      } else if vm.myProfile == nil && !vm.isShowingDemoProfiles {
+        swipeProfileGate(
+          title: "Створи social passport",
+          text: "Інтереси, мови й кантон потрібні, щоб Sweezy знайшов сильні збіги.",
+          icon: "person.crop.circle.badge.plus")
+      } else if vm.swipeProfiles.isEmpty {
+        empty("Нові профілі скоро", "Ти переглянув доступні збіги. Зміни фільтри або повернися завтра.")
       } else {
+        FriendSwipeDeck(
+          profiles: vm.swipeProfiles,
+          cardHeight: min(610, max(430, screenHeight * 0.58)),
+          busy: vm.swipeBusy,
+          canUndo: vm.lastPassedProfile != nil,
+          onDecision: handleSwipe,
+          onUndo: { Task { await vm.undoLastPass() } },
+          onDetails: openProfile)
+        swipeGuidance
+      }
+      Button {
+        withAnimation(.easeInOut(duration: 0.24)) { showPeopleCatalog.toggle() }
+      } label: {
+        HStack {
+          Label(showPeopleCatalog ? "Сховати каталог" : "Пошук і каталог", systemImage: "rectangle.grid.1x2")
+          Spacer()
+          Image(systemName: showPeopleCatalog ? "chevron.up" : "chevron.down")
+        }
+        .font(.subheadline.bold()).foregroundColor(.white)
+        .padding(.horizontal, 16).frame(height: 52)
+        .background(.white.opacity(0.07)).clipShape(RoundedRectangle(cornerRadius: 17))
+        .overlay(RoundedRectangle(cornerRadius: 17).stroke(.white.opacity(0.1)))
+      }
+      if showPeopleCatalog {
+        search
+        title("Усі профілі", sub: "Пошук за ім’ям, містом та інтересом", count: vm.profiles.count)
         LazyVStack(spacing: 13) {
-          ForEach(vm.profiles) { p in
-            Button {
-              if !p.id.hasPrefix("preview-") {
-                Task { try? await FriendsAPI.recordVisit(p.id, invisible: subscription.isPremium && invisibleBrowsing) }
-              }
-              selected = p
-            } label: {
-              FriendCard(profile: p, accent: limeAccent)
+          ForEach(vm.profiles) { profile in
+            Button { openProfile(profile) } label: {
+              FriendCard(profile: profile, accent: limeAccent)
             }
             .buttonStyle(.plain)
-            .accessibilityIdentifier("friends.profile.\(p.id)")
+            .accessibilityIdentifier("friends.profile.\(profile.id)")
           }
         }
       }
     }.padding(.horizontal, 18)
+  }
+  private var swipeHeader: some View {
+    HStack(alignment: .top, spacing: 14) {
+      VStack(alignment: .leading, spacing: 5) {
+        Text("ТВОЇ ЗБІГИ").font(.caption2.bold()).tracking(1.9).foregroundColor(limeAccent)
+        Text("Люди, з якими є спільне").font(.title2.bold()).foregroundColor(.white)
+        Text("Like приватний. Чат відкриється тільки після взаємного вибору.")
+          .font(.caption).foregroundColor(.white.opacity(0.52))
+      }
+      Spacer(minLength: 6)
+      Button { filters = true } label: {
+        Image(systemName: "slider.horizontal.3")
+          .font(.headline).foregroundColor(limeAccent)
+          .frame(width: 48, height: 48).background(.white.opacity(0.08)).clipShape(Circle())
+          .overlay(Circle().stroke(.white.opacity(0.12)))
+      }
+      .accessibilityLabel("Фільтри знайомств")
+    }
+  }
+  private var swipeGuidance: some View {
+    HStack(spacing: 10) {
+      Image(systemName: vm.swipeDeckMeta?.isPremium == true ? "infinity" : "bolt.heart.fill")
+        .foregroundColor(limeAccent)
+      Text(swipeAllowanceText).font(.caption.bold()).foregroundColor(.white.opacity(0.7))
+      Spacer()
+      Text("← PASS   LIKE →").font(.caption2.bold()).tracking(0.8).foregroundColor(.white.opacity(0.38))
+    }
+  }
+  private var swipeAllowanceText: String {
+    if vm.swipeDeckMeta?.isPremium == true { return "Plus · безлімітні Like" }
+    if let remaining = vm.swipeDeckMeta?.likesRemaining { return "Ще \(remaining) Like цього тижня" }
+    return "Взаємні знайомства без відкритих контактів"
+  }
+  private func swipeProfileGate(title: String, text: String, icon: String) -> some View {
+    VStack(spacing: 14) {
+      Image(systemName: icon).font(.system(size: 34, weight: .semibold)).foregroundColor(limeAccent)
+      Text(title).font(.title3.bold()).foregroundColor(.white)
+      Text(text).font(.subheadline).foregroundColor(.white.opacity(0.58)).multilineTextAlignment(.center)
+      Button { editor = true } label: {
+        Text(vm.myProfile == nil ? "Створити профіль" : "Переглянути профіль")
+          .font(.headline).foregroundColor(.black).frame(maxWidth: .infinity, minHeight: 52)
+          .background(limeAccent).clipShape(RoundedRectangle(cornerRadius: 17))
+      }
+    }
+    .padding(24).frame(maxWidth: .infinity)
+    .background(.white.opacity(0.065)).clipShape(RoundedRectangle(cornerRadius: 26))
+    .overlay(RoundedRectangle(cornerRadius: 26).stroke(limeAccent.opacity(0.24)))
+  }
+  private func openProfile(_ profile: SocialProfile) {
+    if !profile.id.hasPrefix("preview-") {
+      Task { try? await FriendsAPI.recordVisit(profile.id, invisible: subscription.isPremium && invisibleBrowsing) }
+    }
+    selected = profile
+  }
+  private func handleSwipe(_ profile: SocialProfile, _ decision: String) {
+    Task {
+      let result = await vm.swipe(profile, decision: decision)
+      if vm.swipeNeedsPlus { paywall = true; return }
+      if result?.isMatch == true {
+        activeMatch = SocialMatchPresentation(profile: profile, conversationID: result?.conversationID)
+      }
+    }
   }
   private var demoNotice: some View {
     HStack(spacing: 10) {
@@ -1587,6 +2161,8 @@ private struct FriendProfileEditor: View {
   }
   private func save() async {
     saving = true
+    error = nil
+    vm.error = nil
     defer { saving = false }
     do {
       if let photo, d.avatarURL.isEmpty {
@@ -1597,7 +2173,12 @@ private struct FriendProfileEditor: View {
             data: data, filename: "social-\(UUID().uuidString).jpg")
         }
       }
-      if await vm.save(d) { dismiss() }
+      if await vm.save(d) {
+        dismiss()
+      } else {
+        error = vm.error ?? "Профіль не опубліковано. Дані збережені на екрані — перевір причину та спробуй ще раз."
+        vm.error = nil
+      }
     } catch { self.error = error.localizedDescription }
   }
   private func loadPhoto(_ item: PhotosPickerItem?) async {

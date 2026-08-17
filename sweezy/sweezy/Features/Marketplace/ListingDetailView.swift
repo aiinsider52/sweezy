@@ -20,7 +20,10 @@ struct ListingDetailView: View {
     @State private var safetyMessage: String?
     @State private var selectedConversation: ChatConversation?
     @State private var pendingChatAfterAuth = false
+    @State private var pendingBookingAfterAuth = false
     @State private var showPublicProfile = false
+    @State private var showBooking = false
+    @State private var publicBusiness: PublicBusinessProfile?
 
     init(listingId: String, initialListing: ServiceListing? = nil) {
         self.listingId = listingId
@@ -49,7 +52,10 @@ struct ListingDetailView: View {
         .sheet(isPresented: $showAuth) {
             AuthEntryView(showsCloseButton: true, onComplete: {
                 showAuth = false
-                if pendingChatAfterAuth {
+                if pendingBookingAfterAuth {
+                    pendingBookingAfterAuth = false
+                    showBooking = true
+                } else if pendingChatAfterAuth {
                     pendingChatAfterAuth = false
                     startChat()
                 }
@@ -67,6 +73,11 @@ struct ListingDetailView: View {
             if let authorID = listing?.authorID {
                 PublicProfileView(userID: authorID, listingID: listingId, conversationID: nil)
                     .environmentObject(appContainer)
+            }
+        }
+        .fullScreenCover(isPresented: $showBooking) {
+            if let publicBusiness {
+                BusinessBookingFlow(profile: publicBusiness, listingID: listingId)
             }
         }
         .confirmationDialog("Чому ви скаржитеся?", isPresented: $showReportReasons, titleVisibility: .visible) {
@@ -95,6 +106,7 @@ struct ListingDetailView: View {
                 bottomActionBar(listing: listing)
             }
         }
+        .task(id: listing?.authorID) { await loadBusinessProfile() }
         .presentationDragIndicator(.hidden)
         .interactiveSwipeBackEnabled()
     }
@@ -482,8 +494,18 @@ struct ListingDetailView: View {
 
     private func bottomActionBar(listing: ServiceListing) -> some View {
         let chatAvailable = listing.authorID != nil && !isOwnListing(listing)
+        let bookable = businessService(for: listing) != nil && !isOwnListing(listing)
         return HStack(spacing: 12) {
             Button {
+                if bookable {
+                    guard sessionManager.isAuthenticated else {
+                        pendingBookingAfterAuth = true
+                        showAuth = true
+                        return
+                    }
+                    showBooking = true
+                    return
+                }
                 guard chatAvailable else {
                     if listing.authorID == nil {
                         safetyMessage = "chat.listing.no_seller".localized
@@ -498,12 +520,12 @@ struct ListingDetailView: View {
                 startChat()
             } label: {
                 HStack(spacing: 10) {
-                    Image(systemName: isOwnListing(listing) ? "person.crop.circle.badge.checkmark" : "bubble.left.and.bubble.right.fill")
+                    Image(systemName: isOwnListing(listing) ? "person.crop.circle.badge.checkmark" : (bookable ? "calendar.badge.plus" : "bubble.left.and.bubble.right.fill"))
                         .font(.system(size: 19, weight: .bold))
                     Text(
                         isOwnListing(listing)
                             ? "chat.listing.own".localized
-                            : (listing.authorID == nil ? "chat.listing.unavailable".localized : "chat.listing.message".localized)
+                            : (bookable ? "Записатися" : (listing.authorID == nil ? "chat.listing.unavailable".localized : "chat.listing.message".localized))
                     )
                         .font(.system(size: 16, weight: .heavy, design: .rounded))
                         .lineLimit(1)
@@ -517,6 +539,27 @@ struct ListingDetailView: View {
             }
             .buttonStyle(.plain)
             .disabled(isOwnListing(listing))
+
+            if bookable {
+                Button {
+                    guard sessionManager.isAuthenticated else {
+                        pendingChatAfterAuth = true
+                        showAuth = true
+                        return
+                    }
+                    startChat()
+                } label: {
+                    Image(systemName: "message.fill")
+                        .font(.system(size: 19, weight: .semibold))
+                        .foregroundColor(.white)
+                        .frame(width: 58, height: 58)
+                        .background(Color.white.opacity(0.08))
+                        .clipShape(Circle())
+                        .overlay(Circle().stroke(Color.white.opacity(0.16), lineWidth: 1))
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Написати")
+            }
 
             Button {
                 toggleSaved(listing)
@@ -547,6 +590,22 @@ struct ListingDetailView: View {
     private func isOwnListing(_ listing: ServiceListing) -> Bool {
         guard let authorID = listing.authorID, let userID = sessionManager.currentUser?.id else { return false }
         return authorID == userID
+    }
+
+    private func businessService(for listing: ServiceListing) -> BusinessServiceItem? {
+        publicBusiness?.services.first(where: { $0.listingID == listing.id })
+    }
+
+    private func loadBusinessProfile() async {
+        guard let currentListing = listing, let authorID = currentListing.authorID, !isOwnListing(currentListing) else {
+            publicBusiness = nil
+            return
+        }
+        do {
+            publicBusiness = try await BusinessProAPI.publicProfile(userID: authorID)
+        } catch {
+            publicBusiness = nil
+        }
     }
 
     private func startChat() {

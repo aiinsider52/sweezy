@@ -56,6 +56,7 @@ struct SettingsView: View {
                     VStack(spacing: 14) {
                         editorialSettingsHero
                         editorialProfileCard
+                        editorialPlanCard
                         editorialCompletionCard
                         editorialActivityStrip
                         editorialSettingsSections
@@ -89,6 +90,7 @@ struct SettingsView: View {
             if newPhase == .active {
                 Task {
                     try? await Task.sleep(nanoseconds: 300_000_000)
+                    await subscriptionManager.refreshEntitlements()
                 }
             }
         }
@@ -375,6 +377,52 @@ private extension SettingsView {
         }
         .buttonStyle(CardPressStyle())
         .padding(.horizontal, 16)
+    }
+
+    var editorialPlanCard: some View {
+        Button {
+            showingSubscription = true
+        } label: {
+            HStack(spacing: 14) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .fill(subscriptionManager.isPremium ? JourneyVisual.lime : Theme.Colors.adaptiveSurface)
+                    Image(systemName: subscriptionManager.isPremium ? "sparkles" : "star")
+                        .font(.system(size: 20, weight: .bold))
+                        .foregroundColor(subscriptionManager.isPremium ? .black : JourneyVisual.lime)
+                }
+                .frame(width: 52, height: 52)
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("ТВІЙ ПЛАН")
+                        .font(.system(size: 10, weight: .bold, design: .rounded))
+                        .tracking(1.7)
+                        .foregroundColor(JourneyVisual.lime)
+                    Text(subscriptionManager.planDisplayName)
+                        .font(.system(size: 18, weight: .bold, design: .rounded))
+                        .foregroundColor(Theme.Colors.textPrimary)
+                    Text(subscriptionManager.planDetails)
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(Theme.Colors.textSecondary)
+                }
+
+                Spacer(minLength: 8)
+
+                Text(subscriptionManager.isPremium ? "ACTIVE" : "FREE")
+                    .font(.system(size: 10, weight: .black, design: .rounded))
+                    .tracking(1)
+                    .foregroundColor(subscriptionManager.isPremium ? .black : Theme.Colors.textPrimary)
+                    .padding(.horizontal, 11)
+                    .frame(height: 30)
+                    .background(subscriptionManager.isPremium ? JourneyVisual.lime : Theme.Colors.adaptiveSurface)
+                    .clipShape(Capsule())
+            }
+            .padding(15)
+            .editorialSettingsPanel(cornerRadius: 22)
+        }
+        .buttonStyle(CardPressStyle())
+        .padding(.horizontal, 16)
+        .accessibilityIdentifier("settings.currentPlan")
     }
 
     var editorialActivityStrip: some View {

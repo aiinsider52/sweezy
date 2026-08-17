@@ -131,6 +131,17 @@ class UserService:
         """
         from ..models.analytics import AnalyticsEvent, AnalyticsSession, PaywallEvent
         from ..models.auth_email_code import AuthEmailCode
+        from ..models.business import (
+            BusinessAvailabilityRule,
+            BusinessBooking,
+            BusinessClient,
+            BusinessDocument,
+            BusinessLead,
+            BusinessProfile,
+            BusinessQuickReply,
+            BusinessService,
+            BusinessTeamMember,
+        )
         from ..models.chat import (
             ChatConversation,
             ChatMessage,
@@ -255,6 +266,19 @@ class UserService:
         db.query(SubscriptionEvent).filter(SubscriptionEvent.user_id == user_id).delete(synchronize_session=False)
         db.query(PremiumUsage).filter(PremiumUsage.user_id == user_id).delete(synchronize_session=False)
         db.query(JobFavorite).filter(JobFavorite.user_id == uuid.UUID(user_id)).delete(synchronize_session=False)
+
+        # Erase Sweezy Pro workspace and remove access to workspaces owned by others.
+        db.query(BusinessDocument).filter(BusinessDocument.business_user_id == user_id).delete(synchronize_session=False)
+        db.query(BusinessBooking).filter(BusinessBooking.business_user_id == user_id).delete(synchronize_session=False)
+        db.query(BusinessLead).filter(BusinessLead.business_user_id == user_id).delete(synchronize_session=False)
+        db.query(BusinessClient).filter(BusinessClient.business_user_id == user_id).delete(synchronize_session=False)
+        db.query(BusinessAvailabilityRule).filter(BusinessAvailabilityRule.business_user_id == user_id).delete(synchronize_session=False)
+        db.query(BusinessQuickReply).filter(BusinessQuickReply.business_user_id == user_id).delete(synchronize_session=False)
+        db.query(BusinessTeamMember).filter(
+            or_(BusinessTeamMember.business_user_id == user_id, BusinessTeamMember.member_user_id == user_id)
+        ).delete(synchronize_session=False)
+        db.query(BusinessService).filter(BusinessService.business_user_id == user_id).delete(synchronize_session=False)
+        db.query(BusinessProfile).filter(BusinessProfile.user_id == user_id).delete(synchronize_session=False)
 
         # Anonymize + deactivate
         user.is_active = False

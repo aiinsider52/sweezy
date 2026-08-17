@@ -130,6 +130,37 @@ def enqueue_chat_push(
     )
 
 
+def enqueue_account_notification(
+    db,
+    *,
+    event_key: str,
+    recipient_id: str,
+    event_type: str,
+    title: str,
+    body: str,
+    data: dict[str, Any] | None = None,
+) -> None:
+    settings = get_settings()
+    if not settings.PUSH_NOTIFICATIONS_ENABLED:
+        return
+    payload = {
+        "aps": {
+            "alert": {"title": title[:80], "body": body[:180]},
+            "sound": "default",
+        },
+        "type": event_type[:40],
+        **(data or {}),
+    }
+    db.add(
+        NotificationOutbox(
+            event_key=event_key[:120],
+            recipient_id=recipient_id,
+            event_type=event_type[:40],
+            payload_json=json.dumps(payload, ensure_ascii=False),
+        )
+    )
+
+
 def _claim_batch() -> list[tuple[str, str, str, list[tuple[str, str]]]]:
     if not apns_client.configured:
         return []

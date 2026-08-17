@@ -236,6 +236,37 @@ struct SocialProfilePage: Codable {
   }
 }
 
+struct SocialSwipeDeck: Codable {
+  let items: [SocialProfile]
+  let likesRemaining: Int?
+  let weeklyLimit: Int?
+  let isPremium: Bool
+  let resetAt: Date?
+  enum CodingKeys: String, CodingKey {
+    case items
+    case likesRemaining = "likes_remaining"
+    case weeklyLimit = "weekly_limit"
+    case isPremium = "is_premium"
+    case resetAt = "reset_at"
+  }
+}
+
+struct SocialSwipeResult: Codable {
+  let targetID: String
+  let decision: String
+  let isMatch: Bool
+  let connectionID, conversationID: String?
+  let likesRemaining: Int?
+  enum CodingKeys: String, CodingKey {
+    case decision
+    case targetID = "target_id"
+    case isMatch = "is_match"
+    case connectionID = "connection_id"
+    case conversationID = "conversation_id"
+    case likesRemaining = "likes_remaining"
+  }
+}
+
 struct SocialProfileDraft: Codable {
   var displayName = "", canton = "ZH", city = "Zürich", bio = ""
   var interests: [SocialInterest] = [.hiking, .travel]

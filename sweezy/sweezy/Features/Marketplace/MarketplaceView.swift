@@ -13,9 +13,11 @@ struct MarketplaceView: View {
     @State private var showCreateEventSheet = false
     @State private var showAuthEntry = false
     @State private var showMyListings = false
+    @State private var showMyBookings = false
     @State private var showMyEvents = false
     @State private var pendingCreateAfterAuth = false
     @State private var pendingCabinetAfterAuth = false
+    @State private var pendingBookingsAfterAuth = false
     @State private var pendingItemCreateAfterAuth = false
     @State private var pendingEventCreateAfterAuth = false
     @State private var pendingEventCabinetAfterAuth = false
@@ -103,6 +105,9 @@ struct MarketplaceView: View {
                     Task { await vm.refresh() }
                 })
             }
+            .fullScreenCover(isPresented: $showMyBookings) {
+                MyBusinessBookingsView()
+            }
             .sheet(isPresented: $showMyEvents) {
                 MyEventsView(onEventsChanged: {
                     Task { await eventsVM.refresh() }
@@ -150,6 +155,10 @@ struct MarketplaceView: View {
                     pendingCabinetAfterAuth = false
                     showMyListings = true
                 }
+                if isAuthenticated, pendingBookingsAfterAuth {
+                    pendingBookingsAfterAuth = false
+                    showMyBookings = true
+                }
                 if isAuthenticated, pendingEventCreateAfterAuth {
                     pendingEventCreateAfterAuth = false
                     showCreateEventSheet = true
@@ -163,6 +172,7 @@ struct MarketplaceView: View {
                 if !isPresented, !sessionManager.isAuthenticated {
                     pendingCreateAfterAuth = false
                     pendingCabinetAfterAuth = false
+                    pendingBookingsAfterAuth = false
                     pendingItemCreateAfterAuth = false
                     pendingEventCreateAfterAuth = false
                     pendingEventCabinetAfterAuth = false
@@ -182,6 +192,19 @@ struct MarketplaceView: View {
                     .foregroundColor(.white)
 
                 Spacer()
+
+                Button {
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                    if sessionManager.isAuthenticated { showMyBookings = true }
+                    else { pendingBookingsAfterAuth = true; showAuthEntry = true }
+                } label: {
+                    Image(systemName: "calendar.badge.clock")
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundColor(.white.opacity(0.9))
+                        .frame(width: 40, height: 40)
+                        .background(Circle().fill(Theme.Colors.inkElevated))
+                }
+                .accessibilityLabel("Мої записи")
 
                 Button {
                     UIImpactFeedbackGenerator(style: .light).impactOccurred()

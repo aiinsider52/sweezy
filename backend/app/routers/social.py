@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime, timedelta, timezone
 from math import atan2, cos, radians, sin, sqrt
 
-from fastapi import APIRouter, HTTPException, Query, status
+from fastapi import APIRouter, HTTPException, Query
 from sqlalchemy import String, and_, cast, func, or_, select
 from sqlalchemy.exc import IntegrityError
 
@@ -12,17 +12,39 @@ from ..models.chat import ChatConversation, ChatParticipant
 from ..models.event_listing import EventListing
 from ..models.marketplace import MarketplaceBlock
 from ..models.social import (
-    EventAttendance, FriendConnection, SocialEventInvite, SocialEventMessage, SocialProfile,
-    SocialProfileReport, SocialProfileVisit,
+    EventAttendance,
+    FriendConnection,
+    SocialEventInvite,
+    SocialEventMessage,
+    SocialProfile,
+    SocialProfileReport,
+    SocialProfileVisit,
+    SocialSwipe,
 )
 from ..models.user import PublicUserProfile, User
-from ..services.moderation import ensure_case, ensure_profile_review_case
 from ..schemas.social import (
-    AttendanceResponse, AttendanceUpsert, FriendConnectionResponse, FriendDecision, FriendRequestCreate,
-    SocialActionResponse, SocialEventInviteCreate, SocialEventMessageCreate, SocialEventMessageResponse,
-    SocialEventResponse, SocialProfilePage, SocialProfileResponse, SocialProfileUpsert, SocialReportCreate,
-    SocialProfileVisitCreate, SocialProfileVisitorResponse,
+    AttendanceResponse,
+    AttendanceUpsert,
+    FriendConnectionResponse,
+    FriendDecision,
+    FriendRequestCreate,
+    SocialActionResponse,
+    SocialEventInviteCreate,
+    SocialEventMessageCreate,
+    SocialEventMessageResponse,
+    SocialEventResponse,
+    SocialProfilePage,
+    SocialProfileResponse,
+    SocialProfileUpsert,
+    SocialProfileVisitCreate,
+    SocialProfileVisitorResponse,
+    SocialReportCreate,
+    SocialSwipeCreate,
+    SocialSwipeDeckResponse,
+    SocialSwipeResponse,
 )
+from ..services.moderation import ensure_case, ensure_profile_review_case
+from ..services.push_notifications import enqueue_account_notification
 
 router = APIRouter()
 
@@ -58,6 +80,20 @@ def _request_allowance(db: DBSession, user: User) -> tuple[int | None, int]:
     sent = db.scalar(select(func.count()).select_from(FriendConnection).where(
         FriendConnection.requester_id == user.id, FriendConnection.created_at >= since)) or 0
     return (None if _premium(user) else max(0, abuse_limit - sent), abuse_limit)
+
+
+def _swipe_allowance(db: DBSession, user: User) -> tuple[int | None, int | None, datetime | None]:
+    if _premium(user):
+        return None, None, None
+    limit = 15
+    since = _now() - timedelta(days=7)
+    likes = db.execute(select(SocialSwipe.created_at).where(
+        SocialSwipe.swiper_id == user.id,
+        SocialSwipe.decision == "like",
+        SocialSwipe.created_at >= since,
+    ).order_by(SocialSwipe.created_at.asc())).scalars().all()
+    reset_at = _utc(likes[0]) + timedelta(days=7) if likes else _now() + timedelta(days=7)
+    return max(0, limit - len(likes)), limit, reset_at
 
 
 def _blocked_ids(db: DBSession, user_id: str):
@@ -107,6 +143,31 @@ def _connection_response(db: DBSession, item: FriendConnection, viewer_id: str) 
         shared_interests=item.shared_interests, other_profile=_response(profile, viewer, item),
         created_at=item.created_at, updated_at=item.updated_at,
     )
+
+
+def _create_friend_conversation(db: DBSession, item: FriendConnection) -> None:
+    if item.conversation_id:
+        return
+    requester, target = db.get(SocialProfile, item.requester_id), db.get(SocialProfile, item.target_id)
+    if not requester or not target:
+        raise HTTPException(404, "Social profile not found")
+    conversation = ChatConversation(
+        social_profile_id=requester.user_id,
+        buyer_id=item.requester_id,
+        seller_id=item.target_id,
+        listing_type="friend",
+        listing_title=f"Друзі · {requester.display_name}"[:100],
+        listing_image_url=requester.avatar_url,
+        listing_price="Спільні інтереси",
+        seller_name=target.display_name[:100],
+    )
+    db.add(conversation)
+    db.flush()
+    db.add_all([
+        ChatParticipant(conversation_id=conversation.id, user_id=item.requester_id),
+        ChatParticipant(conversation_id=conversation.id, user_id=item.target_id),
+    ])
+    item.conversation_id = conversation.id
 
 
 @router.get("/profiles", response_model=SocialProfilePage)
@@ -165,6 +226,199 @@ def my_profile(db: DBSession, user: CurrentUser):
     profile = db.get(SocialProfile, user.id)
     if not profile: raise HTTPException(404, "Social profile not created")
     return _response(profile, profile)
+
+
+@router.get("/swipes/discovery", response_model=SocialSwipeDeckResponse)
+def swipe_discovery(
+    db: DBSession,
+    user: CurrentUser,
+    canton: str | None = None,
+    interest: str | None = None,
+    language: str | None = None,
+    nearby: bool = False,
+    limit: int = Query(20, ge=1, le=40),
+):
+    own = db.get(SocialProfile, user.id)
+    if not own:
+        raise HTTPException(409, "Create your friend profile first")
+    if own.moderation_status != "approved" or not own.is_visible or not own.open_to_friends:
+        raise HTTPException(409, "Your social profile must be approved and visible")
+    premium = _premium(user)
+    if (language or nearby) and not premium:
+        raise HTTPException(status_code=402, detail={"code": "plus_required", "feature": "advanced_friend_search"})
+
+    blocked, blocked_by = _blocked_ids(db, user.id)
+    swiped = select(SocialSwipe.target_id).where(SocialSwipe.swiper_id == user.id)
+    requested = select(FriendConnection.target_id).where(FriendConnection.requester_id == user.id)
+    received = select(FriendConnection.requester_id).where(FriendConnection.target_id == user.id)
+    conditions = [
+        SocialProfile.user_id != user.id,
+        SocialProfile.is_visible.is_(True),
+        SocialProfile.open_to_friends.is_(True),
+        SocialProfile.moderation_status == "approved",
+        User.is_active.is_(True),
+        SocialProfile.user_id.not_in(blocked),
+        SocialProfile.user_id.not_in(blocked_by),
+        SocialProfile.user_id.not_in(swiped),
+        SocialProfile.user_id.not_in(requested),
+        SocialProfile.user_id.not_in(received),
+    ]
+    if canton:
+        conditions.append(SocialProfile.canton == canton.strip().upper())
+    if interest:
+        conditions.append(cast(SocialProfile.interests, String).ilike(f'%"{interest}"%'))
+    if language:
+        conditions.append(cast(SocialProfile.languages, String).ilike(f'%"{language.strip().upper()}"%'))
+
+    rows = db.execute(select(SocialProfile).join(User, User.id == SocialProfile.user_id).where(*conditions)).scalars().all()
+    items = [_response(profile, own) for profile in rows]
+    if nearby:
+        items = [item for item in items if item.distance_km is not None and item.distance_km <= 25]
+    boosted = {profile.user_id: bool(profile.boosted_until and _utc(profile.boosted_until) > _now()) for profile in rows}
+    items.sort(key=lambda item: (boosted.get(item.user_id, False), item.match_score, item.is_verified, item.updated_at), reverse=True)
+    remaining, weekly_limit, reset_at = _swipe_allowance(db, user)
+    return SocialSwipeDeckResponse(
+        items=items[:limit],
+        likes_remaining=remaining,
+        weekly_limit=weekly_limit,
+        is_premium=premium,
+        reset_at=reset_at,
+    )
+
+
+@router.post("/swipes/{target_id}", response_model=SocialSwipeResponse)
+def swipe(target_id: str, payload: SocialSwipeCreate, db: DBSession, user: CurrentUser):
+    if not user.email_verified:
+        raise HTTPException(403, "Verify your email before connecting")
+    own, target = db.get(SocialProfile, user.id), db.get(SocialProfile, target_id)
+    if not own:
+        raise HTTPException(409, "Create your friend profile first")
+    if own.moderation_status != "approved":
+        raise HTTPException(409, "Your social profile must be approved first")
+    if target_id == user.id:
+        raise HTTPException(400, "Cannot swipe your own profile")
+    if not target or target.moderation_status != "approved" or not target.is_visible or not target.open_to_friends:
+        raise HTTPException(404, "Profile unavailable")
+    if db.scalar(select(func.count()).select_from(MarketplaceBlock).where(or_(
+        and_(MarketplaceBlock.user_id == user.id, MarketplaceBlock.blocked_author_id == target_id),
+        and_(MarketplaceBlock.user_id == target_id, MarketplaceBlock.blocked_author_id == user.id),
+    ))):
+        raise HTTPException(404, "Profile unavailable")
+
+    # Serialize decisions for one pair. Without this lock, two simultaneous likes can both
+    # miss the reciprocal row and leave a mutual choice without a match.
+    db.execute(
+        select(User.id)
+        .where(User.id.in_(sorted((user.id, target_id))))
+        .order_by(User.id)
+        .with_for_update()
+    ).all()
+
+    existing_swipe = db.execute(select(SocialSwipe).where(
+        SocialSwipe.swiper_id == user.id,
+        SocialSwipe.target_id == target_id,
+    )).scalar_one_or_none()
+    existing_connection = _pair(db, user.id, target_id)
+    if existing_swipe:
+        if existing_swipe.decision != payload.decision:
+            raise HTTPException(409, "Swipe decision already recorded")
+        is_match = bool(existing_connection and existing_connection.status == "accepted")
+        remaining, _, _ = _swipe_allowance(db, user)
+        return SocialSwipeResponse(
+            target_id=target_id,
+            decision=payload.decision,
+            is_match=is_match,
+            connection_id=existing_connection.id if is_match else None,
+            conversation_id=existing_connection.conversation_id if is_match else None,
+            likes_remaining=remaining,
+        )
+
+    if payload.decision == "like":
+        remaining, limit, _ = _swipe_allowance(db, user)
+        if remaining == 0:
+            raise HTTPException(status_code=402, detail={"code": "plus_required", "feature": "friend_swipes", "free_limit": limit})
+        daily_likes = db.scalar(select(func.count()).select_from(SocialSwipe).where(
+            SocialSwipe.swiper_id == user.id,
+            SocialSwipe.decision == "like",
+            SocialSwipe.created_at >= _now() - timedelta(days=1),
+        )) or 0
+        if daily_likes >= 100:
+            raise HTTPException(429, "Daily safety limit reached")
+
+    row = SocialSwipe(swiper_id=user.id, target_id=target_id, decision=payload.decision)
+    db.add(row)
+    is_match = False
+    connection = existing_connection
+    if payload.decision == "pass":
+        if connection and connection.target_id == user.id and connection.status == "pending":
+            connection.status = "declined"
+            connection.responded_at = _now()
+            db.add(connection)
+    else:
+        reciprocal = db.execute(select(SocialSwipe).where(
+            SocialSwipe.swiper_id == target_id,
+            SocialSwipe.target_id == user.id,
+            SocialSwipe.decision == "like",
+        )).scalar_one_or_none()
+        if connection and connection.status == "accepted":
+            is_match = True
+        elif connection and connection.target_id == user.id and connection.status == "pending":
+            connection.status = "accepted"
+            connection.responded_at = _now()
+            _create_friend_conversation(db, connection)
+            is_match = True
+        elif reciprocal and connection is None:
+            connection = FriendConnection(
+                pair_key=":".join(sorted((user.id, target_id))),
+                requester_id=target_id,
+                target_id=user.id,
+                shared_interests=sorted(set(own.interests) & set(target.interests)),
+                status="accepted",
+                responded_at=_now(),
+            )
+            db.add(connection)
+            db.flush()
+            _create_friend_conversation(db, connection)
+            is_match = True
+    if is_match and connection:
+        pair_key = ":".join(sorted((user.id, target_id)))
+        enqueue_account_notification(
+            db,
+            event_key=f"friend_match:{pair_key}",
+            recipient_id=target_id,
+            event_type="friend_match",
+            title="Новий взаємний збіг",
+            body=f"Ви з {own.display_name} обрали одне одного. Чат уже відкритий.",
+            data={"conversation_id": connection.conversation_id, "profile_id": user.id},
+        )
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(409, "Swipe already recorded") from None
+    remaining, _, _ = _swipe_allowance(db, user)
+    return SocialSwipeResponse(
+        target_id=target_id,
+        decision=payload.decision,
+        is_match=is_match,
+        connection_id=connection.id if is_match and connection else None,
+        conversation_id=connection.conversation_id if is_match and connection else None,
+        likes_remaining=remaining,
+    )
+
+
+@router.delete("/swipes/{target_id}", status_code=204)
+def undo_pass(target_id: str, db: DBSession, user: CurrentUser):
+    row = db.execute(select(SocialSwipe).where(
+        SocialSwipe.swiper_id == user.id,
+        SocialSwipe.target_id == target_id,
+    )).scalar_one_or_none()
+    if not row or row.decision != "pass":
+        raise HTTPException(404, "Pass not found")
+    if _utc(row.created_at) < _now() - timedelta(minutes=10):
+        raise HTTPException(409, "Undo window expired")
+    db.delete(row)
+    db.commit()
 
 
 @router.put("/profile/me", response_model=SocialProfileResponse)
@@ -290,13 +544,7 @@ def decide(connection_id: str, payload: FriendDecision, db: DBSession, user: Cur
     if not item or item.target_id != user.id or item.status != "pending": raise HTTPException(404, "Pending request not found")
     item.status = payload.status; item.responded_at = _now()
     if payload.status == "accepted":
-        requester, target = db.get(SocialProfile, item.requester_id), db.get(SocialProfile, item.target_id)
-        conversation = ChatConversation(social_profile_id=requester.user_id, buyer_id=item.requester_id, seller_id=item.target_id,
-            listing_type="friend", listing_title=f"Друзі · {requester.display_name}"[:100], listing_image_url=requester.avatar_url,
-            listing_price="Спільні інтереси", seller_name=target.display_name[:100])
-        db.add(conversation); db.flush()
-        db.add_all([ChatParticipant(conversation_id=conversation.id, user_id=item.requester_id), ChatParticipant(conversation_id=conversation.id, user_id=item.target_id)])
-        item.conversation_id = conversation.id
+        _create_friend_conversation(db, item)
     db.add(item); db.commit(); db.refresh(item)
     return _connection_response(db, item, user.id)
 

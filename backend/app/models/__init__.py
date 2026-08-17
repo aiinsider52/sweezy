@@ -16,7 +16,7 @@ from .user import PublicUserProfile, User
 from .subscription import PremiumUsage, Subscription, SubscriptionEvent
 from .marketplace import MarketplaceBlock, MarketplaceReport, ServiceListing
 from .network import ProfessionalConnection, ProfessionalProfile, ProfessionalProfileReport
-from .social import EventAttendance, FriendConnection, SocialProfile, SocialProfileReport, SocialProfileVisit
+from .social import EventAttendance, FriendConnection, SocialProfile, SocialProfileReport, SocialProfileVisit, SocialSwipe
 from .event_listing import EventListing, EventReport
 from .swiss_moment import SwissMoment
 from .expert_question import ExpertQuestion
@@ -37,6 +37,17 @@ from .chat import (
 from .discovery_review import DiscoveryReview, DiscoveryReviewReport
 from .incident import Incident
 from .moderation import ModerationAction, ModerationCase, ModerationNotification, UserSanction
+from .business import (
+    BusinessAvailabilityRule,
+    BusinessBooking,
+    BusinessClient,
+    BusinessDocument,
+    BusinessLead,
+    BusinessProfile,
+    BusinessQuickReply,
+    BusinessService,
+    BusinessTeamMember,
+)
 
 __all__ = [
     "Guide",
@@ -59,6 +70,7 @@ __all__ = [
     "EventAttendance",
     "SocialProfileReport",
     "SocialProfileVisit",
+    "SocialSwipe",
     "JobFavorite",
     "JobSearchEvent",
     "Job",
@@ -92,4 +104,13 @@ __all__ = [
     "ModerationCase",
     "ModerationNotification",
     "UserSanction",
+    "BusinessProfile",
+    "BusinessService",
+    "BusinessAvailabilityRule",
+    "BusinessLead",
+    "BusinessClient",
+    "BusinessBooking",
+    "BusinessQuickReply",
+    "BusinessTeamMember",
+    "BusinessDocument",
 ]

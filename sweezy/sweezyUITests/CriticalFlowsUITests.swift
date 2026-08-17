@@ -243,13 +243,30 @@ final class CriticalFlowsUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["96%"].exists)
         keepScreenshot(app, name: "friends-responsive")
 
-        let firstProfile = app.buttons["friends.profile.preview-anna"]
+        let firstProfile = app.descendants(matching: .any)["friends.profile.preview-anna"]
         XCTAssertTrue(firstProfile.waitForExistence(timeout: 5))
         firstProfile.tap()
         XCTAssertTrue(app.staticTexts["Anna Keller"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.staticTexts["96% збіг"].exists)
         XCTAssertTrue(app.staticTexts["Демо-профіль · дії вимкнені"].exists)
         keepScreenshot(app, name: "friends-filled-profile")
+    }
+
+    @MainActor
+    func testFriendsSwipeDeckAdvancesAfterPass() throws {
+        let app = XCUIApplication()
+        app.launchArguments = ["--ui-test-friends"]
+        app.launchEnvironment["UITESTS"] = "1"
+        app.launch()
+
+        let first = app.descendants(matching: .any)["friends.profile.preview-anna"]
+        XCTAssertTrue(first.waitForExistence(timeout: 15))
+        first.swipeLeft()
+
+        let second = app.descendants(matching: .any)["friends.profile.preview-dmytro"]
+        XCTAssertTrue(second.waitForExistence(timeout: 5))
+        XCTAssertFalse(first.exists)
+        keepScreenshot(app, name: "friends-swipe-next-profile")
     }
 
     @MainActor

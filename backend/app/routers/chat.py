@@ -63,6 +63,7 @@ from ..schemas.marketplace import MarketplaceSafetyResponse
 from ..services.chat_realtime import chat_realtime
 from ..services.push_notifications import enqueue_chat_push
 from ..services.users import UserService
+from ..services.business_receptionist import maybe_send_auto_reply
 
 
 def _require_chat_enabled() -> None:
@@ -586,6 +587,8 @@ def send_message(
         recipient_id,
         {"type": "message.created", "conversation_id": conversation.id, "message": response.model_dump(mode="json")},
     )
+    if conversation.listing_id and user.id == conversation.buyer_id:
+        bg.add_task(maybe_send_auto_reply, conversation.id, message.id)
     return response
 
 

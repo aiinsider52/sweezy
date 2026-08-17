@@ -34,6 +34,10 @@ final class SubscriptionManager: ObservableObject {
     @Published private(set) var purchasingProductID: String?
     @Published private(set) var backendSyncPending = false
     @Published private(set) var isMonthlyTrialEligible = false
+    @Published private(set) var entitlementStatus = "free"
+    @Published private(set) var entitlementPlan: String?
+    @Published private(set) var entitlementProvider: String?
+    @Published private(set) var entitlementExpiresAt: Date?
     @Published var lastError: String?
 
     private var updatesTask: Task<Void, Never>?
@@ -48,6 +52,16 @@ final class SubscriptionManager: ObservableObject {
 
     var monthlyProduct: Product? { product(id: ProductID.monthly) }
     var yearlyProduct: Product? { product(id: ProductID.yearly) }
+    var planDisplayName: String {
+        guard isPremium else { return "Sweezy Free" }
+        return entitlementStatus == "trial" ? "Sweezy Plus · Trial" : "Sweezy Plus"
+    }
+    var planDetails: String {
+        guard isPremium else { return "Базовий доступ" }
+        let period = entitlementPlan == "yearly" ? "Річний план" : entitlementPlan == "monthly" ? "Місячний план" : "Активний план"
+        guard let entitlementExpiresAt else { return period }
+        return "\(period) · до \(entitlementExpiresAt.formatted(date: .abbreviated, time: .omitted))"
+    }
 
     func load() async {
         guard !isLoading else { return }
@@ -140,7 +154,20 @@ final class SubscriptionManager: ObservableObject {
             break
         }
 
-        isPremium = hasActiveSubscription
+        if KeychainStore.get("access_token") != nil,
+           let server = await APIClient.fetchEntitlements() {
+            isPremium = hasActiveSubscription || server.is_premium
+            entitlementStatus = server.status
+            entitlementPlan = server.plan
+            entitlementProvider = server.provider
+            entitlementExpiresAt = Self.parseDate(server.expire_at)
+        } else {
+            isPremium = hasActiveSubscription
+            entitlementStatus = hasActiveSubscription ? "premium" : "free"
+            entitlementPlan = nil
+            entitlementProvider = hasActiveSubscription ? "apple" : nil
+            entitlementExpiresAt = nil
+        }
     }
 
     func displayPrice(for productID: String, fallback: String) -> String {
@@ -149,6 +176,14 @@ final class SubscriptionManager: ObservableObject {
 
     private func product(id: String) -> Product? {
         products.first { $0.id == id }
+    }
+
+    private static func parseDate(_ value: String?) -> Date? {
+        guard let value else { return nil }
+        let fractional = ISO8601DateFormatter()
+        fractional.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        if let date = fractional.date(from: value) { return date }
+        return ISO8601DateFormatter().date(from: value)
     }
 
     private func verified<T>(_ result: VerificationResult<T>) throws -> T {

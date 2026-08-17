@@ -12,6 +12,8 @@ struct MyListingsView: View {
     @State private var listingToEdit: ServiceListing?
     @State private var listingToDelete: ServiceListing?
     @State private var proDashboard: MarketplaceProDashboard?
+    @State private var workspaces: [BusinessWorkspace] = []
+    @State private var selectedWorkspace: BusinessWorkspace?
     @State private var showPaywall = false
     @State private var showProDashboard = false
     @StateObject private var subscription = SubscriptionManager.shared
@@ -28,6 +30,7 @@ struct MyListingsView: View {
                         VStack(spacing: 16) {
                             summaryHero
                             proEntry
+                            workspaceEntries
 
                             if listings.isEmpty {
                                 emptyState
@@ -68,7 +71,8 @@ struct MyListingsView: View {
                     onListingsChanged?()
                 }
             }
-            .sheet(isPresented: $showProDashboard) { MarketplaceProDashboardView(dashboard: proDashboard, listings: listings) { updated in replaceListing(updated) } }
+            .fullScreenCover(isPresented: $showProDashboard) { MarketplaceProDashboardView(dashboard: proDashboard, listings: listings) { updated in replaceListing(updated) } }
+            .fullScreenCover(item: $selectedWorkspace) { workspace in MarketplaceProDashboardView(dashboard: nil, listings: [], workspace: workspace) { _ in } }
             .fullScreenCover(isPresented: $showPaywall) { SubscriptionView(source: .profile) }
             .alert("marketplace.delete_title".localized, isPresented: .init(
                 get: { listingToDelete != nil },
@@ -155,10 +159,7 @@ struct MyListingsView: View {
     private var proEntry: some View {
         Button {
             guard subscription.isPremium else { showPaywall = true; return }
-            Task {
-                do { proDashboard = try await APIClient.fetchMarketplaceProDashboard(); showProDashboard = true }
-                catch { errorMessage = error.localizedDescription }
-            }
+            showProDashboard = true
         } label: {
             HStack(spacing: 14) {
                 Image(systemName: "chart.line.uptrend.xyaxis").font(.title2.bold()).foregroundStyle(.black).frame(width: 48, height: 48).background(JourneyVisual.lime).clipShape(RoundedRectangle(cornerRadius: 15))
@@ -166,6 +167,24 @@ struct MyListingsView: View {
                 Spacer(); Image(systemName: "arrow.right")
             }.foregroundStyle(.white).padding(16).background(.black.opacity(0.48)).clipShape(RoundedRectangle(cornerRadius: 22)).overlay(RoundedRectangle(cornerRadius: 22).stroke(JourneyVisual.lime.opacity(0.3)))
         }.buttonStyle(.plain)
+    }
+
+    @ViewBuilder private var workspaceEntries: some View {
+        let teamWorkspaces = workspaces.filter { $0.role != "owner" }
+        if !teamWorkspaces.isEmpty {
+            VStack(alignment: .leading, spacing: 10) {
+                Text("КОМАНДНІ ПРОСТОРИ").font(.caption.bold()).tracking(1.5).foregroundStyle(JourneyVisual.lime)
+                ForEach(teamWorkspaces) { workspace in
+                    Button { selectedWorkspace = workspace } label: {
+                        HStack(spacing: 13) {
+                            Image(systemName: "person.3.fill").foregroundStyle(.black).frame(width: 46, height: 46).background(JourneyVisual.lime, in: RoundedRectangle(cornerRadius: 14))
+                            VStack(alignment: .leading, spacing: 3) { Text(workspace.displayName).font(.headline); Text("\(workspace.role.capitalized) · заявки та календар").font(.caption).foregroundStyle(.white.opacity(0.55)) }
+                            Spacer(); Image(systemName: "arrow.right")
+                        }.foregroundStyle(.white).padding(15).background(.black.opacity(0.48), in: RoundedRectangle(cornerRadius: 20)).overlay(RoundedRectangle(cornerRadius: 20).stroke(JourneyVisual.lime.opacity(0.24)))
+                    }.buttonStyle(.plain)
+                }
+            }
+        }
     }
 
     private func summaryPill(title: String, value: Int, tint: Color) -> some View {
@@ -224,6 +243,7 @@ struct MyListingsView: View {
         isLoading = listings.isEmpty
         do {
             listings = try await APIClient.fetchMyListings()
+            workspaces = (try? await BusinessProAPI.workspaces()) ?? []
         } catch {
             if (error as NSError).code == 401 {
                 sessionManager.signOut()

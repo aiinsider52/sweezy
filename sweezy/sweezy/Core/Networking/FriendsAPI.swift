@@ -13,7 +13,20 @@ enum FriendsAPI {
         return NSError(domain: "FriendsAPI", code: status, userInfo: [NSLocalizedDescriptionKey: message])
       }
     }
-    return NSError(domain: "FriendsAPI", code: status, userInfo: [NSLocalizedDescriptionKey: fallback])
+    let message: String
+    switch status {
+    case 401:
+      message = "Сесія завершилась. Увійди знову — введені дані залишаться на екрані."
+    case 403:
+      message = "Для цієї дії потрібен підтверджений акаунт. Перевір email та повтори."
+    case 404:
+      message = "Розділ тимчасово недоступний на сервері. Онови застосунок або повтори пізніше."
+    case 500...599:
+      message = "Сервер не зміг виконати дію. Дані не втрачено — повтори через хвилину."
+    default:
+      message = fallback
+    }
+    return NSError(domain: "FriendsAPI", code: status, userInfo: [NSLocalizedDescriptionKey: message])
   }
   private struct RequestPayload: Encodable {
     let message: String?
@@ -42,6 +55,7 @@ enum FriendsAPI {
   }
   private struct EventMessageBody: Encodable { let body: String }
   private struct VisitBody: Encodable { let invisible: Bool }
+  private struct SwipeBody: Encodable { let decision: String }
 
   private static func call<T: Decodable>(_ path: String, method: String = "GET", body: Data? = nil)
     async throws -> T
@@ -87,6 +101,42 @@ enum FriendsAPI {
       throw responseError(d, response: res, fallback: "friends.error.people".localized)
     }
     return try ChatAPI.decoder.decode(SocialProfilePage.self, from: d)
+  }
+  static func swipeDeck(
+    canton: String? = nil, interest: SocialInterest? = nil, language: String? = nil,
+    nearby: Bool = false
+  ) async throws -> SocialSwipeDeck {
+    var components = URLComponents(
+      url: APIClient.url("friends/swipes/discovery"), resolvingAgainstBaseURL: false)!
+    components.queryItems = [
+      canton.map { URLQueryItem(name: "canton", value: $0) },
+      interest.map { URLQueryItem(name: "interest", value: $0.rawValue) },
+      language.map { URLQueryItem(name: "language", value: $0) },
+      nearby ? URLQueryItem(name: "nearby", value: "true") : nil,
+      URLQueryItem(name: "limit", value: "24"),
+    ].compactMap { $0 }
+    let request = URLRequest(url: components.url!)
+    let (data, response) = try await APIClient.authorizedData(
+      for: request, context: "friends_swipe_deck")
+    guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+      throw responseError(data, response: response, fallback: "Не вдалося завантажити нові знайомства")
+    }
+    return try ChatAPI.decoder.decode(SocialSwipeDeck.self, from: data)
+  }
+  static func swipe(_ id: String, decision: String) async throws -> SocialSwipeResult {
+    try await call(
+      "friends/swipes/\(id)", method: "POST",
+      body: try JSONEncoder().encode(SwipeBody(decision: decision)))
+  }
+  static func undoPass(_ id: String) async throws {
+    var request = URLRequest(url: APIClient.url("friends/swipes/\(id)"))
+    request.httpMethod = "DELETE"
+    request.timeoutInterval = 20
+    let (data, response) = try await APIClient.authorizedData(
+      for: request, context: "friends_swipe_undo")
+    guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+      throw responseError(data, response: response, fallback: "Не вдалося повернути профіль")
+    }
   }
   static func myProfile() async throws -> SocialProfile { try await call("friends/profile/me") }
   static func save(_ draft: SocialProfileDraft) async throws -> SocialProfile {

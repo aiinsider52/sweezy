@@ -639,6 +639,8 @@ enum APIClient {
     struct Entitlements: Decodable {
         let status: String
         let expire_at: String?
+        let plan: String?
+        let provider: String?
         let is_premium: Bool
         let ai_access: Bool
         let favorites_limit: Int?

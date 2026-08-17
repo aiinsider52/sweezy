@@ -7,7 +7,13 @@ from backend.app.core.database import SessionLocal
 from backend.app.models.audit_log import AuditLog
 from backend.app.models.subscription import Subscription, SubscriptionEvent
 from backend.app.models.user import User
-from backend.app.routers.admin import AdminSubscriptionUpdate, list_subscriptions, set_user_subscription
+from backend.app.routers.admin import (
+    AdminSubscriptionUpdate,
+    list_subscriptions,
+    set_user_subscription,
+    subscriptions_analytics,
+)
+from backend.app.routers.subscriptions import entitlements
 
 
 def _user(email: str, *, admin: bool = False) -> User:
@@ -65,6 +71,17 @@ def test_admin_can_grant_dated_plus_and_list_lifecycle() -> None:
             assert row["purchased_at"] is not None
             assert row["current_period_end"] is not None
             assert row["editable"] is True
+
+            db.refresh(customer)
+            access = entitlements(db, customer)
+            assert access.is_premium is True
+            assert access.status == "premium"
+            assert access.plan == "monthly"
+            assert access.provider == "manual"
+
+            analytics = subscriptions_analytics({"sub": admin.id}, db, months=6)
+            assert analytics["totals"]["premium_users"] >= 1
+            assert analytics["totals"]["monthly"] >= 1
 
             event = db.query(SubscriptionEvent).filter_by(user_id=customer.id).one()
             assert event.provider == "manual"

@@ -1,18 +1,18 @@
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
 import uuid
+from datetime import datetime, timedelta, timezone
 
-from fastapi.testclient import TestClient
 import pytest
+from fastapi.testclient import TestClient
 
-from backend.app.core.database import SessionLocal
 from backend.app.core.config import get_settings
+from backend.app.core.database import SessionLocal
 from backend.app.core.security import create_access_token
 from backend.app.main import app
-from backend.app.models.event_listing import EventListing
 from backend.app.models.chat import NotificationOutbox
-from backend.app.models.social import SocialProfile
+from backend.app.models.event_listing import EventListing
+from backend.app.models.social import SocialProfile, SocialSwipe
 from backend.app.services.users import UserService
 
 client = TestClient(app)
@@ -141,7 +141,7 @@ def test_managed_media_avatar_is_allowed() -> None:
 
 
 def test_free_search_limits_advanced_filters_and_weekly_requests() -> None:
-    viewer, viewer_id = identity()
+    viewer, _viewer_id = identity()
     profile(viewer, "Viewer", ["music", "travel"])
     advanced = client.get("/api/v1/friends/profiles?language=DE", headers=viewer)
     assert advanced.status_code == 402
@@ -221,3 +221,85 @@ def test_profile_visitors_and_invisible_browsing_are_plus() -> None:
     assert visitors.json()[0]["profile"]["user_id"] == viewer_id
     invisible = client.post(f"/api/v1/friends/profiles/{owner_id}/visit", headers=viewer, json={"invisible": True})
     assert invisible.status_code == 200
+
+
+def test_swipes_stay_private_until_mutual_match_then_open_chat() -> None:
+    first, first_id = identity(); second, second_id = identity(); third, third_id = identity()
+    profile(first, "Swipe Anna", ["hiking", "music", "travel"])
+    profile(second, "Swipe Marta", ["hiking", "music", "books"])
+    profile(third, "Swipe Sofia", ["art", "travel", "books"])
+
+    deck = client.get("/api/v1/friends/swipes/discovery", headers=first)
+    assert deck.status_code == 200, deck.text
+    assert second_id in {item["user_id"] for item in deck.json()["items"]}
+    assert deck.json()["likes_remaining"] == 15
+
+    first_like = client.post(
+        f"/api/v1/friends/swipes/{second_id}", headers=first, json={"decision": "like"}
+    )
+    assert first_like.status_code == 200, first_like.text
+    assert first_like.json()["is_match"] is False
+    assert client.get("/api/v1/friends/connections", headers=second).json() == []
+
+    second_like = client.post(
+        f"/api/v1/friends/swipes/{first_id}", headers=second, json={"decision": "like"}
+    )
+    assert second_like.status_code == 200, second_like.text
+    assert second_like.json()["is_match"] is True
+    conversation_id = second_like.json()["conversation_id"]
+    assert conversation_id
+    first_connections = client.get("/api/v1/friends/connections", headers=first).json()
+    assert first_connections[0]["status"] == "accepted"
+    assert first_connections[0]["conversation_id"] == conversation_id
+    assert client.get(f"/api/v1/chat/conversations/{conversation_id}", headers=second).status_code == 200
+
+    passed = client.post(
+        f"/api/v1/friends/swipes/{third_id}", headers=first, json={"decision": "pass"}
+    )
+    assert passed.status_code == 200
+    assert third_id not in {
+        item["user_id"] for item in client.get("/api/v1/friends/swipes/discovery", headers=first).json()["items"]
+    }
+    assert client.delete(f"/api/v1/friends/swipes/{third_id}", headers=first).status_code == 204
+    assert third_id in {
+        item["user_id"] for item in client.get("/api/v1/friends/swipes/discovery", headers=first).json()["items"]
+    }
+
+
+def test_free_swipe_like_limit_is_enforced() -> None:
+    viewer, viewer_id = identity()
+    profile(viewer, "Limited swiper", ["music", "travel"])
+    with SessionLocal() as db:
+        for index in range(15):
+            target = UserService.create(
+                db,
+                email=f"swipe_limit_{uuid.uuid4().hex}@example.test",
+                password="StrongPass1!",
+                role="user",
+                email_verified=True,
+            )
+            db.add(SocialProfile(
+                user_id=target.id,
+                display_name=f"Limit target {index}",
+                canton="ZH",
+                city="Zürich",
+                bio="Профіль для перевірки тижневого ліміту безпечних знайомств у Sweezy.",
+                interests=["music", "travel"],
+                languages=["UK"],
+                meetup_formats=["coffee"],
+                availability=["weekend"],
+                guidelines_accepted=True,
+                is_verified=True,
+                moderation_status="approved",
+            ))
+            db.flush()
+            db.add(SocialSwipe(swiper_id=viewer_id, target_id=target.id, decision="like"))
+        db.commit()
+
+    extra, extra_id = identity()
+    profile(extra, "Extra swipe target", ["music", "travel"])
+    limited = client.post(
+        f"/api/v1/friends/swipes/{extra_id}", headers=viewer, json={"decision": "like"}
+    )
+    assert limited.status_code == 402
+    assert limited.json()["detail"]["feature"] == "friend_swipes"

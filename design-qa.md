@@ -1,3 +1,43 @@
+**Sweezy Circle Swipe Redesign — 2026-08-17**
+- Source visual truth: `/var/folders/h0/856jbdbx62dc4n9mfh_35k540000gn/T/codex-clipboard-46daf8ae-b0a1-466d-a698-c861dee85c17.png`.
+- Implementation screenshot: unavailable; Simulator Computer Use access was denied and sandboxed CoreSimulatorService is disconnected.
+- Viewport: source 853 × 1844 pixels; target compact iPhone portrait, dark appearance, Ukrainian locale, People tab with demo profiles.
+- Density normalization: unavailable because no implementation raster could be captured.
+
+**Full-View Comparison Evidence**
+- Source image opened and measured.
+- Combined source/implementation comparison could not be produced without a rendered implementation capture.
+
+**Focused Region Comparison Evidence**
+- Not possible for same blocker. Code-level checks are not substituted for visual evidence.
+
+**Implementation Evidence**
+- People view now uses black/lime wordmark navigation, underlined text tabs, nearby/Like metrics, tilted portrait card stack, vertical MATCH score, profile chips, swipe cue, and oversized responsive PASS/LIKE controls.
+- Three 1024-class portrait assets are valid JPEGs with valid asset-catalog JSON.
+- PASS, LIKE, profile details, undo, filters, card tap, drag swipe, reduced-motion behavior, and accessibility actions remain connected.
+- Changed Swift and UI-test files pass parser checks; `git diff --check` passes.
+- Full internal-module `swift-frontend -typecheck` passes with Preview macros loaded; only one unrelated iOS 26 deprecation warning remains in `OfflineMapCacheService.swift`.
+
+**Findings**
+- [P1] Rendered fidelity remains unverified.
+  Evidence: implementation screenshot unavailable, so typography, crop, spacing, color, image quality, and copy cannot be compared side by side.
+  Fix: launch `--ui-test-friends` on a working Simulator, capture same compact viewport, combine with source, then run visual iteration.
+
+**Comparison History**
+- Iteration 1 blocked before visual comparison by Simulator access/service failure; no post-fix raster evidence exists.
+
+**Implementation Checklist**
+- [x] Selected composition implemented with live profile data and existing interactions.
+- [x] Responsive action-control scaling added for compact widths.
+- [x] Demo portrait assets and updated XCUI selectors added.
+- [x] Swift parser, asset JSON, image integrity, and whitespace checks pass.
+- [x] Full internal-module frontend typecheck passes.
+- [ ] Capture implementation and complete source-vs-render comparison.
+
+final result: blocked
+
+---
+
 **Jobs Guest Gate Redesign — 2026-08-12**
 - Source visual truth: `/Users/vladyslav.katash/.codex/generated_images/019fdb22-7dc6-70c3-9979-1d72f10c376f/exec-a136a202-aa25-4845-a3c6-11f3a73afef3.png`.
 - Implementation screenshot: `/private/tmp/sweezy-jobs-gate-iphone16.png`.

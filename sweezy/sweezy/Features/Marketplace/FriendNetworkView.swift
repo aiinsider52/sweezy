@@ -261,9 +261,14 @@ private struct FriendSwipeDeck: View {
   }
 
   var body: some View {
-    VStack(spacing: 16) {
+    VStack(spacing: 11) {
       cardStack
+      swipeCue
       actionControls
+      Text("Like приватний до взаємного вибору")
+        .font(.caption2.weight(.semibold))
+        .foregroundColor(.white.opacity(0.42))
+        .accessibilityHidden(true)
     }
   }
 
@@ -273,7 +278,7 @@ private struct FriendSwipeDeck: View {
         swipeCard(layer)
       }
     }
-    .frame(height: cardHeight + 24)
+    .frame(height: cardHeight + 34)
   }
 
   private func swipeCard(_ layer: CardLayer) -> some View {
@@ -285,12 +290,17 @@ private struct FriendSwipeDeck: View {
       direction: isTop ? dragOffset.width : 0)
       .frame(maxWidth: .infinity)
       .frame(height: cardHeight)
-      .scaleEffect(isTop ? 1 : 1 - CGFloat(layer.index) * 0.035)
-      .offset(y: isTop ? dragOffset.height * 0.12 : CGFloat(layer.index) * 12)
-      .offset(x: isTop ? dragOffset.width : 0)
-      .rotationEffect(.degrees(isTop ? Double(dragOffset.width / 34) : 0))
+      .scaleEffect(isTop ? 0.97 : 0.97 - CGFloat(layer.index) * 0.025)
+      .offset(
+        x: isTop ? dragOffset.width : -CGFloat(layer.index) * 12,
+        y: isTop ? 10 + dragOffset.height * 0.12 : 10 + CGFloat(layer.index) * 13)
+      .rotationEffect(
+        .degrees(
+          isTop
+            ? 1.6 + Double(dragOffset.width / 34)
+            : layer.index == 1 ? -2.2 : -4.2))
       .zIndex(Double(3 - layer.index))
-      .shadow(color: .black.opacity(isTop ? 0.42 : 0.2), radius: 24, y: 14)
+      .shadow(color: .black.opacity(isTop ? 0.5 : 0.26), radius: 25, y: 15)
       .contentShape(RoundedRectangle(cornerRadius: 30, style: .continuous))
       .onTapGesture { if isTop && !committing { onDetails(profile) } }
       .gesture(swipeGesture, including: isTop ? .all : .none)
@@ -304,22 +314,69 @@ private struct FriendSwipeDeck: View {
       .accessibilityAction(named: "Відкрити профіль") { onDetails(profile) }
   }
 
-  private var actionControls: some View {
-    HStack(spacing: 14) {
-      actionButton(icon: "arrow.uturn.backward", size: 48, enabled: canUndo && !busy) {
-        onUndo()
-      }
-      actionButton(icon: "xmark", size: 62, enabled: topProfile != nil && !busy) {
-        if let topProfile { commit(topProfile, decision: "pass") }
-      }
-      actionButton(icon: "heart.fill", size: 74, primary: true, enabled: topProfile != nil && !busy) {
-        if let topProfile { commit(topProfile, decision: "like") }
-      }
-      actionButton(icon: "info", size: 48, enabled: topProfile != nil && !busy) {
-        if let topProfile { onDetails(topProfile) }
-      }
+  private var swipeCue: some View {
+    HStack(spacing: 16) {
+      Text("PASS").foregroundColor(.white.opacity(0.42))
+      Image(systemName: "arrow.left")
+      Text("СВАЙП").foregroundColor(JourneyVisual.lime)
+      Image(systemName: "arrow.right")
+      Text("LIKE").foregroundColor(JourneyVisual.lime)
     }
-    .frame(maxWidth: .infinity)
+    .font(.caption.bold())
+    .tracking(1.4)
+    .accessibilityHidden(true)
+  }
+
+  private var actionControls: some View {
+    GeometryReader { proxy in
+      let scale = min(1, max(0.78, (proxy.size.width - 26) / 302))
+      HStack(alignment: .top, spacing: 13 * scale) {
+        swipeActionButton(
+          label: "PASS", icon: "xmark", size: 106 * scale, primary: false,
+          enabled: topProfile != nil && !busy, identifier: "friends.swipe.pass"
+        ) {
+          if let topProfile { commit(topProfile, decision: "pass") }
+        }
+        VStack(spacing: 10 * scale) {
+          actionButton(
+            icon: "info", size: 48 * scale, enabled: topProfile != nil && !busy,
+            identifier: "friends.swipe.details"
+          ) {
+            if let topProfile { onDetails(topProfile) }
+          }
+          if canUndo {
+            actionButton(
+              icon: "arrow.uturn.backward", size: 40 * scale, enabled: !busy,
+              identifier: "friends.swipe.undo", action: onUndo)
+              .transition(.scale.combined(with: .opacity))
+          }
+        }
+        .padding(.top, 35 * scale)
+        swipeActionButton(
+          label: "LIKE", icon: "heart.fill", size: 122 * scale, primary: true,
+          enabled: topProfile != nil && !busy, identifier: "friends.swipe.like"
+        ) {
+          if let topProfile { commit(topProfile, decision: "like") }
+        }
+      }
+      .frame(maxWidth: .infinity)
+    }
+    .frame(height: 154)
+  }
+
+  private func swipeActionButton(
+    label: String, icon: String, size: CGFloat, primary: Bool, enabled: Bool,
+    identifier: String,
+    action: @escaping () -> Void
+  ) -> some View {
+    VStack(spacing: 8) {
+      Text(label)
+        .font(.caption.bold()).tracking(2)
+        .foregroundColor(primary ? JourneyVisual.lime : .white.opacity(0.48))
+      actionButton(
+        icon: icon, size: size, primary: primary, enabled: enabled, identifier: identifier,
+        action: action)
+    }
   }
 
   private var swipeGesture: some Gesture {
@@ -366,6 +423,7 @@ private struct FriendSwipeDeck: View {
 
   private func actionButton(
     icon: String, size: CGFloat, primary: Bool = false, enabled: Bool,
+    identifier: String? = nil,
     action: @escaping () -> Void
   ) -> some View {
     Button(action: action) {
@@ -381,6 +439,7 @@ private struct FriendSwipeDeck: View {
     .buttonStyle(.plain)
     .disabled(!enabled)
     .opacity(enabled ? 1 : 0.45)
+    .accessibilityIdentifier(identifier ?? "")
   }
 
   private func accessibilityLabel(_ profile: SocialProfile) -> String {
@@ -400,14 +459,10 @@ private struct FriendSwipeCard: View {
     ZStack {
       profileImage
       LinearGradient(
-        colors: [.clear, .black.opacity(0.08), .black.opacity(0.94)],
+        colors: [.black.opacity(0.04), .clear, .black.opacity(0.15), .black.opacity(0.98)],
         startPoint: .top, endPoint: .bottom)
       VStack(alignment: .leading, spacing: 0) {
-        HStack(alignment: .top) {
-          locationBadge
-          Spacer()
-          matchRing
-        }
+        locationBadge
         Spacer()
         if profile.residencyStage == "newcomer" {
           Label("НОВИЙ У ШВЕЙЦАРІЇ", systemImage: "sparkles")
@@ -418,31 +473,42 @@ private struct FriendSwipeCard: View {
         }
         HStack(alignment: .firstTextBaseline, spacing: 8) {
           Text(profile.displayName)
-            .font(.system(size: 31, weight: .black, design: .rounded))
+            .font(.system(size: 33, weight: .black, design: .rounded))
             .foregroundColor(.white).lineLimit(1).minimumScaleFactor(0.72)
           if profile.isVerified {
             Image(systemName: "checkmark.seal.fill").foregroundColor(lime)
           }
         }
+        if let ageBand = profile.ageBand, !ageBand.isEmpty {
+          Text(ageBand.replacingOccurrences(of: "-", with: "–"))
+            .font(.title3.bold()).foregroundColor(.white)
+            .padding(.top, 2)
+        }
         Text(profile.bio)
           .font(.subheadline.weight(.medium)).foregroundColor(.white.opacity(0.76))
           .lineLimit(2).fixedSize(horizontal: false, vertical: true)
           .padding(.top, 5)
-        if let reason = profile.matchReasons.first {
-          Label(reason, systemImage: "link")
-            .font(.caption.bold()).foregroundColor(lime).padding(.top, 11)
-        }
         HStack(spacing: 7) {
           ForEach(Array(profile.sharedInterests.prefix(3))) { interest in
             Label(interest.title, systemImage: interest.icon)
-              .font(.system(size: 10, weight: .bold)).foregroundColor(.white.opacity(0.86))
-              .padding(.horizontal, 9).padding(.vertical, 7)
-              .background(Color.black.opacity(0.4)).clipShape(Capsule())
+              .font(.system(size: 10, weight: .bold)).foregroundColor(.white.opacity(0.92))
+              .lineLimit(1).minimumScaleFactor(0.72)
+              .padding(.horizontal, 9).padding(.vertical, 8)
+              .background(Color.black.opacity(0.48)).clipShape(Capsule())
+              .overlay(Capsule().stroke(Color.white.opacity(0.24)))
           }
         }
         .padding(.top, 12)
       }
       .padding(18)
+
+      VStack {
+        HStack(alignment: .top) {
+          Spacer()
+          verticalMatchScore.padding(.top, 72).padding(.trailing, 16)
+        }
+        Spacer()
+      }
 
       if dragProgress > 0.08 {
         swipeStamp
@@ -451,14 +517,25 @@ private struct FriendSwipeCard: View {
       }
     }
     .clipShape(RoundedRectangle(cornerRadius: 30, style: .continuous))
-    .overlay(RoundedRectangle(cornerRadius: 30).stroke(lime.opacity(0.32), lineWidth: 1))
+    .overlay(RoundedRectangle(cornerRadius: 30).stroke(lime, lineWidth: 1.5))
   }
 
   @ViewBuilder private var profileImage: some View {
-    if let raw = profile.avatarURL, let url = APIClient.resolveMediaURL(raw) {
+    if let previewImageName {
+      Image(previewImageName).resizable().scaledToFill()
+    } else if let raw = profile.avatarURL, let url = APIClient.resolveMediaURL(raw) {
       CachedAsyncImage(url: url) { fallback }
     } else {
       fallback
+    }
+  }
+
+  private var previewImageName: String? {
+    switch profile.id {
+    case "preview-anna": return "friend-preview-anna"
+    case "preview-dmytro": return "friend-preview-dmytro"
+    case "preview-sofia": return "friend-preview-sofia"
+    default: return nil
     }
   }
 
@@ -488,19 +565,19 @@ private struct FriendSwipeCard: View {
     .overlay(Capsule().stroke(.white.opacity(0.16)))
   }
 
-  private var matchRing: some View {
-    ZStack {
-      Circle().fill(.black.opacity(0.48))
-      Circle().stroke(.white.opacity(0.14), lineWidth: 4)
-      Circle().trim(from: 0, to: CGFloat(profile.matchScore) / 100)
-        .stroke(lime, style: StrokeStyle(lineWidth: 4, lineCap: .round))
-        .rotationEffect(.degrees(-90))
-      VStack(spacing: -1) {
-        Text("\(profile.matchScore)%").font(.caption.bold())
-        Text("збіг").font(.system(size: 8, weight: .bold))
-      }.foregroundColor(.white)
+  private var verticalMatchScore: some View {
+    VStack(spacing: -3) {
+      Text("\(profile.matchScore)")
+        .font(.system(size: 58, weight: .black, design: .rounded))
+        .minimumScaleFactor(0.7)
+      Text("M\nA\nT\nC\nH")
+        .font(.system(size: 13, weight: .black, design: .rounded))
+        .tracking(1.2)
+        .multilineTextAlignment(.center)
+        .lineSpacing(-1)
     }
-    .frame(width: 58, height: 58)
+    .foregroundColor(lime)
+    .shadow(color: .black.opacity(0.45), radius: 8)
   }
 
   private var swipeStamp: some View {
@@ -660,22 +737,29 @@ struct FriendNetworkView: View {
     GeometryReader { geometry in
       ZStack(alignment: .top) {
         JourneyVisual.black.ignoresSafeArea()
-        Image("journey-place-community")
-          .resizable()
-          .scaledToFill()
-          .frame(width: geometry.size.width, height: 410)
-          .clipped()
-          .overlay(
-            LinearGradient(
-              colors: [.black.opacity(0.05), .black.opacity(0.35), JourneyVisual.black],
-              startPoint: .top, endPoint: .bottom)
-          )
-          .ignoresSafeArea(edges: .top)
-          .accessibilityHidden(true)
+        if tab != 0 {
+          Image("journey-place-community")
+            .resizable()
+            .scaledToFill()
+            .frame(width: geometry.size.width, height: 410)
+            .clipped()
+            .overlay(
+              LinearGradient(
+                colors: [.black.opacity(0.05), .black.opacity(0.35), JourneyVisual.black],
+                startPoint: .top, endPoint: .bottom)
+            )
+            .ignoresSafeArea(edges: .top)
+            .accessibilityHidden(true)
+        }
         ScrollView(showsIndicators: false) {
           LazyVStack(spacing: 0) {
-            hero
+            if tab == 0 {
+              peopleTopBar
+            } else {
+              hero
+            }
             tabs
+            if tab == 0 { peopleMetrics }
             if let loadError = vm.loadErrors[tab] {
               networkIssue(message: loadError)
                 .padding(.horizontal, 20)
@@ -857,6 +941,42 @@ struct FriendNetworkView: View {
       ).foregroundColor(.white.opacity(0.72)).frame(maxWidth: 340, alignment: .leading)
     }.padding(.horizontal, 20).padding(.top, 8).padding(.bottom, 18).frame(height: 350)
   }
+  private var peopleTopBar: some View {
+    HStack(spacing: 12) {
+      Button { dismiss() } label: {
+        Image(systemName: "chevron.left")
+          .font(.subheadline.bold())
+          .foregroundColor(.white)
+          .frame(width: 38, height: 38)
+          .background(.white.opacity(0.07))
+          .clipShape(Circle())
+          .overlay(Circle().stroke(.white.opacity(0.13)))
+      }
+      .accessibilityLabel("Назад")
+      Text("SWEEZY CIRCLE")
+        .font(.system(size: 15, weight: .black))
+        .tracking(3.2)
+        .foregroundColor(limeAccent)
+        .lineLimit(1)
+        .minimumScaleFactor(0.8)
+        .accessibilityIdentifier("friends.people.title")
+      Spacer(minLength: 8)
+      Button { filters = true } label: {
+        Image(systemName: "slider.horizontal.3")
+          .font(.headline)
+          .foregroundColor(.white)
+          .frame(width: 48, height: 48)
+          .background(Color.white.opacity(0.055))
+          .clipShape(Circle())
+          .overlay(Circle().stroke(limeAccent.opacity(0.58), lineWidth: 1))
+      }
+      .accessibilityLabel("Фільтри знайомств")
+      .accessibilityIdentifier("friends.people.filters")
+    }
+    .padding(.horizontal, 18)
+    .padding(.top, 10)
+    .padding(.bottom, 10)
+  }
   private var isUITestPreview: Bool {
     #if DEBUG
       ProcessInfo.processInfo.arguments.contains("--preview-friends-people")
@@ -899,7 +1019,7 @@ struct FriendNetworkView: View {
     #endif
   }
   private var tabs: some View {
-    HStack(spacing: 4) {
+    HStack(spacing: 0) {
       ForEach(
         Array(
           [
@@ -910,22 +1030,55 @@ struct FriendNetworkView: View {
         Button {
           withAnimation(.easeInOut(duration: 0.2)) { tab = i }
         } label: {
-          VStack(spacing: 3) {
-            Image(systemName: x.1)
+          VStack(spacing: 10) {
             Text(x.0)
-          }.font(.caption.bold()).foregroundColor(tab == i ? .black : .white.opacity(0.58)).frame(
-            maxWidth: .infinity
-          ).frame(height: 50).background(tab == i ? limeAccent : .clear).clipShape(Capsule())
+              .font(.system(size: 16, weight: tab == i ? .bold : .semibold))
+            Capsule()
+              .fill(tab == i ? limeAccent : Color.clear)
+              .frame(width: 44, height: 3)
+          }
+          .foregroundColor(tab == i ? .white : .white.opacity(0.53))
+          .frame(maxWidth: .infinity)
+          .frame(height: 54)
         }
       }
-    }.padding(5).background(.white.opacity(0.07)).clipShape(Capsule()).overlay(
-      Capsule().stroke(.white.opacity(0.12))
-    ).padding(.horizontal, 18)
+    }
+    .padding(.horizontal, 18)
+    .overlay(alignment: .bottom) {
+      Rectangle().fill(.white.opacity(0.09)).frame(height: 1)
+    }
+  }
+  private var peopleMetrics: some View {
+    HStack(spacing: 10) {
+      peopleMetric(
+        icon: "mappin.and.ellipse",
+        text: "\(max(vm.swipeProfiles.count, vm.profiles.count)) збігів поруч")
+        .accessibilityIdentifier("friends.people.nearbyCount")
+      Rectangle().fill(.white.opacity(0.14)).frame(width: 1, height: 24)
+      peopleMetric(icon: "sparkles", text: peopleLikesText)
+    }
+    .padding(.horizontal, 18)
+    .padding(.top, 18)
+  }
+  private func peopleMetric(icon: String, text: String) -> some View {
+    HStack(spacing: 8) {
+      Image(systemName: icon).foregroundColor(limeAccent)
+      Text(text).lineLimit(1).minimumScaleFactor(0.72)
+    }
+    .font(.caption.weight(.semibold))
+    .foregroundColor(.white.opacity(0.82))
+    .padding(.horizontal, 12)
+    .frame(maxWidth: .infinity, minHeight: 42)
+    .background(Color(red: 0.025, green: 0.075, blue: 0.06))
+    .clipShape(Capsule())
+  }
+  private var peopleLikesText: String {
+    if vm.swipeDeckMeta?.isPremium == true { return "Like без ліміту" }
+    if let remaining = vm.swipeDeckMeta?.likesRemaining { return "\(remaining) Like доступно" }
+    return "Приватні Like"
   }
   private func discover(screenHeight: CGFloat) -> some View {
-    VStack(alignment: .leading, spacing: 18) {
-      if vm.isShowingDemoProfiles { demoNotice }
-      swipeHeader
+    VStack(alignment: .leading, spacing: 15) {
       if vm.loading && vm.swipeProfiles.isEmpty {
         ProgressView().tint(limeAccent).frame(maxWidth: .infinity).padding(60)
       } else if let own = vm.myProfile, own.moderationStatus != "approved", !vm.isShowingDemoProfiles {
@@ -943,13 +1096,12 @@ struct FriendNetworkView: View {
       } else {
         FriendSwipeDeck(
           profiles: vm.swipeProfiles,
-          cardHeight: min(610, max(430, screenHeight * 0.58)),
+          cardHeight: min(570, max(420, screenHeight * 0.59)),
           busy: vm.swipeBusy,
           canUndo: vm.lastPassedProfile != nil,
           onDecision: handleSwipe,
           onUndo: { Task { await vm.undoLastPass() } },
           onDetails: openProfile)
-        swipeGuidance
       }
       Button {
         withAnimation(.easeInOut(duration: 0.24)) { showPeopleCatalog.toggle() }

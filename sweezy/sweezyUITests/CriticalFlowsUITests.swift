@@ -234,13 +234,15 @@ final class CriticalFlowsUITests: XCTestCase {
 
         let screen = app.descendants(matching: .any)["friends.screen"]
         XCTAssertTrue(screen.waitForExistence(timeout: 15))
-        let title = app.descendants(matching: .any)["friends.heroTitle"]
-        XCTAssertTrue(title.exists)
+        let title = app.descendants(matching: .any)["friends.people.title"]
+        XCTAssertTrue(title.waitForExistence(timeout: 5))
         XCTAssertGreaterThanOrEqual(title.frame.minX, 0)
         XCTAssertLessThanOrEqual(title.frame.maxX, app.frame.maxX)
-        XCTAssertTrue(app.staticTexts["8 збігів поруч"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.descendants(matching: .any)["friends.people.nearbyCount"].exists)
+        XCTAssertTrue(app.buttons["friends.people.filters"].exists)
         XCTAssertTrue(app.staticTexts["Anna Keller"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.staticTexts["96%"].exists)
+        XCTAssertTrue(app.buttons["friends.swipe.pass"].exists)
+        XCTAssertTrue(app.buttons["friends.swipe.like"].exists)
         keepScreenshot(app, name: "friends-responsive")
 
         let firstProfile = app.descendants(matching: .any)["friends.profile.preview-anna"]

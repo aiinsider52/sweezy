@@ -20,7 +20,7 @@ final class CriticalFlowsUITests: XCTestCase {
         assertScreen(app, tab: "tab.directory", screen: "directory.screen")
         assertScreen(app, tab: "tab.map", screen: "map.screen")
         assertScreen(app, tab: "tab.marketplace", screen: "marketplace.screen")
-        assertScreen(app, tab: "tab.settings", screen: "settings.screen")
+        assertScreen(app, tab: "tab.people", screen: "friends.accessGate.signIn")
 
         app.terminate()
         app.launchArguments = []
@@ -218,8 +218,8 @@ final class CriticalFlowsUITests: XCTestCase {
         app.launch()
 
         XCTAssertTrue(app.descendants(matching: .any)["network.screen"].waitForExistence(timeout: 20))
-        XCTAssertTrue(app.staticTexts["Знайомства\nз наміром"].exists)
-        XCTAssertTrue(app.staticTexts["3 нових контактів"].exists)
+        XCTAssertTrue(app.descendants(matching: .any)["network.editorialHeadline"].exists)
+        XCTAssertTrue(app.buttons["network.filters"].exists)
         XCTAssertTrue(scrollToElement(app.buttons["network.profile.1"], in: app))
 
         keepScreenshot(app, name: "professional-network")

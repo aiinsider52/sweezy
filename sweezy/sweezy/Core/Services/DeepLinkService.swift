@@ -47,7 +47,7 @@ enum DeepLink: Equatable {
         case .map, .place:
             return 2
         case .settings, .profile, .privacy, .language:
-            return 4
+            return 0
         case .onboarding, .passwordReset, .chat:
             return nil
         }

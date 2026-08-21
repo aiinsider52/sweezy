@@ -8,6 +8,7 @@ struct JourneyHomeView: View {
     @State private var showMyPlan = false
     @State private var showSubscription = false
     @State private var showCareerHub = false
+    @State private var showSettings = false
 
     private let actions: [(String, String, DovidnykRouteSection?)] = [
         ("doc.text", "journey.home.action.documents".localized, .checklists),
@@ -73,6 +74,10 @@ struct JourneyHomeView: View {
             .fullScreenCover(isPresented: $showSubscription) {
                 SubscriptionView(source: .home)
             }
+            .sheet(isPresented: $showSettings) {
+                SettingsView()
+                    .environmentObject(appContainer)
+            }
             .onAppear {
                 appContainer.telemetry.retention(
                     .nextActionViewed,
@@ -110,6 +115,19 @@ struct JourneyHomeView: View {
                 .foregroundColor(.white)
 
             Spacer()
+
+            Button { showSettings = true } label: {
+                Image(systemName: "gearshape.fill")
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundColor(.white)
+                    .frame(width: 36, height: 36)
+                    .background(.ultraThinMaterial)
+                    .clipShape(Circle())
+                    .overlay(Circle().stroke(Color.white.opacity(0.16)))
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("settings.title".localized)
+            .accessibilityIdentifier("home.openSettingsButton")
         }
     }
 

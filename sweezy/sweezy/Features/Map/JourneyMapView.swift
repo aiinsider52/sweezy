@@ -35,6 +35,7 @@ struct JourneyMapView: View {
     @State private var activeRoute: MKRoute?
     @State private var isCalculatingRoute = false
     @State private var showsPlaceList = false
+    @State private var showsNearbyRail = true
 
     private let filters: [(PlaceType?, String, String)] = [
         (nil, "common.all".localized, "square.grid.2x2"),
@@ -55,17 +56,24 @@ struct JourneyMapView: View {
                 filterBar
                 Spacer(minLength: 16)
                     .allowsHitTesting(false)
-                nearbyPlacesRail
+                if showsNearbyRail {
+                    nearbyPlacesRail
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                } else {
+                    collapsedNearbyRailChip
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
             }
             .padding(.horizontal, 18)
             .padding(.top, 12)
-            .padding(.bottom, 108)
+            .padding(.bottom, 10)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .animation(.spring(response: 0.36, dampingFraction: 0.86), value: showsNearbyRail)
         }
         .overlay(alignment: .trailing) {
             zoomRail
                 .padding(.trailing, 14)
-                .padding(.bottom, 214)
+                .padding(.bottom, showsNearbyRail ? 168 : 58)
         }
         .task {
             if appContainer.contentService.places.isEmpty {
@@ -350,27 +358,43 @@ struct JourneyMapView: View {
     }
 
     private var nearbyPlacesRail: some View {
-        VStack(spacing: 9) {
+        VStack(spacing: 8) {
             HStack(spacing: 8) {
                 Text(railTitle)
-                    .font(.system(size: 17, weight: .bold, design: .rounded))
+                    .font(.system(size: 16, weight: .bold, design: .rounded))
                     .foregroundColor(.white)
 
                 Text("\(railCount)")
                     .font(.system(size: 11, weight: .bold))
                     .foregroundColor(.black)
                     .padding(.horizontal, 8)
-                    .frame(height: 23)
+                    .frame(height: 22)
                     .background(JourneyVisual.lime)
                     .clipShape(Capsule())
 
-                Spacer()
+                Spacer(minLength: 8)
 
                 Button("journey.map.all_places".localized) {
                     showsPlaceList = true
                 }
                 .font(.system(size: 12, weight: .semibold))
                 .foregroundColor(.white.opacity(0.78))
+
+                Button {
+                    withAnimation(.spring(response: 0.36, dampingFraction: 0.86)) {
+                        showsNearbyRail = false
+                    }
+                } label: {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundColor(.white.opacity(0.86))
+                        .frame(width: 28, height: 28)
+                        .background(Color.black.opacity(0.42))
+                        .clipShape(Circle())
+                        .overlay(Circle().stroke(Color.white.opacity(0.22), lineWidth: 1))
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("journey.map.hide_card".localized)
             }
             .shadow(color: .black.opacity(0.65), radius: 6, y: 2)
 
@@ -381,6 +405,41 @@ struct JourneyMapView: View {
             } else {
                 placeCarousel
             }
+        }
+    }
+
+    private var collapsedNearbyRailChip: some View {
+        HStack {
+            Button {
+                withAnimation(.spring(response: 0.36, dampingFraction: 0.86)) {
+                    showsNearbyRail = true
+                }
+            } label: {
+                HStack(spacing: 8) {
+                    Image(systemName: "rectangle.bottomthird.inset.filled")
+                        .font(.system(size: 13, weight: .bold))
+                    Text("journey.map.show_card".localized)
+                        .font(.system(size: 13, weight: .bold, design: .rounded))
+                    Text("\(railCount)")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundColor(.black)
+                        .padding(.horizontal, 7)
+                        .frame(height: 22)
+                        .background(JourneyVisual.lime)
+                        .clipShape(Capsule())
+                }
+                .foregroundColor(.white)
+                .padding(.horizontal, 14)
+                .frame(height: 42)
+                .background(.ultraThinMaterial.opacity(0.84))
+                .background(Color.black.opacity(0.42))
+                .clipShape(Capsule())
+                .overlay(Capsule().stroke(Color.white.opacity(0.28), lineWidth: 1))
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("journey.map.show_card".localized)
+
+            Spacer(minLength: 0)
         }
     }
 
@@ -406,7 +465,7 @@ struct JourneyMapView: View {
                 }
             }
         }
-        .frame(height: 170)
+        .frame(height: 138)
     }
 
     private var discoveryCarousel: some View {
@@ -431,7 +490,7 @@ struct JourneyMapView: View {
                 }
             }
         }
-        .frame(height: 180)
+        .frame(height: 138)
     }
 
     private var emptyPlacesCard: some View {
@@ -461,7 +520,7 @@ struct JourneyMapView: View {
                 Image(imageName(for: place))
                     .resizable()
                     .scaledToFill()
-                    .frame(width: 118, height: 170)
+                    .frame(width: 104, height: 138)
                     .clipped()
 
                 LinearGradient(
@@ -474,17 +533,17 @@ struct JourneyMapView: View {
                     .font(.system(size: 9, weight: .bold))
                     .foregroundColor(.black)
                     .padding(.horizontal, 8)
-                    .frame(height: 25)
+                    .frame(height: 24)
                     .background(JourneyVisual.lime)
                     .clipShape(Capsule())
-                    .padding(10)
+                    .padding(9)
             }
-            .frame(width: 118, height: 170)
+            .frame(width: 104, height: 138)
 
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: 6) {
                 HStack(alignment: .top, spacing: 8) {
                     Text(place.name)
-                        .font(.system(size: 16, weight: .bold, design: .rounded))
+                        .font(.system(size: 15, weight: .bold, design: .rounded))
                         .foregroundColor(.white)
                         .lineLimit(2)
                         .minimumScaleFactor(0.82)
@@ -494,9 +553,9 @@ struct JourneyMapView: View {
                         appContainer.savedItems.togglePlace(place.id)
                     } label: {
                         Image(systemName: appContainer.savedItems.isPlaceSaved(place.id) ? "heart.fill" : "heart")
-                            .font(.system(size: 13, weight: .bold))
+                            .font(.system(size: 12, weight: .bold))
                             .foregroundColor(appContainer.savedItems.isPlaceSaved(place.id) ? JourneyVisual.lime : .white.opacity(0.72))
-                            .frame(width: 30, height: 30)
+                            .frame(width: 28, height: 28)
                             .background(Color.white.opacity(0.08))
                             .clipShape(Circle())
                     }
@@ -544,7 +603,7 @@ struct JourneyMapView: View {
                         .font(.system(size: 12, weight: .bold))
                         .foregroundColor(.black)
                         .frame(maxWidth: .infinity)
-                        .frame(height: 39)
+                        .frame(height: 36)
                         .background(JourneyVisual.lime)
                         .clipShape(Capsule())
                     }
@@ -555,9 +614,9 @@ struct JourneyMapView: View {
                             openURL(bookingURL)
                         } label: {
                             Image(systemName: "calendar.badge.plus")
-                                .font(.system(size: 14, weight: .bold))
+                                .font(.system(size: 13, weight: .bold))
                                 .foregroundColor(.white)
-                                .frame(width: 39, height: 39)
+                                .frame(width: 36, height: 36)
                                 .background(Color.white.opacity(0.1))
                                 .clipShape(Circle())
                                 .overlay(Circle().stroke(Color.white.opacity(0.16), lineWidth: 1))
@@ -567,14 +626,15 @@ struct JourneyMapView: View {
                     }
                 }
             }
-            .padding(12)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
         }
-        .frame(height: 170)
+        .frame(height: 138)
         .background(.ultraThinMaterial.opacity(0.84))
         .background(Color(red: 0.035, green: 0.075, blue: 0.05).opacity(0.92))
-        .clipShape(RoundedRectangle(cornerRadius: 25, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: 25, style: .continuous)
+            RoundedRectangle(cornerRadius: 22, style: .continuous)
                 .stroke(
                     LinearGradient(
                         colors: [Color.white.opacity(0.44), Color.white.opacity(0.08)],
@@ -584,7 +644,7 @@ struct JourneyMapView: View {
                     lineWidth: 1
                 )
         )
-        .shadow(color: .black.opacity(0.42), radius: 22, y: 10)
+        .shadow(color: .black.opacity(0.42), radius: 18, y: 8)
         .onTapGesture {
             focus(on: place)
         }
@@ -596,7 +656,7 @@ struct JourneyMapView: View {
                 Image(place.imageName)
                     .resizable()
                     .scaledToFill()
-                    .frame(width: 132, height: 180)
+                    .frame(width: 104, height: 138)
                     .clipped()
 
                 LinearGradient(
@@ -609,18 +669,18 @@ struct JourneyMapView: View {
                     .font(.system(size: 9, weight: .bold))
                     .foregroundColor(.black)
                     .padding(.horizontal, 8)
-                    .frame(height: 25)
+                    .frame(height: 24)
                     .background(JourneyVisual.lime)
                     .clipShape(Capsule())
-                    .padding(10)
+                    .padding(9)
             }
-            .frame(width: 132, height: 180)
+            .frame(width: 104, height: 138)
 
-            VStack(alignment: .leading, spacing: 7) {
+            VStack(alignment: .leading, spacing: 5) {
                 HStack(alignment: .top, spacing: 7) {
-                    VStack(alignment: .leading, spacing: 3) {
+                    VStack(alignment: .leading, spacing: 2) {
                         Text(place.title)
-                            .font(.system(size: 17, weight: .bold, design: .rounded))
+                            .font(.system(size: 15, weight: .bold, design: .rounded))
                             .foregroundColor(.white)
                             .lineLimit(2)
 
@@ -634,9 +694,9 @@ struct JourneyMapView: View {
 
                     Button { toggleDiscoverySaved(place) } label: {
                         Image(systemName: discoverySavedPlaceIDs.contains(place.id) ? "bookmark.fill" : "bookmark")
-                            .font(.system(size: 13, weight: .bold))
+                            .font(.system(size: 12, weight: .bold))
                             .foregroundColor(discoverySavedPlaceIDs.contains(place.id) ? JourneyVisual.lime : .white.opacity(0.74))
-                            .frame(width: 30, height: 30)
+                            .frame(width: 28, height: 28)
                             .background(Color.white.opacity(0.08))
                             .clipShape(Circle())
                     }
@@ -646,14 +706,7 @@ struct JourneyMapView: View {
                 Text(place.summary)
                     .font(.system(size: 10, weight: .medium))
                     .foregroundColor(.white.opacity(0.66))
-                    .lineLimit(2)
-
-                HStack(spacing: 9) {
-                    Label(place.duration, systemImage: "clock")
-                    Label(place.season, systemImage: "sun.max")
-                }
-                .font(.system(size: 9, weight: .semibold))
-                .foregroundColor(JourneyVisual.lime)
+                    .lineLimit(1)
 
                 Spacer(minLength: 0)
 
@@ -665,7 +718,7 @@ struct JourneyMapView: View {
                             .font(.system(size: 11, weight: .bold))
                             .foregroundColor(.black)
                             .frame(maxWidth: .infinity)
-                            .frame(height: 38)
+                            .frame(height: 36)
                             .background(JourneyVisual.lime)
                             .clipShape(Capsule())
                     }
@@ -675,7 +728,7 @@ struct JourneyMapView: View {
                         Image(systemName: "arrow.triangle.turn.up.right.diamond.fill")
                             .font(.system(size: 13, weight: .bold))
                             .foregroundColor(.white)
-                            .frame(width: 38, height: 38)
+                            .frame(width: 36, height: 36)
                             .background(Color.white.opacity(0.1))
                             .clipShape(Circle())
                             .overlay(Circle().stroke(Color.white.opacity(0.16), lineWidth: 1))
@@ -683,17 +736,18 @@ struct JourneyMapView: View {
                     .buttonStyle(.plain)
                 }
             }
-            .padding(11)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
         }
-        .frame(height: 180)
+        .frame(height: 138)
         .background(.ultraThinMaterial.opacity(0.84))
         .background(Color(red: 0.035, green: 0.075, blue: 0.05).opacity(0.94))
-        .clipShape(RoundedRectangle(cornerRadius: 25, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: 25, style: .continuous)
+            RoundedRectangle(cornerRadius: 22, style: .continuous)
                 .stroke(Color.white.opacity(0.25), lineWidth: 1)
         )
-        .shadow(color: .black.opacity(0.42), radius: 22, y: 10)
+        .shadow(color: .black.opacity(0.42), radius: 18, y: 8)
         .onTapGesture { focus(on: place) }
         .accessibilityIdentifier("journey.map.discovery.card.\(place.id)")
     }
@@ -971,12 +1025,18 @@ struct JourneyMapView: View {
     }
 
     private func focus(on place: Place) {
+        withAnimation(.spring(response: 0.36, dampingFraction: 0.86)) {
+            showsNearbyRail = true
+        }
         selectedDiscoveryPlace = nil
         selectedPlace = place
         moveCamera(to: place.coordinate.clLocationCoordinate, distance: 3_600)
     }
 
     private func focus(on place: SwissDiscoveryPlace) {
+        withAnimation(.spring(response: 0.36, dampingFraction: 0.86)) {
+            showsNearbyRail = true
+        }
         selectedPlace = nil
         selectedDiscoveryPlace = place
         activeRoute = nil

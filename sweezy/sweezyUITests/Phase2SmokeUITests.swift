@@ -18,10 +18,31 @@ final class Phase2SmokeUITests: XCTestCase {
         XCTAssertTrue(app.buttons["auth.entry.continueAsGuest"].waitForExistence(timeout: 10))
         app.buttons["auth.entry.continueAsGuest"].tap()
 
-        XCTAssertTrue(app.buttons["tab.settings"].waitForExistence(timeout: 15))
-        app.buttons["tab.settings"].tap()
+        XCTAssertTrue(app.buttons["home.openSettingsButton"].waitForExistence(timeout: 15))
+        app.buttons["home.openSettingsButton"].tap()
+        let onboardingClose = app.buttons["featureOnboarding.close"]
+        if onboardingClose.waitForExistence(timeout: 2) {
+            onboardingClose.tap()
+        }
         XCTAssertTrue(app.buttons["settings.notifications.open"].waitForExistence(timeout: 10))
         app.buttons["settings.notifications.open"].tap()
         XCTAssertTrue(app.switches["settings.notifications.masterToggle"].waitForExistence(timeout: 10))
+    }
+
+    @MainActor
+    func testPeopleDiscoveryIsReachableFromMainTabBar() throws {
+        let app = XCUIApplication()
+        app.launchArguments = ["--reset-ui-test-state"]
+        app.launchEnvironment["UITESTS"] = "1"
+        app.launch()
+
+        XCTAssertTrue(app.buttons["onboarding.skipButton"].waitForExistence(timeout: 15))
+        app.buttons["onboarding.skipButton"].tap()
+        XCTAssertTrue(app.buttons["auth.entry.continueAsGuest"].waitForExistence(timeout: 10))
+        app.buttons["auth.entry.continueAsGuest"].tap()
+
+        XCTAssertTrue(app.buttons["tab.people"].waitForExistence(timeout: 15))
+        app.buttons["tab.people"].tap()
+        XCTAssertTrue(app.buttons["friends.accessGate.signIn"].waitForExistence(timeout: 10))
     }
 }

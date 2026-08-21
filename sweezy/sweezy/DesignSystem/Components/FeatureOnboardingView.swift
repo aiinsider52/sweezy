@@ -101,6 +101,7 @@ struct FeatureOnboardingView: View {
             }
             .buttonStyle(.plain)
             .accessibilityLabel("onboarding.skip".localized)
+            .accessibilityIdentifier("featureOnboarding.close")
         }
         .padding(.horizontal, 20)
         .padding(.top, 10)

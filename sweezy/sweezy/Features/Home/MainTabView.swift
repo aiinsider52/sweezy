@@ -11,6 +11,9 @@ import UserNotifications
 
 struct MainTabView: View {
     @EnvironmentObject private var appContainer: AppContainer
+    @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var lockManager: AppLockManager
+    @EnvironmentObject private var sessionManager: SessionManager
     @StateObject private var router = MainTabRouter()
     @State private var deepLinkedGuide: Guide?
     @State private var deepLinkedChecklist: Checklist?
@@ -24,6 +27,7 @@ struct MainTabView: View {
     @State private var showPrivacy = false
     @State private var showLanguage = false
     @State private var showWhatsNew = false
+    @State private var showSettings = false
     
     var body: some View {
         Group {
@@ -40,7 +44,10 @@ struct MainTabView: View {
             case 3:
                 JourneyMarketplaceView()
             case 4:
-                SettingsView()
+                FriendNetworkView(showsDismissButton: false)
+                    .environmentObject(appContainer)
+                    .environmentObject(lockManager)
+                    .environmentObject(sessionManager)
             default:
                 JourneyHomeView()
             }
@@ -103,6 +110,13 @@ struct MainTabView: View {
         .sheet(isPresented: $showPrivacy) { PrivacyPolicyView() }
         .sheet(isPresented: $showLanguage) { LanguageSelectionSheet().environmentObject(appContainer) }
         .sheet(isPresented: $showWhatsNew) { WhatsNewView() }
+        .sheet(isPresented: $showSettings) {
+            SettingsView()
+                .environmentObject(appContainer)
+                .environmentObject(themeManager)
+                .environmentObject(lockManager)
+                .environmentObject(sessionManager)
+        }
     }
 
     @MainActor
@@ -128,7 +142,7 @@ struct MainTabView: View {
         case .news:
             deepLinkedNews = appContainer.contentService.latestNews(limit: 1, language: appContainer.currentLocale.language.languageCode?.identifier).first
         case .cvBuilder: showCVBuilder = true
-        case .settings: break
+        case .settings: showSettings = true
         case .profile: showProfile = true
         case .privacy: showPrivacy = true
         case .language: showLanguage = true
@@ -1887,7 +1901,7 @@ struct HomeSimplifiedView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
-                        NotificationCenter.default.post(name: .switchTab, object: 4)
+                        NotificationCenter.default.post(name: .openDeepLinkDestination, object: DeepLink.settings)
                     } label: {
                         Image(systemName: "person.circle.fill")
                             .font(.title2)
@@ -1947,7 +1961,7 @@ struct HomeSimplifiedView: View {
                 QuickAction(title: "guides.title".localized, icon: "book.fill", color: .blue, tab: 1)
                 QuickAction(title: "qa.map".localized, icon: "map.fill", color: .orange, tab: 2)
                 QuickAction(title: "marketplace.tab".localized, icon: "bag.fill", color: Theme.Colors.primary, tab: 3)
-                QuickAction(title: "settings.title".localized, icon: "gearshape.fill", color: .gray, tab: 4)
+                QuickAction(title: "journey.tab.people".localized, icon: "person.2.fill", color: JourneyVisual.lime, tab: 4)
             }
         }
     }

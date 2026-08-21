@@ -691,6 +691,7 @@ struct FriendNetworkView: View {
   @EnvironmentObject private var appContainer: AppContainer
   @EnvironmentObject private var lockManager: AppLockManager
   @EnvironmentObject private var sessionManager: SessionManager
+  let showsDismissButton: Bool
   @StateObject private var vm = FriendNetworkViewModel()
   @State private var tab = 0
   @State private var editor = false
@@ -710,6 +711,11 @@ struct FriendNetworkView: View {
   private let limeAccent = JourneyVisual.lime
   private let forest = Color(red: 0.035, green: 0.105, blue: 0.075)
   private let mintGlow = Color(red: 0.63, green: 0.93, blue: 0.62)
+
+  init(showsDismissButton: Bool = true) {
+    self.showsDismissButton = showsDismissButton
+  }
+
   var body: some View {
     Group {
       if sessionManager.isAuthenticated || isUITestPreview || showsDemoCatalog {
@@ -837,12 +843,14 @@ struct FriendNetworkView: View {
           .accessibilityHidden(true)
         Color.black.opacity(0.68).ignoresSafeArea()
         VStack(alignment: .leading, spacing: 16) {
-          Button { dismiss() } label: {
-            Image(systemName: "xmark")
-              .font(.title2.bold()).foregroundColor(.white)
-              .frame(width: 48, height: 48)
-              .background(Color.black.opacity(0.34)).clipShape(Circle())
-              .overlay(Circle().stroke(Color.white.opacity(0.18)))
+          if showsDismissButton {
+            Button { dismiss() } label: {
+              Image(systemName: "xmark")
+                .font(.title2.bold()).foregroundColor(.white)
+                .frame(width: 48, height: 48)
+                .background(Color.black.opacity(0.34)).clipShape(Circle())
+                .overlay(Circle().stroke(Color.white.opacity(0.18)))
+            }
           }
           Spacer(minLength: 24)
           Text("SWEEZY CIRCLE · CH")
@@ -914,13 +922,15 @@ struct FriendNetworkView: View {
   private var hero: some View {
     VStack(alignment: .leading, spacing: 10) {
       HStack {
-        Button {
-          dismiss()
-        } label: {
-          Image(systemName: "chevron.left").font(.title2.bold()).foregroundColor(.white).frame(
-            width: 52, height: 52
-          ).background(.black.opacity(0.38)).clipShape(Circle()).overlay(
-            Circle().stroke(.white.opacity(0.2)))
+        if showsDismissButton {
+          Button {
+            dismiss()
+          } label: {
+            Image(systemName: "chevron.left").font(.title2.bold()).foregroundColor(.white).frame(
+              width: 52, height: 52
+            ).background(.black.opacity(0.38)).clipShape(Circle()).overlay(
+              Circle().stroke(.white.opacity(0.2)))
+          }
         }
         Spacer()
         if !vm.incoming.isEmpty {
@@ -943,16 +953,18 @@ struct FriendNetworkView: View {
   }
   private var peopleTopBar: some View {
     HStack(spacing: 12) {
-      Button { dismiss() } label: {
-        Image(systemName: "chevron.left")
-          .font(.subheadline.bold())
-          .foregroundColor(.white)
-          .frame(width: 38, height: 38)
-          .background(.white.opacity(0.07))
-          .clipShape(Circle())
-          .overlay(Circle().stroke(.white.opacity(0.13)))
+      if showsDismissButton {
+        Button { dismiss() } label: {
+          Image(systemName: "chevron.left")
+            .font(.subheadline.bold())
+            .foregroundColor(.white)
+            .frame(width: 38, height: 38)
+            .background(.white.opacity(0.07))
+            .clipShape(Circle())
+            .overlay(Circle().stroke(.white.opacity(0.13)))
+        }
+        .accessibilityLabel("Назад")
       }
-      .accessibilityLabel("Назад")
       Text("SWEEZY CIRCLE")
         .font(.system(size: 15, weight: .black))
         .tracking(3.2)

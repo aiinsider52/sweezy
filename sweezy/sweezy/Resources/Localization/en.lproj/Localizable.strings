@@ -1517,6 +1517,8 @@
 "journey.map.places_nearby" = "%d places nearby";
 "journey.map.search_placeholder" = "Search places";
 "journey.map.show_list" = "Show list";
+"journey.map.hide_card" = "Hide place card";
+"journey.map.show_card" = "Show place";
 "journey.map.today" = "Today";
 "journey.map.type.legal" = "Legal";
 "journey.map.zoom_in" = "Zoom in";
@@ -1525,6 +1527,7 @@
 "journey.tab.home" = "Home";
 "journey.tab.map" = "Map";
 "journey.tab.marketplace" = "Market";
+"journey.tab.people" = "People";
 "journey.tab.selected" = "Selected";
 "journey.tab.settings" = "Settings";
 "journey.tool.appointments.subtitle" = "Your meetings calendar";

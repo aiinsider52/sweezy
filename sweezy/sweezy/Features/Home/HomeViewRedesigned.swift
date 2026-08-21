@@ -781,7 +781,7 @@ struct HomeViewRedesigned: View {
                 subtitle: nil,
                 accentColor: Color.gray
             ) {
-                NotificationCenter.default.post(name: .switchTab, object: 4)
+                NotificationCenter.default.post(name: .openDeepLinkDestination, object: DeepLink.settings)
             }
         ]
     }

@@ -1542,6 +1542,8 @@
 "journey.map.save_place" = "Зберегти місце";
 "journey.map.search_placeholder" = "Пошук на карті";
 "journey.map.show_list" = "Показати список місць";
+"journey.map.hide_card" = "Сховати картку місця";
+"journey.map.show_card" = "Показати місце";
 "journey.map.today" = "Сьогодні";
 "journey.map.type.legal" = "Право";
 "journey.map.zoom_in" = "Збільшити масштаб";
@@ -1550,6 +1552,7 @@
 "journey.tab.home" = "Головна";
 "journey.tab.map" = "Карта";
 "journey.tab.marketplace" = "Маркет";
+"journey.tab.people" = "Люди";
 "journey.tab.selected" = "Вибрано";
 "journey.tab.settings" = "Налаштування";
 "journey.tool.appointments.subtitle" = "Календар запланованих зустрічей";

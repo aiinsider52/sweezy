@@ -209,7 +209,7 @@ struct JourneyBottomBar: View {
         ("list.bullet.rectangle", "journey.tab.directory".localized),
         ("mappin", "journey.tab.map".localized),
         ("cart", "journey.tab.marketplace".localized),
-        ("gearshape", "journey.tab.settings".localized)
+        ("person.2", "journey.tab.people".localized)
     ]
 
     var body: some View {
@@ -263,7 +263,7 @@ struct JourneyBottomBar: View {
     }
 
     private func tabIdentifier(for index: Int) -> String {
-        ["home", "directory", "map", "marketplace", "settings"][index]
+        ["home", "directory", "map", "marketplace", "people"][index]
     }
 }
 

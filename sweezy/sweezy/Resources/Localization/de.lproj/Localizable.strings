@@ -1326,6 +1326,8 @@
 "journey.map.places_nearby" = "%d Orte in der Nähe";
 "journey.map.search_placeholder" = "Orte suchen";
 "journey.map.show_list" = "Liste zeigen";
+"journey.map.hide_card" = "Ort-Karte ausblenden";
+"journey.map.show_card" = "Ort anzeigen";
 "journey.map.today" = "Heute";
 "journey.map.type.legal" = "Rechtliches";
 "journey.map.zoom_in" = "Vergrößern";
@@ -1334,6 +1336,7 @@
 "journey.tab.home" = "Start";
 "journey.tab.map" = "Karte";
 "journey.tab.marketplace" = "Markt";
+"journey.tab.people" = "Leute";
 "journey.tab.selected" = "Ausgewählt";
 "journey.tab.settings" = "Einstellungen";
 "journey.tool.appointments.subtitle" = "Dein Terminkalender";

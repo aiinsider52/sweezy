@@ -189,7 +189,7 @@ enum ChatAPI {
             throw NSError(
                 domain: "ChatAPI",
                 code: (response as? HTTPURLResponse)?.statusCode ?? 0,
-                userInfo: [NSLocalizedDescriptionKey: "Не вдалося відключити push-сповіщення"]
+                userInfo: [NSLocalizedDescriptionKey: "Не вдалося відключити push-сповіщення".localized]
             )
         }
     }

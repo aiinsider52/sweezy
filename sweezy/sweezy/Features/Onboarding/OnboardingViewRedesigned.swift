@@ -280,11 +280,11 @@ struct OnboardingViewRedesigned: View {
     
     private var languageDisplayName: String {
         switch preferredLanguage {
-        case "uk": return "Українська"
-        case "ru": return "Русский"
+        case "uk": return "Українська".localized
+        case "ru": return "Русский".localized
         case "en": return "English"
         case "de": return "Deutsch"
-        default: return "Українська"
+        default: return "Українська".localized
         }
     }
     
@@ -1340,7 +1340,7 @@ private struct LanguageSelectionSheetV2: View {
     @Environment(\.dismiss) private var dismiss
     
     private let languages: [(code: String, name: String, flag: String)] = [
-        ("uk", "Українська", "🇺🇦"),
+        ("uk", "Українська".localized, "🇺🇦"),
         ("en", "English", "🇬🇧"),
         ("de", "Deutsch", "🇩🇪")
     ]
@@ -1405,7 +1405,7 @@ private struct LanguagePickerPage: View {
     @State private var revealed = false
     
     private let languages: [(code: String, name: String, shortCode: String)] = [
-        ("uk", "Українська", "UA"),
+        ("uk", "Українська".localized, "UA"),
         ("en", "English", "EN"),
         ("de", "Deutsch", "DE")
     ]

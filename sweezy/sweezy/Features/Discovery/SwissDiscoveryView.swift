@@ -308,7 +308,7 @@ struct SwissDiscoveryView: View {
             plusPill(
                 icon: "sparkles",
                 swatch: JourneyCategoryPalette.lime,
-                title: "AI-план поїздки"
+                title: "AI-план поїздки".localized
             ) {
                 if subscription.isPremium { showPlanner = true } else { showPaywall = true }
             }
@@ -316,7 +316,7 @@ struct SwissDiscoveryView: View {
             plusPill(
                 icon: showsHiddenOnly ? "square.grid.2x2.fill" : "eye.slash.fill",
                 swatch: JourneyCategoryPalette.lilac,
-                title: showsHiddenOnly ? "Усі місця" : "Приховані місця",
+                title: showsHiddenOnly ? "Усі місця".localized : "Приховані місця".localized,
                 active: showsHiddenOnly
             ) {
                 guard subscription.isPremium else { showPaywall = true; return }
@@ -1021,11 +1021,11 @@ struct SwissDiscoveryDetailView: View {
                     defer { downloadingOffline = false }
                     do {
                         try await offlineCache.saveSnapshot(for: place.id, center: place.coordinate, span: MKCoordinateSpan(latitudeDelta: 0.22, longitudeDelta: 0.22))
-                        offlineNotice = "Маршрут і карта-знімок збережені на цьому пристрої."
-                    } catch { offlineNotice = "Не вдалося зберегти карту. Перевір з’єднання й спробуй ще раз." }
+                        offlineNotice = "Маршрут і карта-знімок збережені на цьому пристрої.".localized
+                    } catch { offlineNotice = "Не вдалося зберегти карту. Перевір з’єднання й спробуй ще раз.".localized }
                 }
             } label: {
-                HStack { Image(systemName: offlineCache.hasSnapshot(for: place.id) ? "checkmark.circle.fill" : "arrow.down.circle.fill"); Text(offlineCache.hasSnapshot(for: place.id) ? "Доступно офлайн" : "Зберегти офлайн"); Spacer(); Text("PLUS").font(.caption.bold()) }
+                HStack { Image(systemName: offlineCache.hasSnapshot(for: place.id) ? "checkmark.circle.fill" : "arrow.down.circle.fill"); Text(offlineCache.hasSnapshot(for: place.id) ? "Доступно офлайн".localized : "Зберегти офлайн".localized); Spacer(); Text("PLUS").font(.caption.bold()) }
                     .font(.headline).foregroundStyle(Theme.Colors.textPrimary).padding(.horizontal, 18).frame(height: 54).background(JourneyVisual.lime.opacity(0.09)).clipShape(RoundedRectangle(cornerRadius: 18)).overlay(RoundedRectangle(cornerRadius: 18).stroke(JourneyVisual.lime.opacity(0.25)))
             }.buttonStyle(.plain).disabled(downloadingOffline)
 

@@ -13,6 +13,8 @@ struct AppointmentsView: View {
     @State private var showingAddAppointment = false
     @State private var editingAppointment: Appointment?
     @State private var selectedSegment = 0
+    /// Only a sheet needs its own Close; when pushed, the back button already does that job.
+    var showsCloseButton = false
     
     private let segments = ["appointments.upcoming".localized, "appointments.past".localized]
     
@@ -26,25 +28,21 @@ struct AppointmentsView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-                // Segment control
-                Picker("Appointments", selection: $selectedSegment) {
-                    ForEach(0..<segments.count, id: \.self) { index in
-                        Text(segments[index]).tag(index)
-                    }
-                }
-                .pickerStyle(SegmentedPickerStyle())
-                .padding(.horizontal, Theme.Spacing.md)
-                .padding(.vertical, Theme.Spacing.sm)
-                
-                // Appointments list
-                appointmentsListSection
+            segmentControl
+                .padding(.horizontal, 20)
+                .padding(.vertical, 10)
+
+            appointmentsListSection
         }
+        .background(JourneyVisual.pageBackground.ignoresSafeArea())
         .navigationTitle("appointments.title".localized)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                Button("common.close".localized) {
-                    dismiss()
+            if showsCloseButton {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("common.close".localized) {
+                        dismiss()
+                    }
                 }
             }
 
@@ -65,7 +63,29 @@ struct AppointmentsView: View {
             }
         }
         .featureOnboarding(.appointments)
-        .journeyScreen(.city, darkness: 0.66)
+    }
+
+    private var segmentControl: some View {
+        HStack(spacing: 4) {
+            ForEach(0..<segments.count, id: \.self) { index in
+                let selected = selectedSegment == index
+                Button {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) { selectedSegment = index }
+                } label: {
+                    Text(segments[index])
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundColor(selected ? .black : JourneyVisual.secondaryText)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 40)
+                        .background(selected ? JourneyVisual.lime : Color.clear, in: Capsule())
+                }
+                .buttonStyle(.plain)
+                .accessibilityAddTraits(selected ? .isSelected : [])
+            }
+        }
+        .padding(4)
+        .background(Theme.Colors.card, in: Capsule())
+        .overlay(Capsule().stroke(JourneyVisual.softBorder, lineWidth: 1))
     }
     
     private var appointmentsListSection: some View {
@@ -92,26 +112,18 @@ struct AppointmentsView: View {
     private var appointmentsList: some View {
         ScrollView {
             LazyVStack(spacing: Theme.Spacing.md) {
+                // swipeActions only work inside List, so edit/delete live in a menu on the card.
                 ForEach(currentAppointments) { appointment in
-                    AppointmentCard(appointment: appointment)
-                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                            Button {
-                                editingAppointment = appointment
-                            } label: {
-                                Label("appointments.edit".localized, systemImage: "pencil")
-                            }
-                            .tint(.blue)
-
-                            Button(role: .destructive) {
-                                repository.delete(appointment)
-                            } label: {
-                                Label("common.delete".localized, systemImage: "trash")
-                            }
-                        }
+                    AppointmentCard(
+                        appointment: appointment,
+                        onEdit: { editingAppointment = appointment },
+                        onDelete: { repository.delete(appointment) }
+                    )
                 }
             }
-            .padding(.horizontal, Theme.Spacing.md)
-            .padding(.vertical, Theme.Spacing.sm)
+            .padding(.horizontal, 20)
+            .padding(.top, 6)
+            .padding(.bottom, 120)
         }
     }
 }
@@ -155,67 +167,108 @@ struct AppointmentShimmerRow: View {
 
 struct AppointmentCard: View {
     let appointment: Appointment
-    
+    var onEdit: (() -> Void)?
+    var onDelete: (() -> Void)?
+
+    @Environment(\.locale) private var locale
+
     var body: some View {
-        GlassCard {
-            VStack(alignment: .leading, spacing: Theme.Spacing.md) {
+        HStack(alignment: .top, spacing: 14) {
+            // Date tile: the thing people scan for first.
+            VStack(spacing: 0) {
+                Text(appointment.dateTime.formatted(.dateTime.day().locale(locale)))
+                    .font(.system(size: 22, weight: .black).monospacedDigit())
+                Text(appointment.dateTime.formatted(.dateTime.month(.abbreviated).locale(locale)).uppercased())
+                    .font(.system(size: 10, weight: .bold))
+            }
+            .foregroundColor(appointment.isPast ? JourneyVisual.secondaryText : .black)
+            .frame(width: 56, height: 62)
+            .background(appointment.isPast ? JourneyVisual.softSurface : JourneyVisual.lime,
+                        in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+
+            VStack(alignment: .leading, spacing: 6) {
                 HStack(alignment: .top) {
-                    VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
-                        Text(appointment.title)
-                            .font(Theme.Typography.subheadline)
-                            .fontWeight(.medium)
-                            .foregroundColor(Theme.Colors.textPrimary)
-                        
-                        if let description = appointment.description {
-                            Text(description)
-                                .font(Theme.Typography.caption)
-                                .foregroundColor(Theme.Colors.textSecondary)
-                                .lineLimit(2)
+                    Text(appointment.title)
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(JourneyVisual.primaryText)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Spacer(minLength: 6)
+                    if onEdit != nil || onDelete != nil {
+                        Menu {
+                            if let onEdit {
+                                Button(action: onEdit) {
+                                    Label("appointments.edit".localized, systemImage: "pencil")
+                                }
+                            }
+                            if let onDelete {
+                                Button(role: .destructive, action: onDelete) {
+                                    Label("common.delete".localized, systemImage: "trash")
+                                }
+                            }
+                        } label: {
+                            Image(systemName: "ellipsis")
+                                .font(.system(size: 14, weight: .bold))
+                                .foregroundColor(JourneyVisual.secondaryText)
+                                .frame(width: 32, height: 32)
+                                .background(JourneyVisual.softSurface, in: Circle())
                         }
+                        .accessibilityLabel("common.more".localized)
                     }
-                    
-                    Spacer()
-                    
-                    JourneyCategoryIcon(symbol: appointment.category.iconName, swatch: appointment.category.swatch, size: 42)
                 }
-                
-                // Date and time
-                HStack(spacing: Theme.Spacing.md) {
-                    HStack(spacing: Theme.Spacing.xs) {
-                        Image(systemName: "calendar")
-                            .font(.caption)
-                        Text(appointment.formattedDate)
-                            .font(Theme.Typography.caption)
-                    }
-                    .foregroundColor(Theme.Colors.textSecondary)
-                    
-                    if let location = appointment.location {
-                        HStack(spacing: Theme.Spacing.xs) {
-                            Image(systemName: "location")
-                                .font(.caption)
-                            Text(location.name)
-                                .font(Theme.Typography.caption)
-                        }
-                        .foregroundColor(Theme.Colors.textSecondary)
-                    }
-                    
-                    Spacer()
+
+                Label(appointment.dateTime.formatted(.dateTime.hour().minute().locale(locale)), systemImage: "clock")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(JourneyVisual.secondaryText)
+
+                if let location = appointment.location {
+                    Label(location.name, systemImage: "mappin.and.ellipse")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(JourneyVisual.secondaryText)
+                        .lineLimit(1)
                 }
-                
-                // Status
-                HStack {
-                    TagChip(appointment.status.localizedName, style: .status)
-                    
-                    Spacer()
-                    
+
+                if let description = appointment.description, !description.isEmpty {
+                    Text(description)
+                        .font(.system(size: 12))
+                        .foregroundColor(JourneyVisual.secondaryText)
+                        .lineLimit(2)
+                }
+
+                HStack(spacing: 6) {
+                    JourneyCategoryIcon(symbol: appointment.category.iconName, swatch: appointment.category.swatch, size: 22)
+                    Text(appointment.category.localizedName)
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundColor(JourneyVisual.primaryText)
+                    Spacer(minLength: 4)
                     if appointment.isToday {
-                        TagChip("appointments.today".localized, style: .category)
-                    } else if appointment.isUpcoming {
-                        TagChip("Upcoming", style: .filter)
+                        statusPill("appointments.today".localized, prominent: true)
+                    } else {
+                        statusPill(appointment.status.localizedName, prominent: false)
                     }
                 }
+                .padding(.top, 4)
             }
         }
+        .padding(14)
+        .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(JourneyVisual.softBorder, lineWidth: 1))
+        .contextMenu {
+            if let onEdit {
+                Button(action: onEdit) { Label("appointments.edit".localized, systemImage: "pencil") }
+            }
+            if let onDelete {
+                Button(role: .destructive, action: onDelete) { Label("common.delete".localized, systemImage: "trash") }
+            }
+        }
+    }
+
+    private func statusPill(_ text: String, prominent: Bool) -> some View {
+        Text(text)
+            .font(.system(size: 10, weight: .bold))
+            .foregroundColor(prominent ? .black : JourneyVisual.secondaryText)
+            .padding(.horizontal, 9)
+            .frame(height: 22)
+            .background(prominent ? JourneyVisual.lime : JourneyVisual.softSurface, in: Capsule())
     }
 }
 

@@ -3,17 +3,17 @@ import SwiftUI
 struct QuestsView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Завдання")
+            Text("Завдання".localized)
                 .font(Theme.Typography.title1)
                 .padding(.horizontal, Theme.Spacing.lg)
             
             List {
-                Section("Сьогодні") {
-                    QuestRow(title: "Прочитай 1 гайд", progress: 0.0, reward: "+30 XP")
-                    QuestRow(title: "Заверши 2 кроки чекліста", progress: 0.5, reward: "+40 XP")
+                Section("Сьогодні".localized) {
+                    QuestRow(title: "Прочитай 1 гайд".localized, progress: 0.0, reward: "+30 XP")
+                    QuestRow(title: "Заверши 2 кроки чекліста".localized, progress: 0.5, reward: "+40 XP")
                 }
-                Section("Тиждень") {
-                    QuestRow(title: "5 кроків у Roadmap", progress: 0.2, reward: "+150 XP")
+                Section("Тиждень".localized) {
+                    QuestRow(title: "5 кроків у Roadmap".localized, progress: 0.2, reward: "+150 XP")
                 }
             }
             .listStyle(.insetGrouped)

@@ -151,7 +151,7 @@ struct FullBleedAuroraHero: View {
                             .frame(width: 8, height: 8)
                             .shadow(color: accentColor, radius: 4, x: 0, y: 0)
                         
-                        Text("Привіт, \(userName)!")
+                        Text("Привіт, %@!".localized(with: "\(userName)"))
                             .font(.system(size: 18, weight: .medium))
                             .foregroundColor(.white.opacity(0.9))
                     }
@@ -162,9 +162,9 @@ struct FullBleedAuroraHero: View {
                 
                 // Stats row
                 HStack(spacing: 12) {
-                    AuroraStatPill(icon: "flame.fill", value: "\(streak)", label: "днів", color: Color.orange)
+                    AuroraStatPill(icon: "flame.fill", value: "\(streak)", label: "днів".localized, color: Color.orange)
                     AuroraStatPill(icon: "star.fill", value: "\(xp)", label: "XP", color: Color.yellow)
-                    AuroraStatPill(icon: "trophy.fill", value: "Рів. \(level)", label: "", color: accentColor)
+                    AuroraStatPill(icon: "trophy.fill", value: "Рів. %@".localized(with: "\(level)"), label: "", color: accentColor)
                 }
                 .padding(.horizontal, 24)
                 .padding(.top, 20)
@@ -199,7 +199,7 @@ struct FullBleedAuroraHero: View {
                         }
                         
                         VStack(alignment: .leading, spacing: 2) {
-                            Text("Прогрес інтеграції")
+                            Text("Прогрес інтеграції".localized)
                                 .font(.system(size: 16, weight: .semibold))
                                 .foregroundColor(.white)
                             
@@ -248,11 +248,11 @@ struct FullBleedAuroraHero: View {
     
     private var progressMessage: String {
         switch integrationPercent {
-        case 0..<25: return "Починайте — все вийде! 💪"
-        case 25..<50: return "Гарний старт! 🔥"
-        case 50..<75: return "Половина шляху! ⚡️"
-        case 75..<100: return "Майже готово! 🎯"
-        default: return "Вітаємо! 🏆"
+        case 0..<25: return "Починайте — все вийде! 💪".localized
+        case 25..<50: return "Гарний старт! 🔥".localized
+        case 50..<75: return "Половина шляху! ⚡️".localized
+        case 75..<100: return "Майже готово! 🎯".localized
+        default: return "Вітаємо! 🏆".localized
         }
     }
 }

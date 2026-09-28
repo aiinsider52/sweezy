@@ -36,7 +36,7 @@ struct EventCardView: View {
                             .font(.system(size: 11, weight: .semibold))
                             .foregroundColor(.white.opacity(0.88))
                             .lineLimit(1)
-                        Text("\(event.viewCount) переглядів")
+                        Text("%@ переглядів".localized(with: "\(event.viewCount)"))
                             .font(.system(size: 10, weight: .medium))
                             .foregroundColor(.white.opacity(0.48))
                     }
@@ -141,7 +141,7 @@ struct EventCardView: View {
     }
 
     private var priceText: String {
-        event.isFree ? "Безкоштовно" : (event.priceInfo ?? "Квиток")
+        event.isFree ? "Безкоштовно".localized : (event.priceInfo ?? "Квиток".localized)
     }
 
     private var eventCoverImageName: String {

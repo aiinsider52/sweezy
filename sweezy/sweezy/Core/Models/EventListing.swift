@@ -177,11 +177,11 @@ extension EventListing {
     var freshnessDate: Date? { lastModeratedAt ?? updatedAt ?? createdAt }
 
     var freshnessText: String {
-        guard let date = freshnessDate else { return "Дата актуальності не вказана" }
+        guard let date = freshnessDate else { return "Дата актуальності не вказана".localized }
         let days = max(0, Calendar.current.dateComponents([.day], from: date, to: Date()).day ?? 0)
-        if days == 0 { return "Перевірено сьогодні" }
-        if days == 1 { return "Перевірено вчора" }
-        return "Перевірено \(days) дн. тому"
+        if days == 0 { return "Перевірено сьогодні".localized }
+        if days == 1 { return "Перевірено вчора".localized }
+        return "Перевірено %@ дн. тому".localized(with: "\(days)")
     }
 }
 

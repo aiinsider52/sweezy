@@ -46,12 +46,12 @@ struct BusinessBookingFlow: View {
             }
             .navigationBarTitleDisplayMode(.inline)
             .task(id: "\(selectedServiceID)-\(selectedDay.timeIntervalSince1970)") { await loadSlots() }
-            .alert("Запис надіслано", isPresented: Binding(get: { booked != nil }, set: { if !$0 { booked = nil } })) {
-                Button("Готово") { dismiss() }
+            .alert("Запис надіслано".localized, isPresented: Binding(get: { booked != nil }, set: { if !$0 { booked = nil } })) {
+                Button("Готово".localized) { dismiss() }
             } message: {
-                Text("Бізнес отримав заявку. Після підтвердження статус оновиться у Sweezy.")
+                Text("Бізнес отримав заявку. Після підтвердження статус оновиться у Sweezy.".localized)
             }
-            .alert("Не вдалося записатися", isPresented: Binding(get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } })) {
+            .alert("Не вдалося записатися".localized, isPresented: Binding(get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } })) {
                 Button("OK") { errorMessage = nil }
             } message: { Text(errorMessage ?? "") }
         }
@@ -67,16 +67,16 @@ struct BusinessBookingFlow: View {
                     .background(JourneyVisual.lime, in: RoundedRectangle(cornerRadius: 17))
                 Spacer()
                 if profile.isVerified {
-                    Label("ПЕРЕВІРЕНО", systemImage: "checkmark.seal.fill")
+                    Label("ПЕРЕВІРЕНО".localized, systemImage: "checkmark.seal.fill")
                         .font(.caption2.bold())
                         .foregroundStyle(Theme.Colors.textPrimary)
                 }
             }
-            Text("Записатися до\n\(profile.displayName)")
+            Text("Записатися до\n%@".localized(with: "\(profile.displayName)"))
                 .font(.system(size: 34, weight: .black, design: .default))
                 .foregroundStyle(JourneyVisual.primaryText)
                 .fixedSize(horizontal: false, vertical: true)
-            Text("Обери послугу та вільний час. Заявка потрапить прямо в календар бізнесу.")
+            Text("Обери послугу та вільний час. Заявка потрапить прямо в календар бізнесу.".localized)
                 .font(.subheadline)
                 .foregroundStyle(JourneyVisual.secondaryText)
         }
@@ -85,7 +85,7 @@ struct BusinessBookingFlow: View {
 
     @ViewBuilder private var servicePicker: some View {
         VStack(alignment: .leading, spacing: 12) {
-            sectionLabel("1 · Послуга")
+            sectionLabel("1 · Послуга".localized)
             ForEach(profile.services) { service in
                 Button {
                     selectedServiceID = service.id
@@ -96,7 +96,7 @@ struct BusinessBookingFlow: View {
                             .foregroundStyle(service.id == selectedServiceID ? JourneyVisual.lime : JourneyVisual.primaryText)
                         VStack(alignment: .leading, spacing: 3) {
                             Text(service.title).font(.headline).foregroundStyle(JourneyVisual.primaryText)
-                            Text("\(service.durationMinutes) хв · \(service.priceText)").font(.caption).foregroundStyle(JourneyVisual.secondaryText)
+                            Text("%@ хв · %@".localized(with: "\(service.durationMinutes)", "\(service.priceText)")).font(.caption).foregroundStyle(JourneyVisual.secondaryText)
                         }
                         Spacer()
                     }
@@ -111,7 +111,7 @@ struct BusinessBookingFlow: View {
 
     private var dayPicker: some View {
         VStack(alignment: .leading, spacing: 12) {
-            sectionLabel("2 · День")
+            sectionLabel("2 · День".localized)
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 9) {
                     ForEach(nextDays, id: \.self) { day in
@@ -136,11 +136,11 @@ struct BusinessBookingFlow: View {
 
     private var slotPicker: some View {
         VStack(alignment: .leading, spacing: 12) {
-            sectionLabel("3 · Час")
+            sectionLabel("3 · Час".localized)
             if loading {
                 ProgressView().tint(JourneyVisual.lime).frame(maxWidth: .infinity).padding(24)
             } else if slots.isEmpty {
-                Text("На цей день вільних слотів немає.")
+                Text("На цей день вільних слотів немає.".localized)
                     .font(.subheadline)
                     .foregroundStyle(JourneyVisual.secondaryText)
                     .frame(maxWidth: .infinity)
@@ -168,8 +168,8 @@ struct BusinessBookingFlow: View {
 
     private var notesField: some View {
         VStack(alignment: .leading, spacing: 9) {
-            sectionLabel("4 · Коментар")
-            TextField("Що бізнесу варто знати?", text: $notes, axis: .vertical)
+            sectionLabel("4 · Коментар".localized)
+            TextField("Що бізнесу варто знати?".localized, text: $notes, axis: .vertical)
                 .lineLimit(3...6)
                 .foregroundStyle(JourneyVisual.primaryText)
                 .padding(15)
@@ -192,7 +192,7 @@ struct BusinessBookingFlow: View {
             Button { Task { await submit() } } label: {
                 HStack {
                     if submitting { ProgressView().tint(.black) }
-                    Text(submitting ? "Надсилаємо…" : "Підтвердити запис").font(.headline)
+                    Text(submitting ? "Надсилаємо…".localized : "Підтвердити запис".localized).font(.headline)
                     Spacer()
                     Image(systemName: "arrow.right")
                 }
@@ -205,7 +205,7 @@ struct BusinessBookingFlow: View {
             .buttonStyle(.plain)
             .disabled(selectedSlot == nil || submitting)
             .opacity(selectedSlot == nil ? 0.45 : 1)
-            Text("Запис підтверджує власник. Скасувати можна у Sweezy.")
+            Text("Запис підтверджує власник. Скасувати можна у Sweezy.".localized)
                 .font(.caption2)
                 .foregroundStyle(JourneyVisual.secondaryText)
                 .multilineTextAlignment(.center)

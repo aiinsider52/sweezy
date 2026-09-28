@@ -475,7 +475,7 @@ private extension SettingsView {
                 )
 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("ТВІЙ ПЛАН")
+                    Text("ТВІЙ ПЛАН".localized)
                         .font(.system(size: 10, weight: .bold, design: .default))
                         .tracking(1.7)
                         .foregroundColor(JourneyVisual.secondaryText)
@@ -538,7 +538,7 @@ private extension SettingsView {
                 editorialSettingsRow(
                     icon: "star.circle.fill",
                     title: "Sweezy Plus",
-                    value: subscriptionManager.isPremium ? "Активна" : "Відкрити"
+                    value: subscriptionManager.isPremium ? "Активна".localized : "Відкрити".localized
                 ) {
                     showingSubscription = true
                 }

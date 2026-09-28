@@ -64,18 +64,16 @@ struct MyPlanView: View {
 
     private var statusStrip: some View {
         HStack(spacing: 10) {
-            metric(value: "\(urgentCount)", title: "термінові", icon: "exclamationmark.circle.fill")
-            metric(value: "\(missingDocuments)", title: "документи", icon: "doc.badge.ellipsis")
-            metric(value: "\(upcomingAppointments)", title: "зустрічі", icon: "calendar")
+            metric(value: "\(urgentCount)", title: "термінові".localized, icon: "exclamationmark.circle.fill")
+            metric(value: "\(missingDocuments)", title: "документи".localized, icon: "doc.badge.ellipsis")
+            metric(value: "\(upcomingAppointments)", title: "зустрічі".localized, icon: "calendar")
         }
     }
 
     private func metric(value: String, title: String, icon: String) -> some View {
         CityPaper(inset: 0) {
             VStack(alignment: .leading, spacing: 6) {
-                Image(systemName: icon)
-                    .font(.system(size: 13, weight: .bold))
-                    .foregroundColor(JourneyVisual.accentStrong)
+                JourneyCategoryIcon(symbol: icon, swatch: icon.contains("exclamation") ? JourneyCategoryPalette.coral : planToolSwatch(icon == "doc.badge.ellipsis" ? "doc.text.fill" : "calendar.badge.plus"), size: 30)
                 Text(value)
                     .font(.system(size: 23, weight: .bold, design: .default))
                     .foregroundColor(JourneyVisual.primaryText)
@@ -91,11 +89,11 @@ struct MyPlanView: View {
     private var todaySection: some View {
         VStack(alignment: .leading, spacing: 11) {
             HStack {
-                Text("Сьогодні та найближчі строки")
+                Text("Сьогодні та найближчі строки".localized)
                     .font(.system(size: 18, weight: .bold, design: .default))
                     .foregroundColor(JourneyVisual.primaryText)
                 Spacer()
-                Button("Нагадати") { scheduleReminders() }
+                Button("Нагадати".localized) { scheduleReminders() }
                     .font(.system(size: 12, weight: .bold))
                     .foregroundColor(JourneyVisual.accentText)
             }
@@ -103,7 +101,7 @@ struct MyPlanView: View {
             if deadlines.isEmpty {
                 // Everything done: Sweezy on the hill above the city with a ticked list.
                 MascotEmptyState(
-                    title: "Критичних строків немає",
+                    title: "Критичних строків немає".localized,
                     subtitle: "companion.plan.all_done".localized,
                     story: "plan-complete"
                 )
@@ -119,12 +117,21 @@ struct MyPlanView: View {
 
     private var toolsGrid: some View {
         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 11) {
-            planTool(title: "Документи", subtitle: "Готовність і строки", icon: "doc.text.fill") { showDocuments = true }
+            planTool(title: "Документи".localized, subtitle: "Готовність і строки".localized, icon: "doc.text.fill") { showDocuments = true }
                 .accessibilityIdentifier("plan.documents")
-            planTool(title: "Ask Sweezy", subtitle: "Відповіді з джерелами", icon: "sparkles") { showAsk = true }
+            planTool(title: "journey.tool.ask.title".localized, subtitle: "Відповіді з джерелами".localized, icon: "sparkles") { showAsk = true }
                 .accessibilityIdentifier("plan.ask")
-            planTool(title: "Зустрічі", subtitle: "Експерти й офіси", icon: "calendar.badge.plus") { showAppointments = true }
-            planTool(title: "Weekly Digest", subtitle: "План на тиждень", icon: "newspaper.fill") { showDigest = true }
+            planTool(title: "Зустрічі".localized, subtitle: "Експерти й офіси".localized, icon: "calendar.badge.plus") { showAppointments = true }
+            planTool(title: "journey.tool.digest.title".localized, subtitle: "План на тиждень".localized, icon: "newspaper.fill") { showDigest = true }
+        }
+    }
+
+    private func planToolSwatch(_ icon: String) -> JourneyCategorySwatch {
+        switch icon {
+        case "doc.text.fill": return JourneyCategoryPalette.sky
+        case "sparkles": return JourneyCategoryPalette.lime
+        case "calendar.badge.plus": return JourneyCategoryPalette.teal
+        default: return JourneyCategoryPalette.sand
         }
     }
 
@@ -132,9 +139,7 @@ struct MyPlanView: View {
         Button(action: action) {
             CityPaper(inset: 0) {
                 VStack(alignment: .leading, spacing: 10) {
-                    Image(systemName: icon)
-                        .font(.system(size: 18, weight: .bold))
-                        .foregroundColor(JourneyVisual.accentStrong)
+                    JourneyCategoryIcon(symbol: icon, swatch: planToolSwatch(icon), size: 38)
                     Text(title)
                         .font(.system(size: 16, weight: .bold, design: .default))
                         .foregroundColor(JourneyVisual.primaryText)
@@ -157,7 +162,7 @@ struct MyPlanView: View {
     private func scheduleReminders() {
         Task { @MainActor in
             let count = await appContainer.lifeAdmin.scheduleReminders(for: deadlines, using: appContainer.notificationService)
-            reminderMessage = count > 0 ? "Підключено нагадувань: \(count)" : "Дозволь сповіщення або перевір строки"
+            reminderMessage = count > 0 ? "Підключено нагадувань: %@".localized(with: "\(count)") : "Дозволь сповіщення або перевір строки".localized
         }
     }
 
@@ -222,9 +227,9 @@ private struct DeadlineRow: View {
     }
 
     private var daysText: String {
-        if deadline.daysRemaining < 0 { return "прострочено" }
-        if deadline.daysRemaining == 0 { return "сьогодні" }
-        return "\(deadline.daysRemaining) дн."
+        if deadline.daysRemaining < 0 { return "прострочено".localized }
+        if deadline.daysRemaining == 0 { return "сьогодні".localized }
+        return "%@ дн.".localized(with: "\(deadline.daysRemaining)")
     }
 }
 
@@ -247,7 +252,7 @@ struct DeadlineEngineView: View {
                     Text("Deadline Engine")
                         .font(.system(size: 34, weight: .bold, design: .default))
                         .foregroundColor(JourneyVisual.primaryText)
-                    Text("Permit, insurance, tax, registration та твої зустрічі.")
+                    Text("Permit, insurance, tax, registration та твої зустрічі.".localized)
                         .font(.system(size: 14, weight: .medium))
                         .foregroundColor(JourneyVisual.secondaryText)
                     ForEach(deadlines) { deadline in

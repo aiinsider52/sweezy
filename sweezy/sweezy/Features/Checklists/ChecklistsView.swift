@@ -107,7 +107,7 @@ struct ChecklistsView: View {
                     .padding(.bottom, 100)
                 }
             }
-            .navigationTitle("Чек-листи")
+            .navigationTitle("Чек-листи".localized)
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -117,7 +117,7 @@ struct ChecklistsView: View {
                                 withAnimation(.spring(response: 0.3)) { viewMode = mode }
                                 haptic(.light)
                             } label: {
-                                Label(mode == .list ? "Список" : "Timeline", systemImage: mode.icon)
+                                Label(mode == .list ? "Список".localized : "Timeline", systemImage: mode.icon)
                             }
                         }
                     } label: {
@@ -139,7 +139,7 @@ struct ChecklistsView: View {
         let progress = overallProgress
         return VStack(alignment: .leading, spacing: 16) {
             HStack(alignment: .firstTextBaseline) {
-                Text("Ваш прогрес інтеграції")
+                Text("Ваш прогрес інтеграції".localized)
                     .font(.headline)
                 Spacer(minLength: 12)
                 Text("\(Int(progress.percentage * 100))%")
@@ -148,12 +148,12 @@ struct ChecklistsView: View {
             ProgressView(value: progress.percentage)
                 .tint(JourneyVisual.accentStrong)
             Text(progress.total == 0
-                 ? "Обери чек-лист, щоб почати свій план"
-                 : "\(progress.completed) з \(progress.total) задач виконано")
+                 ? "Обери чек-лист, щоб почати свій план".localized
+                 : "%@ з %@ задач виконано".localized(with: "\(progress.completed)", "\(progress.total)"))
                 .font(.subheadline)
                 .foregroundStyle(JourneyVisual.secondaryText)
             if progress.total > 0 && progress.completed == progress.total {
-                Label("Всі задачі виконано!", systemImage: "checkmark.seal.fill")
+                Label("Всі задачі виконано!".localized, systemImage: "checkmark.seal.fill")
                     .font(.subheadline.bold()).foregroundStyle(JourneyVisual.accentText)
             }
         }
@@ -175,7 +175,7 @@ struct ChecklistsView: View {
                         Text("\(currentStreak)")
                             .font(.system(size: 16, weight: .bold, design: .default))
                             .foregroundColor(Theme.Colors.textPrimary)
-                        Text("днів")
+                        Text("днів".localized)
                             .font(.system(size: 10))
                             .foregroundColor(Theme.Colors.textSecondary)
                     }
@@ -209,7 +209,7 @@ struct ChecklistsView: View {
                 Text("🏆")
                     .font(.system(size: 20))
                 VStack(alignment: .leading, spacing: 0) {
-                    Text("Рівень \(appContainer.gamification.level())")
+                    Text("Рівень %@".localized(with: "\(appContainer.gamification.level())"))
                         .font(.system(size: 14, weight: .bold, design: .default))
                         .foregroundColor(Theme.Colors.textPrimary)
                 }
@@ -230,7 +230,7 @@ struct ChecklistsView: View {
             HStack {
                 Image(systemName: "target")
                     .foregroundColor(JourneyVisual.accentStrong)
-                Text("Фокус на сьогодні")
+                Text("Фокус на сьогодні".localized)
                     .font(Theme.Typography.headline)
                     .foregroundColor(Theme.Colors.textPrimary)
                 Spacer()
@@ -288,7 +288,7 @@ struct ChecklistsView: View {
                         .font(.system(size: 36))
                         .foregroundColor(JourneyVisual.accentStrong)
                 }
-                .accessibilityLabel("Позначити крок виконаним")
+                .accessibilityLabel("Позначити крок виконаним".localized)
             }
         }
         .padding(16)
@@ -399,8 +399,8 @@ struct ChecklistsView: View {
     
     private var emptyState: some View {
         MascotEmptyState(
-            title: "Немає чек-листів",
-            subtitle: "Спробуйте змінити фільтр категорії"
+            title: "Немає чек-листів".localized,
+            subtitle: "Спробуйте змінити фільтр категорії".localized
         )
         .padding(.vertical, 20)
     }
@@ -548,14 +548,14 @@ private struct ChecklistProgressCard: View {
                         Image(systemName: isCompleted ? "checkmark.circle.fill" : "chart.bar.fill")
                             .font(.system(size: 12))
                             .foregroundColor(isCompleted ? .green : checklist.category.swiftUIColor)
-                        Text(isCompleted ? "Завершено" : "\(Int(completion * 100))%")
+                        Text(isCompleted ? "Завершено".localized : "\(Int(completion * 100))%")
                             .font(.system(size: 13, weight: .medium))
                             .foregroundColor(isCompleted ? .green : Theme.Colors.textSecondary)
                     }
 
                     Spacer()
 
-                    Text("\(completedSteps.count)/\(checklist.steps.count) кроків")
+                    Text("%@/%@ кроків".localized(with: "\(completedSteps.count)", "\(checklist.steps.count)"))
                         .font(.system(size: 12, weight: .semibold))
                         .foregroundColor(Theme.Colors.textSecondary)
 
@@ -605,7 +605,7 @@ private struct ChecklistProgressCard: View {
     private var completedBadge: some View {
         HStack(spacing: 4) {
             Image(systemName: "checkmark.seal.fill")
-            Text("Готово")
+            Text("Готово".localized)
         }
         .font(.system(size: 10, weight: .bold))
         .foregroundColor(JourneyVisual.primaryText)
@@ -787,8 +787,8 @@ struct ChecklistDetailView: View {
     
     var body: some View {
         ZStack {
-            JourneyPhotoBackground(imageName: JourneyBackdrop.alpine.rawValue, blurRadius: 7, darkness: 0.7)
-            
+            JourneyVisual.pageBackground.ignoresSafeArea()
+
             ScrollView(showsIndicators: false) {
                 VStack(spacing: Theme.Spacing.lg) {
                     // Hero header
@@ -803,10 +803,10 @@ struct ChecklistDetailView: View {
                 .padding(.bottom, 100)
             }
         }
-        .navigationTitle(checklist.title)
+        // The title already sits under the scene; repeating it in the bar crowded the top.
+        .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
         .interactiveSwipeBackEnabled()
-        .journeyScreen(.alpine, darkness: 0.7)
         .onAppear {
             reloadCompletedSteps()
             appContainer.userStats.setChecklistActive(id: checklist.id, active: !completedSteps.isEmpty)
@@ -852,68 +852,78 @@ struct ChecklistDetailView: View {
         }
     }
     
-    private var heroHeader: some View {
-        ZStack(alignment: .bottomLeading) {
-            // Gradient background
-            LinearGradient(
-                colors: [checklist.category.swiftUIColor, checklist.category.swiftUIColor.opacity(0.5)],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .frame(height: 180)
-            .overlay(
-                Image(systemName: checklist.category.iconName)
-                    .font(.system(size: 100, weight: .thin))
-                    .foregroundColor(JourneyVisual.secondaryText)
-                    .offset(x: 80, y: -20)
-            )
-            
-            VStack(alignment: .leading, spacing: 8) {
-                // Category badge
-                HStack(spacing: 6) {
-                    Image(systemName: checklist.category.iconName)
-                    Text(checklist.category.localizedName)
-                }
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundColor(JourneyVisual.primaryText)
-                .padding(.horizontal, 10)
-                .padding(.vertical, 6)
-                .background(.ultraThinMaterial)
-                .cornerRadius(10)
-                
-                Spacer()
-                
-                Text(checklist.description)
-                    .font(Theme.Typography.subheadline)
-                    .foregroundColor(JourneyVisual.secondaryText)
-                    .lineLimit(2)
-                
-                HStack(spacing: 16) {
-                    Label(checklist.estimatedDuration, systemImage: "clock")
-                    Label(checklist.difficulty.localizedName, systemImage: "speedometer")
-                }
-                .font(Theme.Typography.caption)
-                .foregroundColor(JourneyVisual.secondaryText)
-            }
-            .padding(20)
+    /// Illustrated moment that matches the checklist topic (moving in, documents, work…).
+    private var heroScene: String {
+        switch checklist.category {
+        case .arrival: return "login"
+        case .housing: return "housing"
+        case .work: return "jobs"
+        case .education, .integration: return "language"
+        case .family: return "events"
+        default: return "documents"
         }
-        .frame(height: 180)
-        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-        .padding(.horizontal, Theme.Spacing.md)
     }
-    
+
+    private var heroHeader: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            StoryScene(name: heroScene, height: 180)
+                .overlay(alignment: .bottomLeading) {
+                    HStack(spacing: 6) {
+                        Image(systemName: checklist.category.iconName)
+                        Text(checklist.category.localizedName)
+                    }
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundColor(.black)
+                    .padding(.horizontal, 11)
+                    .frame(height: 28)
+                    .background(JourneyVisual.lime, in: Capsule())
+                    .padding(14)
+                }
+
+            VStack(alignment: .leading, spacing: 8) {
+                Text(checklist.title)
+                    .font(.system(size: 26, weight: .bold))
+                    .foregroundColor(JourneyVisual.primaryText)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                Text(checklist.description)
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundColor(JourneyVisual.secondaryText)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                HStack(spacing: 8) {
+                    metaPill(checklist.estimatedDuration, icon: "clock")
+                    metaPill(checklist.difficulty.localizedName, icon: "speedometer")
+                }
+                .padding(.top, 2)
+            }
+        }
+        .padding(.horizontal, Theme.Spacing.md)
+        .padding(.top, 8)
+    }
+
+    private func metaPill(_ text: String, icon: String) -> some View {
+        Label(text, systemImage: icon)
+            .font(.system(size: 12, weight: .semibold))
+            .foregroundColor(JourneyVisual.primaryText)
+            .padding(.horizontal, 11)
+            .frame(height: 30)
+            .background(Theme.Colors.card, in: Capsule())
+            .overlay(Capsule().stroke(JourneyVisual.softBorder, lineWidth: 1))
+    }
+
     private var progressCard: some View {
         HStack(spacing: 20) {
             // Circular progress
             ZStack {
                 Circle()
-                    .stroke(checklist.category.swiftUIColor.opacity(0.2), lineWidth: 8)
+                    .stroke(JourneyVisual.softBorder, lineWidth: 8)
                     .frame(width: 80, height: 80)
                 
                 Circle()
                     .trim(from: 0, to: completion)
                     .stroke(
-                        completion >= 1.0 ? Color.green : checklist.category.swiftUIColor,
+                        JourneyVisual.lime,
                         style: StrokeStyle(lineWidth: 8, lineCap: .round)
                     )
                     .frame(width: 80, height: 80)
@@ -922,22 +932,22 @@ struct ChecklistDetailView: View {
                 
                 Text("\(Int(completion * 100))%")
                     .font(.system(size: 18, weight: .bold, design: .default))
-                    .foregroundColor(completion >= 1.0 ? .green : checklist.category.swiftUIColor)
+                    .foregroundColor(JourneyVisual.primaryText)
             }
-            .accessibilityLabel("Прогрес")
-            .accessibilityValue("\(Int(completion * 100)) відсотків")
+            .accessibilityLabel("Прогрес".localized)
+            .accessibilityValue("%@ відсотків".localized(with: "\(Int(completion * 100))"))
             
             VStack(alignment: .leading, spacing: 6) {
-                Text("Прогрес")
+                Text("Прогрес".localized)
                     .font(Theme.Typography.headline)
                     .foregroundColor(Theme.Colors.textPrimary)
                 
-                Text("\(completedSteps.count) з \(checklist.steps.count) кроків виконано")
+                Text("%@ з %@ кроків виконано".localized(with: "\(completedSteps.count)", "\(checklist.steps.count)"))
                     .font(Theme.Typography.caption)
                     .foregroundColor(Theme.Colors.textSecondary)
                 
                 if completion < 1.0 {
-                    Text("Залишилось: \(checklist.steps.count - completedSteps.count)")
+                    Text("Залишилось: %@".localized(with: "\(checklist.steps.count - completedSteps.count)"))
                         .font(.system(size: 12))
                         .foregroundColor(Theme.Colors.textTertiary)
                 }
@@ -946,28 +956,27 @@ struct ChecklistDetailView: View {
             Spacer()
         }
         .padding(16)
-        .background(.ultraThinMaterial)
-        .cornerRadius(20)
+        .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(JourneyVisual.softBorder, lineWidth: 1))
         .padding(.horizontal, Theme.Spacing.md)
     }
     
     private var stepsSection: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack {
-                Text("Кроки")
+                Text("Кроки".localized)
                     .font(Theme.Typography.headline)
                     .foregroundColor(Theme.Colors.textPrimary)
 
                 Spacer()
 
                 let stepXP = GamificationXP.value(for: .checklistStepCompleted)
-                Text("+\(stepXP) XP за крок")
-                    .font(.system(size: 11, weight: .semibold))
-                    .foregroundColor(.orange)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(Color.orange.opacity(0.1))
-                    .clipShape(Capsule())
+                Text("+%@ XP за крок".localized(with: "\(stepXP)"))
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundColor(.black)
+                    .padding(.horizontal, 9)
+                    .padding(.vertical, 5)
+                    .background(JourneyVisual.lime, in: Capsule())
             }
             .padding(.horizontal, Theme.Spacing.md)
             .padding(.bottom, 16)
@@ -1110,18 +1119,18 @@ private struct StepCard: View {
                 Button(action: onToggle) {
                     ZStack {
                         Circle()
-                            .fill(isCompleted ? categoryColor : Theme.Colors.primaryBackground)
+                            .fill(isCompleted ? JourneyVisual.lime : Theme.Colors.card)
                             .frame(width: 34, height: 34)
-                            .shadow(color: isCompleted ? categoryColor.opacity(0.3) : .clear, radius: 4, x: 0, y: 2)
+                            .shadow(color: isCompleted ? JourneyVisual.lime.opacity(0.4) : .clear, radius: 4, x: 0, y: 2)
 
                         Circle()
-                            .stroke(isCompleted ? categoryColor : Theme.Colors.chipBorder, lineWidth: 2)
+                            .stroke(isCompleted ? JourneyVisual.accentStrong : JourneyVisual.softBorder, lineWidth: 2)
                             .frame(width: 34, height: 34)
 
                         if isCompleted {
                             Image(systemName: "checkmark")
-                                .font(.system(size: 13, weight: .bold))
-                                .foregroundColor(JourneyVisual.primaryText)
+                                .font(.system(size: 13, weight: .black))
+                                .foregroundColor(.black)
                         } else {
                             Text("\(stepNumber)")
                                 .font(.system(size: 13, weight: .bold))
@@ -1129,13 +1138,13 @@ private struct StepCard: View {
                         }
                     }
                 }
-                .accessibilityLabel(isCompleted ? "Скасувати виконання" : "Виконати крок")
+                .accessibilityLabel(isCompleted ? "Скасувати виконання".localized : "Виконати крок".localized)
                 .accessibilityHint(step.title)
 
                 // Bottom connector line (fills remaining space)
                 if !isLast {
                     Rectangle()
-                        .fill(isCompleted ? categoryColor.opacity(0.4) : Theme.Colors.chipBorder)
+                        .fill(isCompleted ? JourneyVisual.lime : JourneyVisual.softBorder)
                         .frame(width: 2)
                         .frame(maxHeight: .infinity)
                         .padding(.top, 0)
@@ -1160,8 +1169,8 @@ private struct StepCard: View {
                                     .foregroundColor(Theme.Colors.textTertiary)
                             }
                             if step.isOptional {
-                                Text("Опціонально")
-                                    .foregroundColor(.orange)
+                                Text("Опціонально".localized)
+                                    .foregroundColor(JourneyVisual.secondaryText)
                             }
                         }
                         .font(.system(size: 11))
@@ -1172,11 +1181,10 @@ private struct StepCard: View {
                     if !isCompleted {
                         Text("+\(GamificationXP.value(for: .checklistStepCompleted))")
                             .font(.system(size: 11, weight: .bold))
-                            .foregroundColor(.orange)
+                            .foregroundColor(JourneyVisual.accentText)
                             .padding(.horizontal, 7)
                             .padding(.vertical, 3)
-                            .background(Color.orange.opacity(0.12))
-                            .clipShape(Capsule())
+                            .background(JourneyVisual.lime.opacity(0.18), in: Capsule())
                     }
 
                     if !step.description.isEmpty || !step.links.isEmpty || !step.tips.isEmpty {
@@ -1204,7 +1212,7 @@ private struct StepCard: View {
 
                         if !step.tips.isEmpty {
                             VStack(alignment: .leading, spacing: 6) {
-                                Label("Поради", systemImage: "lightbulb.fill")
+                                Label("Поради".localized, systemImage: "lightbulb.fill")
                                     .font(.system(size: 12, weight: .semibold))
                                     .foregroundColor(Theme.Colors.textPrimary)
 
@@ -1224,7 +1232,7 @@ private struct StepCard: View {
 
                         if !step.links.isEmpty {
                             VStack(alignment: .leading, spacing: 8) {
-                                Label("Корисні посилання", systemImage: "link")
+                                Label("Корисні посилання".localized, systemImage: "link")
                                     .font(.system(size: 12, weight: .semibold))
                                     .foregroundColor(Theme.Colors.textPrimary)
 
@@ -1312,11 +1320,11 @@ private struct CelebrationOverlay: View {
                 }
                 
                 VStack(spacing: 8) {
-                    Text("🎉 Вітаємо!")
+                    Text("🎉 Вітаємо!".localized)
                         .font(.system(size: 28, weight: .bold, design: .default))
                         .foregroundColor(JourneyVisual.primaryText)
                     
-                    Text("Чек-лист завершено!")
+                    Text("Чек-лист завершено!".localized)
                         .font(Theme.Typography.body)
                         .foregroundColor(JourneyVisual.secondaryText)
                     

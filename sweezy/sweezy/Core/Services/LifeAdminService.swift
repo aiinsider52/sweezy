@@ -117,7 +117,7 @@ struct WeeklyDigestSnapshot {
         let urgent = urgentDeadlines.count
         let documents = missingDocuments.count
         let appointments = upcomingAppointments.count
-        return "Термінові: \(urgent) · Документи: \(documents) · Зустрічі: \(appointments)"
+        return "Термінові: %@ · Документи: %@ · Зустрічі: %@".localized(with: "\(urgent)", "\(documents)", "\(appointments)")
     }
 }
 
@@ -215,20 +215,20 @@ final class LifeAdminService: ObservableObject {
 
         switch country {
         case .switzerland:
-            add(id: countryID("registration.municipality", "registration"), title: "Реєстрація у громаді", detail: "Перевір термін реєстрації у своєму кантоні та громаді.", date: calendar.date(byAdding: .day, value: 14, to: arrival), category: .registration, sourceTitle: "ch.ch", sourceURL: "https://www.ch.ch/en/foreign-nationals-in-switzerland/entry-and-stay-in-switzerland/")
-            add(id: countryID("insurance.health", "insurance"), title: "Оформити медичне страхування", detail: "Базове страхування зазвичай потрібно оформити протягом трьох місяців після переїзду.", date: calendar.date(byAdding: .month, value: 3, to: arrival), category: .insurance, sourceTitle: "Federal Office of Public Health", sourceURL: "https://www.bag.admin.ch/bag/en/home/versicherungen/krankenversicherung.html")
+            add(id: countryID("registration.municipality", "registration"), title: "Реєстрація у громаді".localized, detail: "Перевір термін реєстрації у своєму кантоні та громаді.".localized, date: calendar.date(byAdding: .day, value: 14, to: arrival), category: .registration, sourceTitle: "ch.ch", sourceURL: "https://www.ch.ch/en/foreign-nationals-in-switzerland/entry-and-stay-in-switzerland/")
+            add(id: countryID("insurance.health", "insurance"), title: "Оформити медичне страхування".localized, detail: "Базове страхування зазвичай потрібно оформити протягом трьох місяців після переїзду.".localized, date: calendar.date(byAdding: .month, value: 3, to: arrival), category: .insurance, sourceTitle: "Federal Office of Public Health", sourceURL: "https://www.bag.admin.ch/bag/en/home/versicherungen/krankenversicherung.html")
         case .germany:
-            add(id: "\(prefix).registration", title: "Завершити Anmeldung", detail: "Зареєструйте адресу у Bürgeramt/Meldebehörde; локальний порядок і запис різняться.", date: calendar.date(byAdding: .day, value: 14, to: arrival), category: .registration, sourceTitle: "Germany4Ukraine", sourceURL: "https://www.germany4ukraine.de/EN/einreise-aufenthalt-und-rueckkehr/ukraine-aufenthaltserlaubnis/seite_node.html")
-            add(id: "\(prefix).insurance.review", title: "Підтвердити медичне покриття", detail: "Контрольна дата Sweezy, не законний строк. Отримайте підтвердження Krankenkasse/Jobcenter/Sozialamt.", date: calendar.date(byAdding: .day, value: 7, to: arrival), category: .insurance, sourceTitle: "Germany4Ukraine", sourceURL: "https://www.germany4ukraine.de/EN/medizinische-versorgung/krankenversicherung-ukrainer/seite_node.html")
+            add(id: "\(prefix).registration", title: "Завершити Anmeldung".localized, detail: "Зареєструйте адресу у Bürgeramt/Meldebehörde; локальний порядок і запис різняться.".localized, date: calendar.date(byAdding: .day, value: 14, to: arrival), category: .registration, sourceTitle: "Germany4Ukraine", sourceURL: "https://www.germany4ukraine.de/EN/einreise-aufenthalt-und-rueckkehr/ukraine-aufenthaltserlaubnis/seite_node.html")
+            add(id: "\(prefix).insurance.review", title: "Підтвердити медичне покриття".localized, detail: "Контрольна дата Sweezy, не законний строк. Отримайте підтвердження Krankenkasse/Jobcenter/Sozialamt.".localized, date: calendar.date(byAdding: .day, value: 7, to: arrival), category: .insurance, sourceTitle: "Germany4Ukraine", sourceURL: "https://www.germany4ukraine.de/EN/medizinische-versorgung/krankenversicherung-ukrainer/seite_node.html")
         case .austria:
-            add(id: "\(prefix).registration", title: "Подати Meldezettel", detail: "Загальний строк реєстрації адреси — три дні після заселення.", date: calendar.date(byAdding: .day, value: 3, to: arrival), category: .registration, sourceTitle: "oesterreich.gv.at", sourceURL: "https://eausweise.oesterreich.gv.at/en/themen/persoenliche_dokumente_und_bestaetigungen/an__abmeldung_des_wohnsitzes/Seite.1180200")
-            add(id: "\(prefix).protection.review", title: "Перевірити реєстрацію тимчасового захисту", detail: "Meldezettel і реєстрація переміщеної особи — окремі процедури.", date: calendar.date(byAdding: .day, value: 7, to: arrival), category: .permit, sourceTitle: "BBU", sourceURL: "https://www.bbu.gv.at/ukraine-info-faq-ukrainian")
+            add(id: "\(prefix).registration", title: "Подати Meldezettel".localized, detail: "Загальний строк реєстрації адреси — три дні після заселення.".localized, date: calendar.date(byAdding: .day, value: 3, to: arrival), category: .registration, sourceTitle: "oesterreich.gv.at", sourceURL: "https://eausweise.oesterreich.gv.at/en/themen/persoenliche_dokumente_und_bestaetigungen/an__abmeldung_des_wohnsitzes/Seite.1180200")
+            add(id: "\(prefix).protection.review", title: "Перевірити реєстрацію тимчасового захисту".localized, detail: "Meldezettel і реєстрація переміщеної особи — окремі процедури.".localized, date: calendar.date(byAdding: .day, value: 7, to: arrival), category: .permit, sourceTitle: "BBU", sourceURL: "https://www.bbu.gv.at/ukraine-info-faq-ukrainian")
         }
         if let expiry = profile?.permitExpiryDate {
             add(
                 id: countryID("permit.renewal", "permit.renewal"),
-                title: "Почати продовження дозволу",
-                detail: "Підготуйте пакет завчасно. Точний порядок залежить від країни та органу.",
+                title: "Почати продовження дозволу".localized,
+                detail: "Підготуйте пакет завчасно. Точний порядок залежить від країни та органу.".localized,
                 date: calendar.date(byAdding: .day, value: -90, to: expiry),
                 category: .permit,
                 sourceTitle: country == .switzerland ? "SEM" : (country == .germany ? "Germany4Ukraine" : "BBU"),
@@ -244,7 +244,7 @@ final class LifeAdminService: ObservableObject {
                 taxComponents.year = year + 1
                 taxDate = calendar.date(from: taxComponents)
             }
-            add(id: "tax.declaration.\(taxComponents.year ?? year)", title: "Перевірити податкову декларацію", detail: "Кантональні строки різняться. Перевір особистий лист або портал кантону.", date: taxDate, category: .tax, sourceTitle: "Federal Tax Administration", sourceURL: "https://www.estv.admin.ch/estv/en/home.html")
+            add(id: "tax.declaration.\(taxComponents.year ?? year)", title: "Перевірити податкову декларацію".localized, detail: "Кантональні строки різняться. Перевір особистий лист або портал кантону.".localized, date: taxDate, category: .tax, sourceTitle: "Federal Tax Administration", sourceURL: "https://www.estv.admin.ch/estv/en/home.html")
         }
 
         for task in firstWeekTasks {
@@ -253,7 +253,7 @@ final class LifeAdminService: ObservableObject {
                 LifeDeadline(
                     id: deadlineID,
                     title: task.title,
-                    detail: task.details ?? "Наступний крок персонального плану.",
+                    detail: task.details ?? "Наступний крок персонального плану.".localized,
                     dueDate: task.dueDate,
                     category: .personal,
                     sourceTitle: "Sweezy My Plan",
@@ -283,7 +283,7 @@ final class LifeAdminService: ObservableObject {
                     detail: appointment.description ?? appointment.category.localizedName,
                     dueDate: appointment.dateTime,
                     category: .appointment,
-                    sourceTitle: "Мої зустрічі",
+                    sourceTitle: "Мої зустрічі".localized,
                     sourceURL: nil,
                     isCompleted: appointment.status == .completed
                 )
@@ -294,7 +294,7 @@ final class LifeAdminService: ObservableObject {
             guard let expiry = document.expiryDate else { continue }
             add(
                 id: "document.\(document.id)",
-                title: "Оновити: \(document.title)",
+                title: "Оновити: %@".localized(with: "\(document.title)"),
                 detail: document.requiredFor,
                 date: calendar.date(byAdding: .day, value: -30, to: expiry),
                 category: .document,
@@ -350,7 +350,7 @@ final class LifeAdminService: ObservableObject {
         guard notificationService.isAuthorized else { return false }
         return await notificationService.scheduleWeeklyReminder(
             id: "life.weekly.digest",
-            title: "Твій тиждень у Sweezy",
+            title: "Твій тиждень у Sweezy".localized,
             body: digest.summary,
             weekday: 2,
             hour: 9
@@ -399,15 +399,15 @@ final class LifeAdminService: ObservableObject {
             source = ("oesterreich.gv.at / BBU", "https://www.bbu.gv.at/ukraine-info-faq-ukrainian")
         }
         var result: [ReadinessDocument] = [
-            ReadinessDocument(id: documentID("passport", "passport"), title: "Паспорт", category: .identity, requiredFor: "Ідентифікація, статус, банк", sourceTitle: source.title, sourceURLString: source.url, isReady: false, expiryDate: nil),
-            ReadinessDocument(id: documentID("permit", "permit"), title: "Документ про статус проживання", category: .residence, requiredFor: "Проживання та працевлаштування", sourceTitle: source.title, sourceURLString: source.url, isReady: false, expiryDate: profile?.permitExpiryDate),
-            ReadinessDocument(id: documentID("insurance", "insurance"), title: "Підтвердження медичного страхування", category: .health, requiredFor: "Медична допомога", sourceTitle: source.title, sourceURLString: source.url, isReady: false, expiryDate: nil),
-            ReadinessDocument(id: documentID("municipality", "registration"), title: country == .austria ? "Meldebestätigung" : (country == .germany ? "Meldebestätigung" : "Підтвердження реєстрації"), category: .residence, requiredFor: "Банк, житло, офіційні процедури", sourceTitle: source.title, sourceURLString: source.url, isReady: false, expiryDate: nil),
-            ReadinessDocument(id: documentID("employment", "employment"), title: "Трудовий договір", category: .work, requiredFor: "Робота й житло", sourceTitle: source.title, sourceURLString: source.url, isReady: false, expiryDate: nil),
-            ReadinessDocument(id: documentID("rental", "rental"), title: "Договір оренди", category: .housing, requiredFor: "Адреса та реєстрація", sourceTitle: source.title, sourceURLString: source.url, isReady: false, expiryDate: nil)
+            ReadinessDocument(id: documentID("passport", "passport"), title: "Паспорт".localized, category: .identity, requiredFor: "Ідентифікація, статус, банк".localized, sourceTitle: source.title, sourceURLString: source.url, isReady: false, expiryDate: nil),
+            ReadinessDocument(id: documentID("permit", "permit"), title: "Документ про статус проживання".localized, category: .residence, requiredFor: "Проживання та працевлаштування".localized, sourceTitle: source.title, sourceURLString: source.url, isReady: false, expiryDate: profile?.permitExpiryDate),
+            ReadinessDocument(id: documentID("insurance", "insurance"), title: "Підтвердження медичного страхування".localized, category: .health, requiredFor: "Медична допомога".localized, sourceTitle: source.title, sourceURLString: source.url, isReady: false, expiryDate: nil),
+            ReadinessDocument(id: documentID("municipality", "registration"), title: country == .austria ? "Meldebestätigung" : (country == .germany ? "Meldebestätigung" : "Підтвердження реєстрації".localized), category: .residence, requiredFor: "Банк, житло, офіційні процедури".localized, sourceTitle: source.title, sourceURLString: source.url, isReady: false, expiryDate: nil),
+            ReadinessDocument(id: documentID("employment", "employment"), title: "Трудовий договір".localized, category: .work, requiredFor: "Робота й житло".localized, sourceTitle: source.title, sourceURLString: source.url, isReady: false, expiryDate: nil),
+            ReadinessDocument(id: documentID("rental", "rental"), title: "Договір оренди".localized, category: .housing, requiredFor: "Адреса та реєстрація".localized, sourceTitle: source.title, sourceURLString: source.url, isReady: false, expiryDate: nil)
         ]
         if profile?.hasChildren == true {
-            result.append(ReadinessDocument(id: documentID("children.school", "children.school"), title: "Документи дитини для школи", category: .family, requiredFor: "Запис до школи", sourceTitle: source.title, sourceURLString: source.url, isReady: false, expiryDate: nil))
+            result.append(ReadinessDocument(id: documentID("children.school", "children.school"), title: "Документи дитини для школи".localized, category: .family, requiredFor: "Запис до школи".localized, sourceTitle: source.title, sourceURLString: source.url, isReady: false, expiryDate: nil))
         }
         return result
     }

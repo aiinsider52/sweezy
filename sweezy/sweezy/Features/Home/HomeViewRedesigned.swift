@@ -467,21 +467,21 @@ struct HomeViewRedesigned: View {
 
     private var plusTodaySection: some View {
         VStack(alignment: .leading, spacing: 14) {
-            HStack { VStack(alignment: .leading, spacing: 4) { Text("SWEEZY PLUS · СЬОГОДНІ").font(.caption.bold()).tracking(1.6).foregroundStyle(JourneyVisual.lime); Text("Що важливо зараз").font(.title2.bold()).foregroundStyle(.white) }; Spacer(); Image(systemName: "sparkles").foregroundStyle(JourneyVisual.lime) }
+            HStack { VStack(alignment: .leading, spacing: 4) { Text("SWEEZY PLUS · СЬОГОДНІ".localized).font(.caption.bold()).tracking(1.6).foregroundStyle(JourneyVisual.lime); Text("Що важливо зараз".localized).font(.title2.bold()).foregroundStyle(.white) }; Spacer(); Image(systemName: "sparkles").foregroundStyle(JourneyVisual.lime) }
             ViewThatFits(in: .horizontal) {
                 HStack(spacing: 10) { plusTodayCards }
                 LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) { plusTodayCards }
             }
-            HStack(spacing: 12) { ProgressView(value: firstWeekProgress).tint(JourneyVisual.lime); Text("Адаптація \(Int(firstWeekProgress * 100))%").font(.caption.bold()).foregroundStyle(.white.opacity(0.7)) }
-            VStack(alignment: .leading, spacing: 5) { Text("ЩОТИЖНЕВИЙ SWEEZY BRIEF").font(.caption2.bold()).tracking(1.4).foregroundStyle(JourneyVisual.lime); Text(weeklyBriefText).font(.subheadline).foregroundStyle(.white.opacity(0.7)).fixedSize(horizontal: false, vertical: true) }
+            HStack(spacing: 12) { ProgressView(value: firstWeekProgress).tint(JourneyVisual.lime); Text("Адаптація %@%%".localized(with: "\(Int(firstWeekProgress * 100))")).font(.caption.bold()).foregroundStyle(.white.opacity(0.7)) }
+            VStack(alignment: .leading, spacing: 5) { Text("ЩОТИЖНЕВИЙ SWEEZY BRIEF".localized).font(.caption2.bold()).tracking(1.4).foregroundStyle(JourneyVisual.lime); Text(weeklyBriefText).font(.subheadline).foregroundStyle(.white.opacity(0.7)).fixedSize(horizontal: false, vertical: true) }
         }.padding(18).background(LinearGradient(colors: [Color.black.opacity(0.9), JourneyVisual.lime.opacity(0.08)], startPoint: .topLeading, endPoint: .bottomTrailing)).clipShape(RoundedRectangle(cornerRadius: 24)).overlay(RoundedRectangle(cornerRadius: 24).stroke(JourneyVisual.lime.opacity(0.28))).padding(.horizontal, Theme.Spacing.lg)
     }
 
     @ViewBuilder private var plusTodayCards: some View {
-        plusTodayCard("Дедлайн", value: appContainer.firstWeekService.nextDueTask?.title ?? "Немає термінових", icon: "calendar.badge.clock") { NotificationCenter.default.post(name: .switchTab, object: 1) }
-        plusTodayCard("Вакансії", value: "AI Match", icon: "briefcase.fill") { showJobs = true }
-        plusTodayCard("Документи", value: "Перевірити", icon: "doc.text.fill") { showDocuments = true }
-        plusTodayCard("Подія", value: recommendedEvent?.title ?? "Знайти поруч", icon: "person.3.fill") { showFriends = true }
+        plusTodayCard("Дедлайн".localized, value: appContainer.firstWeekService.nextDueTask?.title ?? "Немає термінових".localized, icon: "calendar.badge.clock") { NotificationCenter.default.post(name: .switchTab, object: 1) }
+        plusTodayCard("Вакансії".localized, value: "AI Match", icon: "briefcase.fill") { showJobs = true }
+        plusTodayCard("Документи".localized, value: "Перевірити".localized, icon: "doc.text.fill") { showDocuments = true }
+        plusTodayCard("Подія".localized, value: recommendedEvent?.title ?? "Знайти поруч".localized, icon: "person.3.fill") { showFriends = true }
     }
 
     private func plusTodayCard(_ title: String, value: String, icon: String, action: @escaping () -> Void) -> some View {
@@ -491,9 +491,9 @@ struct HomeViewRedesigned: View {
     private var weeklyBriefText: String {
         let remaining = checklistTasks.filter { !$0.isDone }.count
         let unread = appContainer.chatStore.unreadCount
-        var parts = ["\(remaining) активних кроків"]
-        if unread > 0 { parts.append("\(unread) непрочитаних повідомлень") }
-        if let event = recommendedEvent { parts.append("подія: \(event.title)") }
+        var parts = ["%@ активних кроків".localized(with: "\(remaining)")]
+        if unread > 0 { parts.append("%@ непрочитаних повідомлень".localized(with: "\(unread)")) }
+        if let event = recommendedEvent { parts.append("подія: %@".localized(with: "\(event.title)")) }
         return parts.joined(separator: " · ")
     }
 

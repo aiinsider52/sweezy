@@ -39,13 +39,13 @@ struct AskSweezyService {
         if let source = guide.source?.trimmingCharacters(in: .whitespacesAndNewlines),
            let url = URL(string: source),
            ["http", "https"].contains(url.scheme?.lowercased() ?? "") {
-            return (guide.sourceTitle ?? url.host ?? "Офіційне джерело", url)
+            return (guide.sourceTitle ?? url.host ?? "Офіційне джерело".localized, url)
         }
         if let link = guide.links.first(where: { link in
             guard let host = link.asURL?.host?.lowercased() else { return false }
             return host.hasSuffix("admin.ch") || host.hasSuffix("ch.ch") || host.hasSuffix("zh.ch") || host.hasSuffix("vd.ch") || host.hasSuffix("ge.ch")
         }), let url = link.asURL {
-            return (link.title.isEmpty ? (url.host ?? "Офіційне джерело") : link.title, url)
+            return (link.title.isEmpty ? (url.host ?? "Офіційне джерело".localized) : link.title, url)
         }
         return nil
     }

@@ -80,18 +80,18 @@ struct ListingDetailView: View {
                 BusinessBookingFlow(profile: publicBusiness, listingID: listingId)
             }
         }
-        .confirmationDialog("Чому ви скаржитеся?", isPresented: $showReportReasons, titleVisibility: .visible) {
-            Button("Шахрайство") { submitReport(reason: "fraud") }
-            Button("Недостовірна інформація") { submitReport(reason: "misleading") }
-            Button("Оголошення неактуальне") { submitReport(reason: "outdated") }
-            Button("Спам") { submitReport(reason: "spam") }
-            Button("Скасувати", role: .cancel) {}
+        .confirmationDialog("Чому ви скаржитеся?".localized, isPresented: $showReportReasons, titleVisibility: .visible) {
+            Button("Шахрайство".localized) { submitReport(reason: "fraud") }
+            Button("Недостовірна інформація".localized) { submitReport(reason: "misleading") }
+            Button("Оголошення неактуальне".localized) { submitReport(reason: "outdated") }
+            Button("Спам".localized) { submitReport(reason: "spam") }
+            Button("Скасувати".localized, role: .cancel) {}
         }
-        .confirmationDialog("Заблокувати автора?", isPresented: $showBlockConfirmation, titleVisibility: .visible) {
-            Button("Заблокувати", role: .destructive) { blockAuthor() }
-            Button("Скасувати", role: .cancel) {}
+        .confirmationDialog("Заблокувати автора?".localized, isPresented: $showBlockConfirmation, titleVisibility: .visible) {
+            Button("Заблокувати".localized, role: .destructive) { blockAuthor() }
+            Button("Скасувати".localized, role: .cancel) {}
         } message: {
-            Text("Його оголошення більше не з'являтимуться у вашій стрічці.")
+            Text("Його оголошення більше не з'являтимуться у вашій стрічці.".localized)
         }
         .alert("marketplace.error_title".localized, isPresented: Binding(
             get: { safetyMessage != nil },
@@ -319,7 +319,7 @@ struct ListingDetailView: View {
 
     private func metadataRow(_ listing: ServiceListing) -> some View {
         HStack(spacing: 0) {
-            metadataItem(icon: "eye", text: "\(listing.viewCount) переглядів")
+            metadataItem(icon: "eye", text: "%@ переглядів".localized(with: "\(listing.viewCount)"))
 
             Rectangle()
                 .fill(JourneyVisual.softBorder)
@@ -329,8 +329,8 @@ struct ListingDetailView: View {
             metadataItem(
                 icon: "calendar",
                 text: listing.createdAt.map {
-                    "Опубліковано \($0.formatted(.dateTime.day().month(.wide).locale(appContainer.currentLocale)))"
-                } ?? "Дата не вказана"
+                    "Опубліковано %@".localized(with: "\($0.formatted(.dateTime.day().month(.wide).locale(appContainer.currentLocale)))")
+                } ?? "Дата не вказана".localized
             )
         }
         .accessibilityElement(children: .combine)
@@ -366,7 +366,7 @@ struct ListingDetailView: View {
                 .fixedSize(horizontal: false, vertical: true)
 
             if listing.description.count > 220 {
-                Button(descriptionExpanded ? "Згорнути" : "Читати повністю") {
+                Button(descriptionExpanded ? "Згорнути".localized : "Читати повністю".localized) {
                     withAnimation(.easeInOut(duration: 0.24)) {
                         descriptionExpanded.toggle()
                     }
@@ -389,8 +389,8 @@ struct ListingDetailView: View {
                     .font(.subheadline.bold())
                     .foregroundColor(JourneyVisual.primaryText)
                 Text(listing.isStale
-                     ? "Дані могли змінитися. Уточніть ціну й умови перед оплатою."
-                     : "Модерація Sweezy пройдена. Не переказуйте гроші наперед незнайомим людям.")
+                     ? "Дані могли змінитися. Уточніть ціну й умови перед оплатою.".localized
+                     : "Модерація Sweezy пройдена. Не переказуйте гроші наперед незнайомим людям.".localized)
                     .font(.caption)
                     .foregroundColor(JourneyVisual.secondaryText)
                     .fixedSize(horizontal: false, vertical: true)
@@ -412,7 +412,7 @@ struct ListingDetailView: View {
                 guard sessionManager.isAuthenticated else { showAuth = true; return }
                 showReportReasons = true
             } label: {
-                Label("Поскаржитися", systemImage: "exclamationmark.bubble")
+                Label("Поскаржитися".localized, systemImage: "exclamationmark.bubble")
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.bordered)
@@ -421,7 +421,7 @@ struct ListingDetailView: View {
                 guard sessionManager.isAuthenticated else { showAuth = true; return }
                 showBlockConfirmation = true
             } label: {
-                Label("Блокувати", systemImage: "person.crop.circle.badge.xmark")
+                Label("Блокувати".localized, systemImage: "person.crop.circle.badge.xmark")
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.bordered)
@@ -473,7 +473,7 @@ struct ListingDetailView: View {
                 )
             }
             .buttonStyle(.plain)
-            .accessibilityLabel(appContainer.savedItems.isListingSaved(listing.id) ? "Збережено" : "Зберегти")
+            .accessibilityLabel(appContainer.savedItems.isListingSaved(listing.id) ? "Збережено".localized : "Зберегти".localized)
             .accessibilityIdentifier("listing.detail.favorite")
         }
         .padding(.horizontal, 20)
@@ -525,7 +525,7 @@ struct ListingDetailView: View {
                     Text(
                         isOwnListing(listing)
                             ? "chat.listing.own".localized
-                            : (bookable ? "Записатися" : (listing.authorID == nil ? "chat.listing.unavailable".localized : "chat.listing.message".localized))
+                            : (bookable ? "Записатися".localized : (listing.authorID == nil ? "chat.listing.unavailable".localized : "chat.listing.message".localized))
                     )
                         .font(.system(size: 16, weight: .heavy, design: .default))
                         .lineLimit(1)
@@ -558,7 +558,7 @@ struct ListingDetailView: View {
                         .overlay(Circle().stroke(JourneyVisual.softBorder, lineWidth: 1))
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("Написати")
+                .accessibilityLabel("Написати".localized)
             }
 
             Button {
@@ -573,7 +573,7 @@ struct ListingDetailView: View {
                     .overlay(Circle().stroke(JourneyVisual.softBorder, lineWidth: 1))
             }
             .buttonStyle(.plain)
-            .accessibilityLabel(appContainer.savedItems.isListingSaved(listing.id) ? "Збережено" : "Зберегти")
+            .accessibilityLabel(appContainer.savedItems.isListingSaved(listing.id) ? "Збережено".localized : "Зберегти".localized)
         }
         .padding(.horizontal, 16)
         .padding(.top, 12)
@@ -637,10 +637,10 @@ struct ListingDetailView: View {
                     .controlSize(.large)
                     .tint(JourneyVisual.lime)
             }
-            Text("Відкриваємо послугу")
+            Text("Відкриваємо послугу".localized)
                 .font(.system(size: 20, weight: .bold, design: .default))
                 .foregroundColor(JourneyVisual.primaryText)
-            Text("Завантажуємо актуальні дані автора")
+            Text("Завантажуємо актуальні дані автора".localized)
                 .font(.subheadline)
                 .foregroundColor(JourneyVisual.secondaryText)
         }
@@ -654,18 +654,18 @@ struct ListingDetailView: View {
             Image(systemName: "wifi.exclamationmark")
                 .font(.system(size: 34, weight: .semibold))
                 .foregroundColor(Theme.Colors.textPrimary)
-            Text("Не вдалося відкрити послугу")
+            Text("Не вдалося відкрити послугу".localized)
                 .font(.system(size: 22, weight: .bold, design: .default))
                 .foregroundColor(JourneyVisual.primaryText)
                 .multilineTextAlignment(.center)
-            Text("Перевірте з’єднання або спробуйте ще раз.")
+            Text("Перевірте з’єднання або спробуйте ще раз.".localized)
                 .font(.subheadline)
                 .foregroundColor(JourneyVisual.secondaryText)
                 .multilineTextAlignment(.center)
             Button {
                 Task { await loadDetail() }
             } label: {
-                Label("Спробувати знову", systemImage: "arrow.clockwise")
+                Label("Спробувати знову".localized, systemImage: "arrow.clockwise")
                     .font(.headline)
                     .foregroundColor(.black)
                     .frame(maxWidth: .infinity)
@@ -690,7 +690,7 @@ struct ListingDetailView: View {
     private func displayPrice(for listing: ServiceListing) -> String {
         guard let raw = listing.priceDisplay?.trimmingCharacters(in: .whitespacesAndNewlines),
               !raw.isEmpty else {
-            return "За домовленістю"
+            return "За домовленістю".localized
         }
 
         if raw.range(of: listing.currencyCode, options: .caseInsensitive) != nil || listing.isFree {
@@ -776,9 +776,9 @@ struct ListingDetailView: View {
         Task {
             do {
                 try await APIClient.reportListing(id: listingId, reason: reason)
-                safetyMessage = "Дякуємо. Скаргу передано модераторам. Повторно надсилати її не потрібно."
+                safetyMessage = "Дякуємо. Скаргу передано модераторам. Повторно надсилати її не потрібно.".localized
             } catch {
-                safetyMessage = "Не вдалося надіслати скаргу. Перевірте авторизацію та спробуйте ще раз."
+                safetyMessage = "Не вдалося надіслати скаргу. Перевірте авторизацію та спробуйте ще раз.".localized
             }
         }
     }
@@ -787,9 +787,9 @@ struct ListingDetailView: View {
         Task {
             do {
                 try await APIClient.blockListingAuthor(listingID: listingId)
-                safetyMessage = "Автора заблоковано. Його оголошення приховано з вашої стрічки."
+                safetyMessage = "Автора заблоковано. Його оголошення приховано з вашої стрічки.".localized
             } catch {
-                safetyMessage = "Не вдалося заблокувати автора. Спробуйте ще раз."
+                safetyMessage = "Не вдалося заблокувати автора. Спробуйте ще раз.".localized
             }
         }
     }

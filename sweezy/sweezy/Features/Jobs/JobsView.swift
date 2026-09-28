@@ -410,7 +410,7 @@ struct JobsView: View {
                 await refreshFavoritesCount()
             }
         }
-        .alert("Вакансії", isPresented: Binding(
+        .alert("Вакансії".localized, isPresented: Binding(
             get: { interactionMessage != nil },
             set: { if !$0 { interactionMessage = nil } }
         )) {
@@ -443,7 +443,7 @@ struct JobsView: View {
                                 .padding(14)
                         }
 
-                    Text("Знайди роботу,\nяка тобі підходить")
+                    Text("Знайди роботу,\nяка тобі підходить".localized)
                         .font(.system(size: 30, weight: .bold, design: .default))
                         .foregroundColor(JourneyVisual.primaryText)
                         .minimumScaleFactor(0.78)
@@ -451,7 +451,7 @@ struct JobsView: View {
                         .fixedSize(horizontal: false, vertical: true)
                         .padding(.top, 22)
 
-                    Text("AI Match, збережені вакансії та весь шлях заявки — в одному місці.")
+                    Text("AI Match, збережені вакансії та весь шлях заявки — в одному місці.".localized)
                         .font(.system(size: 15, weight: .medium))
                         .foregroundColor(JourneyVisual.secondaryText)
                         .lineSpacing(3)
@@ -462,22 +462,22 @@ struct JobsView: View {
                         accessBenefit(
                             icon: "sparkles",
                             swatch: JourneyCategoryPalette.lime,
-                            title: "Персональний AI Match",
-                            subtitle: "Рекомендації під твій досвід і цілі"
+                            title: "Персональний AI Match".localized,
+                            subtitle: "Рекомендації під твій досвід і цілі".localized
                         )
                         Divider().overlay(JourneyVisual.softBorder).padding(.leading, 64)
                         accessBenefit(
                             icon: "bookmark.fill",
                             swatch: JourneyCategoryPalette.sky,
-                            title: "Збережені вакансії",
-                            subtitle: "Усі цікаві пропозиції завжди під рукою"
+                            title: "Збережені вакансії".localized,
+                            subtitle: "Усі цікаві пропозиції завжди під рукою".localized
                         )
                         Divider().overlay(JourneyVisual.softBorder).padding(.leading, 64)
                         accessBenefit(
                             icon: "paperplane.fill",
                             swatch: JourneyCategoryPalette.sand,
-                            title: "Трекер заявок",
-                            subtitle: "Статуси й наступні кроки в одному місці"
+                            title: "Трекер заявок".localized,
+                            subtitle: "Статуси й наступні кроки в одному місці".localized
                         )
                     }
                     .padding(.horizontal, 14)
@@ -490,7 +490,7 @@ struct JobsView: View {
                         openJobsAuthentication()
                     } label: {
                         HStack {
-                            Text("Увійти та знайти вакансії")
+                            Text("Увійти та знайти вакансії".localized)
                                 .lineLimit(1)
                                 .minimumScaleFactor(0.8)
                             Spacer()
@@ -509,9 +509,9 @@ struct JobsView: View {
                     }
                     .buttonStyle(ScaleButtonStyle(scaleAmount: 0.98, hapticStyle: .medium))
                     .padding(.top, 20)
-                    .accessibilityHint("Відкриває вхід або створення акаунта")
+                    .accessibilityHint("Відкриває вхід або створення акаунта".localized)
 
-                    Label("Вхід потрібен, щоб зберігати вакансії та заявки", systemImage: "lock.fill")
+                    Label("Вхід потрібен, щоб зберігати вакансії та заявки".localized, systemImage: "lock.fill")
                         .font(.system(size: 12, weight: .medium))
                         .foregroundColor(JourneyVisual.secondaryText)
                         .frame(maxWidth: .infinity)
@@ -539,7 +539,7 @@ struct JobsView: View {
                 .overlay(Circle().stroke(Color.white.opacity(0.5), lineWidth: 1))
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("Назад")
+        .accessibilityLabel("Назад".localized)
     }
 
     private func accessBenefit(icon: String, swatch: JourneyCategorySwatch, title: String, subtitle: String) -> some View {
@@ -580,19 +580,19 @@ struct JobsView: View {
                     .overlay(Circle().stroke(JourneyVisual.softBorder, lineWidth: 1))
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("Назад")
+            .accessibilityLabel("Назад".localized)
 
             // Sweezy reviewing a CV next to the laptop: the whole hub in one picture.
             StoryScene(name: "jobs", height: 190)
                 .padding(.top, 14)
                 .padding(.bottom, 18)
 
-            Text("CAREER HUB · ШВЕЙЦАРІЯ")
+            Text("CAREER HUB · ШВЕЙЦАРІЯ".localized)
                 .font(.system(size: 13, weight: .bold))
                 .tracking(2.2)
                 .foregroundColor(Theme.Colors.textPrimary)
 
-            Text("Від сильного CV\nдо першого оферу")
+            Text("Від сильного CV\nдо першого оферу".localized)
                 .font(.system(size: 29, weight: .bold, design: .default))
                 .foregroundColor(JourneyVisual.primaryText)
                 .minimumScaleFactor(0.82)
@@ -612,17 +612,17 @@ struct JobsView: View {
                 CareerReadinessRing(progress: careerProfile.completion)
 
                 VStack(alignment: .leading, spacing: 5) {
-                    Text("КАР’ЄРНИЙ ПРОФІЛЬ")
+                    Text("КАР’ЄРНИЙ ПРОФІЛЬ".localized)
                         .font(.system(size: 10, weight: .black, design: .default))
                         .tracking(1.6)
                         .foregroundColor(Theme.Colors.textPrimary)
 
-                    Text(careerProfile.desiredPosition.isEmpty ? "Твій наступний крок" : careerProfile.desiredPosition)
+                    Text(careerProfile.desiredPosition.isEmpty ? "Твій наступний крок".localized : careerProfile.desiredPosition)
                         .font(.system(size: 22, weight: .bold, design: .default))
                         .foregroundColor(JourneyVisual.primaryText)
                         .lineLimit(2)
 
-                    Text(careerProfile.hasResume ? "CV автоматично живить пошук і AI Match" : "Створи CV — решту Career Hub збере сам")
+                    Text(careerProfile.hasResume ? "CV автоматично живить пошук і AI Match".localized : "Створи CV — решту Career Hub збере сам".localized)
                         .font(.system(size: 12, weight: .medium))
                         .foregroundColor(JourneyVisual.secondaryText)
                         .fixedSize(horizontal: false, vertical: true)
@@ -642,7 +642,7 @@ struct JobsView: View {
                         .overlay(Circle().stroke(JourneyVisual.softBorder, lineWidth: 1))
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel(careerProfile.hasResume ? "Редагувати CV" : "Створити CV")
+                .accessibilityLabel(careerProfile.hasResume ? "Редагувати CV".localized : "Створити CV".localized)
             }
 
             careerRoute
@@ -650,17 +650,17 @@ struct JobsView: View {
             HStack(spacing: 8) {
                 CareerHubMetric(
                     value: "\(careerProfile.completion)%",
-                    label: "готовність CV",
+                    label: "готовність CV".localized,
                     icon: "doc.text.fill"
                 )
                 CareerHubMetric(
                     value: "\(careerMatchCount)",
-                    label: "AI збігів",
+                    label: "AI збігів".localized,
                     icon: "sparkles"
                 )
                 CareerHubMetric(
                     value: "\(activeApplications.count)",
-                    label: "активні заявки",
+                    label: "активні заявки".localized,
                     icon: "paperplane.fill"
                 )
             }
@@ -674,7 +674,7 @@ struct JobsView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
 
                 VStack(alignment: .leading, spacing: 3) {
-                    Text("НАСТУПНА ДІЯ")
+                    Text("НАСТУПНА ДІЯ".localized)
                         .font(.system(size: 9, weight: .black, design: .default))
                         .tracking(1.2)
                         .foregroundColor(Theme.Colors.textPrimary)
@@ -719,13 +719,13 @@ struct JobsView: View {
             .accessibilityIdentifier("careerHub.primaryAction")
 
             HStack(spacing: 10) {
-                careerUtilityButton(icon: "slider.horizontal.3", title: "Профіль AI") {
+                careerUtilityButton(icon: "slider.horizontal.3", title: "Профіль AI".localized) {
                     showAIMatchProfile = true
                 }
-                careerUtilityButton(icon: alerts.isEmpty ? "bell" : "bell.fill", title: "Сповіщення") {
+                careerUtilityButton(icon: alerts.isEmpty ? "bell" : "bell.fill", title: "Сповіщення".localized) {
                     showAlerts = true
                 }
-                careerUtilityButton(icon: "rectangle.stack", title: "Трекер") {
+                careerUtilityButton(icon: "rectangle.stack", title: "Трекер".localized) {
                     showApplicationTracker = true
                 }
             }
@@ -764,15 +764,15 @@ struct JobsView: View {
         HStack(spacing: 0) {
             CareerRouteNode(title: "CV", icon: "doc.text.fill", state: careerProfile.hasResume ? .complete : .current)
             CareerRouteConnector(isComplete: careerMatchCount > 0)
-            CareerRouteNode(title: "Збіги", icon: "sparkles", state: careerMatchCount > 0 ? .complete : (careerProfile.hasResume ? .current : .locked))
+            CareerRouteNode(title: "Збіги".localized, icon: "sparkles", state: careerMatchCount > 0 ? .complete : (careerProfile.hasResume ? .current : .locked))
             CareerRouteConnector(isComplete: !activeApplications.isEmpty)
-            CareerRouteNode(title: "Заявки", icon: "paperplane.fill", state: !activeApplications.isEmpty ? .complete : (careerMatchCount > 0 ? .current : .locked))
+            CareerRouteNode(title: "Заявки".localized, icon: "paperplane.fill", state: !activeApplications.isEmpty ? .complete : (careerMatchCount > 0 ? .current : .locked))
             CareerRouteConnector(isComplete: applications.contains(where: { $0.status == "offer" }))
-            CareerRouteNode(title: "Офер", icon: "checkmark.seal.fill", state: applications.contains(where: { $0.status == "offer" }) ? .complete : .locked)
+            CareerRouteNode(title: "Офер".localized, icon: "checkmark.seal.fill", state: applications.contains(where: { $0.status == "offer" }) ? .complete : .locked)
         }
         .frame(maxWidth: .infinity)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("Кар'єрний маршрут: CV, збіги, заявки, офер")
+        .accessibilityLabel("Кар'єрний маршрут: CV, збіги, заявки, офер".localized)
     }
 
     private func careerUtilityButton(icon: String, title: String, action: @escaping () -> Void) -> some View {
@@ -808,35 +808,35 @@ struct JobsView: View {
 
     private var careerNextTitle: String {
         switch careerNextAction {
-        case .createCV: return "Створи швейцарське CV"
+        case .createCV: return "Створи швейцарське CV".localized
         case .completeCV:
             return "Додай \(careerProfile.nextMissingSection ?? "дані CV")"
-        case .findMatches: return "Запусти пошук за своїм CV"
-        case .reviewMatches: return "Обери першу відповідну вакансію"
+        case .findMatches: return "Запусти пошук за своїм CV".localized
+        case .reviewMatches: return "Обери першу відповідну вакансію".localized
         case .reviewApplications:
-            if applications.contains(where: { $0.status == "interview" }) { return "Підготуйся до співбесіди" }
-            if applications.contains(where: { $0.status == "offer" }) { return "Переглянь свій офер" }
-            return "Онови статус активних заявок"
+            if applications.contains(where: { $0.status == "interview" }) { return "Підготуйся до співбесіди".localized }
+            if applications.contains(where: { $0.status == "offer" }) { return "Переглянь свій офер".localized }
+            return "Онови статус активних заявок".localized
         }
     }
 
     private var careerNextSubtitle: String {
         switch careerNextAction {
-        case .createCV: return "Профіль, досвід, навички та ATS PDF в одному процесі."
-        case .completeCV: return "Повніший профіль дає точніші AI-рекомендації."
-        case .findMatches: return "Посада й навички вже готові для персонального підбору."
-        case .reviewMatches: return "Відкрий збіг, перевір вимоги та підготуй заявку."
-        case .reviewApplications: return "Career Hub збереже етапи й наступні дії в одному місці."
+        case .createCV: return "Профіль, досвід, навички та ATS PDF в одному процесі.".localized
+        case .completeCV: return "Повніший профіль дає точніші AI-рекомендації.".localized
+        case .findMatches: return "Посада й навички вже готові для персонального підбору.".localized
+        case .reviewMatches: return "Відкрий збіг, перевір вимоги та підготуй заявку.".localized
+        case .reviewApplications: return "Career Hub збереже етапи й наступні дії в одному місці.".localized
         }
     }
 
     private var careerPrimaryTitle: String {
         switch careerNextAction {
-        case .createCV: return "Створити CV"
-        case .completeCV: return "Завершити CV"
-        case .findMatches: return "Знайти роботу за моїм CV"
-        case .reviewMatches: return "Переглянути AI-збіги"
-        case .reviewApplications: return "Відкрити трекер заявок"
+        case .createCV: return "Створити CV".localized
+        case .completeCV: return "Завершити CV".localized
+        case .findMatches: return "Знайти роботу за моїм CV".localized
+        case .reviewMatches: return "Переглянути AI-збіги".localized
+        case .reviewApplications: return "Відкрити трекер заявок".localized
         }
     }
 
@@ -888,7 +888,7 @@ struct JobsView: View {
                         Text("AI Match")
                             .font(.system(size: 19, weight: .bold))
                             .foregroundColor(JourneyVisual.primaryText)
-                        Text(hasAIProfile ? "За досвідом і твоїми цілями" : "Профіль для точного підбору")
+                        Text(hasAIProfile ? "За досвідом і твоїми цілями".localized : "Профіль для точного підбору".localized)
                             .font(.system(size: 13, weight: .medium))
                             .foregroundColor(JourneyVisual.secondaryText)
                             .lineLimit(2)
@@ -910,7 +910,7 @@ struct JobsView: View {
                             .overlay(Circle().stroke(JourneyVisual.softBorder, lineWidth: 1))
                     }
                     .buttonStyle(.plain)
-                    .accessibilityLabel("Налаштувати AI профіль")
+                    .accessibilityLabel("Налаштувати AI профіль".localized)
                 }
 
                 Button {
@@ -923,7 +923,7 @@ struct JobsView: View {
                 } label: {
                     HStack(spacing: 9) {
                         if isAIMatching { ProgressView().tint(.black) }
-                        Text(hasAIProfile ? "Знайти збіги" : "Налаштувати профіль")
+                        Text(hasAIProfile ? "Знайти збіги".localized : "Налаштувати профіль".localized)
                             .font(.system(size: 17, weight: .bold))
                         Spacer()
                         Image(systemName: "sparkles")
@@ -945,14 +945,14 @@ struct JobsView: View {
     // MARK: - Dashboard
     private var dashboardSection: some View {
         HStack(spacing: 11) {
-            JobsInlineMetric(icon: "sparkles", value: newTodayCount, label: "нових")
+            JobsInlineMetric(icon: "sparkles", value: newTodayCount, label: "нових".localized)
             Circle().fill(JourneyVisual.softBorder).frame(width: 4, height: 4)
-            JobsInlineMetric(icon: "heart", value: favoritesCount, label: "збережено")
+            JobsInlineMetric(icon: "heart", value: favoritesCount, label: "збережено".localized)
             Circle().fill(JourneyVisual.softBorder).frame(width: 4, height: 4)
             Button {
                 showApplicationTracker = true
             } label: {
-                JobsInlineMetric(icon: "paperplane", value: appliedCount, label: "трекер")
+                JobsInlineMetric(icon: "paperplane", value: appliedCount, label: "трекер".localized)
             }
             .buttonStyle(.plain)
 
@@ -969,14 +969,14 @@ struct JobsView: View {
                     .clipShape(Circle())
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("Сповіщення про вакансії")
+            .accessibilityLabel("Сповіщення про вакансії".localized)
 
             Menu {
                 Button { showJobMap = true } label: {
-                    Label("Карта вакансій", systemImage: "map")
+                    Label("Карта вакансій".localized, systemImage: "map")
                 }
                 Button { showEmployerHub = true } label: {
-                    Label("Для роботодавців", systemImage: "building.2")
+                    Label("Для роботодавців".localized, systemImage: "building.2")
                 }
             } label: {
                 Image(systemName: "ellipsis")
@@ -1002,7 +1002,7 @@ struct JobsView: View {
                 TextField(
                     "",
                     text: $keyword,
-                    prompt: Text("Посада, навичка або компанія").foregroundColor(JourneyVisual.secondaryText)
+                    prompt: Text("Посада, навичка або компанія".localized).foregroundColor(JourneyVisual.secondaryText)
                 )
                     .foregroundColor(JourneyVisual.primaryText)
                     .autocorrectionDisabled()
@@ -1034,19 +1034,19 @@ struct JobsView: View {
                 HStack(spacing: 10) {
                     Menu {
                         ForEach(cantons, id: \.self) { code in
-                            Button(code.isEmpty ? "Всі кантони" : code) {
+                            Button(code.isEmpty ? "Всі кантони".localized : code) {
                                 canton = code
                                 showMatchResults = false
                                 Task { await performSearch() }
                             }
                         }
                     } label: {
-                        JobsMenuPill(icon: "mappin", text: canton.isEmpty ? "Кантон" : canton, isActive: !canton.isEmpty)
+                        JobsMenuPill(icon: "mappin", text: canton.isEmpty ? "Кантон".localized : canton, isActive: !canton.isEmpty)
                     }
 
                     Menu {
                         ForEach(EmploymentFilter.allCases, id: \.self) { filter in
-                            Button(filter.rawValue) {
+                            Button(filter.rawValue.localized) {
                                 selectedEmployment = filter
                                 haptic(.light)
                                 Task { await performSearch() }
@@ -1055,7 +1055,7 @@ struct JobsView: View {
                     } label: {
                         JobsMenuPill(
                             icon: "briefcase",
-                            text: selectedEmployment == .all ? "Тип роботи" : selectedEmployment.rawValue,
+                            text: selectedEmployment == .all ? "Тип роботи".localized : selectedEmployment.rawValue.localized,
                             isActive: selectedEmployment != .all
                         )
                     }
@@ -1065,7 +1065,7 @@ struct JobsView: View {
                         haptic(.light)
                         Task { await performSearch() }
                     } label: {
-                        JobsMenuPill(icon: "house", text: "Віддалено", isActive: selectedEmployment == .remote, showsChevron: false)
+                        JobsMenuPill(icon: "house", text: "Віддалено".localized, isActive: selectedEmployment == .remote, showsChevron: false)
                     }
                     .buttonStyle(.plain)
 
@@ -1091,28 +1091,28 @@ struct JobsView: View {
     private var advancedFiltersSection: some View {
         JourneyGlassPanel(cornerRadius: 20) {
             VStack(alignment: .leading, spacing: 15) {
-                Text("Швидкий пошук")
+                Text("Швидкий пошук".localized)
                     .font(.system(size: 14, weight: .bold))
                     .foregroundColor(JourneyVisual.primaryText)
                 quickTagsSection
 
                 if !topCities.isEmpty {
                     Divider().overlay(Color.white.opacity(0.12))
-                    Text("Міста")
+                    Text("Міста".localized)
                         .font(.system(size: 14, weight: .bold))
                         .foregroundColor(JourneyVisual.primaryText)
                     cityChipsSection
                 }
 
                 Divider().overlay(Color.white.opacity(0.12))
-                Toggle("Без досвіду", isOn: $noExperienceOnly)
+                Toggle("Без досвіду".localized, isOn: $noExperienceOnly)
                     .tint(JourneyVisual.lime)
                     .foregroundColor(JourneyVisual.primaryText)
-                Toggle("Без обов'язкового диплома", isOn: $noDegreeOnly)
+                Toggle("Без обов'язкового диплома".localized, isOn: $noDegreeOnly)
                     .tint(JourneyVisual.lime)
                     .foregroundColor(JourneyVisual.primaryText)
                 VStack(alignment: .leading, spacing: 8) {
-                    Text(minimumSalary == 0 ? "Будь-яка зарплата" : "Від \(activeCountry.currencyCode) \(minimumSalary / 1000)k / рік")
+                    Text(minimumSalary == 0 ? "Будь-яка зарплата".localized : "Від %@ %@k / рік".localized(with: "\(activeCountry.currencyCode)", "\(minimumSalary / 1000)"))
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundColor(JourneyVisual.secondaryText)
                     Slider(value: Binding(
@@ -1125,7 +1125,7 @@ struct JobsView: View {
                 Button {
                     Task { await performSearch() }
                 } label: {
-                    Text("Застосувати фільтри")
+                    Text("Застосувати фільтри".localized)
                         .font(.system(size: 14, weight: .bold))
                         .foregroundColor(.black)
                         .frame(maxWidth: .infinity)
@@ -1140,7 +1140,7 @@ struct JobsView: View {
                         showMatchResults = false
                         haptic(.light)
                     } label: {
-                        Label("Скинути AI результати", systemImage: "xmark.circle.fill")
+                        Label("Скинути AI результати".localized, systemImage: "xmark.circle.fill")
                             .font(.system(size: 13, weight: .semibold))
                             .foregroundColor(Theme.Colors.textPrimary)
                     }
@@ -1174,7 +1174,7 @@ struct JobsView: View {
     private var cityChipsSection: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 10) {
-                QuickTagChip(text: "Всі міста", isSelected: selectedCity.isEmpty) {
+                QuickTagChip(text: "Всі міста".localized, isSelected: selectedCity.isEmpty) {
                     selectedCity = ""
                     haptic(.light)
                 }
@@ -1197,18 +1197,18 @@ struct JobsView: View {
                     HStack(spacing: 6) {
                         Image(systemName: "sparkles")
                             .foregroundColor(Theme.Colors.textPrimary)
-                        Text("AI результати")
+                        Text("AI результати".localized)
                             .foregroundColor(JourneyVisual.primaryText)
                     }
                 } else {
-                    Text("Рекомендовано для тебе")
+                    Text("Рекомендовано для тебе".localized)
                         .foregroundColor(JourneyVisual.primaryText)
                 }
 
                 Spacer()
 
                 if !displayedItems.isEmpty {
-                    Text("\(displayedItems.count) вакансій")
+                    Text("%@ вакансій".localized(with: "\(displayedItems.count)"))
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundColor(Theme.Colors.textPrimary)
                 }
@@ -1224,16 +1224,16 @@ struct JobsView: View {
             } else if let loadErrorMessage {
                 JobsRecoveryState(
                     icon: "wifi.exclamationmark",
-                    title: "Не вдалося оновити вакансії",
+                    title: "Не вдалося оновити вакансії".localized,
                     message: loadErrorMessage,
-                    actionTitle: "Спробувати ще"
+                    actionTitle: "Спробувати ще".localized
                 ) { Task { await performSearch() } }
             } else if catalogStatus == "source_unavailable" {
                 JobsRecoveryState(
                     icon: "antenna.radiowaves.left.and.right.slash",
-                    title: "Джерела вакансій тимчасово недоступні",
-                    message: "Ми вже перевіряємо підключення. Збережені вакансії та трекер залишаються доступними.",
-                    actionTitle: "Перевірити знову"
+                    title: "Джерела вакансій тимчасово недоступні".localized,
+                    message: "Ми вже перевіряємо підключення. Збережені вакансії та трекер залишаються доступними.".localized,
+                    actionTitle: "Перевірити знову".localized
                 ) { Task { await performSearch() } }
             } else if displayedItems.isEmpty {
                 JobsEmptyState(hasSearched: didSearchOnce, isAIMatch: showMatchResults)
@@ -1259,7 +1259,7 @@ struct JobsView: View {
                             if isLoading {
                                 ProgressView().tint(JourneyVisual.primaryText)
                             } else {
-                                Text("Завантажити ще")
+                                Text("Завантажити ще".localized)
                             }
                         }
                         .foregroundColor(JourneyVisual.primaryText)
@@ -1408,7 +1408,7 @@ struct JobsView: View {
             summary: "Product designer building clear, accessible services for international teams in Switzerland."
         )
         resume.experience = [
-            CVExperience(role: "Product Designer", company: "Digital Solutions AG", period: "2022–сьогодні", location: "Zürich", achievements: "Запустила дизайн-систему та покращила ключові user flows.")
+            CVExperience(role: "Product Designer", company: "Digital Solutions AG", period: "2022–сьогодні".localized, location: "Zürich", achievements: "Запустила дизайн-систему та покращила ключові user flows.".localized)
         ]
         resume.skills = ["Figma", "UX Research", "Design Systems", "Prototyping"]
         return resume
@@ -1597,7 +1597,7 @@ struct JobsView: View {
             language: appContainer.currentLocale.identifier,
             candidateSummary: savedCandidateSummary()
         )
-        draftedText = text ?? "Не вдалося згенерувати відповідь."
+        draftedText = text ?? "Не вдалося згенерувати відповідь.".localized
         isDrafting = false
         
         if let text {
@@ -1657,7 +1657,7 @@ struct JobsView: View {
         do {
             try await APIClient.reportJob(id: job.id, reason: "suspicious")
             haptic(.success)
-            await MainActor.run { interactionMessage = "Скаргу надіслано. Модерація перевірить вакансію." }
+            await MainActor.run { interactionMessage = "Скаргу надіслано. Модерація перевірить вакансію.".localized }
         } catch {
             haptic(.error)
             await MainActor.run { interactionMessage = error.localizedDescription }
@@ -1758,7 +1758,7 @@ private struct CareerReadinessRing: View {
         }
         .frame(width: 66, height: 66)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Готовність CV \(progress) відсотків")
+        .accessibilityLabel("Готовність CV %@ відсотків".localized(with: "\(progress)"))
     }
 }
 
@@ -1876,7 +1876,7 @@ private struct AIMatchProfileSheet: View {
                         Text("AI Match Profile")
                             .font(.title2.bold())
                         
-                        Text("Заповніть профіль для персоналізованого пошуку вакансій")
+                        Text("Заповніть профіль для персоналізованого пошуку вакансій".localized)
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                             .multilineTextAlignment(.center)
@@ -1888,34 +1888,34 @@ private struct AIMatchProfileSheet: View {
                         // Desired position
                         ProfileField(
                             icon: "briefcase.fill",
-                            title: "Бажана посада",
-                            placeholder: "напр. iOS Developer, Project Manager",
+                            title: "Бажана посада".localized,
+                            placeholder: "напр. iOS Developer, Project Manager".localized,
                             text: $desiredPosition
                         )
                         
                         // Skills
                         ProfileField(
                             icon: "star.fill",
-                            title: "Навички",
-                            placeholder: "Swift, Python, SQL (через кому)",
+                            title: "Навички".localized,
+                            placeholder: "Swift, Python, SQL (через кому)".localized,
                             text: $skills
                         )
                         
                         // Canton
                         VStack(alignment: .leading, spacing: 8) {
-                            Label("Бажаний кантон", systemImage: "mappin.circle.fill")
+                            Label("Бажаний кантон".localized, systemImage: "mappin.circle.fill")
                                 .font(.subheadline.bold())
                                 .foregroundColor(.primary)
                             
                             Menu {
                                 ForEach(cantons, id: \.self) { code in
-                                    Button(code.isEmpty ? "Будь-який" : code) {
+                                    Button(code.isEmpty ? "Будь-який".localized : code) {
                                         preferredCanton = code
                                     }
                                 }
                             } label: {
                                 HStack {
-                                    Text(preferredCanton.isEmpty ? "Будь-який" : preferredCanton)
+                                    Text(preferredCanton.isEmpty ? "Будь-який".localized : preferredCanton)
                                         .foregroundColor(preferredCanton.isEmpty ? .secondary : .primary)
                                     Spacer()
                                     Image(systemName: "chevron.down")
@@ -1929,19 +1929,19 @@ private struct AIMatchProfileSheet: View {
                         
                         // Employment type
                         VStack(alignment: .leading, spacing: 8) {
-                            Label("Тип зайнятості", systemImage: "clock.fill")
+                            Label("Тип зайнятості".localized, systemImage: "clock.fill")
                                 .font(.subheadline.bold())
                                 .foregroundColor(.primary)
                             
                             Menu {
                                 ForEach(employmentTypes, id: \.self) { type in
-                                    Button(type.isEmpty ? "Будь-який" : type) {
+                                    Button(type.isEmpty ? "Будь-який".localized : type) {
                                         employmentType = type
                                     }
                                 }
                             } label: {
                                 HStack {
-                                    Text(employmentType.isEmpty ? "Будь-який" : employmentType)
+                                    Text(employmentType.isEmpty ? "Будь-який".localized : employmentType)
                                         .foregroundColor(employmentType.isEmpty ? .secondary : .primary)
                                     Spacer()
                                     Image(systemName: "chevron.down")
@@ -1955,19 +1955,19 @@ private struct AIMatchProfileSheet: View {
                         
                         // Experience level
                         VStack(alignment: .leading, spacing: 8) {
-                            Label("Рівень досвіду", systemImage: "chart.bar.fill")
+                            Label("Рівень досвіду".localized, systemImage: "chart.bar.fill")
                                 .font(.subheadline.bold())
                                 .foregroundColor(.primary)
                             
                             Menu {
                                 ForEach(experienceLevels, id: \.self) { level in
-                                    Button(level.isEmpty ? "Будь-який" : level) {
+                                    Button(level.isEmpty ? "Будь-який".localized : level) {
                                         experienceLevel = level
                                     }
                                 }
                             } label: {
                                 HStack {
-                                    Text(experienceLevel.isEmpty ? "Будь-який" : experienceLevel)
+                                    Text(experienceLevel.isEmpty ? "Будь-який".localized : experienceLevel)
                                         .foregroundColor(experienceLevel.isEmpty ? .secondary : .primary)
                                     Spacer()
                                     Image(systemName: "chevron.down")
@@ -1981,7 +1981,7 @@ private struct AIMatchProfileSheet: View {
                         
                         // Remote preference
                         Toggle(isOn: $remotePreference) {
-                            Label("Віддалена робота", systemImage: "house.fill")
+                            Label("Віддалена робота".localized, systemImage: "house.fill")
                                 .font(.subheadline.bold())
                         }
                         .padding()
@@ -1994,7 +1994,7 @@ private struct AIMatchProfileSheet: View {
                     Button(action: onSearch) {
                         HStack {
                             Image(systemName: "magnifyingglass")
-                            Text("Знайти вакансії")
+                            Text("Знайти вакансії".localized)
                                 .fontWeight(.semibold)
                         }
                         .foregroundColor(JourneyVisual.primaryText)
@@ -2015,7 +2015,7 @@ private struct AIMatchProfileSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Закрити") { dismiss() }
+                    Button("Закрити".localized) { dismiss() }
                 }
             }
         }
@@ -2058,25 +2058,25 @@ private struct JobsOnboardingSheet: View {
             icon: "briefcase.fill",
             color1: Theme.Colors.primary,
             color2: Theme.Colors.primaryDark,
-            title: "Знайди роботу мрії",
-            subtitle: "Актуальні вакансії з перевірених джерел",
-            features: ["Дата оновлення", "Пряме посилання", "Статус джерела"]
+            title: "Знайди роботу мрії".localized,
+            subtitle: "Актуальні вакансії з перевірених джерел".localized,
+            features: ["Дата оновлення".localized, "Пряме посилання".localized, "Статус джерела".localized]
         ),
         (
             icon: "magnifyingglass",
             color1: Theme.Colors.accent,
             color2: Theme.Colors.accentCoral,
-            title: "Розумний пошук",
-            subtitle: "Знаходь швидко та точно",
-            features: ["Пошук по ключовим словам", "Фільтри по кантону", "Тип зайнятості"]
+            title: "Розумний пошук".localized,
+            subtitle: "Знаходь швидко та точно".localized,
+            features: ["Пошук по ключовим словам".localized, "Фільтри по кантону".localized, "Тип зайнятості".localized]
         ),
         (
             icon: "wand.and.stars",
             color1: Theme.Colors.primaryLight,
             color2: Theme.Colors.primary,
             title: "AI Match",
-            subtitle: "Пояснює, чому вакансія підходить",
-            features: ["Семантичний пошук", "Збіги навичок", "Чого бракує"]
+            subtitle: "Пояснює, чому вакансія підходить".localized,
+            features: ["Семантичний пошук".localized, "Збіги навичок".localized, "Чого бракує".localized]
         )
     ]
     
@@ -2136,7 +2136,7 @@ private struct JobsOnboardingSheet: View {
                             HStack(spacing: 10) {
                                 Image(systemName: "wand.and.stars")
                                     .font(.system(size: 18, weight: .semibold))
-                                Text("Заповнити профіль")
+                                Text("Заповнити профіль".localized)
                                     .font(.system(size: 17, weight: .semibold))
                             }
                             .foregroundColor(.black)
@@ -2155,7 +2155,7 @@ private struct JobsOnboardingSheet: View {
                         Button {
                             onClose()
                         } label: {
-                            Text("Пропустити")
+                            Text("Пропустити".localized)
                                 .font(.system(size: 15, weight: .medium))
                                 .foregroundColor(JourneyVisual.secondaryText)
                         }
@@ -2169,7 +2169,7 @@ private struct JobsOnboardingSheet: View {
                             }
                         } label: {
                             HStack(spacing: 8) {
-                                Text("Далі")
+                                Text("Далі".localized)
                                     .font(.system(size: 17, weight: .semibold))
                                 Image(systemName: "arrow.right")
                                     .font(.system(size: 16, weight: .semibold))
@@ -2188,7 +2188,7 @@ private struct JobsOnboardingSheet: View {
                         Button {
                             onClose()
                         } label: {
-                            Text("Пропустити")
+                            Text("Пропустити".localized)
                                 .font(.system(size: 15, weight: .medium))
                                 .foregroundColor(JourneyVisual.secondaryText)
                         }
@@ -2331,7 +2331,7 @@ private struct AIProfileProgressRing: View {
         }
         .frame(width: 46, height: 46)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Профіль заповнено на \(percentage) відсотків")
+        .accessibilityLabel("Профіль заповнено на %@ відсотків".localized(with: "\(percentage)"))
     }
 }
 
@@ -2522,7 +2522,7 @@ private struct JobCard: View {
                             .multilineTextAlignment(.leading)
 
                         HStack(spacing: 5) {
-                            Text(job.company ?? "Компанія")
+                            Text(job.company ?? "Компанія".localized)
                             if isNew {
                                 Image(systemName: "sparkles")
                                     .font(.system(size: 10, weight: .bold))
@@ -2545,12 +2545,12 @@ private struct JobCard: View {
                             .overlay(Circle().stroke(JourneyVisual.softBorder, lineWidth: 1))
                     }
                     .buttonStyle(.plain)
-                    .accessibilityLabel(isSaved ? "Видалити зі збережених" : "Зберегти вакансію")
+                    .accessibilityLabel(isSaved ? "Видалити зі збережених".localized : "Зберегти вакансію".localized)
                 }
 
                 HStack(spacing: 7) {
                     Image(systemName: "mappin")
-                    Text(job.location ?? (ResidenceCountry(rawValue: APIClient.countryCode)?.name ?? "Швейцарія"))
+                    Text(job.location ?? (ResidenceCountry(rawValue: APIClient.countryCode)?.name ?? "Швейцарія".localized))
                     if let employment = job.employment_type, !employment.isEmpty {
                         Text("·")
                         Text(employment)
@@ -2575,7 +2575,7 @@ private struct JobCard: View {
                     }
 
                     if let score = matchScore, score > 0 {
-                        Text("\(score)% збіг")
+                        Text("%@%% збіг".localized(with: "\(score)"))
                             .font(.system(size: 12, weight: .bold))
                             .foregroundColor(Theme.Colors.textPrimary)
                             .padding(.horizontal, 10)
@@ -2594,7 +2594,7 @@ private struct JobCard: View {
                             .frame(width: 34, height: 34)
                     }
                     .buttonStyle(.plain)
-                    .accessibilityLabel("Поділитися вакансією")
+                    .accessibilityLabel("Поділитися вакансією".localized)
 
                     Image(systemName: "chevron.right")
                         .font(.system(size: 15, weight: .bold))
@@ -2719,11 +2719,11 @@ private struct JobsEmptyState: View {
                 .clipShape(RoundedRectangle(cornerRadius: 15, style: .continuous))
 
             VStack(alignment: .leading, spacing: 4) {
-                Text(isAIMatch ? "Немає відповідних вакансій" : (hasSearched ? "Нічого не знайдено" : "Почніть пошук"))
+                Text(isAIMatch ? "Немає відповідних вакансій".localized : (hasSearched ? "Нічого не знайдено".localized : "Почніть пошук".localized))
                     .font(.system(size: 16, weight: .bold))
                     .foregroundColor(JourneyVisual.primaryText)
 
-                Text(isAIMatch ? "Зміни параметри AI Match" : (hasSearched ? "Зміни фільтри або ключові слова" : "Введи посаду або навичку"))
+                Text(isAIMatch ? "Зміни параметри AI Match".localized : (hasSearched ? "Зміни фільтри або ключові слова".localized : "Введи посаду або навичку".localized))
                     .font(.system(size: 13, weight: .medium))
                     .foregroundColor(JourneyVisual.secondaryText)
                     .lineLimit(2)
@@ -2819,9 +2819,9 @@ private struct JobDetailSheet: View {
                     Divider()
 
                     HStack(spacing: 10) {
-                        Label(job.is_verified == true ? "Перевірене джерело" : job.source.capitalized, systemImage: job.is_verified == true ? "checkmark.seal.fill" : "link")
+                        Label(job.is_verified == true ? "Перевірене джерело".localized : job.source.capitalized, systemImage: job.is_verified == true ? "checkmark.seal.fill" : "link")
                         if let freshness = job.freshness {
-                            Label(freshness == "fresh" ? "Оновлено нещодавно" : "Перевір дату", systemImage: "clock")
+                            Label(freshness == "fresh" ? "Оновлено нещодавно".localized : "Перевір дату".localized, systemImage: "clock")
                         }
                     }
                     .font(.caption.weight(.semibold))
@@ -2829,7 +2829,7 @@ private struct JobDetailSheet: View {
 
                     if let matchScore {
                         VStack(alignment: .leading, spacing: 8) {
-                            Text("Підходить на \(matchScore)%")
+                            Text("Підходить на %@%%".localized(with: "\(matchScore)"))
                                 .font(.headline)
                             ForEach(matchReasons, id: \.self) { reason in
                                 Label(reason, systemImage: "checkmark.circle.fill")
@@ -2846,7 +2846,7 @@ private struct JobDetailSheet: View {
 
                     if job.recognition_required == true {
                         Label(
-                            "Для цієї професії може знадобитися офіційне визнання диплома у \(ResidenceCountry(rawValue: APIClient.countryCode)?.name ?? "Швейцарія").",
+                            "Для цієї професії може знадобитися офіційне визнання диплома %@.".localized(with: (ResidenceCountry(rawValue: APIClient.countryCode) ?? .switzerland).inCountryPhrase),
                             systemImage: "checkmark.seal"
                         )
                         .font(.subheadline.weight(.semibold))
@@ -2861,7 +2861,7 @@ private struct JobDetailSheet: View {
                     if let description = job.description ?? job.snippet, !description.isEmpty {
                         VStack(alignment: .leading, spacing: 12) {
                             HStack {
-                                Text(translatedDescription == nil ? "Опис вакансії" : "Переклад українською")
+                                Text(translatedDescription == nil ? "Опис вакансії".localized : "Переклад українською".localized)
                                     .font(.headline)
                                 Spacer()
                                 Button {
@@ -2875,7 +2875,7 @@ private struct JobDetailSheet: View {
                                         ProgressView()
                                     } else {
                                         Label(
-                                            translatedDescription == nil ? "Перекласти" : "Оригінал",
+                                            translatedDescription == nil ? "Перекласти".localized : "Оригінал".localized,
                                             systemImage: "character.book.closed"
                                         )
                                     }
@@ -2898,7 +2898,7 @@ private struct JobDetailSheet: View {
                             } label: {
                                 HStack {
                                     Image(systemName: "arrow.up.right.square")
-                                    Text("Відкрити вакансію")
+                                    Text("Відкрити вакансію".localized)
                                 }
                                 .frame(maxWidth: .infinity)
                                 .padding()
@@ -2912,7 +2912,7 @@ private struct JobDetailSheet: View {
                             Button {
                                 Task { await onApplied() }
                             } label: {
-                                Label("Позначити як відправлено", systemImage: "paperplane.fill")
+                                Label("Позначити як відправлено".localized, systemImage: "paperplane.fill")
                                     .frame(maxWidth: .infinity)
                                     .padding()
                                     .background(Theme.Colors.card)
@@ -2920,7 +2920,7 @@ private struct JobDetailSheet: View {
                                     .cornerRadius(12)
                             }
                         } else {
-                            Label("Відгук додано до трекера", systemImage: "checkmark.circle.fill")
+                            Label("Відгук додано до трекера".localized, systemImage: "checkmark.circle.fill")
                                 .font(.subheadline.weight(.semibold))
                                 .foregroundColor(JourneyVisual.accentText)
                                 .frame(maxWidth: .infinity)
@@ -2931,7 +2931,7 @@ private struct JobDetailSheet: View {
                             Button {
                                 Task { await onChat() }
                             } label: {
-                                Label("Написати роботодавцю", systemImage: "bubble.left.and.bubble.right.fill")
+                                Label("Написати роботодавцю".localized, systemImage: "bubble.left.and.bubble.right.fill")
                                     .frame(maxWidth: .infinity)
                                     .padding()
                                     .background(Theme.Colors.card)
@@ -2945,7 +2945,7 @@ private struct JobDetailSheet: View {
                         } label: {
                             HStack {
                                 Image(systemName: "sparkles")
-                                Text("AI Відповідь")
+                                Text("AI Відповідь".localized)
                             }
                             .frame(maxWidth: .infinity)
                             .padding()
@@ -2957,7 +2957,7 @@ private struct JobDetailSheet: View {
                 }
                 .padding()
             }
-            .navigationTitle("Деталі")
+            .navigationTitle("Деталі".localized)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -2965,9 +2965,9 @@ private struct JobDetailSheet: View {
                         Button(role: .destructive) {
                             showReportConfirmation = true
                         } label: {
-                            Label("Поскаржитися", systemImage: "exclamationmark.triangle")
+                            Label("Поскаржитися".localized, systemImage: "exclamationmark.triangle")
                         }
-                        Button("Закрити") { dismiss() }
+                        Button("Закрити".localized) { dismiss() }
                     } label: {
                         Image(systemName: "ellipsis.circle")
                     }
@@ -2975,17 +2975,17 @@ private struct JobDetailSheet: View {
             }
         }
         .journeyScreen(.city, darkness: 0.72)
-        .confirmationDialog("Повідомити про підозрілу вакансію?", isPresented: $showReportConfirmation) {
-            Button("Надіслати скаргу", role: .destructive) { Task { await onReport() } }
-            Button("Скасувати", role: .cancel) {}
+        .confirmationDialog("Повідомити про підозрілу вакансію?".localized, isPresented: $showReportConfirmation) {
+            Button("Надіслати скаргу".localized, role: .destructive) { Task { await onReport() } }
+            Button("Скасувати".localized, role: .cancel) {}
         }
-        .alert("Переклад недоступний", isPresented: Binding(
+        .alert("Переклад недоступний".localized, isPresented: Binding(
             get: { translationError != nil },
             set: { if !$0 { translationError = nil } }
         )) {
             Button("OK", role: .cancel) { translationError = nil }
         } message: {
-            Text(translationError ?? "Спробуйте пізніше.")
+            Text(translationError ?? "Спробуйте пізніше.".localized)
         }
     }
 
@@ -3004,7 +3004,7 @@ private struct JobDetailSheet: View {
         VStack(alignment: .leading, spacing: 12) {
             if let salary = salaryText {
                 Label(salary, systemImage: "banknote")
-                Text("Вказана зарплата — brutto. Netto залежить від кантону, сімейного стану та відрахувань.")
+                Text("Вказана зарплата — brutto. Netto залежить від кантону, сімейного стану та відрахувань.".localized)
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
@@ -3021,10 +3021,10 @@ private struct JobDetailSheet: View {
                 Label("Дозвіл: \(permits.joined(separator: ", "))", systemImage: "person.text.rectangle")
             }
             if job.no_experience_required == true {
-                Label("Підходить без досвіду", systemImage: "sparkles")
+                Label("Підходить без досвіду".localized, systemImage: "sparkles")
             }
             if job.degree_required == false {
-                Label("Диплом не вказаний як обов’язковий", systemImage: "graduationcap")
+                Label("Диплом не вказаний як обов’язковий".localized, systemImage: "graduationcap")
             }
         }
         .font(.subheadline.weight(.semibold))
@@ -3039,24 +3039,24 @@ private struct JobDetailSheet: View {
         if let salary = job.salary, !salary.isEmpty { return salary }
         guard job.salary_min != nil || job.salary_max != nil else { return nil }
         let currency = job.salary_currency ?? (APIClient.countryCode == "CH" ? "CHF" : "EUR")
-        let period = ["year": "/рік", "month": "/місяць", "hour": "/год"].first { job.salary_period?.lowercased().contains($0.key) == true }?.value ?? ""
+        let period = ["year": "/рік".localized, "month": "/місяць".localized, "hour": "/год".localized].first { job.salary_period?.lowercased().contains($0.key) == true }?.value ?? ""
         if let minimum = job.salary_min, let maximum = job.salary_max {
             return "\(currency) \(minimum.formatted())–\(maximum.formatted())\(period) brutto"
         }
-        if let minimum = job.salary_min { return "від \(currency) \(minimum.formatted())\(period) brutto" }
-        if let maximum = job.salary_max { return "до \(currency) \(maximum.formatted())\(period) brutto" }
+        if let minimum = job.salary_min { return "від %@ %@%@ brutto".localized(with: "\(currency)", "\(minimum.formatted())", "\(period)") }
+        if let maximum = job.salary_max { return "до %@ %@%@ brutto".localized(with: "\(currency)", "\(maximum.formatted())", "\(period)") }
         return nil
     }
 
     private var workloadText: String? {
-        if let minimum = job.workload_min, let maximum = job.workload_max { return "Зайнятість: \(minimum)–\(maximum)%" }
-        if let minimum = job.workload_min { return "Зайнятість: від \(minimum)%" }
-        if let maximum = job.workload_max { return "Зайнятість: до \(maximum)%" }
+        if let minimum = job.workload_min, let maximum = job.workload_max { return "Зайнятість: %@–%@%%".localized(with: "\(minimum)", "\(maximum)") }
+        if let minimum = job.workload_min { return "Зайнятість: від %@%%".localized(with: "\(minimum)") }
+        if let maximum = job.workload_max { return "Зайнятість: до %@%%".localized(with: "\(maximum)") }
         return job.employment_type
     }
 
     private func workplaceLabel(_ value: String) -> String {
-        ["remote": "Віддалено", "hybrid": "Гібридно", "on_site": "На місці"][value] ?? value
+        ["remote": "Віддалено".localized, "hybrid": "Гібридно".localized, "on_site": "На місці".localized][value] ?? value
     }
 }
 
@@ -3074,7 +3074,7 @@ private struct DraftSheet: View {
                     if isDrafting {
                         HStack {
                             ProgressView()
-                            Text("Генерую відповідь...")
+                            Text("Генерую відповідь...".localized)
                                 .foregroundColor(.secondary)
                         }
                     } else {
@@ -3084,11 +3084,11 @@ private struct DraftSheet: View {
                 }
                 .padding()
             }
-            .navigationTitle("AI Відповідь")
+            .navigationTitle("AI Відповідь".localized)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Копіювати") {
+                    Button("Копіювати".localized) {
                         if let text {
                             UIPasteboard.general.string = text
                         }
@@ -3109,7 +3109,7 @@ private struct JobApplicationTrackerSheet: View {
     private let stages = ["saved", "prepared", "applied", "interview", "offer", "rejected", "withdrawn"]
 
     private func title(_ status: String) -> String {
-        ["saved": "Збережено", "prepared": "Готово", "applied": "Відправлено", "interview": "Співбесіда", "offer": "Офер", "rejected": "Відмова", "withdrawn": "Закрито"][status] ?? status
+        ["saved": "Збережено".localized, "prepared": "Готово".localized, "applied": "Відправлено".localized, "interview": "Співбесіда".localized, "offer": "Офер".localized, "rejected": "Відмова".localized, "withdrawn": "Закрито".localized][status] ?? status
     }
 
     private func nextStages(after status: String) -> [String] {
@@ -3128,19 +3128,19 @@ private struct JobApplicationTrackerSheet: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 18) {
-                    Text("Твій шлях до оферу")
+                    Text("Твій шлях до оферу".localized)
                         .font(.system(size: 30, weight: .bold, design: .default))
                         .foregroundColor(JourneyVisual.primaryText)
-                    Text("Оновлюй статус після кожного кроку. Уся історія синхронізується між пристроями.")
+                    Text("Оновлюй статус після кожного кроку. Уся історія синхронізується між пристроями.".localized)
                         .font(.subheadline)
                         .foregroundColor(JourneyVisual.secondaryText)
 
                     if applications.isEmpty {
                         JobsRecoveryState(
                             icon: "paperplane",
-                            title: "Трекер поки порожній",
-                            message: "Відкрий вакансію, підготуй відгук або познач його як відправлений.",
-                            actionTitle: "Знайти вакансію"
+                            title: "Трекер поки порожній".localized,
+                            message: "Відкрий вакансію, підготуй відгук або познач його як відправлений.".localized,
+                            actionTitle: "Знайти вакансію".localized
                         ) { dismiss() }
                     } else {
                         ForEach(stages, id: \.self) { stage in
@@ -3185,7 +3185,7 @@ private struct JobApplicationTrackerSheet: View {
                                                     }
                                                 }
                                             } label: {
-                                                Label("Змінити етап", systemImage: "arrow.triangle.2.circlepath")
+                                                Label("Змінити етап".localized, systemImage: "arrow.triangle.2.circlepath")
                                                     .font(.caption.bold())
                                                     .foregroundColor(.black)
                                                     .frame(maxWidth: .infinity)
@@ -3208,9 +3208,9 @@ private struct JobApplicationTrackerSheet: View {
                 .padding(.bottom, 30)
             }
             .background(JourneyVisual.pageBackground.ignoresSafeArea())
-            .navigationTitle("Відгуки")
+            .navigationTitle("Відгуки".localized)
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Готово") { dismiss() } } }
+            .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Готово".localized) { dismiss() } } }
         }
     }
 }
@@ -3234,7 +3234,7 @@ private struct JobAlertsSheet: View {
         self.alerts = alerts
         self.onCreate = onCreate
         self.onDelete = onDelete
-        _name = State(initialValue: defaultCanton.isEmpty ? "Нові вакансії" : "Нові вакансії · \(defaultCanton)")
+        _name = State(initialValue: defaultCanton.isEmpty ? "Нові вакансії".localized : "Нові вакансії · %@".localized(with: "\(defaultCanton)"))
         _keywords = State(initialValue: defaultKeywords)
     }
 
@@ -3242,20 +3242,20 @@ private struct JobAlertsSheet: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 18) {
-                    Text("Не пропусти свій шанс")
+                    Text("Не пропусти свій шанс".localized)
                         .font(.system(size: 29, weight: .bold, design: .default))
                         .foregroundColor(JourneyVisual.primaryText)
-                    Text("Sweezy перевіряє нові збіги після синхронізації каталогу та надсилає push лише про релевантні вакансії.")
+                    Text("Sweezy перевіряє нові збіги після синхронізації каталогу та надсилає push лише про релевантні вакансії.".localized)
                         .font(.subheadline)
                         .foregroundColor(JourneyVisual.secondaryText)
 
                     VStack(spacing: 12) {
-                        JobsDarkField(title: "Назва", text: $name, icon: "bell")
-                        JobsDarkField(title: "Ключові слова", text: $keywords, icon: "magnifyingglass")
+                        JobsDarkField(title: "Назва".localized, text: $name, icon: "bell")
+                        JobsDarkField(title: "Ключові слова".localized, text: $keywords, icon: "magnifyingglass")
                         Button {
                             Task { await onCreate(name, keywords) }
                         } label: {
-                            Label("Створити сповіщення", systemImage: "bell.badge.fill")
+                            Label("Створити сповіщення".localized, systemImage: "bell.badge.fill")
                                 .font(.headline)
                                 .foregroundColor(.black)
                                 .frame(maxWidth: .infinity)
@@ -3297,7 +3297,7 @@ private struct JobAlertsSheet: View {
             .background(JourneyVisual.pageBackground.ignoresSafeArea())
             .navigationTitle("Job Alerts")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Готово") { dismiss() } } }
+            .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Готово".localized) { dismiss() } } }
         }
     }
 }
@@ -3334,7 +3334,7 @@ private struct JobMapSheet: View {
                 .mapStyle(.standard(elevation: .realistic))
 
                 if mappedJobs.isEmpty {
-                    Text("У цих результатах немає координат. Зміни пошук або кантон.")
+                    Text("У цих результатах немає координат. Зміни пошук або кантон.".localized)
                         .font(.subheadline.weight(.semibold))
                         .foregroundColor(JourneyVisual.primaryText)
                         .padding(16)
@@ -3343,9 +3343,9 @@ private struct JobMapSheet: View {
                         .padding(20)
                 }
             }
-            .navigationTitle("Карта вакансій")
+            .navigationTitle("Карта вакансій".localized)
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Закрити") { dismiss() } } }
+            .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Закрити".localized) { dismiss() } } }
         }
     }
 }
@@ -3371,6 +3371,7 @@ private struct JobEmployerHubSheet: View {
     @State private var isVerified = false
     @State private var isLoading = false
     @State private var message: String?
+    @State private var messageIsError = false
 
     private var activeCountry: ResidenceCountry {
         ResidenceCountry(rawValue: APIClient.countryCode) ?? .switzerland
@@ -3380,40 +3381,40 @@ private struct JobEmployerHubSheet: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 18) {
-                    Text("Знайди людей, які підходять")
+                    Text("Знайди людей, які підходять".localized)
                         .font(.system(size: 30, weight: .bold, design: .default))
                         .foregroundColor(JourneyVisual.primaryText)
-                    Label(isVerified ? "Перевірена компанія" : "Профіль очікує перевірки", systemImage: isVerified ? "checkmark.seal.fill" : "clock.badge")
+                    Label(isVerified ? "Перевірена компанія".localized : "Профіль очікує перевірки".localized, systemImage: isVerified ? "checkmark.seal.fill" : "clock.badge")
                         .font(.subheadline.weight(.semibold))
                         .foregroundColor(isVerified ? JourneyVisual.lime : .orange)
 
-                    JobsPanelTitle("Компанія", icon: "building.2")
+                    JobsPanelTitle("Компанія".localized, icon: "building.2")
                     VStack(spacing: 11) {
-                        JobsDarkField(title: "Назва компанії", text: $company, icon: "building.2")
-                        JobsDarkField(title: "Контактна особа", text: $contactName, icon: "person")
-                        JobsDarkField(title: "Робочий email", text: $contactEmail, icon: "envelope")
+                        JobsDarkField(title: "Назва компанії".localized, text: $company, icon: "building.2")
+                        JobsDarkField(title: "Контактна особа".localized, text: $contactName, icon: "person")
+                        JobsDarkField(title: "Робочий email".localized, text: $contactEmail, icon: "envelope")
                             .textInputAutocapitalization(.never)
                             .keyboardType(.emailAddress)
-                        JobsDarkField(title: "Website (необов'язково)", text: $website, icon: "globe")
+                        JobsDarkField(title: "Website (необов'язково)".localized, text: $website, icon: "globe")
                             .textInputAutocapitalization(.never)
                         Picker(activeCountry.subdivisionTitle, selection: $canton) {
                             ForEach(cantons.filter { !$0.isEmpty }, id: \.self) { Text($0).tag($0) }
                         }
                         .tint(JourneyVisual.lime)
-                        JobsDarkField(title: "Про компанію", text: $companyDescription, icon: "text.alignleft")
+                        JobsDarkField(title: "Про компанію".localized, text: $companyDescription, icon: "text.alignleft")
                     }
 
-                    JobsPanelTitle("Нова вакансія", icon: "briefcase")
+                    JobsPanelTitle("Нова вакансія".localized, icon: "briefcase")
                     VStack(spacing: 11) {
-                        JobsDarkField(title: "Посада", text: $title, icon: "briefcase")
-                        JobsDarkField(title: "Місто / адреса", text: $location, icon: "mappin")
-                        JobsDarkField(title: "Опис — мінімум 30 символів", text: $jobDescription, icon: "text.alignleft")
-                        JobsDarkField(title: "Навички через кому", text: $skills, icon: "checkmark.circle")
-                        JobsDarkField(title: "Мови через кому", text: $languages, icon: "character.book.closed")
+                        JobsDarkField(title: "Посада".localized, text: $title, icon: "briefcase")
+                        JobsDarkField(title: "Місто / адреса".localized, text: $location, icon: "mappin")
+                        JobsDarkField(title: "Опис — мінімум 30 символів".localized, text: $jobDescription, icon: "text.alignleft")
+                        JobsDarkField(title: "Навички через кому".localized, text: $skills, icon: "checkmark.circle")
+                        JobsDarkField(title: "Мови через кому".localized, text: $languages, icon: "character.book.closed")
                         HStack {
-                            JobsDarkField(title: "\(activeCountry.currencyCode) від", text: $salaryMin, icon: "banknote")
+                            JobsDarkField(title: "%@ від".localized(with: "\(activeCountry.currencyCode)"), text: $salaryMin, icon: "banknote")
                                 .keyboardType(.numberPad)
-                            JobsDarkField(title: "\(activeCountry.currencyCode) до", text: $salaryMax, icon: "banknote")
+                            JobsDarkField(title: "%@ до".localized(with: "\(activeCountry.currencyCode)"), text: $salaryMax, icon: "banknote")
                                 .keyboardType(.numberPad)
                         }
                     }
@@ -3423,7 +3424,7 @@ private struct JobEmployerHubSheet: View {
                     } label: {
                         HStack {
                             if isLoading { ProgressView().tint(.black) }
-                            Text("Надіслати на модерацію")
+                            Text("Надіслати на модерацію".localized)
                             Spacer()
                             Image(systemName: "arrow.right")
                         }
@@ -3440,16 +3441,16 @@ private struct JobEmployerHubSheet: View {
                     if let message {
                         Text(message)
                             .font(.subheadline.weight(.semibold))
-                            .foregroundColor(message.contains("помил") ? .orange : JourneyVisual.lime)
+                            .foregroundColor(messageIsError ? .orange : JourneyVisual.lime)
                     }
 
                     if !ownJobs.isEmpty {
-                        JobsPanelTitle("Мої вакансії", icon: "tray.full")
+                        JobsPanelTitle("Мої вакансії".localized, icon: "tray.full")
                         ForEach(ownJobs) { job in
                             HStack {
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text(job.title).font(.headline).foregroundColor(JourneyVisual.primaryText)
-                                    Text(["pending": "На модерації", "active": "Активна", "rejected": "Відхилена", "closed": "Закрита"][job.status ?? ""] ?? (job.status ?? ""))
+                                    Text(["pending": "На модерації".localized, "active": "Активна".localized, "rejected": "Відхилена".localized, "closed": "Закрита".localized][job.status ?? ""] ?? (job.status ?? ""))
                                         .font(.caption).foregroundColor(JourneyVisual.secondaryText)
                                 }
                                 Spacer()
@@ -3463,7 +3464,7 @@ private struct JobEmployerHubSheet: View {
                     }
 
                     if !candidates.isEmpty {
-                        JobsPanelTitle("Відгуки кандидатів", icon: "person.2.badge.gearshape")
+                        JobsPanelTitle("Відгуки кандидатів".localized, icon: "person.2.badge.gearshape")
                         ForEach(candidates) { candidate in
                             VStack(alignment: .leading, spacing: 12) {
                                 HStack(alignment: .top) {
@@ -3486,13 +3487,13 @@ private struct JobEmployerHubSheet: View {
                                 }
                                 if candidate.status == "applied" {
                                     HStack(spacing: 9) {
-                                        employerStatusButton("Співбесіда", icon: "video", status: "interview", candidate: candidate)
-                                        employerStatusButton("Відмовити", icon: "xmark", status: "rejected", candidate: candidate)
+                                        employerStatusButton("Співбесіда".localized, icon: "video", status: "interview", candidate: candidate)
+                                        employerStatusButton("Відмовити".localized, icon: "xmark", status: "rejected", candidate: candidate)
                                     }
                                 } else if candidate.status == "interview" {
                                     HStack(spacing: 9) {
-                                        employerStatusButton("Зробити offer", icon: "checkmark.seal", status: "offer", candidate: candidate)
-                                        employerStatusButton("Відмовити", icon: "xmark", status: "rejected", candidate: candidate)
+                                        employerStatusButton("Зробити offer".localized, icon: "checkmark.seal", status: "offer", candidate: candidate)
+                                        employerStatusButton("Відмовити".localized, icon: "xmark", status: "rejected", candidate: candidate)
                                     }
                                 }
                             }
@@ -3507,9 +3508,9 @@ private struct JobEmployerHubSheet: View {
                 .padding(.bottom, 30)
             }
             .background(JourneyVisual.pageBackground.ignoresSafeArea())
-            .navigationTitle("Для роботодавців")
+            .navigationTitle("Для роботодавців".localized)
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Готово") { dismiss() } } }
+            .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Готово".localized) { dismiss() } } }
             .task { await load() }
         }
     }
@@ -3519,7 +3520,8 @@ private struct JobEmployerHubSheet: View {
             canton = activeCountry.defaultSubdivisionCode
         }
         guard KeychainStore.get("access_token") != nil else {
-            message = "Увійди в акаунт, щоб публікувати вакансії."
+            message = "Увійди в акаунт, щоб публікувати вакансії.".localized
+            messageIsError = true
             return
         }
         if let profile = try? await APIClient.getJobEmployerProfile() {
@@ -3536,7 +3538,7 @@ private struct JobEmployerHubSheet: View {
     }
 
     private func applicationStatusTitle(_ status: String) -> String {
-        ["applied": "Новий відгук", "interview": "Співбесіда", "offer": "Offer", "rejected": "Відмовлено", "withdrawn": "Відкликано"][status] ?? status
+        ["applied": "Новий відгук".localized, "interview": "Співбесіда".localized, "offer": "Offer", "rejected": "Відмовлено".localized, "withdrawn": "Відкликано".localized][status] ?? status
     }
 
     private func employerStatusButton(
@@ -3551,7 +3553,8 @@ private struct JobEmployerHubSheet: View {
                     let updated = try await APIClient.updateEmployerJobApplication(id: candidate.id, status: status)
                     if let index = candidates.firstIndex(where: { $0.id == updated.id }) { candidates[index] = updated }
                 } catch {
-                    message = "Помилка: \(error.localizedDescription)"
+                    message = "Помилка: %@".localized(with: "\(error.localizedDescription)")
+                    messageIsError = true
                 }
             }
         } label: {
@@ -3602,9 +3605,11 @@ private struct JobEmployerHubSheet: View {
             ownJobs.insert(job, at: 0)
             title = ""
             jobDescription = ""
-            message = "Вакансію надіслано на модерацію."
+            message = "Вакансію надіслано на модерацію.".localized
+            messageIsError = false
         } catch {
-            message = "Помилка: \(error.localizedDescription)"
+            message = "Помилка: %@".localized(with: "\(error.localizedDescription)")
+            messageIsError = true
         }
     }
 }

@@ -187,7 +187,7 @@ private struct QuickActionCard: View {
                 
                 // CTA
                 HStack(spacing: 6) {
-                    Text("Перейти")
+                    Text("Перейти".localized)
                         .font(Theme.Typography.caption)
                         .fontWeight(.medium)
                     Image(systemName: "arrow.right")

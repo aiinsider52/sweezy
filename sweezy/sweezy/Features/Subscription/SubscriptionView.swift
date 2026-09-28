@@ -54,9 +54,9 @@ struct SubscriptionView: View {
             await manager.load()
         }
         .alert("Sweezy Plus", isPresented: $purchaseSucceeded) {
-            Button("Готово") { dismiss() }
+            Button("Готово".localized) { dismiss() }
         } message: {
-            Text("Підписку активовано на всіх ваших пристроях Apple.")
+            Text("Підписку активовано на всіх ваших пристроях Apple.".localized)
         }
     }
 
@@ -82,7 +82,7 @@ struct SubscriptionView: View {
                     .clipShape(Circle())
                     .overlay(Circle().stroke(softBorder, lineWidth: 1))
             }
-            .accessibilityLabel("Закрити")
+            .accessibilityLabel("Закрити".localized)
             .accessibilityIdentifier("subscription.close")
 
             Spacer()
@@ -90,7 +90,7 @@ struct SubscriptionView: View {
             Button {
                 Task { await manager.restorePurchases() }
             } label: {
-                Label("Відновити покупки", systemImage: "clock.arrow.circlepath")
+                Label("Відновити покупки".localized, systemImage: "clock.arrow.circlepath")
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundColor(primaryText)
                     .padding(.horizontal, 14)
@@ -113,10 +113,10 @@ struct SubscriptionView: View {
         JourneyMascotStage(
             pose: .celebrate,
             stickers: [
-                JourneyStageSticker(icon: "sparkles", title: "AI без лімітів", swatch: JourneyCategoryPalette.lime),
-                JourneyStageSticker(icon: "map.fill", title: "Твій план", swatch: JourneyCategoryPalette.sand),
-                JourneyStageSticker(icon: "doc.text.fill", title: "CV і листи", swatch: JourneyCategoryPalette.sky),
-                JourneyStageSticker(icon: "bell.badge.fill", title: "Дедлайни", swatch: JourneyCategoryPalette.coral)
+                JourneyStageSticker(icon: "sparkles", title: "AI без лімітів".localized, swatch: JourneyCategoryPalette.lime),
+                JourneyStageSticker(icon: "map.fill", title: "Твій план".localized, swatch: JourneyCategoryPalette.sand),
+                JourneyStageSticker(icon: "doc.text.fill", title: "CV і листи".localized, swatch: JourneyCategoryPalette.sky),
+                JourneyStageSticker(icon: "bell.badge.fill", title: "Дедлайни".localized, swatch: JourneyCategoryPalette.coral)
             ]
         )
         .padding(.horizontal, 18)
@@ -127,7 +127,7 @@ struct SubscriptionView: View {
             HStack(spacing: 8) {
                 Label("PLUS", systemImage: "sparkles")
                 if hasMonthlyFreeTrial {
-                    Text("30 ДНІВ БЕЗКОШТОВНО")
+                    Text("30 ДНІВ БЕЗКОШТОВНО".localized)
                 }
             }
             .font(.system(size: 10, weight: .black))
@@ -140,13 +140,13 @@ struct SubscriptionView: View {
             VStack(alignment: .leading, spacing: -2) {
                 Text("\(selectedCountry.name).")
                     .foregroundColor(primaryText)
-                Text("Твій маршрут.")
+                Text("Твій маршрут.".localized)
                     .foregroundColor(readableAccent)
             }
             .font(.largeTitle.bold())
             .fixedSize(horizontal: false, vertical: true)
 
-            Text("Документи, робота, мова й дедлайни — в одному зрозумілому плані.")
+            Text("Документи, робота, мова й дедлайни — в одному зрозумілому плані.".localized)
                 .font(.system(size: 16, weight: .medium))
                 .foregroundColor(secondaryText)
                 .fixedSize(horizontal: false, vertical: true)
@@ -158,18 +158,18 @@ struct SubscriptionView: View {
 
     private var benefitItems: [PlusBenefit] {
         [
-            PlusBenefit(icon: "sparkles", title: "AI-помічник без лімітів", text: "Документи, робота, побут — питай скільки треба", swatch: JourneyCategoryPalette.lime),
-            PlusBenefit(icon: "map.fill", title: "Особистий план", text: "Кроки й терміни під твою ситуацію", swatch: JourneyCategoryPalette.sand),
-            PlusBenefit(icon: "doc.text.fill", title: "CV та мотиваційні листи", text: "Для ринку \(selectedCountry.ukrainianGenitiveName)", swatch: JourneyCategoryPalette.sky),
-            PlusBenefit(icon: "globe.europe.africa.fill", title: "Переклади DE · FR · IT", text: "Листи, договори, оголошення", swatch: JourneyCategoryPalette.coral),
-            PlusBenefit(icon: "bell.badge.fill", title: "Розумні нагадування", text: "Жодного пропущеного дедлайну", swatch: JourneyCategoryPalette.lilac),
-            PlusBenefit(icon: "briefcase.fill", title: "Пошук роботи", text: "Від вакансії до заявки", swatch: JourneyCategoryPalette.teal)
+            PlusBenefit(icon: "sparkles", title: "AI-помічник без лімітів".localized, text: "Документи, робота, побут — питай скільки треба".localized, swatch: JourneyCategoryPalette.lime),
+            PlusBenefit(icon: "map.fill", title: "Особистий план".localized, text: "Кроки й терміни під твою ситуацію".localized, swatch: JourneyCategoryPalette.sand),
+            PlusBenefit(icon: "doc.text.fill", title: "CV та мотиваційні листи".localized, text: selectedCountry.jobMarketPhrase, swatch: JourneyCategoryPalette.sky),
+            PlusBenefit(icon: "globe.europe.africa.fill", title: "Переклади DE · FR · IT".localized, text: "Листи, договори, оголошення".localized, swatch: JourneyCategoryPalette.coral),
+            PlusBenefit(icon: "bell.badge.fill", title: "Розумні нагадування".localized, text: "Жодного пропущеного дедлайну".localized, swatch: JourneyCategoryPalette.lilac),
+            PlusBenefit(icon: "briefcase.fill", title: "Пошук роботи".localized, text: "Від вакансії до заявки".localized, swatch: JourneyCategoryPalette.teal)
         ]
     }
 
     private var benefits: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Що відкриває Plus")
+            Text("Що відкриває Plus".localized)
                 .font(.title3.bold())
                 .foregroundColor(primaryText)
 
@@ -190,7 +190,7 @@ struct SubscriptionView: View {
             .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(softBorder, lineWidth: 1))
 
             Label(
-                "А ще чеклісти й база знань про життя у \(selectedCountry.homeHeroName(languageIdentifier: "uk"))",
+                "А ще чеклісти й база знань про життя %@".localized(with: selectedCountry.inCountryPhrase),
                 systemImage: "plus.circle.fill"
             )
             .font(.system(size: 12, weight: .medium))
@@ -232,11 +232,11 @@ struct SubscriptionView: View {
     private var plans: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack(alignment: .firstTextBaseline) {
-                Text("Обери план")
+                Text("Обери план".localized)
                     .font(.title3.bold())
                     .foregroundColor(primaryText)
                 Spacer(minLength: 8)
-                Label("Оплата через Apple", systemImage: "checkmark.shield.fill")
+                Label("Оплата через Apple".localized, systemImage: "checkmark.shield.fill")
                     .font(.caption2.bold())
                     .foregroundColor(readableAccent)
             }
@@ -247,19 +247,19 @@ struct SubscriptionView: View {
             layout {
                 planCard(
                     id: SubscriptionManager.ProductID.monthly,
-                    title: "Щомісячно",
+                    title: "Щомісячно".localized,
                     price: monthlyPrice,
-                    period: "на місяць",
-                    badge: hasMonthlyFreeTrial ? "30 днів free" : nil,
-                    note: hasMonthlyFreeTrial ? "Перший місяць 0 \(selectedCountry.currencyCode)" : "Без зобов’язань"
+                    period: "на місяць".localized,
+                    badge: hasMonthlyFreeTrial ? "30 днів free".localized : nil,
+                    note: hasMonthlyFreeTrial ? "Перший місяць 0 %@".localized(with: "\(selectedCountry.currencyCode)") : "Без зобов’язань".localized
                 )
                 planCard(
                     id: SubscriptionManager.ProductID.yearly,
-                    title: "Щорічно",
+                    title: "Щорічно".localized,
                     price: yearlyPrice,
-                    period: "на рік",
-                    badge: "2 міс. у подарунок",
-                    note: "≈ \(yearlyPerMonth) / міс"
+                    period: "на рік".localized,
+                    badge: "2 міс. у подарунок".localized,
+                    note: "≈ %@ / міс".localized(with: "\(yearlyPerMonth)")
                 )
             }
         }
@@ -338,9 +338,9 @@ struct SubscriptionView: View {
     /// What happens after "Start": said plainly, because trust is what converts a trial.
     private var trialTimeline: some View {
         VStack(alignment: .leading, spacing: 0) {
-            trialStep(icon: "lock.open.fill", title: "Сьогодні", text: "Повний доступ до Plus · 0 \(selectedCountry.currencyCode)", isLast: false)
-            trialStep(icon: "calendar", title: "Через 30 днів", text: "\(monthlyPrice) / місяць, якщо не скасуєш", isLast: false)
-            trialStep(icon: "hand.raised.fill", title: "Будь-коли", text: "Скасування в налаштуваннях Apple ID", isLast: true)
+            trialStep(icon: "lock.open.fill", title: "Сьогодні".localized, text: "Повний доступ до Plus · 0 %@".localized(with: "\(selectedCountry.currencyCode)"), isLast: false)
+            trialStep(icon: "calendar", title: "Через 30 днів".localized, text: "%@ / місяць, якщо не скасуєш".localized(with: "\(monthlyPrice)"), isLast: false)
+            trialStep(icon: "hand.raised.fill", title: "Будь-коли".localized, text: "Скасування в налаштуваннях Apple ID".localized, isLast: true)
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 12)
@@ -389,15 +389,15 @@ struct SubscriptionView: View {
                     .multilineTextAlignment(.center)
             }
 
-            Text("Підписка поновлюється автоматично. Скасувати можна будь-коли в налаштуваннях Apple ID.")
+            Text("Підписка поновлюється автоматично. Скасувати можна будь-коли в налаштуваннях Apple ID.".localized)
                 .font(.system(size: 11))
                 .foregroundColor(secondaryText)
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
 
             HStack(spacing: 18) {
-                trustItem("lock.fill", "Безпечна оплата")
-                trustItem("iphone.and.arrow.forward", "На всіх пристроях")
+                trustItem("lock.fill", "Безпечна оплата".localized)
+                trustItem("iphone.and.arrow.forward", "На всіх пристроях".localized)
             }
         }
         .frame(maxWidth: .infinity)
@@ -434,10 +434,10 @@ struct SubscriptionView: View {
                         Spacer()
                     } else {
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(hasSelectedFreeTrial ? "Почати 30 днів безкоштовно" : "Продовжити з Plus")
+                            Text(hasSelectedFreeTrial ? "Почати 30 днів безкоштовно".localized : "Продовжити з Plus".localized)
                                 .font(.headline)
                                 .contentTransition(.opacity)
-                            Text(hasSelectedFreeTrial ? "потім \(monthlyPrice) / місяць" : selectedPrice)
+                            Text(hasSelectedFreeTrial ? "потім %@ / місяць".localized(with: "\(monthlyPrice)") : selectedPrice)
                                 .font(.caption.weight(.semibold))
                                 .opacity(0.72)
                                 .contentTransition(.opacity)
@@ -475,10 +475,10 @@ struct SubscriptionView: View {
             : AnyLayout(HStackLayout(spacing: 20))
         return layout {
             Link(destination: URL(string: "https://sweezy-9xyk.onrender.com/legal/terms")!) {
-                Text("Умови").font(.subheadline).frame(minHeight: 44)
+                Text("Умови".localized).font(.subheadline).frame(minHeight: 44)
             }
             Link(destination: URL(string: "https://sweezy-9xyk.onrender.com/legal/privacy")!) {
-                Text("Конфіденційність").font(.subheadline)
+                Text("Конфіденційність".localized).font(.subheadline)
                     .lineLimit(1).minimumScaleFactor(0.8).frame(minHeight: 44)
             }
             .accessibilityIdentifier("subscription.privacy")
@@ -519,8 +519,8 @@ struct SubscriptionView: View {
 
     private var selectedPrice: String {
         selectedProductID == SubscriptionManager.ProductID.monthly
-            ? "\(monthlyPrice) / місяць"
-            : "\(yearlyPrice) / рік"
+            ? "%@ / місяць".localized(with: "\(monthlyPrice)")
+            : "%@ / рік".localized(with: "\(yearlyPrice)")
     }
 
     private var selectedCountry: ResidenceCountry {
@@ -561,20 +561,20 @@ struct SweezyPlusHomeCard: View {
                         .frame(height: 26)
                         .background(JourneyVisual.black, in: Capsule())
 
-                    Text("Більше можливостей з Plus")
+                    Text("Більше можливостей з Plus".localized)
                         .font(.system(size: 22, weight: .bold))
                         .foregroundColor(.black)
                         .fixedSize(horizontal: false, vertical: true)
 
                     VStack(alignment: .leading, spacing: 5) {
-                        Label("Персональний план", systemImage: "checkmark.circle.fill")
-                        Label("AI без лімітів", systemImage: "checkmark.circle.fill")
+                        Label("Персональний план".localized, systemImage: "checkmark.circle.fill")
+                        Label("AI без лімітів".localized, systemImage: "checkmark.circle.fill")
                     }
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundColor(.black.opacity(0.72))
 
                     HStack(spacing: 6) {
-                        Text("Відкрити Plus")
+                        Text("Відкрити Plus".localized)
                             .lineLimit(1)
                             .fixedSize()
                         Image(systemName: "arrow.right")
@@ -586,7 +586,7 @@ struct SweezyPlusHomeCard: View {
                     .background(JourneyVisual.black, in: Capsule())
                     .padding(.top, 4)
 
-                    Text("від \(manager.displayPrice(for: SubscriptionManager.ProductID.monthly, fallback: fallbackPrice)) / місяць")
+                    Text("від %@ / місяць".localized(with: "\(manager.displayPrice(for: SubscriptionManager.ProductID.monthly, fallback: fallbackPrice))"))
                         .font(.system(size: 11, weight: .semibold))
                         .foregroundColor(.black.opacity(0.62))
                         .lineLimit(1)
@@ -663,19 +663,19 @@ struct CVPlusGateSheet: View {
                 }
             }
 
-            Text("Продовжуй із\nSweezy Plus")
+            Text("Продовжуй із\nSweezy Plus".localized)
                 .font(.system(size: 34, weight: .bold, design: .default))
                 .foregroundColor(Theme.Colors.textPrimary)
 
-            Text("Без лімітів для твого CV")
+            Text("Без лімітів для твого CV".localized)
                 .font(.system(size: 16, weight: .medium))
                 .foregroundColor(Theme.Colors.textSecondary)
 
-            gateBenefit("sparkles", "AI-покращення тексту")
-            gateBenefit("globe", "Переклад DE / FR / IT")
-            gateBenefit("doc.richtext", "PDF без обмежень")
+            gateBenefit("sparkles", "AI-покращення тексту".localized)
+            gateBenefit("globe", "Переклад DE / FR / IT".localized)
+            gateBenefit("doc.richtext", "PDF без обмежень".localized)
 
-            Label("\(freeActionsUsed) безкоштовні дії використано", systemImage: "info.circle")
+            Label("%@ безкоштовні дії використано".localized(with: "\(freeActionsUsed)"), systemImage: "info.circle")
                 .font(.system(size: 12, weight: .medium))
                 .foregroundColor(Theme.Colors.textSecondary)
                 .frame(maxWidth: .infinity)
@@ -684,7 +684,7 @@ struct CVPlusGateSheet: View {
                 .clipShape(RoundedRectangle(cornerRadius: 12))
 
             Button(action: openPlus) {
-                Label("Відкрити Plus", systemImage: "arrow.right")
+                Label("Відкрити Plus".localized, systemImage: "arrow.right")
                     .labelStyle(.titleAndIcon)
                     .font(.system(size: 17, weight: .bold))
                     .foregroundColor(.black)
@@ -694,7 +694,7 @@ struct CVPlusGateSheet: View {
                     .clipShape(RoundedRectangle(cornerRadius: 17, style: .continuous))
             }
 
-            Button("Не зараз", action: dismiss)
+            Button("Не зараз".localized, action: dismiss)
                 .font(.system(size: 14, weight: .semibold))
                 .foregroundColor(Theme.Colors.textSecondary)
                 .frame(maxWidth: .infinity)

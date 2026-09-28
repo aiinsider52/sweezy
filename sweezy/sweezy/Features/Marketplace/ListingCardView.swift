@@ -47,7 +47,7 @@ struct HeroListingCardView: View {
                                 HeroCoverBadge(text: badge.text, onPhoto: hasPhoto)
                             }
                             if isNew {
-                                HeroCoverBadge(text: "Нове", onPhoto: hasPhoto)
+                                HeroCoverBadge(text: "Нове".localized, onPhoto: hasPhoto)
                             }
                         }
                         Text(listing.title)
@@ -92,7 +92,7 @@ struct HeroListingCardView: View {
                                 .foregroundColor(JourneyVisual.accentStrong)
                         }
                     }
-                    Text(listing.canton == "all" ? "Вся Швейцарія" : listing.canton)
+                    Text(listing.canton == "all" ? "Вся Швейцарія".localized : listing.canton)
                         .font(.system(size: 12))
                         .foregroundColor(Theme.Colors.textSecondary)
                 }
@@ -161,7 +161,7 @@ struct CompactListingCardView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
 
                 if isNew {
-                    Text("Нове")
+                    Text("Нове".localized)
                         .font(.system(size: 9, weight: .bold))
                         .foregroundColor(JourneyVisual.accentText)
                         .padding(.horizontal, 7)
@@ -263,7 +263,7 @@ struct ListingCardView: View {
                             ListingBadgePill(text: listing.categoryDisplayName, color: listing.categoryColor)
                             ListingBadgePill(text: listing.canton == "all" ? "🇨🇭" : listing.canton, color: .orange)
                             if isNew {
-                                ListingBadgePill(text: "Нове", color: .green)
+                                ListingBadgePill(text: "Нове".localized, color: .green)
                             }
                         }
                     }

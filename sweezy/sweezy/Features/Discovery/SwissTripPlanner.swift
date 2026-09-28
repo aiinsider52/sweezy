@@ -3,14 +3,14 @@ import SwiftUI
 enum SwissTripTransport: String, CaseIterable, Identifiable {
     case publicTransit, car, walking
     var id: String { rawValue }
-    var title: String { ["publicTransit": "Без авто", "car": "Авто", "walking": "Пішки"][rawValue] ?? rawValue }
+    var title: String { ["publicTransit": "Без авто".localized, "car": "Авто".localized, "walking": "Пішки".localized][rawValue] ?? rawValue }
     var icon: String { self == .car ? "car.fill" : (self == .walking ? "figure.walk" : "tram.fill") }
 }
 
 enum SwissTripWeather: String, CaseIterable, Identifiable {
     case any, sun, rain, snow
     var id: String { rawValue }
-    var title: String { ["any": "Будь-яка", "sun": "Сонце", "rain": "Дощ", "snow": "Сніг"][rawValue] ?? rawValue }
+    var title: String { ["any": "Будь-яка".localized, "sun": "Сонце".localized, "rain": "Дощ".localized, "snow": "Сніг".localized][rawValue] ?? rawValue }
 }
 
 struct SwissTripPlan: Identifiable {
@@ -62,30 +62,30 @@ struct SwissTripPlannerView: View {
                 JourneyPhotoBackground(imageName: "swiss-discovery-interlaken", blurRadius: 10, darkness: 0.78)
                 ScrollView {
                     VStack(alignment: .leading, spacing: 18) {
-                        Text("AI-план поїздки").font(.system(size: 34, weight: .black, design: .default)).foregroundStyle(JourneyVisual.primaryText)
-                        Text("План формується з перевірених місць Sweezy під бюджет, транспорт, склад групи й погоду.").foregroundStyle(JourneyVisual.secondaryText)
-                        field("Звідки", text: $origin)
+                        Text("AI-план поїздки".localized).font(.system(size: 34, weight: .black, design: .default)).foregroundStyle(JourneyVisual.primaryText)
+                        Text("План формується з перевірених місць Sweezy під бюджет, транспорт, склад групи й погоду.".localized).foregroundStyle(JourneyVisual.secondaryText)
+                        field("Звідки".localized, text: $origin)
                         VStack(alignment: .leading) {
-                            Text("Бюджет до CHF \(Int(budget))").font(.headline).foregroundStyle(JourneyVisual.primaryText)
+                            Text("Бюджет до CHF %@".localized(with: "\(Int(budget))")).font(.headline).foregroundStyle(JourneyVisual.primaryText)
                             Slider(value: $budget, in: 20...300, step: 10).tint(JourneyVisual.primaryText)
                         }.padding(16).background(Theme.Colors.card).clipShape(RoundedRectangle(cornerRadius: 18))
                         VStack(alignment: .leading) {
-                            Text("Час: до \(Int(availableHours)) год").font(.headline).foregroundStyle(JourneyVisual.primaryText)
+                            Text("Час: до %@ год".localized(with: "\(Int(availableHours))")).font(.headline).foregroundStyle(JourneyVisual.primaryText)
                             Slider(value: $availableHours, in: 2...12, step: 1).tint(JourneyVisual.primaryText)
                         }.padding(16).background(Theme.Colors.card).clipShape(RoundedRectangle(cornerRadius: 18))
-                        Picker("Транспорт", selection: $transport) { ForEach(SwissTripTransport.allCases) { Text($0.title).tag($0) } }.pickerStyle(.segmented)
-                        Picker("Погода", selection: $weather) { ForEach(SwissTripWeather.allCases) { Text($0.title).tag($0) } }.pickerStyle(.menu).tint(JourneyVisual.primaryText)
-                        Toggle("Сімейний маршрут", isOn: $family).tint(JourneyVisual.primaryText).foregroundStyle(JourneyVisual.primaryText)
+                        Picker("Транспорт".localized, selection: $transport) { ForEach(SwissTripTransport.allCases) { Text($0.title).tag($0) } }.pickerStyle(.segmented)
+                        Picker("Погода".localized, selection: $weather) { ForEach(SwissTripWeather.allCases) { Text($0.title).tag($0) } }.pickerStyle(.menu).tint(JourneyVisual.primaryText)
+                        Toggle("Сімейний маршрут".localized, isOn: $family).tint(JourneyVisual.primaryText).foregroundStyle(JourneyVisual.primaryText)
                         if let result { resultCard(result) }
                         Button { Task { await createPlan() } } label: {
-                            Group { if isGenerating { ProgressView() } else { Label("Створити маршрут", systemImage: "sparkles") } }.font(.headline).foregroundStyle(.black).frame(maxWidth: .infinity, minHeight: 56).background(JourneyVisual.lime).clipShape(RoundedRectangle(cornerRadius: 18))
+                            Group { if isGenerating { ProgressView() } else { Label("Створити маршрут".localized, systemImage: "sparkles") } }.font(.headline).foregroundStyle(.black).frame(maxWidth: .infinity, minHeight: 56).background(JourneyVisual.lime).clipShape(RoundedRectangle(cornerRadius: 18))
                         }.disabled(isGenerating).accessibilityIdentifier("trip.planner.create")
                     }.padding(20).padding(.bottom, 30)
                 }
             }
-            .statusBarScrim().toolbar { ToolbarItem(placement: .cancellationAction) { Button("Закрити") { dismiss() } } }
+            .statusBarScrim().toolbar { ToolbarItem(placement: .cancellationAction) { Button("Закрити".localized) { dismiss() } } }
                 .accessibilityIdentifier("trip.planner.screen")
-                .alert("AI-план", isPresented: Binding(get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } })) { Button("OK") {} } message: { Text(errorMessage ?? "") }
+                .alert("AI-план".localized, isPresented: Binding(get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } })) { Button("OK") {} } message: { Text(errorMessage ?? "") }
         }
     }
     private func field(_ title: String, text: Binding<String>) -> some View {
@@ -93,13 +93,13 @@ struct SwissTripPlannerView: View {
     }
     private func resultCard(_ plan: SwissTripPlan) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("РЕКОМЕНДАЦІЯ").font(.caption.bold()).tracking(1.6).foregroundStyle(Theme.Colors.textPrimary)
+            Text("РЕКОМЕНДАЦІЯ".localized).font(.caption.bold()).tracking(1.6).foregroundStyle(Theme.Colors.textPrimary)
             Text(plan.place.title).font(.title2.bold()).foregroundStyle(JourneyVisual.primaryText)
             Text(plan.place.route).foregroundStyle(JourneyVisual.secondaryText)
             if let rationale = plan.rationale { Text(rationale).font(.subheadline).foregroundStyle(JourneyVisual.secondaryText) }
             ForEach(Array(plan.itinerary.enumerated()), id: \.offset) { index, step in Label("\(index + 1). \(step)", systemImage: "checkmark.circle.fill").font(.caption).foregroundStyle(JourneyVisual.secondaryText) }
-            HStack { Label(plan.transport.title, systemImage: plan.transport.icon); Spacer(); Text("до CHF \(plan.budgetCHF)") }.font(.caption.bold()).foregroundStyle(Theme.Colors.textPrimary)
-            ShareLink(item: plan.shareText) { Label("Поділитися планом", systemImage: "person.2.fill").frame(maxWidth: .infinity, minHeight: 46) }.buttonStyle(.bordered).tint(JourneyVisual.primaryText)
+            HStack { Label(plan.transport.title, systemImage: plan.transport.icon); Spacer(); Text("до CHF %@".localized(with: "\(plan.budgetCHF)")) }.font(.caption.bold()).foregroundStyle(Theme.Colors.textPrimary)
+            ShareLink(item: plan.shareText) { Label("Поділитися планом".localized, systemImage: "person.2.fill").frame(maxWidth: .infinity, minHeight: 46) }.buttonStyle(.bordered).tint(JourneyVisual.primaryText)
         }.padding(18).background(Theme.Colors.card).clipShape(RoundedRectangle(cornerRadius: 22)).overlay(RoundedRectangle(cornerRadius: 22).stroke(JourneyVisual.lime.opacity(0.35)))
     }
 
@@ -113,6 +113,6 @@ struct SwissTripPlannerView: View {
             let ai = try await APIClient.createTripPlan(origin: origin, budget: Int(budget), transport: transport.rawValue, weather: weather.rawValue, family: family, availableHours: Int(availableHours), candidates: SwissDiscoveryCatalog.places)
             guard let place = SwissDiscoveryCatalog.places.first(where: { $0.id == ai.selectedPlaceID }) else { return }
             result = SwissTripPlan(place: place, budgetCHF: Int(budget), transport: transport, family: family, availableHours: Int(availableHours), rationale: ai.rationale, itinerary: ai.itinerary, generatedByAI: ai.generatedByAI)
-        } catch { errorMessage = "Не вдалося оновити AI-план. Показано безпечну локальну рекомендацію." }
+        } catch { errorMessage = "Не вдалося оновити AI-план. Показано безпечну локальну рекомендацію.".localized }
     }
 }

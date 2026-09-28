@@ -25,11 +25,11 @@ struct MyBusinessBookingsView: View {
                     .refreshable { await load() }
                 }
             }
-            .navigationTitle("Мої записи")
+            .navigationTitle("Мої записи".localized)
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Закрити") { dismiss() } } }
+            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Закрити".localized) { dismiss() } } }
             .task { await load() }
-            .alert("Не вдалося виконати дію", isPresented: Binding(get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } })) {
+            .alert("Не вдалося виконати дію".localized, isPresented: Binding(get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } })) {
                 Button("OK") { errorMessage = nil }
             } message: { Text(errorMessage ?? "") }
         }
@@ -38,8 +38,8 @@ struct MyBusinessBookingsView: View {
     private var header: some View {
         VStack(alignment: .leading, spacing: 9) {
             Label("Sweezy Booking", systemImage: "calendar.badge.checkmark").font(.caption.bold()).tracking(1.2).foregroundStyle(Theme.Colors.textPrimary)
-            Text("Усі твої записи\nв одному місці").font(.system(size: 32, weight: .black, design: .default)).foregroundStyle(JourneyVisual.primaryText)
-            Text("Статуси оновлює бізнес. Майбутній запис можна скасувати тут.").font(.subheadline).foregroundStyle(JourneyVisual.secondaryText)
+            Text("Усі твої записи\nв одному місці".localized).font(.system(size: 32, weight: .black, design: .default)).foregroundStyle(JourneyVisual.primaryText)
+            Text("Статуси оновлює бізнес. Майбутній запис можна скасувати тут.".localized).font(.subheadline).foregroundStyle(JourneyVisual.secondaryText)
         }
         .padding(.bottom, 8)
     }
@@ -47,8 +47,8 @@ struct MyBusinessBookingsView: View {
     private var emptyState: some View {
         VStack(spacing: 13) {
             Image(systemName: "calendar.badge.plus").font(.system(size: 40)).foregroundStyle(Theme.Colors.textPrimary)
-            Text("Записів поки немає").font(.title3.bold()).foregroundStyle(JourneyVisual.primaryText)
-            Text("Відкрий послугу перевіреного бізнесу та обери вільний час.").font(.subheadline).foregroundStyle(JourneyVisual.secondaryText).multilineTextAlignment(.center)
+            Text("Записів поки немає".localized).font(.title3.bold()).foregroundStyle(JourneyVisual.primaryText)
+            Text("Відкрий послугу перевіреного бізнесу та обери вільний час.".localized).font(.subheadline).foregroundStyle(JourneyVisual.secondaryText).multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity).padding(.vertical, 42).padding(.horizontal, 24)
         .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 24))
@@ -69,7 +69,7 @@ struct MyBusinessBookingsView: View {
             if !booking.notes.isEmpty { Text(booking.notes).font(.caption).foregroundStyle(JourneyVisual.secondaryText).lineLimit(3) }
             if canCancel(booking) {
                 Button { Task { await cancel(booking) } } label: {
-                    HStack { if cancellingID == booking.id { ProgressView().tint(JourneyVisual.primaryText) }; Text("Скасувати запис"); Spacer(); Image(systemName: "xmark.circle") }
+                    HStack { if cancellingID == booking.id { ProgressView().tint(JourneyVisual.primaryText) }; Text("Скасувати запис".localized); Spacer(); Image(systemName: "xmark.circle") }
                         .font(.subheadline.bold()).foregroundStyle(JourneyVisual.primaryText).padding(.horizontal, 15).frame(height: 46)
                         .background(.red.opacity(0.16), in: RoundedRectangle(cornerRadius: 14))
                 }
@@ -85,11 +85,11 @@ struct MyBusinessBookingsView: View {
         let title: String
         let color: Color
         switch status {
-        case "confirmed": (title, color) = ("Підтверджено", JourneyVisual.lime)
-        case "completed": (title, color) = ("Завершено", .cyan)
-        case "cancelled": (title, color) = ("Скасовано", .red)
-        case "no_show": (title, color) = ("Не відбувся", .orange)
-        default: (title, color) = ("Очікує", .yellow)
+        case "confirmed": (title, color) = ("Підтверджено".localized, JourneyVisual.lime)
+        case "completed": (title, color) = ("Завершено".localized, .cyan)
+        case "cancelled": (title, color) = ("Скасовано".localized, .red)
+        case "no_show": (title, color) = ("Не відбувся".localized, .orange)
+        default: (title, color) = ("Очікує".localized, .yellow)
         }
         return Text(title.uppercased()).font(.caption2.bold()).foregroundStyle(color).padding(.horizontal, 9).padding(.vertical, 6).background(color.opacity(0.12), in: Capsule())
     }

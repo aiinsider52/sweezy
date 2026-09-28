@@ -36,6 +36,7 @@ struct Place: Codable, Identifiable, Hashable {
     let source: String? // URL or authority reference
     
     init(
+        id: UUID = UUID(),
         name: String,
         type: PlaceType,
         category: PlaceCategory,
@@ -58,7 +59,7 @@ struct Place: Codable, Identifiable, Hashable {
         verifiedAt: Date? = nil,
         source: String? = nil
     ) {
-        self.id = UUID()
+        self.id = id
         self.name = name
         self.type = type
         self.category = category

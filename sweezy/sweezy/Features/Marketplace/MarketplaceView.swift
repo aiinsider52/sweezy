@@ -208,7 +208,7 @@ struct MarketplaceView: View {
                         .frame(width: 40, height: 40)
                         .background(Circle().fill(Theme.Colors.inkElevated))
                 }
-                .accessibilityLabel("Мої записи")
+                .accessibilityLabel("Мої записи".localized)
 
                 Button {
                     UIImpactFeedbackGenerator(style: .light).impactOccurred()
@@ -576,11 +576,11 @@ struct MarketplaceView: View {
         }
 
         var result: [EventGroup] = []
-        if !today.isEmpty { result.append(.init(label: "Сьогодні", accentColor: Theme.Colors.accent, events: today)) }
-        if !thisWeek.isEmpty { result.append(.init(label: "Цього тижня", accentColor: Theme.Colors.primary, events: thisWeek)) }
-        if !nextWeek.isEmpty { result.append(.init(label: "Наступного тижня", accentColor: .purple, events: nextWeek)) }
-        if !thisMonth.isEmpty { result.append(.init(label: "Цього місяця", accentColor: .orange, events: thisMonth)) }
-        if !later.isEmpty { result.append(.init(label: "Пізніше", accentColor: Theme.Colors.textSecondary, events: later)) }
+        if !today.isEmpty { result.append(.init(label: "Сьогодні".localized, accentColor: Theme.Colors.accent, events: today)) }
+        if !thisWeek.isEmpty { result.append(.init(label: "Цього тижня".localized, accentColor: Theme.Colors.primary, events: thisWeek)) }
+        if !nextWeek.isEmpty { result.append(.init(label: "Наступного тижня".localized, accentColor: .purple, events: nextWeek)) }
+        if !thisMonth.isEmpty { result.append(.init(label: "Цього місяця".localized, accentColor: .orange, events: thisMonth)) }
+        if !later.isEmpty { result.append(.init(label: "Пізніше".localized, accentColor: Theme.Colors.textSecondary, events: later)) }
         return result
     }
 

@@ -92,6 +92,8 @@ struct MainAppContent: View {
                 NavigationStack { SwissDiscoveryView() }
             } else if isTripPlannerUITest {
                 SwissTripPlannerView()
+            } else if isSuggestPlaceUITest {
+                SuggestPlaceView()
             } else if isCareerHubUITest || isJobsGateUITest {
                 JobsView()
             } else if isCareerToolsUITest {
@@ -288,6 +290,15 @@ struct MainAppContent: View {
         #if DEBUG
         ProcessInfo.processInfo.environment["UITESTS"] == "1" &&
             ProcessInfo.processInfo.arguments.contains("--ui-test-discovery")
+        #else
+        false
+        #endif
+    }
+
+    private var isSuggestPlaceUITest: Bool {
+        #if DEBUG
+        ProcessInfo.processInfo.environment["UITESTS"] == "1" &&
+            ProcessInfo.processInfo.arguments.contains("--ui-test-suggest-place")
         #else
         false
         #endif

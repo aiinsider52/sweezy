@@ -141,7 +141,7 @@ struct BusinessServiceItem: Codable, Identifiable {
         case bufferMinutes = "buffer_minutes", isActive = "is_active", createdAt = "created_at", updatedAt = "updated_at"
     }
     var priceText: String {
-        guard let priceCents else { return "Ціна за домовленістю" }
+        guard let priceCents else { return "Ціна за домовленістю".localized }
         let from = Double(priceCents) / 100
         if let priceToCents { return String(format: "%@ %.2f–%.2f", currency, from, Double(priceToCents) / 100) }
         return String(format: "%@ %.2f", currency, from)

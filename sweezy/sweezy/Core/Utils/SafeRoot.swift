@@ -22,7 +22,7 @@ struct SafeRootContainer<Content: View>: View {
                     ProgressView()
                         .scaleEffect(1.2)
                         .tint(.secondary)
-                    Text("Завантаження...")
+                    Text("Завантаження...".localized)
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                 }

@@ -91,6 +91,51 @@ final class CriticalFlowsUITests: XCTestCase {
     }
 
     @MainActor
+    func testSuggestPlaceFormNeedsRequiredFields() throws {
+        let app = XCUIApplication()
+        app.launchArguments = ["--ui-test-suggest-place", "-selected_locale", "uk"]
+        // Earlier flows can persist a pending auth sheet that would cover this screen.
+        app.launchArguments += ["-pending_initial_auth_entry", "NO"]
+        app.launchEnvironment["UITESTS"] = "1"
+        app.launch()
+
+        let name = app.textFields["place.suggest.name"]
+        XCTAssertTrue(name.waitForExistence(timeout: 15))
+        XCTAssertTrue(app.buttons["place.suggest.category.legal_aid"].exists)
+        let submit = app.buttons["place.suggest.submit"]
+        XCTAssertTrue(scrollToElement(submit, in: app))
+        XCTAssertFalse(submit.isEnabled)
+        keepScreenshot(app, name: "suggest-place-empty")
+
+        app.swipeDown()
+        app.swipeDown()
+        let keyboardDone = app.buttons["place.suggest.keyboard_done"]
+        name.tap()
+        name.typeText("Українська суботня школа")
+        keyboardDone.tap()
+        app.buttons["place.suggest.category.school"].tap()
+        for (identifier, value) in [
+            ("place.suggest.street", "Bahnhofstrasse 10"),
+            ("place.suggest.postal", "8001"),
+            ("place.suggest.city", "Zürich")
+        ] {
+            let field = app.textFields[identifier]
+            XCTAssertTrue(scrollToElement(field, in: app))
+            field.tap()
+            field.typeText(value)
+            keyboardDone.tap()
+        }
+        let note = app.textViews["place.suggest.note"]
+        XCTAssertTrue(scrollToElement(note, in: app))
+        note.tap()
+        note.typeText("Уроки для дітей щосуботи зранку.")
+        keyboardDone.tap()
+        XCTAssertTrue(scrollToElement(submit, in: app))
+        XCTAssertTrue(submit.isEnabled)
+        keepScreenshot(app, name: "suggest-place-filled")
+    }
+
+    @MainActor
     func testPlusTripPlannerFitsCurrentDevice() throws {
         let app = XCUIApplication()
         app.launchArguments = ["--ui-test-trip-planner"]

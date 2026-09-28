@@ -82,13 +82,13 @@ struct TemplatesView: View {
                     HStack(spacing: 8) {
                         Text("📄")
                             .font(.title2)
-                        Text("Шаблони документів")
+                        Text("Шаблони документів".localized)
                             .font(.title2)
                             .fontWeight(.bold)
                             .foregroundColor(JourneyVisual.primaryText)
                     }
                     
-                    Text("Готові шаблони для швейцарських документів")
+                    Text("Готові шаблони для швейцарських документів".localized)
                         .font(.subheadline)
                         .foregroundColor(JourneyVisual.secondaryText)
                 }
@@ -107,7 +107,7 @@ struct TemplatesView: View {
                 Image(systemName: "magnifyingglass")
                     .foregroundColor(Theme.Colors.textSecondary)
                 
-                TextField("Пошук шаблонів...", text: $searchText)
+                TextField("Пошук шаблонів...".localized, text: $searchText)
                     .foregroundColor(Theme.Colors.textPrimary)
                 
                 if !searchText.isEmpty {
@@ -190,17 +190,17 @@ struct TemplatesView: View {
                 .foregroundColor(Theme.Colors.textTertiary)
             
             VStack(spacing: Theme.Spacing.sm) {
-                Text("Шаблони не знайдено")
+                Text("Шаблони не знайдено".localized)
                     .font(Theme.Typography.headline)
                     .foregroundColor(Theme.Colors.textPrimary)
                 
-                Text("Спробуйте змінити фільтри")
+                Text("Спробуйте змінити фільтри".localized)
                     .font(Theme.Typography.subheadline)
                     .foregroundColor(Theme.Colors.textSecondary)
             }
             
             Button(action: { selectedCategory = nil; searchText = "" }) {
-                Text("Скинути фільтри")
+                Text("Скинути фільтри".localized)
                     .font(.subheadline.weight(.medium))
                     .foregroundColor(JourneyVisual.accentText)
             }
@@ -215,11 +215,11 @@ struct TemplatesView: View {
                 .font(.system(size: 40))
                 .foregroundColor(JourneyVisual.accentStrong)
             
-            Text("Зареєструйтесь для доступу")
+            Text("Зареєструйтесь для доступу".localized)
                 .font(.headline)
                 .foregroundColor(Theme.Colors.textPrimary)
             
-            Text("Шаблони доступні для зареєстрованих користувачів")
+            Text("Шаблони доступні для зареєстрованих користувачів".localized)
                 .font(.subheadline)
                 .foregroundColor(Theme.Colors.textSecondary)
                 .multilineTextAlignment(.center)
@@ -343,7 +343,7 @@ struct TemplateCardView: View {
                     HStack(spacing: 4) {
                         Image(systemName: "checkmark.seal.fill")
                             .font(.caption2)
-                        Text("Офіційний")
+                        Text("Офіційний".localized)
                             .font(.caption2.weight(.medium))
                         }
                         .foregroundColor(.green)
@@ -441,7 +441,7 @@ struct TemplateDetailView: View {
                 if template.isOfficial {
                     HStack(spacing: 4) {
                         Image(systemName: "checkmark.seal.fill")
-                        Text("Офіційний")
+                        Text("Офіційний".localized)
                             .font(.caption.weight(.medium))
                     }
                     .foregroundColor(.green)
@@ -476,7 +476,7 @@ struct TemplateDetailView: View {
     private var formSection: some View {
         VStack(alignment: .leading, spacing: Theme.Spacing.md) {
             HStack {
-                Text("Заповніть форму")
+                Text("Заповніть форму".localized)
                     .font(.headline.weight(.semibold))
                     .foregroundColor(Theme.Colors.textPrimary)
             }
@@ -512,7 +512,7 @@ struct TemplateDetailView: View {
                             .scaleEffect(0.9)
                     } else {
                         Image(systemName: "doc.badge.plus")
-                        Text("Створити документ")
+                        Text("Створити документ".localized)
                             .fontWeight(.semibold)
                     }
                 }
@@ -536,7 +536,7 @@ struct TemplateDetailView: View {
                 HStack(spacing: 4) {
                     Image(systemName: "exclamationmark.circle")
                         .font(.caption)
-                    Text("Обов'язкове поле")
+                    Text("Обов'язкове поле".localized)
                         .font(.caption)
                 }
                 .foregroundColor(.red.opacity(0.8))
@@ -624,19 +624,19 @@ struct TemplateFieldView: View {
     private var fieldInput: some View {
                 switch placeholder.type {
                 case .text:
-            styledTextField(placeholder: "Введіть \(placeholder.label.lowercased())")
+            styledTextField(placeholder: "Введіть %@".localized(with: "\(placeholder.label.lowercased())"))
                 
                 case .multilineText:
-            styledTextField(placeholder: "Введіть \(placeholder.label.lowercased())", isMultiline: true)
+            styledTextField(placeholder: "Введіть %@".localized(with: "\(placeholder.label.lowercased())"), isMultiline: true)
                 
                 case .email:
-            styledTextField(placeholder: "Введіть email", keyboardType: .emailAddress)
+            styledTextField(placeholder: "Введіть email".localized, keyboardType: .emailAddress)
                 
                 case .phone:
-            styledTextField(placeholder: "Введіть номер телефону", keyboardType: .phonePad)
+            styledTextField(placeholder: "Введіть номер телефону".localized, keyboardType: .phonePad)
                 
                 case .number:
-            styledTextField(placeholder: "Введіть число", keyboardType: .numberPad)
+            styledTextField(placeholder: "Введіть число".localized, keyboardType: .numberPad)
                 
                 case .date:
             styledDatePicker
@@ -650,7 +650,7 @@ struct TemplateFieldView: View {
             styledToggle
                 
                 default:
-            styledTextField(placeholder: "Введіть \(placeholder.label.lowercased())")
+            styledTextField(placeholder: "Введіть %@".localized(with: "\(placeholder.label.lowercased())"))
         }
     }
     
@@ -705,7 +705,7 @@ struct TemplateFieldView: View {
             }
         } label: {
             HStack {
-                Text(value.isEmpty ? "Оберіть..." : value)
+                Text(value.isEmpty ? "Оберіть...".localized : value)
                     .foregroundColor(value.isEmpty
                         ? Theme.Colors.textTertiary
                         : Theme.Colors.textPrimary)
@@ -762,7 +762,7 @@ struct DocumentPreviewView: View {
                 VStack(alignment: .leading, spacing: Theme.Spacing.md) {
                         if availableLanguages.count > 1 {
                             HStack(spacing: 8) {
-                                Text("Мова листа")
+                                Text("Мова листа".localized)
                                     .font(.caption)
                                     .foregroundColor(Theme.Colors.textSecondary)
                                 
@@ -799,7 +799,7 @@ struct DocumentPreviewView: View {
                         .padding(Theme.Spacing.md)
                 }
             }
-            .navigationTitle("Попередній перегляд")
+            .navigationTitle("Попередній перегляд".localized)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -813,7 +813,7 @@ struct DocumentPreviewView: View {
                     Button(action: copyToClipboard) {
                         HStack(spacing: 4) {
                             Image(systemName: "doc.on.doc")
-                            Text("Копіювати")
+                            Text("Копіювати".localized)
                         }
                         .font(.subheadline.weight(.medium))
                         .foregroundColor(JourneyVisual.accentText)
@@ -822,7 +822,7 @@ struct DocumentPreviewView: View {
                     Button(action: shareDocument) {
                         HStack(spacing: 4) {
                             Image(systemName: "square.and.arrow.up")
-                            Text("Експорт")
+                            Text("Експорт".localized)
                         }
                         .font(.subheadline.weight(.medium))
                         .foregroundColor(JourneyVisual.accentText)
@@ -852,7 +852,7 @@ struct DocumentPreviewView: View {
     
     private func languageDisplayName(for code: String) -> String {
         switch code.lowercased() {
-        case "uk": return "Українська"
+        case "uk": return "Українська".localized
         case "de": return "Deutsch"
         case "en": return "English"
         default: return code.uppercased()

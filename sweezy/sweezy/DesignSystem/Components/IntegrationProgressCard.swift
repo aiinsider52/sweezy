@@ -190,10 +190,10 @@ struct IntegrationProgressCard: View {
     
     private var subtitleText: String {
         switch percent {
-        case 0..<25: return "Починайте — все вийде! 💪"
-        case 25..<60: return "Гарний прогрес! 🔥"
-        case 60..<90: return "Майже готово! ⚡️"
-        default: return "Фінішна пряма! 🏆"
+        case 0..<25: return "Починайте — все вийде! 💪".localized
+        case 25..<60: return "Гарний прогрес! 🔥".localized
+        case 60..<90: return "Майже готово! ⚡️".localized
+        default: return "Фінішна пряма! 🏆".localized
         }
     }
 }

@@ -19,11 +19,11 @@ final class SubscriptionManager: ObservableObject {
         var errorDescription: String? {
             switch self {
             case .productUnavailable:
-                return "Підписка ще не доступна в App Store. Спробуйте пізніше."
+                return "Підписка ще не доступна в App Store. Спробуйте пізніше.".localized
             case .verificationFailed:
-                return "Apple не вдалося підтвердити покупку."
+                return "Apple не вдалося підтвердити покупку.".localized
             case .pending:
-                return "Покупка очікує підтвердження."
+                return "Покупка очікує підтвердження.".localized
             }
         }
     }
@@ -57,10 +57,10 @@ final class SubscriptionManager: ObservableObject {
         return entitlementStatus == "trial" ? "Sweezy Plus · Trial" : "Sweezy Plus"
     }
     var planDetails: String {
-        guard isPremium else { return "Базовий доступ" }
-        let period = entitlementPlan == "yearly" ? "Річний план" : entitlementPlan == "monthly" ? "Місячний план" : "Активний план"
+        guard isPremium else { return "Базовий доступ".localized }
+        let period = entitlementPlan == "yearly" ? "Річний план".localized : entitlementPlan == "monthly" ? "Місячний план".localized : "Активний план".localized
         guard let entitlementExpiresAt else { return period }
-        return "\(period) · до \(entitlementExpiresAt.formatted(date: .abbreviated, time: .omitted))"
+        return "%@ · до %@".localized(with: "\(period)", "\(entitlementExpiresAt.formatted(date: .abbreviated, time: .omitted))")
     }
 
     func load() async {
@@ -81,7 +81,7 @@ final class SubscriptionManager: ObservableObject {
         } catch {
             products = []
             isMonthlyTrialEligible = false
-            lastError = "Не вдалося завантажити тарифи App Store."
+            lastError = "Не вдалося завантажити тарифи App Store.".localized
         }
 
         await refreshEntitlements()
@@ -117,7 +117,7 @@ final class SubscriptionManager: ObservableObject {
             case .userCancelled:
                 break
             @unknown default:
-                lastError = "Невідомий статус покупки."
+                lastError = "Невідомий статус покупки.".localized
             }
         } catch {
             lastError = error.localizedDescription
@@ -131,7 +131,7 @@ final class SubscriptionManager: ObservableObject {
             try await AppStore.sync()
             await refreshEntitlements()
             if !isPremium {
-                lastError = "Активну підписку не знайдено."
+                lastError = "Активну підписку не знайдено.".localized
             }
         } catch {
             lastError = error.localizedDescription

@@ -115,7 +115,7 @@ struct MainTabView: View {
         }
         .sheet(item: $deepLinkedNews) { NewsDetailView(news: $0) }
         .sheet(isPresented: $showCalculator) { NavigationStack { BenefitsCalculatorView() }.environmentObject(appContainer) }
-        .sheet(isPresented: $showAppointments) { NavigationStack { AppointmentsView() }.environmentObject(appContainer.appointmentRepository) }
+        .sheet(isPresented: $showAppointments) { NavigationStack { AppointmentsView(showsCloseButton: true) }.environmentObject(appContainer.appointmentRepository) }
         .fullScreenCover(isPresented: $showCVBuilder) { CVBuilderView().environmentObject(appContainer) }
         .sheet(isPresented: $showProfile) { ProfileEditView().environmentObject(appContainer) }
         .sheet(isPresented: $showPrivacy) { PrivacyPolicyView() }

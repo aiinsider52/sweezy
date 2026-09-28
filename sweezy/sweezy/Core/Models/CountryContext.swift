@@ -74,6 +74,12 @@ enum ResidenceCountry: String, CaseIterable, Codable, Hashable, Identifiable {
         }
     }
 
+    /// "у Швейцарії" / "in der Schweiz" / "in Switzerland": insert whole, never glue "у" + name.
+    var inCountryPhrase: String { "country.in.\(rawValue.lowercased())".localized }
+
+    /// "Для ринку Швейцарії" / "Für den Schweizer Arbeitsmarkt".
+    var jobMarketPhrase: String { "country.job_market.\(rawValue.lowercased())".localized }
+
     var ukrainianGenitiveName: String {
         switch self {
         case .switzerland: return "Швейцарії"

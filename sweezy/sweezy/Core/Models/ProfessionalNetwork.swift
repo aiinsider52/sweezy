@@ -6,11 +6,11 @@ enum ProfessionalRole: String, Codable, CaseIterable, Identifiable {
     var id: String { rawValue }
     var title: String {
         switch self {
-        case .founder: return "Засновник"
-        case .freelancer: return "Фрилансер"
-        case .specialist: return "Спеціаліст"
-        case .investor: return "Інвестор"
-        case .mentor: return "Ментор"
+        case .founder: return "Засновник".localized
+        case .freelancer: return "Фрилансер".localized
+        case .specialist: return "Спеціаліст".localized
+        case .investor: return "Інвестор".localized
+        case .mentor: return "Ментор".localized
         }
     }
     var icon: String {
@@ -30,13 +30,13 @@ enum ProfessionalGoal: String, Codable, CaseIterable, Identifiable {
     var id: String { rawValue }
     var title: String {
         switch self {
-        case .clients: return "Клієнти"
-        case .partners: return "Партнери"
+        case .clients: return "Клієнти".localized
+        case .partners: return "Партнери".localized
         case .cofounder: return "Co-founder"
-        case .hiring: return "Команда"
-        case .investing: return "Інвестиції"
-        case .mentoring: return "Менторство"
-        case .events: return "Події"
+        case .hiring: return "Команда".localized
+        case .investing: return "Інвестиції".localized
+        case .mentoring: return "Менторство".localized
+        case .events: return "Події".localized
         }
     }
     var icon: String {

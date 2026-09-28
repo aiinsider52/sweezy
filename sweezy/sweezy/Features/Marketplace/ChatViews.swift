@@ -386,13 +386,19 @@ struct ChatConversationView: View {
         HStack(spacing: 12) {
             Button { dismiss() } label: {
                 Image(systemName: "chevron.left")
-                    .font(.system(size: 18, weight: .bold))
-                    .frame(width: 44, height: 44)
-                    .background(JourneyVisual.elevatedSurface)
-                    .clipShape(Circle())
+                    .font(.system(size: 17, weight: .bold))
+                    .frame(width: 42, height: 42)
+                    .background(Theme.Colors.card, in: Circle())
+                    .overlay(Circle().stroke(JourneyVisual.softBorder, lineWidth: 1))
             }
             .buttonStyle(.plain)
             Button { showProfile = true } label: {
+                HStack(spacing: 10) {
+                Text(chatInitials(currentConversation.otherUserName))
+                    .font(.system(size: 15, weight: .black))
+                    .foregroundColor(.black)
+                    .frame(width: 42, height: 42)
+                    .background(JourneyVisual.lime, in: Circle())
                 VStack(alignment: .leading, spacing: 2) {
                     HStack(spacing: 5) {
                         Text(currentConversation.otherUserName)
@@ -404,7 +410,8 @@ struct ChatConversationView: View {
                      ? "chat.status.typing".localized
                      : (appContainer.chatStore.isConnected ? "chat.status.secure".localized : "chat.status.connecting".localized))
                     .font(.caption)
-                    .foregroundColor(appContainer.chatStore.typingConversationIDs.contains(conversation.id) ? JourneyVisual.lime : JourneyVisual.secondaryText)
+                    .foregroundColor(appContainer.chatStore.typingConversationIDs.contains(conversation.id) ? JourneyVisual.accentText : JourneyVisual.secondaryText)
+                }
                 }
             }
             .buttonStyle(.plain)
@@ -430,10 +437,10 @@ struct ChatConversationView: View {
                 }
             } label: {
                 Image(systemName: "ellipsis")
-                    .font(.system(size: 18, weight: .bold))
-                    .frame(width: 44, height: 44)
-                    .background(JourneyVisual.elevatedSurface)
-                    .clipShape(Circle())
+                    .font(.system(size: 17, weight: .bold))
+                    .frame(width: 42, height: 42)
+                    .background(Theme.Colors.card, in: Circle())
+                    .overlay(Circle().stroke(JourneyVisual.softBorder, lineWidth: 1))
             }
         }
         .foregroundColor(JourneyVisual.primaryText)
@@ -443,13 +450,11 @@ struct ChatConversationView: View {
 
     private var listingContext: some View {
         HStack(spacing: 12) {
-            ZStack {
-                JourneyVisual.lime.opacity(0.14)
-                Image(systemName: currentConversation.listingType == "item" ? "shippingbox.fill" : "person.2.fill")
-                    .foregroundColor(JourneyVisual.accentStrong)
-            }
-            .frame(width: 48, height: 48)
-            .clipShape(RoundedRectangle(cornerRadius: 13))
+            JourneyCategoryIcon(
+                symbol: currentConversation.listingType == "item" ? "shippingbox.fill" : "person.2.fill",
+                swatch: currentConversation.listingType == "item" ? JourneyCategoryPalette.sand : JourneyCategoryPalette.sky,
+                size: 44
+            )
             VStack(alignment: .leading, spacing: 3) {
                 Text(currentConversation.listingTitle)
                     .font(.subheadline.bold())
@@ -470,8 +475,10 @@ struct ChatConversationView: View {
                 .foregroundColor(JourneyVisual.accentStrong)
         }
         .padding(12)
-        .background(JourneyVisual.elevatedSurface)
-        .overlay(alignment: .bottom) { Rectangle().fill(JourneyVisual.softBorder).frame(height: 1) }
+        .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(JourneyVisual.softBorder, lineWidth: 1))
+        .padding(.horizontal, 14)
+        .padding(.bottom, 4)
     }
 
     private var messagesList: some View {
@@ -554,8 +561,8 @@ struct ChatConversationView: View {
                             .foregroundColor(JourneyVisual.primaryText)
                             .padding(.horizontal, 13)
                             .frame(height: 34)
-                            .background(JourneyVisual.elevatedSurface)
-                            .clipShape(Capsule())
+                            .background(Theme.Colors.card, in: Capsule())
+                            .overlay(Capsule().stroke(JourneyVisual.softBorder, lineWidth: 1))
                     }
                 }
                 .padding(.horizontal, 14)
@@ -589,16 +596,16 @@ struct ChatConversationView: View {
                     .lineLimit(1...5)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 12)
-                    .background(JourneyVisual.elevatedSurface)
-                    .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+                    .background(JourneyVisual.softSurface, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(JourneyVisual.softBorder, lineWidth: 1))
                     .onChange(of: draft) { _, value in typingChanged(!value.isEmpty) }
                 Button { sendDraft() } label: {
+                    let empty = draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
                     Image(systemName: "arrow.up")
                         .font(.system(size: 18, weight: .black))
-                        .foregroundColor(.black)
+                        .foregroundColor(empty ? JourneyVisual.secondaryText : .black)
                         .frame(width: 46, height: 46)
-                        .background(draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? Color.gray : JourneyVisual.lime)
-                        .clipShape(Circle())
+                        .background(empty ? JourneyVisual.softSurface : JourneyVisual.lime, in: Circle())
                 }
                 .disabled(draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
@@ -606,8 +613,14 @@ struct ChatConversationView: View {
             .padding(.horizontal, 12)
             .padding(.top, 9)
             .padding(.bottom, 8)
-            .background(.ultraThinMaterial)
+            .background(Theme.Colors.card)
+            .overlay(alignment: .top) { Rectangle().fill(JourneyVisual.softBorder).frame(height: 1) }
         }
+    }
+
+    private func chatInitials(_ name: String) -> String {
+        let letters = name.split(separator: " ").prefix(2).compactMap(\.first)
+        return letters.isEmpty ? "S" : String(letters).uppercased()
     }
 
     private func sendDraft() {
@@ -696,8 +709,12 @@ private struct ChatMessageBubble: View {
                 }
                 .padding(.horizontal, 14)
                 .padding(.vertical, 10)
-                .background(isMine ? JourneyVisual.lime : JourneyVisual.elevatedSurface)
+                .background(isMine ? JourneyVisual.lime : Theme.Colors.card)
                 .clipShape(RoundedRectangle(cornerRadius: 19, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 19, style: .continuous)
+                        .stroke(isMine ? Color.clear : JourneyVisual.softBorder, lineWidth: 1)
+                )
                 if !isMine { Spacer(minLength: 54) }
             }
         }

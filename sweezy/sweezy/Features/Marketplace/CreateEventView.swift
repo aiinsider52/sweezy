@@ -186,8 +186,8 @@ struct CreateEventView: View {
                     }
                 )) {
                     VStack(alignment: .leading, spacing: 3) {
-                        HStack { Text("Закрита подія"); Text("PLUS").font(.caption2.bold()).padding(.horizontal, 7).padding(.vertical, 3).background(JourneyVisual.lime).foregroundColor(.black).clipShape(Capsule()) }
-                        Text("Видима лише запрошеним людям").font(.caption).foregroundColor(Theme.Colors.textSecondary)
+                        HStack { Text("Закрита подія".localized); Text("PLUS").font(.caption2.bold()).padding(.horizontal, 7).padding(.vertical, 3).background(JourneyVisual.lime).foregroundColor(.black).clipShape(Capsule()) }
+                        Text("Видима лише запрошеним людям".localized).font(.caption).foregroundColor(Theme.Colors.textSecondary)
                     }
                 }.tint(JourneyVisual.accentText)
             }

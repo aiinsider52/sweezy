@@ -25,12 +25,12 @@ struct PasswordChecklist: View {
     
     private var rules: [ChecklistRule] {
         [
-            ChecklistRule(id: "length", text: "Не менше 8 символів", isOk: strength.hasMinLength),
-            ChecklistRule(id: "upper", text: "Щонайменше 1 велика літера", isOk: strength.hasUpper),
-            ChecklistRule(id: "lower", text: "Щонайменше 1 мала літера", isOk: strength.hasLower),
-            ChecklistRule(id: "digit", text: "Щонайменше 1 цифра", isOk: strength.hasDigit),
-            ChecklistRule(id: "special", text: "Щонайменше 1 спецсимвол", isOk: strength.hasSpecial),
-            ChecklistRule(id: "spaces", text: "Без пробілів", isOk: strength.noSpaces)
+            ChecklistRule(id: "length", text: "Не менше 8 символів".localized, isOk: strength.hasMinLength),
+            ChecklistRule(id: "upper", text: "Щонайменше 1 велика літера".localized, isOk: strength.hasUpper),
+            ChecklistRule(id: "lower", text: "Щонайменше 1 мала літера".localized, isOk: strength.hasLower),
+            ChecklistRule(id: "digit", text: "Щонайменше 1 цифра".localized, isOk: strength.hasDigit),
+            ChecklistRule(id: "special", text: "Щонайменше 1 спецсимвол".localized, isOk: strength.hasSpecial),
+            ChecklistRule(id: "spaces", text: "Без пробілів".localized, isOk: strength.noSpaces)
         ]
     }
     

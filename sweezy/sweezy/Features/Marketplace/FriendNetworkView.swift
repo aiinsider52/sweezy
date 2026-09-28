@@ -73,15 +73,15 @@ import UIKit
     async let s = friendResult { try await FriendsAPI.swipeDeck(canton: self.canton, interest: self.interest) }
     let values = await (p, c, e, m, s)
     var failures: [Int: String] = [:]
-    switch values.0 { case .success(let page): profiles = page.items; searchMeta = page; case .failure(let issue): failures[0] = loadIssue("Не вдалося завантажити людей.", issue) }
-    switch values.1 { case .success(let value): connections = value; case .failure(let issue): failures[2] = loadIssue("Не вдалося завантажити зв’язки.", issue) }
-    switch values.2 { case .success(let value): events = value; case .failure(let issue): failures[1] = loadIssue("Не вдалося завантажити події.", issue) }
-    switch values.3 { case .success(let value): myProfile = value; case .failure(let issue): failures[3] = loadIssue("Не вдалося завантажити твій Social Passport.", issue) }
+    switch values.0 { case .success(let page): profiles = page.items; searchMeta = page; case .failure(let issue): failures[0] = loadIssue("Не вдалося завантажити людей.".localized, issue) }
+    switch values.1 { case .success(let value): connections = value; case .failure(let issue): failures[2] = loadIssue("Не вдалося завантажити зв’язки.".localized, issue) }
+    switch values.2 { case .success(let value): events = value; case .failure(let issue): failures[1] = loadIssue("Не вдалося завантажити події.".localized, issue) }
+    switch values.3 { case .success(let value): myProfile = value; case .failure(let issue): failures[3] = loadIssue("Не вдалося завантажити твій Social Passport.".localized, issue) }
     switch values.4 {
     case .success(let value): swipeProfiles = value.items; swipeDeckMeta = value
     case .failure(let issue):
       if myProfile?.moderationStatus == "approved" {
-        failures[0] = loadIssue("Не вдалося завантажити картки знайомств.", issue)
+        failures[0] = loadIssue("Не вдалося завантажити картки знайомств.".localized, issue)
       }
     }
     loadErrors = failures
@@ -106,9 +106,9 @@ import UIKit
     }
     let values = await (page, eventPage, deck)
     var failures = loadErrors
-    switch values.0 { case .success(let value): profiles = value.items; searchMeta = value; failures[0] = nil; case .failure(let issue): failures[0] = loadIssue("Не вдалося оновити людей.", issue) }
-    switch values.1 { case .success(let value): events = value; failures[1] = nil; case .failure(let issue): failures[1] = loadIssue("Не вдалося оновити події.", issue) }
-    switch values.2 { case .success(let value): swipeProfiles = value.items; swipeDeckMeta = value; case .failure(let issue): failures[0] = loadIssue("Не вдалося оновити картки знайомств.", issue) }
+    switch values.0 { case .success(let value): profiles = value.items; searchMeta = value; failures[0] = nil; case .failure(let issue): failures[0] = loadIssue("Не вдалося оновити людей.".localized, issue) }
+    switch values.1 { case .success(let value): events = value; failures[1] = nil; case .failure(let issue): failures[1] = loadIssue("Не вдалося оновити події.".localized, issue) }
+    switch values.2 { case .success(let value): swipeProfiles = value.items; swipeDeckMeta = value; case .failure(let issue): failures[0] = loadIssue("Не вдалося оновити картки знайомств.".localized, issue) }
     loadErrors = failures
     #if DEBUG
     if !failures.isEmpty || profiles.isEmpty { applyDemoProfiles() }
@@ -293,7 +293,7 @@ private struct FriendSwipeDeck: View {
     VStack(spacing: 11) {
       cardStack
       actionControls
-      Text("Like приватний до взаємного вибору")
+      Text("Like приватний до взаємного вибору".localized)
         .font(.caption2.weight(.semibold))
         .foregroundColor(JourneyVisual.secondaryText)
         .accessibilityHidden(true)
@@ -344,7 +344,7 @@ private struct FriendSwipeDeck: View {
       .accessibilityAddTraits(.isButton)
       .accessibilityIdentifier("friends.profile.\(profile.id)")
       .accessibilityLabel(accessibilityLabel(profile))
-      .accessibilityHint("Свайп праворуч — Like, ліворуч — пропустити")
+      .accessibilityHint("Свайп праворуч — Like, ліворуч — пропустити".localized)
       .accessibilityAction(named: "Like") { commit(profile, decision: "like") }
       .accessibilityAction(named: "Пропустити") { commit(profile, decision: "pass") }
       .accessibilityAction(named: "Відкрити профіль") { onDetails(profile) }
@@ -469,8 +469,8 @@ private struct FriendSwipeDeck: View {
   }
 
   private func accessibilityLabel(_ profile: SocialProfile) -> String {
-    let distance = profile.distanceKM.map { ", \($0) кілометрів" } ?? ""
-    return "\(profile.displayName), \(profile.city), \(profile.canton), \(profile.matchScore) відсотків збігу\(distance). \(profile.bio)"
+    let distance = profile.distanceKM.map { ", %@ кілометрів".localized(with: "\($0)") } ?? ""
+    return "%@, %@, %@, %@ відсотків збігу%@. %@".localized(with: "\(profile.displayName)", "\(profile.city)", "\(profile.canton)", "\(profile.matchScore)", "\(distance)", "\(profile.bio)")
   }
 }
 
@@ -495,7 +495,7 @@ private struct FriendSwipeCard: View {
         locationBadge
         Spacer()
         if profile.residencyStage == "newcomer" {
-          Label("НОВИЙ У ШВЕЙЦАРІЇ", systemImage: "sparkles")
+          Label("НОВИЙ У ШВЕЙЦАРІЇ".localized, systemImage: "sparkles")
             .font(.system(size: 10, weight: .black)).tracking(1.1)
             .foregroundColor(.black).padding(.horizontal, 10).padding(.vertical, 7)
             .background(lime).clipShape(Capsule())
@@ -602,7 +602,7 @@ private struct FriendSwipeCard: View {
     HStack(spacing: 6) {
       Image(systemName: "mappin.and.ellipse")
       Text("\(profile.city) · \(profile.canton)")
-      if let distance = profile.distanceKM { Text("· \(distance) км") }
+      if let distance = profile.distanceKM { Text("· %@ км".localized(with: "\(distance)")) }
     }
     .font(.caption.bold()).foregroundColor(.white)
     .padding(.horizontal, 11).padding(.vertical, 8)
@@ -629,7 +629,7 @@ private struct FriendSwipeCard: View {
     VStack {
       HStack {
         if direction > 0 { Spacer() }
-        Text(direction > 0 ? "ЦІКАВО" : "ДАЛІ")
+        Text(direction > 0 ? "ЦІКАВО".localized : "ДАЛІ".localized)
           .font(.system(size: 25, weight: .black, design: .default)).tracking(1.1)
           .foregroundColor(direction > 0 ? .black : .white)
           .padding(.horizontal, 18).padding(.vertical, 10)
@@ -690,11 +690,11 @@ private struct FriendMatchCelebration: View {
         SocialCompanion(pose: .celebrate, size: 176)
           .padding(.top, 10)
         VStack(spacing: 10) {
-          Text("ВЗАЄМНИЙ ВИБІР").font(.caption.bold()).tracking(2.2).foregroundColor(Theme.Colors.textPrimary)
-          Text("Ви знайшли\nодне одного")
+          Text("ВЗАЄМНИЙ ВИБІР".localized).font(.caption.bold()).tracking(2.2).foregroundColor(Theme.Colors.textPrimary)
+          Text("Ви знайшли\nодне одного".localized)
             .font(.system(size: 31, weight: .bold, design: .default)).foregroundColor(JourneyVisual.primaryText)
             .multilineTextAlignment(.center).lineSpacing(1)
-          Text("Ти та \(profile.displayName) обрали Like. Контакти залишаються приватними — почніть з чату Sweezy.")
+          Text("Ти та %@ обрали Like. Контакти залишаються приватними — почніть з чату Sweezy.".localized(with: "\(profile.displayName)"))
             .font(.subheadline).foregroundColor(JourneyVisual.secondaryText).multilineTextAlignment(.center)
             .padding(.horizontal, 26)
         }
@@ -712,7 +712,7 @@ private struct FriendMatchCelebration: View {
             .clipShape(RoundedRectangle(cornerRadius: 19))
           }
         }
-        Button("Продовжити знайомства", action: close)
+        Button("Продовжити знайомства".localized, action: close)
           .font(.subheadline.bold()).foregroundColor(JourneyVisual.secondaryText).frame(minHeight: 48)
       }
       .padding(.horizontal, 22).padding(.bottom, 22)
@@ -903,7 +903,7 @@ struct FriendNetworkView: View {
                   .background(Theme.Colors.card).clipShape(Circle())
                   .overlay(Circle().stroke(JourneyVisual.softBorder))
               }
-              .accessibilityLabel("Закрити")
+              .accessibilityLabel("Закрити".localized)
             }
             HStack(spacing: 8) {
               Circle().fill(JourneyVisual.lime).frame(width: 8, height: 8)
@@ -919,19 +919,19 @@ struct FriendNetworkView: View {
             // Sweezy at the lakeside bench waving two neighbours over: what this tab is for.
             StoryScene(name: "find-people", height: 210, cornerRadius: 22)
               .padding(.bottom, 6)
-            Text("Знайди своїх\nу Швейцарії")
+            Text("Знайди своїх\nу Швейцарії".localized)
               .font(.system(size: 28, weight: .bold, design: .default))
               .foregroundColor(JourneyVisual.primaryText)
               .lineSpacing(2)
               .fixedSize(horizontal: false, vertical: true)
               .accessibilityIdentifier("friends.accessGate.title")
-            Text("Увійди, щоб створити social passport, надсилати заявки та спілкуватися без публікації контактів.")
+            Text("Увійди, щоб створити social passport, надсилати заявки та спілкуватися без публікації контактів.".localized)
               .font(Theme.Typography.callout.weight(.medium))
               .foregroundColor(JourneyVisual.secondaryText)
               .lineSpacing(3)
               .fixedSize(horizontal: false, vertical: true)
             Button { showAuth = true } label: {
-              Text("Увійти та продовжити")
+              Text("Увійти та продовжити".localized)
                 .font(Theme.Typography.headline).foregroundColor(.black)
                 .frame(maxWidth: .infinity, minHeight: 56)
                 .background(limeAccent).clipShape(RoundedRectangle(cornerRadius: 18))
@@ -943,7 +943,7 @@ struct FriendNetworkView: View {
               showsDemoCatalog = true
               loadPeopleCatalogPreview()
             } label: {
-              Text("Переглянути демо-профілі")
+              Text("Переглянути демо-профілі".localized)
                 .font(.subheadline.bold()).foregroundColor(JourneyVisual.primaryText)
                 .frame(maxWidth: .infinity, minHeight: 50)
                 .background(Theme.Colors.card).clipShape(RoundedRectangle(cornerRadius: 17))
@@ -989,7 +989,7 @@ struct FriendNetworkView: View {
           .frame(width: Theme.Layout.minimumTouchTarget, height: Theme.Layout.minimumTouchTarget)
           .background(JourneyVisual.softSurface).clipShape(Circle())
       }
-      .accessibilityLabel("Закрити повідомлення")
+      .accessibilityLabel("Закрити повідомлення".localized)
     }
     .padding(12).background(JourneyVisual.elevatedSurface)
     .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
@@ -1006,7 +1006,7 @@ struct FriendNetworkView: View {
             .clipShape(Circle())
             .overlay(Circle().stroke(JourneyVisual.softBorder))
         }
-        .accessibilityLabel("Назад")
+        .accessibilityLabel("Назад".localized)
       }
       Text("SWEEZY CIRCLE")
         .font(.system(size: 15, weight: .black))
@@ -1018,10 +1018,10 @@ struct FriendNetworkView: View {
       Spacer(minLength: 8)
       if !vm.incoming.isEmpty {
         Button { tab = 2 } label: {
-          Text("\(vm.incoming.count) нових").font(.caption.bold()).foregroundColor(.black)
+          Text("%@ нових".localized(with: "\(vm.incoming.count)")).font(.caption.bold()).foregroundColor(.black)
             .padding(.horizontal, 12).frame(height: 32).background(limeAccent).clipShape(Capsule())
         }
-        .accessibilityLabel("\(vm.incoming.count) нових запитів")
+        .accessibilityLabel("%@ нових запитів".localized(with: "\(vm.incoming.count)"))
       }
       Button { filters = true } label: {
         Image(systemName: "slider.horizontal.3")
@@ -1032,7 +1032,7 @@ struct FriendNetworkView: View {
           .clipShape(Circle())
           .overlay(Circle().stroke(limeAccent.opacity(0.58), lineWidth: 1))
       }
-      .accessibilityLabel("Фільтри знайомств")
+      .accessibilityLabel("Фільтри знайомств".localized)
       .accessibilityIdentifier("friends.people.filters")
     }
     .padding(.horizontal, 18)
@@ -1085,8 +1085,8 @@ struct FriendNetworkView: View {
       ForEach(
         Array(
           [
-            ("Люди", "sparkles"), ("Події", "calendar"), ("Друзі", "person.2.fill"),
-            ("Я", "person.crop.circle"),
+            ("Люди".localized, "sparkles"), ("Події".localized, "calendar"), ("Друзі".localized, "person.2.fill"),
+            ("Я".localized, "person.crop.circle"),
           ].enumerated()), id: \.offset
       ) { i, x in
         Button {
@@ -1115,7 +1115,7 @@ struct FriendNetworkView: View {
     HStack(spacing: 10) {
       peopleMetric(
         icon: "mappin.and.ellipse",
-        text: "\(max(vm.swipeProfiles.count, vm.profiles.count)) збігів поруч")
+        text: "%@ збігів поруч".localized(with: "\(max(vm.swipeProfiles.count, vm.profiles.count))"))
         .accessibilityIdentifier("friends.people.nearbyCount")
       Rectangle().fill(JourneyVisual.softBorder).frame(width: 1, height: 24)
       peopleMetric(icon: "sparkles", text: peopleLikesText)
@@ -1136,9 +1136,9 @@ struct FriendNetworkView: View {
     .clipShape(Capsule())
   }
   private var peopleLikesText: String {
-    if vm.swipeDeckMeta?.isPremium == true { return "Like без ліміту" }
-    if let remaining = vm.swipeDeckMeta?.likesRemaining { return "\(remaining) Like доступно" }
-    return "Приватні Like"
+    if vm.swipeDeckMeta?.isPremium == true { return "Like без ліміту".localized }
+    if let remaining = vm.swipeDeckMeta?.likesRemaining { return "%@ Like доступно".localized(with: "\(remaining)") }
+    return "Приватні Like".localized
   }
   private func discover(screenHeight: CGFloat) -> some View {
     VStack(alignment: .leading, spacing: 15) {
@@ -1150,16 +1150,16 @@ struct FriendNetworkView: View {
         SkeletonList(rows: 2).padding(.vertical, 12)
       } else if let own = vm.myProfile, own.moderationStatus != "approved", !vm.isShowingDemoProfiles {
         swipeProfileGate(
-          title: "Профіль на перевірці",
-          text: "Після схвалення social passport тут з’являться персональні знайомства.",
+          title: "Профіль на перевірці".localized,
+          text: "Після схвалення social passport тут з’являться персональні знайомства.".localized,
           icon: "checkmark.shield")
       } else if vm.myProfile == nil && !vm.isShowingDemoProfiles {
         swipeProfileGate(
-          title: "Створи social passport",
-          text: "Інтереси, мови й кантон потрібні, щоб Sweezy знайшов сильні збіги.",
+          title: "Створи social passport".localized,
+          text: "Інтереси, мови й кантон потрібні, щоб Sweezy знайшов сильні збіги.".localized,
           icon: "person.crop.circle.badge.plus")
       } else if vm.swipeProfiles.isEmpty {
-        empty("Нові профілі скоро", "Ти переглянув доступні збіги. Зміни фільтри або повернися завтра.", story: "find-people")
+        empty("Нові профілі скоро".localized, "Ти переглянув доступні збіги. Зміни фільтри або повернися завтра.".localized, story: "find-people")
       } else {
         FriendSwipeDeck(
           profiles: vm.swipeProfiles,
@@ -1175,7 +1175,7 @@ struct FriendNetworkView: View {
         showPeopleCatalog.toggle()
       } label: {
         HStack {
-          Label(showPeopleCatalog ? "Картки знайомств" : "Пошук і каталог", systemImage: "rectangle.grid.1x2")
+          Label(showPeopleCatalog ? "Картки знайомств".localized : "Пошук і каталог".localized, systemImage: "rectangle.grid.1x2")
           Spacer()
           Image(systemName: showPeopleCatalog ? "chevron.up" : "chevron.down")
         }
@@ -1193,16 +1193,16 @@ struct FriendNetworkView: View {
             .accessibilityIdentifier("friends.search.loading")
         } else if vm.profiles.isEmpty && vm.loadErrors[0] == nil {
           MascotEmptyState(
-            title: "Поки нікого не знайшли",
-            subtitle: "Спробуй змінити місто або інтереси",
-            actionTitle: "Змінити фільтри",
+            title: "Поки нікого не знайшли".localized,
+            subtitle: "Спробуй змінити місто або інтереси".localized,
+            actionTitle: "Змінити фільтри".localized,
             actionIdentifier: "friends.search.changeFilters"
           ) {
             filters = true
           }
           .padding(.vertical, 12)
         } else {
-        title("Усі профілі", sub: "Пошук за ім’ям, містом та інтересом", count: vm.profiles.count)
+        title("Усі профілі".localized, sub: "Пошук за ім’ям, містом та інтересом".localized, count: vm.profiles.count)
         LazyVStack(spacing: 13) {
           ForEach(vm.profiles) { profile in
             Button { openProfile(profile) } label: {
@@ -1219,9 +1219,9 @@ struct FriendNetworkView: View {
   private var swipeHeader: some View {
     HStack(alignment: .top, spacing: 14) {
       VStack(alignment: .leading, spacing: 5) {
-        Text("ТВОЇ ЗБІГИ").font(.caption2.bold()).tracking(1.9).foregroundColor(JourneyVisual.accentText)
-        Text("Люди, з якими є спільне").font(.title2.bold()).foregroundColor(JourneyVisual.primaryText)
-        Text("Like приватний. Чат відкриється тільки після взаємного вибору.")
+        Text("ТВОЇ ЗБІГИ".localized).font(.caption2.bold()).tracking(1.9).foregroundColor(JourneyVisual.accentText)
+        Text("Люди, з якими є спільне".localized).font(.title2.bold()).foregroundColor(JourneyVisual.primaryText)
+        Text("Like приватний. Чат відкриється тільки після взаємного вибору.".localized)
           .font(.caption).foregroundColor(JourneyVisual.secondaryText)
       }
       Spacer(minLength: 6)
@@ -1231,7 +1231,7 @@ struct FriendNetworkView: View {
           .frame(width: 48, height: 48).background(Theme.Colors.card).clipShape(Circle())
           .overlay(Circle().stroke(JourneyVisual.softBorder))
       }
-      .accessibilityLabel("Фільтри знайомств")
+      .accessibilityLabel("Фільтри знайомств".localized)
     }
   }
   private var swipeGuidance: some View {
@@ -1244,16 +1244,16 @@ struct FriendNetworkView: View {
     }
   }
   private var swipeAllowanceText: String {
-    if vm.swipeDeckMeta?.isPremium == true { return "Plus · безлімітні Like" }
-    if let remaining = vm.swipeDeckMeta?.likesRemaining { return "Ще \(remaining) Like цього тижня" }
-    return "Взаємні знайомства без відкритих контактів"
+    if vm.swipeDeckMeta?.isPremium == true { return "Plus · безлімітні Like".localized }
+    if let remaining = vm.swipeDeckMeta?.likesRemaining { return "Ще %@ Like цього тижня".localized(with: "\(remaining)") }
+    return "Взаємні знайомства без відкритих контактів".localized
   }
   private func swipeProfileGate(title: String, text: String, icon: String) -> some View {
     MascotEmptyState(
       title: title,
       subtitle: text,
       pose: icon == "checkmark.shield" ? .documents : .welcome,
-      actionTitle: vm.myProfile == nil ? "Створити профіль" : "Переглянути профіль"
+      actionTitle: vm.myProfile == nil ? "Створити профіль".localized : "Переглянути профіль".localized
     ) {
       editor = true
     }
@@ -1274,7 +1274,7 @@ struct FriendNetworkView: View {
     }
   }
   private var demoNotice: some View {
-    Label("Демо-каталог · тестові профілі", systemImage: "info.circle")
+    Label("Демо-каталог · тестові профілі".localized, systemImage: "info.circle")
       .font(.caption).foregroundColor(JourneyVisual.secondaryText)
       .accessibilityIdentifier("friends.demo.notice")
   }
@@ -1287,8 +1287,8 @@ struct FriendNetworkView: View {
       HStack {
         VStack(alignment: .leading, spacing: 6) {
           Text("SWISS CIRCLE").font(.caption2.bold()).tracking(1.7).foregroundColor(JourneyVisual.accentText)
-          Text("\(vm.profiles.count) збігів поруч").font(.title3.bold()).foregroundColor(JourneyVisual.primaryText)
-          Text("Люди, з якими вже є про що поговорити").font(.caption).foregroundColor(JourneyVisual.primaryText)
+          Text("%@ збігів поруч".localized(with: "\(vm.profiles.count)")).font(.title3.bold()).foregroundColor(JourneyVisual.primaryText)
+          Text("Люди, з якими вже є про що поговорити".localized).font(.caption).foregroundColor(JourneyVisual.primaryText)
         }
         Spacer()
         ZStack {
@@ -1306,8 +1306,8 @@ struct FriendNetworkView: View {
     VStack(spacing: 10) {
       HStack(alignment: .bottom) {
         VStack(alignment: .leading, spacing: 6) {
-          Text("Люди поруч").font(.title2.bold())
-          Text("Шукаємо спільне").font(.subheadline)
+          Text("Люди поруч".localized).font(.title2.bold())
+          Text("Шукаємо спільне".localized).font(.subheadline)
         }.foregroundColor(JourneyVisual.primaryText).padding(.bottom, 18)
         Spacer(minLength: 8)
         if vm.loading || !vm.profiles.isEmpty {
@@ -1318,7 +1318,7 @@ struct FriendNetworkView: View {
         .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 20))
       HStack {
         Image(systemName: "magnifyingglass").foregroundColor(JourneyVisual.secondaryText)
-        TextField("Ім’я, місто або інтерес", text: $vm.query).foregroundColor(JourneyVisual.primaryText).submitLabel(
+        TextField("Ім’я, місто або інтерес".localized, text: $vm.query).foregroundColor(JourneyVisual.primaryText).submitLabel(
           .search
         ).onSubmit { Task { await vm.reload() } }
           .accessibilityIdentifier("friends.search.query")
@@ -1329,18 +1329,18 @@ struct FriendNetworkView: View {
         Button {
           filters = true
         } label: {
-          Label("Фільтри", systemImage: "slider.horizontal.3").font(.subheadline.bold())
+          Label("Фільтри".localized, systemImage: "slider.horizontal.3").font(.subheadline.bold())
         }
         Spacer()
         if let remaining = vm.searchMeta?.requestsRemaining {
-          Text("\(remaining) запитів цього тижня").font(.caption).foregroundColor(JourneyVisual.secondaryText)
+          Text("%@ запитів цього тижня".localized(with: "\(remaining)")).font(.caption).foregroundColor(JourneyVisual.secondaryText)
         } else if vm.searchMeta?.advancedFiltersAvailable == true {
           Label("PLUS", systemImage: "star.fill").font(.caption.bold()).foregroundColor(JourneyVisual.primaryText)
         }
       }.foregroundColor(JourneyVisual.primaryText)
       ScrollView(.horizontal, showsIndicators: false) {
         HStack {
-          chip("Усі", active: vm.interest == nil) { vm.interest = nil }
+          chip("Усі".localized, active: vm.interest == nil) { vm.interest = nil }
           ForEach(SocialInterest.allCases) { i in
             chip(i.title, icon: i.icon, active: vm.interest == i) {
               vm.interest = vm.interest == i ? nil : i
@@ -1353,7 +1353,7 @@ struct FriendNetworkView: View {
           paywall = true
         } label: {
           HStack {
-            Label("Показати всі збіги", systemImage: "star.fill")
+            Label("Показати всі збіги".localized, systemImage: "star.fill")
             Spacer()
             Image(systemName: "arrow.right")
           }
@@ -1383,9 +1383,9 @@ struct FriendNetworkView: View {
   }
   private var events: some View {
     VStack(alignment: .leading, spacing: 16) {
-      title("Зустрінемось там", sub: "Події, де легко почати розмову", count: vm.events.count)
+      title("Зустрінемось там".localized, sub: "Події, де легко почати розмову".localized, count: vm.events.count)
       if vm.events.isEmpty {
-        empty("Подій поки немає", "Спробуй інший кантон або повернися пізніше.", story: "events")
+        empty("Подій поки немає".localized, "Спробуй інший кантон або повернися пізніше.".localized, story: "events")
       } else {
         ForEach(vm.events) { e in
           VStack(alignment: .leading, spacing: 12) {
@@ -1404,7 +1404,7 @@ struct FriendNetworkView: View {
                 Task { await vm.attend(e) }
               } label: {
                 Label(
-                  e.myStatus == "going" ? "Я йду" : "Піти",
+                  e.myStatus == "going" ? "Я йду".localized : "Піти".localized,
                   systemImage: e.myStatus == "going" ? "checkmark.circle.fill" : "plus.circle.fill"
                 ).font(.subheadline.bold()).foregroundColor(.black).padding(.horizontal, 16).frame(
                   height: 42
@@ -1419,7 +1419,7 @@ struct FriendNetworkView: View {
                     } catch { vm.error = error.localizedDescription }
                   }
                 } label: {
-                  Text("Хто буде").font(.subheadline.bold()).foregroundColor(JourneyVisual.primaryText)
+                  Text("Хто буде".localized).font(.subheadline.bold()).foregroundColor(JourneyVisual.primaryText)
                 }
                 if e.groupChatAvailable {
                   Button {
@@ -1446,19 +1446,19 @@ struct FriendNetworkView: View {
   }
   private var connections: some View {
     VStack(alignment: .leading, spacing: 18) {
-      title("Твоє коло", sub: "Заявки та активні друзі", count: vm.friends.count)
+      title("Твоє коло".localized, sub: "Заявки та активні друзі".localized, count: vm.friends.count)
       if !vm.incoming.isEmpty {
-        Text("НОВІ ЗАПИТИ").font(.caption.bold()).tracking(1.5).foregroundColor(JourneyVisual.accentText)
+        Text("НОВІ ЗАПИТИ".localized).font(.caption.bold()).tracking(1.5).foregroundColor(JourneyVisual.accentText)
         ForEach(vm.incoming) { c in connectionRow(c, incoming: true) }
       }
       if !vm.friends.isEmpty {
-        Text("ДРУЗІ").font(.caption.bold()).tracking(1.5).foregroundColor(JourneyVisual.secondaryText)
+        Text("ДРУЗІ".localized).font(.caption.bold()).tracking(1.5).foregroundColor(JourneyVisual.secondaryText)
         ForEach(vm.friends) { c in connectionRow(c, incoming: false) }
       }
       if vm.incoming.isEmpty && vm.friends.isEmpty {
         empty(
-          "Коло ще формується",
-          "Знайди людину зі спільними інтересами та надішли коротке привітання.")
+          "Коло ще формується".localized,
+          "Знайди людину зі спільними інтересами та надішли коротке привітання.".localized)
       }
     }.padding(.horizontal, 18)
   }
@@ -1483,11 +1483,11 @@ struct FriendNetworkView: View {
             guard subscription.isPremium else { paywall = true; return }
             Task { await vm.loadVisitors(); showVisitors = true }
           } label: {
-            Label("Гості профілю", systemImage: "eye.fill").frame(maxWidth: .infinity, minHeight: 50)
+            Label("Гості профілю".localized, systemImage: "eye.fill").frame(maxWidth: .infinity, minHeight: 50)
           }
           Toggle(isOn: Binding(get: { invisibleBrowsing }, set: { value in
             if subscription.isPremium { invisibleBrowsing = value } else { paywall = true }
-          })) { Label("Невидимий", systemImage: "eye.slash.fill") }
+          })) { Label("Невидимий".localized, systemImage: "eye.slash.fill") }
           .toggleStyle(.button).frame(maxWidth: .infinity, minHeight: 50)
         }.font(.caption.bold()).foregroundColor(JourneyVisual.accentText)
       } else if let id = c.conversationID {
@@ -1538,7 +1538,7 @@ struct FriendNetworkView: View {
           editor = true
         } label: {
           HStack {
-            Text("Редагувати social passport").font(.headline)
+            Text("Редагувати social passport".localized).font(.headline)
             Spacer()
             Image(systemName: "arrow.up.right")
           }.foregroundColor(.black).padding(.horizontal, 20).frame(
@@ -1546,7 +1546,7 @@ struct FriendNetworkView: View {
           )
           .background(limeAccent).clipShape(RoundedRectangle(cornerRadius: 19))
         }
-        Text("Твої контакти не публікуються. Видимість участі у подіях контролюється окремо.").font(
+        Text("Твої контакти не публікуються. Видимість участі у подіях контролюється окремо.".localized).font(
           .caption
         ).foregroundColor(JourneyVisual.secondaryText)
         Button {
@@ -1557,7 +1557,7 @@ struct FriendNetworkView: View {
           }
         } label: {
           HStack {
-            Label("Підняти профіль на 7 днів", systemImage: "bolt.fill")
+            Label("Підняти профіль на 7 днів".localized, systemImage: "bolt.fill")
             Spacer()
             Text("PLUS").font(.caption.bold())
           }
@@ -1576,8 +1576,8 @@ struct FriendNetworkView: View {
     return HStack(alignment: .top, spacing: 11) {
       Image(systemName: pending ? "clock.badge.checkmark" : rejected ? "exclamationmark.shield.fill" : "checkmark.shield.fill")
       VStack(alignment: .leading, spacing: 3) {
-        Text(pending ? "Профіль на перевірці" : rejected ? "Профіль потребує змін" : "Профіль схвалено").font(.subheadline.bold())
-        Text(rejected ? (reason ?? "Відредагуй дані та надішли профіль повторно.") : pending ? "Після схвалення профіль з’явиться у пошуку людей." : "Профіль видимий у каталозі.").font(.caption)
+        Text(pending ? "Профіль на перевірці".localized : rejected ? "Профіль потребує змін".localized : "Профіль схвалено".localized).font(.subheadline.bold())
+        Text(rejected ? (reason ?? "Відредагуй дані та надішли профіль повторно.".localized) : pending ? "Після схвалення профіль з’явиться у пошуку людей.".localized : "Профіль видимий у каталозі.".localized).font(.caption)
       }
       Spacer()
     }
@@ -1589,13 +1589,13 @@ struct FriendNetworkView: View {
     VStack(alignment: .leading, spacing: 20) {
       HStack(alignment: .top) {
         VStack(alignment: .leading, spacing: 7) {
-          Text("ТВІЙ КРУГ У ШВЕЙЦАРІЇ").font(.caption2.bold()).tracking(1.9).foregroundColor(
+          Text("ТВІЙ КРУГ У ШВЕЙЦАРІЇ".localized).font(.caption2.bold()).tracking(1.9).foregroundColor(
             JourneyVisual.accentText)
-          Text("Створи свій\nsocial passport").font(
+          Text("Створи свій\nsocial passport".localized).font(
             .system(size: 29, weight: .black, design: .default)
           )
           .lineSpacing(1).foregroundColor(JourneyVisual.primaryText)
-          Text("Знайомства за інтересами, подіями та кантоном.").font(.subheadline)
+          Text("Знайомства за інтересами, подіями та кантоном.".localized).font(.subheadline)
             .foregroundColor(JourneyVisual.secondaryText).fixedSize(horizontal: false, vertical: true)
         }
         Spacer(minLength: 10)
@@ -1608,24 +1608,24 @@ struct FriendNetworkView: View {
         }
       }
       VStack(spacing: 0) {
-        profileStep("sparkles", "Інтереси", "Обери теми, які тебе захоплюють")
+        profileStep("sparkles", "Інтереси".localized, "Обери теми, які тебе захоплюють".localized)
         Divider().overlay(JourneyVisual.softBorder).padding(.leading, 46)
-        profileStep("person.2.fill", "Формат зустрічей", "Прогулянки, спорт, кава або події")
+        profileStep("person.2.fill", "Формат зустрічей".localized, "Прогулянки, спорт, кава або події".localized)
         Divider().overlay(JourneyVisual.softBorder).padding(.leading, 46)
-        profileStep("lock.shield.fill", "Приватність", "Контакти приховані, контроль завжди твій")
+        profileStep("lock.shield.fill", "Приватність".localized, "Контакти приховані, контроль завжди твій".localized)
       }.padding(.horizontal, 14).background(Theme.Colors.card).clipShape(
         RoundedRectangle(cornerRadius: 20))
       Button {
         editor = true
       } label: {
         HStack {
-          Text("Створити social passport").font(.headline)
+          Text("Створити social passport".localized).font(.headline)
           Spacer()
           Image(systemName: "arrow.right").font(.headline.bold())
         }.foregroundColor(.black).padding(.horizontal, 20).frame(maxWidth: .infinity, minHeight: 58)
           .background(limeAccent).clipShape(RoundedRectangle(cornerRadius: 19))
       }
-      Label("Професійний профіль залишається окремим", systemImage: "checkmark.shield.fill")
+      Label("Професійний профіль залишається окремим".localized, systemImage: "checkmark.shield.fill")
         .font(.caption).foregroundColor(JourneyVisual.secondaryText).frame(maxWidth: .infinity)
     }.padding(20).background(
       LinearGradient(
@@ -1696,19 +1696,19 @@ private struct FriendVisitorsView: View {
         ScrollView {
           LazyVStack(spacing: 12) {
             if visitors.isEmpty {
-              ContentUnavailableView("Гостей ще немає", systemImage: "eye", description: Text("Тут з’являться люди, які відкривали твій social passport."))
+              ContentUnavailableView("Гостей ще немає".localized, systemImage: "eye", description: Text("Тут з’являться люди, які відкривали твій social passport.".localized))
             } else {
               ForEach(visitors) { item in
                 HStack(spacing: 13) {
                   Text(item.profile.initials).font(.headline.bold()).foregroundStyle(.black).frame(width: 48, height: 48).background(JourneyVisual.lime).clipShape(Circle())
-                  VStack(alignment: .leading, spacing: 3) { Text(item.profile.displayName).font(.headline).foregroundStyle(JourneyVisual.primaryText); Text("\(item.profile.city) · \(item.visitCount) переглядів").font(.caption).foregroundStyle(JourneyVisual.secondaryText) }
+                  VStack(alignment: .leading, spacing: 3) { Text(item.profile.displayName).font(.headline).foregroundStyle(JourneyVisual.primaryText); Text("%@ · %@ переглядів".localized(with: "\(item.profile.city)", "\(item.visitCount)")).font(.caption).foregroundStyle(JourneyVisual.secondaryText) }
                   Spacer(); Text(item.lastVisitedAt, style: .relative).font(.caption2).foregroundStyle(JourneyVisual.secondaryText)
                 }.padding(14).background(JourneyVisual.elevatedSurface).clipShape(RoundedRectangle(cornerRadius: 18))
               }
             }
           }.padding(18)
         }
-      }.navigationTitle("Гості профілю").toolbar { ToolbarItem(placement: .cancellationAction) { Button("Закрити") { dismiss() } } }
+      }.navigationTitle("Гості профілю".localized).toolbar { ToolbarItem(placement: .cancellationAction) { Button("Закрити".localized) { dismiss() } } }
     }
   }
 }
@@ -1747,7 +1747,7 @@ private struct FriendCard: View {
             .font(.system(size: 10, weight: .bold))
           Text("\(profile.city) · \(profile.canton)")
           if let distance = profile.distanceKM {
-            Text("· \(distance) км")
+            Text("· %@ км".localized(with: "\(distance)"))
           }
         }
         .font(.system(size: 12, weight: .medium))
@@ -1775,7 +1775,7 @@ private struct FriendCard: View {
         Text("\(profile.matchScore)%")
           .font(.system(size: 15, weight: .black))
           .foregroundColor(JourneyVisual.accentStrong)
-        Text("збіг")
+        Text("збіг".localized)
           .font(.system(size: 10, weight: .semibold))
           .foregroundColor(JourneyVisual.secondaryText)
       }
@@ -1857,7 +1857,7 @@ private struct FriendProfileDetail: View {
             }
             Spacer()
             if !isDemo { Menu {
-              Button("Поскаржитися", role: .destructive) {
+              Button("Поскаржитися".localized, role: .destructive) {
                 Task {
                   do {
                     try await FriendsAPI.report(profile.id)
@@ -1866,7 +1866,7 @@ private struct FriendProfileDetail: View {
                   }
                 }
               }
-              Button("Заблокувати", role: .destructive) {
+              Button("Заблокувати".localized, role: .destructive) {
                 Task {
                   do {
                     try await FriendsAPI.block(profile.id)
@@ -1881,13 +1881,13 @@ private struct FriendProfileDetail: View {
             } }
           }
           profilePortrait
-          Text("\(profile.matchScore)% збіг").font(.caption.bold()).foregroundColor(
+          Text("%@%% збіг".localized(with: "\(profile.matchScore)")).font(.caption.bold()).foregroundColor(
             JourneyVisual.accentText)
           Text(profile.displayName).font(.largeTitle.bold())
             .foregroundColor(JourneyVisual.primaryText)
           Text("\(profile.city) · \(profile.canton)").foregroundColor(JourneyVisual.secondaryText)
           Text(profile.bio).foregroundColor(JourneyVisual.primaryText.opacity(0.78))
-          Text("СПІЛЬНІ ІНТЕРЕСИ").font(.caption.bold()).tracking(1.5).foregroundColor(
+          Text("СПІЛЬНІ ІНТЕРЕСИ".localized).font(.caption.bold()).tracking(1.5).foregroundColor(
             JourneyVisual.accentText)
           FlowLayout(spacing: 8) {
             ForEach(profile.sharedInterests) { i in
@@ -1898,7 +1898,7 @@ private struct FriendProfileDetail: View {
             }
           }
           if isDemo {
-            Label("Демо-профіль · дії вимкнені", systemImage: "sparkles")
+            Label("Демо-профіль · дії вимкнені".localized, systemImage: "sparkles")
               .font(.subheadline.bold()).foregroundColor(Theme.Colors.textPrimary)
               .frame(maxWidth: .infinity, minHeight: 52)
               .background(JourneyVisual.lime.opacity(0.1))
@@ -1907,29 +1907,29 @@ private struct FriendProfileDetail: View {
             Button {
               Task { conversation = try? await ChatAPI.conversation(id: id) }
             } label: {
-              Text("Відкрити чат").font(.headline).foregroundColor(.black).frame(
+              Text("Відкрити чат".localized).font(.headline).foregroundColor(.black).frame(
                 maxWidth: .infinity, minHeight: 56
               ).background(JourneyVisual.lime).clipShape(RoundedRectangle(cornerRadius: 18))
             }
           } else if profile.connectionState == "none" {
-            TextField("Коротко привітайся…", text: $message, axis: .vertical).padding().background(
+            TextField("Коротко привітайся…".localized, text: $message, axis: .vertical).padding().background(
               JourneyVisual.elevatedSurface
             ).clipShape(RoundedRectangle(cornerRadius: 16))
               .foregroundColor(JourneyVisual.primaryText)
             Button {
               Task { if await vm.connect(profile, message: message) { dismiss() } }
             } label: {
-              Text("Запропонувати дружбу").font(.headline).foregroundColor(.black).frame(
+              Text("Запропонувати дружбу".localized).font(.headline).foregroundColor(.black).frame(
                 maxWidth: .infinity, minHeight: 56
               ).background(JourneyVisual.lime).clipShape(RoundedRectangle(cornerRadius: 18))
             }
           } else {
             Text(
               profile.connectionState == "incoming"
-                ? "Заявка очікує твоєї відповіді" : "Заявку надіслано"
+                ? "Заявка очікує твоєї відповіді".localized : "Заявку надіслано".localized
             ).foregroundColor(JourneyVisual.secondaryText)
           }
-          Text("Зустрічайся у публічному місці. Не надсилай гроші або документи незнайомим людям.")
+          Text("Зустрічайся у публічному місці. Не надсилай гроші або документи незнайомим людям.".localized)
             .font(.caption).foregroundColor(JourneyVisual.secondaryText)
         }.padding(20)
       }
@@ -1950,49 +1950,49 @@ private struct FriendSearchFilters: View {
         JourneyAmbientBackground()
         ScrollView {
           VStack(alignment: .leading, spacing: 20) {
-            header("Локація", icon: "mappin.and.ellipse")
+            header("Локація".localized, icon: "mappin.and.ellipse")
             Menu {
-              Button("Усі кантони") { vm.canton = nil }
+              Button("Усі кантони".localized) { vm.canton = nil }
               ForEach(SwissCanton.all, id: \.code) { c in
                 Button("\(c.name) · \(c.code)") { vm.canton = c.code }
               }
             } label: {
-              filterRow("Кантон", value: vm.canton ?? "Усі")
+              filterRow("Кантон".localized, value: vm.canton ?? "Усі".localized)
             }
-            plusSection("Радіус", icon: "location.circle.fill") {
-              Picker("Радіус", selection: $vm.maxDistanceKM) {
-                Text("Будь-який").tag(Int?.none)
-                ForEach([10, 25, 50, 100], id: \.self) { Text("до \($0) км").tag(Optional($0)) }
+            plusSection("Радіус".localized, icon: "location.circle.fill") {
+              Picker("Радіус".localized, selection: $vm.maxDistanceKM) {
+                Text("Будь-який".localized).tag(Int?.none)
+                ForEach([10, 25, 50, 100], id: \.self) { Text("до %@ км".localized(with: "\($0)")).tag(Optional($0)) }
               }.pickerStyle(.segmented)
             }
-            plusSection("Мова", icon: "character.bubble.fill") {
+            plusSection("Мова".localized, icon: "character.bubble.fill") {
               chipRow(languages, selected: vm.language) {
                 vm.language = vm.language == $0 ? nil : $0
               }
             }
-            plusSection("Вік", icon: "person.2.fill") {
+            plusSection("Вік".localized, icon: "person.2.fill") {
               chipRow(SocialAgeBand.allCases.map(\.rawValue), selected: vm.ageBand) {
                 vm.ageBand = vm.ageBand == $0 ? nil : $0
               }
             }
-            plusSection("Досвід у Швейцарії", icon: "flag.fill") {
+            plusSection("Досвід у Швейцарії".localized, icon: "flag.fill") {
               chipRow(
-                ["Нові мешканці", "Давно тут"],
+                ["Нові мешканці".localized, "Давно тут".localized],
                 selected: vm.residency == "newcomer"
-                  ? "Нові мешканці" : vm.residency == "established" ? "Давно тут" : nil
-              ) { vm.residency = $0 == "Нові мешканці" ? "newcomer" : "established" }
+                  ? "Нові мешканці".localized : vm.residency == "established" ? "Давно тут".localized : nil
+              ) { vm.residency = $0 == "Нові мешканці".localized ? "newcomer" : "established" }
             }
-            plusSection("Нові люди поруч", icon: "dot.radiowaves.left.and.right") {
-              Toggle("Показати профілі в радіусі 25 км", isOn: $vm.nearby).tint(lime)
+            plusSection("Нові люди поруч".localized, icon: "dot.radiowaves.left.and.right") {
+              Toggle("Показати профілі в радіусі 25 км".localized, isOn: $vm.nearby).tint(lime)
                 .foregroundColor(JourneyVisual.primaryText)
             }
           }.padding(20).padding(.bottom, 30)
         }
-      }.navigationTitle("Пошук людей").navigationBarTitleDisplayMode(.inline)
+      }.navigationTitle("Пошук людей".localized).navigationBarTitleDisplayMode(.inline)
         .toolbar {
-          ToolbarItem(placement: .cancellationAction) { Button("Закрити") { dismiss() } }
+          ToolbarItem(placement: .cancellationAction) { Button("Закрити".localized) { dismiss() } }
           ToolbarItem(placement: .confirmationAction) {
-            Button("Застосувати") {
+            Button("Застосувати".localized) {
               Task {
                 await vm.reload()
                 dismiss()
@@ -2036,7 +2036,7 @@ private struct FriendSearchFilters: View {
         } label: {
           HStack {
             Image(systemName: "lock.fill")
-            Text("Відкрити розширений фільтр")
+            Text("Відкрити розширений фільтр".localized)
             Spacer()
             Image(systemName: "arrow.right")
           }.foregroundColor(JourneyVisual.primaryText).padding()
@@ -2092,7 +2092,7 @@ private struct SocialEventChatView: View {
             }.padding()
           }
           HStack {
-            TextField("Повідомлення групі", text: $text)
+            TextField("Повідомлення групі".localized, text: $text)
               .foregroundColor(JourneyVisual.primaryText).padding(13)
               .background(JourneyVisual.elevatedSurface).clipShape(Capsule())
             Button {
@@ -2104,7 +2104,7 @@ private struct SocialEventChatView: View {
           }.padding()
         }
       }.navigationTitle(event.title).navigationBarTitleDisplayMode(.inline).toolbar {
-        ToolbarItem(placement: .cancellationAction) { Button("Закрити") { dismiss() } }
+        ToolbarItem(placement: .cancellationAction) { Button("Закрити".localized) { dismiss() } }
         ToolbarItem(placement: .primaryAction) {
           Button {
             invitePicker = true
@@ -2129,7 +2129,7 @@ private struct SocialEventChatView: View {
                 } catch { vm.error = error.localizedDescription }
               }
             }
-          }.navigationTitle("Запросити друга")
+          }.navigationTitle("Запросити друга".localized)
         }
       }
     }
@@ -2188,7 +2188,7 @@ private struct FriendProfileEditor: View {
       }.safeAreaInset(edge: .bottom) { controls }
         .toolbar {
           ToolbarItem(placement: .cancellationAction) {
-            Button("Закрити") { dismiss() }.foregroundColor(JourneyVisual.primaryText)
+            Button("Закрити".localized) { dismiss() }.foregroundColor(JourneyVisual.primaryText)
           }
         }
         .navigationBarTitleDisplayMode(.inline)
@@ -2257,22 +2257,22 @@ private struct FriendProfileEditor: View {
 
   private var identity: some View {
     VStack(spacing: 13) {
-      field("person.fill", "Ім’я", text: $d.displayName)
-      field("building.2.fill", "Місто", text: $d.city)
+      field("person.fill", "Ім’я".localized, text: $d.displayName)
+      field("building.2.fill", "Місто".localized, text: $d.city)
       Menu {
         ForEach(SwissCanton.all, id: \.code) { c in
           Button("\(c.name) · \(c.code)") { d.canton = c.code }
         }
       } label: {
-        row("mappin.and.ellipse", "Кантон", value: d.canton)
+        row("mappin.and.ellipse", "Кантон".localized, value: d.canton)
       }
       Menu {
-        Button("Не вказувати") { d.ageBand = nil }
+        Button("Не вказувати".localized) { d.ageBand = nil }
         ForEach(SocialAgeBand.allCases) { band in
           Button(band.rawValue) { d.ageBand = band.rawValue }
         }
       } label: {
-        row("person.2.fill", "Вікова група", value: d.ageBand ?? "Не вказано")
+        row("person.2.fill", "Вікова група".localized, value: d.ageBand ?? "Не вказано".localized)
       }
       Stepper(
         value: Binding(get: { d.arrivalYear ?? 2026 }, set: { d.arrivalYear = $0 }),
@@ -2280,14 +2280,14 @@ private struct FriendProfileEditor: View {
       ) {
         HStack {
           Image(systemName: "flag.fill").foregroundColor(JourneyVisual.accentStrong)
-          Text("У Швейцарії з")
+          Text("У Швейцарії з".localized)
           Spacer()
           Text(String(d.arrivalYear ?? 2026)).foregroundColor(JourneyVisual.accentText)
         }
       }.tint(lime).padding().background(JourneyVisual.elevatedSurface).clipShape(
         RoundedRectangle(cornerRadius: 18))
       Text(
-        "Радіус пошуку можна увімкнути після дозволу геолокації. Точні координати іншим не показуються."
+        "Радіус пошуку можна увімкнути після дозволу геолокації. Точні координати іншим не показуються.".localized
       )
       .font(.caption).foregroundColor(JourneyVisual.secondaryText)
       Button {
@@ -2295,7 +2295,7 @@ private struct FriendProfileEditor: View {
         locationService.startLocationUpdates()
       } label: {
         Label(
-          locationService.currentLocation == nil ? "Додати приблизну локацію" : "Локацію додано",
+          locationService.currentLocation == nil ? "Додати приблизну локацію".localized : "Локацію додано".localized,
           systemImage: locationService.currentLocation == nil
             ? "location.fill" : "checkmark.circle.fill"
         ).font(.subheadline.bold()).foregroundColor(
@@ -2305,7 +2305,7 @@ private struct FriendProfileEditor: View {
         .background(locationService.currentLocation == nil ? lime : lime.opacity(0.1))
         .clipShape(RoundedRectangle(cornerRadius: 16))
       }
-      TextField("Розкажи про себе — мінімум 30 символів", text: $d.bio, axis: .vertical).lineLimit(
+      TextField("Розкажи про себе — мінімум 30 символів".localized, text: $d.bio, axis: .vertical).lineLimit(
         4...7
       )
       .padding().background(JourneyVisual.elevatedSurface)
@@ -2352,13 +2352,13 @@ private struct FriendProfileEditor: View {
         }
       }.overlay(Circle().stroke(lime.opacity(0.35), lineWidth: 2))
       PhotosPicker(selection: $photoItem, matching: .images) {
-        Label(photo == nil ? "Додати фото" : "Замінити фото", systemImage: "photo.fill").font(
+        Label(photo == nil ? "Додати фото".localized : "Замінити фото".localized, systemImage: "photo.fill").font(
           .headline
         )
         .foregroundColor(.black).padding(.horizontal, 22).frame(height: 52).background(lime)
         .clipShape(Capsule())
       }
-      Text("Фото перевіряється разом з описом. Контакти та документи на фото заборонені.")
+      Text("Фото перевіряється разом з описом. Контакти та документи на фото заборонені.".localized)
         .font(.caption).multilineTextAlignment(.center).foregroundColor(JourneyVisual.secondaryText)
     }.frame(maxWidth: .infinity).padding(24).background(JourneyVisual.elevatedSurface).clipShape(
       RoundedRectangle(cornerRadius: 28))
@@ -2367,15 +2367,15 @@ private struct FriendProfileEditor: View {
   private var safety: some View {
     VStack(spacing: 12) {
       safetyToggle(
-        "Показувати профіль", "Профіль бере участь у пошуку", icon: "eye.fill", value: $d.isVisible)
+        "Показувати профіль".localized, "Профіль бере участь у пошуку".localized, icon: "eye.fill", value: $d.isVisible)
       safetyToggle(
-        "Відкритий до знайомств", "Інші можуть надіслати запит", icon: "person.badge.plus",
+        "Відкритий до знайомств".localized, "Інші можуть надіслати запит".localized, icon: "person.badge.plus",
         value: $d.openToFriends)
       safetyToggle(
-        "Правила спільноти", "Без продажів, переслідувань та небезпечних зустрічей",
+        "Правила спільноти".localized, "Без продажів, переслідувань та небезпечних зустрічей".localized,
         icon: "checkmark.shield.fill", value: $d.guidelinesAccepted)
       Label(
-        "Контакти не публікуються. Точна геолокація не показується іншим.", systemImage: "lock.fill"
+        "Контакти не публікуються. Точна геолокація не показується іншим.".localized, systemImage: "lock.fill"
       )
       .font(.caption).foregroundColor(JourneyVisual.secondaryText).padding(.top, 6)
     }
@@ -2395,7 +2395,7 @@ private struct FriendProfileEditor: View {
         VStack(alignment: .leading, spacing: 4) {
           Text(d.displayName).font(.title2.bold())
           Text("\(d.city) · \(d.canton)").foregroundColor(JourneyVisual.secondaryText)
-          Label("Email підтверджено", systemImage: "checkmark.seal.fill").font(.caption)
+          Label("Email підтверджено".localized, systemImage: "checkmark.seal.fill").font(.caption)
             .foregroundColor(JourneyVisual.accentText)
         }
       }
@@ -2407,7 +2407,7 @@ private struct FriendProfileEditor: View {
           ).clipShape(Capsule())
         }
       }
-      Label("Профіль буде надіслано на перевірку адміністратору", systemImage: "shield.lefthalf.filled")
+      Label("Профіль буде надіслано на перевірку адміністратору".localized, systemImage: "shield.lefthalf.filled")
         .font(.caption).foregroundColor(JourneyVisual.secondaryText)
     }.foregroundColor(JourneyVisual.primaryText).padding(20)
       .background(JourneyVisual.elevatedSurface)
@@ -2431,7 +2431,7 @@ private struct FriendProfileEditor: View {
       } label: {
         HStack {
           if saving || uploading { ProgressView().tint(.black) }
-          Text(step == .preview ? "Опублікувати профіль" : "Продовжити").font(.headline)
+          Text(step == .preview ? "Опублікувати профіль".localized : "Продовжити".localized).font(.headline)
           Spacer()
           Image(systemName: step == .preview ? "checkmark" : "arrow.right")
         }
@@ -2454,16 +2454,16 @@ private struct FriendProfileEditor: View {
   }
   private var stepTitle: String {
     [
-      "Хто ти", "Твої інтереси", "Мови спілкування", "Як зустрічаємось", "Коли ти вільний",
-      "Твоє фото", "Безпека", "Перевір профіль",
+      "Хто ти".localized, "Твої інтереси".localized, "Мови спілкування".localized, "Як зустрічаємось".localized, "Коли ти вільний".localized,
+      "Твоє фото".localized, "Безпека".localized, "Перевір профіль".localized,
     ][step.rawValue]
   }
   private var stepSubtitle: String {
     [
-      "Створимо основу social passport.", "Обери мінімум дві теми.",
-      "Вкажи мови для комфортного спілкування.", "Обери один або кілька форматів.",
-      "Допоможи знайти зручний час.", "Живе фото підвищує довіру.",
-      "Ти контролюєш видимість і контакти.", "Так тебе побачать інші люди.",
+      "Створимо основу social passport.".localized, "Обери мінімум дві теми.".localized,
+      "Вкажи мови для комфортного спілкування.".localized, "Обери один або кілька форматів.".localized,
+      "Допоможи знайти зручний час.".localized, "Живе фото підвищує довіру.".localized,
+      "Ти контролюєш видимість і контакти.".localized, "Так тебе побачать інші люди.".localized,
     ][step.rawValue]
   }
   private var initials: String {
@@ -2495,7 +2495,7 @@ private struct FriendProfileEditor: View {
       if await vm.save(d) {
         dismiss()
       } else {
-        error = vm.error ?? "Профіль не опубліковано. Дані збережені на екрані — перевір причину та спробуй ще раз."
+        error = vm.error ?? "Профіль не опубліковано. Дані збережені на екрані — перевір причину та спробуй ще раз.".localized
         vm.error = nil
       }
     } catch { self.error = error.localizedDescription }

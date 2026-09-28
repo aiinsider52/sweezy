@@ -204,9 +204,9 @@ enum Difficulty: String, CaseIterable, Codable, Hashable {
     
     var localizedName: String {
         switch self {
-        case .easy: return "Easy"
-        case .medium: return "Medium"
-        case .hard: return "Complex"
+        case .easy: return "checklist.difficulty.easy".localized
+        case .medium: return "checklist.difficulty.medium".localized
+        case .hard: return "checklist.difficulty.hard".localized
         }
     }
     

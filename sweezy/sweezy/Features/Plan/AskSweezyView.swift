@@ -27,7 +27,7 @@ struct AskSweezyView: View {
                             .foregroundStyle(JourneyVisual.primaryText)
                     }
 
-                    JourneySearchField(text: $query, prompt: "Наприклад: як продовжити permit?")
+                    JourneySearchField(text: $query, prompt: "Наприклад: як продовжити permit?".localized)
                         .accessibilityIdentifier("ask.search")
 
                     if query.count >= 2 && results.isEmpty {
@@ -117,14 +117,14 @@ struct WeeklyDigestView: View {
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundColor(JourneyVisual.accentText)
 
-                    digestSection("Наступні дії", items: digest.nextActions.map { "\($0.title) — \($0.daysRemaining) дн." })
-                    digestSection("Документи", items: digest.missingDocuments.map { "Підготувати: \($0.title)" })
-                    digestSection("Зустрічі", items: digest.upcomingAppointments.map { "\($0.title) — \($0.formattedDate)" })
+                    digestSection("Наступні дії".localized, items: digest.nextActions.map { "%@ — %@ дн.".localized(with: "\($0.title)", "\($0.daysRemaining)") })
+                    digestSection("Документи".localized, items: digest.missingDocuments.map { "Підготувати: %@".localized(with: "\($0.title)") })
+                    digestSection("Зустрічі".localized, items: digest.upcomingAppointments.map { "\($0.title) — \($0.formattedDate)" })
 
-                    JourneyPrimaryButton(title: "Нагадувати щопонеділка") {
+                    JourneyPrimaryButton(title: "Нагадувати щопонеділка".localized) {
                         Task { @MainActor in
                             let ok = await appContainer.lifeAdmin.scheduleWeeklyDigest(digest, using: appContainer.notificationService)
-                            scheduleMessage = ok ? "Наступний digest заплановано" : "Дозволь сповіщення у Settings"
+                            scheduleMessage = ok ? "Наступний digest заплановано".localized : "Дозволь сповіщення у Settings".localized
                         }
                     }
                     if let scheduleMessage {
@@ -147,7 +147,7 @@ struct WeeklyDigestView: View {
                     .font(.system(size: 17, weight: .bold, design: .default))
                     .foregroundColor(JourneyVisual.primaryText)
                 if items.isEmpty {
-                    Text("Нічого критичного")
+                    Text("Нічого критичного".localized)
                         .font(.system(size: 12, weight: .medium))
                         .foregroundColor(JourneyVisual.secondaryText)
                 } else {

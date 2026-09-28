@@ -339,6 +339,22 @@ class ContentService: ContentServiceProtocol {
             AppLogger.content("Error loading places: \(error)", isError: true)
             places = []
         }
+        await mergeCommunityPlaces()
+    }
+
+    /// Places suggested by users and approved by a moderator. Falls back to the last cached copy offline.
+    private func mergeCommunityPlaces() async {
+        let filename = cacheName("places_community.json")
+        var community: [Place] = []
+        if let remote = try? await APIClient.fetchCommunityPlaces(country: countryCode) {
+            community = remote.map(Place.init(community:))
+            try? saveToCache(community, filename: filename)
+        } else if let cached = try? loadFromCache(filename, type: [Place].self) {
+            community = cached
+        }
+        guard !community.isEmpty else { return }
+        let existingIDs = Set(places.map(\.id))
+        places.append(contentsOf: community.filter { !existingIDs.contains($0.id) })
     }
     
     private func loadTemplates() async {

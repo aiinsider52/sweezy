@@ -27,7 +27,7 @@ struct JourneyGuideArticleView: View {
     }
 
     private var cantonScope: String {
-        guide.cantonCodes.isEmpty ? "All cantons — local procedures may differ" : guide.cantonCodes.sorted().joined(separator: ", ")
+        guide.cantonCodes.isEmpty ? "journey.guide.scope.all_cantons".localized : guide.cantonCodes.sorted().joined(separator: ", ")
     }
 
     private var relatedChecklist: Checklist? {
@@ -130,6 +130,18 @@ struct JourneyGuideArticleView: View {
         }
     }
 
+    /// Illustration that matches the guide's topic; falls back to the civic-square scene.
+    private var heroSceneAsset: String {
+        switch guide.category {
+        case .housing: return "story-housing"
+        case .documents, .legal: return "story-documents"
+        case .work, .finance, .banking: return "story-jobs"
+        case .education, .integration: return "story-language"
+        case .transport, .lifestyle: return "city-scene-map"
+        default: return "city-scene-directory"
+        }
+    }
+
     private var overscrollBackdrop: some View {
         JourneyVisual.pageBackground.ignoresSafeArea()
     }
@@ -167,18 +179,31 @@ struct JourneyGuideArticleView: View {
 
     private func hero(width: CGFloat, horizontalInset: CGFloat, contentWidth: CGFloat) -> some View {
         VStack(alignment: .leading, spacing: 16) {
-            // Room for the floating back/share controls now that the hero has no artwork.
+            // Room for the floating back/share controls, then the topic scene.
             Spacer().frame(height: 64)
+            FocusedSceneImage(name: heroSceneAsset, focusY: 0.28)
+                .frame(width: contentWidth, height: 170)
+                .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 24, style: .continuous)
+                        .stroke(JourneyVisual.softBorder, lineWidth: 1)
+                )
+                .padding(.horizontal, horizontalInset)
+                .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 12) {
                 HStack(spacing: 8) {
-                    Label(guide.category.localizedName, systemImage: guide.category.iconName)
-                        .font(.system(size: 11, weight: .bold))
-                        .foregroundColor(JourneyVisual.primaryText)
-                        .padding(.horizontal, 11)
-                        .frame(height: 30)
-                        .background(Theme.Colors.card)
-                        .clipShape(Capsule())
-                        .overlay(Capsule().stroke(JourneyVisual.softBorder, lineWidth: 1))
+                    HStack(spacing: 7) {
+                        JourneyCategoryIcon(symbol: guide.category.iconName, swatch: guide.category.swatch, size: 22)
+                        Text(guide.category.localizedName)
+                    }
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundColor(JourneyVisual.primaryText)
+                    .padding(.leading, 5)
+                    .padding(.trailing, 11)
+                    .frame(height: 30)
+                    .background(Theme.Colors.card)
+                    .clipShape(Capsule())
+                    .overlay(Capsule().stroke(JourneyVisual.softBorder, lineWidth: 1))
 
                     if guide.isNew, case .verified = freshness {
                         Text("NEW")
@@ -226,7 +251,7 @@ struct JourneyGuideArticleView: View {
                         .foregroundColor(Theme.Colors.textPrimary)
 
                     VStack(alignment: .leading, spacing: 3) {
-                        Text(isOfficialSource ? "OFFICIAL SOURCE" : "SOURCE")
+                        Text(isOfficialSource ? "journey.guide.source.official".localized : "journey.guide.source.generic".localized)
                             .font(.system(size: 9, weight: .black))
                             .foregroundColor(Theme.Colors.textPrimary)
                         Text(guide.sourceTitle ?? sourceURL.host() ?? "journey.guide.official_portal".localized)
@@ -274,15 +299,15 @@ struct JourneyGuideArticleView: View {
             scopeRow(cantonScope, systemImage: "map")
             switch freshness {
             case .verified:
-                scopeRow("Current as of the verification date shown above", systemImage: "checkmark.circle")
+                scopeRow("journey.guide.scope.current".localized, systemImage: "checkmark.circle")
             case .expired:
-                scopeRow("Verification expired — confirm with the linked authority", systemImage: "clock.badge.exclamationmark")
+                scopeRow("journey.guide.scope.expired".localized, systemImage: "clock.badge.exclamationmark")
                     .foregroundColor(.orange)
             case .unverified:
-                scopeRow("Unverified — do not rely on this as current guidance", systemImage: "exclamationmark.triangle")
+                scopeRow("journey.guide.scope.unverified".localized, systemImage: "exclamationmark.triangle")
                     .foregroundColor(.orange)
             }
-            Text("Educational information only — not legal advice. Requirements and deadlines can vary by canton and personal situation.")
+            Text("journey.guide.scope.disclaimer".localized)
                 .foregroundColor(JourneyVisual.secondaryText)
                 .fixedSize(horizontal: false, vertical: true)
         }

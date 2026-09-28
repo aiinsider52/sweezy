@@ -20,7 +20,7 @@ enum NetworkAPI {
         let (data, response) = try await APIClient.authorizedData(for: request, context: "network_\(method.lowercased())")
         guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
             let detail = (try? JSONSerialization.jsonObject(with: data) as? [String: Any])?["detail"]
-            let message = (detail as? String) ?? "Не вдалося виконати запит"
+            let message = (detail as? String) ?? "Не вдалося виконати запит".localized
             throw NSError(
                 domain: "NetworkAPI",
                 code: (response as? HTTPURLResponse)?.statusCode ?? 0,
@@ -48,7 +48,7 @@ enum NetworkAPI {
             throw NSError(
                 domain: "NetworkAPI",
                 code: (response as? HTTPURLResponse)?.statusCode ?? 0,
-                userInfo: [NSLocalizedDescriptionKey: detail ?? "Не вдалося виконати запит"]
+                userInfo: [NSLocalizedDescriptionKey: detail ?? "Не вдалося виконати запит".localized]
             )
         }
     }
@@ -77,7 +77,7 @@ enum NetworkAPI {
         guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
             let detail = (try? JSONSerialization.jsonObject(with: data) as? [String: Any])?["detail"] as? String
             throw NSError(domain: "NetworkAPI", code: (response as? HTTPURLResponse)?.statusCode ?? 0,
-                          userInfo: [NSLocalizedDescriptionKey: detail ?? "Каталог тимчасово недоступний"])
+                          userInfo: [NSLocalizedDescriptionKey: detail ?? "Каталог тимчасово недоступний".localized])
         }
         return try ChatAPI.decoder.decode(ProfessionalProfilePage.self, from: data)
     }

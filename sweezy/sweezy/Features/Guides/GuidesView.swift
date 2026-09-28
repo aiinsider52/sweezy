@@ -114,7 +114,7 @@ struct GuidesView: View {
             HStack(spacing: 10) {
                 Image(systemName: "magnifyingglass")
                     .foregroundColor(Theme.Colors.textTertiary)
-                TextField("Пошук гідів...", text: $searchText)
+                TextField("Пошук гідів...".localized, text: $searchText)
                     .font(Theme.Typography.body)
                 if !searchText.isEmpty {
                     Button { withAnimation { searchText = "" }; haptic(.light) } label: {
@@ -182,7 +182,7 @@ struct GuidesView: View {
             HStack(spacing: 6) {
                 Image(systemName: category?.iconName ?? "square.grid.2x2")
                     .font(.system(size: 14, weight: .semibold))
-                Text(category?.localizedName ?? "Всі")
+                Text(category?.localizedName ?? "Всі".localized)
                     .font(Theme.Typography.subheadline)
                     .fontWeight(isSelected ? .semibold : .regular)
             }
@@ -224,7 +224,7 @@ struct GuidesView: View {
                 VStack(alignment: .leading, spacing: 12) {
                     // Badges
                     HStack(spacing: 8) {
-                        guideBadge("Рекомендовано", color: .white, textColor: guide.category.swiftUIColor)
+                        guideBadge("Рекомендовано".localized, color: .white, textColor: guide.category.swiftUIColor)
                         if guide.isNew {
                             guideBadge("NEW", color: .red, textColor: .white)
                         }
@@ -252,9 +252,9 @@ struct GuidesView: View {
                     }
                     
                     HStack(spacing: 16) {
-                        Label("\(guide.estimatedReadingTime) хв", systemImage: "clock")
+                        Label("%@ хв".localized(with: "\(guide.estimatedReadingTime)"), systemImage: "clock")
                         if appContainer.userStats.isGuideRead(id: guide.id) {
-                            Label("Прочитано", systemImage: "checkmark.circle.fill")
+                            Label("Прочитано".localized, systemImage: "checkmark.circle.fill")
                         }
                     }
                     .font(Theme.Typography.caption)
@@ -284,7 +284,7 @@ struct GuidesView: View {
                     withAnimation { selectedCategory = category }
                     haptic(.light)
                 } label: {
-                    Text("Всі")
+                    Text("Всі".localized)
                         .font(Theme.Typography.subheadline)
                         .foregroundColor(JourneyVisual.accentText)
                 }
@@ -330,7 +330,7 @@ struct GuidesView: View {
 
                 // Bottom: time + read badge
                 HStack(spacing: 6) {
-                    Label("\(guide.estimatedReadingTime) хв", systemImage: "clock")
+                    Label("%@ хв".localized(with: "\(guide.estimatedReadingTime)"), systemImage: "clock")
                         .font(.system(size: 10, weight: .medium))
                         .foregroundColor(JourneyVisual.secondaryText)
                     Spacer()
@@ -424,9 +424,9 @@ struct GuidesView: View {
                             .lineLimit(1)
                     }
                     HStack(spacing: 10) {
-                        Label("\(guide.estimatedReadingTime) хв", systemImage: "clock")
+                        Label("%@ хв".localized(with: "\(guide.estimatedReadingTime)"), systemImage: "clock")
                         if isRead {
-                            Label("Прочитано", systemImage: "checkmark.circle.fill")
+                            Label("Прочитано".localized, systemImage: "checkmark.circle.fill")
                                 .foregroundColor(.green)
                         }
                     }
@@ -456,10 +456,10 @@ struct GuidesView: View {
             Image(systemName: "doc.text.magnifyingglass")
                 .font(.system(size: 48))
                 .foregroundColor(Theme.Colors.textTertiary)
-            Text("Нічого не знайдено")
+            Text("Нічого не знайдено".localized)
                 .font(Theme.Typography.headline)
                 .foregroundColor(Theme.Colors.textPrimary)
-            Text("Спробуйте змінити пошук або фільтри")
+            Text("Спробуйте змінити пошук або фільтри".localized)
                 .font(Theme.Typography.subheadline)
                 .foregroundColor(Theme.Colors.textSecondary)
             Button {
@@ -469,7 +469,7 @@ struct GuidesView: View {
                 }
                 haptic(.light)
             } label: {
-                Text("Скинути фільтри")
+                Text("Скинути фільтри".localized)
                     .font(Theme.Typography.subheadline)
                     .fontWeight(.semibold)
                     .foregroundColor(JourneyVisual.primaryText)
@@ -674,9 +674,9 @@ struct GuideDetailView: View {
                     .font(.system(size: 28, weight: .bold, design: .default))
                     .foregroundColor(JourneyVisual.primaryText)
                     .multilineTextAlignment(.center)
-                Text("Цей матеріал входить до Sweezy Plus")
+                Text("Цей матеріал входить до Sweezy Plus".localized)
                     .foregroundColor(JourneyVisual.secondaryText)
-                Button("Відкрити Plus") { showSubscription = true }
+                Button("Відкрити Plus".localized) { showSubscription = true }
                     .font(.system(size: 17, weight: .bold))
                     .foregroundColor(.black)
                     .frame(maxWidth: .infinity)
@@ -870,7 +870,7 @@ struct GuideDetailView: View {
                     if appContainer.userStats.isGuideRead(id: guide.id) {
                         HStack(spacing: 4) {
                             Image(systemName: "checkmark.circle.fill")
-                            Text("Прочитано")
+                            Text("Прочитано".localized)
                         }
                         .font(.system(size: 10, weight: .semibold))
                         .foregroundColor(JourneyVisual.primaryText)
@@ -896,7 +896,7 @@ struct GuideDetailView: View {
                 
                 // Meta
                 HStack(spacing: 16) {
-                    Label("≈ \(calculatedReadingMinutes) хв читання", systemImage: "clock")
+                    Label("≈ %@ хв читання".localized(with: "\(calculatedReadingMinutes)"), systemImage: "clock")
                     Label(formatDate(guide.lastUpdated), systemImage: "calendar")
                 }
                 .font(.system(size: 13, weight: .regular))
@@ -954,7 +954,7 @@ struct GuideDetailView: View {
                 HStack(spacing: 7) {
                     trustSignalContent
                     Spacer()
-                    Text("Джерело потребує перевірки")
+                    Text("Джерело потребує перевірки".localized)
                         .font(.system(size: 10, weight: .semibold))
                         .foregroundColor(.orange)
                 }
@@ -1054,7 +1054,7 @@ struct GuideDetailView: View {
     @ViewBuilder
     private var contentSection: some View {
         if isLocked {
-            Text("Цей матеріал доступний у Sweezy Plus.")
+            Text("Цей матеріал доступний у Sweezy Plus.".localized)
         } else {
             MarkdownContentView(content: guide.bodyMarkdown)
         }
@@ -1063,12 +1063,12 @@ struct GuideDetailView: View {
     // MARK: - Template Steps Section
     private var templateStepsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Документи за кроками")
+            Text("Документи за кроками".localized)
                 .font(Theme.Typography.headline)
                 .fontWeight(.semibold)
                 .foregroundColor(Theme.Colors.textPrimary)
             
-            Text("Заповніть потрібні шаблони одразу під час читання гайда.")
+            Text("Заповніть потрібні шаблони одразу під час читання гайда.".localized)
                 .font(Theme.Typography.subheadline)
                 .foregroundColor(Theme.Colors.textSecondary)
             
@@ -1094,7 +1094,7 @@ struct GuideDetailView: View {
     // MARK: - Links Section
     private var linksSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Корисні посилання")
+            Text("Корисні посилання".localized)
                 .font(Theme.Typography.headline)
                 .fontWeight(.semibold)
                 .foregroundColor(Theme.Colors.textPrimary)
@@ -1108,7 +1108,7 @@ struct GuideDetailView: View {
     // MARK: - Tags Section
     private var tagsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Теги")
+            Text("Теги".localized)
                 .font(Theme.Typography.headline)
                 .fontWeight(.semibold)
                 .foregroundColor(Theme.Colors.textPrimary)
@@ -1143,11 +1143,11 @@ struct GuideDetailView: View {
             }
             
             VStack(alignment: .leading, spacing: 2) {
-                Text("Отримайте +50 XP")
+                Text("Отримайте +50 XP".localized)
                     .font(Theme.Typography.subheadline)
                     .fontWeight(.semibold)
                     .foregroundColor(Theme.Colors.textPrimary)
-                Text("Дочитайте гід до кінця")
+                Text("Дочитайте гід до кінця".localized)
                     .font(Theme.Typography.caption)
                     .foregroundColor(Theme.Colors.textSecondary)
             }
@@ -1325,7 +1325,7 @@ struct TemplateStepCard: View {
                 badge(title: template.category.localizedName, icon: template.category.iconName, color: accent.opacity(0.15), textColor: accent)
                 badge(title: template.language.uppercased(), icon: "globe", color: Color.gray.opacity(0.15), textColor: Theme.Colors.textSecondary)
                 if template.isOfficial {
-                    badge(title: "Офіційний", icon: "checkmark.seal.fill", color: Color.green.opacity(0.15), textColor: .green)
+                    badge(title: "Офіційний".localized, icon: "checkmark.seal.fill", color: Color.green.opacity(0.15), textColor: .green)
                 }
             }
             
@@ -1335,7 +1335,7 @@ struct TemplateStepCard: View {
                 } label: {
                     HStack(spacing: 6) {
                         Image(systemName: "eye")
-                        Text("Переглянути")
+                        Text("Переглянути".localized)
                     }
                     .font(.system(size: 14, weight: .semibold))
                     .padding(.vertical, 10)
@@ -1353,7 +1353,7 @@ struct TemplateStepCard: View {
                 } label: {
                     HStack(spacing: 6) {
                         Image(systemName: "doc.on.doc.fill")
-                        Text("Скопіювати")
+                        Text("Скопіювати".localized)
                     }
                     .font(.system(size: 14, weight: .semibold))
                     .padding(.vertical, 10)

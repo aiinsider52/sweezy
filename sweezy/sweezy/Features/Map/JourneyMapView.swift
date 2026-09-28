@@ -4,6 +4,8 @@ import UIKit
 
 struct JourneyMapView: View {
     @EnvironmentObject private var appContainer: AppContainer
+    @EnvironmentObject private var lockManager: AppLockManager
+    @EnvironmentObject private var sessionManager: SessionManager
     @Environment(\.openURL) private var openURL
 
     private static var defaultCenter: CLLocationCoordinate2D {
@@ -41,6 +43,7 @@ struct JourneyMapView: View {
     @State private var activeRoute: MKRoute?
     @State private var isCalculatingRoute = false
     @State private var showsPlaceList = false
+    @State private var showsSuggestPlace = false
     @State private var showsNearbyRail = true
 
     private let filters: [(PlaceType?, String, String)] = [
@@ -494,6 +497,9 @@ struct JourneyMapView: View {
                 }
 
                 VStack(alignment: .leading, spacing: 4) {
+                    if place.isCommunitySuggested {
+                        communityBadge
+                    }
                     mapMetaRow(locationLine(for: place)) {
                         Image(systemName: "mappin.and.ellipse")
                             .font(.system(size: 10, weight: .semibold))
@@ -732,11 +738,13 @@ struct JourneyMapView: View {
 
                         if !showsDiscoveryOnly {
                             if selectedType == nil, !displayedPlaces.isEmpty {
-                                Text("journey.map.places_nearby".localized)
+                                Text("journey.map.near_you".localized)
                                     .font(.system(size: 18, weight: .bold, design: .default))
                                     .foregroundStyle(JourneyVisual.primaryText)
                                     .padding(.top, 10)
                             }
+                            suggestPlaceCard
+
                             ForEach(displayedPlaces) { place in
                                 placeListRow(place)
                             }
@@ -747,9 +755,18 @@ struct JourneyMapView: View {
                     .padding(.bottom, 28)
                 }
             }
-            .navigationTitle("journey.map.places_nearby".localized)
+            .navigationTitle("journey.map.places_nearby".localized(with: displayedPlaces.count))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        showsSuggestPlace = true
+                    } label: {
+                        Image(systemName: "plus")
+                    }
+                    .foregroundColor(Theme.Colors.textPrimary)
+                    .accessibilityLabel("place.suggest.title".localized)
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("common.done".localized) {
                         showsPlaceList = false
@@ -761,6 +778,49 @@ struct JourneyMapView: View {
         .presentationDetents([.medium, .large])
         .presentationDragIndicator(.visible)
         .presentationBackground(.ultraThinMaterial)
+        .sheet(isPresented: $showsSuggestPlace) {
+            SuggestPlaceView()
+                .environment(\.locale, appContainer.currentLocale)
+                .environmentObject(appContainer)
+                .environmentObject(lockManager)
+                .environmentObject(sessionManager)
+        }
+    }
+
+    private var suggestPlaceCard: some View {
+        Button {
+            showsSuggestPlace = true
+        } label: {
+            HStack(spacing: 12) {
+                SweezyCompanion(pose: .plan, size: 64)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("place.suggest.card.title".localized)
+                        .font(.system(size: 15, weight: .bold))
+                        .foregroundStyle(JourneyVisual.primaryText)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Text("place.suggest.card.subtitle".localized)
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundStyle(JourneyVisual.secondaryText)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: 4)
+                Image(systemName: "plus")
+                    .font(.system(size: 15, weight: .bold))
+                    .foregroundStyle(.black)
+                    .frame(width: 38, height: 38)
+                    .background(JourneyVisual.lime)
+                    .clipShape(Circle())
+            }
+            .padding(12)
+            .background(Theme.Colors.card)
+            .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 22, style: .continuous)
+                    .strokeBorder(JourneyVisual.accentStrong.opacity(0.5), style: StrokeStyle(lineWidth: 1.4, dash: [6, 5]))
+            )
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier("map.suggest_place")
     }
 
     private func placeListRow(_ place: Place) -> some View {
@@ -779,6 +839,9 @@ struct JourneyMapView: View {
                     HStack(spacing: 6) {
                         Image(systemName: icon(for: place.type))
                         Text(typeTitle(for: place.type))
+                        if place.isCommunitySuggested {
+                            communityBadge
+                        }
                     }
                     .font(.system(size: 10, weight: .bold))
                     .foregroundColor(JourneyVisual.accentText)
@@ -818,6 +881,18 @@ struct JourneyMapView: View {
             )
         }
         .buttonStyle(.plain)
+    }
+
+    private var communityBadge: some View {
+        Label("place.suggest.badge".localized, systemImage: "person.2.fill")
+            .labelStyle(.titleAndIcon)
+            .font(.system(size: 9, weight: .bold))
+            .foregroundStyle(.black)
+            .padding(.horizontal, 7)
+            .frame(height: 18)
+            .background(JourneyVisual.lime)
+            .clipShape(Capsule())
+            .lineLimit(1)
     }
 
     private func discoveryPlaceListRow(_ place: SwissDiscoveryPlace) -> some View {
@@ -1138,6 +1213,13 @@ struct JourneyMapView: View {
 
     private func locationLine(for place: Place) -> String {
         let city = place.address.city.trimmingCharacters(in: .whitespacesAndNewlines)
+        // `canton` is a Swiss-only field; German and Austrian places carry their region in subdivisionCode.
+        guard place.countryCode == "CH" else {
+            let country = ResidenceCountry(rawValue: place.countryCode) ?? .germany
+            let region = CountryCatalog.subdivisionName(country: country, code: place.subdivisionCode)
+            if city.isEmpty { return region }
+            return city == region ? city : "\(city) · \(region)"
+        }
         return city.isEmpty ? place.canton.localizedName : "\(city) · \(place.canton.rawValue)"
     }
 

@@ -217,9 +217,9 @@ struct ThemePreviewView: View {
                 }
                 
                 HeroSplitView(
-                    title: "Добро пожаловать",
-                    subtitle: "Мы помогаем вам ориентироваться",
-                    ctaTitle: "Начать",
+                    title: "Добро пожаловать".localized,
+                    subtitle: "Мы помогаем вам ориентироваться".localized,
+                    ctaTitle: "Начать".localized,
                     right: { PixelBadgeIcon("sparkles", tint: .white) }
                 ) {}
             }

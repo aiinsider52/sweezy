@@ -835,25 +835,25 @@ struct WinterBadge: Identifiable {
     
     static let winterPioneer = WinterBadge(
         id: "winter_pioneer",
-        title: "Зимовий першопрохідець",
+        title: "Зимовий першопрохідець".localized,
         icon: "❄️",
-        description: "Перший запуск додатку взимку",
+        description: "Перший запуск додатку взимку".localized,
         earnedDate: nil
     )
     
     static let festiveOrganizer = WinterBadge(
         id: "festive_organizer",
-        title: "Святковий організатор",
+        title: "Святковий організатор".localized,
         icon: "🎄",
-        description: "Завершено 5 чек-листів у грудні",
+        description: "Завершено 5 чек-листів у грудні".localized,
         earnedDate: nil
     )
     
     static let newYearHero = WinterBadge(
         id: "new_year_hero",
-        title: "Новорічний герой",
+        title: "Новорічний герой".localized,
         icon: "🎅",
-        description: "Прочитано 10 гідів у святковий період",
+        description: "Прочитано 10 гідів у святковий період".localized,
         earnedDate: nil
     )
     
@@ -898,17 +898,17 @@ struct WinterGreetingScreen: View {
                 
                 // Greeting
                 VStack(spacing: 12) {
-                    Text(WinterTheme.isPostNewYear ? "З Новим Роком!" : "Святкова зима разом із Sweezy")
+                    Text(WinterTheme.isPostNewYear ? "З Новим Роком!".localized : "Святкова зима разом із Sweezy".localized)
                         .font(.system(size: 30, weight: .bold, design: .default))
                         .foregroundColor(.white)
                         .multilineTextAlignment(.center)
                     
-                    Text("Ласкаво просимо до Sweezy")
+                    Text("Ласкаво просимо до Sweezy".localized)
                         .font(.system(size: 22, weight: .medium))
                         .foregroundColor(.white.opacity(0.9))
                         .multilineTextAlignment(.center)
                     
-                    Text("Ваш особистий гід для успішного життя в Швейцарії")
+                    Text("Ваш особистий гід для успішного життя в Швейцарії".localized)
                         .font(.system(size: 16))
                         .foregroundColor(.white.opacity(0.7))
                         .multilineTextAlignment(.center)
@@ -921,7 +921,7 @@ struct WinterGreetingScreen: View {
                 // Continue button
                 Button(action: onContinue) {
                     HStack(spacing: 12) {
-                        Text("Почати подорож")
+                        Text("Почати подорож".localized)
                             .font(.system(size: 18, weight: .semibold))
                         Image(systemName: "arrow.right")
                             .font(.system(size: 16, weight: .bold))
@@ -1003,7 +1003,7 @@ struct WinterBadgeCard: View {
                     .lineLimit(2)
                 
                 if isEarned, let date = badge.earnedDate {
-                    Text("Отримано \(date, formatter: dateFormatter)")
+                    Text("Отримано %@".localized(with: dateFormatter.string(from: date)))
                         .font(.system(size: 11))
                         .foregroundColor(Theme.Colors.accent)
                 }

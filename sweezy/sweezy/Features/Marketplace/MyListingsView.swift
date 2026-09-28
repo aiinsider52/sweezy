@@ -163,7 +163,7 @@ struct MyListingsView: View {
         } label: {
             HStack(spacing: 14) {
                 Image(systemName: "chart.line.uptrend.xyaxis").font(.title2.bold()).foregroundStyle(.black).frame(width: 48, height: 48).background(JourneyVisual.lime).clipShape(RoundedRectangle(cornerRadius: 15))
-                VStack(alignment: .leading, spacing: 3) { HStack { Text("Marketplace Pro").font(.headline); Text("PLUS PRO").font(.caption2.bold()).foregroundStyle(.black).padding(.horizontal, 7).padding(.vertical, 3).background(JourneyVisual.lime).clipShape(Capsule()) }; Text("Перегляди · клієнти · просування · швидкі відповіді").font(.caption).foregroundStyle(JourneyVisual.secondaryText).multilineTextAlignment(.leading) }
+                VStack(alignment: .leading, spacing: 3) { HStack { Text("Marketplace Pro").font(.headline); Text("PLUS PRO").font(.caption2.bold()).foregroundStyle(.black).padding(.horizontal, 7).padding(.vertical, 3).background(JourneyVisual.lime).clipShape(Capsule()) }; Text("Перегляди · клієнти · просування · швидкі відповіді".localized).font(.caption).foregroundStyle(JourneyVisual.secondaryText).multilineTextAlignment(.leading) }
                 Spacer(); Image(systemName: "arrow.right")
             }.foregroundStyle(JourneyVisual.primaryText).padding(16).background(Theme.Colors.card).clipShape(RoundedRectangle(cornerRadius: 22)).overlay(RoundedRectangle(cornerRadius: 22).stroke(JourneyVisual.lime.opacity(0.3)))
         }.buttonStyle(.plain)
@@ -173,12 +173,12 @@ struct MyListingsView: View {
         let teamWorkspaces = workspaces.filter { $0.role != "owner" }
         if !teamWorkspaces.isEmpty {
             VStack(alignment: .leading, spacing: 10) {
-                Text("КОМАНДНІ ПРОСТОРИ").font(.caption.bold()).tracking(1.5).foregroundStyle(Theme.Colors.textPrimary)
+                Text("КОМАНДНІ ПРОСТОРИ".localized).font(.caption.bold()).tracking(1.5).foregroundStyle(Theme.Colors.textPrimary)
                 ForEach(teamWorkspaces) { workspace in
                     Button { selectedWorkspace = workspace } label: {
                         HStack(spacing: 13) {
                             Image(systemName: "person.3.fill").foregroundStyle(.black).frame(width: 46, height: 46).background(JourneyVisual.lime, in: RoundedRectangle(cornerRadius: 14))
-                            VStack(alignment: .leading, spacing: 3) { Text(workspace.displayName).font(.headline); Text("\(workspace.role.capitalized) · заявки та календар").font(.caption).foregroundStyle(JourneyVisual.secondaryText) }
+                            VStack(alignment: .leading, spacing: 3) { Text(workspace.displayName).font(.headline); Text("%@ · заявки та календар".localized(with: "\(workspace.role.capitalized)")).font(.caption).foregroundStyle(JourneyVisual.secondaryText) }
                             Spacer(); Image(systemName: "arrow.right")
                         }.foregroundStyle(JourneyVisual.primaryText).padding(15).background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 20)).overlay(RoundedRectangle(cornerRadius: 20).stroke(JourneyVisual.lime.opacity(0.24)))
                     }.buttonStyle(.plain)

@@ -16,13 +16,13 @@ enum FriendsAPI {
     let message: String
     switch status {
     case 401:
-      message = "Сесія завершилась. Увійди знову — введені дані залишаться на екрані."
+      message = "Сесія завершилась. Увійди знову — введені дані залишаться на екрані.".localized
     case 403:
-      message = "Для цієї дії потрібен підтверджений акаунт. Перевір email та повтори."
+      message = "Для цієї дії потрібен підтверджений акаунт. Перевір email та повтори.".localized
     case 404:
-      message = "Розділ тимчасово недоступний на сервері. Онови застосунок або повтори пізніше."
+      message = "Розділ тимчасово недоступний на сервері. Онови застосунок або повтори пізніше.".localized
     case 500...599:
-      message = "Сервер не зміг виконати дію. Дані не втрачено — повтори через хвилину."
+      message = "Сервер не зміг виконати дію. Дані не втрачено — повтори через хвилину.".localized
     default:
       message = fallback
     }
@@ -121,7 +121,7 @@ enum FriendsAPI {
     let (data, response) = try await APIClient.authorizedData(
       for: request, context: "friends_swipe_deck")
     guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
-      throw responseError(data, response: response, fallback: "Не вдалося завантажити нові знайомства")
+      throw responseError(data, response: response, fallback: "Не вдалося завантажити нові знайомства".localized)
     }
     return try ChatAPI.decoder.decode(SocialSwipeDeck.self, from: data)
   }
@@ -137,7 +137,7 @@ enum FriendsAPI {
     let (data, response) = try await APIClient.authorizedData(
       for: request, context: "friends_swipe_undo")
     guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
-      throw responseError(data, response: response, fallback: "Не вдалося повернути профіль")
+      throw responseError(data, response: response, fallback: "Не вдалося повернути профіль".localized)
     }
   }
   static func myProfile() async throws -> SocialProfile { try await call("friends/profile/me") }

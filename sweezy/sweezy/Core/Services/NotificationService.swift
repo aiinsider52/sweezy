@@ -92,8 +92,8 @@ class NotificationService: NotificationServiceProtocol {
         // Disabled: no active subscriptions in this build.
         guard NotificationPreference.isEnabled && isAuthorized else { return false }
         let content = UNMutableNotificationContent()
-        content.title = "Нагадування від Sweezy"
-        content.body = "Відкрийте застосунок, щоб перевірити останні оновлення"
+        content.title = "Нагадування від Sweezy".localized
+        content.body = "Відкрийте застосунок, щоб перевірити останні оновлення".localized
         content.sound = .default
         content.categoryIdentifier = "TRIAL_REMINDER"
         content.userInfo = ["type": "trial_end"]
@@ -116,8 +116,8 @@ class NotificationService: NotificationServiceProtocol {
     func scheduleReengageReminder(afterDays days: Int) async -> Bool {
         guard NotificationPreference.isEnabled && isAuthorized else { return false }
         let content = UNMutableNotificationContent()
-        content.title = "Повернімося до інтеграції"
-        content.body = "Нові кроки та поради вже чекають на вас"
+        content.title = "Повернімося до інтеграції".localized
+        content.body = "Нові кроки та поради вже чекають на вас".localized
         content.sound = .default
         content.categoryIdentifier = "REENGAGE"
         content.userInfo = ["type": "reengage"]

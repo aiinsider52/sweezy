@@ -25,7 +25,7 @@ struct BusinessBookingFlow: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color(red: 0.025, green: 0.035, blue: 0.028).ignoresSafeArea()
+                Theme.Colors.card.ignoresSafeArea()
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 24) {
                         hero
@@ -69,16 +69,16 @@ struct BusinessBookingFlow: View {
                 if profile.isVerified {
                     Label("ПЕРЕВІРЕНО", systemImage: "checkmark.seal.fill")
                         .font(.caption2.bold())
-                        .foregroundStyle(JourneyVisual.lime)
+                        .foregroundStyle(Theme.Colors.textPrimary)
                 }
             }
             Text("Записатися до\n\(profile.displayName)")
-                .font(.system(size: 34, weight: .black, design: .rounded))
-                .foregroundStyle(.white)
+                .font(.system(size: 34, weight: .black, design: .default))
+                .foregroundStyle(JourneyVisual.primaryText)
                 .fixedSize(horizontal: false, vertical: true)
             Text("Обери послугу та вільний час. Заявка потрапить прямо в календар бізнесу.")
                 .font(.subheadline)
-                .foregroundStyle(.white.opacity(0.58))
+                .foregroundStyle(JourneyVisual.secondaryText)
         }
         .padding(.top, 10)
     }
@@ -93,10 +93,10 @@ struct BusinessBookingFlow: View {
                 } label: {
                     HStack(spacing: 13) {
                         Image(systemName: service.id == selectedServiceID ? "checkmark.circle.fill" : "circle")
-                            .foregroundStyle(service.id == selectedServiceID ? JourneyVisual.lime : .white.opacity(0.28))
+                            .foregroundStyle(service.id == selectedServiceID ? JourneyVisual.lime : JourneyVisual.primaryText)
                         VStack(alignment: .leading, spacing: 3) {
-                            Text(service.title).font(.headline).foregroundStyle(.white)
-                            Text("\(service.durationMinutes) хв · \(service.priceText)").font(.caption).foregroundStyle(.white.opacity(0.5))
+                            Text(service.title).font(.headline).foregroundStyle(JourneyVisual.primaryText)
+                            Text("\(service.durationMinutes) хв · \(service.priceText)").font(.caption).foregroundStyle(JourneyVisual.secondaryText)
                         }
                         Spacer()
                     }
@@ -123,7 +123,7 @@ struct BusinessBookingFlow: View {
                                 Text(day.formatted(.dateTime.weekday(.abbreviated))).font(.caption2.bold())
                                 Text(day.formatted(.dateTime.day())).font(.title3.weight(.black))
                             }
-                            .foregroundStyle(Calendar.current.isDate(day, inSameDayAs: selectedDay) ? .black : .white)
+                            .foregroundStyle(Calendar.current.isDate(day, inSameDayAs: selectedDay) ? .black : JourneyVisual.primaryText)
                             .frame(width: 58, height: 66)
                             .background(Calendar.current.isDate(day, inSameDayAs: selectedDay) ? JourneyVisual.lime : .white.opacity(0.07), in: RoundedRectangle(cornerRadius: 17))
                         }
@@ -142,10 +142,10 @@ struct BusinessBookingFlow: View {
             } else if slots.isEmpty {
                 Text("На цей день вільних слотів немає.")
                     .font(.subheadline)
-                    .foregroundStyle(.white.opacity(0.52))
+                    .foregroundStyle(JourneyVisual.secondaryText)
                     .frame(maxWidth: .infinity)
                     .padding(22)
-                    .background(.white.opacity(0.04), in: RoundedRectangle(cornerRadius: 18))
+                    .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 18))
             } else {
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 92), spacing: 9)], spacing: 9) {
                     ForEach(slots) { slot in
@@ -154,7 +154,7 @@ struct BusinessBookingFlow: View {
                         } label: {
                             Text(slot.startsAt.formatted(date: .omitted, time: .shortened))
                                 .font(.subheadline.bold())
-                                .foregroundStyle(selectedSlot == slot ? .black : .white)
+                                .foregroundStyle(selectedSlot == slot ? .black : JourneyVisual.primaryText)
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 46)
                                 .background(selectedSlot == slot ? JourneyVisual.lime : .white.opacity(0.07), in: Capsule())
@@ -171,9 +171,9 @@ struct BusinessBookingFlow: View {
             sectionLabel("4 · Коментар")
             TextField("Що бізнесу варто знати?", text: $notes, axis: .vertical)
                 .lineLimit(3...6)
-                .foregroundStyle(.white)
+                .foregroundStyle(JourneyVisual.primaryText)
                 .padding(15)
-                .background(.white.opacity(0.07), in: RoundedRectangle(cornerRadius: 17))
+                .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 17))
         }
     }
 
@@ -182,11 +182,11 @@ struct BusinessBookingFlow: View {
             if let selectedSlot, let service = selectedService {
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text(service.title).font(.headline).foregroundStyle(.white)
-                        Text(selectedSlot.startsAt.formatted(date: .abbreviated, time: .shortened)).font(.caption).foregroundStyle(.white.opacity(0.55))
+                        Text(service.title).font(.headline).foregroundStyle(JourneyVisual.primaryText)
+                        Text(selectedSlot.startsAt.formatted(date: .abbreviated, time: .shortened)).font(.caption).foregroundStyle(JourneyVisual.secondaryText)
                     }
                     Spacer()
-                    Text(service.priceText).font(.caption.bold()).foregroundStyle(JourneyVisual.lime)
+                    Text(service.priceText).font(.caption.bold()).foregroundStyle(Theme.Colors.textPrimary)
                 }
             }
             Button { Task { await submit() } } label: {
@@ -207,11 +207,11 @@ struct BusinessBookingFlow: View {
             .opacity(selectedSlot == nil ? 0.45 : 1)
             Text("Запис підтверджує власник. Скасувати можна у Sweezy.")
                 .font(.caption2)
-                .foregroundStyle(.white.opacity(0.38))
+                .foregroundStyle(JourneyVisual.secondaryText)
                 .multilineTextAlignment(.center)
         }
         .padding(16)
-        .background(.black.opacity(0.36), in: RoundedRectangle(cornerRadius: 22))
+        .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 22))
         .overlay(RoundedRectangle(cornerRadius: 22).stroke(JourneyVisual.lime.opacity(0.2)))
     }
 
@@ -226,7 +226,7 @@ struct BusinessBookingFlow: View {
     }
 
     private func sectionLabel(_ text: String) -> some View {
-        Text(text.uppercased()).font(.caption.bold()).tracking(1.5).foregroundStyle(JourneyVisual.lime)
+        Text(text.uppercased()).font(.caption.bold()).tracking(1.5).foregroundStyle(Theme.Colors.textPrimary)
     }
 
     private func loadSlots() async {

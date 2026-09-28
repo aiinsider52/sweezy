@@ -11,6 +11,9 @@ import Foundation
 struct UserProfile: Codable, Identifiable {
     let id: UUID
     var fullName: String
+    var country: ResidenceCountry
+    var administrativeAreaCode: String
+    var residenceStatusCode: String
     var canton: Canton
     var permitType: PermitType
     var arrivalDate: Date?
@@ -30,6 +33,9 @@ struct UserProfile: Codable, Identifiable {
 
     init(
         fullName: String = "",
+        country: ResidenceCountry = .switzerland,
+        administrativeAreaCode: String? = nil,
+        residenceStatusCode: String? = nil,
         canton: Canton = .zurich,
         permitType: PermitType = .s,
         arrivalDate: Date? = nil,
@@ -43,6 +49,9 @@ struct UserProfile: Codable, Identifiable {
     ) {
         self.id = UUID()
         self.fullName = fullName
+        self.country = country
+        self.administrativeAreaCode = administrativeAreaCode ?? (country == .switzerland ? canton.rawValue : country.defaultSubdivisionCode)
+        self.residenceStatusCode = residenceStatusCode ?? (country == .switzerland ? permitType.rawValue : country.defaultResidenceStatusCode)
         self.canton = canton
         self.permitType = permitType
         self.arrivalDate = arrivalDate
@@ -89,7 +98,8 @@ struct UserProfile: Codable, Identifiable {
     }
 
     private enum CodingKeys: String, CodingKey {
-        case id, fullName, canton, permitType, arrivalDate, permitExpiryDate
+        case id, fullName, country, administrativeAreaCode, residenceStatusCode
+        case canton, permitType, arrivalDate, permitExpiryDate
         case goals, familySize, hasChildren, familyStatus, preferredLanguage
         case address, phoneNumber, email, emergencyContact, lifeEvents
         case createdAt, updatedAt
@@ -99,8 +109,13 @@ struct UserProfile: Codable, Identifiable {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         self.id = try c.decode(UUID.self, forKey: .id)
         self.fullName = try c.decode(String.self, forKey: .fullName)
-        self.canton = try c.decode(Canton.self, forKey: .canton)
-        self.permitType = try c.decode(PermitType.self, forKey: .permitType)
+        self.canton = (try? c.decode(Canton.self, forKey: .canton)) ?? .zurich
+        self.permitType = (try? c.decode(PermitType.self, forKey: .permitType)) ?? .s
+        self.country = (try? c.decode(ResidenceCountry.self, forKey: .country)) ?? .switzerland
+        self.administrativeAreaCode = (try? c.decode(String.self, forKey: .administrativeAreaCode))
+            ?? self.canton.rawValue
+        self.residenceStatusCode = (try? c.decode(String.self, forKey: .residenceStatusCode))
+            ?? self.permitType.rawValue
         self.arrivalDate = try c.decodeIfPresent(Date.self, forKey: .arrivalDate)
         self.permitExpiryDate = try c.decodeIfPresent(Date.self, forKey: .permitExpiryDate)
         self.goals = try c.decode([UserGoal].self, forKey: .goals)
@@ -115,6 +130,12 @@ struct UserProfile: Codable, Identifiable {
         self.lifeEvents = (try? c.decodeIfPresent([LifeEvent].self, forKey: .lifeEvents)) ?? []
         self.createdAt = try c.decode(Date.self, forKey: .createdAt)
         self.updatedAt = try c.decode(Date.self, forKey: .updatedAt)
+    }
+
+    var currencyCode: String { country.currencyCode }
+
+    var administrativeAreaName: String {
+        CountryCatalog.subdivisionName(country: country, code: administrativeAreaCode)
     }
 }
 

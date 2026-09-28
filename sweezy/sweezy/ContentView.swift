@@ -72,6 +72,10 @@ struct MainAppContent: View {
     @EnvironmentObject private var sessionManager: SessionManager
     @Environment(\.scenePhase) private var scenePhase
     
+    #if DEBUG
+    @StateObject private var cityTestGerman = DailyGermanGameService()
+    #endif
+
     @State private var showGlobalReset: Bool = false
     @State private var resetToken: String? = nil
     @State private var showPostOnboardingAuthEntry: Bool = false
@@ -80,7 +84,9 @@ struct MainAppContent: View {
     
     var body: some View {
         ZStack {
-            if isArticleLayoutUITest {
+            if isCityDesignUITest {
+                cityDesignPreview
+            } else if isArticleLayoutUITest {
                 JourneyGuideArticleView(guide: Self.articleLayoutFixture)
             } else if isDiscoveryUITest {
                 NavigationStack { SwissDiscoveryView() }
@@ -225,6 +231,39 @@ struct MainAppContent: View {
         UserDefaults.standard.bool(forKey: "screenshotCVGate")
         #else
         false
+        #endif
+    }
+
+    // Read-only UI fixtures use the real forms and never submit their contents.
+    private var isCityDesignUITest: Bool {
+        #if DEBUG
+        ProcessInfo.processInfo.environment["UITESTS"] == "1" &&
+            ProcessInfo.processInfo.arguments.contains("--ui-test-city-form")
+        #else
+        false
+        #endif
+    }
+
+    @ViewBuilder
+    private var cityDesignPreview: some View {
+        #if DEBUG
+        let page = ProcessInfo.processInfo.environment["CITY_TEST_PAGE"] ?? "listing"
+        NavigationStack {
+            Group {
+                switch page {
+                case "event": CreateEventView()
+                case "templates": TemplatesView()
+                case "checklists": ChecklistsView()
+                case "roadmap": MountainRoadmapView()
+                case "appointments": AppointmentsView()
+                case "language": DailyGermanGameView(service: cityTestGerman)
+                default: CreateListingView()
+                }
+            }
+            .accessibilityIdentifier("city.form." + page)
+        }
+        #else
+        EmptyView()
         #endif
     }
 

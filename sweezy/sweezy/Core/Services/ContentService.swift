@@ -36,6 +36,7 @@ protocol ContentServiceProtocol: ObservableObject {
     func getTemplatesForLocale(_ locale: String) -> [DocumentTemplate]
     func getBenefitRulesForLocale(_ locale: String) -> [BenefitRule]
     func loadLocalizedContent(for language: String) async
+    func configureCountry(_ countryCode: String)
 }
 
 /// Content service implementation with local JSON and remote updates
@@ -56,11 +57,30 @@ class ContentService: ContentServiceProtocol {
     private let encoder = JSONEncoder()
     // Preferred language for localized content; defaults to Ukrainian until user explicitly changes язык
     private var preferredLanguage: String = (UserDefaults.standard.string(forKey: "selected_locale") ?? "uk")
+    private var countryCode: String = APIClient.countryCode
     // Флаг: guides были успешно загружены з бекенду (Render). Если true — не перезаписываем их локальними JSON.
     private var didLoadRemoteGuides: Bool = false
     private let errorHandler: any ErrorHandlingServiceProtocol
     private let remoteConfigService: RemoteConfigService
     private var safetyPolicy = ContentSafetyPolicy()
+
+    private func cacheName(_ filename: String) -> String {
+        let stem = filename.replacingOccurrences(of: ".json", with: "")
+        return "\(stem)-\(countryCode).json"
+    }
+
+    func configureCountry(_ countryCode: String) {
+        let normalized = countryCode.uppercased()
+        guard normalized != self.countryCode else { return }
+        self.countryCode = normalized
+        didLoadRemoteGuides = false
+        guides = []
+        checklists = []
+        places = []
+        templates = []
+        benefitRules = []
+        news = []
+    }
     
     private var cacheDirectory: URL {
         let urls = fileManager.urls(for: .cachesDirectory, in: .userDomainMask)
@@ -214,7 +234,7 @@ class ContentService: ContentServiceProtocol {
             // 1) Пробуем забрать всі гайды з бекенду (публічний ендпоінт /api/v1/guides).
             //    Якщо є access_token у Keychain — він буде доданий автоматично як Bearer.
             do {
-                let remote = try await APIClient.fetchGuides()
+                let remote = try await APIClient.fetchGuides(language: preferredLanguage)
                 if !remote.isEmpty {
                     self.guides = remote.map { g in
                         Guide(
@@ -225,15 +245,12 @@ class ContentService: ContentServiceProtocol {
                             bodyMarkdown: g.content ?? "",
                             tags: [],
                             category: GuideCategory(rawValue: g.category ?? "documents") ?? .documents,
-                            cantonCodes: [],
+                            cantonCodes: g.subdivision_codes ?? [],
                             links: [],
                             priority: 0,
                             isNew: false,
                             estimatedReadingTime: 5,
-                            // Сейчас весь контент з бекенду українською, тому ставимо language = "uk".
-                            // Коли з'являться інші мови, бекенд отримає окреме поле language,
-                            // і меппінг тут можна буде оновити.
-                            language: "uk",
+                            language: g.language ?? "uk",
                             verifiedAt: Self.parseBackendDate(g.verified_at),
                             source: g.source_url,
                             sourceTitle: g.source_title,
@@ -244,14 +261,14 @@ class ContentService: ContentServiceProtocol {
                         )
                     }
                     didLoadRemoteGuides = true
-                    try? saveToCache(self.guides, filename: "guides.json")
+                    try? saveToCache(self.guides, filename: cacheName("guides.json"))
                 } else {
-                    guides = try loadCacheOrBundle("guides.json", type: [Guide].self) ?? []
+                    guides = try loadCountryCacheOrBundle("guides.json", type: [Guide].self) ?? []
                 }
             } catch {
-                guides = try loadCacheOrBundle("guides.json", type: [Guide].self) ?? []
+                guides = try loadCountryCacheOrBundle("guides.json", type: [Guide].self) ?? []
             }
-            await loadAdditionalGuides()
+            if countryCode == "CH" { await loadAdditionalGuides() }
         } catch {
             AppLogger.content("Error loading guides: \(error)", isError: true)
             guides = []
@@ -266,7 +283,7 @@ class ContentService: ContentServiceProtocol {
     private func loadChecklists() async {
         do {
             do {
-                let remote = try await APIClient.fetchChecklists()
+                let remote = try await APIClient.fetchChecklists(language: preferredLanguage)
                 if !remote.isEmpty {
                     self.checklists = remote.map { c in
                             let steps: [ChecklistStep] = c.items.enumerated().map { i, s in
@@ -290,24 +307,24 @@ class ContentService: ContentServiceProtocol {
                                 difficulty: .medium,
                                 steps: steps,
                                 tags: [],
-                                cantonCodes: [],
+                                cantonCodes: c.subdivision_codes ?? [],
                                 priority: 0,
                                 isNew: false,
-                                language: nil,
+                                language: c.language ?? "uk",
                                 verifiedAt: Self.parseBackendDate(c.verified_at),
                                 source: c.source_url,
                                 sourceTitle: c.source_title,
                                 heroImage: nil
                             )
                     }
-                    try? saveToCache(self.checklists, filename: "checklists.json")
+                    try? saveToCache(self.checklists, filename: cacheName("checklists.json"))
                 } else {
-                    checklists = try loadCacheOrBundle("checklists.json", type: [Checklist].self) ?? []
+                    checklists = try loadCountryCacheOrBundle("checklists.json", type: [Checklist].self) ?? []
                 }
             } catch {
-                checklists = try loadCacheOrBundle("checklists.json", type: [Checklist].self) ?? []
+                checklists = try loadCountryCacheOrBundle("checklists.json", type: [Checklist].self) ?? []
             }
-            await loadAdditionalChecklists()
+            if countryCode == "CH" { await loadAdditionalChecklists() }
         } catch {
             AppLogger.content("Error loading checklists: \(error)", isError: true)
             checklists = []
@@ -316,8 +333,8 @@ class ContentService: ContentServiceProtocol {
     
     private func loadPlaces() async {
         do {
-            places = try loadCacheOrBundle("places.json", type: [Place].self) ?? []
-            await loadAdditionalPlaces()
+            places = try loadCountryCacheOrBundle("places.json", type: [Place].self) ?? []
+            if countryCode == "CH" { await loadAdditionalPlaces() }
         } catch {
             AppLogger.content("Error loading places: \(error)", isError: true)
             places = []
@@ -337,17 +354,19 @@ class ContentService: ContentServiceProtocol {
                                 category: .government,
                                 templateType: .letter,
                                 content: t.content,
-                                placeholders: []
+                                placeholders: [],
+                                cantonCodes: t.subdivision_codes ?? [],
+                                language: t.language ?? "de"
                             )
                     }
-                    try? saveToCache(self.templates, filename: "templates.json")
+                    try? saveToCache(self.templates, filename: cacheName("templates.json"))
                 } else {
-                    templates = try loadCacheOrBundle("templates.json", type: [DocumentTemplate].self) ?? []
+                    templates = try loadCountryCacheOrBundle("templates.json", type: [DocumentTemplate].self) ?? []
                 }
             } catch {
-                templates = try loadCacheOrBundle("templates.json", type: [DocumentTemplate].self) ?? []
+                templates = try loadCountryCacheOrBundle("templates.json", type: [DocumentTemplate].self) ?? []
             }
-            await loadAdditionalTemplates()
+            if countryCode == "CH" { await loadAdditionalTemplates() }
         } catch {
             AppLogger.content("Error loading templates: \(error)", isError: true)
             templates = []
@@ -356,8 +375,8 @@ class ContentService: ContentServiceProtocol {
     
     private func loadBenefitRules() async {
         do {
-            benefitRules = try loadCacheOrBundle("benefit_rules.json", type: [BenefitRule].self) ?? []
-            await loadAdditionalBenefitRules()
+            benefitRules = try loadCountryCacheOrBundle("benefit_rules.json", type: [BenefitRule].self) ?? []
+            if countryCode == "CH" { await loadAdditionalBenefitRules() }
         } catch {
             AppLogger.content("Error loading benefit rules: \(error)", isError: true)
             benefitRules = []
@@ -391,14 +410,14 @@ class ContentService: ContentServiceProtocol {
                                 imageURL: n.image_url
                             )
                     }
-                    try? saveToCache(self.news, filename: "news.json")
+                    try? saveToCache(self.news, filename: cacheName("news.json"))
                 } else {
-                    news = try loadCacheOrBundle("news.json", type: [NewsItem].self) ?? []
+                    news = try loadCountryCacheOrBundle("news.json", type: [NewsItem].self) ?? []
                 }
             } catch {
-                news = try loadCacheOrBundle("news.json", type: [NewsItem].self) ?? []
+                news = try loadCountryCacheOrBundle("news.json", type: [NewsItem].self) ?? []
             }
-            await loadAdditionalNews()
+            if countryCode == "CH" { await loadAdditionalNews() }
         } catch {
             AppLogger.content("Error loading news: \(error)", isError: true)
             news = []
@@ -543,6 +562,17 @@ class ContentService: ContentServiceProtocol {
         }
         return nil
     }
+
+    private func loadCountryCacheOrBundle<T: Codable>(_ filename: String, type: T.Type) throws -> T? {
+        if let cached = try loadFromCache(cacheName(filename), type: type) {
+            return cached
+        }
+        if countryCode != "CH" {
+            let stem = filename.replacingOccurrences(of: ".json", with: "")
+            return try loadFromBundle("\(stem)-\(countryCode).json", type: type)
+        }
+        return try loadCacheOrBundle(filename, type: type)
+    }
     
     private func loadFromCache<T: Codable>(_ filename: String, type: T.Type) throws -> T? {
         let url = cacheDirectory.appendingPathComponent(filename)
@@ -625,7 +655,8 @@ class ContentService: ContentServiceProtocol {
         
         // First, try to get guides matching the requested language
         let matchingGuides = guides.filter { guide in
-            guard let lang = guide.language?.lowercased() else { return false }
+            // Bundled guides without a language are the original Ukrainian set.
+            let lang = guide.language?.lowercased() ?? "uk"
             return lang == normalizedLocale || guide.tags.contains("lang:\(normalizedLocale)")
         }
         
@@ -742,6 +773,12 @@ class ContentService: ContentServiceProtocol {
     // MARK: - Localized content loader
     func loadLocalizedContent(for language: String) async {
         let lang = normalizeLocale(language)
+        preferredLanguage = lang
+        if countryCode != "CH" {
+            didLoadRemoteGuides = false
+            await loadContent()
+            return
+        }
         
         // Load ALL guides from all language files to have comprehensive multilingual content.
         // This ensures users can access any guide in their preferred language, even when the

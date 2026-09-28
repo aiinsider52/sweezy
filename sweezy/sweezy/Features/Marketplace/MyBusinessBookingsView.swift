@@ -10,7 +10,7 @@ struct MyBusinessBookingsView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                LinearGradient(colors: [Color(red: 0.025, green: 0.035, blue: 0.028), .black], startPoint: .top, endPoint: .bottom).ignoresSafeArea()
+                JourneyVisual.pageBackground.ignoresSafeArea()
                 if loading {
                     ProgressView().tint(JourneyVisual.lime)
                 } else {
@@ -37,48 +37,48 @@ struct MyBusinessBookingsView: View {
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 9) {
-            Label("Sweezy Booking", systemImage: "calendar.badge.checkmark").font(.caption.bold()).tracking(1.2).foregroundStyle(JourneyVisual.lime)
-            Text("Усі твої записи\nв одному місці").font(.system(size: 32, weight: .black, design: .rounded)).foregroundStyle(.white)
-            Text("Статуси оновлює бізнес. Майбутній запис можна скасувати тут.").font(.subheadline).foregroundStyle(.white.opacity(0.52))
+            Label("Sweezy Booking", systemImage: "calendar.badge.checkmark").font(.caption.bold()).tracking(1.2).foregroundStyle(Theme.Colors.textPrimary)
+            Text("Усі твої записи\nв одному місці").font(.system(size: 32, weight: .black, design: .default)).foregroundStyle(JourneyVisual.primaryText)
+            Text("Статуси оновлює бізнес. Майбутній запис можна скасувати тут.").font(.subheadline).foregroundStyle(JourneyVisual.secondaryText)
         }
         .padding(.bottom, 8)
     }
 
     private var emptyState: some View {
         VStack(spacing: 13) {
-            Image(systemName: "calendar.badge.plus").font(.system(size: 40)).foregroundStyle(JourneyVisual.lime)
-            Text("Записів поки немає").font(.title3.bold()).foregroundStyle(.white)
-            Text("Відкрий послугу перевіреного бізнесу та обери вільний час.").font(.subheadline).foregroundStyle(.white.opacity(0.5)).multilineTextAlignment(.center)
+            Image(systemName: "calendar.badge.plus").font(.system(size: 40)).foregroundStyle(Theme.Colors.textPrimary)
+            Text("Записів поки немає").font(.title3.bold()).foregroundStyle(JourneyVisual.primaryText)
+            Text("Відкрий послугу перевіреного бізнесу та обери вільний час.").font(.subheadline).foregroundStyle(JourneyVisual.secondaryText).multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity).padding(.vertical, 42).padding(.horizontal, 24)
-        .background(.white.opacity(0.05), in: RoundedRectangle(cornerRadius: 24))
+        .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 24))
     }
 
     private func bookingCard(_ booking: BusinessBooking) -> some View {
         VStack(alignment: .leading, spacing: 13) {
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(booking.businessName ?? "Sweezy business").font(.headline).foregroundStyle(.white)
-                    if let service = booking.serviceTitle { Text(service).font(.caption).foregroundStyle(.white.opacity(0.52)) }
-                    Text(booking.startsAt.formatted(date: .abbreviated, time: .shortened)).font(.subheadline.bold()).foregroundStyle(JourneyVisual.lime)
+                    Text(booking.businessName ?? "Sweezy business").font(.headline).foregroundStyle(JourneyVisual.primaryText)
+                    if let service = booking.serviceTitle { Text(service).font(.caption).foregroundStyle(JourneyVisual.secondaryText) }
+                    Text(booking.startsAt.formatted(date: .abbreviated, time: .shortened)).font(.subheadline.bold()).foregroundStyle(Theme.Colors.textPrimary)
                 }
                 Spacer()
                 statusBadge(booking.status)
             }
-            if let location = booking.location, !location.isEmpty { Label(location, systemImage: "mappin.and.ellipse").font(.caption).foregroundStyle(.white.opacity(0.55)) }
-            if !booking.notes.isEmpty { Text(booking.notes).font(.caption).foregroundStyle(.white.opacity(0.5)).lineLimit(3) }
+            if let location = booking.location, !location.isEmpty { Label(location, systemImage: "mappin.and.ellipse").font(.caption).foregroundStyle(JourneyVisual.secondaryText) }
+            if !booking.notes.isEmpty { Text(booking.notes).font(.caption).foregroundStyle(JourneyVisual.secondaryText).lineLimit(3) }
             if canCancel(booking) {
                 Button { Task { await cancel(booking) } } label: {
-                    HStack { if cancellingID == booking.id { ProgressView().tint(.white) }; Text("Скасувати запис"); Spacer(); Image(systemName: "xmark.circle") }
-                        .font(.subheadline.bold()).foregroundStyle(.white).padding(.horizontal, 15).frame(height: 46)
+                    HStack { if cancellingID == booking.id { ProgressView().tint(JourneyVisual.primaryText) }; Text("Скасувати запис"); Spacer(); Image(systemName: "xmark.circle") }
+                        .font(.subheadline.bold()).foregroundStyle(JourneyVisual.primaryText).padding(.horizontal, 15).frame(height: 46)
                         .background(.red.opacity(0.16), in: RoundedRectangle(cornerRadius: 14))
                 }
                 .buttonStyle(.plain).disabled(cancellingID != nil)
             }
         }
         .padding(17)
-        .background(.white.opacity(0.055), in: RoundedRectangle(cornerRadius: 22))
-        .overlay(RoundedRectangle(cornerRadius: 22).stroke(.white.opacity(0.09)))
+        .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 22))
+        .overlay(RoundedRectangle(cornerRadius: 22).stroke(JourneyVisual.softBorder))
     }
 
     private func statusBadge(_ status: String) -> some View {

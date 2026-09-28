@@ -228,7 +228,7 @@ private struct CoachMarksOverlay: View {
                 }
                 
                 Text(currentStep.title)
-                    .font(.system(size: 17, weight: .bold, design: .rounded))
+                    .font(.system(size: 17, weight: .bold, design: .default))
                     .foregroundColor(.white)
                 
                 Spacer()

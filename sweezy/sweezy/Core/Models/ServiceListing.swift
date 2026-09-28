@@ -43,22 +43,25 @@ enum ServiceCategory: String, Codable, CaseIterable, Identifiable {
         }
     }
 
-    var color: Color {
+    /// Brand paper/ink pair; `color` stays for call sites that only need a tint.
+    var swatch: JourneyCategorySwatch {
         switch self {
-        case .translation: return .blue
-        case .documents:   return .indigo
-        case .tutoring:    return .purple
-        case .it:          return .cyan
-        case .beauty:      return .pink
-        case .cleaning:    return .mint
-        case .accounting:  return .orange
-        case .legal:       return .brown
-        case .childcare:   return .teal
-        case .moving:      return .yellow
-        case .repair:      return .red
-        case .other:       return .gray
+        case .translation: return JourneyCategoryPalette.sky
+        case .documents:   return JourneyCategoryPalette.sky
+        case .tutoring:    return JourneyCategoryPalette.lilac
+        case .it:          return JourneyCategoryPalette.teal
+        case .beauty:      return JourneyCategoryPalette.coral
+        case .cleaning:    return JourneyCategoryPalette.teal
+        case .accounting:  return JourneyCategoryPalette.sand
+        case .legal:       return JourneyCategoryPalette.graphite
+        case .childcare:   return JourneyCategoryPalette.coral
+        case .moving:      return JourneyCategoryPalette.sand
+        case .repair:      return JourneyCategoryPalette.lime
+        case .other:       return JourneyCategoryPalette.graphite
         }
     }
+
+    var color: Color { swatch.ink }
 }
 
 // MARK: - Listing Type
@@ -102,19 +105,21 @@ enum ItemCategory: String, Codable, CaseIterable, Identifiable {
         }
     }
 
-    var color: Color {
+    var swatch: JourneyCategorySwatch {
         switch self {
-        case .furniture:   return Theme.Colors.primary
-        case .electronics: return .indigo
-        case .kids:        return Theme.Colors.accent
-        case .clothing:    return .pink
-        case .home:        return .teal
-        case .sports:      return Theme.Colors.primaryLight
-        case .books:       return .brown
-        case .free:        return Theme.Colors.accentCoral
-        case .other:       return .gray
+        case .furniture:   return JourneyCategoryPalette.sand
+        case .electronics: return JourneyCategoryPalette.sky
+        case .kids:        return JourneyCategoryPalette.coral
+        case .clothing:    return JourneyCategoryPalette.lilac
+        case .home:        return JourneyCategoryPalette.teal
+        case .sports:      return JourneyCategoryPalette.lime
+        case .books:       return JourneyCategoryPalette.sand
+        case .free:        return JourneyCategoryPalette.lime
+        case .other:       return JourneyCategoryPalette.graphite
         }
     }
+
+    var color: Color { swatch.ink }
 }
 
 // MARK: - Item Condition
@@ -187,8 +192,12 @@ struct ServiceListing: Codable, Identifiable, Equatable {
     let rawCategory: String
     var category: ServiceCategory { ServiceCategory(rawValue: rawCategory) ?? .other }
     let canton: String
+    let countryCode: String
+    let subdivisionCode: String
     let priceInfo: String?
     let priceChf: Int?
+    let priceMinor: Int?
+    let currencyCode: String
     let isFree: Bool
     let condition: ItemCondition?
     let negotiable: Bool
@@ -218,10 +227,14 @@ struct ServiceListing: Codable, Identifiable, Equatable {
 
     private enum CodingKeys: String, CodingKey {
         case id, title, description, canton, negotiable, condition
+        case countryCode = "country_code"
+        case subdivisionCode = "subdivision_code"
         case rawCategory = "category"
         case listingType = "listing_type"
         case priceInfo = "price_info"
         case priceChf = "price_chf"
+        case priceMinor = "price_minor"
+        case currencyCode = "currency_code"
         case isFree = "is_free"
         case contactType = "contact_type"
         case contactValue = "contact_value"
@@ -256,8 +269,12 @@ struct ServiceListing: Codable, Identifiable, Equatable {
         description = try c.decode(String.self, forKey: .description)
         rawCategory = (try? c.decode(String.self, forKey: .rawCategory)) ?? "other"
         canton = try c.decode(String.self, forKey: .canton)
+        countryCode = (try? c.decode(String.self, forKey: .countryCode)) ?? "CH"
+        subdivisionCode = (try? c.decode(String.self, forKey: .subdivisionCode)) ?? canton
         priceInfo = try? c.decode(String.self, forKey: .priceInfo)
         priceChf = try? c.decode(Int.self, forKey: .priceChf)
+        priceMinor = try? c.decode(Int.self, forKey: .priceMinor)
+        currencyCode = (try? c.decode(String.self, forKey: .currencyCode)) ?? "CHF"
         isFree = (try? c.decode(Bool.self, forKey: .isFree)) ?? false
         condition = try? c.decode(ItemCondition.self, forKey: .condition)
         negotiable = (try? c.decode(Bool.self, forKey: .negotiable)) ?? false
@@ -340,16 +357,26 @@ struct ServiceListing: Codable, Identifiable, Equatable {
     var categoryDisplayName: String { itemCategory?.displayName ?? category.displayName }
     var categoryIcon: String { itemCategory?.icon ?? category.icon }
     var categoryColor: Color { itemCategory?.color ?? category.color }
+    var categorySwatch: JourneyCategorySwatch { itemCategory?.swatch ?? category.swatch }
 
-    /// "Free" / "CHF 250" / legacy text price for services
+    /// Country-aware price with legacy CHF fallback.
     var priceDisplay: String? {
         switch listingType {
         case .item:
             if isFree { return "marketplace.price.free".localized }
+            if let priceMinor {
+                let country = ResidenceCountry(rawValue: countryCode) ?? .switzerland
+                return CountryCatalog.currency(priceMinor, country: country)
+            }
             guard let priceChf else { return nil }
-            return "CHF \(priceChf)"
+            return "\(currencyCode) \(priceChf)"
         case .service:
-            return priceInfo
+            if let priceInfo, !priceInfo.isEmpty { return priceInfo }
+            if let priceMinor {
+                let country = ResidenceCountry(rawValue: countryCode) ?? .switzerland
+                return CountryCatalog.currency(priceMinor, country: country)
+            }
+            return nil
         }
     }
 
@@ -378,8 +405,12 @@ struct ServiceListingCreate: Codable {
     /// Raw category value: ServiceCategory for services, ItemCategory for items
     var category: String
     var canton: String
+    var countryCode: String = APIClient.countryCode
+    var subdivisionCode: String = APIClient.subdivisionCode
     var priceInfo: String?
     var priceChf: Int?
+    var priceMinor: Int?
+    var currencyCode: String = APIClient.countryCode == "CH" ? "CHF" : "EUR"
     var isFree: Bool = false
     var condition: ItemCondition?
     var negotiable: Bool = false
@@ -390,9 +421,13 @@ struct ServiceListingCreate: Codable {
 
     private enum CodingKeys: String, CodingKey {
         case title, description, category, canton, negotiable, condition
+        case countryCode = "country_code"
+        case subdivisionCode = "subdivision_code"
         case listingType = "listing_type"
         case priceInfo = "price_info"
         case priceChf = "price_chf"
+        case priceMinor = "price_minor"
+        case currencyCode = "currency_code"
         case isFree = "is_free"
         case contactType = "contact_type"
         case contactValue = "contact_value"

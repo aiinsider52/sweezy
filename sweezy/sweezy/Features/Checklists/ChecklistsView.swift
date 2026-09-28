@@ -122,7 +122,7 @@ struct ChecklistsView: View {
                         }
                     } label: {
                         Image(systemName: viewMode.icon)
-                            .foregroundColor(Theme.Colors.accent)
+                            .foregroundColor(JourneyVisual.accentStrong)
                     }
                 }
             }
@@ -137,89 +137,33 @@ struct ChecklistsView: View {
     // MARK: - Hero Progress Card
     private var heroProgressCard: some View {
         let progress = overallProgress
-        
-        return ZStack {
-            // Background gradient
-            RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .fill(
-                    LinearGradient(
-                        colors: [Theme.Colors.accentTurquoise, Theme.Colors.accentTurquoise.opacity(0.6)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
-            
-            // Decorative circles
-            Circle()
-                .fill(.white.opacity(0.1))
-                .frame(width: 120, height: 120)
-                .offset(x: 100, y: -40)
-            
-            Circle()
-                .fill(.white.opacity(0.08))
-                .frame(width: 80, height: 80)
-                .offset(x: -120, y: 50)
-            
-            HStack(spacing: 20) {
-                // Circular progress
-                ZStack {
-                    Circle()
-                        .stroke(.white.opacity(0.3), lineWidth: 10)
-                        .frame(width: 100, height: 100)
-                    
-                    Circle()
-                        .trim(from: 0, to: progress.percentage)
-                        .stroke(
-                            .white,
-                            style: StrokeStyle(lineWidth: 10, lineCap: .round)
-                        )
-                        .frame(width: 100, height: 100)
-                        .rotationEffect(.degrees(-90))
-                        .animation(.spring(response: 0.8), value: progress.percentage)
-                    
-                    VStack(spacing: 2) {
-                        Text("\(Int(progress.percentage * 100))%")
-                            .font(.system(size: 24, weight: .bold, design: .rounded))
-                            .foregroundColor(.white)
-                        Text("готово")
-                            .font(.system(size: 11))
-                            .foregroundColor(.white.opacity(0.8))
-                    }
-                }
-                
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Ваш прогрес інтеграції")
-                        .font(.system(size: 18, weight: .bold, design: .rounded))
-                        .foregroundColor(.white)
-                    
-                    Text("\(progress.completed) з \(progress.total) задач виконано")
-                        .font(Theme.Typography.subheadline)
-                        .foregroundColor(.white.opacity(0.9))
-                    
-                    if progress.total - progress.completed > 0 {
-                        Text("Залишилось \(progress.total - progress.completed) задач")
-                            .font(Theme.Typography.caption)
-                            .foregroundColor(.white.opacity(0.7))
-                    } else {
-                        HStack(spacing: 6) {
-                            Image(systemName: "checkmark.seal.fill")
-                            Text("Всі задачі виконано!")
-                        }
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundColor(.white)
-                    }
-                }
-                
-                Spacer()
+        return VStack(alignment: .leading, spacing: 16) {
+            HStack(alignment: .firstTextBaseline) {
+                Text("Ваш прогрес інтеграції")
+                    .font(.headline)
+                Spacer(minLength: 12)
+                Text("\(Int(progress.percentage * 100))%")
+                    .font(.title.bold()).monospacedDigit()
             }
-            .padding(20)
+            ProgressView(value: progress.percentage)
+                .tint(JourneyVisual.accentStrong)
+            Text(progress.total == 0
+                 ? "Обери чек-лист, щоб почати свій план"
+                 : "\(progress.completed) з \(progress.total) задач виконано")
+                .font(.subheadline)
+                .foregroundStyle(JourneyVisual.secondaryText)
+            if progress.total > 0 && progress.completed == progress.total {
+                Label("Всі задачі виконано!", systemImage: "checkmark.seal.fill")
+                    .font(.subheadline.bold()).foregroundStyle(JourneyVisual.accentText)
+            }
         }
-        .frame(height: 160)
-        .shadow(color: Theme.Colors.accentTurquoise.opacity(0.4), radius: 16, x: 0, y: 8)
+        .foregroundStyle(JourneyVisual.primaryText)
+        .padding(20)
+        .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 22))
+        .overlay(RoundedRectangle(cornerRadius: 22).stroke(JourneyVisual.softBorder))
         .padding(.horizontal, Theme.Spacing.md)
     }
-    
-    // MARK: - Gamification Bar
+
     private var gamificationBar: some View {
         HStack(spacing: 16) {
             // Streak
@@ -229,7 +173,7 @@ struct ChecklistsView: View {
                         .font(.system(size: 20))
                     VStack(alignment: .leading, spacing: 0) {
                         Text("\(currentStreak)")
-                            .font(.system(size: 16, weight: .bold, design: .rounded))
+                            .font(.system(size: 16, weight: .bold, design: .default))
                             .foregroundColor(Theme.Colors.textPrimary)
                         Text("днів")
                             .font(.system(size: 10))
@@ -248,7 +192,7 @@ struct ChecklistsView: View {
                     .font(.system(size: 20))
                 VStack(alignment: .leading, spacing: 0) {
                     Text("\(appContainer.gamification.totalXP)")
-                        .font(.system(size: 16, weight: .bold, design: .rounded))
+                        .font(.system(size: 16, weight: .bold, design: .default))
                         .foregroundColor(Theme.Colors.textPrimary)
                     Text("XP")
                         .font(.system(size: 10))
@@ -266,7 +210,7 @@ struct ChecklistsView: View {
                     .font(.system(size: 20))
                 VStack(alignment: .leading, spacing: 0) {
                     Text("Рівень \(appContainer.gamification.level())")
-                        .font(.system(size: 14, weight: .bold, design: .rounded))
+                        .font(.system(size: 14, weight: .bold, design: .default))
                         .foregroundColor(Theme.Colors.textPrimary)
                 }
             }
@@ -285,7 +229,7 @@ struct ChecklistsView: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Image(systemName: "target")
-                    .foregroundColor(Theme.Colors.accent)
+                    .foregroundColor(JourneyVisual.accentStrong)
                 Text("Фокус на сьогодні")
                     .font(Theme.Typography.headline)
                     .foregroundColor(Theme.Colors.textPrimary)
@@ -342,7 +286,7 @@ struct ChecklistsView: View {
                 } label: {
                     Image(systemName: "checkmark.circle.fill")
                         .font(.system(size: 36))
-                        .foregroundColor(Theme.Colors.primary)
+                        .foregroundColor(JourneyVisual.accentStrong)
                 }
                 .accessibilityLabel("Позначити крок виконаним")
             }
@@ -385,7 +329,7 @@ struct ChecklistsView: View {
     
     private func categoryChip(_ category: ChecklistCategory?, count: Int) -> some View {
         let isSelected = selectedCategory == category
-        let color = category?.swiftUIColor ?? Theme.Colors.accent
+        let color = category?.swiftUIColor ?? JourneyVisual.accentText
         
         return Button {
             withAnimation(.spring(response: 0.3)) {
@@ -396,7 +340,7 @@ struct ChecklistsView: View {
             HStack(spacing: 8) {
                 Image(systemName: category?.iconName ?? "square.grid.2x2")
                     .font(.system(size: 14, weight: .semibold))
-                Text(category?.localizedName ?? "Всі")
+                Text(category?.localizedName ?? "common.all".localized)
                     .font(Theme.Typography.subheadline)
                     .fontWeight(isSelected ? .semibold : .regular)
                 
@@ -454,18 +398,11 @@ struct ChecklistsView: View {
     }
     
     private var emptyState: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "checklist")
-                .font(.system(size: 48))
-                .foregroundColor(Theme.Colors.textTertiary)
-            Text("Немає чек-листів")
-                .font(Theme.Typography.headline)
-                .foregroundColor(Theme.Colors.textPrimary)
-            Text("Спробуйте змінити фільтр категорії")
-                .font(Theme.Typography.subheadline)
-                .foregroundColor(Theme.Colors.textSecondary)
-        }
-        .padding(.vertical, 60)
+        MascotEmptyState(
+            title: "Немає чек-листів",
+            subtitle: "Спробуйте змінити фільтр категорії"
+        )
+        .padding(.vertical, 20)
     }
     
     // MARK: - Helpers
@@ -554,7 +491,7 @@ private struct ChecklistProgressCard: View {
                     VStack(alignment: .leading, spacing: 5) {
                         HStack {
                             Text(checklist.title)
-                                .font(.system(size: 16, weight: .semibold, design: .rounded))
+                                .font(.system(size: 16, weight: .semibold, design: .default))
                                 .foregroundColor(Theme.Colors.textPrimary)
                                 .lineLimit(2)
 
@@ -671,7 +608,7 @@ private struct ChecklistProgressCard: View {
             Text("Готово")
         }
         .font(.system(size: 10, weight: .bold))
-        .foregroundColor(.white)
+        .foregroundColor(JourneyVisual.primaryText)
         .padding(.horizontal, 8)
         .padding(.vertical, 4)
         .background(Color.green)
@@ -681,7 +618,7 @@ private struct ChecklistProgressCard: View {
     private var newBadge: some View {
         Text("NEW")
             .font(.system(size: 10, weight: .bold))
-            .foregroundColor(.white)
+            .foregroundColor(JourneyVisual.primaryText)
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
             .background(Color.red)
@@ -735,7 +672,7 @@ private struct TimelineChecklistRow: View {
                     if isCompleted {
                         Image(systemName: "checkmark")
                             .font(.system(size: 12, weight: .bold))
-                            .foregroundColor(.white)
+                            .foregroundColor(JourneyVisual.primaryText)
                     } else if isInProgress {
                         Circle()
                             .fill(.white)
@@ -927,7 +864,7 @@ struct ChecklistDetailView: View {
             .overlay(
                 Image(systemName: checklist.category.iconName)
                     .font(.system(size: 100, weight: .thin))
-                    .foregroundColor(.white.opacity(0.15))
+                    .foregroundColor(JourneyVisual.secondaryText)
                     .offset(x: 80, y: -20)
             )
             
@@ -938,7 +875,7 @@ struct ChecklistDetailView: View {
                     Text(checklist.category.localizedName)
                 }
                 .font(.system(size: 12, weight: .semibold))
-                .foregroundColor(.white)
+                .foregroundColor(JourneyVisual.primaryText)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 6)
                 .background(.ultraThinMaterial)
@@ -948,7 +885,7 @@ struct ChecklistDetailView: View {
                 
                 Text(checklist.description)
                     .font(Theme.Typography.subheadline)
-                    .foregroundColor(.white.opacity(0.9))
+                    .foregroundColor(JourneyVisual.secondaryText)
                     .lineLimit(2)
                 
                 HStack(spacing: 16) {
@@ -956,7 +893,7 @@ struct ChecklistDetailView: View {
                     Label(checklist.difficulty.localizedName, systemImage: "speedometer")
                 }
                 .font(Theme.Typography.caption)
-                .foregroundColor(.white.opacity(0.8))
+                .foregroundColor(JourneyVisual.secondaryText)
             }
             .padding(20)
         }
@@ -984,7 +921,7 @@ struct ChecklistDetailView: View {
                     .animation(.spring(response: 0.5), value: completion)
                 
                 Text("\(Int(completion * 100))%")
-                    .font(.system(size: 18, weight: .bold, design: .rounded))
+                    .font(.system(size: 18, weight: .bold, design: .default))
                     .foregroundColor(completion >= 1.0 ? .green : checklist.category.swiftUIColor)
             }
             .accessibilityLabel("Прогрес")
@@ -1065,7 +1002,7 @@ struct ChecklistDetailView: View {
                 .font(.system(size: 16))
                 .foregroundColor(.yellow)
             Text("+\(earnedXP) XP")
-                .font(.system(size: 15, weight: .bold, design: .rounded))
+                .font(.system(size: 15, weight: .bold, design: .default))
                 .foregroundColor(Theme.Colors.textPrimary)
         }
         .padding(.horizontal, 16)
@@ -1184,7 +1121,7 @@ private struct StepCard: View {
                         if isCompleted {
                             Image(systemName: "checkmark")
                                 .font(.system(size: 13, weight: .bold))
-                                .foregroundColor(.white)
+                                .foregroundColor(JourneyVisual.primaryText)
                         } else {
                             Text("\(stepNumber)")
                                 .font(.system(size: 13, weight: .bold))
@@ -1369,19 +1306,19 @@ private struct CelebrationOverlay: View {
                     
                     Image(systemName: "checkmark")
                         .font(.system(size: 50, weight: .bold))
-                        .foregroundColor(.white)
+                        .foregroundColor(JourneyVisual.primaryText)
                         .scaleEffect(isAnimating ? 1 : 0.1)
                         .animation(.spring(response: 0.5, dampingFraction: 0.6).delay(0.1), value: isAnimating)
                 }
                 
                 VStack(spacing: 8) {
                     Text("🎉 Вітаємо!")
-                        .font(.system(size: 28, weight: .bold, design: .rounded))
-                        .foregroundColor(.white)
+                        .font(.system(size: 28, weight: .bold, design: .default))
+                        .foregroundColor(JourneyVisual.primaryText)
                     
                     Text("Чек-лист завершено!")
                         .font(Theme.Typography.body)
-                        .foregroundColor(.white.opacity(0.9))
+                        .foregroundColor(JourneyVisual.secondaryText)
                     
                     HStack(spacing: 6) {
                         Text("⭐")

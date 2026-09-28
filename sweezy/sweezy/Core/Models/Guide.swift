@@ -328,23 +328,25 @@ enum GuideCategory: String, CaseIterable, Codable, Hashable {
         }
     }
     
-    var swiftUIColor: Color {
+    var swatch: JourneyCategorySwatch {
         switch self {
-        case .documents: return .blue
-        case .housing: return .green
-        case .insurance: return .purple
-        case .work: return .orange
-        case .finance: return .red
-        case .education: return .indigo
-        case .healthcare: return .pink
-        case .legal: return .brown
-        case .emergency: return .red
-        case .integration: return .cyan
-        case .transport: return .mint
-        case .banking: return .yellow
-        case .lifestyle: return .teal
+        case .documents: return JourneyCategoryPalette.sky
+        case .housing: return JourneyCategoryPalette.lime
+        case .insurance: return JourneyCategoryPalette.lilac
+        case .work: return JourneyCategoryPalette.sand
+        case .finance: return JourneyCategoryPalette.coral
+        case .education: return JourneyCategoryPalette.sky
+        case .healthcare: return JourneyCategoryPalette.coral
+        case .legal: return JourneyCategoryPalette.graphite
+        case .emergency: return JourneyCategoryPalette.coral
+        case .integration: return JourneyCategoryPalette.teal
+        case .transport: return JourneyCategoryPalette.teal
+        case .banking: return JourneyCategoryPalette.sand
+        case .lifestyle: return JourneyCategoryPalette.lime
         }
     }
+
+    var swiftUIColor: Color { swatch.ink }
 }
 
 /// External links in guides

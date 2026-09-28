@@ -6,7 +6,13 @@ struct JourneyMapView: View {
     @EnvironmentObject private var appContainer: AppContainer
     @Environment(\.openURL) private var openURL
 
-    private static let defaultCenter = CLLocationCoordinate2D(latitude: 47.3769, longitude: 8.5417)
+    private static var defaultCenter: CLLocationCoordinate2D {
+        switch APIClient.countryCode {
+        case "DE": return CLLocationCoordinate2D(latitude: 52.5200, longitude: 13.4050)
+        case "AT": return CLLocationCoordinate2D(latitude: 48.2082, longitude: 16.3738)
+        default: return CLLocationCoordinate2D(latitude: 47.3769, longitude: 8.5417)
+        }
+    }
     private static let minCameraDistance: CLLocationDistance = 700
     private static let maxCameraDistance: CLLocationDistance = 520_000
     private static let defaultCameraDistance: CLLocationDistance = 6_800
@@ -49,7 +55,7 @@ struct JourneyMapView: View {
     var body: some View {
         ZStack {
             mapLayer
-            mapReadabilityGradient
+
 
             VStack(spacing: 10) {
                 topControls
@@ -71,9 +77,9 @@ struct JourneyMapView: View {
             .animation(.spring(response: 0.36, dampingFraction: 0.86), value: showsNearbyRail)
         }
         .overlay(alignment: .trailing) {
-            zoomRail
-                .padding(.trailing, 14)
-                .padding(.bottom, showsNearbyRail ? 168 : 58)
+            zoomStepper
+                .padding(.trailing, 16)
+                .padding(.bottom, showsNearbyRail ? 210 : 96)
         }
         .task {
             if appContainer.contentService.places.isEmpty {
@@ -94,6 +100,13 @@ struct JourneyMapView: View {
             if status == .authorizedWhenInUse || status == .authorizedAlways {
                 appContainer.locationService.startLocationUpdates()
             }
+        }
+        .onChange(of: appContainer.userProfile?.country) { _, _ in
+            showsDiscoveryOnly = false
+            selectedDiscoveryPlace = nil
+            selectedPlace = nil
+            moveCamera(to: Self.defaultCenter, distance: Self.defaultCameraDistance)
+            selectFirstVisiblePlace()
         }
         .onChange(of: selectedPlace?.id) { _, _ in
             guard let selectedPlace else {
@@ -176,11 +189,7 @@ struct JourneyMapView: View {
                 }
             }
         }
-        .mapStyle(.imagery(elevation: .realistic))
-        .mapControls {
-            MapScaleView()
-                .mapControlVisibility(.visible)
-        }
+        .mapStyle(.standard(elevation: .realistic))
         .onMapCameraChange(frequency: .continuous) { context in
             cameraCenter = context.camera.centerCoordinate
             cameraDistance = context.camera.distance
@@ -190,109 +199,39 @@ struct JourneyMapView: View {
         .ignoresSafeArea()
     }
 
-    private var zoomRail: some View {
-        VStack(spacing: 0) {
-            Button {
+    /// Compact paper stepper; pinch still drives the map, this is the tidy fallback.
+    private var zoomStepper: some View {
+        VStack(spacing: 2) {
+            zoomButton(icon: "plus", label: "journey.map.zoom_in".localized) {
                 adjustZoom(factor: 0.62)
-            } label: {
-                Image(systemName: "plus")
-                    .font(.system(size: 15, weight: .bold))
-                    .foregroundColor(.white)
-                    .frame(width: 40, height: 40)
             }
-            .buttonStyle(.plain)
-            .accessibilityLabel("journey.map.zoom_in".localized)
-
-            zoomGradation
-                .frame(width: 40, height: 92)
-                .padding(.vertical, 4)
-
-            Button {
+            Rectangle()
+                .fill(JourneyVisual.softBorder)
+                .frame(width: 26, height: 1)
+            zoomButton(icon: "minus", label: "journey.map.zoom_out".localized) {
                 adjustZoom(factor: 1.55)
-            } label: {
-                Image(systemName: "minus")
-                    .font(.system(size: 15, weight: .bold))
-                    .foregroundColor(.white)
-                    .frame(width: 40, height: 40)
             }
-            .buttonStyle(.plain)
-            .accessibilityLabel("journey.map.zoom_out".localized)
         }
-        .background(.ultraThinMaterial.opacity(0.88))
-        .background(Color.black.opacity(0.28))
-        .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .padding(.vertical, 4)
+        .background(JourneyVisual.chrome)
+        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: 22, style: .continuous)
-                .stroke(Color.white.opacity(0.28), lineWidth: 1)
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .stroke(JourneyVisual.softBorder, lineWidth: 1)
         )
-        .shadow(color: .black.opacity(0.35), radius: 12, y: 4)
+        .shadow(color: .black.opacity(0.12), radius: 10, y: 3)
         .accessibilityElement(children: .contain)
     }
 
-    private var zoomGradation: some View {
-        GeometryReader { geometry in
-            let trackWidth: CGFloat = 3
-            let thumbHeight: CGFloat = 14
-            let progress = zoomProgress
-            let travel = max(geometry.size.height - thumbHeight, 1)
-            let thumbY = (1 - progress) * travel
-
-            ZStack {
-                Capsule()
-                    .fill(Color.white.opacity(0.16))
-                    .frame(width: trackWidth)
-
-                VStack(spacing: geometry.size.height / 5.2) {
-                    ForEach(0..<4, id: \.self) { _ in
-                        Capsule()
-                            .fill(Color.white.opacity(0.28))
-                            .frame(width: 10, height: 1.5)
-                    }
-                }
-
-                Capsule()
-                    .fill(
-                        LinearGradient(
-                            colors: [JourneyVisual.lime, JourneyVisual.lime.opacity(0.55)],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
-                    )
-                    .frame(width: trackWidth, height: max(progress * geometry.size.height, 6))
-                    .frame(maxHeight: .infinity, alignment: .bottom)
-
-                Capsule()
-                    .fill(JourneyVisual.lime)
-                    .frame(width: 12, height: thumbHeight)
-                    .shadow(color: JourneyVisual.lime.opacity(0.55), radius: 6, y: 0)
-                    .offset(y: thumbY - travel / 2)
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+    private func zoomButton(icon: String, label: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: icon)
+                .font(.system(size: 15, weight: .bold))
+                .foregroundColor(JourneyVisual.primaryText)
+                .frame(width: 44, height: 40)
         }
-        .accessibilityHidden(true)
-    }
-
-    private var zoomProgress: CGFloat {
-        let clamped = min(max(cameraDistance, Self.minCameraDistance), Self.maxCameraDistance)
-        let logMin = log(Self.minCameraDistance)
-        let logMax = log(Self.maxCameraDistance)
-        let logCur = log(clamped)
-        return CGFloat((logMax - logCur) / (logMax - logMin))
-    }
-
-    private var mapReadabilityGradient: some View {
-        LinearGradient(
-            stops: [
-                .init(color: .black.opacity(0.42), location: 0),
-                .init(color: .clear, location: 0.27),
-                .init(color: .clear, location: 0.58),
-                .init(color: .black.opacity(0.52), location: 1)
-            ],
-            startPoint: .top,
-            endPoint: .bottom
-        )
-        .ignoresSafeArea()
-        .allowsHitTesting(false)
+        .buttonStyle(.plain)
+        .accessibilityLabel(label)
     }
 
     private var topControls: some View {
@@ -304,12 +243,12 @@ struct JourneyMapView: View {
             } label: {
                 Image(systemName: "list.bullet")
                     .font(.system(size: 17, weight: .bold))
-                    .foregroundColor(.white)
+                    .foregroundColor(JourneyVisual.primaryText)
                     .frame(width: 48, height: 48)
-                    .background(.ultraThinMaterial.opacity(0.82))
-                    .background(Color.black.opacity(0.22))
+                    .background(JourneyVisual.chrome)
                     .clipShape(Circle())
-                    .overlay(Circle().stroke(Color.white.opacity(0.34), lineWidth: 1))
+                    .overlay(Circle().stroke(JourneyVisual.softBorder, lineWidth: 1))
+                    .shadow(color: .black.opacity(0.12), radius: 10, y: 3)
             }
             .buttonStyle(.plain)
             .accessibilityLabel("journey.map.show_list".localized)
@@ -319,11 +258,12 @@ struct JourneyMapView: View {
             } label: {
                 Image(systemName: appContainer.locationService.isLocationEnabled ? "location.fill" : "location")
                     .font(.system(size: 17, weight: .bold))
-                    .foregroundColor(appContainer.locationService.isLocationEnabled ? .black : .white)
+                    .foregroundColor(appContainer.locationService.isLocationEnabled ? .black : JourneyVisual.primaryText)
                     .frame(width: 48, height: 48)
-                    .background(appContainer.locationService.isLocationEnabled ? JourneyVisual.lime : Color.black.opacity(0.48))
+                    .background(appContainer.locationService.isLocationEnabled ? JourneyVisual.lime : JourneyVisual.chrome)
                     .clipShape(Circle())
-                    .overlay(Circle().stroke(Color.white.opacity(0.34), lineWidth: 1))
+                    .overlay(Circle().stroke(appContainer.locationService.isLocationEnabled ? Color.clear : JourneyVisual.softBorder, lineWidth: 1))
+                    .shadow(color: .black.opacity(0.12), radius: 10, y: 3)
             }
             .buttonStyle(.plain)
             .accessibilityLabel("map.center_on_me.label".localized)
@@ -334,14 +274,16 @@ struct JourneyMapView: View {
     private var filterBar: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
-                JourneyFilterChip(
-                    title: "swiss.discovery.map_filter".localized,
-                    icon: "sparkles",
-                    isSelected: showsDiscoveryOnly
-                ) {
-                    applyDiscoveryFilter()
+                if APIClient.countryCode == "CH" {
+                    JourneyFilterChip(
+                        title: "swiss.discovery.map_filter".localized,
+                        icon: "sparkles",
+                        isSelected: showsDiscoveryOnly
+                    ) {
+                        applyDiscoveryFilter()
+                    }
+                    .accessibilityIdentifier("journey.map.discovery.filter")
                 }
-                .accessibilityIdentifier("journey.map.discovery.filter")
 
                 ForEach(filters, id: \.1) { type, title, icon in
                     JourneyFilterChip(
@@ -358,11 +300,11 @@ struct JourneyMapView: View {
     }
 
     private var nearbyPlacesRail: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: 0) {
             HStack(spacing: 8) {
                 Text(railTitle)
-                    .font(.system(size: 16, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
+                    .font(.system(size: 16, weight: .bold, design: .default))
+                    .foregroundColor(JourneyVisual.primaryText)
 
                 Text("\(railCount)")
                     .font(.system(size: 11, weight: .bold))
@@ -374,11 +316,19 @@ struct JourneyMapView: View {
 
                 Spacer(minLength: 8)
 
-                Button("journey.map.all_places".localized) {
+                Button {
                     showsPlaceList = true
+                } label: {
+                    Label("journey.map.all_places".localized, systemImage: "list.bullet")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(JourneyVisual.primaryText)
+                        .padding(.horizontal, 11)
+                        .frame(height: 30)
+                        .background(JourneyVisual.softSurface)
+                        .clipShape(Capsule())
+                        .overlay(Capsule().stroke(JourneyVisual.softBorder, lineWidth: 1))
                 }
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundColor(.white.opacity(0.78))
+                .buttonStyle(.plain)
 
                 Button {
                     withAnimation(.spring(response: 0.36, dampingFraction: 0.86)) {
@@ -387,16 +337,18 @@ struct JourneyMapView: View {
                 } label: {
                     Image(systemName: "xmark")
                         .font(.system(size: 11, weight: .bold))
-                        .foregroundColor(.white.opacity(0.86))
-                        .frame(width: 28, height: 28)
-                        .background(Color.black.opacity(0.42))
+                        .foregroundColor(JourneyVisual.primaryText)
+                        .frame(width: 30, height: 30)
+                        .background(JourneyVisual.softSurface)
                         .clipShape(Circle())
-                        .overlay(Circle().stroke(Color.white.opacity(0.22), lineWidth: 1))
+                        .overlay(Circle().stroke(JourneyVisual.softBorder, lineWidth: 1))
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel("journey.map.hide_card".localized)
             }
-            .shadow(color: .black.opacity(0.65), radius: 6, y: 2)
+            .padding(.horizontal, 16)
+            .padding(.top, 14)
+            .padding(.bottom, 12)
 
             if railCount == 0 {
                 emptyPlacesCard
@@ -406,6 +358,14 @@ struct JourneyMapView: View {
                 placeCarousel
             }
         }
+        // One surface over the live map instead of a stack of floating chips and cards.
+        .background(JourneyVisual.chrome)
+        .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 26, style: .continuous)
+                .stroke(JourneyVisual.softBorder, lineWidth: 1)
+        )
+        .shadow(color: .black.opacity(0.16), radius: 18, y: 6)
     }
 
     private var collapsedNearbyRailChip: some View {
@@ -419,7 +379,7 @@ struct JourneyMapView: View {
                     Image(systemName: "rectangle.bottomthird.inset.filled")
                         .font(.system(size: 13, weight: .bold))
                     Text("journey.map.show_card".localized)
-                        .font(.system(size: 13, weight: .bold, design: .rounded))
+                        .font(.system(size: 13, weight: .bold, design: .default))
                     Text("\(railCount)")
                         .font(.system(size: 11, weight: .bold))
                         .foregroundColor(.black)
@@ -428,13 +388,12 @@ struct JourneyMapView: View {
                         .background(JourneyVisual.lime)
                         .clipShape(Capsule())
                 }
-                .foregroundColor(.white)
+                .foregroundColor(JourneyVisual.primaryText)
                 .padding(.horizontal, 14)
                 .frame(height: 42)
-                .background(.ultraThinMaterial.opacity(0.84))
-                .background(Color.black.opacity(0.42))
+                .background(JourneyVisual.chrome)
                 .clipShape(Capsule())
-                .overlay(Capsule().stroke(Color.white.opacity(0.28), lineWidth: 1))
+                .overlay(Capsule().stroke(JourneyVisual.softBorder, lineWidth: 1))
             }
             .buttonStyle(.plain)
             .accessibilityLabel("journey.map.show_card".localized)
@@ -465,7 +424,7 @@ struct JourneyMapView: View {
                 }
             }
         }
-        .frame(height: 138)
+        .frame(height: Self.mapCardHeight + 16)
     }
 
     private var discoveryCarousel: some View {
@@ -490,22 +449,20 @@ struct JourneyMapView: View {
                 }
             }
         }
-        .frame(height: 138)
+        .frame(height: Self.mapCardHeight + 16)
     }
 
     private var emptyPlacesCard: some View {
         JourneyGlassPanel(cornerRadius: 24) {
             HStack(spacing: 13) {
-                Image(systemName: "mappin.slash")
-                    .font(.system(size: 21, weight: .semibold))
-                    .foregroundColor(JourneyVisual.lime)
+                SweezyCompanion(pose: .guide, size: 60)
                 VStack(alignment: .leading, spacing: 3) {
                     Text("journey.map.nothing_found".localized)
                         .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(.white)
+                        .foregroundColor(JourneyVisual.primaryText)
                     Text("journey.map.change_search_or_category".localized)
                         .font(.system(size: 12))
-                        .foregroundColor(.white.opacity(0.62))
+                        .foregroundColor(JourneyVisual.secondaryText)
                 }
                 Spacer()
             }
@@ -514,248 +471,234 @@ struct JourneyMapView: View {
         .frame(height: 96)
     }
 
+    /// Photo height drives the whole card, so the text column and buttons line up with it.
+    private static let mapCardHeight: CGFloat = 126
+
     private func placeCard(_ place: Place) -> some View {
-        HStack(spacing: 0) {
-            ZStack(alignment: .bottomLeading) {
-                Image(imageName(for: place))
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 104, height: 138)
-                    .clipped()
+        let saved = appContainer.savedItems.isPlaceSaved(place.id)
+        let status = [todayHours(for: place), distanceText(to: place)].compactMap { $0 }.joined(separator: " · ")
 
-                LinearGradient(
-                    colors: [.clear, .black.opacity(0.72)],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
+        return HStack(alignment: .top, spacing: 14) {
+            mapCardPhoto(imageName(for: place), badge: typeTitle(for: place.type), badgeIcon: icon(for: place.type))
 
-                Label(typeTitle(for: place.type), systemImage: icon(for: place.type))
-                    .font(.system(size: 9, weight: .bold))
-                    .foregroundColor(.black)
-                    .padding(.horizontal, 8)
-                    .frame(height: 24)
-                    .background(JourneyVisual.lime)
-                    .clipShape(Capsule())
-                    .padding(9)
-            }
-            .frame(width: 104, height: 138)
-
-            VStack(alignment: .leading, spacing: 6) {
+            VStack(alignment: .leading, spacing: 0) {
                 HStack(alignment: .top, spacing: 8) {
-                    Text(place.name)
-                        .font(.system(size: 15, weight: .bold, design: .rounded))
-                        .foregroundColor(.white)
-                        .lineLimit(2)
-                        .minimumScaleFactor(0.82)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-
-                    Button {
+                    mapCardTitle(place.name)
+                    mapCardCircleButton(
+                        icon: saved ? "heart.fill" : "heart",
+                        active: saved,
+                        label: "journey.map.save_place".localized
+                    ) {
                         appContainer.savedItems.togglePlace(place.id)
-                    } label: {
-                        Image(systemName: appContainer.savedItems.isPlaceSaved(place.id) ? "heart.fill" : "heart")
-                            .font(.system(size: 12, weight: .bold))
-                            .foregroundColor(appContainer.savedItems.isPlaceSaved(place.id) ? JourneyVisual.lime : .white.opacity(0.72))
-                            .frame(width: 28, height: 28)
-                            .background(Color.white.opacity(0.08))
-                            .clipShape(Circle())
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel("journey.map.save_place".localized)
-                }
-
-                Label(locationLine(for: place), systemImage: "mappin.and.ellipse")
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundColor(.white.opacity(0.62))
-                    .lineLimit(1)
-
-                HStack(spacing: 7) {
-                    Circle()
-                        .fill(place.isOpen() ? JourneyVisual.lime : Color.orange)
-                        .frame(width: 6, height: 6)
-                    Text(todayHours(for: place))
-                        .lineLimit(1)
-                    if let distance = distanceText(to: place) {
-                        Text("·")
-                        Text(distance)
-                            .lineLimit(1)
                     }
                 }
-                .font(.system(size: 10, weight: .semibold))
-                .foregroundColor(.white.opacity(0.68))
 
-                Spacer(minLength: 0)
+                VStack(alignment: .leading, spacing: 4) {
+                    mapMetaRow(locationLine(for: place)) {
+                        Image(systemName: "mappin.and.ellipse")
+                            .font(.system(size: 10, weight: .semibold))
+                    }
+                    mapMetaRow(status) {
+                        Circle()
+                            .fill(place.isOpen() ? JourneyVisual.accentStrong : Color.orange)
+                            .frame(width: 7, height: 7)
+                    }
+                }
+                .padding(.top, 6)
+
+                Spacer(minLength: 8)
 
                 HStack(spacing: 8) {
-                    Button {
+                    mapCardPrimaryButton(
+                        title: "map.directions".localized,
+                        icon: "arrow.triangle.turn.up.right.diamond.fill",
+                        loading: isCalculatingRoute && selectedPlace?.id == place.id
+                    ) {
                         openDirections(to: place)
-                    } label: {
-                        HStack(spacing: 7) {
-                            if isCalculatingRoute && selectedPlace?.id == place.id {
-                                ProgressView()
-                                    .controlSize(.small)
-                                    .tint(.black)
-                            } else {
-                                Image(systemName: "arrow.triangle.turn.up.right.diamond.fill")
-                            }
-                            Text("map.directions".localized)
-                                .lineLimit(1)
-                        }
-                        .font(.system(size: 12, weight: .bold))
-                        .foregroundColor(.black)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 36)
-                        .background(JourneyVisual.lime)
-                        .clipShape(Capsule())
                     }
-                    .buttonStyle(.plain)
 
                     if let bookingURL = bookingURL(for: place) {
-                        Button {
+                        mapCardCircleButton(
+                            icon: "calendar.badge.plus",
+                            size: 40,
+                            label: "journey.map.book_appointment".localized
+                        ) {
                             openURL(bookingURL)
-                        } label: {
-                            Image(systemName: "calendar.badge.plus")
-                                .font(.system(size: 13, weight: .bold))
-                                .foregroundColor(.white)
-                                .frame(width: 36, height: 36)
-                                .background(Color.white.opacity(0.1))
-                                .clipShape(Circle())
-                                .overlay(Circle().stroke(Color.white.opacity(0.16), lineWidth: 1))
                         }
-                        .buttonStyle(.plain)
-                        .accessibilityLabel("journey.map.book_appointment".localized)
                     }
                 }
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 10)
+            .frame(height: Self.mapCardHeight)
         }
-        .frame(height: 138)
-        .background(.ultraThinMaterial.opacity(0.84))
-        .background(Color(red: 0.035, green: 0.075, blue: 0.05).opacity(0.92))
-        .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: 22, style: .continuous)
-                .stroke(
-                    LinearGradient(
-                        colors: [Color.white.opacity(0.44), Color.white.opacity(0.08)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ),
-                    lineWidth: 1
-                )
-        )
-        .shadow(color: .black.opacity(0.42), radius: 18, y: 8)
+        .padding(.horizontal, 16)
+        .padding(.bottom, 16)
+        .contentShape(Rectangle())
         .onTapGesture {
             focus(on: place)
         }
     }
 
     private func discoveryPlaceCard(_ place: SwissDiscoveryPlace) -> some View {
-        HStack(spacing: 0) {
-            ZStack(alignment: .bottomLeading) {
-                Image(place.imageName)
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 104, height: 138)
-                    .clipped()
+        let saved = discoverySavedPlaceIDs.contains(place.id)
 
-                LinearGradient(
-                    colors: [.clear, .black.opacity(0.78)],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
+        return HStack(alignment: .top, spacing: 14) {
+            mapCardPhoto(
+                place.imageName,
+                badge: "swiss.discovery.setting.\(place.settings.first?.rawValue ?? "all")".localized,
+                badgeIcon: "sparkles"
+            )
 
-                Label("swiss.discovery.setting.\(place.settings.first?.rawValue ?? "all")".localized, systemImage: "sparkles")
-                    .font(.system(size: 9, weight: .bold))
-                    .foregroundColor(.black)
-                    .padding(.horizontal, 8)
-                    .frame(height: 24)
-                    .background(JourneyVisual.lime)
-                    .clipShape(Capsule())
-                    .padding(9)
-            }
-            .frame(width: 104, height: 138)
-
-            VStack(alignment: .leading, spacing: 5) {
-                HStack(alignment: .top, spacing: 7) {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(place.title)
-                            .font(.system(size: 15, weight: .bold, design: .rounded))
-                            .foregroundColor(.white)
-                            .lineLimit(2)
-
-                        Text(place.region)
-                            .font(.system(size: 10, weight: .medium))
-                            .foregroundColor(.white.opacity(0.58))
-                            .lineLimit(1)
+            VStack(alignment: .leading, spacing: 0) {
+                HStack(alignment: .top, spacing: 8) {
+                    mapCardTitle(place.title)
+                    mapCardCircleButton(
+                        icon: saved ? "bookmark.fill" : "bookmark",
+                        active: saved,
+                        label: "journey.map.save_place".localized
+                    ) {
+                        toggleDiscoverySaved(place)
                     }
-
-                    Spacer(minLength: 2)
-
-                    Button { toggleDiscoverySaved(place) } label: {
-                        Image(systemName: discoverySavedPlaceIDs.contains(place.id) ? "bookmark.fill" : "bookmark")
-                            .font(.system(size: 12, weight: .bold))
-                            .foregroundColor(discoverySavedPlaceIDs.contains(place.id) ? JourneyVisual.lime : .white.opacity(0.74))
-                            .frame(width: 28, height: 28)
-                            .background(Color.white.opacity(0.08))
-                            .clipShape(Circle())
-                    }
-                    .buttonStyle(.plain)
                 }
 
-                Text(place.summary)
-                    .font(.system(size: 10, weight: .medium))
-                    .foregroundColor(.white.opacity(0.66))
-                    .lineLimit(1)
+                VStack(alignment: .leading, spacing: 4) {
+                    mapMetaRow(place.region) {
+                        Image(systemName: "mappin.and.ellipse")
+                            .font(.system(size: 10, weight: .semibold))
+                    }
+                    mapMetaRow(place.summary) {
+                        Image(systemName: "sparkles")
+                            .font(.system(size: 9, weight: .semibold))
+                    }
+                }
+                .padding(.top, 6)
 
-                Spacer(minLength: 0)
+                Spacer(minLength: 8)
 
                 HStack(spacing: 8) {
-                    Button {
+                    mapCardPrimaryButton(title: "swiss.discovery.open_place".localized, icon: "arrow.up.right") {
                         presentedDiscoveryPlace = place
-                    } label: {
-                        Label("swiss.discovery.open_place".localized, systemImage: "arrow.up.right")
-                            .font(.system(size: 11, weight: .bold))
-                            .foregroundColor(.black)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 36)
-                            .background(JourneyVisual.lime)
-                            .clipShape(Capsule())
                     }
-                    .buttonStyle(.plain)
-
-                    Button { openDirections(to: place) } label: {
-                        Image(systemName: "arrow.triangle.turn.up.right.diamond.fill")
-                            .font(.system(size: 13, weight: .bold))
-                            .foregroundColor(.white)
-                            .frame(width: 36, height: 36)
-                            .background(Color.white.opacity(0.1))
-                            .clipShape(Circle())
-                            .overlay(Circle().stroke(Color.white.opacity(0.16), lineWidth: 1))
+                    mapCardCircleButton(
+                        icon: "arrow.triangle.turn.up.right.diamond.fill",
+                        size: 40,
+                        label: "map.directions".localized
+                    ) {
+                        openDirections(to: place)
                     }
-                    .buttonStyle(.plain)
                 }
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 10)
+            .frame(height: Self.mapCardHeight)
         }
-        .frame(height: 138)
-        .background(.ultraThinMaterial.opacity(0.84))
-        .background(Color(red: 0.035, green: 0.075, blue: 0.05).opacity(0.94))
-        .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: 22, style: .continuous)
-                .stroke(Color.white.opacity(0.25), lineWidth: 1)
-        )
-        .shadow(color: .black.opacity(0.42), radius: 18, y: 8)
+        .padding(.horizontal, 16)
+        .padding(.bottom, 16)
+        .contentShape(Rectangle())
         .onTapGesture { focus(on: place) }
         .accessibilityIdentifier("journey.map.discovery.card.\(place.id)")
+    }
+
+    // MARK: - Card parts
+
+    /// Fixed frame first, image as overlay: `scaledToFill` can no longer push the badge
+    /// or the text column out of line, which is what made the old card look shifted.
+    private func mapCardPhoto(_ asset: String, badge: String, badgeIcon: String) -> some View {
+        Color.clear
+            .frame(width: 100, height: Self.mapCardHeight)
+            .overlay {
+                Image(asset)
+                    .resizable()
+                    .scaledToFill()
+            }
+            .overlay(alignment: .bottom) {
+                LinearGradient(colors: [.clear, .black.opacity(0.5)], startPoint: .top, endPoint: .bottom)
+                    .frame(height: 54)
+            }
+            .overlay(alignment: .bottomLeading) {
+                Label(badge, systemImage: badgeIcon)
+                    .font(.system(size: 9, weight: .bold))
+                    .foregroundColor(.black)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+                    .padding(.horizontal, 8)
+                    .frame(height: 22)
+                    .background(JourneyVisual.lime)
+                    .clipShape(Capsule())
+                    .padding(7)
+            }
+            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+            .allowsHitTesting(false)
+            .accessibilityHidden(true)
+    }
+
+    private func mapCardTitle(_ text: String) -> some View {
+        Text(text)
+            .font(.system(size: 16, weight: .bold))
+            .foregroundColor(JourneyVisual.primaryText)
+            .lineLimit(2)
+            .minimumScaleFactor(0.85)
+            .fixedSize(horizontal: false, vertical: true)
+            .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    /// Icon column has a fixed width so the location and status texts start on the same x.
+    private func mapMetaRow<Leading: View>(_ text: String, @ViewBuilder leading: () -> Leading) -> some View {
+        HStack(spacing: 6) {
+            leading()
+                .frame(width: 14)
+            Text(text)
+                .lineLimit(1)
+        }
+        .font(.system(size: 11, weight: .medium))
+        .foregroundColor(JourneyVisual.secondaryText)
+    }
+
+    private func mapCardPrimaryButton(title: String, icon: String, loading: Bool = false, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: 7) {
+                if loading {
+                    ProgressView()
+                        .controlSize(.small)
+                        .tint(.black)
+                } else {
+                    Image(systemName: icon)
+                }
+                Text(title)
+                    .lineLimit(1)
+            }
+            .font(.system(size: 13, weight: .bold))
+            .foregroundColor(.black)
+            .frame(maxWidth: .infinity)
+            .frame(height: 40)
+            .background(JourneyVisual.lime)
+            .clipShape(Capsule())
+        }
+        .buttonStyle(ScaleButtonStyle(scaleAmount: 0.97, hapticStyle: .light))
+    }
+
+    private func mapCardCircleButton(
+        icon: String,
+        size: CGFloat = 32,
+        active: Bool = false,
+        label: String,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            Image(systemName: icon)
+                .font(.system(size: size * 0.36, weight: .bold))
+                .foregroundColor(active ? JourneyVisual.accentStrong : JourneyVisual.primaryText)
+                .contentTransition(.symbolEffect(.replace))
+                .frame(width: size, height: size)
+                .background(JourneyVisual.softSurface)
+                .clipShape(Circle())
+                .overlay(Circle().stroke(JourneyVisual.softBorder, lineWidth: 1))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(label)
     }
 
     private var placeListSheet: some View {
         NavigationStack {
             ZStack {
-                Color(red: 0.025, green: 0.045, blue: 0.032)
+                JourneyVisual.pageBackground
                     .ignoresSafeArea()
 
                 ScrollView {
@@ -764,11 +707,11 @@ struct JourneyMapView: View {
                             HStack {
                                 VStack(alignment: .leading, spacing: 3) {
                                     Text("swiss.discovery.map_title".localized)
-                                        .font(.system(size: 22, weight: .bold, design: .rounded))
-                                        .foregroundStyle(.white)
+                                        .font(.system(size: 22, weight: .bold, design: .default))
+                                        .foregroundStyle(JourneyVisual.primaryText)
                                     Text("swiss.discovery.map_subtitle".localized)
                                         .font(.system(size: 12, weight: .medium))
-                                        .foregroundStyle(.white.opacity(0.56))
+                                        .foregroundStyle(JourneyVisual.secondaryText)
                                 }
                                 Spacer()
                                 Text("\(displayedDiscoveryPlaces.count)")
@@ -790,8 +733,8 @@ struct JourneyMapView: View {
                         if !showsDiscoveryOnly {
                             if selectedType == nil, !displayedPlaces.isEmpty {
                                 Text("journey.map.places_nearby".localized)
-                                    .font(.system(size: 18, weight: .bold, design: .rounded))
-                                    .foregroundStyle(.white)
+                                    .font(.system(size: 18, weight: .bold, design: .default))
+                                    .foregroundStyle(JourneyVisual.primaryText)
                                     .padding(.top, 10)
                             }
                             ForEach(displayedPlaces) { place in
@@ -811,7 +754,7 @@ struct JourneyMapView: View {
                     Button("common.done".localized) {
                         showsPlaceList = false
                     }
-                    .foregroundColor(JourneyVisual.lime)
+                    .foregroundColor(Theme.Colors.textPrimary)
                 }
             }
         }
@@ -838,11 +781,11 @@ struct JourneyMapView: View {
                         Text(typeTitle(for: place.type))
                     }
                     .font(.system(size: 10, weight: .bold))
-                    .foregroundColor(JourneyVisual.lime)
+                    .foregroundColor(JourneyVisual.accentText)
 
                     Text(place.name)
-                        .font(.system(size: 15, weight: .bold, design: .rounded))
-                        .foregroundColor(.white)
+                        .font(.system(size: 15, weight: .bold, design: .default))
+                        .foregroundColor(JourneyVisual.primaryText)
                         .lineLimit(2)
 
                     HStack(spacing: 6) {
@@ -857,21 +800,21 @@ struct JourneyMapView: View {
                         }
                     }
                     .font(.system(size: 10, weight: .medium))
-                    .foregroundColor(.white.opacity(0.58))
+                    .foregroundColor(JourneyVisual.secondaryText)
                 }
 
                 Spacer(minLength: 4)
 
                 Image(systemName: "chevron.right")
                     .font(.system(size: 12, weight: .bold))
-                    .foregroundColor(.white.opacity(0.42))
+                    .foregroundColor(JourneyVisual.secondaryText)
             }
             .padding(10)
-            .background(Color.white.opacity(0.065))
+            .background(Theme.Colors.card)
             .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: 22, style: .continuous)
-                    .stroke(Color.white.opacity(0.11), lineWidth: 1)
+                    .stroke(JourneyVisual.softBorder, lineWidth: 1)
             )
         }
         .buttonStyle(.plain)
@@ -883,11 +826,7 @@ struct JourneyMapView: View {
             showsPlaceList = false
         } label: {
             ZStack(alignment: .bottomLeading) {
-                Image(place.imageName)
-                    .resizable()
-                    .scaledToFill()
-                    .frame(height: 190)
-                    .clipped()
+                FittedAssetImage(name: place.imageName, height: 190)
 
                 LinearGradient(
                     colors: [.clear, .black.opacity(0.9)],
@@ -901,7 +840,7 @@ struct JourneyMapView: View {
                         .tracking(0.7)
                         .foregroundStyle(JourneyVisual.lime)
                     Text(place.title)
-                        .font(.system(size: 22, weight: .bold, design: .rounded))
+                        .font(.system(size: 22, weight: .bold, design: .default))
                         .foregroundStyle(.white)
                         .lineLimit(2)
                     Text(place.summary)
@@ -936,11 +875,12 @@ struct JourneyMapView: View {
     private var displayedPlaces: [Place] {
         let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
         let matches = appContainer.contentService.places.filter { place in
+            let matchesCountry = place.countryCode == APIClient.countryCode
             let matchesType = selectedType == nil || place.type == selectedType
             let matchesSearch = query.isEmpty
                 || place.name.localizedCaseInsensitiveContains(query)
                 || place.formattedAddress.localizedCaseInsensitiveContains(query)
-            return matchesType && matchesSearch
+            return matchesCountry && matchesType && matchesSearch
         }
 
         guard let location = appContainer.locationService.currentLocation else {
@@ -950,7 +890,7 @@ struct JourneyMapView: View {
     }
 
     private var displayedDiscoveryPlaces: [SwissDiscoveryPlace] {
-        guard selectedType == nil else { return [] }
+        guard APIClient.countryCode == "CH", selectedType == nil else { return [] }
         let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
         return SwissDiscoveryCatalog.places.filter { place in
             query.isEmpty
@@ -989,6 +929,7 @@ struct JourneyMapView: View {
     }
 
     private func applyDiscoveryFilter() {
+        guard APIClient.countryCode == "CH" else { return }
         withAnimation(.easeInOut(duration: 0.24)) {
             showsDiscoveryOnly = true
             selectedType = nil
@@ -1238,20 +1179,30 @@ private struct JourneyMapPin: View {
     let icon: String
     let isSelected: Bool
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var landed = false
+
     var body: some View {
         ZStack {
             Circle()
-                .fill(isSelected ? JourneyVisual.lime : Color.black.opacity(0.84))
+                .fill(isSelected ? JourneyVisual.lime : JourneyVisual.chrome)
                 .frame(width: isSelected ? 42 : 34, height: isSelected ? 42 : 34)
-                .overlay(Circle().stroke(Color.white.opacity(0.76), lineWidth: 1.5))
-                .shadow(
-                    color: isSelected ? JourneyVisual.lime.opacity(0.5) : .black.opacity(0.4),
-                    radius: 10,
-                    y: 4
+                .overlay(
+                    Circle().stroke(
+                        isSelected ? Color.black.opacity(0.12) : JourneyVisual.softBorder,
+                        lineWidth: 1
+                    )
                 )
+                .shadow(color: .black.opacity(isSelected ? 0.28 : 0.18), radius: isSelected ? 10 : 6, y: 3)
             Image(systemName: icon)
                 .font(.system(size: isSelected ? 15 : 12, weight: .bold))
-                .foregroundColor(isSelected ? .black : .white)
+                .foregroundColor(isSelected ? .black : JourneyVisual.accentStrong)
         }
+        .scaleEffect(landed || reduceMotion ? 1 : 0.4)
+        .opacity(landed || reduceMotion ? 1 : 0)
+        .animation(.spring(response: 0.42, dampingFraction: 0.68), value: landed)
+        .animation(.spring(response: 0.34, dampingFraction: 0.7), value: isSelected)
+        .onAppear { landed = true }
+        .onDisappear { landed = false }
     }
 }

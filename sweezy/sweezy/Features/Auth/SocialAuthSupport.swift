@@ -68,6 +68,50 @@ enum AuthSessionBootstrapper {
     }
 }
 
+/// Runs Sign in with Apple from our own button. The system `SignInWithAppleButton` always
+/// labels itself in the device language, so a German iPhone showed "Mit Apple fortfahren"
+/// inside a Ukrainian UI; this keeps the label in the in-app language.
+@MainActor
+final class AppleSignInCoordinator: NSObject, ASAuthorizationControllerDelegate, ASAuthorizationControllerPresentationContextProviding {
+    private var continuation: CheckedContinuation<ASAuthorization, Error>?
+
+    func signIn(configure: (ASAuthorizationAppleIDRequest) -> Void) async throws -> ASAuthorization {
+        let request = ASAuthorizationAppleIDProvider().createRequest()
+        configure(request)
+        let controller = ASAuthorizationController(authorizationRequests: [request])
+        controller.delegate = self
+        controller.presentationContextProvider = self
+        return try await withCheckedThrowingContinuation { continuation in
+            self.continuation?.resume(throwing: CancellationError())
+            self.continuation = continuation
+            controller.performRequests()
+        }
+    }
+
+    nonisolated func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
+        MainActor.assumeIsolated {
+            continuation?.resume(returning: authorization)
+            continuation = nil
+        }
+    }
+
+    nonisolated func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
+        MainActor.assumeIsolated {
+            continuation?.resume(throwing: error)
+            continuation = nil
+        }
+    }
+
+    nonisolated func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
+        MainActor.assumeIsolated {
+            UIApplication.shared.connectedScenes
+                .compactMap { $0 as? UIWindowScene }
+                .flatMap(\.windows)
+                .first(where: \.isKeyWindow) ?? ASPresentationAnchor()
+        }
+    }
+}
+
 struct SocialAuthPanel: View {
     @EnvironmentObject private var appContainer: AppContainer
     @EnvironmentObject private var lockManager: AppLockManager
@@ -78,7 +122,10 @@ struct SocialAuthPanel: View {
     var onAuthenticated: (() -> Void)? = nil
     var showsDivider: Bool = true
 
+    @Environment(\.colorScheme) private var colorScheme
     @State private var isGoogleLoading = false
+    @State private var isAppleLoading = false
+    @State private var appleCoordinator = AppleSignInCoordinator()
     @State private var appleNonce: String?
     @State private var pendingLinkResponse: APIClient.SocialAuthResponse?
 
@@ -87,29 +134,45 @@ struct SocialAuthPanel: View {
             if showsDivider {
                 HStack {
                     Rectangle()
-                        .fill(.white.opacity(0.2))
+                        .fill(JourneyVisual.softBorder)
                         .frame(height: 1)
                     Text("auth.social.or_continue_with".localized)
                         .font(.caption)
-                        .foregroundColor(.white.opacity(0.5))
+                        .foregroundColor(JourneyVisual.secondaryText)
+                        .lineLimit(1)
+                        .fixedSize()
                     Rectangle()
-                        .fill(.white.opacity(0.2))
+                        .fill(JourneyVisual.softBorder)
                         .frame(height: 1)
                 }
             }
 
-            SignInWithAppleButton(.continue) { request in
-                let nonce = randomNonceString()
-                appleNonce = nonce
-                request.requestedScopes = [.fullName, .email]
-                request.nonce = sha256(nonce)
-            } onCompletion: { result in
-                Task { await handleAppleSignIn(result) }
+            // Apple's HIG allows a custom button: Apple logo, "Continue with Apple" in the user's
+            // language, black on light backgrounds and white on dark ones.
+            Button {
+                Task { await startAppleSignIn() }
+            } label: {
+                HStack(spacing: 8) {
+                    if isAppleLoading {
+                        ProgressView()
+                            .tint(appleForeground)
+                    } else {
+                        Image(systemName: "apple.logo")
+                            .font(.system(size: 17, weight: .semibold))
+                    }
+                    Text("auth.social.apple".localized)
+                        .font(.subheadline.weight(.semibold))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.82)
+                }
+                .foregroundColor(appleForeground)
+                .frame(maxWidth: .infinity)
+                .frame(height: 52)
+                .background(appleBackground, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
             }
-            .environment(\.locale, appContainer.currentLocale)
-            .signInWithAppleButtonStyle(.white)
-            .frame(height: 50)
-            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .buttonStyle(ScaleButtonStyle(scaleAmount: 0.98))
+            .disabled(isAppleLoading)
+            .accessibilityIdentifier("auth.social.apple")
 
             Button {
                 Task { await startGoogleSignIn() }
@@ -136,13 +199,13 @@ struct SocialAuthPanel: View {
                         .minimumScaleFactor(0.82)
                 }
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 15)
+                .frame(height: 52)
                 .background(
                     RoundedRectangle(cornerRadius: 16, style: .continuous)
                         .fill(Color(red: 0.965, green: 0.972, blue: 0.965))
                         .overlay(
                             RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                .stroke(Color.white.opacity(0.24), lineWidth: 1)
+                                .stroke(JourneyVisual.softBorder, lineWidth: 1)
                         )
                 )
             }
@@ -156,6 +219,25 @@ struct SocialAuthPanel: View {
             .environmentObject(appContainer)
             .environmentObject(lockManager)
             .environmentObject(sessionManager)
+        }
+    }
+
+    private var appleBackground: Color { colorScheme == .dark ? .white : .black }
+    private var appleForeground: Color { colorScheme == .dark ? .black : .white }
+
+    private func startAppleSignIn() async {
+        isAppleLoading = true
+        defer { isAppleLoading = false }
+        let nonce = randomNonceString()
+        appleNonce = nonce
+        do {
+            let authorization = try await appleCoordinator.signIn { request in
+                request.requestedScopes = [.fullName, .email]
+                request.nonce = sha256(nonce)
+            }
+            await handleAppleSignIn(.success(authorization))
+        } catch {
+            await handleAppleSignIn(.failure(error))
         }
     }
 
@@ -304,11 +386,11 @@ struct SocialLinkConfirmationSheet: View {
                         VStack(spacing: 10) {
                             Image(systemName: "link.circle.fill")
                                 .font(.system(size: 42))
-                                .foregroundColor(Theme.Colors.primary)
+                                .foregroundColor(JourneyVisual.accentStrong)
 
                             Text("auth.social.link.title".localized)
                                 .font(.title3.bold())
-                                .foregroundColor(.white)
+                                .foregroundColor(JourneyVisual.primaryText)
 
                             Text(
                                 "auth.social.link.subtitle".localized(
@@ -317,7 +399,7 @@ struct SocialLinkConfirmationSheet: View {
                                 )
                             )
                             .font(.subheadline)
-                            .foregroundColor(.white.opacity(0.72))
+                            .foregroundColor(JourneyVisual.secondaryText)
                             .multilineTextAlignment(.center)
                         }
                         .padding(.top, 24)
@@ -350,8 +432,8 @@ struct SocialLinkConfirmationSheet: View {
                         .fill(
                             LinearGradient(
                                 colors: [
-                                    Theme.Colors.darkBackground.opacity(0.96),
-                                    Color(red: 0.13, green: 0.17, blue: 0.12).opacity(0.94)
+                                    Theme.Colors.card,
+                                    Theme.Colors.card
                                 ],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
@@ -359,7 +441,7 @@ struct SocialLinkConfirmationSheet: View {
                         )
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 20)
-                                .stroke(Color.white.opacity(0.08), lineWidth: 1)
+                                .stroke(JourneyVisual.softBorder, lineWidth: 1)
                                 )
                         )
 
@@ -385,7 +467,7 @@ struct SocialLinkConfirmationSheet: View {
                                     endPoint: .trailing
                                 )
                             )
-                            .foregroundColor(.white)
+                            .foregroundColor(JourneyVisual.primaryText)
                             .cornerRadius(16)
                         }
                         .disabled(email.isEmpty || password.isEmpty || isLoading)
@@ -403,7 +485,7 @@ struct SocialLinkConfirmationSheet: View {
                     } label: {
                         Image(systemName: "xmark.circle.fill")
                             .font(.title3)
-                            .foregroundStyle(.white.opacity(0.6))
+                            .foregroundStyle(JourneyVisual.secondaryText)
                     }
                 }
             }

@@ -84,6 +84,7 @@ enum FriendsAPI {
   ) async throws -> SocialProfilePage {
     var c = URLComponents(url: APIClient.url("friends/profiles"), resolvingAgainstBaseURL: false)!
     c.queryItems = [
+      URLQueryItem(name: "country_code", value: APIClient.countryCode),
       query.isEmpty ? nil : URLQueryItem(name: "q", value: query),
       canton.map { URLQueryItem(name: "canton", value: $0) },
       interest.map { URLQueryItem(name: "interest", value: $0.rawValue) },
@@ -109,6 +110,7 @@ enum FriendsAPI {
     var components = URLComponents(
       url: APIClient.url("friends/swipes/discovery"), resolvingAgainstBaseURL: false)!
     components.queryItems = [
+      URLQueryItem(name: "country_code", value: APIClient.countryCode),
       canton.map { URLQueryItem(name: "canton", value: $0) },
       interest.map { URLQueryItem(name: "interest", value: $0.rawValue) },
       language.map { URLQueryItem(name: "language", value: $0) },
@@ -158,7 +160,9 @@ enum FriendsAPI {
       body: try JSONEncoder().encode(Decision(status: accept ? "accepted" : "declined")))
   }
   static func events(canton: String? = nil) async throws -> [SocialEvent] {
-    try await call("friends/events" + (canton.map { "?canton=\($0)" } ?? ""))
+    var path = "friends/events?country_code=\(APIClient.countryCode)"
+    if let canton { path += "&canton=\(canton)" }
+    return try await call(path)
   }
   static func attend(_ id: String, status: String, visible: Bool = true) async throws
     -> SocialAction

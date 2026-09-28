@@ -274,14 +274,7 @@ enum TemplateType: String, CaseIterable, Codable, Hashable {
     case notice = "notice"
     
     var localizedName: String {
-        switch self {
-        case .letter: return "Letter"
-        case .form: return "Form"
-        case .email: return "Email"
-        case .application: return "Application"
-        case .complaint: return "Complaint"
-        case .notice: return "Notice"
-        }
+        "template.type.\(rawValue)".localized
     }
     
     var iconName: String {

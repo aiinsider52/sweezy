@@ -65,6 +65,7 @@ enum SocialAgeBand: String, Codable, CaseIterable, Identifiable {
 
 struct SocialProfile: Codable, Identifiable, Equatable {
   let userID, displayName, canton, city, bio: String
+  let countryCode, subdivisionCode: String
   let interests: [SocialInterest]
   let languages: [String]
   let meetupFormats: [MeetupFormat]
@@ -90,6 +91,8 @@ struct SocialProfile: Codable, Identifiable, Equatable {
   }
   enum CodingKeys: String, CodingKey {
     case canton, city, bio, interests, languages, availability
+    case countryCode = "country_code"
+    case subdivisionCode = "subdivision_code"
     case userID = "user_id"
     case displayName = "display_name"
     case meetupFormats = "meetup_formats"
@@ -116,6 +119,7 @@ struct SocialProfile: Codable, Identifiable, Equatable {
 
   init(
     userID: String, displayName: String, canton: String, city: String, bio: String,
+    countryCode: String = "CH", subdivisionCode: String? = nil,
     interests: [SocialInterest], languages: [String], meetupFormats: [MeetupFormat],
     availability: [SocialAvailability] = [.flexible], ageBand: String? = nil,
     arrivalYear: Int? = nil, avatarURL: String? = nil, isVisible: Bool = true,
@@ -129,6 +133,8 @@ struct SocialProfile: Codable, Identifiable, Equatable {
     self.userID = userID
     self.displayName = displayName
     self.canton = canton
+    self.countryCode = countryCode
+    self.subdivisionCode = subdivisionCode ?? canton
     self.city = city
     self.bio = bio
     self.interests = interests
@@ -161,6 +167,8 @@ struct SocialProfile: Codable, Identifiable, Equatable {
     userID = try c.decode(String.self, forKey: .userID)
     displayName = try c.decode(String.self, forKey: .displayName)
     canton = try c.decode(String.self, forKey: .canton)
+    countryCode = (try? c.decode(String.self, forKey: .countryCode)) ?? "CH"
+    subdivisionCode = (try? c.decode(String.self, forKey: .subdivisionCode)) ?? canton
     city = try c.decode(String.self, forKey: .city)
     bio = try c.decode(String.self, forKey: .bio)
     interests = try c.decode([SocialInterest].self, forKey: .interests)
@@ -268,7 +276,8 @@ struct SocialSwipeResult: Codable {
 }
 
 struct SocialProfileDraft: Codable {
-  var displayName = "", canton = "ZH", city = "Zürich", bio = ""
+  var displayName = "", canton = APIClient.subdivisionCode, city = "", bio = ""
+  var countryCode = APIClient.countryCode, subdivisionCode = APIClient.subdivisionCode
   var interests: [SocialInterest] = [.hiking, .travel]
   var languages = ["UK"]
   var meetupFormats: [MeetupFormat] = [.coffee, .event]
@@ -283,6 +292,8 @@ struct SocialProfileDraft: Codable {
   init(_ p: SocialProfile) {
     displayName = p.displayName
     canton = p.canton
+    countryCode = p.countryCode
+    subdivisionCode = p.subdivisionCode
     city = p.city
     bio = p.bio
     interests = p.interests
@@ -297,6 +308,8 @@ struct SocialProfileDraft: Codable {
   }
   enum CodingKeys: String, CodingKey {
     case canton, city, bio, interests, languages, availability, latitude, longitude
+    case countryCode = "country_code"
+    case subdivisionCode = "subdivision_code"
     case displayName = "display_name"
     case meetupFormats = "meetup_formats"
     case ageBand = "age_band"

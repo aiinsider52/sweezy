@@ -2211,7 +2211,7 @@
 "swiss.discovery.save" = "Save place";
 "swiss.discovery.unsave" = "Remove from saved";
 "swiss.discovery.places_count" = "%d places";
-"swiss.discovery.filter.all" = "All";
+"swiss.discovery.filter.all" = "All themes";
 "swiss.discovery.filter.nature" = "Nature";
 "swiss.discovery.filter.culture" = "Culture";
 "swiss.discovery.filter.family" = "With children";
@@ -2442,7 +2442,7 @@
 "swiss.discovery.reviews.delete_confirm.action" = "Delete";
 "swiss.discovery.reviews.cancel" = "Cancel";
 
-"swiss.discovery.setting.all" = "All";
+"swiss.discovery.setting.all" = "Anywhere";
 "swiss.discovery.setting.city" = "Cities";
 "swiss.discovery.setting.mountain" = "Mountains";
 "swiss.discovery.setting.lake" = "By the lake";
@@ -2545,3 +2545,105 @@
 "journey.directory.toolkit.plan.ready" = "READY";
 "journey.directory.toolkit.swiss.eyebrow" = "NEARBY AND USEFUL";
 "journey.directory.toolkit.swiss.title" = "Switzerland for you";
+
+// Sweezy companion — contextual guidance and document progress
+"companion.open_plan" = "Open my plan";
+"companion.plan.title" = "My plan";
+"companion.plan.subtitle" = "Together, step by step. Your tasks, documents and upcoming deadlines.";
+"companion.documents.title" = "My documents";
+"companion.documents.intro" = "Documents, sorted";
+"companion.documents.subtitle" = "Mark what you have prepared for your next step.";
+"companion.documents.privacy" = "Only status and expiry dates are saved. Document files are not uploaded.";
+"companion.documents.progress" = "Readiness";
+"companion.documents.done" = "One more step done!";
+"companion.documents.mark" = "Mark as ready";
+"companion.documents.unmark" = "Mark as not ready";
+"companion.documents.expiry" = "Expiry date";
+"companion.documents.remove_expiry" = "Remove expiry date";
+"companion.documents.add_expiry" = "Add expiry date";
+"companion.documents.save" = "Save";
+"companion.documents.missing" = "Not ready";
+"companion.documents.ready" = "Ready";
+"companion.documents.expiring" = "Expires soon";
+"companion.documents.expired" = "Expired";
+"companion.search.subtitle" = "Search guide materials with links to sources.";
+"companion.search.empty.title" = "No materials found";
+"companion.search.empty.subtitle" = "Try a shorter or more specific query. Sweezy does not invent an answer without a source.";
+"companion.search.reset" = "Change search";
+
+/* Country context */
+"country.name.ch" = "Switzerland";
+"country.name.de" = "Germany";
+"country.name.at" = "Austria";
+"country.subdivision.canton" = "Canton";
+"country.subdivision.federal_state" = "Federal state";
+"country.residence_country" = "Country of residence";
+"country.country" = "Country";
+"country.residence_status" = "Residence status";
+"country.status" = "Status";
+"country.whole_country" = "Whole country";
+"country.select_subdivision_format" = "Choose: %@";
+"residence.status.ch.s" = "Status S";
+"residence.status.ch.b" = "Permit B";
+"residence.status.ch.c" = "Permit C";
+"residence.status.ch.f" = "Status F";
+"residence.status.ch.n" = "Status N";
+"residence.status.ch.l" = "Permit L";
+"residence.status.other" = "Other";
+"residence.detail.temporary_protection" = "Temporary protection";
+"residence.detail.residence_permit" = "Residence permit";
+"residence.detail.permanent_residence" = "Permanent residence";
+"residence.detail.provisional_admission" = "Provisional admission";
+"residence.detail.asylum" = "Asylum procedure";
+"residence.detail.short_term" = "Short-term residence";
+"residence.detail.free_movement" = "Free movement right";
+"residence.detail.work_and_residence" = "Work and residence";
+"residence.detail.other" = "Another status or permit";
+
+/* Templates */
+"template.category.government" = "Government";
+"template.category.housing" = "Housing";
+"template.category.employment" = "Employment";
+"template.category.insurance" = "Insurance";
+"template.category.healthcare" = "Healthcare";
+"template.category.education" = "Education";
+"template.category.legal" = "Legal";
+"template.category.banking" = "Banking";
+"template.category.complaint" = "Complaint";
+"template.category.request" = "Request";
+"template.category.application" = "Application";
+"template.category.notification" = "Notification";
+"template.type.letter" = "Letter";
+"template.type.form" = "Form";
+"template.type.email" = "Email";
+"template.type.application" = "Application";
+"template.type.complaint" = "Complaint";
+"template.type.notice" = "Notice";
+"appointments.empty_subtitle" = "Add a doctor visit, consultation or office appointment — Sweezy will remind you in time.";
+
+/* Onboarding plan build */
+"onboarding.building.title" = "Building your plan…";
+"onboarding.building.subtitle" = "Picking the steps for your situation.";
+"onboarding.ready.title" = "Your plan is ready!";
+"onboarding.ready.subtitle" = "Your first steps are waiting on Home.";
+"onboarding.profile.editable_hint" = "You can change these details anytime in Settings.";
+"onboarding.profile.subtitle_short" = "A few details and the plan will match your situation.";
+
+/* Home: explore + help */
+"journey.home.explore.title" = "Explore Sweezy";
+"journey.home.explore.subtitle" = "Everything for life here, in one place";
+"journey.home.explore.directory" = "Guides, checklists and tools";
+"journey.home.explore.map" = "Offices and great places nearby";
+"journey.home.explore.market" = "Services, items and events";
+"journey.home.explore.people" = "Meet people who share your interests";
+"journey.home.help.title" = "Not sure where to start?";
+"journey.home.help.subtitle" = "Step-by-step guides on documents, housing and work";
+"journey.home.help.action" = "Open guides";
+"auth.social.apple" = "Continue with Apple";
+"auth.entry.sticker.profile" = "Your profile";
+"auth.entry.sticker.progress" = "Your progress";
+"auth.entry.sticker.people" = "New friends";
+"companion.plan.all_done" = "Everything important is done. Time to breathe!";
+"settings.biometry.unavailable" = "Biometric authentication is not available on this device.";
+"settings.biometry.not_enrolled" = "Set up Face ID or Touch ID in device settings to use app lock.";
+"settings.biometry.no_passcode" = "Set a device passcode before enabling biometric lock.";

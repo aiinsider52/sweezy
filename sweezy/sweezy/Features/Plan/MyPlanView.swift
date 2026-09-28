@@ -8,6 +8,7 @@ struct MyPlanView: View {
     @State private var showAppointments = false
     @State private var showDigest = false
     @State private var reminderMessage: String?
+    @State private var companionReaction = 0
 
     private var deadlines: [LifeDeadline] {
         appContainer.lifeAdmin.deadlines(
@@ -20,7 +21,7 @@ struct MyPlanView: View {
 
     var body: some View {
         ZStack {
-            JourneyPhotoBackground(imageName: "journey-tool-my-plan", blurRadius: 2, darkness: 0.58)
+            JourneyVisual.pageBackground.ignoresSafeArea()
 
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 18) {
@@ -32,13 +33,14 @@ struct MyPlanView: View {
                     if let reminderMessage {
                         Text(reminderMessage)
                             .font(.system(size: 12, weight: .semibold))
-                            .foregroundColor(JourneyVisual.lime)
+                            .foregroundColor(JourneyVisual.accentText)
                     }
                 }
                 .padding(20)
-                .padding(.bottom, 48)
+                .padding(.bottom, 128)
             }
         }
+        .statusBarScrim()
         .navigationBarTitleDisplayMode(.inline)
         .navigationDestination(isPresented: $showDocuments) { DocumentReadinessView() }
         .navigationDestination(isPresented: $showAsk) { AskSweezyView() }
@@ -51,14 +53,13 @@ struct MyPlanView: View {
     }
 
     private var header: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Мій план")
-                .font(.system(size: 38, weight: .bold, design: .rounded))
-                .foregroundColor(.white)
-            Text("Конкретні дії, строки та документи — без зайвого каталогу.")
-                .font(.system(size: 14, weight: .medium))
-                .foregroundColor(.white.opacity(0.7))
-        }
+        SweezyCompanionHeader(
+            title: "companion.plan.title".localized,
+            subtitle: "companion.plan.subtitle".localized,
+            pose: .documents,
+            reaction: companionReaction,
+            onPhoto: false
+        )
     }
 
     private var statusStrip: some View {
@@ -70,17 +71,17 @@ struct MyPlanView: View {
     }
 
     private func metric(value: String, title: String, icon: String) -> some View {
-        JourneyGlassPanel(cornerRadius: 18) {
+        CityPaper(inset: 0) {
             VStack(alignment: .leading, spacing: 6) {
                 Image(systemName: icon)
                     .font(.system(size: 13, weight: .bold))
-                    .foregroundColor(JourneyVisual.lime)
+                    .foregroundColor(JourneyVisual.accentStrong)
                 Text(value)
-                    .font(.system(size: 23, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
+                    .font(.system(size: 23, weight: .bold, design: .default))
+                    .foregroundColor(JourneyVisual.primaryText)
                 Text(title)
                     .font(.system(size: 10, weight: .medium))
-                    .foregroundColor(.white.opacity(0.56))
+                    .foregroundColor(JourneyVisual.secondaryText)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(13)
@@ -91,21 +92,21 @@ struct MyPlanView: View {
         VStack(alignment: .leading, spacing: 11) {
             HStack {
                 Text("Сьогодні та найближчі строки")
-                    .font(.system(size: 18, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
+                    .font(.system(size: 18, weight: .bold, design: .default))
+                    .foregroundColor(JourneyVisual.primaryText)
                 Spacer()
                 Button("Нагадати") { scheduleReminders() }
                     .font(.system(size: 12, weight: .bold))
-                    .foregroundColor(JourneyVisual.lime)
+                    .foregroundColor(JourneyVisual.accentText)
             }
 
             if deadlines.isEmpty {
-                JourneyGlassPanel(cornerRadius: 22) {
-                    Label("Критичних строків немає", systemImage: "checkmark.seal.fill")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(.white)
-                        .padding(16)
-                }
+                // Everything done: Sweezy on the hill above the city with a ticked list.
+                MascotEmptyState(
+                    title: "Критичних строків немає",
+                    subtitle: "companion.plan.all_done".localized,
+                    story: "plan-complete"
+                )
             } else {
                 ForEach(deadlines.prefix(7)) { deadline in
                     DeadlineRow(deadline: deadline) {
@@ -119,7 +120,9 @@ struct MyPlanView: View {
     private var toolsGrid: some View {
         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 11) {
             planTool(title: "Документи", subtitle: "Готовність і строки", icon: "doc.text.fill") { showDocuments = true }
+                .accessibilityIdentifier("plan.documents")
             planTool(title: "Ask Sweezy", subtitle: "Відповіді з джерелами", icon: "sparkles") { showAsk = true }
+                .accessibilityIdentifier("plan.ask")
             planTool(title: "Зустрічі", subtitle: "Експерти й офіси", icon: "calendar.badge.plus") { showAppointments = true }
             planTool(title: "Weekly Digest", subtitle: "План на тиждень", icon: "newspaper.fill") { showDigest = true }
         }
@@ -127,17 +130,17 @@ struct MyPlanView: View {
 
     private func planTool(title: String, subtitle: String, icon: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            JourneyGlassPanel(cornerRadius: 21) {
+            CityPaper(inset: 0) {
                 VStack(alignment: .leading, spacing: 10) {
                     Image(systemName: icon)
                         .font(.system(size: 18, weight: .bold))
-                        .foregroundColor(JourneyVisual.lime)
+                        .foregroundColor(JourneyVisual.accentStrong)
                     Text(title)
-                        .font(.system(size: 16, weight: .bold, design: .rounded))
-                        .foregroundColor(.white)
+                        .font(.system(size: 16, weight: .bold, design: .default))
+                        .foregroundColor(JourneyVisual.primaryText)
                     Text(subtitle)
                         .font(.system(size: 10, weight: .medium))
-                        .foregroundColor(.white.opacity(0.58))
+                        .foregroundColor(JourneyVisual.secondaryText)
                         .lineLimit(2)
                 }
                 .frame(maxWidth: .infinity, minHeight: 100, alignment: .leading)
@@ -159,6 +162,7 @@ struct MyPlanView: View {
     }
 
     private func complete(_ deadline: LifeDeadline) {
+        companionReaction += 1
         if let taskID = LifeAdminService.firstWeekTaskID(from: deadline.id) {
             appContainer.firstWeekService.toggle(taskID)
         } else {
@@ -173,29 +177,28 @@ private struct DeadlineRow: View {
     @Environment(\.openURL) private var openURL
 
     var body: some View {
-        JourneyGlassPanel(cornerRadius: 21) {
+        CityPaper(inset: 0) {
             HStack(spacing: 12) {
-                Image(systemName: deadline.category.icon)
-                    .font(.system(size: 16, weight: .bold))
-                    .foregroundColor(deadline.urgency == .overdue ? .red : JourneyVisual.lime)
-                    .frame(width: 38, height: 38)
-                    .background(Color.black.opacity(0.28))
-                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                JourneyCategoryIcon(
+                    symbol: deadline.category.icon,
+                    swatch: deadline.urgency == .overdue ? JourneyCategoryPalette.coral : JourneyCategoryPalette.swatch(for: deadline.category.rawValue),
+                    size: 38
+                )
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(deadline.title)
                         .font(.system(size: 14, weight: .bold))
-                        .foregroundColor(.white)
+                        .foregroundColor(JourneyVisual.primaryText)
                     Text(deadline.detail)
                         .font(.system(size: 11, weight: .medium))
-                        .foregroundColor(.white.opacity(0.58))
+                        .foregroundColor(JourneyVisual.secondaryText)
                         .lineLimit(2)
                     Button {
                         if let url = deadline.sourceURL { openURL(url) }
                     } label: {
                         Label(deadline.sourceTitle, systemImage: "checkmark.seal.fill")
                             .font(.system(size: 10, weight: .semibold))
-                            .foregroundColor(deadline.sourceURL == nil ? .white.opacity(0.45) : JourneyVisual.lime)
+                            .foregroundColor(deadline.sourceURL == nil ? JourneyVisual.secondaryText : Theme.Colors.primaryDark)
                     }
                     .buttonStyle(.plain)
                     .disabled(deadline.sourceURL == nil)
@@ -206,11 +209,11 @@ private struct DeadlineRow: View {
                 VStack(alignment: .trailing, spacing: 10) {
                     Text(daysText)
                         .font(.system(size: 11, weight: .bold))
-                        .foregroundColor(deadline.urgency == .overdue ? .red : .white)
+                        .foregroundColor(deadline.urgency == .overdue ? .red : JourneyVisual.primaryText)
                     Button(action: complete) {
                         Image(systemName: "checkmark.circle")
                             .font(.system(size: 21, weight: .semibold))
-                            .foregroundColor(.white.opacity(0.75))
+                            .foregroundColor(JourneyVisual.secondaryText)
                     }
                 }
             }
@@ -238,15 +241,15 @@ struct DeadlineEngineView: View {
 
     var body: some View {
         ZStack {
-            JourneyPhotoBackground(imageName: "swiss-moment-luzern", darkness: 0.66)
+            JourneyVisual.pageBackground.ignoresSafeArea()
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 14) {
                     Text("Deadline Engine")
-                        .font(.system(size: 34, weight: .bold, design: .rounded))
-                        .foregroundColor(.white)
+                        .font(.system(size: 34, weight: .bold, design: .default))
+                        .foregroundColor(JourneyVisual.primaryText)
                     Text("Permit, insurance, tax, registration та твої зустрічі.")
                         .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(.white.opacity(0.68))
+                        .foregroundColor(JourneyVisual.secondaryText)
                     ForEach(deadlines) { deadline in
                         DeadlineRow(deadline: deadline) {
                             if let taskID = LifeAdminService.firstWeekTaskID(from: deadline.id) {
@@ -258,7 +261,7 @@ struct DeadlineEngineView: View {
                     }
                 }
                 .padding(20)
-                .padding(.bottom, 48)
+                .padding(.bottom, 128)
             }
         }
         .navigationBarTitleDisplayMode(.inline)

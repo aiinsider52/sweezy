@@ -88,7 +88,7 @@ struct JourneyGuideArticleView: View {
                         .padding(.horizontal, horizontalInset)
                         .padding(.top, 20)
                         .padding(.bottom, 72)
-                        .background(JourneyVisual.black)
+                        .background(JourneyVisual.pageBackground)
                     }
                     .frame(width: viewportWidth)
                     .background(
@@ -107,8 +107,10 @@ struct JourneyGuideArticleView: View {
                 readingProgress
                 stickyHeader
             }
+            .statusBarScrim()
             .frame(width: viewportWidth)
         }
+        .accessibilityIdentifier("guide.article.screen")
         .toolbar(.hidden, for: .navigationBar)
         .interactiveSwipeBackEnabled()
         .onAppear {
@@ -129,20 +131,13 @@ struct JourneyGuideArticleView: View {
     }
 
     private var overscrollBackdrop: some View {
-        VStack(spacing: 0) {
-            JourneyGuideHeroImage(guide: guide)
-                .frame(height: 520)
-                .clipped()
-                .overlay(Color.black.opacity(0.34))
-            JourneyVisual.black
-        }
-        .ignoresSafeArea()
+        JourneyVisual.pageBackground.ignoresSafeArea()
     }
 
     private var stickyHeader: some View {
         HStack {
             Button { dismiss() } label: {
-                stickyControlLabel(icon: "chevron.left", tint: .white)
+                stickyControlLabel(icon: "chevron.left", tint: JourneyVisual.primaryText)
             }
             .buttonStyle(.plain)
             .accessibilityLabel("common.back".localized)
@@ -163,34 +158,27 @@ struct JourneyGuideArticleView: View {
             .font(.system(size: 17, weight: .bold))
             .foregroundColor(tint)
             .frame(width: 48, height: 48)
-            .background(Color.black.opacity(0.58))
+            .background(Theme.Colors.card)
             .background(.ultraThinMaterial.opacity(0.72))
             .clipShape(Circle())
-            .overlay(Circle().stroke(.white.opacity(0.24), lineWidth: 1))
+            .overlay(Circle().stroke(JourneyVisual.softBorder, lineWidth: 1))
             .shadow(color: .black.opacity(0.24), radius: 12, y: 5)
     }
 
     private func hero(width: CGFloat, horizontalInset: CGFloat, contentWidth: CGFloat) -> some View {
-        ZStack(alignment: .bottomLeading) {
-            Color.clear
-                .frame(width: width, height: 408)
-
-            LinearGradient(
-                colors: [.black.opacity(0.12), .black.opacity(0.12), JourneyVisual.black],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-
+        VStack(alignment: .leading, spacing: 16) {
+            // Room for the floating back/share controls now that the hero has no artwork.
+            Spacer().frame(height: 64)
             VStack(alignment: .leading, spacing: 12) {
                 HStack(spacing: 8) {
                     Label(guide.category.localizedName, systemImage: guide.category.iconName)
                         .font(.system(size: 11, weight: .bold))
-                        .foregroundColor(.white)
+                        .foregroundColor(JourneyVisual.primaryText)
                         .padding(.horizontal, 11)
                         .frame(height: 30)
-                        .background(Color.black.opacity(0.5))
+                        .background(Theme.Colors.card)
                         .clipShape(Capsule())
-                        .overlay(Capsule().stroke(.white.opacity(0.2), lineWidth: 1))
+                        .overlay(Capsule().stroke(JourneyVisual.softBorder, lineWidth: 1))
 
                     if guide.isNew, case .verified = freshness {
                         Text("NEW")
@@ -204,14 +192,13 @@ struct JourneyGuideArticleView: View {
                 }
 
                 Text(guide.title)
-                    .font(.system(size: 34, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
-                    .lineSpacing(-2)
+                    .font(.system(size: 34, weight: .bold, design: .default))
+                    .foregroundColor(JourneyVisual.primaryText)
+                    .lineSpacing(1)
                     .lineLimit(4)
                     .minimumScaleFactor(0.78)
                     .fixedSize(horizontal: false, vertical: true)
                     .frame(maxWidth: contentWidth, alignment: .leading)
-                    .shadow(color: .black.opacity(0.48), radius: 12, y: 4)
 
                 HStack(spacing: 16) {
                     Label("guides.reading_time".localized(with: guide.estimatedReadingTime), systemImage: "clock")
@@ -220,12 +207,12 @@ struct JourneyGuideArticleView: View {
                     }
                 }
                 .font(.system(size: 11, weight: .semibold))
-                .foregroundColor(.white.opacity(0.74))
+                .foregroundColor(JourneyVisual.secondaryText)
             }
             .padding(.horizontal, horizontalInset)
             .padding(.bottom, 18)
         }
-        .frame(width: width, height: 408)
+        .frame(width: width)
         .clipped()
     }
 
@@ -236,20 +223,20 @@ struct JourneyGuideArticleView: View {
                 HStack(spacing: 12) {
                     Image(systemName: isOfficialSource ? "checkmark.seal.fill" : "link")
                         .font(.system(size: 18, weight: .bold))
-                        .foregroundColor(JourneyVisual.lime)
+                        .foregroundColor(Theme.Colors.textPrimary)
 
                     VStack(alignment: .leading, spacing: 3) {
                         Text(isOfficialSource ? "OFFICIAL SOURCE" : "SOURCE")
                             .font(.system(size: 9, weight: .black))
-                            .foregroundColor(JourneyVisual.lime)
+                            .foregroundColor(Theme.Colors.textPrimary)
                         Text(guide.sourceTitle ?? sourceURL.host() ?? "journey.guide.official_portal".localized)
                             .font(.system(size: 13, weight: .bold))
-                            .foregroundColor(.white)
+                            .foregroundColor(JourneyVisual.primaryText)
                             .lineLimit(2)
                         if case .verified(let date) = freshness {
                             Text("journey.guide.verified".localized(with: date.formatted(date: .long, time: .omitted)))
                                 .font(.system(size: 10, weight: .medium))
-                                .foregroundColor(.white.opacity(0.48))
+                                .foregroundColor(JourneyVisual.secondaryText)
                         }
                     }
 
@@ -263,9 +250,9 @@ struct JourneyGuideArticleView: View {
                         .clipShape(Circle())
                 }
                 .padding(14)
-                .background(Color.white.opacity(0.065))
+                .background(Theme.Colors.card)
                 .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-                .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(.white.opacity(0.14), lineWidth: 1))
+                .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(JourneyVisual.softBorder, lineWidth: 1))
             }
         } else {
             HStack(spacing: 12) {
@@ -273,11 +260,11 @@ struct JourneyGuideArticleView: View {
                     .foregroundColor(.orange)
                 Text("journey.guide.source_pending".localized)
                     .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(.white.opacity(0.68))
+                    .foregroundColor(JourneyVisual.secondaryText)
                 Spacer()
             }
             .padding(14)
-            .background(Color.white.opacity(0.055))
+            .background(Theme.Colors.card)
             .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
         }
     }
@@ -296,14 +283,14 @@ struct JourneyGuideArticleView: View {
                     .foregroundColor(.orange)
             }
             Text("Educational information only — not legal advice. Requirements and deadlines can vary by canton and personal situation.")
-                .foregroundColor(.white.opacity(0.58))
+                .foregroundColor(JourneyVisual.secondaryText)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .font(.system(size: 11, weight: .semibold))
-        .foregroundColor(.white.opacity(0.76))
+        .foregroundColor(JourneyVisual.secondaryText)
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.white.opacity(0.055))
+        .background(Theme.Colors.card)
         .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
     }
 
@@ -328,39 +315,39 @@ struct JourneyGuideArticleView: View {
                 .clipShape(Capsule())
 
             Text(summary)
-                .font(.system(size: 16, weight: .semibold, design: .rounded))
-                .foregroundColor(.white)
+                .font(.system(size: 16, weight: .semibold, design: .default))
+                .foregroundColor(JourneyVisual.primaryText)
                 .lineSpacing(4)
         }
         .padding(17)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.white.opacity(0.065))
+        .background(Theme.Colors.card)
         .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(.white.opacity(0.14), lineWidth: 1))
+        .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(JourneyVisual.softBorder, lineWidth: 1))
     }
 
     private var usefulLinks: some View {
         VStack(alignment: .leading, spacing: 11) {
             Text("journey.guide.useful_links".localized)
-                .font(.system(size: 21, weight: .bold, design: .rounded))
-                .foregroundColor(.white)
+                .font(.system(size: 21, weight: .bold, design: .default))
+                .foregroundColor(JourneyVisual.primaryText)
 
             ForEach(guide.links) { link in
                 if let url = URL(string: link.url) {
                     Link(destination: url) {
                         HStack(spacing: 11) {
                             Image(systemName: "link")
-                                .foregroundColor(JourneyVisual.lime)
+                                .foregroundColor(Theme.Colors.textPrimary)
                             Text(link.title)
                                 .font(.system(size: 13, weight: .semibold))
-                                .foregroundColor(.white)
+                                .foregroundColor(JourneyVisual.primaryText)
                                 .multilineTextAlignment(.leading)
                             Spacer()
                             Image(systemName: "arrow.up.right")
-                                .foregroundColor(.white.opacity(0.46))
+                                .foregroundColor(JourneyVisual.secondaryText)
                         }
                         .padding(13)
-                        .background(Color.white.opacity(0.055))
+                        .background(Theme.Colors.card)
                         .clipShape(RoundedRectangle(cornerRadius: 17, style: .continuous))
                     }
                 }
@@ -381,19 +368,19 @@ struct JourneyGuideArticleView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("journey.guide.take_action".localized)
                         .font(.system(size: 9, weight: .black))
-                        .foregroundColor(JourneyVisual.lime)
+                        .foregroundColor(Theme.Colors.textPrimary)
                     Text(checklist.title)
-                        .font(.system(size: 15, weight: .bold, design: .rounded))
-                        .foregroundColor(.white)
+                        .font(.system(size: 15, weight: .bold, design: .default))
+                        .foregroundColor(JourneyVisual.primaryText)
                         .lineLimit(2)
                 }
 
                 Spacer()
                 Image(systemName: "arrow.right")
-                    .foregroundColor(.white)
+                    .foregroundColor(JourneyVisual.primaryText)
             }
             .padding(14)
-            .background(Color.white.opacity(0.065))
+            .background(Theme.Colors.card)
             .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
             .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(JourneyVisual.lime.opacity(0.42), lineWidth: 1))
         }
@@ -498,9 +485,9 @@ private struct JourneyArticleMarkdown: View {
     private func heading(_ text: String, size: CGFloat) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(text)
-                .font(.system(size: size, weight: .bold, design: .rounded))
-                .foregroundColor(.white)
-                .lineSpacing(-1)
+                .font(.system(size: size, weight: .bold, design: .default))
+                .foregroundColor(JourneyVisual.primaryText)
+                .lineSpacing(1)
                 .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: .infinity, alignment: .leading)
             Capsule()
@@ -512,8 +499,8 @@ private struct JourneyArticleMarkdown: View {
 
     private func paragraph(_ text: String) -> some View {
         Text(attributed(text))
-            .font(.system(size: 17, weight: .regular, design: .rounded))
-            .foregroundColor(.white.opacity(0.84))
+            .font(.system(size: 17, weight: .regular, design: .default))
+            .foregroundColor(JourneyVisual.secondaryText)
             .lineSpacing(7)
             .fixedSize(horizontal: false, vertical: true)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -533,8 +520,8 @@ private struct JourneyArticleMarkdown: View {
 
     private func callout(_ text: String) -> some View {
         Text(attributed(text))
-            .font(.system(size: 15, weight: .semibold, design: .rounded))
-            .foregroundColor(.white.opacity(0.9))
+            .font(.system(size: 15, weight: .semibold, design: .default))
+            .foregroundColor(JourneyVisual.secondaryText)
             .lineSpacing(5)
             .padding(15)
             .frame(maxWidth: .infinity, alignment: .leading)

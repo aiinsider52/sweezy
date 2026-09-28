@@ -206,6 +206,7 @@ struct ProfessionalNetworkView: View {
             }
         }
         .toolbar(.hidden, for: .navigationBar)
+        .statusBarScrim()
         .fullScreenCover(item: $selectedProfile) { profile in
             NetworkProfileDetailView(
                 profile: profile,
@@ -265,11 +266,12 @@ struct ProfessionalNetworkView: View {
                 Task { await vm.loadAll() }
             }
         }
+        .interactiveSwipeBackEnabled { dismiss() }
     }
 
     private var networkContent: some View {
         ZStack {
-            JourneyVisual.black.ignoresSafeArea()
+            JourneyAmbientBackground()
             ScrollView(showsIndicators: false) {
                 LazyVStack(spacing: 0) {
                     if section == .discover {
@@ -299,7 +301,9 @@ struct ProfessionalNetworkView: View {
     private var editorialDiscovery: some View {
         VStack(spacing: 0) {
             editorialHeader
+                .journeyEntrance(delay: 0.02, distance: 8)
             spotlightGoalTabs
+                .journeyEntrance(delay: 0.06, distance: 8)
 
             if vm.isLoading && vm.profiles.isEmpty {
                 networkSkeleton
@@ -320,7 +324,7 @@ struct ProfessionalNetworkView: View {
             HStack(spacing: 12) {
                 Button { dismiss() } label: {
                     NetworkSVGIcon(name: "network-icon-back", size: 22)
-                        .foregroundColor(JourneyVisual.lime)
+                        .foregroundColor(Theme.Colors.textPrimary)
                         .frame(width: 44, height: 44)
                         .contentShape(Circle())
                 }
@@ -329,15 +333,15 @@ struct ProfessionalNetworkView: View {
                 Text("SWEEZY NETWORK")
                     .font(.system(size: 11, weight: .black, design: .default))
                     .tracking(3.2)
-                    .foregroundColor(JourneyVisual.lime)
+                    .foregroundColor(Theme.Colors.textPrimary)
 
                 Spacer(minLength: 12)
 
                 Button { showFilters = true } label: {
                     NetworkSVGIcon(name: "network-icon-filter", size: 24)
-                        .foregroundColor(JourneyVisual.lime)
+                        .foregroundColor(Theme.Colors.textPrimary)
                         .frame(width: 50, height: 50)
-                        .background(Color.black)
+                        .background(Theme.Colors.card)
                         .clipShape(Circle())
                         .overlay(Circle().stroke(JourneyVisual.lime, lineWidth: 1))
                 }
@@ -355,11 +359,11 @@ struct ProfessionalNetworkView: View {
     }
 
     private var editorialHeadline: some View {
-        Text("Знайди людину,\nяка \(Text("прискорить\nтвій бізнес").foregroundColor(JourneyVisual.lime))")
-        .foregroundColor(.white)
-        .font(.system(size: 37, weight: .black, design: .default))
-        .tracking(-1.0)
-        .lineSpacing(-3)
+        Text("Знайди людину,\nяка \(Text("прискорить\nтвій бізнес").foregroundColor(Theme.Colors.textPrimary))")
+        .foregroundColor(JourneyVisual.primaryText)
+        .font(.system(size: 29, weight: .bold, design: .default))
+        .tracking(-0.6)
+        .lineSpacing(2)
         .fixedSize(horizontal: false, vertical: true)
         .minimumScaleFactor(0.82)
         .accessibilityLabel("Знайди людину, яка прискорить твій бізнес")
@@ -383,7 +387,7 @@ struct ProfessionalNetworkView: View {
                                 .lineLimit(1)
                                 .minimumScaleFactor(0.82)
                         }
-                        .foregroundColor(active ? JourneyVisual.lime : .white.opacity(0.48))
+                        .foregroundColor(active ? JourneyVisual.accentText : JourneyVisual.secondaryText)
 
                         Capsule()
                             .fill(active ? JourneyVisual.lime : Color.clear)
@@ -420,7 +424,7 @@ struct ProfessionalNetworkView: View {
             ZStack(alignment: .bottomLeading) {
                 NetworkSpotlightPhoto(profile: profile, isDemo: vm.isShowingDemoProfiles || isUITestPreview)
                     .frame(maxWidth: .infinity)
-                    .frame(height: 640)
+                    .frame(height: 560)
                     .clipped()
 
                 LinearGradient(
@@ -432,7 +436,7 @@ struct ProfessionalNetworkView: View {
                 VStack(alignment: .leading, spacing: 13) {
                     HStack(alignment: .firstTextBaseline, spacing: 8) {
                         Text(profile.displayName)
-                            .font(.system(size: 36, weight: .bold, design: .default))
+                            .font(.system(size: 30, weight: .bold, design: .default))
                             .tracking(-0.9)
                             .foregroundColor(.white)
                             .lineLimit(2)
@@ -447,22 +451,22 @@ struct ProfessionalNetworkView: View {
 
                     Text(profile.headline)
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.white.opacity(0.68))
+                        .foregroundColor(.white.opacity(0.82))
 
                     HStack(spacing: 8) {
                         NetworkSVGIcon(name: "network-icon-location", size: 18)
                         Text("\(profile.city) · \(profile.canton)")
                     }
                         .font(.system(size: 15, weight: .bold))
-                        .foregroundColor(JourneyVisual.lime)
+                        .foregroundColor(.white)
 
                     Rectangle()
-                        .fill(Color.white.opacity(0.25))
+                        .fill(JourneyVisual.softBorder)
                         .frame(maxWidth: 210, maxHeight: 1)
 
                     Text(profile.bio)
                         .font(.system(size: 15, weight: .medium))
-                        .foregroundColor(.white.opacity(0.72))
+                        .foregroundColor(.white.opacity(0.82))
                         .lineLimit(4)
                         .fixedSize(horizontal: false, vertical: true)
 
@@ -522,23 +526,23 @@ struct ProfessionalNetworkView: View {
                 } label: {
                     HStack(spacing: 13) {
                         NetworkSVGIcon(name: "network-icon-more", size: 21)
-                            .foregroundColor(.white.opacity(0.78))
+                            .foregroundColor(JourneyVisual.secondaryText)
                             .frame(width: 46, height: 46)
-                            .background(Color.white.opacity(0.055))
+                            .background(Theme.Colors.card)
                             .clipShape(Circle())
-                            .overlay(Circle().stroke(Color.white.opacity(0.14)))
+                            .overlay(Circle().stroke(JourneyVisual.softBorder))
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Ще \(remainingProfiles.count) сильних збігів")
                                 .font(.system(size: 15, weight: .bold))
-                                .foregroundColor(.white)
+                                .foregroundColor(JourneyVisual.primaryText)
                             Text(showMoreMatches ? "Згорнути список" : "Потягни, щоб переглянути")
                                 .font(.system(size: 12, weight: .medium))
-                                .foregroundColor(.white.opacity(0.42))
+                                .foregroundColor(JourneyVisual.secondaryText)
                         }
                         Spacer()
                         Image(systemName: showMoreMatches ? "chevron.up" : "chevron.down")
                             .font(.system(size: 16, weight: .black))
-                            .foregroundColor(JourneyVisual.lime)
+                            .foregroundColor(Theme.Colors.textPrimary)
                     }
                     .contentShape(Rectangle())
                 }
@@ -573,10 +577,10 @@ struct ProfessionalNetworkView: View {
             Text("\(matchScore(for: profile))% збіг")
         }
             .font(.system(size: 12, weight: .bold))
-            .foregroundColor(JourneyVisual.lime)
+            .foregroundColor(Theme.Colors.textPrimary)
             .padding(.horizontal, 13)
             .frame(height: 38)
-            .background(Color.black.opacity(0.72))
+            .background(Theme.Colors.card)
             .clipShape(Capsule())
             .overlay(Capsule().stroke(JourneyVisual.lime.opacity(0.62)))
     }
@@ -596,12 +600,12 @@ struct ProfessionalNetworkView: View {
             Text(skillDisplayName(skill))
         }
             .font(.system(size: 11, weight: .semibold))
-            .foregroundColor(.white.opacity(0.78))
+            .foregroundColor(JourneyVisual.secondaryText)
             .padding(.horizontal, 11)
             .frame(height: 32)
-            .background(Color.black.opacity(0.46))
+            .background(Theme.Colors.card)
             .clipShape(Capsule())
-            .overlay(Capsule().stroke(Color.white.opacity(0.24)))
+            .overlay(Capsule().stroke(JourneyVisual.softBorder))
     }
 
     private func skillDisplayName(_ skill: String) -> String {
@@ -673,11 +677,11 @@ struct ProfessionalNetworkView: View {
                     .font(.system(size: 11, weight: .bold))
                     .lineLimit(1)
             }
-            .foregroundColor(.white.opacity(0.72))
+            .foregroundColor(JourneyVisual.secondaryText)
             .frame(maxWidth: .infinity, minHeight: 64)
-            .background(Color.white.opacity(0.045))
+            .background(Theme.Colors.card)
             .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 18).stroke(Color.white.opacity(0.09)))
+            .overlay(RoundedRectangle(cornerRadius: 18).stroke(JourneyVisual.softBorder))
         }
         .buttonStyle(.plain)
     }
@@ -687,19 +691,19 @@ struct ProfessionalNetworkView: View {
             Button { section = .discover } label: {
                 Image(systemName: "chevron.left")
                     .font(.system(size: 17, weight: .black))
-                    .foregroundColor(JourneyVisual.lime)
+                    .foregroundColor(Theme.Colors.textPrimary)
                     .frame(width: 46, height: 46)
-                    .background(Color.white.opacity(0.055))
+                    .background(Theme.Colors.card)
                     .clipShape(Circle())
             }
             VStack(alignment: .leading, spacing: 2) {
                 Text("SWEEZY NETWORK")
                     .font(.system(size: 9, weight: .black, design: .default))
                     .tracking(2)
-                    .foregroundColor(JourneyVisual.lime)
+                    .foregroundColor(Theme.Colors.textPrimary)
                 Text(section.rawValue)
                     .font(.system(size: 28, weight: .black, design: .default))
-                    .foregroundColor(.white)
+                    .foregroundColor(JourneyVisual.primaryText)
             }
             Spacer()
         }
@@ -719,7 +723,7 @@ struct ProfessionalNetworkView: View {
                         Text(item.rawValue)
                     }
                     .font(.system(size: 13, weight: .bold))
-                    .foregroundColor(section == item ? .black : .white.opacity(0.62))
+                    .foregroundColor(section == item ? .black : JourneyVisual.secondaryText)
                     .frame(maxWidth: .infinity)
                     .frame(height: 46)
                     .background(section == item ? JourneyVisual.lime : Color.clear)
@@ -729,40 +733,40 @@ struct ProfessionalNetworkView: View {
             }
         }
         .padding(5)
-        .background(Color.white.opacity(0.07))
+        .background(Theme.Colors.card)
         .clipShape(Capsule())
-        .overlay(Capsule().stroke(Color.white.opacity(0.12)))
+        .overlay(Capsule().stroke(JourneyVisual.softBorder))
         .padding(.horizontal, 18)
     }
 
     private var discoveryFiltersSheet: some View {
         NavigationStack {
             ZStack {
-                JourneyVisual.black.ignoresSafeArea()
+                JourneyAmbientBackground()
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 18) {
                         Text("Знайди точний збіг")
                             .font(.system(size: 28, weight: .black, design: .default))
-                            .foregroundColor(.white)
+                            .foregroundColor(JourneyVisual.primaryText)
 
                         HStack(spacing: 10) {
                             Image(systemName: "magnifyingglass")
-                                .foregroundColor(JourneyVisual.lime)
+                                .foregroundColor(Theme.Colors.textPrimary)
                             TextField("Ім’я, сфера або навичка", text: $vm.searchText)
-                                .foregroundColor(.white)
+                                .foregroundColor(JourneyVisual.primaryText)
                                 .textInputAutocapitalization(.never)
                                 .submitLabel(.search)
                         }
                         .padding(.horizontal, 15)
                         .frame(height: 56)
-                        .background(Color.white.opacity(0.07))
+                        .background(JourneyVisual.softSurface)
                         .clipShape(RoundedRectangle(cornerRadius: 17))
-                        .overlay(RoundedRectangle(cornerRadius: 17).stroke(Color.white.opacity(0.12)))
+                        .overlay(RoundedRectangle(cornerRadius: 17).stroke(JourneyVisual.softBorder))
 
                         Text("ЦІЛЬ ЗНАЙОМСТВА")
                             .font(.system(size: 9, weight: .black))
                             .tracking(1.5)
-                            .foregroundColor(JourneyVisual.lime)
+                            .foregroundColor(Theme.Colors.textPrimary)
                         FlowLayout(spacing: 8) {
                             filterChip("Усі цілі", active: vm.selectedGoal == nil) { vm.selectedGoal = nil }
                             ForEach(ProfessionalGoal.allCases) { goal in
@@ -806,7 +810,7 @@ struct ProfessionalNetworkView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Закрити") { showFilters = false }
-                        .foregroundColor(JourneyVisual.lime)
+                        .foregroundColor(Theme.Colors.textPrimary)
                 }
             }
         }
@@ -817,7 +821,7 @@ struct ProfessionalNetworkView: View {
             RoundedRectangle(cornerRadius: 28, style: .continuous)
                 .fill(
                     LinearGradient(
-                        colors: [Color(red: 0.05, green: 0.12, blue: 0.12), Color(red: 0.055, green: 0.065, blue: 0.06)],
+                        colors: [Theme.Colors.card, Theme.Colors.card],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     )
@@ -847,19 +851,19 @@ struct ProfessionalNetworkView: View {
                     Text("ТВІЙ КРУГ У ШВЕЙЦАРІЇ")
                         .font(.system(size: 10, weight: .black, design: .default))
                         .tracking(1.5)
-                        .foregroundColor(JourneyVisual.lime)
+                        .foregroundColor(Theme.Colors.textPrimary)
                     Text("\(vm.profiles.count) нових контактів")
                         .font(.system(size: 21, weight: .bold, design: .default))
-                        .foregroundColor(.white)
+                        .foregroundColor(JourneyVisual.primaryText)
                     Text(vm.selectedCanton.map { "Фокус: кантон \($0)" } ?? "Від Zürich до Genève")
                         .font(.system(size: 12, weight: .medium))
-                        .foregroundColor(.white.opacity(0.54))
+                        .foregroundColor(JourneyVisual.secondaryText)
                 }
                 Spacer()
                 VStack(spacing: 4) {
                     Text("ZH  ·  BS  ·  GE")
                         .font(.system(size: 10, weight: .black, design: .monospaced))
-                        .foregroundColor(.white.opacity(0.56))
+                        .foregroundColor(JourneyVisual.secondaryText)
                     Text("CH")
                         .font(.system(size: 18, weight: .black, design: .default))
                         .foregroundColor(.black)
@@ -883,11 +887,11 @@ struct ProfessionalNetworkView: View {
                 }.frame(width: 54, height: 54)
                 VStack(alignment: .leading, spacing: 4) {
                     Text("SWEEZY FRIENDS").font(.system(size: 10, weight: .black, design: .default)).tracking(1.5).foregroundColor(Color(red: 1, green: 0.42, blue: 0.34))
-                    Text("Знайди друзів за інтересами").font(.system(size: 17, weight: .bold, design: .default)).foregroundColor(.white)
-                    Text("Події, хобі та люди поруч").font(.system(size: 12, weight: .medium)).foregroundColor(.white.opacity(0.5))
+                    Text("Знайди друзів за інтересами").font(.system(size: 17, weight: .bold, design: .default)).foregroundColor(JourneyVisual.primaryText)
+                    Text("Події, хобі та люди поруч").font(.system(size: 12, weight: .medium)).foregroundColor(JourneyVisual.secondaryText)
                 }
                 Spacer()
-                Image(systemName: "arrow.up.right").font(.system(size: 17, weight: .bold)).foregroundColor(.white)
+                Image(systemName: "arrow.up.right").font(.system(size: 17, weight: .bold)).foregroundColor(JourneyVisual.primaryText)
             }
             .padding(16).background(LinearGradient(colors:[Color(red:0.12,green:0.055,blue:0.08),Color.white.opacity(0.055)],startPoint:.leading,endPoint:.trailing))
             .clipShape(RoundedRectangle(cornerRadius: 23, style: .continuous))
@@ -900,9 +904,9 @@ struct ProfessionalNetworkView: View {
             HStack(spacing: 11) {
                 Image(systemName: "magnifyingglass")
                     .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(JourneyVisual.lime)
+                    .foregroundColor(Theme.Colors.textPrimary)
                 TextField("Ім’я, сфера або навичка", text: $vm.searchText)
-                    .foregroundColor(.white)
+                    .foregroundColor(JourneyVisual.primaryText)
                     .textInputAutocapitalization(.never)
                     .submitLabel(.search)
                     .onSubmit { Task { await vm.reloadProfiles() } }
@@ -910,7 +914,7 @@ struct ProfessionalNetworkView: View {
                     showFilters.toggle()
                 } label: {
                     Image(systemName: "slider.horizontal.3")
-                        .foregroundColor(showFilters ? .black : .white)
+                        .foregroundColor(showFilters ? .black : JourneyVisual.primaryText)
                         .frame(width: 39, height: 39)
                         .background(showFilters ? JourneyVisual.lime : Color.white.opacity(0.08))
                         .clipShape(Circle())
@@ -918,9 +922,9 @@ struct ProfessionalNetworkView: View {
             }
             .padding(.horizontal, 15)
             .frame(height: 58)
-            .background(Color.white.opacity(0.07))
+            .background(Theme.Colors.card)
             .clipShape(RoundedRectangle(cornerRadius: 19, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 19).stroke(Color.white.opacity(0.12)))
+            .overlay(RoundedRectangle(cornerRadius: 19).stroke(JourneyVisual.softBorder))
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
@@ -964,7 +968,7 @@ struct ProfessionalNetworkView: View {
                 Text(title)
             }
             .font(.system(size: 12, weight: .bold))
-            .foregroundColor(active ? .black : .white.opacity(0.7))
+            .foregroundColor(active ? .black : JourneyVisual.primaryText)
             .padding(.horizontal, 13)
             .frame(height: 38)
             .background(active ? JourneyVisual.lime : Color.white.opacity(0.065))
@@ -977,15 +981,15 @@ struct ProfessionalNetworkView: View {
     private func networkPicker<Content: View>(title: String, value: String, @ViewBuilder content: () -> Content) -> some View {
         HStack {
             VStack(alignment: .leading, spacing: 2) {
-                Text(title.uppercased()).font(.system(size: 8, weight: .black)).tracking(1).foregroundColor(.white.opacity(0.4))
-                Text(value).font(.system(size: 14, weight: .bold)).foregroundColor(.white)
+                Text(title.uppercased()).font(.system(size: 8, weight: .black)).tracking(1).foregroundColor(JourneyVisual.secondaryText)
+                Text(value).font(.system(size: 14, weight: .bold)).foregroundColor(JourneyVisual.primaryText)
             }
             Spacer()
-            content().labelsHidden().tint(JourneyVisual.lime)
+            content().labelsHidden().tint(JourneyVisual.accentText)
         }
         .padding(.horizontal, 14)
         .frame(height: 58)
-        .background(Color.white.opacity(0.055))
+        .background(Theme.Colors.card)
         .clipShape(RoundedRectangle(cornerRadius: 16))
     }
 
@@ -994,9 +998,9 @@ struct ProfessionalNetworkView: View {
             HStack {
                 Label("Знайомся наживо", systemImage: "calendar.badge.plus")
                     .font(.system(size: 17, weight: .bold, design: .default))
-                    .foregroundColor(.white)
+                    .foregroundColor(JourneyVisual.primaryText)
                 Spacer()
-                Text("ПОДІЇ").font(.system(size: 9, weight: .black)).tracking(1.2).foregroundColor(JourneyVisual.lime)
+                Text("ПОДІЇ").font(.system(size: 9, weight: .black)).tracking(1.2).foregroundColor(Theme.Colors.textPrimary)
             }
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 10) {
@@ -1005,7 +1009,7 @@ struct ProfessionalNetworkView: View {
                             VStack(alignment: .leading, spacing: 7) {
                                 Text(event.title)
                                     .font(.system(size: 14, weight: .bold))
-                                    .foregroundColor(.white)
+                                    .foregroundColor(JourneyVisual.primaryText)
                                     .lineLimit(2)
                                 Spacer()
                                 HStack {
@@ -1014,13 +1018,13 @@ struct ProfessionalNetworkView: View {
                                     Image(systemName: "arrow.up.right")
                                 }
                                 .font(.system(size: 10, weight: .black))
-                                .foregroundColor(JourneyVisual.lime)
+                                .foregroundColor(Theme.Colors.textPrimary)
                             }
                             .padding(13)
                             .frame(width: 175, height: 105, alignment: .leading)
-                            .background(Color(red: 0.07, green: 0.11, blue: 0.1))
+                            .background(Theme.Colors.card)
                             .clipShape(RoundedRectangle(cornerRadius: 18))
-                            .overlay(RoundedRectangle(cornerRadius: 18).stroke(Color.white.opacity(0.1)))
+                            .overlay(RoundedRectangle(cornerRadius: 18).stroke(JourneyVisual.softBorder))
                         }
                         .buttonStyle(.plain)
                     }
@@ -1043,17 +1047,17 @@ struct ProfessionalNetworkView: View {
 
     private func connectionGroup(title: String, subtitle: String, items: [ProfessionalConnection], kind: ConnectionGroupKind) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(title).font(.system(size: 22, weight: .bold, design: .default)).foregroundColor(.white)
-            Text(subtitle).font(.system(size: 12, weight: .medium)).foregroundColor(.white.opacity(0.48))
+            Text(title).font(.system(size: 22, weight: .bold, design: .default)).foregroundColor(JourneyVisual.primaryText)
+            Text(subtitle).font(.system(size: 12, weight: .medium)).foregroundColor(JourneyVisual.secondaryText)
             if items.isEmpty {
                 HStack(spacing: 12) {
                     Image(systemName: kind == .incoming ? "person.crop.circle.badge.checkmark" : "circle.dotted")
-                        .foregroundColor(JourneyVisual.lime)
+                        .foregroundColor(Theme.Colors.textPrimary)
                     Text(kind == .incoming ? "Нових запитів поки немає" : "Тут з’являться професійні контакти")
-                        .font(.system(size: 13, weight: .semibold)).foregroundColor(.white.opacity(0.58))
+                        .font(.system(size: 13, weight: .semibold)).foregroundColor(JourneyVisual.secondaryText)
                 }
                 .padding(16).frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color.white.opacity(0.05)).clipShape(RoundedRectangle(cornerRadius: 18))
+                .background(Theme.Colors.card).clipShape(RoundedRectangle(cornerRadius: 18))
             } else {
                 ForEach(items) { connection in
                     NetworkConnectionRow(connection: connection, kind: kind) {
@@ -1091,11 +1095,11 @@ struct ProfessionalNetworkView: View {
             } else {
                 VStack(alignment: .leading, spacing: 16) {
                     Image(systemName: "person.crop.circle.badge.plus")
-                        .font(.system(size: 34, weight: .bold)).foregroundColor(JourneyVisual.lime)
+                        .font(.system(size: 34, weight: .bold)).foregroundColor(Theme.Colors.textPrimary)
                     Text("Відкрий себе для сильних знайомств")
-                        .font(.system(size: 26, weight: .bold, design: .default)).foregroundColor(.white)
+                        .font(.system(size: 26, weight: .bold, design: .default)).foregroundColor(JourneyVisual.primaryText)
                     Text("Розкажи, чим займаєшся, кого шукаєш і в якому кантоні працюєш. Контакти залишаються приватними.")
-                        .font(.system(size: 14, weight: .medium)).foregroundColor(.white.opacity(0.58))
+                        .font(.system(size: 14, weight: .medium)).foregroundColor(JourneyVisual.secondaryText)
                     Button { showEditor = true } label: {
                         Text("Створити профіль").font(.system(size: 16, weight: .bold)).foregroundColor(.black)
                             .frame(maxWidth: .infinity, minHeight: 54).background(JourneyVisual.lime)
@@ -1103,7 +1107,7 @@ struct ProfessionalNetworkView: View {
                     }
                 }
                 .padding(20)
-                .background(Color.white.opacity(0.06))
+                .background(Theme.Colors.card)
                 .clipShape(RoundedRectangle(cornerRadius: 26))
                 .overlay(RoundedRectangle(cornerRadius: 26).stroke(JourneyVisual.lime.opacity(0.35)))
             }
@@ -1139,17 +1143,17 @@ struct ProfessionalNetworkView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 14))
                 VStack(alignment: .leading, spacing: 3) {
                     Text("Потрібна професійна консультація?")
-                        .font(.system(size: 14, weight: .bold)).foregroundColor(.white)
+                        .font(.system(size: 14, weight: .bold)).foregroundColor(JourneyVisual.primaryText)
                     Text("Перевірені експерти Sweezy")
-                        .font(.system(size: 11, weight: .medium)).foregroundColor(.white.opacity(0.5))
+                        .font(.system(size: 11, weight: .medium)).foregroundColor(JourneyVisual.secondaryText)
                 }
                 Spacer()
-                Image(systemName: "chevron.right").foregroundColor(.white.opacity(0.42))
+                Image(systemName: "chevron.right").foregroundColor(JourneyVisual.secondaryText)
             }
             .padding(13)
-            .background(Color.white.opacity(0.055))
+            .background(Theme.Colors.card)
             .clipShape(RoundedRectangle(cornerRadius: 18))
-            .overlay(RoundedRectangle(cornerRadius: 18).stroke(Color.white.opacity(0.09)))
+            .overlay(RoundedRectangle(cornerRadius: 18).stroke(JourneyVisual.softBorder))
         }
         .buttonStyle(.plain)
     }
@@ -1158,80 +1162,73 @@ struct ProfessionalNetworkView: View {
         let score = min(100, 45 + min(profile.skills.count, 5) * 5 + min(profile.goals.count, 3) * 5 + (profile.bio.count > 120 ? 15 : 0))
         return VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text("Сила профілю").font(.system(size: 15, weight: .bold)).foregroundColor(.white)
+                Text("Сила профілю").font(.system(size: 15, weight: .bold)).foregroundColor(JourneyVisual.primaryText)
                 Spacer()
-                Text("\(score)%").font(.system(size: 15, weight: .black)).foregroundColor(JourneyVisual.lime)
+                Text("\(score)%").font(.system(size: 15, weight: .black)).foregroundColor(Theme.Colors.textPrimary)
             }
             GeometryReader { proxy in
                 ZStack(alignment: .leading) {
-                    Capsule().fill(Color.white.opacity(0.08))
+                    Capsule().fill(JourneyVisual.softBorder)
                     Capsule().fill(JourneyVisual.lime).frame(width: proxy.size.width * CGFloat(score) / 100)
                 }
             }.frame(height: 8)
             Text("Додай конкретні навички та цілі — так рекомендації стануть точнішими.")
-                .font(.system(size: 12, weight: .medium)).foregroundColor(.white.opacity(0.5))
+                .font(.system(size: 12, weight: .medium)).foregroundColor(JourneyVisual.secondaryText)
         }
-        .padding(17).background(Color.white.opacity(0.05)).clipShape(RoundedRectangle(cornerRadius: 20))
+        .padding(17).background(Theme.Colors.card).clipShape(RoundedRectangle(cornerRadius: 20))
     }
 
     private var networkSkeleton: some View {
         VStack(spacing: 12) {
             ForEach(0..<3, id: \.self) { _ in
-                RoundedRectangle(cornerRadius: 24).fill(Color.white.opacity(0.06)).frame(height: 190)
+                RoundedRectangle(cornerRadius: 24).fill(JourneyVisual.softBorder).frame(height: 190)
             }
         }.redacted(reason: .placeholder)
     }
 
     private var emptyDiscover: some View {
         VStack(spacing: 12) {
-            Image(systemName: "person.3.sequence.fill").font(.system(size: 34)).foregroundColor(JourneyVisual.lime)
+            Image(systemName: "person.3.sequence.fill").font(.system(size: 34)).foregroundColor(Theme.Colors.textPrimary)
             Text("Зміни фільтри або стань першим контактом у цьому кантоні")
-                .font(.system(size: 16, weight: .bold)).multilineTextAlignment(.center).foregroundColor(.white)
+                .font(.system(size: 16, weight: .bold)).multilineTextAlignment(.center).foregroundColor(JourneyVisual.primaryText)
             Button("Скинути фільтри") {
                 vm.selectedCanton = nil; vm.selectedRole = nil; vm.selectedGoal = nil; vm.searchText = ""
                 Task { await vm.reloadProfiles() }
-            }.foregroundColor(JourneyVisual.lime)
+            }.foregroundColor(Theme.Colors.textPrimary)
         }
         .frame(maxWidth: .infinity).padding(30)
-        .background(Color.white.opacity(0.05)).clipShape(RoundedRectangle(cornerRadius: 24))
+        .background(Theme.Colors.card).clipShape(RoundedRectangle(cornerRadius: 24))
     }
 
     private var accessGate: some View {
         GeometryReader { proxy in
             ZStack {
-                Image("journey-market-consultant")
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: proxy.size.width, height: proxy.size.height)
-                    .clipped()
-                    .ignoresSafeArea()
-                    .accessibilityHidden(true)
-                Color.black.opacity(0.66).ignoresSafeArea()
+                CityPageBackground(scene: "people")
 
                 VStack(alignment: .leading, spacing: 16) {
                     Button { dismiss() } label: {
                         Image(systemName: "xmark")
                             .font(.title2.bold())
-                            .foregroundColor(.white)
+                            .foregroundColor(JourneyVisual.primaryText)
                             .frame(width: 48, height: 48)
-                            .background(Color.black.opacity(0.34))
+                            .background(Theme.Colors.card)
                             .clipShape(Circle())
-                            .overlay(Circle().stroke(Color.white.opacity(0.18)))
+                            .overlay(Circle().stroke(JourneyVisual.softBorder))
                     }
-                    Spacer(minLength: 24)
+                    Spacer(minLength: 12)
                     Text("SWISS NETWORK")
                         .font(.caption.bold())
                         .tracking(2)
-                        .foregroundColor(JourneyVisual.lime)
+                        .foregroundColor(Theme.Colors.textPrimary)
                     Text("Люди, які можуть змінити твій шлях")
                         .font(.system(size: min(38, max(31, proxy.size.width * 0.095)), weight: .black, design: .default))
-                        .foregroundColor(.white)
+                        .foregroundColor(JourneyVisual.primaryText)
                         .fixedSize(horizontal: false, vertical: true)
                         .minimumScaleFactor(0.82)
                         .layoutPriority(1)
                     Text("Увійди, створи професійний профіль і знайомся без публікації особистих контактів.")
                         .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(.white.opacity(0.72))
+                        .foregroundColor(JourneyVisual.secondaryText)
                         .fixedSize(horizontal: false, vertical: true)
                     Button { showAuth = true } label: {
                         Text("Увійти та продовжити")
@@ -1335,14 +1332,12 @@ private struct NetworkSpotlightPhoto: View {
 
     private var fallback: some View {
         ZStack {
-            Image("journey-market-consultant")
-                .resizable()
-                .scaledToFill()
-                .blur(radius: 1.5)
-            Color.black.opacity(0.36)
+            LinearGradient(
+                colors: [Color(red: 0.06, green: 0.16, blue: 0.11), Color(red: 0.02, green: 0.04, blue: 0.03)],
+                startPoint: .topLeading, endPoint: .bottomTrailing)
             Text(profile.initials)
                 .font(.system(size: 76, weight: .black, design: .default))
-                .foregroundColor(JourneyVisual.lime)
+                .foregroundColor(.white)
         }
     }
 }
@@ -1357,18 +1352,18 @@ private struct NetworkProfileCard: View {
                 NetworkAvatar(profile: profile, size: expanded ? 72 : 60)
                 VStack(alignment: .leading, spacing: 4) {
                     HStack(spacing: 6) {
-                        Text(profile.displayName).font(.system(size: expanded ? 21 : 18, weight: .bold, design: .default)).foregroundColor(.white)
-                        if profile.isVerified { Image(systemName: "checkmark.seal.fill").foregroundColor(JourneyVisual.lime) }
+                        Text(profile.displayName).font(.system(size: expanded ? 21 : 18, weight: .bold, design: .default)).foregroundColor(JourneyVisual.primaryText)
+                        if profile.isVerified { Image(systemName: "checkmark.seal.fill").foregroundColor(Theme.Colors.textPrimary) }
                     }
-                    Text(profile.headline).font(.system(size: 13, weight: .semibold)).foregroundColor(.white.opacity(0.64)).lineLimit(2)
+                    Text(profile.headline).font(.system(size: 13, weight: .semibold)).foregroundColor(JourneyVisual.secondaryText).lineLimit(2)
                     Label("\(profile.city) · \(profile.canton)", systemImage: "mappin.and.ellipse")
-                        .font(.system(size: 11, weight: .bold)).foregroundColor(JourneyVisual.lime)
+                        .font(.system(size: 11, weight: .bold)).foregroundColor(Theme.Colors.textPrimary)
                 }
                 Spacer(minLength: 4)
-                Image(systemName: "arrow.up.right").font(.system(size: 12, weight: .black)).foregroundColor(.white.opacity(0.42))
+                Image(systemName: "arrow.up.right").font(.system(size: 12, weight: .black)).foregroundColor(JourneyVisual.secondaryText)
             }
 
-            Text(profile.bio).font(.system(size: 13, weight: .medium)).foregroundColor(.white.opacity(0.66)).lineLimit(expanded ? 5 : 3)
+            Text(profile.bio).font(.system(size: 13, weight: .medium)).foregroundColor(JourneyVisual.secondaryText).lineLimit(expanded ? 5 : 3)
 
             HStack(spacing: 7) {
                 NetworkTag(text: profile.role.title, icon: profile.role.icon, accent: true)
@@ -1376,7 +1371,7 @@ private struct NetworkProfileCard: View {
             }
 
             HStack {
-                Text(profile.industry.uppercased()).font(.system(size: 9, weight: .black)).tracking(1.1).foregroundColor(.white.opacity(0.42))
+                Text(profile.industry.uppercased()).font(.system(size: 9, weight: .black)).tracking(1.1).foregroundColor(JourneyVisual.secondaryText)
                 Spacer()
                 connectionBadge
             }
@@ -1392,10 +1387,10 @@ private struct NetworkProfileCard: View {
     @ViewBuilder private var connectionBadge: some View {
         Group {
             switch profile.connectionState {
-            case "accepted": Label("Контакт", systemImage: "checkmark").foregroundColor(JourneyVisual.lime)
-            case "outgoing": Label("Надіслано", systemImage: "clock").foregroundColor(.white.opacity(0.5))
-            case "incoming": Label("Новий запит", systemImage: "person.badge.plus").foregroundColor(JourneyVisual.lime)
-            default: Label("Познайомитись", systemImage: "plus").foregroundColor(.white.opacity(0.66))
+            case "accepted": Label("Контакт", systemImage: "checkmark").foregroundColor(Theme.Colors.textPrimary)
+            case "outgoing": Label("Надіслано", systemImage: "clock").foregroundColor(JourneyVisual.secondaryText)
+            case "incoming": Label("Новий запит", systemImage: "person.badge.plus").foregroundColor(Theme.Colors.textPrimary)
+            default: Label("Познайомитись", systemImage: "plus").foregroundColor(JourneyVisual.secondaryText)
             }
         }
         .font(.system(size: 10, weight: .bold))
@@ -1432,7 +1427,7 @@ private struct NetworkTag: View {
     var body: some View {
         Label(text, systemImage: icon)
             .font(.system(size: 9, weight: .bold))
-            .foregroundColor(accent ? .black : .white.opacity(0.65))
+            .foregroundColor(accent ? .black : JourneyVisual.primaryText)
             .padding(.horizontal, 9).frame(height: 28)
             .background(accent ? JourneyVisual.lime : Color.white.opacity(0.07))
             .clipShape(Capsule())
@@ -1455,15 +1450,15 @@ private struct NetworkConnectionRow: View {
                 HStack(spacing: 12) {
                     NetworkAvatar(profile: connection.otherProfile, size: 50)
                     VStack(alignment: .leading, spacing: 3) {
-                        Text(connection.otherProfile.displayName).font(.system(size: 16, weight: .bold)).foregroundColor(.white)
-                        Text(connection.otherProfile.headline).font(.system(size: 12, weight: .medium)).foregroundColor(.white.opacity(0.55)).lineLimit(1)
+                        Text(connection.otherProfile.displayName).font(.system(size: 16, weight: .bold)).foregroundColor(JourneyVisual.primaryText)
+                        Text(connection.otherProfile.headline).font(.system(size: 12, weight: .medium)).foregroundColor(JourneyVisual.secondaryText).lineLimit(1)
                     }
                     Spacer()
-                    Text(connection.otherProfile.canton).font(.system(size: 10, weight: .black)).foregroundColor(JourneyVisual.lime)
+                    Text(connection.otherProfile.canton).font(.system(size: 10, weight: .black)).foregroundColor(Theme.Colors.textPrimary)
                 }
             }.buttonStyle(.plain)
             if let message = connection.message, !message.isEmpty {
-                Text("“\(message)”").font(.system(size: 12, weight: .medium)).italic().foregroundColor(.white.opacity(0.58)).lineLimit(3)
+                Text("“\(message)”").font(.system(size: 12, weight: .medium)).italic().foregroundColor(JourneyVisual.secondaryText).lineLimit(3)
             }
             HStack(spacing: 9) {
                 switch kind {
@@ -1477,14 +1472,14 @@ private struct NetworkConnectionRow: View {
                 }
             }
         }
-        .padding(15).background(Color.white.opacity(0.055)).clipShape(RoundedRectangle(cornerRadius: 20))
-        .overlay(RoundedRectangle(cornerRadius: 20).stroke(Color.white.opacity(0.09)))
+        .padding(15).background(Theme.Colors.card).clipShape(RoundedRectangle(cornerRadius: 20))
+        .overlay(RoundedRectangle(cornerRadius: 20).stroke(JourneyVisual.softBorder))
     }
 
     private func actionButton(_ title: String, icon: String, primary: Bool = false, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Label(title, systemImage: icon).font(.system(size: 12, weight: .bold))
-                .foregroundColor(primary ? .black : .white.opacity(0.7))
+                .foregroundColor(primary ? .black : JourneyVisual.primaryText)
                 .frame(maxWidth: .infinity, minHeight: 42)
                 .background(primary ? JourneyVisual.lime : Color.white.opacity(0.07))
                 .clipShape(RoundedRectangle(cornerRadius: 13))
@@ -1507,15 +1502,14 @@ private struct NetworkProfileDetailView: View {
 
     var body: some View {
         ZStack(alignment: .top) {
-            JourneyVisual.black.ignoresSafeArea()
-            LinearGradient(colors: [Color(red: 0.04, green: 0.15, blue: 0.14), .black], startPoint: .top, endPoint: .center).ignoresSafeArea()
+            JourneyAmbientBackground()
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 20) {
                     HStack {
-                        Button { dismiss() } label: { Image(systemName: "xmark").font(.title3.bold()).foregroundColor(.white).frame(width: 46, height: 46).background(Color.white.opacity(0.08)).clipShape(Circle()) }
+                        Button { dismiss() } label: { Image(systemName: "xmark").font(.title3.bold()).foregroundColor(JourneyVisual.primaryText).frame(width: 46, height: 46).background(JourneyVisual.softSurface).clipShape(Circle()) }
                         Spacer()
                         if !isDemo {
-                            Button { showSafety = true } label: { Image(systemName: "ellipsis").foregroundColor(.white).frame(width: 46, height: 46).background(Color.white.opacity(0.08)).clipShape(Circle()) }
+                            Button { showSafety = true } label: { Image(systemName: "ellipsis").foregroundColor(JourneyVisual.primaryText).frame(width: 46, height: 46).background(JourneyVisual.softSurface).clipShape(Circle()) }
                         }
                     }
                     .padding(.top, 8)
@@ -1523,14 +1517,14 @@ private struct NetworkProfileDetailView: View {
                     HStack(alignment: .bottom, spacing: 17) {
                         NetworkAvatar(profile: current, size: 92)
                         VStack(alignment: .leading, spacing: 5) {
-                            HStack { Text(current.displayName).font(.system(size: 29, weight: .black, design: .default)).foregroundColor(.white); if current.isVerified { Image(systemName: "checkmark.seal.fill").foregroundColor(JourneyVisual.lime) } }
-                            Text(current.headline).font(.system(size: 15, weight: .semibold)).foregroundColor(.white.opacity(0.64))
-                            Label("\(current.city) · \(current.canton)", systemImage: "mappin.and.ellipse").font(.system(size: 12, weight: .bold)).foregroundColor(JourneyVisual.lime)
+                            HStack { Text(current.displayName).font(.system(size: 29, weight: .black, design: .default)).foregroundColor(JourneyVisual.primaryText); if current.isVerified { Image(systemName: "checkmark.seal.fill").foregroundColor(Theme.Colors.textPrimary) } }
+                            Text(current.headline).font(.system(size: 15, weight: .semibold)).foregroundColor(JourneyVisual.secondaryText)
+                            Label("\(current.city) · \(current.canton)", systemImage: "mappin.and.ellipse").font(.system(size: 12, weight: .bold)).foregroundColor(Theme.Colors.textPrimary)
                         }
                     }
 
                     if let company = current.companyName, !company.isEmpty {
-                        Label(company, systemImage: "building.2.fill").font(.system(size: 14, weight: .bold)).foregroundColor(.white)
+                        Label(company, systemImage: "building.2.fill").font(.system(size: 14, weight: .bold)).foregroundColor(JourneyVisual.primaryText)
                     }
 
                     actionArea
@@ -1540,7 +1534,7 @@ private struct NetworkProfileDetailView: View {
                     skillsBlock
 
                     Text("Контакти залишаються приватними. Чат відкриється лише після взаємного підтвердження.")
-                        .font(.system(size: 11, weight: .medium)).foregroundColor(.white.opacity(0.4)).padding(.bottom, 20)
+                        .font(.system(size: 11, weight: .medium)).foregroundColor(JourneyVisual.secondaryText).padding(.bottom, 20)
                 }.padding(20)
             }
         }
@@ -1556,7 +1550,7 @@ private struct NetworkProfileDetailView: View {
         if isDemo {
             Label("Демо-профіль · дії вимкнені", systemImage: "sparkles")
                 .font(.system(size: 14, weight: .bold))
-                .foregroundColor(JourneyVisual.lime)
+                .foregroundColor(Theme.Colors.textPrimary)
                 .frame(maxWidth: .infinity, minHeight: 54)
                 .background(JourneyVisual.lime.opacity(0.09))
                 .clipShape(RoundedRectangle(cornerRadius: 17))
@@ -1581,17 +1575,17 @@ private struct NetworkProfileDetailView: View {
         Button(action: action) { Label(title, systemImage: icon).font(.system(size: 15, weight: .bold)).foregroundColor(.black).frame(maxWidth: .infinity, minHeight: 54).background(JourneyVisual.lime).clipShape(RoundedRectangle(cornerRadius: 17)) }.buttonStyle(.plain)
     }
     private func secondaryButton(_ title: String, icon: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) { Label(title, systemImage: icon).font(.system(size: 15, weight: .bold)).foregroundColor(.white.opacity(0.7)).frame(maxWidth: .infinity, minHeight: 54).background(Color.white.opacity(0.07)).clipShape(RoundedRectangle(cornerRadius: 17)) }.buttonStyle(.plain)
+        Button(action: action) { Label(title, systemImage: icon).font(.system(size: 15, weight: .bold)).foregroundColor(JourneyVisual.primaryText).frame(maxWidth: .infinity, minHeight: 54).background(JourneyVisual.softSurface).clipShape(RoundedRectangle(cornerRadius: 17)) }.buttonStyle(.plain)
     }
     private func detailBlock(title: String, text: String) -> some View {
-        VStack(alignment: .leading, spacing: 9) { Text(title).font(.system(size: 20, weight: .bold, design: .default)).foregroundColor(.white); Text(text).font(.system(size: 14, weight: .medium)).foregroundColor(.white.opacity(0.64)).lineSpacing(3) }
-        .padding(17).frame(maxWidth: .infinity, alignment: .leading).background(Color.white.opacity(0.055)).clipShape(RoundedRectangle(cornerRadius: 20))
+        VStack(alignment: .leading, spacing: 9) { Text(title).font(.system(size: 20, weight: .bold, design: .default)).foregroundColor(JourneyVisual.primaryText); Text(text).font(.system(size: 14, weight: .medium)).foregroundColor(JourneyVisual.secondaryText).lineSpacing(3) }
+        .padding(17).frame(maxWidth: .infinity, alignment: .leading).background(JourneyVisual.elevatedSurface).clipShape(RoundedRectangle(cornerRadius: 20))
     }
     private func tagsBlock(title: String, goals: [ProfessionalGoal]) -> some View {
-        VStack(alignment: .leading, spacing: 11) { Text(title).font(.system(size: 20, weight: .bold, design: .default)).foregroundColor(.white); FlowLayout(spacing: 8) { ForEach(goals) { NetworkTag(text: $0.title, icon: $0.icon, accent: true) } } }
+        VStack(alignment: .leading, spacing: 11) { Text(title).font(.system(size: 20, weight: .bold, design: .default)).foregroundColor(JourneyVisual.primaryText); FlowLayout(spacing: 8) { ForEach(goals) { NetworkTag(text: $0.title, icon: $0.icon, accent: true) } } }
     }
     private var skillsBlock: some View {
-        VStack(alignment: .leading, spacing: 11) { Text("Експертиза").font(.system(size: 20, weight: .bold, design: .default)).foregroundColor(.white); FlowLayout(spacing: 8) { ForEach(current.skills, id: \.self) { NetworkTag(text: $0, icon: "checkmark") } } }
+        VStack(alignment: .leading, spacing: 11) { Text("Експертиза").font(.system(size: 20, weight: .bold, design: .default)).foregroundColor(JourneyVisual.primaryText); FlowLayout(spacing: 8) { ForEach(current.skills, id: \.self) { NetworkTag(text: $0, icon: "checkmark") } } }
     }
     private func respond(_ accept: Bool) async {
         guard let id = current.connectionID, let connection = vm.connections.first(where: { $0.id == id }) else { return }
@@ -1614,17 +1608,17 @@ private struct NetworkConnectSheet: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                JourneyVisual.black.ignoresSafeArea()
+                JourneyAmbientBackground()
                 VStack(alignment: .leading, spacing: 18) {
-                    HStack(spacing: 13) { NetworkAvatar(profile: profile, size: 58); VStack(alignment: .leading) { Text(profile.displayName).font(.headline).foregroundColor(.white); Text(profile.headline).font(.caption).foregroundColor(.white.opacity(0.55)) } }
-                    Text("Навіщо хочеш познайомитись?").font(.system(size: 25, weight: .bold, design: .default)).foregroundColor(.white)
-                    Text("Короткий контекст збільшує шанс відповіді. Не надсилай контакти або чутливі дані.").font(.subheadline).foregroundColor(.white.opacity(0.55))
-                    TextEditor(text: $message).scrollContentBackground(.hidden).foregroundColor(.white).padding(12).frame(height: 160).background(Color.white.opacity(0.07)).clipShape(RoundedRectangle(cornerRadius: 18)).overlay(RoundedRectangle(cornerRadius: 18).stroke(Color.white.opacity(0.1)))
+                    HStack(spacing: 13) { NetworkAvatar(profile: profile, size: 58); VStack(alignment: .leading) { Text(profile.displayName).font(.headline).foregroundColor(JourneyVisual.primaryText); Text(profile.headline).font(.caption).foregroundColor(JourneyVisual.secondaryText) } }
+                    Text("Навіщо хочеш познайомитись?").font(.system(size: 25, weight: .bold, design: .default)).foregroundColor(JourneyVisual.primaryText)
+                    Text("Короткий контекст збільшує шанс відповіді. Не надсилай контакти або чутливі дані.").font(.subheadline).foregroundColor(JourneyVisual.secondaryText)
+                    TextEditor(text: $message).scrollContentBackground(.hidden).foregroundColor(JourneyVisual.primaryText).padding(12).frame(height: 160).background(JourneyVisual.softSurface).clipShape(RoundedRectangle(cornerRadius: 18)).overlay(RoundedRectangle(cornerRadius: 18).stroke(JourneyVisual.softBorder))
                     Button { Task { await send() } } label: { HStack { if sending { ProgressView().tint(.black) }; Text("Надіслати запит"); Spacer(); Image(systemName: "arrow.right") }.font(.headline).foregroundColor(.black).padding(.horizontal, 18).frame(maxWidth: .infinity, minHeight: 56).background(JourneyVisual.lime).clipShape(RoundedRectangle(cornerRadius: 18)) }.disabled(sending)
                     Spacer()
                 }.padding(20)
             }
-            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Закрити") { dismiss() }.foregroundColor(.white) } }
+            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Закрити") { dismiss() }.foregroundColor(JourneyVisual.primaryText) } }
         }
     }
     private func send() async { sending = true; defer { sending = false }; if await vm.connect(to: profile, message: message) { dismiss() } }
@@ -1650,12 +1644,12 @@ private struct NetworkProfileEditorView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                JourneyVisual.black.ignoresSafeArea()
+                JourneyAmbientBackground()
                 ScrollView {
                     VStack(alignment: .leading, spacing: 18) {
                         Text(profile == nil ? "Створи свій професійний образ" : "Онови професійний профіль")
-                            .font(.system(size: 31, weight: .black, design: .default)).foregroundColor(.white)
-                        Text("Це бачать люди в Swiss Network. Email і телефон не публікуються.").font(.subheadline).foregroundColor(.white.opacity(0.5))
+                            .font(.system(size: 26, weight: .bold, design: .default)).foregroundColor(JourneyVisual.primaryText)
+                        Text("Це бачать люди в Swiss Network. Email і телефон не публікуються.").font(.subheadline).foregroundColor(JourneyVisual.secondaryText)
                         editorField("Ім’я", text: $draft.displayName)
                         editorField("Професійний заголовок", text: $draft.headline)
                         editorField("Компанія", text: $draft.companyName)
@@ -1666,24 +1660,24 @@ private struct NetworkProfileEditorView: View {
                         goalsPicker
                         editorField("Навички через кому", text: $skillsText)
                         editorField("Мови через кому", text: $languagesText)
-                        Toggle("Відкритий до знайомств", isOn: $draft.openToConnections).tint(JourneyVisual.lime).foregroundColor(.white)
-                        Toggle("Показувати у каталозі", isOn: $draft.isVisible).tint(JourneyVisual.lime).foregroundColor(.white)
+                        Toggle("Відкритий до знайомств", isOn: $draft.openToConnections).tint(JourneyVisual.lime).foregroundColor(JourneyVisual.primaryText)
+                        Toggle("Показувати у каталозі", isOn: $draft.isVisible).tint(JourneyVisual.lime).foregroundColor(JourneyVisual.primaryText)
                         Button { Task { await save() } } label: { HStack { if vm.isSaving { ProgressView().tint(.black) }; Text(profile == nil ? "Опублікувати профіль" : "Зберегти зміни"); Spacer(); Image(systemName: "checkmark") }.font(.headline).foregroundColor(.black).padding(.horizontal, 18).frame(maxWidth: .infinity, minHeight: 58).background(canSave ? JourneyVisual.lime : JourneyVisual.lime.opacity(0.4)).clipShape(RoundedRectangle(cornerRadius: 18)) }.disabled(!canSave || vm.isSaving)
                     }.padding(20).padding(.bottom, 30)
                 }
             }
-            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Закрити") { dismiss() }.foregroundColor(.white) } }
+            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Закрити") { dismiss() }.foregroundColor(JourneyVisual.primaryText) } }
         }
     }
 
     private func editorField(_ title: String, text: Binding<String>) -> some View {
-        VStack(alignment: .leading, spacing: 7) { Text(title.uppercased()).font(.system(size: 9, weight: .black)).tracking(1.2).foregroundColor(JourneyVisual.lime); TextField(title, text: text).foregroundColor(.white).padding(.horizontal, 14).frame(height: 52).background(Color.white.opacity(0.065)).clipShape(RoundedRectangle(cornerRadius: 15)).overlay(RoundedRectangle(cornerRadius: 15).stroke(Color.white.opacity(0.1))) }
+        VStack(alignment: .leading, spacing: 7) { Text(title.uppercased()).font(.system(size: 9, weight: .black)).tracking(1.2).foregroundColor(Theme.Colors.textPrimary); TextField(title, text: text).foregroundColor(JourneyVisual.primaryText).padding(.horizontal, 14).frame(height: 52).background(JourneyVisual.softSurface).clipShape(RoundedRectangle(cornerRadius: 15)).overlay(RoundedRectangle(cornerRadius: 15).stroke(JourneyVisual.softBorder)) }
         .frame(maxWidth: .infinity)
     }
-    private var editorTextArea: some View { VStack(alignment: .leading, spacing: 7) { Text("ПРО МЕНЕ").font(.system(size: 9, weight: .black)).tracking(1.2).foregroundColor(JourneyVisual.lime); TextEditor(text: $draft.bio).scrollContentBackground(.hidden).foregroundColor(.white).padding(10).frame(height: 150).background(Color.white.opacity(0.065)).clipShape(RoundedRectangle(cornerRadius: 15)).overlay(RoundedRectangle(cornerRadius: 15).stroke(Color.white.opacity(0.1))); Text("\(draft.bio.count)/800").font(.caption2).foregroundColor(.white.opacity(0.35)).frame(maxWidth: .infinity, alignment: .trailing) } }
-    private var rolePicker: some View { VStack(alignment: .leading, spacing: 8) { Text("ТВОЯ РОЛЬ").font(.system(size: 9, weight: .black)).tracking(1.2).foregroundColor(JourneyVisual.lime); ScrollView(.horizontal, showsIndicators: false) { HStack { ForEach(ProfessionalRole.allCases) { role in Button { draft.role = role } label: { NetworkTag(text: role.title, icon: role.icon, accent: draft.role == role) }.buttonStyle(.plain) } } } } }
-    private var goalsPicker: some View { VStack(alignment: .leading, spacing: 8) { Text("КОГО АБО ЩО ШУКАЄШ").font(.system(size: 9, weight: .black)).tracking(1.2).foregroundColor(JourneyVisual.lime); FlowLayout(spacing: 8) { ForEach(ProfessionalGoal.allCases) { goal in Button { if draft.goals.contains(goal) { draft.goals.removeAll { $0 == goal } } else if draft.goals.count < 5 { draft.goals.append(goal) } } label: { NetworkTag(text: goal.title, icon: goal.icon, accent: draft.goals.contains(goal)) }.buttonStyle(.plain) } } } }
-    private var cantonPicker: some View { VStack(alignment: .leading, spacing: 7) { Text("КАНТОН").font(.system(size: 9, weight: .black)).tracking(1.2).foregroundColor(JourneyVisual.lime); Picker("Кантон", selection: $draft.canton) { ForEach(SwissCanton.all.dropFirst(), id: \.code) { Text($0.code).tag($0.code) } }.tint(.white).padding(.horizontal, 10).frame(height: 52).background(Color.white.opacity(0.065)).clipShape(RoundedRectangle(cornerRadius: 15)) }.frame(width: 105) }
+    private var editorTextArea: some View { VStack(alignment: .leading, spacing: 7) { Text("ПРО МЕНЕ").font(.system(size: 9, weight: .black)).tracking(1.2).foregroundColor(Theme.Colors.textPrimary); TextEditor(text: $draft.bio).scrollContentBackground(.hidden).foregroundColor(JourneyVisual.primaryText).padding(10).frame(height: 150).background(JourneyVisual.softSurface).clipShape(RoundedRectangle(cornerRadius: 15)).overlay(RoundedRectangle(cornerRadius: 15).stroke(JourneyVisual.softBorder)); Text("\(draft.bio.count)/800").font(.caption2).foregroundColor(JourneyVisual.secondaryText).frame(maxWidth: .infinity, alignment: .trailing) } }
+    private var rolePicker: some View { VStack(alignment: .leading, spacing: 8) { Text("ТВОЯ РОЛЬ").font(.system(size: 9, weight: .black)).tracking(1.2).foregroundColor(Theme.Colors.textPrimary); ScrollView(.horizontal, showsIndicators: false) { HStack { ForEach(ProfessionalRole.allCases) { role in Button { draft.role = role } label: { NetworkTag(text: role.title, icon: role.icon, accent: draft.role == role) }.buttonStyle(.plain) } } } } }
+    private var goalsPicker: some View { VStack(alignment: .leading, spacing: 8) { Text("КОГО АБО ЩО ШУКАЄШ").font(.system(size: 9, weight: .black)).tracking(1.2).foregroundColor(Theme.Colors.textPrimary); FlowLayout(spacing: 8) { ForEach(ProfessionalGoal.allCases) { goal in Button { if draft.goals.contains(goal) { draft.goals.removeAll { $0 == goal } } else if draft.goals.count < 5 { draft.goals.append(goal) } } label: { NetworkTag(text: goal.title, icon: goal.icon, accent: draft.goals.contains(goal)) }.buttonStyle(.plain) } } } }
+    private var cantonPicker: some View { VStack(alignment: .leading, spacing: 7) { Text("КАНТОН").font(.system(size: 9, weight: .black)).tracking(1.2).foregroundColor(Theme.Colors.textPrimary); Picker("Кантон", selection: $draft.canton) { ForEach(SwissCanton.all.dropFirst(), id: \.code) { Text($0.code).tag($0.code) } }.tint(JourneyVisual.primaryText).padding(.horizontal, 10).frame(height: 52).background(JourneyVisual.softSurface).clipShape(RoundedRectangle(cornerRadius: 15)) }.frame(width: 105) }
     private var canSave: Bool { draft.displayName.trimmingCharacters(in: .whitespaces).count >= 2 && draft.headline.count >= 3 && draft.industry.count >= 2 && draft.city.count >= 2 && draft.bio.count >= 30 && !draft.goals.isEmpty && !languagesText.trimmingCharacters(in: .whitespaces).isEmpty }
     private func save() async { draft.skills = split(skillsText); draft.languages = split(languagesText).map { $0.uppercased() }; if await vm.save(draft) { dismiss() } }
     private func split(_ value: String) -> [String] { value.split(separator: ",").map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty } }

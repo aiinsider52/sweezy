@@ -16,34 +16,26 @@ struct EmptyStateView: View {
     }
     
     var body: some View {
-        VStack(spacing: Theme.Spacing.lg) {
-            Image(systemName: systemImage)
-                .font(.system(size: 56))
-                .foregroundStyle(Theme.Colors.primaryGradient)
-            
-            VStack(spacing: Theme.Spacing.sm) {
-                Text(title)
-                    .font(Theme.Typography.title2)
-                    .fontWeight(.semibold)
-                    .foregroundColor(Theme.Colors.textPrimary)
-                if let subtitle = subtitle {
-                    Text(subtitle)
-                        .font(Theme.Typography.body)
-                        .foregroundColor(Theme.Colors.textSecondary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, Theme.Spacing.xl)
-                }
-            }
-            
-            if let actionTitle = actionTitle, let action = action {
-                PrimaryButton(actionTitle, style: .secondary) {
-                    action()
-                }
-                .frame(maxWidth: 220)
-            }
+        MascotEmptyState(
+            title: title,
+            subtitle: subtitle,
+            pose: pose,
+            actionTitle: actionTitle,
+            action: action
+        )
+        .frame(maxWidth: 520)
+        .padding(Theme.Spacing.lg)
+        .frame(maxWidth: .infinity)
+        .accessibilityElement(children: .contain)
+    }
+
+    /// The mascot mirrors what the screen is about, so empty states stop looking interchangeable.
+    private var pose: SweezyCompanionPose {
+        switch systemImage {
+        case "calendar", "clock": return .documents
+        case "checkmark.seal", "party.popper": return .celebrate
+        default: return .guide
         }
-        .padding(Theme.Spacing.xl)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 
@@ -75,16 +67,22 @@ struct LoadingStateView: View {
         }
         .padding(Theme.Spacing.xl)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(subtitle.map { "\(title). \($0)" } ?? title)
     }
 }
 
 private struct PulseAnimation: ViewModifier {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var animate = false
     func body(content: Content) -> some View {
         content
-            .scaleEffect(animate ? 1.05 : 1.0)
-            .animation(Theme.Animation.soft.repeatForever(autoreverses: true), value: animate)
-            .onAppear { animate = true }
+            .scaleEffect(!reduceMotion && animate ? 1.05 : 1.0)
+            .animation(
+                reduceMotion ? nil : Theme.Animation.soft.repeatForever(autoreverses: true),
+                value: animate
+            )
+            .onAppear { animate = !reduceMotion }
     }
 }
 
@@ -97,8 +95,11 @@ struct ErrorStateView: View {
     var body: some View {
         VStack(spacing: Theme.Spacing.lg) {
             Image(systemName: "exclamationmark.triangle.fill")
-                .font(.system(size: 56))
+                .font(.system(size: 34, weight: .semibold))
                 .foregroundColor(.orange)
+                .frame(width: 64, height: 64)
+                .background(Color.orange.opacity(0.10))
+                .clipShape(RoundedRectangle(cornerRadius: Theme.CornerRadius.xl, style: .continuous))
             Text(title)
                 .font(Theme.Typography.title2)
                 .fontWeight(.semibold)
@@ -107,13 +108,16 @@ struct ErrorStateView: View {
                 .font(Theme.Typography.body)
                 .foregroundColor(Theme.Colors.textSecondary)
                 .multilineTextAlignment(.center)
-                .padding(.horizontal, Theme.Spacing.xl)
+                .lineSpacing(3)
+                .frame(maxWidth: 420)
             PrimaryButton(retryTitle) {
                 onRetry()
             }
             .frame(maxWidth: 220)
         }
         .padding(Theme.Spacing.xl)
+        .frame(maxWidth: 520)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .accessibilityElement(children: .contain)
     }
 }

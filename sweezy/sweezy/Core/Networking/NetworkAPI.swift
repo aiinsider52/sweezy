@@ -62,6 +62,7 @@ enum NetworkAPI {
     ) async throws -> ProfessionalProfilePage {
         var components = URLComponents(url: APIClient.url("network/profiles"), resolvingAgainstBaseURL: false)!
         components.queryItems = [
+            URLQueryItem(name: "country_code", value: APIClient.countryCode),
             query.isEmpty ? nil : URLQueryItem(name: "q", value: query),
             canton.map { URLQueryItem(name: "canton", value: $0) },
             role.map { URLQueryItem(name: "role", value: $0.rawValue) },

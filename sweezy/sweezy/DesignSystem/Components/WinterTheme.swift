@@ -899,7 +899,7 @@ struct WinterGreetingScreen: View {
                 // Greeting
                 VStack(spacing: 12) {
                     Text(WinterTheme.isPostNewYear ? "З Новим Роком!" : "Святкова зима разом із Sweezy")
-                        .font(.system(size: 38, weight: .bold, design: .rounded))
+                        .font(.system(size: 30, weight: .bold, design: .default))
                         .foregroundColor(.white)
                         .multilineTextAlignment(.center)
                     
@@ -1023,4 +1023,3 @@ struct WinterBadgeCard: View {
         return formatter
     }
 }
-

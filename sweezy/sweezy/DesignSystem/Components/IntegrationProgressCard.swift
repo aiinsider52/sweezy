@@ -91,7 +91,7 @@ struct IntegrationProgressCard: View {
                 // Center: Text content
                 VStack(alignment: .leading, spacing: 4) {
                     Text(title)
-                        .font(.system(size: 17, weight: .bold, design: .rounded))
+                        .font(.system(size: 17, weight: .bold, design: .default))
                         .foregroundColor(inHero ? .white : Theme.Colors.textPrimary)
                         .lineLimit(1)
                     
@@ -131,7 +131,7 @@ struct IntegrationProgressCard: View {
                         .frame(width: 52, height: 36)
                     
                     Text("\(percent)%")
-                        .font(.system(size: 15, weight: .black, design: .rounded))
+                        .font(.system(size: 15, weight: .black, design: .default))
                         .foregroundColor(inHero ? .white : accentColor)
                 }
                 

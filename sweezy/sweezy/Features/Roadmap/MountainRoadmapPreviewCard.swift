@@ -81,7 +81,7 @@ struct MountainRoadmapPreviewCard: View {
                 HStack(alignment: .top, spacing: 16) {
                     VStack(alignment: .leading, spacing: 6) {
                         Text(roadmapService.currentLevel.map { $0.title.localized } ?? "roadmap.default_level_title".localized)
-                            .font(.system(size: 21, weight: .bold, design: .rounded))
+                            .font(.system(size: 21, weight: .bold, design: .default))
                             .foregroundColor(Theme.Colors.textPrimary)
                             .lineLimit(2)
 
@@ -121,7 +121,7 @@ struct MountainRoadmapPreviewCard: View {
                         Spacer()
                         Text("\(Int(roadmapService.overallProgress * 100))%")
                             .font(.system(size: 18, weight: .bold))
-                            .foregroundColor(Theme.Colors.primary)
+                            .foregroundColor(JourneyVisual.accentText)
                     }
 
                     GeometryReader { geo in

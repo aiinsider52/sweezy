@@ -15,6 +15,9 @@ struct OnboardingViewRedesigned: View {
     
     @State private var currentPage = 0
     @State private var showLanguageSelection = false
+    @State private var selectedCountry: ResidenceCountry = .switzerland
+    @State private var selectedSubdivisionCode = ResidenceCountry.switzerland.defaultSubdivisionCode
+    @State private var selectedResidenceStatusCode = ResidenceCountry.switzerland.defaultResidenceStatusCode
     @State private var selectedCanton: Canton = .zurich
     @State private var selectedPermitType: PermitType = .s
     @State private var arrivalMonth: Int = Calendar.current.component(.month, from: Date())
@@ -65,6 +68,9 @@ struct OnboardingViewRedesigned: View {
                     OnboardingV2PageView(page: introPages[1])
                         .tag(2)
                     ProfileDetailsPage(
+                        selectedCountry: $selectedCountry,
+                        selectedSubdivisionCode: $selectedSubdivisionCode,
+                        selectedResidenceStatusCode: $selectedResidenceStatusCode,
                         selectedCanton: $selectedCanton,
                         selectedPermitType: $selectedPermitType,
                         arrivalMonth: $arrivalMonth,
@@ -93,7 +99,9 @@ struct OnboardingViewRedesigned: View {
                 }
             .tabViewStyle(.page(indexDisplayMode: .never))
             .ignoresSafeArea()
-            
+
+            OnboardingMascotStage(page: currentPage)
+
             VStack {
                 HStack {
                     HStack(spacing: 8) {
@@ -103,14 +111,14 @@ struct OnboardingViewRedesigned: View {
                         Text("SWEEZY")
                             .font(.system(size: 12, weight: .bold))
                             .tracking(1.5)
-                            .foregroundStyle(.white)
+                            .foregroundStyle(JourneyVisual.primaryText)
                     }
                     .padding(.horizontal, 14)
                     .frame(height: 38)
-                    .background(Color.black.opacity(0.46))
+                    .background(Theme.Colors.card)
                     .background(.ultraThinMaterial.opacity(0.45))
                     .clipShape(Capsule())
-                    .overlay(Capsule().stroke(Color.white.opacity(0.22), lineWidth: 1))
+                    .overlay(Capsule().stroke(JourneyVisual.softBorder, lineWidth: 1))
 
                     Spacer()
 
@@ -122,20 +130,31 @@ struct OnboardingViewRedesigned: View {
                                     .font(.system(size: 11, weight: .bold))
                             }
                             .font(.system(size: 13, weight: .semibold))
-                            .foregroundColor(.white.opacity(0.9))
+                            .foregroundColor(JourneyVisual.secondaryText)
                             .padding(.horizontal, 15)
                             .frame(height: 38)
-                            .background(Color.black.opacity(0.46))
+                            .background(Theme.Colors.card)
                             .background(.ultraThinMaterial.opacity(0.45))
                             .clipShape(Capsule())
-                            .overlay(Capsule().stroke(Color.white.opacity(0.22), lineWidth: 1))
+                            .overlay(Capsule().stroke(JourneyVisual.softBorder, lineWidth: 1))
                         }
                         .accessibilityIdentifier("onboarding.skipButton")
                     }
                 }
                 .padding(.horizontal, 18)
                 .padding(.top, 10)
-                
+                .background(alignment: .top) {
+                    // Scrolling form steps fade out under the brand bar instead of colliding with it.
+                    LinearGradient(
+                        colors: [JourneyVisual.pageBackground, JourneyVisual.pageBackground.opacity(0)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                    .frame(height: 96)
+                    .ignoresSafeArea(edges: .top)
+                    .allowsHitTesting(false)
+                }
+
                 Spacer()
             }
             
@@ -144,42 +163,34 @@ struct OnboardingViewRedesigned: View {
                     Spacer()
 
                     VStack(spacing: 13) {
-                        HStack(spacing: 10) {
-                            Text(String(format: "%d / %d", currentPage + 1, totalPages))
-                                .font(.system(size: 11, weight: .bold, design: .monospaced))
-                                .foregroundStyle(.white.opacity(0.64))
-                            GeometryReader { geometry in
-                                ZStack(alignment: .leading) {
-                                    Capsule().fill(Color.white.opacity(0.14))
-                                    Capsule()
-                                        .fill(JourneyVisual.lime)
-                                        .frame(width: geometry.size.width * CGFloat(currentPage + 1) / CGFloat(totalPages))
-                                }
-                            }
-                            .frame(height: 4)
-                        }
-                        .accessibilityLabel("Step \(currentPage + 1) of \(totalPages)")
+                        OnboardingStepProgress(current: currentPage, total: totalPages)
+                            .accessibilityElement(children: .ignore)
+                            .accessibilityLabel("Step \(currentPage + 1) of \(totalPages)")
 
                         HStack(spacing: 10) {
                             if currentPage > 0 {
                                 Button(action: goBack) {
                                     Image(systemName: "chevron.left")
                                         .font(.system(size: 17, weight: .bold))
-                                        .foregroundColor(.white)
+                                        .foregroundColor(JourneyVisual.primaryText)
                                         .frame(width: 52, height: 52)
-                                        .background(Color.white.opacity(0.09))
+                                        .background(Theme.Colors.card)
                                         .clipShape(Circle())
-                                        .overlay(Circle().stroke(Color.white.opacity(0.18), lineWidth: 1))
+                                        .overlay(Circle().stroke(JourneyVisual.softBorder, lineWidth: 1))
                                 }
                                 .accessibilityLabel(Text(LocalizedStringKey("common.back")))
                                 .accessibilityIdentifier("onboarding.backButton")
+                                .transition(.scale(scale: 0.6).combined(with: .opacity))
                             }
 
                             Button(action: goNext) {
                                 HStack(spacing: 10) {
                                     Text(LocalizedStringKey(currentPage == totalPages - 1 ? "onboarding.get_started" : "common.next"))
-                                    Image(systemName: "arrow.right")
+                                        .id(currentPage == totalPages - 1)
+                                        .transition(.push(from: .bottom).combined(with: .opacity))
+                                    Image(systemName: currentPage == totalPages - 1 ? "sparkles" : "arrow.right")
                                         .font(.system(size: 14, weight: .bold))
+                                        .contentTransition(.symbolEffect(.replace))
                                 }
                                 .font(.system(size: 16, weight: .bold))
                                 .foregroundColor(.black)
@@ -194,10 +205,10 @@ struct OnboardingViewRedesigned: View {
                     }
                     .padding(14)
                     .background(.ultraThinMaterial.opacity(0.78))
-                    .background(Color.black.opacity(0.60))
+                    .background(Theme.Colors.card)
                     .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
-                    .overlay(RoundedRectangle(cornerRadius: 28, style: .continuous).stroke(Color.white.opacity(0.18), lineWidth: 1))
-                    .shadow(color: .black.opacity(0.42), radius: 24, y: 12)
+                    .overlay(RoundedRectangle(cornerRadius: 28, style: .continuous).stroke(JourneyVisual.softBorder, lineWidth: 1))
+                    .shadow(color: .black.opacity(0.10), radius: 22, y: 10)
                     .padding(.horizontal, 16)
                     .padding(.bottom, 8)
                 }
@@ -287,6 +298,9 @@ struct OnboardingViewRedesigned: View {
         didSeedProfileState = true
         
         guard let profile = appContainer.userProfile else { return }
+        selectedCountry = profile.country
+        selectedSubdivisionCode = profile.administrativeAreaCode
+        selectedResidenceStatusCode = profile.residenceStatusCode
         selectedCanton = profile.canton
         selectedPermitType = profile.permitType
         preferredLanguage = profile.preferredLanguage
@@ -319,6 +333,9 @@ struct OnboardingViewRedesigned: View {
         profile.preferredLanguage = preferredLanguage
         
         if !skippedAboutStep {
+            profile.country = selectedCountry
+            profile.administrativeAreaCode = selectedSubdivisionCode
+            profile.residenceStatusCode = selectedResidenceStatusCode
             profile.canton = selectedCanton
             profile.permitType = selectedPermitType
             profile.arrivalDate = resolvedArrivalDate
@@ -345,6 +362,9 @@ struct OnboardingViewRedesigned: View {
             .onboardingProfileSaved,
             source: "onboarding",
             meta: [
+                "country": profile.country.rawValue,
+                "subdivision": profile.administrativeAreaCode,
+                "residence_status": profile.residenceStatusCode,
                 "canton": profile.canton.rawValue,
                 "permit": profile.permitType.rawValue,
                 "has_children": String(profile.hasChildren),
@@ -403,21 +423,21 @@ struct OnboardingViewRedesigned: View {
 
 private struct AnalyticsConsentPage: View {
     @EnvironmentObject private var appContainer: AppContainer
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     let onDecision: () -> Void
 
     var body: some View {
         OnboardingDetailsBackground {
             VStack(alignment: .leading, spacing: 22) {
-                Spacer().frame(height: 130)
-                Image(systemName: "chart.bar.xaxis")
-                    .font(.system(size: 30, weight: .bold))
-                    .foregroundStyle(JourneyVisual.lime)
+                Spacer().frame(height: 96)
+                SweezyCompanion(pose: .guide, size: 104)
+                    .idleFloat(enabled: !reduceMotion)
                 Text("onboarding.analytics.title".localized)
-                    .font(.system(size: 36, weight: .bold, design: .rounded))
-                    .foregroundStyle(.white)
+                    .font(.system(size: 29, weight: .bold, design: .default))
+                    .foregroundStyle(JourneyVisual.primaryText)
                 Text("onboarding.analytics.body".localized)
                     .font(.system(size: 16))
-                    .foregroundStyle(.white.opacity(0.75))
+                    .foregroundStyle(JourneyVisual.secondaryText)
                     .lineSpacing(4)
 
                 Spacer()
@@ -444,7 +464,7 @@ private struct AnalyticsConsentPage: View {
                         onDecision()
                     }
                     .font(.system(size: 15, weight: .semibold))
-                    .foregroundStyle(.white.opacity(0.75))
+                    .foregroundStyle(JourneyVisual.secondaryText)
                     .frame(maxWidth: .infinity, minHeight: 46)
                     .accessibilityIdentifier("onboarding.analytics.declineButton")
                 }
@@ -452,6 +472,8 @@ private struct AnalyticsConsentPage: View {
             }
             .padding(.horizontal, 20)
         }
+        // Contain keeps the page id from overriding the ids of its buttons.
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier("onboarding.analyticsConsentPage")
     }
 }
@@ -480,16 +502,16 @@ private struct NotificationPermissionPage: View {
                     Text("onboarding.notifications.eyebrow".localized)
                         .font(.system(size: 12, weight: .bold))
                         .tracking(1.4)
-                        .foregroundStyle(JourneyVisual.lime)
+                        .foregroundStyle(Theme.Colors.textPrimary)
                 }
 
                 VStack(alignment: .leading, spacing: 8) {
                         Text("onboarding.notifications_title".localized)
-                            .font(.system(size: 36, weight: .bold, design: .rounded))
-                            .foregroundColor(.white)
+                            .font(.system(size: 29, weight: .bold, design: .default))
+                            .foregroundColor(JourneyVisual.primaryText)
                         Text("onboarding.notifications_subtitle".localized)
                             .font(.system(size: 16))
-                            .foregroundColor(.white.opacity(0.70))
+                            .foregroundColor(JourneyVisual.secondaryText)
                             .multilineTextAlignment(.leading)
                             .lineSpacing(3)
                 }
@@ -503,22 +525,22 @@ private struct NotificationPermissionPage: View {
                             Spacer()
                             Text("onboarding.notifications.preview.now".localized)
                                 .font(.system(size: 12, weight: .medium))
-                                .foregroundStyle(.white.opacity(0.50))
+                                .foregroundStyle(JourneyVisual.secondaryText)
                         }
                         Text("onboarding.notifications.preview.title".localized)
                             .font(.system(size: 17, weight: .bold))
                         Text("onboarding.notifications.preview.body".localized)
                             .font(.system(size: 14, weight: .medium))
-                            .foregroundStyle(.white.opacity(0.68))
+                            .foregroundStyle(JourneyVisual.secondaryText)
                             .lineSpacing(2)
                         HStack(spacing: 8) {
                             Image(systemName: "clock.fill")
                             Text("onboarding.notifications.preview.action".localized)
                         }
                         .font(.system(size: 13, weight: .bold))
-                        .foregroundStyle(JourneyVisual.lime)
+                        .foregroundStyle(Theme.Colors.textPrimary)
                     }
-                    .foregroundStyle(.white)
+                    .foregroundStyle(JourneyVisual.primaryText)
                     .padding(20)
                 }
                 .padding(.top, 26)
@@ -549,7 +571,7 @@ private struct NotificationPermissionPage: View {
                     } label: {
                         Text("onboarding.notifications_later".localized)
                             .font(.system(size: 15, weight: .semibold))
-                            .foregroundColor(.white.opacity(0.72))
+                            .foregroundColor(JourneyVisual.secondaryText)
                             .frame(maxWidth: .infinity)
                             .frame(height: 46)
                             .contentShape(Rectangle())
@@ -558,10 +580,10 @@ private struct NotificationPermissionPage: View {
                     .accessibilityIdentifier("onboarding.notifications.laterButton")
                 }
                 .padding(14)
-                .background(Color.black.opacity(0.48))
+                .background(Theme.Colors.card)
                 .background(.ultraThinMaterial.opacity(0.68))
                 .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
-                .overlay(RoundedRectangle(cornerRadius: 26, style: .continuous).stroke(Color.white.opacity(0.16), lineWidth: 1))
+                .overlay(RoundedRectangle(cornerRadius: 26, style: .continuous).stroke(JourneyVisual.softBorder, lineWidth: 1))
                 // Keep both actions clear of the home indicator even though the
                 // page background intentionally extends under the safe areas.
                 .padding(.bottom, 42)
@@ -575,6 +597,8 @@ private struct NotificationPermissionPage: View {
                 titleAppeared = true
             }
         }
+        // Contain keeps the page id from overriding the ids of its buttons.
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier("onboarding.notificationPermissionPage")
     }
     
@@ -596,18 +620,13 @@ private struct NotificationPermissionPage: View {
 
 private struct ThemePickerPage: View {
     @Binding var selectedTheme: AppTheme
+    @State private var revealed = false
     
     var body: some View {
         ZStack {
             JourneyPhotoBackground(imageName: JourneyBackdrop.alpine.rawValue, blurRadius: 2, darkness: 0.62)
                 .allowsHitTesting(false)
-            LinearGradient(
-                colors: [.clear, Color.black.opacity(0.26), Color.black.opacity(0.96)],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .ignoresSafeArea()
-            .allowsHitTesting(false)
+            OnboardingScrim(middle: 0.26, bottom: 0.96)
             
             VStack(alignment: .leading, spacing: 0) {
                 Spacer(minLength: 170)
@@ -615,54 +634,60 @@ private struct ThemePickerPage: View {
                 Text("onboarding.style.eyebrow".localized)
                     .font(.system(size: 12, weight: .bold))
                     .tracking(1.4)
-                    .foregroundStyle(JourneyVisual.lime)
+                    .foregroundStyle(Theme.Colors.textPrimary)
+                    .onboardingReveal(revealed, order: 0)
 
                 VStack(alignment: .leading, spacing: 7) {
                     Text("onboarding.choose_style.title".localized)
-                        .font(.system(size: 36, weight: .bold, design: .rounded))
-                        .foregroundColor(.white)
+                        .font(.system(size: 29, weight: .bold, design: .default))
+                        .foregroundColor(JourneyVisual.primaryText)
                     Text("onboarding.choose_style.subtitle".localized)
                         .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(.white.opacity(0.66))
+                        .foregroundColor(JourneyVisual.secondaryText)
                 }
                 .padding(.top, 10)
+                .onboardingReveal(revealed, order: 1)
 
                 JourneyGlassPanel(cornerRadius: 26) {
                     VStack(spacing: 8) {
                         ForEach(AppTheme.allCases) { theme in
                             Button {
-                                withAnimation(.spring(response: 0.35, dampingFraction: 0.82)) {
+                                withAnimation(.spring(response: 0.35, dampingFraction: 0.74)) {
                                     selectedTheme = theme
                                 }
-                                UIImpactFeedbackGenerator(style: .light).impactOccurred()
                             } label: {
                                 HStack(spacing: 14) {
                                     Image(systemName: theme.iconName)
                                         .font(.system(size: 17, weight: .semibold))
-                                        .foregroundStyle(selectedTheme == theme ? .black : .white)
+                                        .foregroundStyle(selectedTheme == theme ? .black : JourneyVisual.primaryText)
                                         .frame(width: 42, height: 42)
-                                        .background(selectedTheme == theme ? JourneyVisual.lime : Color.white.opacity(0.09))
+                                        .background(selectedTheme == theme ? JourneyVisual.lime : JourneyVisual.softSurface)
                                         .clipShape(RoundedRectangle(cornerRadius: 13, style: .continuous))
+                                        .overlay(RoundedRectangle(cornerRadius: 13, style: .continuous).stroke(selectedTheme == theme ? Color.clear : JourneyVisual.softBorder, lineWidth: 1))
+                                        .symbolEffect(.bounce, value: selectedTheme == theme)
                                     Text(theme.localizedName)
                                         .font(.system(size: 16, weight: .semibold))
-                                        .foregroundStyle(.white)
+                                        .foregroundStyle(JourneyVisual.primaryText)
                                     Spacer()
                                     Image(systemName: selectedTheme == theme ? "checkmark.circle.fill" : "circle")
                                         .font(.system(size: 21))
-                                        .foregroundStyle(selectedTheme == theme ? JourneyVisual.lime : .white.opacity(0.26))
+                                        .foregroundStyle(selectedTheme == theme ? JourneyVisual.accentStrong : JourneyVisual.softBorder)
+                                        .contentTransition(.symbolEffect(.replace))
                                 }
                                 .padding(.horizontal, 13)
                                 .frame(height: 62)
-                                .background(selectedTheme == theme ? Color.white.opacity(0.10) : Color.clear)
+                                .background(selectedTheme == theme ? JourneyVisual.softSurface : Color.clear)
                                 .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
                             }
                             .buttonStyle(.plain)
+                            .sensoryFeedback(.selection, trigger: selectedTheme == theme)
                             .accessibilityIdentifier("onboarding.theme.\(theme.rawValue)")
                         }
                     }
                     .padding(10)
                 }
                 .padding(.top, 24)
+                .onboardingReveal(revealed, order: 2)
 
                 HStack(spacing: Theme.Spacing.md) {
                     ThemePreviewCard(isDark: false, isSelected: selectedTheme == .light)
@@ -671,11 +696,14 @@ private struct ThemePickerPage: View {
                         .onTapGesture { withAnimation { selectedTheme = .dark } }
                 }
                 .padding(.top, 16)
+                .onboardingReveal(revealed, order: 3)
 
                 Spacer().frame(height: 154)
             }
             .padding(.horizontal, 20)
         }
+        .onAppear { revealed = true }
+        .onDisappear { revealed = false }
     }
 }
 
@@ -704,149 +732,229 @@ private struct ThemePreviewCard: View {
                 .stroke(isSelected ? LinearGradient(colors: [Theme.Colors.primary, Theme.Colors.accent], startPoint: .leading, endPoint: .trailing) : LinearGradient(colors: [Color.black.opacity(0.06)], startPoint: .leading, endPoint: .trailing), lineWidth: isSelected ? 2 : 1)
         )
         .shadow(color: .black.opacity(isDark ? 0.4 : 0.1), radius: 12, x: 0, y: 8)
+        .scaleEffect(isSelected ? 1.03 : 0.97)
+        .animation(.spring(response: 0.38, dampingFraction: 0.72), value: isSelected)
     }
 }
 
 private struct ProfileDetailsPage: View {
     @Environment(\.locale) private var locale
+    @Binding var selectedCountry: ResidenceCountry
+    @Binding var selectedSubdivisionCode: String
+    @Binding var selectedResidenceStatusCode: String
     @Binding var selectedCanton: Canton
     @Binding var selectedPermitType: PermitType
     @Binding var arrivalMonth: Int
     @Binding var arrivalYear: Int
     let onSkip: () -> Void
-    
-    private let permitOptions: [PermitType] = [.b, .c, .s, .n, .other]
+
     private let months = Array(1...12)
+    private var subdivisions: [AdministrativeArea] { CountryCatalog.subdivisions(for: selectedCountry) }
+    private var residenceStatuses: [ResidenceStatusOption] { CountryCatalog.statuses(for: selectedCountry) }
     private var years: [Int] {
         let currentYear = Calendar.current.component(.year, from: Date())
         return Array((currentYear - 10)...(currentYear + 1)).reversed()
     }
-    
+    private var selectedStatus: ResidenceStatusOption? {
+        residenceStatuses.first { $0.code == selectedResidenceStatusCode }
+    }
+
     @State private var titleAppeared = false
-    
+
     var body: some View {
         OnboardingDetailsBackground {
             ScrollView(showsIndicators: false) {
-                VStack(spacing: 14) {
+                VStack(alignment: .leading, spacing: 18) {
                     Spacer().frame(height: 92)
-                    
-                    HStack(alignment: .top, spacing: 14) {
+
+                    HStack(alignment: .center, spacing: 14) {
                         ZStack {
                             RoundedRectangle(cornerRadius: 16, style: .continuous)
                                 .fill(JourneyVisual.lime)
-                                .frame(width: 54, height: 54)
+                                .frame(width: 48, height: 48)
                             Image(systemName: "person.text.rectangle")
-                                .font(.system(size: 22, weight: .bold))
+                                .font(.system(size: 20, weight: .bold))
                                 .foregroundColor(.black)
                         }
-                        .opacity(titleAppeared ? 1 : 0)
-                        .scaleEffect(titleAppeared ? 1 : 0.5)
-                        
-                        VStack(alignment: .leading, spacing: 5) {
+
+                        VStack(alignment: .leading, spacing: 4) {
                             Text("onboarding.profile_title".localized)
-                                .font(.system(size: 28, weight: .bold, design: .rounded))
-                                .foregroundColor(.white)
-                                .multilineTextAlignment(.leading)
-                            Text("onboarding.profile_subtitle".localized)
+                                .font(.system(size: 26, weight: .bold, design: .default))
+                                .foregroundColor(JourneyVisual.primaryText)
+                            Text("onboarding.profile.subtitle_short".localized)
                                 .font(.system(size: 14))
-                                .foregroundColor(.white.opacity(0.75))
-                                .multilineTextAlignment(.leading)
-                                .lineSpacing(2)
+                                .foregroundColor(JourneyVisual.secondaryText)
+                                .fixedSize(horizontal: false, vertical: true)
                         }
-                        .opacity(titleAppeared ? 1 : 0)
-                        .offset(y: titleAppeared ? 0 : 15)
+
                         Spacer(minLength: 0)
                     }
-                    .padding(.horizontal, Theme.Spacing.lg)
-                    
-                    VStack(spacing: 12) {
-                        OnboardingFieldCard(title: "onboarding.canton".localized, icon: "mappin.and.ellipse", delay: 0.15) {
-                            Menu {
-                                ForEach(Canton.sortedByName, id: \.self) { canton in
-                                    Button("\(canton.localizedName) (\(canton.rawValue))") {
-                                        selectedCanton = canton
-                                    }
-                                }
-                            } label: {
-                                HStack {
-                                    VStack(alignment: .leading, spacing: 4) {
-                                        Text(selectedCanton.localizedName)
-                                            .font(.system(size: 17, weight: .semibold))
-                                            .foregroundColor(.white)
-                                        Text(selectedCanton.rawValue)
-                                            .font(.system(size: 13))
-                                            .foregroundColor(.white.opacity(0.55))
-                                    }
-                                    Spacer()
-                                    Image(systemName: "chevron.down.circle.fill")
-                                        .font(.system(size: 22))
-                                        .foregroundColor(.white.opacity(0.35))
-                                }
-                                .padding(.vertical, 4)
-                            }
-                        }
-                        
-                        OnboardingFieldCard(title: "onboarding.permit_type".localized, icon: "doc.badge.gearshape", delay: 0.25) {
-                            VStack(spacing: 4) {
-                                ForEach(permitOptions, id: \.self) { permit in
-                                    OnboardingChoiceRow(
-                                        title: permitTitle(for: permit),
-                                        subtitle: permitDescription(for: permit),
-                                        isSelected: selectedPermitType == permit
-                                    ) {
-                                        selectedPermitType = permit
-                                    }
-                                }
-                            }
-                        }
-                        
-                        OnboardingFieldCard(title: "onboarding.arrival_date".localized, icon: "calendar", delay: 0.35) {
-                            HStack(spacing: 12) {
-                                Picker("Month", selection: $arrivalMonth) {
-                                    ForEach(months, id: \.self) { month in
-                                        Text(monthName(for: month)).tag(month)
-                                    }
-                                }
-                                .pickerStyle(.menu)
-                                .tint(.white)
-                                
-                                Picker("Year", selection: $arrivalYear) {
-                                    ForEach(years, id: \.self) { year in
-                                        Text(String(year)).tag(year)
-                                    }
-                                }
-                                .pickerStyle(.menu)
-                                .tint(.white)
-                            }
-                        }
-                    }
-                    .padding(.horizontal, Theme.Spacing.lg)
+                    .onboardingReveal(titleAppeared, order: 0)
 
-                    // Extra clearance for page indicator + bottom nav buttons
-                    Spacer().frame(height: 220)
+                    // One settings-style card: four taps instead of four cards and a long radio list.
+                    VStack(spacing: 0) {
+                        countryRow
+                        rowDivider
+                        subdivisionRow
+                        rowDivider
+                        statusRow
+                        rowDivider
+                        arrivalRow
+                    }
+                    .background(Theme.Colors.card)
+                    .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 22, style: .continuous)
+                            .stroke(JourneyVisual.softBorder, lineWidth: 1)
+                    )
+                    .onboardingReveal(titleAppeared, order: 1)
+
+                    Text("onboarding.profile.editable_hint".localized)
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(JourneyVisual.secondaryText)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .onboardingReveal(titleAppeared, order: 2)
+
+                    Spacer().frame(height: 200)
                 }
+                .padding(.horizontal, Theme.Spacing.lg)
             }
         }
-        .onAppear {
-            withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
-                titleAppeared = true
-            }
-        }
+        .onAppear { titleAppeared = true }
+        .onDisappear { titleAppeared = false }
+        .sensoryFeedback(.selection, trigger: selectedResidenceStatusCode)
         .accessibilityIdentifier("onboarding.profileDetailsPage")
     }
-    
+
+    private var rowDivider: some View {
+        Rectangle()
+            .fill(JourneyVisual.softBorder)
+            .frame(height: 1)
+            .padding(.leading, 58)
+    }
+
+    private var countryRow: some View {
+        Menu {
+            ForEach(ResidenceCountry.allCases) { country in
+                Button("\(country.flag) \(country.name)") { select(country) }
+            }
+        } label: {
+            OnboardingSummaryRow(
+                icon: "globe.europe.africa.fill",
+                label: "country.residence_country".localized,
+                value: "\(selectedCountry.flag) \(selectedCountry.name)"
+            )
+        }
+        .accessibilityIdentifier("onboarding.profile.country")
+    }
+
+    private var subdivisionRow: some View {
+        Menu {
+            ForEach(subdivisions) { area in
+                Button("\(area.name) (\(area.code))") {
+                    selectedSubdivisionCode = area.code
+                    if selectedCountry == .switzerland {
+                        selectedCanton = Canton(rawValue: area.code) ?? .zurich
+                    }
+                }
+            }
+        } label: {
+            OnboardingSummaryRow(
+                icon: "mappin.and.ellipse",
+                label: selectedCountry.subdivisionTitle,
+                value: CountryCatalog.subdivisionName(country: selectedCountry, code: selectedSubdivisionCode)
+            )
+        }
+        .accessibilityIdentifier("onboarding.profile.subdivision")
+    }
+
+    private var statusRow: some View {
+        Menu {
+            ForEach(residenceStatuses) { status in
+                Button("\(status.title) · \(status.detail)") {
+                    selectedResidenceStatusCode = status.code
+                    if selectedCountry == .switzerland {
+                        selectedPermitType = PermitType(rawValue: status.code) ?? .other
+                    }
+                }
+            }
+        } label: {
+            OnboardingSummaryRow(
+                icon: "doc.badge.gearshape",
+                label: "country.residence_status".localized,
+                value: selectedStatus?.title ?? selectedResidenceStatusCode,
+                detail: selectedStatus?.detail
+            )
+        }
+        .accessibilityIdentifier("onboarding.profile.status")
+    }
+
+    private var arrivalRow: some View {
+        HStack(spacing: 12) {
+            OnboardingRowIcon(icon: "calendar")
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text("onboarding.arrival_date".localized)
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(JourneyVisual.secondaryText)
+
+                HStack(spacing: 8) {
+                    Menu {
+                        ForEach(months, id: \.self) { month in
+                            Button(monthName(for: month)) { arrivalMonth = month }
+                        }
+                    } label: {
+                        valuePill(monthName(for: arrivalMonth))
+                    }
+                    .accessibilityIdentifier("onboarding.profile.arrivalMonth")
+
+                    Menu {
+                        ForEach(years, id: \.self) { year in
+                            Button(String(year)) { arrivalYear = year }
+                        }
+                    } label: {
+                        valuePill(String(arrivalYear))
+                    }
+                    .accessibilityIdentifier("onboarding.profile.arrivalYear")
+                }
+            }
+
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+    }
+
+    private func valuePill(_ title: String) -> some View {
+        HStack(spacing: 6) {
+            Text(title)
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundColor(JourneyVisual.primaryText)
+            Image(systemName: "chevron.down")
+                .font(.system(size: 10, weight: .bold))
+                .foregroundColor(JourneyVisual.secondaryText)
+        }
+        .padding(.horizontal, 12)
+        .frame(height: 38)
+        .background(JourneyVisual.softSurface)
+        .clipShape(Capsule())
+        .overlay(Capsule().stroke(JourneyVisual.softBorder, lineWidth: 1))
+    }
+
+    private func select(_ country: ResidenceCountry) {
+        selectedCountry = country
+        selectedSubdivisionCode = country.defaultSubdivisionCode
+        selectedResidenceStatusCode = country.defaultResidenceStatusCode
+        if country == .switzerland {
+            selectedCanton = .zurich
+            selectedPermitType = .s
+        }
+    }
+
     private func monthName(for month: Int) -> String {
         let formatter = DateFormatter()
         formatter.locale = locale
         return formatter.monthSymbols[month - 1]
-    }
-
-    private func permitTitle(for permit: PermitType) -> String {
-        "onboarding.permit.\(permit.rawValue.lowercased()).title".localized
-    }
-
-    private func permitDescription(for permit: PermitType) -> String {
-        "onboarding.permit.\(permit.rawValue.lowercased()).description".localized
     }
 }
 
@@ -877,11 +985,11 @@ private struct FamilyDetailsPage: View {
                         
                         VStack(alignment: .leading, spacing: 5) {
                             Text("onboarding.family_title".localized)
-                                .font(.system(size: 28, weight: .bold, design: .rounded))
-                                .foregroundColor(.white)
+                                .font(.system(size: 28, weight: .bold, design: .default))
+                                .foregroundColor(JourneyVisual.primaryText)
                             Text("onboarding.family_subtitle".localized)
                                 .font(.system(size: 14))
-                                .foregroundColor(.white.opacity(0.75))
+                                .foregroundColor(JourneyVisual.secondaryText)
                                 .multilineTextAlignment(.leading)
                                 .lineSpacing(2)
                         }
@@ -910,9 +1018,9 @@ private struct FamilyDetailsPage: View {
                             Toggle(isOn: $hasChildren) {
                                 Text(hasChildren ? "onboarding.yes".localized : "onboarding.no".localized)
                                     .font(.system(size: 15, weight: .semibold))
-                                    .foregroundColor(.white)
+                                    .foregroundColor(JourneyVisual.primaryText)
                             }
-                            .tint(Theme.Colors.accent)
+                            .tint(JourneyVisual.accentText)
                         }
                         
                         if hasChildren {
@@ -920,9 +1028,9 @@ private struct FamilyDetailsPage: View {
                                 Stepper(value: $childrenCount, in: 1...5) {
                                     Text("\(childrenCount)")
                                         .font(.system(size: 17, weight: .bold))
-                                        .foregroundColor(.white)
+                                        .foregroundColor(JourneyVisual.primaryText)
                                 }
-                                .tint(Theme.Colors.accent)
+                                .tint(JourneyVisual.accentText)
                             }
                         }
                     }
@@ -950,17 +1058,7 @@ private struct OnboardingDetailsBackground<Content: View>: View {
         ZStack {
             JourneyPhotoBackground(imageName: JourneyBackdrop.alpine.rawValue, blurRadius: 2, darkness: 0.64)
                 .allowsHitTesting(false)
-            LinearGradient(
-                colors: [
-                    Color.black.opacity(0.10),
-                    Color.black.opacity(0.42),
-                    Color.black.opacity(0.96)
-                ],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .ignoresSafeArea()
-            .allowsHitTesting(false)
+            OnboardingScrim(top: 0.10, middle: 0.42, bottom: 0.96)
 
             RadialGradient(
                 colors: [JourneyVisual.lime.opacity(0.11), .clear],
@@ -976,7 +1074,28 @@ private struct OnboardingDetailsBackground<Content: View>: View {
     }
 }
 
+/// Night scrim in dark mode; in light mode the illustration fades into paper so dark text stays readable.
+private struct OnboardingScrim: View {
+    @Environment(\.colorScheme) private var colorScheme
+    var top: Double = 0
+    let middle: Double
+    let bottom: Double
+
+    var body: some View {
+        LinearGradient(
+            colors: colorScheme == .dark
+                ? [Color.black.opacity(top), Color.black.opacity(middle), Color.black.opacity(bottom)]
+                : [.clear, JourneyVisual.pageBackground.opacity(0.7), JourneyVisual.pageBackground],
+            startPoint: .top,
+            endPoint: .bottom
+        )
+        .ignoresSafeArea()
+        .allowsHitTesting(false)
+    }
+}
+
 private struct OnboardingFieldCard<Content: View>: View {
+    @Environment(\.colorScheme) private var colorScheme
     let title: String
     let icon: String?
     let delay: Double
@@ -996,11 +1115,11 @@ private struct OnboardingFieldCard<Content: View>: View {
                 if let icon {
                     Image(systemName: icon)
                         .font(.system(size: 13, weight: .semibold))
-                        .foregroundColor(.white.opacity(0.55))
+                        .foregroundColor(JourneyVisual.secondaryText)
                 }
                 Text(title)
-                    .font(.system(size: 13, weight: .semibold, design: .rounded))
-                    .foregroundColor(.white.opacity(0.72))
+                    .font(.system(size: 13, weight: .semibold, design: .default))
+                    .foregroundColor(JourneyVisual.secondaryText)
                     .textCase(.uppercase)
                     .tracking(0.5)
             }
@@ -1012,21 +1131,23 @@ private struct OnboardingFieldCard<Content: View>: View {
                 .fill(.ultraThinMaterial.opacity(0.72))
                 .background(
                     RoundedRectangle(cornerRadius: 20, style: .continuous)
-                        .fill(Color.black.opacity(0.52))
+                        .fill(colorScheme == .dark ? Color.black.opacity(0.52) : Theme.Colors.card)
                 )
         )
         .overlay(
             RoundedRectangle(cornerRadius: 20, style: .continuous)
                 .stroke(
-                    LinearGradient(
-                        colors: [Color.white.opacity(0.30), Color.white.opacity(0.06)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ),
+                    colorScheme == .dark
+                        ? LinearGradient(
+                            colors: [Color.white.opacity(0.30), Color.white.opacity(0.06)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                        : LinearGradient(colors: [JourneyVisual.softBorder], startPoint: .top, endPoint: .bottom),
                     lineWidth: 1
                 )
         )
-        .shadow(color: Color.black.opacity(0.32), radius: 18, y: 9)
+        .shadow(color: Color.black.opacity(colorScheme == .dark ? 0.32 : 0.06), radius: 18, y: 9)
         .opacity(appeared ? 1 : 0)
         .offset(y: appeared ? 0 : 20)
         .onAppear {
@@ -1038,6 +1159,7 @@ private struct OnboardingFieldCard<Content: View>: View {
 }
 
 private struct OnboardingChoiceRow: View {
+    @Environment(\.colorScheme) private var colorScheme
     let title: String
     let subtitle: String?
     let isSelected: Bool
@@ -1045,33 +1167,34 @@ private struct OnboardingChoiceRow: View {
     
     var body: some View {
         Button(action: {
-            UIImpactFeedbackGenerator(style: .light).impactOccurred()
-            action()
+            withAnimation(.spring(response: 0.34, dampingFraction: 0.72)) { action() }
         }) {
             HStack(spacing: 12) {
                 VStack(alignment: .leading, spacing: 3) {
                     Text(title)
                         .font(.system(size: 15, weight: .semibold))
-                        .foregroundColor(.white)
+                        .foregroundColor(JourneyVisual.primaryText)
                     if let subtitle {
                         Text(subtitle)
                             .font(.system(size: 12))
-                            .foregroundColor(.white.opacity(0.6))
+                            .foregroundColor(JourneyVisual.secondaryText)
                             .multilineTextAlignment(.leading)
                     }
                 }
                 Spacer()
                 ZStack {
                     Circle()
-                        .stroke(isSelected ? Color.clear : Color.white.opacity(0.35), lineWidth: 1.5)
+                        .stroke(isSelected ? Color.clear : (colorScheme == .dark ? Color.white.opacity(0.35) : JourneyVisual.softBorder), lineWidth: 1.5)
                         .frame(width: 24, height: 24)
                     if isSelected {
                         Circle()
                             .fill(Theme.Colors.accent)
                             .frame(width: 24, height: 24)
+                            .transition(.scale(scale: 0.4).combined(with: .opacity))
                         Image(systemName: "checkmark")
                             .font(.system(size: 12, weight: .bold))
-                            .foregroundColor(Theme.Colors.primaryDark)
+                            .foregroundColor(.black)
+                            .transition(.scale(scale: 0.2).combined(with: .opacity))
                     }
                 }
                 .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isSelected)
@@ -1080,7 +1203,7 @@ private struct OnboardingChoiceRow: View {
             .padding(.vertical, 10)
             .background(
                 RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .fill(isSelected ? Color.white.opacity(0.14) : Color.clear)
+                    .fill(isSelected ? (colorScheme == .dark ? Color.white.opacity(0.14) : JourneyVisual.softSurface) : Color.clear)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 14, style: .continuous)
@@ -1088,6 +1211,7 @@ private struct OnboardingChoiceRow: View {
             )
         }
         .buttonStyle(.plain)
+        .sensoryFeedback(.selection, trigger: isSelected)
     }
 }
 
@@ -1105,9 +1229,7 @@ private struct OnboardingV2Page: Identifiable {
 
 private struct OnboardingV2PageView: View {
     let page: OnboardingV2Page
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var animateIcon = false
-    @State private var animateText = false
+    @State private var revealed = false
 
     private var backdrop: JourneyBackdrop {
         page.id == 1 ? .city : .alpine
@@ -1133,13 +1255,7 @@ private struct OnboardingV2PageView: View {
             JourneyPhotoBackground(imageName: backdrop.rawValue, blurRadius: 1.5, darkness: 0.46)
                 .allowsHitTesting(false)
 
-            LinearGradient(
-                colors: [.clear, Color.black.opacity(0.18), Color.black.opacity(0.94)],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .ignoresSafeArea()
-            .allowsHitTesting(false)
+            OnboardingScrim(middle: 0.18, bottom: 0.94)
 
             VStack(alignment: .leading, spacing: 0) {
                 Spacer(minLength: 190)
@@ -1156,24 +1272,26 @@ private struct OnboardingV2PageView: View {
                     Text("onboarding.hero.eyebrow".localized)
                         .font(.system(size: 12, weight: .bold))
                         .tracking(1.4)
-                        .foregroundStyle(JourneyVisual.lime)
+                        .foregroundStyle(Theme.Colors.textPrimary)
                 }
+                .onboardingReveal(revealed, order: 0)
 
                 VStack(alignment: .leading, spacing: 10) {
                     Text(LocalizedStringKey(page.titleKey))
-                        .font(.system(size: 42, weight: .bold, design: .rounded))
-                        .foregroundColor(.white)
+                        .font(.system(size: 29, weight: .bold, design: .default))
+                        .foregroundColor(JourneyVisual.primaryText)
                         .multilineTextAlignment(.leading)
                         .lineLimit(2)
                         .minimumScaleFactor(0.75)
                     
                     Text(LocalizedStringKey(page.subtitleKey))
                         .font(.system(size: 17, weight: .medium))
-                        .foregroundColor(.white.opacity(0.72))
+                        .foregroundColor(JourneyVisual.secondaryText)
                         .multilineTextAlignment(.leading)
                         .lineSpacing(3)
                 }
                 .padding(.top, 18)
+                .onboardingReveal(revealed, order: 1)
                 .accessibilityIdentifier("onboarding.page.title.\(page.id)")
 
                 JourneyGlassPanel(cornerRadius: 24) {
@@ -1182,20 +1300,21 @@ private struct OnboardingV2PageView: View {
                             HStack(spacing: 13) {
                                 Image(systemName: feature.0)
                                     .font(.system(size: 16, weight: .semibold))
-                                    .foregroundStyle(JourneyVisual.lime)
+                                    .foregroundStyle(Theme.Colors.textPrimary)
                                     .frame(width: 24)
                                 Text(feature.1)
                                     .font(.system(size: 14, weight: .semibold))
-                                    .foregroundStyle(.white)
+                                    .foregroundStyle(JourneyVisual.primaryText)
                                 Spacer()
                                 Image(systemName: "checkmark")
                                     .font(.system(size: 11, weight: .bold))
-                                    .foregroundStyle(.white.opacity(0.4))
+                                    .foregroundStyle(JourneyVisual.secondaryText)
                             }
                             .frame(minHeight: 48)
+                            .onboardingReveal(revealed, order: 3 + index)
 
                             if index < featureRows.count - 1 {
-                                Divider().overlay(Color.white.opacity(0.10))
+                                Divider().overlay(JourneyVisual.softBorder)
                             }
                         }
                     }
@@ -1203,19 +1322,14 @@ private struct OnboardingV2PageView: View {
                     .padding(.vertical, 5)
                 }
                 .padding(.top, 24)
+                .onboardingReveal(revealed, order: 2)
 
                 Spacer().frame(height: 154)
             }
             .padding(.horizontal, 20)
-            .opacity(animateText ? 1 : 0)
-            .offset(y: animateText ? 0 : 18)
         }
-        .onAppear {
-            animateIcon = true
-            withAnimation(reduceMotion ? nil : .spring(response: 0.62, dampingFraction: 0.86).delay(0.12)) {
-                animateText = true
-            }
-        }
+        .onAppear { revealed = true }
+        .onDisappear { revealed = false }
     }
 }
 
@@ -1288,6 +1402,7 @@ private struct LanguageSelectionSheetV2: View {
 private struct LanguagePickerPage: View {
     @Binding var selectedLanguage: String
     var onSelect: (String) -> Void
+    @State private var revealed = false
     
     private let languages: [(code: String, name: String, shortCode: String)] = [
         ("uk", "Українська", "UA"),
@@ -1299,13 +1414,7 @@ private struct LanguagePickerPage: View {
         ZStack {
             JourneyPhotoBackground(imageName: JourneyBackdrop.city.rawValue, blurRadius: 2, darkness: 0.56)
                 .allowsHitTesting(false)
-            LinearGradient(
-                colors: [.clear, Color.black.opacity(0.22), Color.black.opacity(0.94)],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .ignoresSafeArea()
-            .allowsHitTesting(false)
+            OnboardingScrim(middle: 0.22, bottom: 0.94)
             
             VStack(alignment: .leading, spacing: 0) {
                 Spacer(minLength: 180)
@@ -1313,208 +1422,231 @@ private struct LanguagePickerPage: View {
                 Text("onboarding.language.eyebrow".localized)
                     .font(.system(size: 12, weight: .bold))
                     .tracking(1.4)
-                    .foregroundStyle(JourneyVisual.lime)
+                    .foregroundStyle(Theme.Colors.textPrimary)
+                    .onboardingReveal(revealed, order: 0)
 
                 Text(LocalizedStringKey("onboarding.select_language"))
-                    .font(.system(size: 38, weight: .bold, design: .rounded))
-                    .foregroundStyle(.white)
+                    .font(.system(size: 30, weight: .bold, design: .default))
+                    .foregroundStyle(JourneyVisual.primaryText)
                     .padding(.top, 10)
+                    .onboardingReveal(revealed, order: 1)
 
                 Text("onboarding.language.subtitle".localized)
                     .font(.system(size: 16, weight: .medium))
-                    .foregroundStyle(.white.opacity(0.66))
+                    .foregroundStyle(JourneyVisual.secondaryText)
                     .padding(.top, 8)
+                    .onboardingReveal(revealed, order: 2)
 
                 JourneyGlassPanel(cornerRadius: 26) {
                     VStack(spacing: 8) {
                         ForEach(languages, id: \.code) { language in
+                            let isSelected = selectedLanguage == language.code
                             Button(action: {
-                                selectedLanguage = language.code
+                                withAnimation(.spring(response: 0.34, dampingFraction: 0.72)) {
+                                    selectedLanguage = language.code
+                                }
                                 onSelect(language.code)
-                                UIImpactFeedbackGenerator(style: .medium).impactOccurred()
                             }) {
                                 HStack(spacing: 14) {
                                     Text(language.shortCode)
                                         .font(.system(size: 12, weight: .bold, design: .monospaced))
-                                        .foregroundStyle(selectedLanguage == language.code ? .black : .white)
+                                        .foregroundStyle(isSelected ? .black : JourneyVisual.primaryText)
                                         .frame(width: 42, height: 42)
-                                        .background(selectedLanguage == language.code ? JourneyVisual.lime : Color.white.opacity(0.09))
+                                        .background(isSelected ? JourneyVisual.lime : JourneyVisual.softSurface)
                                         .clipShape(RoundedRectangle(cornerRadius: 13, style: .continuous))
+                                        .overlay(RoundedRectangle(cornerRadius: 13, style: .continuous).stroke(isSelected ? Color.clear : JourneyVisual.softBorder, lineWidth: 1))
+                                        .scaleEffect(isSelected ? 1.06 : 1)
 
                                 Text(language.name)
                                         .font(.system(size: 16, weight: .semibold))
-                                        .foregroundStyle(.white)
+                                        .foregroundStyle(JourneyVisual.primaryText)
                                 Spacer()
-                                    Image(systemName: selectedLanguage == language.code ? "checkmark.circle.fill" : "circle")
+                                    Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
                                         .font(.system(size: 21, weight: .medium))
-                                        .foregroundStyle(selectedLanguage == language.code ? JourneyVisual.lime : .white.opacity(0.28))
+                                        .foregroundStyle(isSelected ? JourneyVisual.accentStrong : JourneyVisual.softBorder)
+                                        .contentTransition(.symbolEffect(.replace))
+                                        .symbolEffect(.bounce, value: isSelected)
                             }
                                 .padding(.horizontal, 13)
                                 .frame(height: 62)
-                                .background(selectedLanguage == language.code ? Color.white.opacity(0.10) : Color.clear)
+                                .background(isSelected ? JourneyVisual.softSurface : Color.clear)
                                 .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
                             }
                             .buttonStyle(.plain)
+                            .sensoryFeedback(.selection, trigger: isSelected)
                             .accessibilityIdentifier("onboarding.language.option.\(language.code)")
                         }
                     }
                     .padding(10)
                 }
                 .padding(.top, 24)
+                .onboardingReveal(revealed, order: 3)
 
                 Spacer().frame(height: 158)
             }
             .padding(.horizontal, 20)
         }
+        .onAppear { revealed = true }
+        .onDisappear { revealed = false }
     }
 }
 
 // MARK: - Success Page (last)
 
 private struct SuccessPageView: View {
-    @State private var appeared = false
-    @State private var glowPulse = false
+    private enum Phase { case building, ready }
 
-    private let features: [(icon: String, title: String, color: Color)] = [
-        ("book.fill", "onboarding.success.feature1".localized, JourneyVisual.lime),
-        ("checklist", "onboarding.success.feature2".localized, JourneyVisual.lime),
-        ("storefront.fill", "onboarding.success.feature3".localized, JourneyVisual.lime),
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var phase: Phase = .building
+    @State private var checkedCount = 0
+    @State private var confetti = 0
+    @State private var revealed = false
+
+    private let features: [(icon: String, title: String)] = [
+        ("book.fill", "onboarding.success.feature1".localized),
+        ("checklist", "onboarding.success.feature2".localized),
+        ("storefront.fill", "onboarding.success.feature3".localized)
     ]
 
     var body: some View {
         ZStack {
             JourneyPhotoBackground(imageName: JourneyBackdrop.zurich.rawValue, blurRadius: 2, darkness: 0.58)
                 .allowsHitTesting(false)
-            LinearGradient(
-                colors: [.clear, Color.black.opacity(0.32), Color.black.opacity(0.96)],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .ignoresSafeArea()
-            .allowsHitTesting(false)
-
-            // Decorative background blobs
-            Circle()
-                .fill(JourneyVisual.lime.opacity(0.07))
-                .frame(width: 320, height: 320)
-                .offset(x: 120, y: -240)
-                .allowsHitTesting(false)
-            Circle()
-                .fill(JourneyVisual.lime.opacity(0.04))
-                .frame(width: 220, height: 220)
-                .offset(x: -100, y: 280)
-                .allowsHitTesting(false)
+            OnboardingScrim(middle: 0.32, bottom: 0.96)
 
             VStack(spacing: 0) {
-                Spacer().frame(height: 128)
+                Spacer().frame(height: 104)
 
-                // Animated checkmark badge
                 ZStack {
-                    // Outer glow ring — pulses
                     Circle()
-                        .fill(JourneyVisual.lime.opacity(0.08))
-                        .frame(width: 190, height: 190)
-                        .scaleEffect(glowPulse ? 1.12 : 0.95)
-                        .animation(.easeInOut(duration: 1.6).repeatForever(autoreverses: true), value: glowPulse)
+                        .fill(JourneyVisual.lime.opacity(phase == .ready ? 0.3 : 0.18))
+                        .frame(width: 210, height: 210)
+                        .blur(radius: 34)
 
-                    // Middle ring
-                    Circle()
-                        .fill(JourneyVisual.lime.opacity(0.14))
-                        .frame(width: 150, height: 150)
-                        .scaleEffect(appeared ? 1 : 0.3)
-                        .animation(.spring(response: 0.55, dampingFraction: 0.7).delay(0.1), value: appeared)
-
-                    // Inner solid circle
-                    Circle()
-                        .fill(
-                            LinearGradient(
-                                colors: [JourneyVisual.lime, JourneyVisual.lime.opacity(0.72)],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
+                    Image((phase == .ready ? SweezyCompanionPose.celebrate : .documents).assetName)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 172, height: 172)
+                        .id(phase)
+                        .transition(
+                            reduceMotion
+                                ? .opacity
+                                : .asymmetric(
+                                    insertion: .scale(scale: 0.62, anchor: .bottom).combined(with: .opacity),
+                                    removal: .scale(scale: 0.9).combined(with: .opacity)
+                                )
                         )
-                        .frame(width: 110, height: 110)
-                        .scaleEffect(appeared ? 1 : 0.2)
-                        .animation(.spring(response: 0.5, dampingFraction: 0.65).delay(0.05), value: appeared)
-
-                    // Checkmark
-                    Image(systemName: "checkmark")
-                        .font(.system(size: 46, weight: .bold, design: .rounded))
-                        .foregroundColor(.black)
-                        .scaleEffect(appeared ? 1 : 0.1)
-                        .opacity(appeared ? 1 : 0)
-                        .animation(.spring(response: 0.45, dampingFraction: 0.6).delay(0.28), value: appeared)
                 }
-                .padding(.bottom, 28)
+                .frame(height: 212)
+                .idleFloat(enabled: !reduceMotion && phase == .building)
+                .animation(reduceMotion ? nil : .spring(response: 0.55, dampingFraction: 0.66), value: phase)
 
-                // Title + subtitle
                 VStack(spacing: 10) {
-                    Text("onboarding.page3.title".localized)
-                        .font(.system(size: 34, weight: .bold, design: .rounded))
-                        .foregroundColor(.white)
+                    Text((phase == .ready ? "onboarding.ready.title" : "onboarding.building.title").localized)
+                        .font(.system(size: 30, weight: .bold, design: .default))
+                        .foregroundColor(JourneyVisual.primaryText)
                         .multilineTextAlignment(.center)
-                        .opacity(appeared ? 1 : 0)
-                        .offset(y: appeared ? 0 : 22)
-                        .animation(.spring(response: 0.5, dampingFraction: 0.8).delay(0.38), value: appeared)
+                        .contentTransition(.opacity)
 
-                    Text("onboarding.page3.subtitle".localized)
+                    Text((phase == .ready ? "onboarding.ready.subtitle" : "onboarding.building.subtitle").localized)
                         .font(.system(size: 16))
-                        .foregroundColor(.white.opacity(0.82))
+                        .foregroundColor(JourneyVisual.secondaryText)
                         .multilineTextAlignment(.center)
                         .lineSpacing(4)
                         .padding(.horizontal, 36)
-                        .opacity(appeared ? 1 : 0)
-                        .offset(y: appeared ? 0 : 18)
-                        .animation(.spring(response: 0.5, dampingFraction: 0.8).delay(0.46), value: appeared)
+                        .contentTransition(.opacity)
                 }
-                .padding(.bottom, 32)
+                .padding(.top, 6)
+                .padding(.bottom, 28)
+                .animation(reduceMotion ? nil : .easeInOut(duration: 0.3), value: phase)
 
-                // Feature highlights
                 VStack(spacing: 10) {
-                    ForEach(Array(features.enumerated()), id: \.offset) { idx, feature in
-                        HStack(spacing: 14) {
-                            ZStack {
-                                Circle()
-                                    .fill(feature.color.opacity(0.18))
-                                    .frame(width: 44, height: 44)
-                                Image(systemName: feature.icon)
-                                    .font(.system(size: 18, weight: .semibold))
-                                    .foregroundColor(.white)
-                            }
-                            Text(feature.title)
-                                .font(.system(size: 15, weight: .semibold))
-                                .foregroundColor(.white)
-                            Spacer()
-                            Image(systemName: "checkmark.circle.fill")
-                                .font(.system(size: 17))
-                                .foregroundColor(.white.opacity(0.55))
-                        }
-                        .padding(.horizontal, 18)
-                        .padding(.vertical, 13)
-                        .background(
-                            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                .fill(Color.white.opacity(0.1))
-                        )
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                .stroke(Color.white.opacity(0.18), lineWidth: 1)
-                        )
-                        .opacity(appeared ? 1 : 0)
-                        .offset(x: appeared ? 0 : 32)
-                        .animation(.spring(response: 0.5, dampingFraction: 0.8).delay(0.56 + Double(idx) * 0.1), value: appeared)
+                    ForEach(Array(features.enumerated()), id: \.offset) { index, feature in
+                        planRow(index: index, icon: feature.icon, title: feature.title)
+                            .onboardingReveal(revealed, order: index + 1)
                     }
                 }
                 .padding(.horizontal, 28)
 
                 Spacer().frame(height: 152)
             }
+
+            ConfettiBurst(trigger: confetti)
         }
-        .onAppear {
-            withAnimation { appeared = true }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                glowPulse = true
+        .onAppear { revealed = true }
+        .onDisappear {
+            revealed = false
+            phase = .building
+            checkedCount = 0
+        }
+        .task(id: revealed) {
+            guard revealed else { return }
+            await buildPlan()
+        }
+        .sensoryFeedback(.success, trigger: phase == .ready)
+    }
+
+    private func planRow(index: Int, icon: String, title: String) -> some View {
+        let isChecked = index < checkedCount
+        return HStack(spacing: 14) {
+            ZStack {
+                Circle()
+                    .fill(isChecked ? JourneyVisual.lime.opacity(0.22) : JourneyVisual.softBorder)
+                    .frame(width: 44, height: 44)
+                Image(systemName: icon)
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundColor(isChecked ? JourneyVisual.accentStrong : JourneyVisual.secondaryText)
+            }
+
+            Text(title)
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundColor(JourneyVisual.primaryText)
+
+            Spacer()
+
+            if isChecked {
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.system(size: 19))
+                    .foregroundColor(JourneyVisual.accentStrong)
+                    .transition(.scale(scale: 0.3).combined(with: .opacity))
+            } else {
+                ProgressView()
+                    .controlSize(.small)
+                    .tint(JourneyVisual.accentStrong)
             }
         }
+        .padding(.horizontal, 18)
+        .padding(.vertical, 13)
+        .background(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(Theme.Colors.card)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .stroke(isChecked ? JourneyVisual.accentStrong.opacity(0.35) : JourneyVisual.softBorder, lineWidth: 1)
+        )
+        .animation(reduceMotion ? nil : .spring(response: 0.42, dampingFraction: 0.74), value: isChecked)
+    }
+
+    /// Short "we are preparing your plan" beat, then the celebration.
+    private func buildPlan() async {
+        guard !reduceMotion else {
+            checkedCount = features.count
+            phase = .ready
+            return
+        }
+        try? await Task.sleep(for: .milliseconds(420))
+        for step in 1...features.count {
+            guard !Task.isCancelled else { return }
+            checkedCount = step
+            try? await Task.sleep(for: .milliseconds(430))
+        }
+        guard !Task.isCancelled else { return }
+        try? await Task.sleep(for: .milliseconds(220))
+        withAnimation(.spring(response: 0.55, dampingFraction: 0.7)) {
+            phase = .ready
+        }
+        confetti += 1
     }
 }
 

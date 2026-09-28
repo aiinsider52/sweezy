@@ -116,7 +116,7 @@ struct MyListingsView: View {
                 )
 
             Circle()
-                .fill(Color.white.opacity(0.15))
+                .fill(JourneyVisual.softBorder)
                 .frame(width: 140, height: 140)
                 .blur(radius: 12)
                 .offset(x: 40, y: -30)
@@ -125,18 +125,18 @@ struct MyListingsView: View {
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("marketplace.cabinet_title".localized)
-                            .font(.system(size: 22, weight: .bold, design: .rounded))
-                            .foregroundColor(.white)
+                            .font(.system(size: 22, weight: .bold, design: .default))
+                            .foregroundColor(JourneyVisual.primaryText)
                         Text("marketplace.cabinet_subtitle".localized)
                             .font(.subheadline)
-                            .foregroundColor(.white.opacity(0.78))
+                            .foregroundColor(JourneyVisual.secondaryText)
                     }
 
                     Spacer()
 
                     Image(systemName: "briefcase.fill")
                         .font(.system(size: 28, weight: .semibold))
-                        .foregroundColor(.white.opacity(0.92))
+                        .foregroundColor(JourneyVisual.secondaryText)
                 }
 
                 ViewThatFits(in: .horizontal) {
@@ -163,9 +163,9 @@ struct MyListingsView: View {
         } label: {
             HStack(spacing: 14) {
                 Image(systemName: "chart.line.uptrend.xyaxis").font(.title2.bold()).foregroundStyle(.black).frame(width: 48, height: 48).background(JourneyVisual.lime).clipShape(RoundedRectangle(cornerRadius: 15))
-                VStack(alignment: .leading, spacing: 3) { HStack { Text("Marketplace Pro").font(.headline); Text("PLUS PRO").font(.caption2.bold()).foregroundStyle(.black).padding(.horizontal, 7).padding(.vertical, 3).background(JourneyVisual.lime).clipShape(Capsule()) }; Text("Перегляди · клієнти · просування · швидкі відповіді").font(.caption).foregroundStyle(.white.opacity(0.58)).multilineTextAlignment(.leading) }
+                VStack(alignment: .leading, spacing: 3) { HStack { Text("Marketplace Pro").font(.headline); Text("PLUS PRO").font(.caption2.bold()).foregroundStyle(.black).padding(.horizontal, 7).padding(.vertical, 3).background(JourneyVisual.lime).clipShape(Capsule()) }; Text("Перегляди · клієнти · просування · швидкі відповіді").font(.caption).foregroundStyle(JourneyVisual.secondaryText).multilineTextAlignment(.leading) }
                 Spacer(); Image(systemName: "arrow.right")
-            }.foregroundStyle(.white).padding(16).background(.black.opacity(0.48)).clipShape(RoundedRectangle(cornerRadius: 22)).overlay(RoundedRectangle(cornerRadius: 22).stroke(JourneyVisual.lime.opacity(0.3)))
+            }.foregroundStyle(JourneyVisual.primaryText).padding(16).background(Theme.Colors.card).clipShape(RoundedRectangle(cornerRadius: 22)).overlay(RoundedRectangle(cornerRadius: 22).stroke(JourneyVisual.lime.opacity(0.3)))
         }.buttonStyle(.plain)
     }
 
@@ -173,14 +173,14 @@ struct MyListingsView: View {
         let teamWorkspaces = workspaces.filter { $0.role != "owner" }
         if !teamWorkspaces.isEmpty {
             VStack(alignment: .leading, spacing: 10) {
-                Text("КОМАНДНІ ПРОСТОРИ").font(.caption.bold()).tracking(1.5).foregroundStyle(JourneyVisual.lime)
+                Text("КОМАНДНІ ПРОСТОРИ").font(.caption.bold()).tracking(1.5).foregroundStyle(Theme.Colors.textPrimary)
                 ForEach(teamWorkspaces) { workspace in
                     Button { selectedWorkspace = workspace } label: {
                         HStack(spacing: 13) {
                             Image(systemName: "person.3.fill").foregroundStyle(.black).frame(width: 46, height: 46).background(JourneyVisual.lime, in: RoundedRectangle(cornerRadius: 14))
-                            VStack(alignment: .leading, spacing: 3) { Text(workspace.displayName).font(.headline); Text("\(workspace.role.capitalized) · заявки та календар").font(.caption).foregroundStyle(.white.opacity(0.55)) }
+                            VStack(alignment: .leading, spacing: 3) { Text(workspace.displayName).font(.headline); Text("\(workspace.role.capitalized) · заявки та календар").font(.caption).foregroundStyle(JourneyVisual.secondaryText) }
                             Spacer(); Image(systemName: "arrow.right")
-                        }.foregroundStyle(.white).padding(15).background(.black.opacity(0.48), in: RoundedRectangle(cornerRadius: 20)).overlay(RoundedRectangle(cornerRadius: 20).stroke(JourneyVisual.lime.opacity(0.24)))
+                        }.foregroundStyle(JourneyVisual.primaryText).padding(15).background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 20)).overlay(RoundedRectangle(cornerRadius: 20).stroke(JourneyVisual.lime.opacity(0.24)))
                     }.buttonStyle(.plain)
                 }
             }
@@ -190,11 +190,11 @@ struct MyListingsView: View {
     private func summaryPill(title: String, value: Int, tint: Color) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text("\(value)")
-                .font(.system(size: 20, weight: .bold, design: .rounded))
-                .foregroundColor(.white)
+                .font(.system(size: 20, weight: .bold, design: .default))
+                .foregroundColor(JourneyVisual.primaryText)
             Text(title)
                 .font(.caption2.weight(.semibold))
-                .foregroundColor(.white.opacity(0.8))
+                .foregroundColor(JourneyVisual.secondaryText)
                 .lineLimit(1)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -204,7 +204,7 @@ struct MyListingsView: View {
                 .fill(tint.opacity(0.14))
                 .overlay(
                     RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .stroke(Color.white.opacity(0.16), lineWidth: 1)
+                        .stroke(JourneyVisual.softBorder, lineWidth: 1)
                 )
         )
     }
@@ -323,10 +323,10 @@ private struct MyListingCard: View {
             if let price = listing.priceDisplay, !price.isEmpty {
                 HStack(spacing: 6) {
                     Image(systemName: "banknote.fill")
-                        .foregroundColor(Theme.Colors.primary)
+                        .foregroundColor(JourneyVisual.accentStrong)
                     Text(price)
                         .font(.subheadline.weight(.semibold))
-                        .foregroundColor(Theme.Colors.primary)
+                        .foregroundColor(JourneyVisual.accentText)
                 }
             }
 

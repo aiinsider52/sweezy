@@ -269,7 +269,7 @@ struct HomeViewRedesigned: View {
             HStack(alignment: .center, spacing: Theme.Spacing.md) {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("home.brand.title".localized)
-                        .font(.system(size: 28, weight: .bold, design: .rounded))
+                        .font(.system(size: 28, weight: .bold, design: .default))
                         .foregroundColor(.white)
                     Text(greetingSubtitle)
                         .font(.system(size: 15, weight: .medium))
@@ -295,7 +295,7 @@ struct HomeViewRedesigned: View {
                             .stroke(Color.white.opacity(0.25), lineWidth: 1.5)
                             .frame(width: 44, height: 44)
                         Text(profileBadgeText)
-                            .font(.system(size: 17, weight: .bold, design: .rounded))
+                            .font(.system(size: 17, weight: .bold, design: .default))
                             .foregroundColor(.white)
                     }
                 }
@@ -1629,7 +1629,7 @@ private struct TelegramCommunityCard: View {
                     VStack(alignment: .leading, spacing: 6) {
                         HStack(spacing: 8) {
                             Text("Telegram")
-                                .font(.system(size: 18, weight: .bold, design: .rounded))
+                                .font(.system(size: 18, weight: .bold, design: .default))
                                 .foregroundColor(Theme.Colors.textPrimary)
                             
                             // Live badge
@@ -1740,7 +1740,7 @@ private struct CompactProgressPill: View {
             VStack(alignment: .leading, spacing: 2) {
                 // Always white: this pill lives on the ink header in both schemes
                 Text(value)
-                    .font(.system(size: 17, weight: .bold, design: .rounded))
+                    .font(.system(size: 17, weight: .bold, design: .default))
                     .foregroundColor(.white)
                     .monospacedDigit()
                 Text(label)
@@ -1943,7 +1943,7 @@ private struct HomeFocusProgressRing: View {
                 )
                 .rotationEffect(.degrees(-90))
             Text("\(percent)%")
-                .font(.system(size: 15, weight: .bold, design: .rounded))
+                .font(.system(size: 15, weight: .bold, design: .default))
                 .foregroundColor(labelColor)
         }
         .frame(width: 68, height: 68)
@@ -2071,7 +2071,7 @@ private struct FeaturedNewsInlineCard: View {
                 }
                 
                 Text(item.title)
-                    .font(.system(size: 18, weight: .bold, design: .rounded))
+                    .font(.system(size: 18, weight: .bold, design: .default))
                     .foregroundColor(Theme.Colors.textPrimary)
                     .multilineTextAlignment(.leading)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -2310,7 +2310,7 @@ private struct BentoLevelCard: View {
                         .frame(width: 48, height: 48)
                     
                     Text("\(level)")
-                        .font(.system(size: 20, weight: .bold, design: .rounded))
+                        .font(.system(size: 20, weight: .bold, design: .default))
                         .foregroundColor(Theme.Colors.textPrimary)
                 }
                 
@@ -2385,7 +2385,7 @@ private struct BentoMiniCard: View {
                     .foregroundColor(color)
                 
                 Text(value)
-                    .font(.system(size: 22, weight: .bold, design: .rounded))
+                    .font(.system(size: 22, weight: .bold, design: .default))
                     .foregroundColor(.white)
                 
                 Text(label)
@@ -2433,7 +2433,7 @@ private struct BentoMediumCard: View {
                 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(value)
-                        .font(.system(size: 26, weight: .bold, design: .rounded))
+                        .font(.system(size: 26, weight: .bold, design: .default))
                         .foregroundColor(Theme.Colors.textPrimary)
                     
                     Text(label)
@@ -2536,7 +2536,7 @@ private struct RecommendationCard: View {
                 VStack(alignment: .leading, spacing: 5) {
                     HStack(spacing: 8) {
                         Text(card.guide.title)
-                            .font(.system(size: 15, weight: .semibold, design: .rounded))
+                            .font(.system(size: 15, weight: .semibold, design: .default))
                             .foregroundColor(Theme.Colors.textPrimary)
                             .lineLimit(1)
                             .minimumScaleFactor(0.85)
@@ -3194,7 +3194,7 @@ private struct WeekDayCell: View {
                     }
                     
                     Text("\(day.dayNumber)")
-                        .font(.system(size: 15, weight: day.isToday ? .bold : .medium, design: .rounded))
+                        .font(.system(size: 15, weight: day.isToday ? .bold : .medium, design: .default))
                         .foregroundColor(day.isToday ? .white : Theme.Colors.textPrimary)
                 }
                 
@@ -3235,7 +3235,7 @@ private struct FocusSummaryItem: View {
             
             VStack(alignment: .leading, spacing: 1) {
                 Text(value)
-                    .font(.system(size: 16, weight: .bold, design: .rounded))
+                    .font(.system(size: 16, weight: .bold, design: .default))
                     .foregroundColor(Theme.Colors.textPrimary)
                 Text(label)
                     .font(.system(size: 10, weight: .medium))
@@ -3314,7 +3314,7 @@ private struct AmbientCard<Badge: View>: View {
                 
                 // Title
                 Text(title)
-                    .font(.system(size: 22, weight: .bold, design: .rounded))
+                    .font(.system(size: 22, weight: .bold, design: .default))
                     .foregroundColor(.white)
                     .shadow(color: Color.black.opacity(0.15), radius: 4, x: 0, y: 2)
                 
@@ -3478,7 +3478,7 @@ private struct PremiumNewsCard: View {
                     
                     // Title
                     Text(item.title)
-                        .font(.system(size: 17, weight: .bold, design: .rounded))
+                        .font(.system(size: 17, weight: .bold, design: .default))
                         .foregroundColor(.white)
                         .lineLimit(2)
                         .minimumScaleFactor(0.9)
@@ -3788,7 +3788,7 @@ private struct JourneyRoadmapView: View {
                                 
                                 // Step number badge
                                 Text("\(index + 1)")
-                                    .font(.system(size: 11, weight: .heavy, design: .rounded))
+                                    .font(.system(size: 11, weight: .heavy, design: .default))
                                     .foregroundColor(stage.accent)
                                     .padding(6)
                                     .background(Circle().fill(Color.white))
@@ -3807,7 +3807,7 @@ private struct JourneyRoadmapView: View {
                         // Label below node
                         VStack(spacing: 4) {
                             Text(stage.title)
-                                .font(.system(size: 13, weight: .semibold, design: .rounded))
+                                .font(.system(size: 13, weight: .semibold, design: .default))
                                 .foregroundColor(.white)
                             
                             Text("\(Int(stage.progress * 100))%")
@@ -4160,7 +4160,7 @@ private struct InsiderCard: View {
                 
                 // Title
                 Text(moment.title)
-                    .font(.system(size: 18, weight: .bold, design: .rounded))
+                    .font(.system(size: 18, weight: .bold, design: .default))
                     .foregroundColor(.white)
                     .shadow(color: .black.opacity(0.3), radius: 2, x: 0, y: 1)
                 
@@ -4353,7 +4353,7 @@ struct GamificationLevelCard: View {
                     
                     // Level number
                     Text("\(level)")
-                        .font(.system(size: 24, weight: .bold, design: .rounded))
+                        .font(.system(size: 24, weight: .bold, design: .default))
                         .foregroundColor(Theme.Colors.textPrimary)
                 }
                 
@@ -4373,7 +4373,7 @@ struct GamificationLevelCard: View {
                 // XP earned badge
                 VStack(alignment: .trailing, spacing: 2) {
                     Text("+\(lastAward)")
-                        .font(.system(size: 22, weight: .bold, design: .rounded))
+                        .font(.system(size: 22, weight: .bold, design: .default))
                         .foregroundColor(levelAccent)
                         .scaleEffect(showXPGain ? 1.15 : 1.0)
                     
@@ -4520,7 +4520,7 @@ private struct LevelStatItem: View {
                     .font(.system(size: 11, weight: .semibold))
                     .foregroundColor(color)
                 Text(value)
-                    .font(.system(size: 14, weight: .bold, design: .rounded))
+                    .font(.system(size: 14, weight: .bold, design: .default))
                     .foregroundColor(Theme.Colors.textPrimary)
                     .monospacedDigit()
             }

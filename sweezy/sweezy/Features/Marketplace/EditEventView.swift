@@ -97,7 +97,7 @@ struct EditEventView: View {
                             Task { await saveChanges() }
                         } label: {
                             HStack {
-                                if isSaving { ProgressView().tint(.white) }
+                                if isSaving { ProgressView().tint(JourneyVisual.primaryText) }
                                 Text("marketplace.save_changes".localized)
                                     .font(.headline)
                             }
@@ -136,7 +136,7 @@ struct EditEventView: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 8) {
                 Image(systemName: icon)
-                    .foregroundColor(Theme.Colors.primary)
+                    .foregroundColor(JourneyVisual.accentStrong)
                 Text(title)
                     .font(.headline)
                     .foregroundColor(Theme.Colors.textPrimary)

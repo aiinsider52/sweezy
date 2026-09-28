@@ -2,7 +2,7 @@
 //  JobsView.swift
 //  sweezy
 //
-//  Swiss job finder with modern dashboard design and AI Match
+//  Country-scoped job finder with modern dashboard design and AI Match
 //
 
 import SwiftUI
@@ -82,7 +82,12 @@ struct JobsView: View {
     @State private var aiExperienceLevel: String = ""
     
     private let perPage: Int = 20
-    private let cantons = ["", "AG", "AI", "AR", "BE", "BL", "BS", "FR", "GE", "GL", "GR", "JU", "LU", "NE", "NW", "OW", "SG", "SH", "SO", "SZ", "TG", "TI", "UR", "VD", "VS", "ZG", "ZH"]
+    private var activeCountry: ResidenceCountry {
+        ResidenceCountry(rawValue: APIClient.countryCode) ?? .switzerland
+    }
+    private var cantons: [String] {
+        [""] + CountryCatalog.subdivisions(for: activeCountry).map(\.code)
+    }
     private let quickTags = ["Java", "Driver", "Nurse", "QA", "Warehouse", "React", "Manager", "Sales"]
     private let defaults = UserDefaults.standard
     
@@ -258,24 +263,7 @@ struct JobsView: View {
 
     private var jobsContent: some View {
         ZStack(alignment: .top) {
-            Color.black.ignoresSafeArea()
-
-            Image("jobs-zurich-hero")
-                .resizable()
-                .scaledToFill()
-                .frame(maxWidth: .infinity)
-                .frame(height: 610)
-                .clipped()
-                .overlay(Color.black.opacity(0.24))
-                .overlay(
-                    LinearGradient(
-                        colors: [.clear, Color.black.opacity(0.22), .black],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                )
-                .ignoresSafeArea(edges: .top)
-                .accessibilityHidden(true)
+            JourneyVisual.pageBackground.ignoresSafeArea()
 
             ScrollView(.vertical, showsIndicators: false) {
                 LazyVStack(spacing: 0) {
@@ -435,45 +423,30 @@ struct JobsView: View {
     private var jobsAccessGate: some View {
         GeometryReader { proxy in
             ZStack(alignment: .top) {
-                Color.black.ignoresSafeArea()
-
-                Image("jobs-zurich-hero")
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: proxy.size.width, height: max(430, proxy.size.height * 0.54))
-                    .clipped()
-                    .overlay(Color.black.opacity(0.3))
-                    .overlay(
-                        LinearGradient(
-                            colors: [.black.opacity(0.08), .black.opacity(0.16), .black.opacity(0.92), .black],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
-                    )
-                    .ignoresSafeArea(edges: .top)
+                JourneyVisual.pageBackground.ignoresSafeArea()
 
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 0) {
                         jobsGateBackButton
 
-                        Spacer(minLength: max(150, proxy.size.height * 0.18))
+                        Spacer().frame(height: 20)
 
                         Text("РОБОТА У ШВЕЙЦАРІЇ")
-                            .font(.system(size: 12, weight: .black, design: .rounded))
+                            .font(.system(size: 12, weight: .black, design: .default))
                             .tracking(2.2)
-                            .foregroundColor(JourneyVisual.lime)
+                            .foregroundColor(Theme.Colors.textPrimary)
 
                         Text("Знайди роботу,\nяка тобі підходить")
-                            .font(.system(size: 39, weight: .bold, design: .rounded))
-                            .foregroundColor(.white)
+                            .font(.system(size: 30, weight: .bold, design: .default))
+                            .foregroundColor(JourneyVisual.primaryText)
                             .minimumScaleFactor(0.78)
-                            .lineSpacing(-2)
+                            .lineSpacing(1)
                             .fixedSize(horizontal: false, vertical: true)
                             .padding(.top, 11)
 
                         Text("AI Match, збережені вакансії та весь шлях заявки — в одному місці.")
                             .font(.system(size: 16, weight: .medium))
-                            .foregroundColor(.white.opacity(0.68))
+                            .foregroundColor(JourneyVisual.secondaryText)
                             .lineSpacing(4)
                             .fixedSize(horizontal: false, vertical: true)
                             .padding(.top, 13)
@@ -511,7 +484,7 @@ struct JobsView: View {
                                 Image(systemName: "arrow.right")
                                 Spacer(minLength: 0)
                             }
-                            .font(.system(size: 17, weight: .black, design: .rounded))
+                            .font(.system(size: 17, weight: .black, design: .default))
                             .foregroundColor(.black)
                             .frame(maxWidth: .infinity, minHeight: 58)
                             .background(JourneyVisual.lime)
@@ -525,8 +498,8 @@ struct JobsView: View {
                             openJobsAuthentication()
                         } label: {
                             Text("Переглянути можливості")
-                                .font(.system(size: 15, weight: .bold, design: .rounded))
-                                .foregroundColor(.white.opacity(0.88))
+                                .font(.system(size: 15, weight: .bold, design: .default))
+                                .foregroundColor(JourneyVisual.secondaryText)
                                 .frame(maxWidth: .infinity, minHeight: 44)
                         }
                         .buttonStyle(.plain)
@@ -548,12 +521,12 @@ struct JobsView: View {
         Button { dismiss() } label: {
             Image(systemName: "chevron.left")
                 .font(.system(size: 22, weight: .semibold))
-                .foregroundColor(.white)
+                .foregroundColor(JourneyVisual.primaryText)
                 .frame(width: 52, height: 52)
                 .background(.ultraThinMaterial.opacity(0.74))
-                .background(Color.black.opacity(0.34))
+                .background(Theme.Colors.card)
                 .clipShape(Circle())
-                .overlay(Circle().stroke(Color.white.opacity(0.24), lineWidth: 1))
+                .overlay(Circle().stroke(JourneyVisual.softBorder, lineWidth: 1))
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Назад")
@@ -563,7 +536,7 @@ struct JobsView: View {
         HStack(spacing: 15) {
             ZStack {
                 Circle()
-                    .stroke(Color.white.opacity(0.12), lineWidth: 6)
+                    .stroke(JourneyVisual.softBorder, lineWidth: 6)
                 Circle()
                     .trim(from: 0, to: max(0.03, Double(careerProfile.completion) / 100))
                     .stroke(
@@ -573,21 +546,21 @@ struct JobsView: View {
                     .rotationEffect(.degrees(-90))
                 Image(systemName: "person.crop.circle")
                     .font(.system(size: 19, weight: .semibold))
-                    .foregroundColor(.white)
+                    .foregroundColor(JourneyVisual.primaryText)
             }
             .frame(width: 60, height: 60)
 
             VStack(alignment: .leading, spacing: 5) {
                 Text("Кар’єрний профіль")
-                    .font(.system(size: 16, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
+                    .font(.system(size: 16, weight: .bold, design: .default))
+                    .foregroundColor(JourneyVisual.primaryText)
                 Text("\(careerProfile.completion)% готово")
-                    .font(.system(size: 15, weight: .bold, design: .rounded))
-                    .foregroundColor(JourneyVisual.lime)
+                    .font(.system(size: 15, weight: .bold, design: .default))
+                    .foregroundColor(Theme.Colors.textPrimary)
 
                 GeometryReader { geometry in
                     ZStack(alignment: .leading) {
-                        Capsule().fill(Color.white.opacity(0.1))
+                        Capsule().fill(JourneyVisual.softBorder)
                         Capsule()
                             .fill(JourneyVisual.lime)
                             .frame(width: geometry.size.width * max(0.03, Double(careerProfile.completion) / 100))
@@ -604,18 +577,18 @@ struct JobsView: View {
         HStack(spacing: 14) {
             Image(systemName: icon)
                 .font(.system(size: 17, weight: .bold))
-                .foregroundColor(JourneyVisual.lime)
+                .foregroundColor(Theme.Colors.textPrimary)
                 .frame(width: 48, height: 48)
-                .background(Color.white.opacity(0.055))
+                .background(Theme.Colors.card)
                 .clipShape(RoundedRectangle(cornerRadius: 15, style: .continuous))
 
             VStack(alignment: .leading, spacing: 3) {
                 Text(title)
-                    .font(.system(size: 15, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
+                    .font(.system(size: 15, weight: .bold, design: .default))
+                    .foregroundColor(JourneyVisual.primaryText)
                 Text(subtitle)
                     .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(.white.opacity(0.54))
+                    .foregroundColor(JourneyVisual.secondaryText)
                     .lineLimit(2)
             }
             Spacer()
@@ -635,31 +608,34 @@ struct JobsView: View {
             Button { dismiss() } label: {
                 Image(systemName: "chevron.left")
                     .font(.system(size: 22, weight: .semibold))
-                    .foregroundColor(.white)
+                    .foregroundColor(JourneyVisual.primaryText)
                     .frame(width: 52, height: 52)
                     .background(.ultraThinMaterial.opacity(0.78))
-                    .background(Color.black.opacity(0.34))
+                    .background(Theme.Colors.card)
                     .clipShape(Circle())
-                    .overlay(Circle().stroke(Color.white.opacity(0.24), lineWidth: 1))
+                    .overlay(Circle().stroke(JourneyVisual.softBorder, lineWidth: 1))
             }
             .buttonStyle(.plain)
             .accessibilityLabel("Назад")
 
-            Spacer(minLength: 12)
+            // Sweezy reviewing a CV next to the laptop: the whole hub in one picture.
+            StoryScene(name: "jobs", height: 190)
+                .padding(.top, 14)
+                .padding(.bottom, 18)
 
             Text("CAREER HUB · ШВЕЙЦАРІЯ")
                 .font(.system(size: 13, weight: .bold))
                 .tracking(2.2)
-                .foregroundColor(JourneyVisual.lime)
+                .foregroundColor(Theme.Colors.textPrimary)
 
             Text("Від сильного CV\nдо першого оферу")
-                .font(.system(size: 36, weight: .bold, design: .rounded))
-                .foregroundColor(.white)
+                .font(.system(size: 29, weight: .bold, design: .default))
+                .foregroundColor(JourneyVisual.primaryText)
                 .minimumScaleFactor(0.82)
-                .lineSpacing(-2)
+                .lineSpacing(1)
                 .padding(.top, 13)
         }
-        .frame(maxWidth: .infinity, minHeight: 225, alignment: .topLeading)
+        .frame(maxWidth: .infinity, alignment: .topLeading)
         .padding(.horizontal, 22)
         .padding(.top, 10)
         .padding(.bottom, 16)
@@ -673,18 +649,18 @@ struct JobsView: View {
 
                 VStack(alignment: .leading, spacing: 5) {
                     Text("КАР’ЄРНИЙ ПРОФІЛЬ")
-                        .font(.system(size: 10, weight: .black, design: .rounded))
+                        .font(.system(size: 10, weight: .black, design: .default))
                         .tracking(1.6)
-                        .foregroundColor(JourneyVisual.lime)
+                        .foregroundColor(Theme.Colors.textPrimary)
 
                     Text(careerProfile.desiredPosition.isEmpty ? "Твій наступний крок" : careerProfile.desiredPosition)
-                        .font(.system(size: 22, weight: .bold, design: .rounded))
-                        .foregroundColor(.white)
+                        .font(.system(size: 22, weight: .bold, design: .default))
+                        .foregroundColor(JourneyVisual.primaryText)
                         .lineLimit(2)
 
                     Text(careerProfile.hasResume ? "CV автоматично живить пошук і AI Match" : "Створи CV — решту Career Hub збере сам")
                         .font(.system(size: 12, weight: .medium))
-                        .foregroundColor(.white.opacity(0.58))
+                        .foregroundColor(JourneyVisual.secondaryText)
                         .fixedSize(horizontal: false, vertical: true)
                 }
 
@@ -695,11 +671,11 @@ struct JobsView: View {
                 } label: {
                     Image(systemName: careerProfile.hasResume ? "pencil" : "plus")
                         .font(.system(size: 15, weight: .bold))
-                        .foregroundColor(.white)
+                        .foregroundColor(JourneyVisual.primaryText)
                         .frame(width: 40, height: 40)
-                        .background(Color.white.opacity(0.08))
+                        .background(Theme.Colors.card)
                         .clipShape(Circle())
-                        .overlay(Circle().stroke(Color.white.opacity(0.16), lineWidth: 1))
+                        .overlay(Circle().stroke(JourneyVisual.softBorder, lineWidth: 1))
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel(careerProfile.hasResume ? "Редагувати CV" : "Створити CV")
@@ -735,23 +711,23 @@ struct JobsView: View {
 
                 VStack(alignment: .leading, spacing: 3) {
                     Text("НАСТУПНА ДІЯ")
-                        .font(.system(size: 9, weight: .black, design: .rounded))
+                        .font(.system(size: 9, weight: .black, design: .default))
                         .tracking(1.2)
-                        .foregroundColor(JourneyVisual.lime)
+                        .foregroundColor(Theme.Colors.textPrimary)
                     Text(careerNextTitle)
-                        .font(.system(size: 15, weight: .bold, design: .rounded))
-                        .foregroundColor(.white)
+                        .font(.system(size: 15, weight: .bold, design: .default))
+                        .foregroundColor(JourneyVisual.primaryText)
                     Text(careerNextSubtitle)
                         .font(.system(size: 11, weight: .medium))
-                        .foregroundColor(.white.opacity(0.56))
+                        .foregroundColor(JourneyVisual.secondaryText)
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 Spacer(minLength: 0)
             }
             .padding(13)
-            .background(Color.black.opacity(0.24))
+            .background(Theme.Colors.card)
             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.white.opacity(0.1)))
+            .overlay(RoundedRectangle(cornerRadius: 16).stroke(JourneyVisual.softBorder))
 
             Button {
                 handleCareerPrimaryAction()
@@ -763,7 +739,7 @@ struct JobsView: View {
                         Image(systemName: careerPrimaryIcon)
                     }
                     Text(careerPrimaryTitle)
-                        .font(.system(size: 16, weight: .bold, design: .rounded))
+                        .font(.system(size: 16, weight: .bold, design: .default))
                     Spacer()
                     Image(systemName: "arrow.right")
                         .font(.system(size: 16, weight: .black))
@@ -794,7 +770,7 @@ struct JobsView: View {
         .background(
             ZStack {
                 RoundedRectangle(cornerRadius: 28, style: .continuous)
-                    .fill(Color(red: 0.045, green: 0.062, blue: 0.051).opacity(0.97))
+                    .fill(Theme.Colors.card.opacity(0.97))
                 RadialGradient(
                     colors: [JourneyVisual.lime.opacity(0.14), .clear],
                     center: .topTrailing,
@@ -840,18 +816,18 @@ struct JobsView: View {
             VStack(spacing: 6) {
                 Image(systemName: icon)
                     .font(.system(size: 15, weight: .semibold))
-                    .foregroundColor(JourneyVisual.lime)
+                    .foregroundColor(Theme.Colors.textPrimary)
                 Text(title)
                     .font(.system(size: 9, weight: .bold))
-                    .foregroundColor(.white.opacity(0.68))
+                    .foregroundColor(JourneyVisual.secondaryText)
                     .lineLimit(1)
                     .minimumScaleFactor(0.72)
             }
             .frame(maxWidth: .infinity)
             .frame(height: 54)
-            .background(Color.white.opacity(0.055))
+            .background(Theme.Colors.card)
             .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.white.opacity(0.09)))
+            .overlay(RoundedRectangle(cornerRadius: 14).stroke(JourneyVisual.softBorder))
         }
         .buttonStyle(.plain)
     }
@@ -947,10 +923,10 @@ struct JobsView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("AI Match")
                             .font(.system(size: 19, weight: .bold))
-                            .foregroundColor(.white)
+                            .foregroundColor(JourneyVisual.primaryText)
                         Text(hasAIProfile ? "За досвідом і твоїми цілями" : "Профіль для точного підбору")
                             .font(.system(size: 13, weight: .medium))
-                            .foregroundColor(.white.opacity(0.62))
+                            .foregroundColor(JourneyVisual.secondaryText)
                             .lineLimit(2)
                     }
 
@@ -963,11 +939,11 @@ struct JobsView: View {
                     } label: {
                         Image(systemName: "gearshape")
                             .font(.system(size: 17, weight: .semibold))
-                            .foregroundColor(.white)
+                            .foregroundColor(JourneyVisual.primaryText)
                             .frame(width: 38, height: 38)
-                            .background(Color.white.opacity(0.08))
+                            .background(Theme.Colors.card)
                             .clipShape(Circle())
-                            .overlay(Circle().stroke(Color.white.opacity(0.18), lineWidth: 1))
+                            .overlay(Circle().stroke(JourneyVisual.softBorder, lineWidth: 1))
                     }
                     .buttonStyle(.plain)
                     .accessibilityLabel("Налаштувати AI профіль")
@@ -1006,9 +982,9 @@ struct JobsView: View {
     private var dashboardSection: some View {
         HStack(spacing: 11) {
             JobsInlineMetric(icon: "sparkles", value: newTodayCount, label: "нових")
-            Circle().fill(Color.white.opacity(0.34)).frame(width: 4, height: 4)
+            Circle().fill(JourneyVisual.softBorder).frame(width: 4, height: 4)
             JobsInlineMetric(icon: "heart", value: favoritesCount, label: "збережено")
-            Circle().fill(Color.white.opacity(0.34)).frame(width: 4, height: 4)
+            Circle().fill(JourneyVisual.softBorder).frame(width: 4, height: 4)
             Button {
                 showApplicationTracker = true
             } label: {
@@ -1023,9 +999,9 @@ struct JobsView: View {
             } label: {
                 Image(systemName: alerts.isEmpty ? "bell.badge" : "bell.badge.fill")
                     .font(.system(size: 15, weight: .bold))
-                    .foregroundColor(alerts.isEmpty ? .white.opacity(0.72) : JourneyVisual.lime)
+                    .foregroundColor(JourneyVisual.primaryText)
                     .frame(width: 34, height: 34)
-                    .background(Color.white.opacity(0.08))
+                    .background(Theme.Colors.card)
                     .clipShape(Circle())
             }
             .buttonStyle(.plain)
@@ -1041,9 +1017,9 @@ struct JobsView: View {
             } label: {
                 Image(systemName: "ellipsis")
                     .font(.system(size: 15, weight: .bold))
-                    .foregroundColor(.white.opacity(0.72))
+                    .foregroundColor(JourneyVisual.secondaryText)
                     .frame(width: 34, height: 34)
-                    .background(Color.white.opacity(0.08))
+                    .background(Theme.Colors.card)
                     .clipShape(Circle())
             }
         }
@@ -1057,14 +1033,14 @@ struct JobsView: View {
             HStack(spacing: 10) {
                 Image(systemName: "magnifyingglass")
                     .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(.white.opacity(0.9))
+                    .foregroundColor(JourneyVisual.secondaryText)
 
                 TextField(
                     "",
                     text: $keyword,
-                    prompt: Text("Посада, навичка або компанія").foregroundColor(.white.opacity(0.88))
+                    prompt: Text("Посада, навичка або компанія").foregroundColor(JourneyVisual.secondaryText)
                 )
-                    .foregroundColor(.white)
+                    .foregroundColor(JourneyVisual.primaryText)
                     .autocorrectionDisabled()
                     .textInputAutocapitalization(.never)
                     .submitLabel(.search)
@@ -1079,16 +1055,16 @@ struct JobsView: View {
                         showMatchResults = false
                     } label: {
                         Image(systemName: "xmark.circle.fill")
-                            .foregroundColor(.white.opacity(0.44))
+                            .foregroundColor(JourneyVisual.secondaryText)
                     }
                 }
             }
             .padding(.horizontal, 17)
             .frame(height: 54)
             .background(.ultraThinMaterial.opacity(0.7))
-            .background(Color.black.opacity(0.32))
+            .background(Theme.Colors.card)
             .clipShape(RoundedRectangle(cornerRadius: 19, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 19, style: .continuous).stroke(Color.white.opacity(0.18), lineWidth: 1))
+            .overlay(RoundedRectangle(cornerRadius: 19, style: .continuous).stroke(JourneyVisual.softBorder, lineWidth: 1))
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 10) {
@@ -1135,11 +1111,11 @@ struct JobsView: View {
                     } label: {
                         Image(systemName: "slider.horizontal.3")
                             .font(.system(size: 17, weight: .semibold))
-                            .foregroundColor(showAdvancedFilters ? .black : .white)
+                            .foregroundColor(showAdvancedFilters ? .black : JourneyVisual.primaryText)
                             .frame(width: 44, height: 44)
                             .background(showAdvancedFilters ? JourneyVisual.lime : Color.white.opacity(0.09))
                             .clipShape(RoundedRectangle(cornerRadius: 15, style: .continuous))
-                            .overlay(RoundedRectangle(cornerRadius: 15, style: .continuous).stroke(Color.white.opacity(0.18), lineWidth: 1))
+                            .overlay(RoundedRectangle(cornerRadius: 15, style: .continuous).stroke(JourneyVisual.softBorder, lineWidth: 1))
                     }
                     .buttonStyle(.plain)
                 }
@@ -1153,33 +1129,33 @@ struct JobsView: View {
             VStack(alignment: .leading, spacing: 15) {
                 Text("Швидкий пошук")
                     .font(.system(size: 14, weight: .bold))
-                    .foregroundColor(.white)
+                    .foregroundColor(JourneyVisual.primaryText)
                 quickTagsSection
 
                 if !topCities.isEmpty {
                     Divider().overlay(Color.white.opacity(0.12))
                     Text("Міста")
                         .font(.system(size: 14, weight: .bold))
-                        .foregroundColor(.white)
+                        .foregroundColor(JourneyVisual.primaryText)
                     cityChipsSection
                 }
 
                 Divider().overlay(Color.white.opacity(0.12))
                 Toggle("Без досвіду", isOn: $noExperienceOnly)
                     .tint(JourneyVisual.lime)
-                    .foregroundColor(.white)
+                    .foregroundColor(JourneyVisual.primaryText)
                 Toggle("Без обов'язкового диплома", isOn: $noDegreeOnly)
                     .tint(JourneyVisual.lime)
-                    .foregroundColor(.white)
+                    .foregroundColor(JourneyVisual.primaryText)
                 VStack(alignment: .leading, spacing: 8) {
-                    Text(minimumSalary == 0 ? "Будь-яка зарплата" : "Від CHF \(minimumSalary / 1000)k / рік")
+                    Text(minimumSalary == 0 ? "Будь-яка зарплата" : "Від \(activeCountry.currencyCode) \(minimumSalary / 1000)k / рік")
                         .font(.system(size: 13, weight: .semibold))
-                        .foregroundColor(.white.opacity(0.74))
+                        .foregroundColor(JourneyVisual.secondaryText)
                     Slider(value: Binding(
                         get: { Double(minimumSalary) },
                         set: { minimumSalary = Int($0 / 5_000) * 5_000 }
                     ), in: 0...200_000, step: 5_000)
-                    .tint(JourneyVisual.lime)
+                    .tint(JourneyVisual.accentText)
                 }
 
                 Button {
@@ -1202,7 +1178,7 @@ struct JobsView: View {
                     } label: {
                         Label("Скинути AI результати", systemImage: "xmark.circle.fill")
                             .font(.system(size: 13, weight: .semibold))
-                            .foregroundColor(JourneyVisual.lime)
+                            .foregroundColor(Theme.Colors.textPrimary)
                     }
                     .buttonStyle(.plain)
                 }
@@ -1256,13 +1232,13 @@ struct JobsView: View {
                 if showMatchResults {
                     HStack(spacing: 6) {
                         Image(systemName: "sparkles")
-                            .foregroundColor(JourneyVisual.lime)
+                            .foregroundColor(Theme.Colors.textPrimary)
                         Text("AI результати")
-                            .foregroundColor(.white)
+                            .foregroundColor(JourneyVisual.primaryText)
                     }
                 } else {
                     Text("Рекомендовано для тебе")
-                        .foregroundColor(.white)
+                        .foregroundColor(JourneyVisual.primaryText)
                 }
 
                 Spacer()
@@ -1270,10 +1246,10 @@ struct JobsView: View {
                 if !displayedItems.isEmpty {
                     Text("\(displayedItems.count) вакансій")
                         .font(.system(size: 13, weight: .semibold))
-                        .foregroundColor(JourneyVisual.lime)
+                        .foregroundColor(Theme.Colors.textPrimary)
                 }
             }
-            .font(.system(size: 21, weight: .bold, design: .rounded))
+            .font(.system(size: 21, weight: .bold, design: .default))
             .padding(.top, 6)
             
             if isLoading || isAIMatching {
@@ -1317,15 +1293,15 @@ struct JobsView: View {
                     } label: {
                         HStack {
                             if isLoading {
-                                ProgressView().tint(.white)
+                                ProgressView().tint(JourneyVisual.primaryText)
                             } else {
                                 Text("Завантажити ще")
                             }
                         }
-                        .foregroundColor(.white)
+                        .foregroundColor(JourneyVisual.primaryText)
                         .padding(.vertical, 12)
                         .frame(maxWidth: .infinity)
-                        .background(Color.white.opacity(0.1))
+                        .background(Theme.Colors.card)
                         .cornerRadius(12)
                     }
                 }
@@ -1802,18 +1778,18 @@ private struct CareerReadinessRing: View {
     var body: some View {
         ZStack {
             Circle()
-                .stroke(Color.white.opacity(0.1), lineWidth: 6)
+                .stroke(JourneyVisual.softBorder, lineWidth: 6)
             Circle()
                 .trim(from: 0, to: CGFloat(max(0, min(progress, 100))) / 100)
                 .stroke(JourneyVisual.lime, style: StrokeStyle(lineWidth: 6, lineCap: .round))
                 .rotationEffect(.degrees(-90))
             VStack(spacing: -1) {
                 Text("\(progress)%")
-                    .font(.system(size: 17, weight: .black, design: .rounded))
-                    .foregroundColor(.white)
+                    .font(.system(size: 17, weight: .black, design: .default))
+                    .foregroundColor(JourneyVisual.primaryText)
                 Text("CV")
-                    .font(.system(size: 8, weight: .bold, design: .rounded))
-                    .foregroundColor(.white.opacity(0.48))
+                    .font(.system(size: 8, weight: .bold, design: .default))
+                    .foregroundColor(JourneyVisual.secondaryText)
             }
         }
         .frame(width: 66, height: 66)
@@ -1832,23 +1808,23 @@ private struct CareerHubMetric: View {
             HStack(spacing: 5) {
                 Image(systemName: icon)
                     .font(.system(size: 10, weight: .bold))
-                    .foregroundColor(JourneyVisual.lime)
+                    .foregroundColor(Theme.Colors.textPrimary)
                 Text(value)
-                    .font(.system(size: 17, weight: .black, design: .rounded))
-                    .foregroundColor(.white)
+                    .font(.system(size: 17, weight: .black, design: .default))
+                    .foregroundColor(JourneyVisual.primaryText)
             }
             Text(label)
                 .font(.system(size: 8, weight: .bold))
-                .foregroundColor(.white.opacity(0.48))
+                .foregroundColor(JourneyVisual.secondaryText)
                 .lineLimit(1)
                 .minimumScaleFactor(0.68)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 10)
         .frame(height: 58)
-        .background(Color.white.opacity(0.05))
+        .background(Theme.Colors.card)
         .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.white.opacity(0.08)))
+        .overlay(RoundedRectangle(cornerRadius: 14).stroke(JourneyVisual.softBorder))
         .accessibilityElement(children: .combine)
     }
 }
@@ -1885,7 +1861,7 @@ private struct CareerRouteNode: View {
                 .overlay(Circle().stroke(state == .current ? JourneyVisual.lime.opacity(0.62) : Color.clear, lineWidth: 1))
             Text(title)
                 .font(.system(size: 8, weight: .bold))
-                .foregroundColor(state == .locked ? .white.opacity(0.32) : .white.opacity(0.72))
+                .foregroundColor(state == .locked ? JourneyVisual.secondaryText : JourneyVisual.primaryText)
                 .lineLimit(1)
         }
         .frame(width: 48)
@@ -2057,7 +2033,7 @@ private struct AIMatchProfileSheet: View {
                             Text("Знайти вакансії")
                                 .fontWeight(.semibold)
                         }
-                        .foregroundColor(.white)
+                        .foregroundColor(JourneyVisual.primaryText)
                         .frame(maxWidth: .infinity)
                         .padding()
                         .background(
@@ -2153,9 +2129,9 @@ private struct JobsOnboardingSheet: View {
                     } label: {
                         Image(systemName: "xmark")
                             .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(.white.opacity(0.6))
+                            .foregroundColor(JourneyVisual.secondaryText)
                             .padding(12)
-                            .background(Color.white.opacity(0.1))
+                            .background(Theme.Colors.card)
                             .clipShape(Circle())
                     }
                 }
@@ -2217,7 +2193,7 @@ private struct JobsOnboardingSheet: View {
                         } label: {
                             Text("Пропустити")
                                 .font(.system(size: 15, weight: .medium))
-                                .foregroundColor(.white.opacity(0.6))
+                                .foregroundColor(JourneyVisual.secondaryText)
                         }
                         .padding(.top, 4)
                     } else {
@@ -2234,14 +2210,14 @@ private struct JobsOnboardingSheet: View {
                                 Image(systemName: "arrow.right")
                                     .font(.system(size: 16, weight: .semibold))
                             }
-                            .foregroundColor(.white)
+                            .foregroundColor(JourneyVisual.primaryText)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 16)
-                            .background(Color.white.opacity(0.15))
+                            .background(Theme.Colors.card)
                             .cornerRadius(16)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 16)
-                                    .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                                    .stroke(JourneyVisual.softBorder, lineWidth: 1)
                             )
                         }
                         
@@ -2250,7 +2226,7 @@ private struct JobsOnboardingSheet: View {
                         } label: {
                             Text("Пропустити")
                                 .font(.system(size: 15, weight: .medium))
-                                .foregroundColor(.white.opacity(0.5))
+                                .foregroundColor(JourneyVisual.secondaryText)
                         }
                         .padding(.top, 4)
                     }
@@ -2310,7 +2286,7 @@ private struct OnboardingSlideView: View {
                     
                     Image(systemName: slide.icon)
                         .font(.system(size: 44, weight: .semibold))
-                        .foregroundColor(.white)
+                        .foregroundColor(JourneyVisual.primaryText)
                 }
                 .shadow(color: slide.color1.opacity(0.5), radius: 20, x: 0, y: 10)
             }
@@ -2320,7 +2296,7 @@ private struct OnboardingSlideView: View {
             // Title
             Text(slide.title)
                 .font(.system(size: 28, weight: .bold))
-                .foregroundColor(.white)
+                .foregroundColor(JourneyVisual.primaryText)
                 .multilineTextAlignment(.center)
                 .offset(y: appeared ? 0 : 20)
                 .opacity(appeared ? 1 : 0)
@@ -2328,7 +2304,7 @@ private struct OnboardingSlideView: View {
             // Subtitle
             Text(slide.subtitle)
                 .font(.system(size: 16))
-                .foregroundColor(.white.opacity(0.7))
+                .foregroundColor(JourneyVisual.secondaryText)
                 .multilineTextAlignment(.center)
                 .offset(y: appeared ? 0 : 20)
                 .opacity(appeared ? 1 : 0)
@@ -2349,13 +2325,13 @@ private struct OnboardingSlideView: View {
                         
                         Text(feature)
                             .font(.system(size: 15, weight: .medium))
-                            .foregroundColor(.white.opacity(0.9))
+                            .foregroundColor(JourneyVisual.secondaryText)
                         
                         Spacer()
                     }
                     .padding(.horizontal, 20)
                     .padding(.vertical, 12)
-                    .background(Color.white.opacity(0.08))
+                    .background(Theme.Colors.card)
                     .cornerRadius(12)
                 }
             }
@@ -2380,14 +2356,14 @@ private struct AIProfileProgressRing: View {
     var body: some View {
         ZStack {
             Circle()
-                .stroke(Color.white.opacity(0.14), lineWidth: 5)
+                .stroke(JourneyVisual.softBorder, lineWidth: 5)
             Circle()
                 .trim(from: 0, to: max(progress, 0.035))
                 .stroke(JourneyVisual.lime, style: StrokeStyle(lineWidth: 5, lineCap: .round))
                 .rotationEffect(.degrees(-90))
             Text("\(percentage)%")
-                .font(.system(size: 13, weight: .bold, design: .rounded))
-                .foregroundColor(.white)
+                .font(.system(size: 13, weight: .bold, design: .default))
+                .foregroundColor(JourneyVisual.primaryText)
         }
         .frame(width: 46, height: 46)
         .accessibilityElement(children: .ignore)
@@ -2404,10 +2380,10 @@ private struct JobsInlineMetric: View {
         HStack(spacing: 6) {
             Image(systemName: icon)
                 .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(JourneyVisual.lime)
+                .foregroundColor(Theme.Colors.textPrimary)
             Text("\(value) \(label)")
                 .font(.system(size: 13, weight: .medium))
-                .foregroundColor(.white.opacity(0.68))
+                .foregroundColor(JourneyVisual.secondaryText)
         }
         .lineLimit(1)
         .minimumScaleFactor(0.76)
@@ -2432,7 +2408,7 @@ private struct JobsMenuPill: View {
                     .font(.system(size: 11, weight: .bold))
             }
         }
-        .foregroundColor(isActive ? .black : .white.opacity(0.88))
+        .foregroundColor(isActive ? .black : JourneyVisual.primaryText)
         .padding(.horizontal, 15)
         .frame(height: 44)
         .background(isActive ? JourneyVisual.lime : Color.white.opacity(0.09))
@@ -2459,18 +2435,18 @@ private struct DashboardMetricCard: View {
                     .font(.system(size: 14, weight: .semibold))
                 
                 Text(value)
-                    .font(.system(size: 22, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
+                    .font(.system(size: 22, weight: .bold, design: .default))
+                    .foregroundColor(JourneyVisual.primaryText)
             }
             
             Text(label)
                 .font(.system(size: 11))
-                .foregroundColor(.white.opacity(0.5))
+                .foregroundColor(JourneyVisual.secondaryText)
                 .lineLimit(1)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 16)
-        .background(Color.white.opacity(0.06))
+        .background(Theme.Colors.card)
         .cornerRadius(16)
         .overlay(
             RoundedRectangle(cornerRadius: 16)
@@ -2496,7 +2472,7 @@ private struct FilterChip: View {
                 Text(text)
                     .font(.system(size: 13, weight: .medium))
             }
-            .foregroundColor(isActive ? .black : .white.opacity(0.8))
+            .foregroundColor(isActive ? .black : JourneyVisual.primaryText)
             .padding(.horizontal, 14)
             .padding(.vertical, 10)
             .background(isActive ? Theme.Colors.primary : Color.white.opacity(0.1))
@@ -2561,7 +2537,7 @@ private struct JobCard: View {
                 RoundedRectangle(cornerRadius: 17, style: .continuous)
                     .fill(Color.white)
                 Text(companyInitial)
-                    .font(.system(size: 25, weight: .black, design: .rounded))
+                    .font(.system(size: 25, weight: .black, design: .default))
                     .foregroundStyle(
                         LinearGradient(
                             colors: [JourneyVisual.lime, Color(red: 0.15, green: 0.36, blue: 0.25)],
@@ -2576,8 +2552,8 @@ private struct JobCard: View {
                 HStack(alignment: .top, spacing: 8) {
                     VStack(alignment: .leading, spacing: 4) {
                         Text(job.title)
-                            .font(.system(size: 18, weight: .bold, design: .rounded))
-                            .foregroundColor(.white)
+                            .font(.system(size: 18, weight: .bold, design: .default))
+                            .foregroundColor(JourneyVisual.primaryText)
                             .lineLimit(2)
                             .multilineTextAlignment(.leading)
 
@@ -2586,11 +2562,11 @@ private struct JobCard: View {
                             if isNew {
                                 Image(systemName: "sparkles")
                                     .font(.system(size: 10, weight: .bold))
-                                    .foregroundColor(JourneyVisual.lime)
+                                    .foregroundColor(Theme.Colors.textPrimary)
                             }
                         }
                         .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(.white.opacity(0.78))
+                        .foregroundColor(JourneyVisual.secondaryText)
                     }
 
                     Spacer(minLength: 4)
@@ -2598,11 +2574,11 @@ private struct JobCard: View {
                     Button(action: onSave) {
                         Image(systemName: isSaved ? "bookmark.fill" : "bookmark")
                             .font(.system(size: 17, weight: .semibold))
-                            .foregroundColor(isSaved ? JourneyVisual.lime : .white)
+                            .foregroundColor(isSaved ? Theme.Colors.textPrimary : JourneyVisual.secondaryText)
                             .frame(width: 42, height: 42)
-                            .background(Color.white.opacity(0.07))
+                            .background(Theme.Colors.card)
                             .clipShape(Circle())
-                            .overlay(Circle().stroke(Color.white.opacity(0.16), lineWidth: 1))
+                            .overlay(Circle().stroke(JourneyVisual.softBorder, lineWidth: 1))
                     }
                     .buttonStyle(.plain)
                     .accessibilityLabel(isSaved ? "Видалити зі збережених" : "Зберегти вакансію")
@@ -2610,7 +2586,7 @@ private struct JobCard: View {
 
                 HStack(spacing: 7) {
                     Image(systemName: "mappin")
-                    Text(job.location ?? "Швейцарія")
+                    Text(job.location ?? (ResidenceCountry(rawValue: APIClient.countryCode)?.name ?? "Швейцарія"))
                     if let employment = job.employment_type, !employment.isEmpty {
                         Text("·")
                         Text(employment)
@@ -2619,25 +2595,25 @@ private struct JobCard: View {
                     }
                 }
                 .font(.system(size: 13, weight: .medium))
-                .foregroundColor(.white.opacity(0.52))
+                .foregroundColor(JourneyVisual.secondaryText)
                 .lineLimit(1)
 
                 HStack(spacing: 10) {
                     if let salary = job.salary, !salary.isEmpty {
                         Text(salary)
-                            .font(.system(size: 16, weight: .bold, design: .rounded))
-                            .foregroundColor(.white)
+                            .font(.system(size: 16, weight: .bold, design: .default))
+                            .foregroundColor(JourneyVisual.primaryText)
                             .lineLimit(1)
                     } else {
                         Text(job.source.uppercased())
                             .font(.system(size: 12, weight: .bold))
-                            .foregroundColor(.white.opacity(0.58))
+                            .foregroundColor(JourneyVisual.secondaryText)
                     }
 
                     if let score = matchScore, score > 0 {
                         Text("\(score)% збіг")
                             .font(.system(size: 12, weight: .bold))
-                            .foregroundColor(JourneyVisual.lime)
+                            .foregroundColor(Theme.Colors.textPrimary)
                             .padding(.horizontal, 10)
                             .padding(.vertical, 6)
                             .background(JourneyVisual.lime.opacity(0.11))
@@ -2650,7 +2626,7 @@ private struct JobCard: View {
                     Button(action: onShare) {
                         Image(systemName: "square.and.arrow.up")
                             .font(.system(size: 15, weight: .semibold))
-                            .foregroundColor(.white.opacity(0.58))
+                            .foregroundColor(JourneyVisual.secondaryText)
                             .frame(width: 34, height: 34)
                     }
                     .buttonStyle(.plain)
@@ -2658,13 +2634,13 @@ private struct JobCard: View {
 
                     Image(systemName: "chevron.right")
                         .font(.system(size: 15, weight: .bold))
-                        .foregroundColor(.white.opacity(0.62))
+                        .foregroundColor(JourneyVisual.secondaryText)
                 }
             }
         }
         .padding(16)
         .background(.ultraThinMaterial.opacity(0.72))
-        .background(Color.black.opacity(0.38))
+        .background(Theme.Colors.card)
         .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 24, style: .continuous)
@@ -2725,27 +2701,27 @@ private struct JobCardSkeleton: View {
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
             RoundedRectangle(cornerRadius: 12)
-                .fill(Color.white.opacity(0.1))
+                .fill(JourneyVisual.softBorder)
                 .frame(width: 48, height: 48)
             
             VStack(alignment: .leading, spacing: 8) {
                 RoundedRectangle(cornerRadius: 4)
-                    .fill(Color.white.opacity(0.1))
+                    .fill(JourneyVisual.softBorder)
                     .frame(height: 16)
                 
                 RoundedRectangle(cornerRadius: 4)
-                    .fill(Color.white.opacity(0.08))
+                    .fill(JourneyVisual.softBorder)
                     .frame(width: 120, height: 12)
                 
                 RoundedRectangle(cornerRadius: 4)
-                    .fill(Color.white.opacity(0.06))
+                    .fill(JourneyVisual.softBorder)
                     .frame(width: 80, height: 10)
             }
             
             Spacer()
         }
         .padding(16)
-        .background(Color.white.opacity(0.04))
+        .background(Theme.Colors.card)
         .cornerRadius(20)
         .overlay(
             LinearGradient(
@@ -2773,7 +2749,7 @@ private struct JobsEmptyState: View {
         HStack(spacing: 14) {
             Image(systemName: isAIMatch ? "wand.and.stars" : (hasSearched ? "magnifyingglass" : "briefcase.fill"))
                 .font(.system(size: 24, weight: .semibold))
-                .foregroundColor(JourneyVisual.lime)
+                .foregroundColor(Theme.Colors.textPrimary)
                 .frame(width: 48, height: 48)
                 .background(JourneyVisual.lime.opacity(0.1))
                 .clipShape(RoundedRectangle(cornerRadius: 15, style: .continuous))
@@ -2781,11 +2757,11 @@ private struct JobsEmptyState: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(isAIMatch ? "Немає відповідних вакансій" : (hasSearched ? "Нічого не знайдено" : "Почніть пошук"))
                     .font(.system(size: 16, weight: .bold))
-                    .foregroundColor(.white)
+                    .foregroundColor(JourneyVisual.primaryText)
 
                 Text(isAIMatch ? "Зміни параметри AI Match" : (hasSearched ? "Зміни фільтри або ключові слова" : "Введи посаду або навичку"))
                     .font(.system(size: 13, weight: .medium))
-                    .foregroundColor(.white.opacity(0.56))
+                    .foregroundColor(JourneyVisual.secondaryText)
                     .lineLimit(2)
             }
 
@@ -2793,9 +2769,9 @@ private struct JobsEmptyState: View {
         }
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.white.opacity(0.055))
+        .background(Theme.Colors.card)
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(Color.white.opacity(0.12), lineWidth: 1))
+        .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(JourneyVisual.softBorder, lineWidth: 1))
     }
 }
 
@@ -2811,17 +2787,17 @@ private struct JobsRecoveryState: View {
             HStack(alignment: .top, spacing: 14) {
                 Image(systemName: icon)
                     .font(.system(size: 23, weight: .semibold))
-                    .foregroundColor(JourneyVisual.lime)
+                    .foregroundColor(Theme.Colors.textPrimary)
                     .frame(width: 48, height: 48)
                     .background(JourneyVisual.lime.opacity(0.1))
                     .clipShape(RoundedRectangle(cornerRadius: 15, style: .continuous))
                 VStack(alignment: .leading, spacing: 5) {
                     Text(title)
                         .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(.white)
+                        .foregroundColor(JourneyVisual.primaryText)
                     Text(message)
                         .font(.system(size: 13, weight: .medium))
-                        .foregroundColor(.white.opacity(0.58))
+                        .foregroundColor(JourneyVisual.secondaryText)
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }
@@ -2837,9 +2813,9 @@ private struct JobsRecoveryState: View {
             .buttonStyle(.plain)
         }
         .padding(16)
-        .background(Color.white.opacity(0.055))
+        .background(Theme.Colors.card)
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(Color.white.opacity(0.12), lineWidth: 1))
+        .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(JourneyVisual.softBorder, lineWidth: 1))
     }
 }
 
@@ -2906,7 +2882,7 @@ private struct JobDetailSheet: View {
 
                     if job.recognition_required == true {
                         Label(
-                            "Для цієї професії може знадобитися офіційне визнання диплома у Швейцарії.",
+                            "Для цієї професії може знадобитися офіційне визнання диплома у \(ResidenceCountry(rawValue: APIClient.countryCode)?.name ?? "Швейцарія").",
                             systemImage: "checkmark.seal"
                         )
                         .font(.subheadline.weight(.semibold))
@@ -2975,14 +2951,14 @@ private struct JobDetailSheet: View {
                                 Label("Позначити як відправлено", systemImage: "paperplane.fill")
                                     .frame(maxWidth: .infinity)
                                     .padding()
-                                    .background(Color.white.opacity(0.1))
+                                    .background(Theme.Colors.card)
                                     .foregroundColor(.primary)
                                     .cornerRadius(12)
                             }
                         } else {
                             Label("Відгук додано до трекера", systemImage: "checkmark.circle.fill")
                                 .font(.subheadline.weight(.semibold))
-                                .foregroundColor(Theme.Colors.primary)
+                                .foregroundColor(JourneyVisual.accentText)
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 10)
                         }
@@ -2994,7 +2970,7 @@ private struct JobDetailSheet: View {
                                 Label("Написати роботодавцю", systemImage: "bubble.left.and.bubble.right.fill")
                                     .frame(maxWidth: .infinity)
                                     .padding()
-                                    .background(Color.white.opacity(0.1))
+                                    .background(Theme.Colors.card)
                                     .foregroundColor(.primary)
                                     .cornerRadius(12)
                             }
@@ -3010,7 +2986,7 @@ private struct JobDetailSheet: View {
                             .frame(maxWidth: .infinity)
                             .padding()
                             .background(Theme.Colors.accent)
-                            .foregroundColor(.white)
+                            .foregroundColor(JourneyVisual.primaryText)
                             .cornerRadius(12)
                         }
                     }
@@ -3091,14 +3067,14 @@ private struct JobDetailSheet: View {
         .foregroundColor(.primary)
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.white.opacity(0.07))
+        .background(Theme.Colors.card)
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 
     private var salaryText: String? {
         if let salary = job.salary, !salary.isEmpty { return salary }
         guard job.salary_min != nil || job.salary_max != nil else { return nil }
-        let currency = job.salary_currency ?? "CHF"
+        let currency = job.salary_currency ?? (APIClient.countryCode == "CH" ? "CHF" : "EUR")
         let period = ["year": "/рік", "month": "/місяць", "hour": "/год"].first { job.salary_period?.lowercased().contains($0.key) == true }?.value ?? ""
         if let minimum = job.salary_min, let maximum = job.salary_max {
             return "\(currency) \(minimum.formatted())–\(maximum.formatted())\(period) brutto"
@@ -3189,11 +3165,11 @@ private struct JobApplicationTrackerSheet: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 18) {
                     Text("Твій шлях до оферу")
-                        .font(.system(size: 30, weight: .bold, design: .rounded))
-                        .foregroundColor(.white)
+                        .font(.system(size: 30, weight: .bold, design: .default))
+                        .foregroundColor(JourneyVisual.primaryText)
                     Text("Оновлюй статус після кожного кроку. Уся історія синхронізується між пристроями.")
                         .font(.subheadline)
-                        .foregroundColor(.white.opacity(0.62))
+                        .foregroundColor(JourneyVisual.secondaryText)
 
                     if applications.isEmpty {
                         JobsRecoveryState(
@@ -3210,7 +3186,7 @@ private struct JobApplicationTrackerSheet: View {
                                     HStack {
                                         Text(title(stage))
                                             .font(.headline)
-                                            .foregroundColor(.white)
+                                            .foregroundColor(JourneyVisual.primaryText)
                                         Text("\(rows.count)")
                                             .font(.caption.bold())
                                             .foregroundColor(.black)
@@ -3225,16 +3201,16 @@ private struct JobApplicationTrackerSheet: View {
                                                 VStack(alignment: .leading, spacing: 4) {
                                                     Text(application.job_title)
                                                         .font(.system(size: 16, weight: .bold))
-                                                        .foregroundColor(.white)
+                                                        .foregroundColor(JourneyVisual.primaryText)
                                                     Text([application.company, application.location].compactMap { $0 }.joined(separator: " · "))
                                                         .font(.caption)
-                                                        .foregroundColor(.white.opacity(0.55))
+                                                        .foregroundColor(JourneyVisual.secondaryText)
                                                 }
                                                 Spacer()
                                                 if let url = URL(string: application.job_url) {
                                                     Link(destination: url) {
                                                         Image(systemName: "arrow.up.right")
-                                                            .foregroundColor(JourneyVisual.lime)
+                                                            .foregroundColor(Theme.Colors.textPrimary)
                                                     }
                                                 }
                                             }
@@ -3255,9 +3231,9 @@ private struct JobApplicationTrackerSheet: View {
                                             }
                                         }
                                         .padding(14)
-                                        .background(Color.white.opacity(0.065))
+                                        .background(Theme.Colors.card)
                                         .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-                                        .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(Color.white.opacity(0.12)))
+                                        .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(JourneyVisual.softBorder))
                                     }
                                 }
                             }
@@ -3267,7 +3243,7 @@ private struct JobApplicationTrackerSheet: View {
                 .padding(20)
                 .padding(.bottom, 30)
             }
-            .background(Color.black.ignoresSafeArea())
+            .background(JourneyVisual.pageBackground.ignoresSafeArea())
             .navigationTitle("Відгуки")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Готово") { dismiss() } } }
@@ -3303,11 +3279,11 @@ private struct JobAlertsSheet: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 18) {
                     Text("Не пропусти свій шанс")
-                        .font(.system(size: 29, weight: .bold, design: .rounded))
-                        .foregroundColor(.white)
+                        .font(.system(size: 29, weight: .bold, design: .default))
+                        .foregroundColor(JourneyVisual.primaryText)
                     Text("Sweezy перевіряє нові збіги після синхронізації каталогу та надсилає push лише про релевантні вакансії.")
                         .font(.subheadline)
-                        .foregroundColor(.white.opacity(0.62))
+                        .foregroundColor(JourneyVisual.secondaryText)
 
                     VStack(spacing: 12) {
                         JobsDarkField(title: "Назва", text: $name, icon: "bell")
@@ -3327,7 +3303,7 @@ private struct JobAlertsSheet: View {
                         .opacity(keywords.trimmingCharacters(in: .whitespacesAndNewlines).count < 2 ? 0.45 : 1)
                     }
                     .padding(15)
-                    .background(Color.white.opacity(0.055))
+                    .background(Theme.Colors.card)
                     .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
 
                     ForEach(alerts) { alert in
@@ -3338,9 +3314,9 @@ private struct JobAlertsSheet: View {
                                 .background(JourneyVisual.lime)
                                 .clipShape(RoundedRectangle(cornerRadius: 13, style: .continuous))
                             VStack(alignment: .leading, spacing: 3) {
-                                Text(alert.name).font(.headline).foregroundColor(.white)
+                                Text(alert.name).font(.headline).foregroundColor(JourneyVisual.primaryText)
                                 Text([alert.keywords, alert.canton].compactMap { $0 }.joined(separator: " · "))
-                                    .font(.caption).foregroundColor(.white.opacity(0.55))
+                                    .font(.caption).foregroundColor(JourneyVisual.secondaryText)
                             }
                             Spacer()
                             Button(role: .destructive) { Task { await onDelete(alert.id) } } label: {
@@ -3348,13 +3324,13 @@ private struct JobAlertsSheet: View {
                             }
                         }
                         .padding(14)
-                        .background(Color.white.opacity(0.055))
+                        .background(Theme.Colors.card)
                         .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
                     }
                 }
                 .padding(20)
             }
-            .background(Color.black.ignoresSafeArea())
+            .background(JourneyVisual.pageBackground.ignoresSafeArea())
             .navigationTitle("Job Alerts")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Готово") { dismiss() } } }
@@ -3396,7 +3372,7 @@ private struct JobMapSheet: View {
                 if mappedJobs.isEmpty {
                     Text("У цих результатах немає координат. Зміни пошук або кантон.")
                         .font(.subheadline.weight(.semibold))
-                        .foregroundColor(.white)
+                        .foregroundColor(JourneyVisual.primaryText)
                         .padding(16)
                         .background(.ultraThinMaterial)
                         .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
@@ -3415,7 +3391,7 @@ private struct JobEmployerHubSheet: View {
     @Environment(\.dismiss) private var dismiss
     @State private var company = ""
     @State private var website = ""
-    @State private var canton = "ZH"
+    @State private var canton = ""
     @State private var contactName = ""
     @State private var contactEmail = ""
     @State private var companyDescription = ""
@@ -3432,13 +3408,17 @@ private struct JobEmployerHubSheet: View {
     @State private var isLoading = false
     @State private var message: String?
 
+    private var activeCountry: ResidenceCountry {
+        ResidenceCountry(rawValue: APIClient.countryCode) ?? .switzerland
+    }
+
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 18) {
                     Text("Знайди людей, які підходять")
-                        .font(.system(size: 30, weight: .bold, design: .rounded))
-                        .foregroundColor(.white)
+                        .font(.system(size: 30, weight: .bold, design: .default))
+                        .foregroundColor(JourneyVisual.primaryText)
                     Label(isVerified ? "Перевірена компанія" : "Профіль очікує перевірки", systemImage: isVerified ? "checkmark.seal.fill" : "clock.badge")
                         .font(.subheadline.weight(.semibold))
                         .foregroundColor(isVerified ? JourneyVisual.lime : .orange)
@@ -3452,7 +3432,7 @@ private struct JobEmployerHubSheet: View {
                             .keyboardType(.emailAddress)
                         JobsDarkField(title: "Website (необов'язково)", text: $website, icon: "globe")
                             .textInputAutocapitalization(.never)
-                        Picker("Кантон", selection: $canton) {
+                        Picker(activeCountry.subdivisionTitle, selection: $canton) {
                             ForEach(cantons.filter { !$0.isEmpty }, id: \.self) { Text($0).tag($0) }
                         }
                         .tint(JourneyVisual.lime)
@@ -3467,9 +3447,9 @@ private struct JobEmployerHubSheet: View {
                         JobsDarkField(title: "Навички через кому", text: $skills, icon: "checkmark.circle")
                         JobsDarkField(title: "Мови через кому", text: $languages, icon: "character.book.closed")
                         HStack {
-                            JobsDarkField(title: "CHF від", text: $salaryMin, icon: "francsign")
+                            JobsDarkField(title: "\(activeCountry.currencyCode) від", text: $salaryMin, icon: "banknote")
                                 .keyboardType(.numberPad)
-                            JobsDarkField(title: "CHF до", text: $salaryMax, icon: "francsign")
+                            JobsDarkField(title: "\(activeCountry.currencyCode) до", text: $salaryMax, icon: "banknote")
                                 .keyboardType(.numberPad)
                         }
                     }
@@ -3504,16 +3484,16 @@ private struct JobEmployerHubSheet: View {
                         ForEach(ownJobs) { job in
                             HStack {
                                 VStack(alignment: .leading, spacing: 4) {
-                                    Text(job.title).font(.headline).foregroundColor(.white)
+                                    Text(job.title).font(.headline).foregroundColor(JourneyVisual.primaryText)
                                     Text(["pending": "На модерації", "active": "Активна", "rejected": "Відхилена", "closed": "Закрита"][job.status ?? ""] ?? (job.status ?? ""))
-                                        .font(.caption).foregroundColor(.white.opacity(0.55))
+                                        .font(.caption).foregroundColor(JourneyVisual.secondaryText)
                                 }
                                 Spacer()
                                 Image(systemName: job.is_verified == true ? "checkmark.seal.fill" : "clock")
                                     .foregroundColor(job.is_verified == true ? JourneyVisual.lime : .orange)
                             }
                             .padding(14)
-                            .background(Color.white.opacity(0.055))
+                            .background(Theme.Colors.card)
                             .clipShape(RoundedRectangle(cornerRadius: 17, style: .continuous))
                         }
                     }
@@ -3526,10 +3506,10 @@ private struct JobEmployerHubSheet: View {
                                     VStack(alignment: .leading, spacing: 4) {
                                         Text(candidate.job_title)
                                             .font(.headline)
-                                            .foregroundColor(.white)
+                                            .foregroundColor(JourneyVisual.primaryText)
                                         Text(candidate.candidate_email)
                                             .font(.subheadline)
-                                            .foregroundColor(.white.opacity(0.58))
+                                            .foregroundColor(JourneyVisual.secondaryText)
                                     }
                                     Spacer()
                                     Text(applicationStatusTitle(candidate.status))
@@ -3553,16 +3533,16 @@ private struct JobEmployerHubSheet: View {
                                 }
                             }
                             .padding(15)
-                            .background(Color.white.opacity(0.055))
+                            .background(Theme.Colors.card)
                             .clipShape(RoundedRectangle(cornerRadius: 19, style: .continuous))
-                            .overlay(RoundedRectangle(cornerRadius: 19).stroke(Color.white.opacity(0.1), lineWidth: 1))
+                            .overlay(RoundedRectangle(cornerRadius: 19).stroke(JourneyVisual.softBorder, lineWidth: 1))
                         }
                     }
                 }
                 .padding(20)
                 .padding(.bottom, 30)
             }
-            .background(Color.black.ignoresSafeArea())
+            .background(JourneyVisual.pageBackground.ignoresSafeArea())
             .navigationTitle("Для роботодавців")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Готово") { dismiss() } } }
@@ -3571,6 +3551,9 @@ private struct JobEmployerHubSheet: View {
     }
 
     private func load() async {
+        if canton.isEmpty {
+            canton = activeCountry.defaultSubdivisionCode
+        }
         guard KeychainStore.get("access_token") != nil else {
             message = "Увійди в акаунт, щоб публікувати вакансії."
             return
@@ -3669,7 +3652,7 @@ private struct JobsPanelTitle: View {
     var body: some View {
         Label(title, systemImage: icon)
             .font(.headline)
-            .foregroundColor(.white)
+            .foregroundColor(JourneyVisual.primaryText)
             .padding(.top, 4)
     }
 }
@@ -3680,16 +3663,16 @@ private struct JobsDarkField: View {
     let icon: String
     var body: some View {
         HStack(spacing: 11) {
-            Image(systemName: icon).foregroundColor(JourneyVisual.lime).frame(width: 22)
+            Image(systemName: icon).foregroundColor(Theme.Colors.textPrimary).frame(width: 22)
             TextField(title, text: $text, axis: .vertical)
-                .foregroundColor(.white)
+                .foregroundColor(JourneyVisual.primaryText)
                 .lineLimit(1...5)
         }
         .padding(.horizontal, 14)
         .frame(minHeight: 52)
-        .background(Color.white.opacity(0.065))
+        .background(Theme.Colors.card)
         .clipShape(RoundedRectangle(cornerRadius: 15, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 15, style: .continuous).stroke(Color.white.opacity(0.12)))
+        .overlay(RoundedRectangle(cornerRadius: 15, style: .continuous).stroke(JourneyVisual.softBorder))
     }
 }
 

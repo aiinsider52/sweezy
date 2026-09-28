@@ -103,16 +103,16 @@ struct MyEventsView: View {
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("events.cabinet_title".localized)
-                            .font(.system(size: 22, weight: .bold, design: .rounded))
-                            .foregroundColor(.white)
+                            .font(.system(size: 22, weight: .bold, design: .default))
+                            .foregroundColor(JourneyVisual.primaryText)
                         Text("events.cabinet_subtitle".localized)
                             .font(.subheadline)
-                            .foregroundColor(.white.opacity(0.8))
+                            .foregroundColor(JourneyVisual.secondaryText)
                     }
                     Spacer()
                     Image(systemName: "calendar.badge.clock")
                         .font(.system(size: 28, weight: .semibold))
-                        .foregroundColor(.white.opacity(0.92))
+                        .foregroundColor(JourneyVisual.secondaryText)
                 }
 
                 HStack(spacing: 10) {
@@ -129,41 +129,32 @@ struct MyEventsView: View {
     private func summaryPill(title: String, value: Int) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text("\(value)")
-                .font(.system(size: 20, weight: .bold, design: .rounded))
-                .foregroundColor(.white)
+                .font(.system(size: 20, weight: .bold, design: .default))
+                .foregroundColor(JourneyVisual.primaryText)
             Text(title)
                 .font(.caption2.weight(.semibold))
-                .foregroundColor(.white.opacity(0.82))
+                .foregroundColor(JourneyVisual.secondaryText)
                 .lineLimit(1)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(12)
         .background(
             RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(Color.white.opacity(0.12))
+                .fill(JourneyVisual.softBorder)
                 .overlay(
                     RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .stroke(Color.white.opacity(0.16), lineWidth: 1)
+                        .stroke(JourneyVisual.softBorder, lineWidth: 1)
                 )
         )
     }
 
     private var emptyState: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "calendar.badge.plus")
-                .font(.system(size: 44))
-                .foregroundColor(Theme.Colors.textTertiary)
-            Text("events.empty_my_title".localized)
-                .font(.headline)
-                .foregroundColor(Theme.Colors.textPrimary)
-            Text("events.empty_my_subtitle".localized)
-                .font(.subheadline)
-                .foregroundColor(Theme.Colors.textSecondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 40)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 40)
+        MascotEmptyState(
+            title: "events.empty_my_title".localized,
+            subtitle: "events.empty_my_subtitle".localized,
+            story: "events"
+        )
+        .padding(.vertical, 12)
     }
 
     private var approvedCount: Int { events.filter { $0.status == .approved }.count }
@@ -212,14 +203,7 @@ private struct MyEventCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack(alignment: .top, spacing: 12) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .fill(event.category.color.opacity(0.16))
-                        .frame(width: 48, height: 48)
-                    Image(systemName: event.category.icon)
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(event.category.color)
-                }
+                JourneyCategoryIcon(symbol: event.category.icon, swatch: event.category.swatch, size: 48)
 
                 VStack(alignment: .leading, spacing: 6) {
                     Text(event.title)

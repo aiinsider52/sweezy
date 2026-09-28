@@ -10,7 +10,8 @@ enum SubscriptionSource: String {
 
 struct SubscriptionView: View {
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @StateObject private var manager = SubscriptionManager.shared
     @State private var selectedProductID = SubscriptionManager.ProductID.monthly
     @State private var purchaseSucceeded = false
@@ -23,38 +24,31 @@ struct SubscriptionView: View {
 
     var body: some View {
         GeometryReader { geometry in
-            ZStack {
-                pageBackground.ignoresSafeArea()
-
-                ScrollView(showsIndicators: false) {
-                    VStack(spacing: 0) {
-                        hero
-                        valueHeader
-                            .padding(.top, 26)
-                        swissRoute
-                            .padding(.top, 18)
-                        benefits
-                            .padding(.top, 30)
-                        plans
-                            .padding(.top, 30)
-                        purchaseDetails
-                            .padding(.top, 18)
-                        legalLinks
-                            .padding(.top, 18)
-                            .padding(.bottom, 24)
+            ScrollView(showsIndicators: false) {
+                VStack(alignment: .leading, spacing: 0) {
+                    heroStage
+                    headline.padding(.top, 22)
+                    benefits.padding(.top, 26)
+                    plans.padding(.top, 28)
+                    if hasSelectedFreeTrial {
+                        trialTimeline
+                            .padding(.top, 14)
+                            .transition(.opacity.combined(with: .move(edge: .top)))
                     }
+                    purchaseDetails.padding(.top, 16)
+                    legalLinks.padding(.top, 10).padding(.bottom, 20)
                 }
-                .contentMargins(.top, -windowTopSafeAreaInset, for: .scrollContent)
-                .ignoresSafeArea(edges: .top)
+                .frame(width: geometry.size.width)
+                .animation(reduceMotion ? nil : .spring(response: 0.36, dampingFraction: 0.86), value: selectedProductID)
             }
-            .ignoresSafeArea(edges: .top)
-            .overlay(alignment: .top) {
-                topBar
-                    .padding(.top, max(geometry.safeAreaInsets.top, windowTopSafeAreaInset))
-            }
-            .safeAreaInset(edge: .bottom, spacing: 0) { stickyPurchaseButton }
+            .frame(width: geometry.size.width, height: geometry.size.height)
+            .accessibilityIdentifier("subscription.paywall")
+            .background(pageBackground)
         }
-        .ignoresSafeArea(edges: .top)
+        .safeAreaInset(edge: .top, spacing: 0) { topBar.background(pageBackground) }
+        .safeAreaInset(edge: .bottom, spacing: 0) { stickyPurchaseButton }
+        .background(pageBackground.ignoresSafeArea())
+        .sensoryFeedback(.selection, trigger: selectedProductID)
         .task {
             APIClient.logPaywall(eventType: "view", context: source.rawValue)
             await manager.load()
@@ -64,107 +58,15 @@ struct SubscriptionView: View {
         } message: {
             Text("Підписку активовано на всіх ваших пристроях Apple.")
         }
-        .accessibilityIdentifier("subscription.paywall")
     }
 
-    private var windowTopSafeAreaInset: CGFloat {
-        UIApplication.shared.connectedScenes
-            .compactMap { $0 as? UIWindowScene }
-            .flatMap(\.windows)
-            .first(where: \.isKeyWindow)?
-            .safeAreaInsets.top ?? 0
-    }
+    private var pageBackground: Color { JourneyVisual.pageBackground }
+    private var primaryText: Color { JourneyVisual.primaryText }
+    private var secondaryText: Color { JourneyVisual.secondaryText }
+    private var softBorder: Color { JourneyVisual.softBorder }
+    private var readableAccent: Color { JourneyVisual.accentText }
 
-    private var pageBackground: Color {
-        Color(UIColor { traits in
-            traits.userInterfaceStyle == .dark
-                ? UIColor(red: 0.018, green: 0.026, blue: 0.021, alpha: 1)
-                : UIColor(red: 0.955, green: 0.972, blue: 0.944, alpha: 1)
-        })
-    }
-
-    private var cardBackground: Color {
-        Color(UIColor { traits in
-            traits.userInterfaceStyle == .dark
-                ? UIColor(white: 1, alpha: 0.055)
-                : UIColor(white: 1, alpha: 0.92)
-        })
-    }
-
-    private var raisedBackground: Color {
-        Color(UIColor { traits in
-            traits.userInterfaceStyle == .dark
-                ? UIColor(red: 0.055, green: 0.075, blue: 0.061, alpha: 1)
-                : UIColor.white
-        })
-    }
-
-    private var primaryText: Color { Theme.Colors.textPrimary }
-    private var secondaryText: Color { Theme.Colors.textSecondary }
-    private var subtleText: Color { Theme.Colors.textTertiary }
-    private var softBorder: Color {
-        Color(UIColor { traits in
-            traits.userInterfaceStyle == .dark
-                ? UIColor(white: 1, alpha: 0.12)
-                : UIColor(white: 0, alpha: 0.085)
-        })
-    }
-    private var readableAccent: Color {
-        Color(UIColor { traits in
-            traits.userInterfaceStyle == .dark
-                ? UIColor(red: 0.78, green: 1.0, blue: 0.02, alpha: 1)
-                : UIColor(red: 0.34, green: 0.49, blue: 0.015, alpha: 1)
-        })
-    }
-
-    private var hero: some View {
-        ZStack(alignment: .bottomLeading) {
-            Image("cityhub-zurich-lake")
-                .resizable()
-                .scaledToFill()
-                .frame(height: 370)
-                .clipped()
-
-            LinearGradient(
-                colors: [Color.black.opacity(0.06), Color.black.opacity(0.22), Color.black.opacity(0.96)],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-
-            VStack(alignment: .leading, spacing: 12) {
-                HStack(spacing: 8) {
-                    Label("PLUS", systemImage: "sparkles")
-                    if hasMonthlyFreeTrial {
-                        Text("30 ДНІВ БЕЗКОШТОВНО")
-                    }
-                }
-                .font(.system(size: 10, weight: .black, design: .rounded))
-                .foregroundColor(.black)
-                .padding(.horizontal, 11)
-                .frame(height: 30)
-                .background(JourneyVisual.lime)
-                .clipShape(Capsule())
-
-                VStack(alignment: .leading, spacing: -4) {
-                    Text("Швейцарія.")
-                        .foregroundColor(.white)
-                    Text("Твій маршрут.")
-                        .foregroundColor(JourneyVisual.lime)
-                }
-                .font(.system(size: 43, weight: .black, design: .rounded))
-                .minimumScaleFactor(0.68)
-                .lineLimit(2)
-
-                Text("Plus збирає документи, роботу, мову та дедлайни в один зрозумілий план.")
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(.white.opacity(0.76))
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            .padding(.horizontal, 22)
-            .padding(.bottom, 20)
-        }
-        .frame(height: 400)
-    }
+    // MARK: - Top bar
 
     private var topBar: some View {
         HStack {
@@ -173,14 +75,15 @@ struct SubscriptionView: View {
                 dismiss()
             } label: {
                 Image(systemName: "xmark")
-                    .font(.system(size: 18, weight: .bold))
-                    .foregroundColor(.white)
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundColor(primaryText)
                     .frame(width: 44, height: 44)
-                    .background(.ultraThinMaterial.opacity(0.8))
+                    .background(Theme.Colors.card)
                     .clipShape(Circle())
-                    .overlay(Circle().stroke(.white.opacity(0.15), lineWidth: 1))
+                    .overlay(Circle().stroke(softBorder, lineWidth: 1))
             }
             .accessibilityLabel("Закрити")
+            .accessibilityIdentifier("subscription.close")
 
             Spacer()
 
@@ -189,245 +92,296 @@ struct SubscriptionView: View {
             } label: {
                 Label("Відновити покупки", systemImage: "clock.arrow.circlepath")
                     .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(.white)
+                    .foregroundColor(primaryText)
                     .padding(.horizontal, 14)
-                    .frame(height: 42)
-                    .background(.ultraThinMaterial.opacity(0.8))
+                    .frame(height: 44)
+                    .background(Theme.Colors.card)
                     .clipShape(Capsule())
-                    .overlay(Capsule().stroke(.white.opacity(0.15), lineWidth: 1))
+                    .overlay(Capsule().stroke(softBorder, lineWidth: 1))
             }
             .accessibilityIdentifier("subscription.restore")
         }
         .padding(.horizontal, 18)
-        .padding(.top, 8)
+        .padding(.vertical, 8)
     }
 
-    private var valueHeader: some View {
-        HStack(alignment: .top, spacing: 12) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Від першого дня — до свого життя")
-                    .font(.system(size: 25, weight: .black, design: .rounded))
+    // MARK: - Hero
+
+    /// Mascot celebrating on a lime stage, with the four things people buy Plus for
+    /// pinned beside it as stickers. Decorative: the same facts are in the list below.
+    private var heroStage: some View {
+        JourneyMascotStage(
+            pose: .celebrate,
+            stickers: [
+                JourneyStageSticker(icon: "sparkles", title: "AI без лімітів", swatch: JourneyCategoryPalette.lime),
+                JourneyStageSticker(icon: "map.fill", title: "Твій план", swatch: JourneyCategoryPalette.sand),
+                JourneyStageSticker(icon: "doc.text.fill", title: "CV і листи", swatch: JourneyCategoryPalette.sky),
+                JourneyStageSticker(icon: "bell.badge.fill", title: "Дедлайни", swatch: JourneyCategoryPalette.coral)
+            ]
+        )
+        .padding(.horizontal, 18)
+    }
+
+    private var headline: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 8) {
+                Label("PLUS", systemImage: "sparkles")
+                if hasMonthlyFreeTrial {
+                    Text("30 ДНІВ БЕЗКОШТОВНО")
+                }
+            }
+            .font(.system(size: 10, weight: .black))
+            .foregroundColor(.black)
+            .padding(.horizontal, 11)
+            .frame(height: 28)
+            .background(JourneyVisual.lime)
+            .clipShape(Capsule())
+
+            VStack(alignment: .leading, spacing: -2) {
+                Text("\(selectedCountry.name).")
                     .foregroundColor(primaryText)
-                Text("Один маршрут замість десятків розрізнених сервісів.")
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundColor(secondaryText)
-            }
-            Spacer(minLength: 0)
-            VStack(spacing: 1) {
-                Text("8")
-                    .font(.system(size: 24, weight: .black, design: .rounded))
+                Text("Твій маршрут.")
                     .foregroundColor(readableAccent)
-                Text("інструментів")
-                    .font(.system(size: 10, weight: .bold))
-                    .foregroundColor(subtleText)
             }
-            .padding(.horizontal, 13)
-            .padding(.vertical, 8)
-            .background(cardBackground)
-            .clipShape(RoundedRectangle(cornerRadius: 15, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 15).stroke(softBorder))
+            .font(.largeTitle.bold())
+            .fixedSize(horizontal: false, vertical: true)
+
+            Text("Документи, робота, мова й дедлайни — в одному зрозумілому плані.")
+                .font(.system(size: 16, weight: .medium))
+                .foregroundColor(secondaryText)
+                .fixedSize(horizontal: false, vertical: true)
         }
         .padding(.horizontal, 22)
     }
 
-    private var swissRoute: some View {
-        VStack(spacing: 0) {
-            routeStop(icon: "location.fill", title: "Старт", text: "Розкажи про свою ситуацію", isLast: false)
-            routeStop(icon: "doc.text.fill", title: "Порядок", text: "Отримай документи, кроки та дедлайни", isLast: false)
-            routeStop(icon: "briefcase.fill", title: "Результат", text: "Підготуй CV, листи та пошук роботи", isLast: false)
-            routeStop(icon: "checkmark.seal.fill", title: "Впевненість", text: "Контролюй прогрес без зайвого стресу", isLast: true)
+    // MARK: - Benefits
+
+    private var benefitItems: [PlusBenefit] {
+        [
+            PlusBenefit(icon: "sparkles", title: "AI-помічник без лімітів", text: "Документи, робота, побут — питай скільки треба", swatch: JourneyCategoryPalette.lime),
+            PlusBenefit(icon: "map.fill", title: "Особистий план", text: "Кроки й терміни під твою ситуацію", swatch: JourneyCategoryPalette.sand),
+            PlusBenefit(icon: "doc.text.fill", title: "CV та мотиваційні листи", text: "Для ринку \(selectedCountry.ukrainianGenitiveName)", swatch: JourneyCategoryPalette.sky),
+            PlusBenefit(icon: "globe.europe.africa.fill", title: "Переклади DE · FR · IT", text: "Листи, договори, оголошення", swatch: JourneyCategoryPalette.coral),
+            PlusBenefit(icon: "bell.badge.fill", title: "Розумні нагадування", text: "Жодного пропущеного дедлайну", swatch: JourneyCategoryPalette.lilac),
+            PlusBenefit(icon: "briefcase.fill", title: "Пошук роботи", text: "Від вакансії до заявки", swatch: JourneyCategoryPalette.teal)
+        ]
+    }
+
+    private var benefits: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Що відкриває Plus")
+                .font(.title3.bold())
+                .foregroundColor(primaryText)
+
+            VStack(spacing: 0) {
+                ForEach(Array(benefitItems.enumerated()), id: \.offset) { index, item in
+                    benefitRow(item)
+                    if index < benefitItems.count - 1 {
+                        Divider()
+                            .overlay(softBorder)
+                            .padding(.leading, 50)
+                    }
+                }
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 4)
+            .background(Theme.Colors.card)
+            .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(softBorder, lineWidth: 1))
+
+            Label(
+                "А ще чеклісти й база знань про життя у \(selectedCountry.homeHeroName(languageIdentifier: "uk"))",
+                systemImage: "plus.circle.fill"
+            )
+            .font(.system(size: 12, weight: .medium))
+            .foregroundColor(secondaryText)
         }
-        .padding(.vertical, 10)
-        .padding(.horizontal, 16)
-        .background(raisedBackground)
-        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 24).stroke(softBorder))
-        .shadow(color: .black.opacity(colorScheme == .dark ? 0.18 : 0.08), radius: 22, y: 10)
         .padding(.horizontal, 22)
     }
 
-    private func routeStop(icon: String, title: String, text: String, isLast: Bool) -> some View {
-        HStack(alignment: .top, spacing: 14) {
+    private func benefitRow(_ item: PlusBenefit) -> some View {
+        HStack(spacing: 12) {
+            if !dynamicTypeSize.isAccessibilitySize {
+                JourneyCategoryIcon(symbol: item.icon, swatch: item.swatch, size: 36)
+            }
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(item.title)
+                    .font(.subheadline.bold())
+                    .foregroundColor(primaryText)
+                    .minimumScaleFactor(0.7)
+                    .fixedSize(horizontal: false, vertical: true)
+                Text(item.text)
+                    .font(.caption)
+                    .foregroundColor(secondaryText)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            Spacer(minLength: 8)
+
+            Image(systemName: "checkmark")
+                .font(.system(size: 12, weight: .black))
+                .foregroundColor(JourneyVisual.accentStrong)
+        }
+        .padding(.vertical, 11)
+        .accessibilityElement(children: .combine)
+    }
+
+    // MARK: - Plans
+
+    private var plans: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(alignment: .firstTextBaseline) {
+                Text("Обери план")
+                    .font(.title3.bold())
+                    .foregroundColor(primaryText)
+                Spacer(minLength: 8)
+                Label("Оплата через Apple", systemImage: "checkmark.shield.fill")
+                    .font(.caption2.bold())
+                    .foregroundColor(readableAccent)
+            }
+
+            let layout = dynamicTypeSize.isAccessibilitySize
+                ? AnyLayout(VStackLayout(spacing: 14))
+                : AnyLayout(HStackLayout(alignment: .top, spacing: 10))
+            layout {
+                planCard(
+                    id: SubscriptionManager.ProductID.monthly,
+                    title: "Щомісячно",
+                    price: monthlyPrice,
+                    period: "на місяць",
+                    badge: hasMonthlyFreeTrial ? "30 днів free" : nil,
+                    note: hasMonthlyFreeTrial ? "Перший місяць 0 \(selectedCountry.currencyCode)" : "Без зобов’язань"
+                )
+                planCard(
+                    id: SubscriptionManager.ProductID.yearly,
+                    title: "Щорічно",
+                    price: yearlyPrice,
+                    period: "на рік",
+                    badge: "2 міс. у подарунок",
+                    note: "≈ \(yearlyPerMonth) / міс"
+                )
+            }
+        }
+        .padding(.horizontal, 22)
+    }
+
+    private func planCard(id: String, title: String, price: String, period: String, badge: String?, note: String) -> some View {
+        let selected = selectedProductID == id
+        return Button {
+            selectedProductID = id
+        } label: {
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(alignment: .center) {
+                    Text(title)
+                        .font(.subheadline.bold())
+                        .foregroundColor(primaryText)
+                    Spacer(minLength: 6)
+                    ZStack {
+                        Circle()
+                            .stroke(selected ? Color.clear : softBorder, lineWidth: 1.5)
+                        if selected {
+                            Circle().fill(JourneyVisual.lime)
+                            Image(systemName: "checkmark")
+                                .font(.system(size: 10, weight: .black))
+                                .foregroundColor(.black)
+                                .transition(.scale.combined(with: .opacity))
+                        }
+                    }
+                    .frame(width: 22, height: 22)
+                }
+                .padding(.top, badge == nil ? 0 : 6)
+
+                Text(price)
+                    .font(.system(size: 22, weight: .black).monospacedDigit())
+                    .foregroundColor(primaryText)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+                    .padding(.top, 6)
+                Text(period)
+                    .font(.caption.weight(.semibold))
+                    .foregroundColor(secondaryText)
+                Text(note)
+                    .font(.caption2.bold())
+                    .foregroundColor(readableAccent)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.top, 6)
+            }
+            .padding(14)
+            .frame(maxWidth: .infinity, minHeight: 140, alignment: .topLeading)
+            .background(selected ? JourneyVisual.lime.opacity(0.12) : Theme.Colors.card)
+            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .stroke(selected ? JourneyVisual.accentStrong : softBorder, lineWidth: selected ? 2 : 1)
+            )
+            .overlay(alignment: .topLeading) {
+                if let badge {
+                    Text(badge)
+                        .font(.system(size: 9, weight: .black))
+                        .foregroundColor(.black)
+                        .lineLimit(1)
+                        .padding(.horizontal, 9)
+                        .frame(height: 20)
+                        .background(JourneyVisual.lime)
+                        .clipShape(Capsule())
+                        .offset(x: 12, y: -10)
+                }
+            }
+            .scaleEffect(selected || reduceMotion ? 1 : 0.985)
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier("subscription.plan.\(id)")
+        .accessibilityAddTraits(selected ? .isSelected : [])
+    }
+
+    /// What happens after "Start": said plainly, because trust is what converts a trial.
+    private var trialTimeline: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            trialStep(icon: "lock.open.fill", title: "Сьогодні", text: "Повний доступ до Plus · 0 \(selectedCountry.currencyCode)", isLast: false)
+            trialStep(icon: "calendar", title: "Через 30 днів", text: "\(monthlyPrice) / місяць, якщо не скасуєш", isLast: false)
+            trialStep(icon: "hand.raised.fill", title: "Будь-коли", text: "Скасування в налаштуваннях Apple ID", isLast: true)
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+        .background(JourneyVisual.lime.opacity(0.08))
+        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(JourneyVisual.lime.opacity(0.3), lineWidth: 1))
+        .padding(.horizontal, 22)
+    }
+
+    private func trialStep(icon: String, title: String, text: String, isLast: Bool) -> some View {
+        HStack(alignment: .top, spacing: 12) {
             VStack(spacing: 0) {
                 Image(systemName: icon)
-                    .font(.system(size: 14, weight: .bold))
+                    .font(.system(size: 11, weight: .bold))
                     .foregroundColor(.black)
-                    .frame(width: 34, height: 34)
+                    .frame(width: 26, height: 26)
                     .background(JourneyVisual.lime)
                     .clipShape(Circle())
                 if !isLast {
                     Rectangle()
-                        .fill(
-                            LinearGradient(
-                                colors: [JourneyVisual.lime, JourneyVisual.lime.opacity(0.18)],
-                                startPoint: .top,
-                                endPoint: .bottom
-                            )
-                        )
-                        .frame(width: 2, height: 31)
+                        .fill(JourneyVisual.lime.opacity(0.5))
+                        .frame(width: 2, height: 18)
                 }
             }
-
-            VStack(alignment: .leading, spacing: 3) {
+            VStack(alignment: .leading, spacing: 1) {
                 Text(title)
-                    .font(.system(size: 14, weight: .bold, design: .rounded))
+                    .font(.system(size: 13, weight: .bold))
                     .foregroundColor(primaryText)
                 Text(text)
-                    .font(.system(size: 12, weight: .medium))
+                    .font(.caption)
                     .foregroundColor(secondaryText)
                     .fixedSize(horizontal: false, vertical: true)
             }
-            .padding(.top, 1)
+            .padding(.top, 3)
             Spacer(minLength: 0)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-    }
-
-    private var benefits: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            Text("Усе, що входить у Plus")
-                .font(.system(size: 21, weight: .bold, design: .rounded))
-                .foregroundColor(primaryText)
-
-            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
-                benefit(icon: "sparkles", title: "AI-помічник", text: "Запити без лімітів")
-                benefit(icon: "map", title: "Особистий план", text: "Кроки під твою ситуацію")
-                benefit(icon: "doc.text", title: "CV та листи", text: "Для ринку Швейцарії")
-                benefit(icon: "globe.europe.africa", title: "Переклади", text: "DE · FR · IT")
-                benefit(icon: "bell.badge", title: "Дедлайни", text: "Розумні нагадування")
-                benefit(icon: "checklist", title: "Чеклісти", text: "Документи й побут")
-                benefit(icon: "briefcase", title: "Пошук роботи", text: "Від вакансії до заявки")
-                benefit(icon: "books.vertical", title: "База знань", text: "Життя у Швейцарії")
-            }
-        }
-        .padding(.horizontal, 22)
-    }
-
-    private func benefit(icon: String, title: String, text: String) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Image(systemName: icon)
-                .font(.system(size: 20, weight: .semibold))
-                .foregroundColor(readableAccent)
-                .frame(width: 38, height: 38)
-                .background(JourneyVisual.lime.opacity(0.1))
-                .clipShape(RoundedRectangle(cornerRadius: 13, style: .continuous))
-                .overlay(RoundedRectangle(cornerRadius: 13).stroke(JourneyVisual.lime.opacity(0.22)))
-
-            Text(title)
-                .font(.system(size: 14, weight: .bold, design: .rounded))
-                .foregroundColor(primaryText)
-                .lineLimit(2)
-            Text(text)
-                .font(.system(size: 11, weight: .medium))
-                .foregroundColor(secondaryText)
-                .lineLimit(2)
-        }
-        .padding(14)
-        .frame(maxWidth: .infinity, minHeight: 128, alignment: .leading)
-        .background(cardBackground)
-        .clipShape(RoundedRectangle(cornerRadius: 19, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 19).stroke(softBorder))
-    }
-
-    private var plans: some View {
-        VStack(alignment: .leading, spacing: 11) {
-            HStack(alignment: .bottom) {
-                VStack(alignment: .leading, spacing: 3) {
-                    Text("Обери свій Plus")
-                        .font(.system(size: 21, weight: .bold, design: .rounded))
-                        .foregroundColor(primaryText)
-                    Text("Повний доступ на всіх Apple-пристроях")
-                        .font(.system(size: 12, weight: .medium))
-                        .foregroundColor(secondaryText)
-                }
-                Spacer(minLength: 8)
-                Label("Apple", systemImage: "checkmark.shield.fill")
-                    .font(.system(size: 10, weight: .bold))
-                    .foregroundColor(readableAccent)
-            }
-
-            planRow(
-                id: SubscriptionManager.ProductID.monthly,
-                title: "Щомісячно",
-                price: "\(manager.displayPrice(for: SubscriptionManager.ProductID.monthly, fallback: "4.95 CHF")) / місяць",
-                badge: hasMonthlyFreeTrial ? "1 місяць free" : nil
-            )
-            planRow(
-                id: SubscriptionManager.ProductID.yearly,
-                title: "Щорічно",
-                price: "\(manager.displayPrice(for: SubscriptionManager.ProductID.yearly, fallback: "49.50 CHF")) / рік",
-                badge: "2 місяці в подарунок"
-            )
-        }
-        .padding(.horizontal, 22)
-    }
-
-    private func planRow(id: String, title: String, price: String, badge: String?) -> some View {
-        let selected = selectedProductID == id
-        return Button {
-            withAnimation(.easeInOut(duration: 0.18)) { selectedProductID = id }
-        } label: {
-            HStack(spacing: 14) {
-                Image(systemName: selected ? "largecircle.fill.circle" : "circle")
-                    .font(.system(size: 22, weight: .medium))
-                    .foregroundColor(selected ? readableAccent : subtleText)
-
-                VStack(alignment: .leading, spacing: 3) {
-                    Text(title)
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(primaryText)
-                    Text(price)
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(selected ? readableAccent : secondaryText)
-                }
-
-                Spacer()
-
-                if let badge {
-                    Text(badge)
-                        .font(.system(size: 10, weight: .bold))
-                        .foregroundColor(.black)
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 6)
-                        .background(JourneyVisual.lime)
-                        .clipShape(Capsule())
-                }
-            }
-            .padding(.horizontal, 17)
-            .frame(minHeight: 78)
-            .background(selected ? JourneyVisual.lime.opacity(colorScheme == .dark ? 0.08 : 0.10) : cardBackground)
-            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .stroke(selected ? readableAccent : softBorder, lineWidth: selected ? 1.7 : 1)
-            )
-        }
-        .buttonStyle(.plain)
-        .accessibilityIdentifier("subscription.plan.\(id)")
+        .accessibilityElement(children: .combine)
     }
 
     private var purchaseDetails: some View {
-        VStack(spacing: 11) {
-            if hasSelectedFreeTrial {
-                HStack(spacing: 10) {
-                    Image(systemName: "gift.fill")
-                        .foregroundColor(JourneyVisual.lime)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Перший місяць — 0 CHF")
-                            .font(.system(size: 14, weight: .bold))
-                            .foregroundColor(primaryText)
-                        Text("Потім \(monthlyPrice) / місяць. Скасування будь-коли.")
-                            .font(.system(size: 11, weight: .medium))
-                            .foregroundColor(secondaryText)
-                    }
-                    Spacer(minLength: 0)
-                }
-                .padding(13)
-                .background(JourneyVisual.lime.opacity(0.08))
-                .clipShape(RoundedRectangle(cornerRadius: 15, style: .continuous))
-                .overlay(RoundedRectangle(cornerRadius: 15).stroke(JourneyVisual.lime.opacity(0.24)))
-            }
-
+        VStack(spacing: 10) {
             if let error = manager.lastError {
                 Text(error)
                     .font(.caption)
@@ -436,28 +390,34 @@ struct SubscriptionView: View {
             }
 
             Text("Підписка поновлюється автоматично. Скасувати можна будь-коли в налаштуваннях Apple ID.")
-                .font(.system(size: 10))
-                .foregroundColor(subtleText)
+                .font(.system(size: 11))
+                .foregroundColor(secondaryText)
                 .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
 
             HStack(spacing: 18) {
                 trustItem("lock.fill", "Безпечна оплата")
-                trustItem("arrow.counterclockwise", "Відновлення покупок")
+                trustItem("iphone.and.arrow.forward", "На всіх пристроях")
             }
         }
+        .frame(maxWidth: .infinity)
         .padding(.horizontal, 22)
     }
 
     private func trustItem(_ icon: String, _ title: String) -> some View {
         Label(title, systemImage: icon)
-            .font(.system(size: 9, weight: .semibold))
-            .foregroundColor(subtleText)
+            .font(.system(size: 10, weight: .semibold))
+            .foregroundColor(secondaryText)
     }
+
+    // MARK: - Purchase
 
     private var stickyPurchaseButton: some View {
         VStack(spacing: 0) {
-            Divider()
-                .overlay(softBorder)
+            // Content fades out under the button instead of being cut by a hard line.
+            LinearGradient(colors: [pageBackground.opacity(0), pageBackground], startPoint: .top, endPoint: .bottom)
+                .frame(height: 18)
+                .allowsHitTesting(false)
 
             Button {
                 APIClient.logPaywall(eventType: "purchase_start", context: source.rawValue)
@@ -467,47 +427,77 @@ struct SubscriptionView: View {
                     }
                 }
             } label: {
-                HStack {
+                HStack(spacing: 12) {
                     if manager.purchasingProductID != nil {
                         Spacer()
                         ProgressView().tint(.black)
                         Spacer()
                     } else {
-                        VStack(alignment: .leading, spacing: 1) {
-                            Text(hasSelectedFreeTrial ? "Почати безкоштовний місяць" : "Продовжити з Plus")
-                                .font(.system(size: 17, weight: .bold, design: .rounded))
-                            Text(hasSelectedFreeTrial ? "сьогодні 0 CHF" : selectedPrice)
-                                .font(.system(size: 10, weight: .bold))
-                                .opacity(0.6)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(hasSelectedFreeTrial ? "Почати 30 днів безкоштовно" : "Продовжити з Plus")
+                                .font(.headline)
+                                .contentTransition(.opacity)
+                            Text(hasSelectedFreeTrial ? "потім \(monthlyPrice) / місяць" : selectedPrice)
+                                .font(.caption.weight(.semibold))
+                                .opacity(0.72)
+                                .contentTransition(.opacity)
                         }
                         Spacer()
                         Image(systemName: "arrow.right")
-                            .font(.system(size: 18, weight: .bold))
+                            .font(.system(size: 16, weight: .bold))
+                            .frame(width: 36, height: 36)
+                            .background(Color.black.opacity(0.08))
+                            .clipShape(Circle())
                     }
                 }
                 .foregroundColor(.black)
-                .padding(.horizontal, 20)
-                .frame(height: 58)
+                .padding(.leading, 20)
+                .padding(.trailing, 12)
+                .padding(.vertical, 10)
+                .frame(maxWidth: .infinity, minHeight: 60)
                 .background(JourneyVisual.lime)
-                .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                .shadow(color: JourneyVisual.lime.opacity(0.35), radius: 14, y: 4)
             }
+            .buttonStyle(ScaleButtonStyle(scaleAmount: 0.98, hapticStyle: .medium))
             .disabled(manager.purchasingProductID != nil)
             .accessibilityIdentifier("subscription.purchase")
+            .padding(.horizontal, 22)
+            .padding(.bottom, 8)
+            .background(pageBackground)
         }
-        .padding(.horizontal, 22)
-        .padding(.top, 10)
-        .padding(.bottom, 8)
-        .background(.ultraThinMaterial)
-        .background(pageBackground.opacity(0.88))
+        .dynamicTypeSize(...DynamicTypeSize.accessibility1)
     }
 
     private var legalLinks: some View {
-        HStack(spacing: 20) {
-            Link("Умови", destination: URL(string: "https://sweezy-9xyk.onrender.com/legal/terms")!)
-            Link("Конфіденційність", destination: URL(string: "https://sweezy-9xyk.onrender.com/legal/privacy")!)
+        let layout = dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(spacing: 8))
+            : AnyLayout(HStackLayout(spacing: 20))
+        return layout {
+            Link(destination: URL(string: "https://sweezy-9xyk.onrender.com/legal/terms")!) {
+                Text("Умови").font(.subheadline).frame(minHeight: 44)
+            }
+            Link(destination: URL(string: "https://sweezy-9xyk.onrender.com/legal/privacy")!) {
+                Text("Конфіденційність").font(.subheadline)
+                    .lineLimit(1).minimumScaleFactor(0.8).frame(minHeight: 44)
+            }
+            .accessibilityIdentifier("subscription.privacy")
         }
-        .font(.system(size: 11, weight: .medium))
         .foregroundColor(secondaryText)
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, 22)
+    }
+
+    private var yearlyPrice: String {
+        manager.displayPrice(for: SubscriptionManager.ProductID.yearly, fallback: yearlyFallbackPrice)
+    }
+
+    /// Yearly price spread over 12 months, in the store's own currency format.
+    private var yearlyPerMonth: String {
+        if let yearly = manager.yearlyProduct {
+            return (yearly.price / 12).formatted(yearly.priceFormatStyle)
+        }
+        return selectedCountry == .switzerland ? "4.13 CHF" : "4.13 EUR"
     }
 
     private var hasMonthlyFreeTrial: Bool {
@@ -524,78 +514,122 @@ struct SubscriptionView: View {
     }
 
     private var monthlyPrice: String {
-        manager.displayPrice(for: SubscriptionManager.ProductID.monthly, fallback: "4.95 CHF")
+        manager.displayPrice(for: SubscriptionManager.ProductID.monthly, fallback: monthlyFallbackPrice)
     }
 
     private var selectedPrice: String {
         selectedProductID == SubscriptionManager.ProductID.monthly
             ? "\(monthlyPrice) / місяць"
-            : "\(manager.displayPrice(for: SubscriptionManager.ProductID.yearly, fallback: "49.50 CHF")) / рік"
+            : "\(yearlyPrice) / рік"
     }
+
+    private var selectedCountry: ResidenceCountry {
+        ResidenceCountry(rawValue: APIClient.countryCode) ?? .switzerland
+    }
+
+    private var monthlyFallbackPrice: String {
+        selectedCountry == .switzerland ? "4.95 CHF" : "4.95 EUR"
+    }
+
+    private var yearlyFallbackPrice: String {
+        selectedCountry == .switzerland ? "49.50 CHF" : "49.50 EUR"
+    }
+}
+
+private struct PlusBenefit {
+    let icon: String
+    let title: String
+    let text: String
+    let swatch: JourneyCategorySwatch
 }
 
 struct SweezyPlusHomeCard: View {
     @StateObject private var manager = SubscriptionManager.shared
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    let country: ResidenceCountry
     let action: () -> Void
 
     var body: some View {
+        let shape = RoundedRectangle(cornerRadius: 26, style: .continuous)
         Button(action: action) {
-            ZStack(alignment: .bottomLeading) {
-                Image("cityhub-zurich-lake")
-                    .resizable()
-                    .scaledToFill()
-                    .frame(height: 260)
-                    .clipped()
+            HStack(alignment: .bottom, spacing: 0) {
+                VStack(alignment: .leading, spacing: 10) {
+                    Label("PLUS", systemImage: "sparkles")
+                        .font(.system(size: 10, weight: .black))
+                        .foregroundColor(JourneyVisual.lime)
+                        .padding(.horizontal, 10)
+                        .frame(height: 26)
+                        .background(JourneyVisual.black, in: Capsule())
 
-                LinearGradient(
-                    colors: [Color.black.opacity(0.94), Color.black.opacity(0.62), Color.clear],
-                    startPoint: .leading,
-                    endPoint: .trailing
-                )
-
-                VStack(alignment: .leading, spacing: 12) {
-                    Label("PLUS", systemImage: "star.fill")
-                        .font(.system(size: 11, weight: .black))
+                    Text("Більше можливостей з Plus")
+                        .font(.system(size: 22, weight: .bold))
                         .foregroundColor(.black)
-                        .padding(.horizontal, 11)
-                        .padding(.vertical, 7)
-                        .background(JourneyVisual.lime)
-                        .clipShape(Capsule())
+                        .fixedSize(horizontal: false, vertical: true)
 
-                    Text("Більше можливостей\nз Plus")
-                        .font(.system(size: 25, weight: .bold, design: .rounded))
-                        .foregroundColor(.white)
-
-                    Label("Персональний план", systemImage: "person.crop.circle")
-                    Label("AI без лімітів", systemImage: "sparkles")
-
-                    HStack {
-                        Text("від \(manager.displayPrice(for: SubscriptionManager.ProductID.monthly, fallback: "4.95 CHF")) / місяць")
-                            .font(.system(size: 12, weight: .semibold))
-                        Spacer()
-                        Text("Відкрити Plus")
-                            .font(.system(size: 13, weight: .bold))
-                            .foregroundColor(.black)
-                            .padding(.horizontal, 16)
-                            .frame(height: 42)
-                            .background(JourneyVisual.lime)
-                            .clipShape(Capsule())
+                    VStack(alignment: .leading, spacing: 5) {
+                        Label("Персональний план", systemImage: "checkmark.circle.fill")
+                        Label("AI без лімітів", systemImage: "checkmark.circle.fill")
                     }
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(.black.opacity(0.72))
+
+                    HStack(spacing: 6) {
+                        Text("Відкрити Plus")
+                            .lineLimit(1)
+                            .fixedSize()
+                        Image(systemName: "arrow.right")
+                    }
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundColor(JourneyVisual.lime)
+                    .padding(.horizontal, 16)
+                    .frame(height: 42)
+                    .background(JourneyVisual.black, in: Capsule())
+                    .padding(.top, 4)
+
+                    Text("від \(manager.displayPrice(for: SubscriptionManager.ProductID.monthly, fallback: fallbackPrice)) / місяць")
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundColor(.black.opacity(0.62))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
                 }
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundColor(.white.opacity(0.82))
-                .padding(18)
+                .padding(20)
+                .layoutPriority(1)
+
+                Spacer(minLength: 0)
+
+                SweezyCompanion(pose: .celebrate, size: 140)
+                    .idleFloat(enabled: !reduceMotion)
+                    .offset(x: 16, y: 14)
             }
-            .frame(height: 260)
-            .clipShape(RoundedRectangle(cornerRadius: 25, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: 25, style: .continuous)
-                    .stroke(JourneyVisual.lime.opacity(0.9), lineWidth: 1.3)
-            )
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background {
+                ZStack {
+                    LinearGradient(
+                        colors: [JourneyVisual.lime, JourneyVisual.lime.opacity(0.62)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                    Circle()
+                        .stroke(Color.white.opacity(0.5), lineWidth: 1.2)
+                        .frame(width: 260, height: 260)
+                        .offset(x: 120, y: 30)
+                    Circle()
+                        .stroke(Color.white.opacity(0.35), lineWidth: 1)
+                        .frame(width: 170, height: 170)
+                        .offset(x: 120, y: 30)
+                }
+            }
+            .clipShape(shape)
+            .contentShape(shape)
+            .shadow(color: JourneyVisual.lime.opacity(0.25), radius: 18, y: 8)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(CardPressStyle())
         .accessibilityIdentifier("home.plusCard")
         .task { await manager.load() }
+    }
+
+    private var fallbackPrice: String {
+        country == .switzerland ? "4.95 CHF" : "4.95 EUR"
     }
 }
 
@@ -630,7 +664,7 @@ struct CVPlusGateSheet: View {
             }
 
             Text("Продовжуй із\nSweezy Plus")
-                .font(.system(size: 34, weight: .bold, design: .rounded))
+                .font(.system(size: 34, weight: .bold, design: .default))
                 .foregroundColor(Theme.Colors.textPrimary)
 
             Text("Без лімітів для твого CV")

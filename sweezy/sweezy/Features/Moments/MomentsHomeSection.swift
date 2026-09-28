@@ -17,7 +17,7 @@ struct MomentsHomeSection: View {
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("moments.section.title".localized)
-                        .font(.system(size: 20, weight: .semibold, design: .rounded))
+                        .font(.system(size: 20, weight: .semibold, design: .default))
                     Text("moments.section.subtitle".localized)
                         .font(.system(size: 13))
                         .foregroundColor(Theme.Colors.textSecondary)
@@ -75,13 +75,13 @@ private struct MomentCard: View {
             HStack(spacing: Theme.Spacing.xs) {
                 Image(systemName: "bell.badge.fill")
                     .font(.system(size: 13, weight: .semibold))
-                    .foregroundColor(Theme.Colors.accent)
+                    .foregroundColor(JourneyVisual.accentStrong)
                 Text(deadlineLabel)
                     .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(Theme.Colors.accent)
+                    .foregroundColor(JourneyVisual.accentText)
             }
             Text(moment.title)
-                .font(.system(size: 17, weight: .semibold, design: .rounded))
+                .font(.system(size: 17, weight: .semibold, design: .default))
                 .foregroundColor(Theme.Colors.textPrimary)
                 .lineLimit(2)
             Text(moment.descriptionMd)
@@ -91,10 +91,10 @@ private struct MomentCard: View {
             HStack {
                 Text(NSLocalizedString(moment.ctaKind.localizedCtaKey, comment: ""))
                     .font(.system(size: 13, weight: .semibold))
-                    .foregroundColor(Theme.Colors.primary)
+                    .foregroundColor(JourneyVisual.accentText)
                 Image(systemName: "arrow.right")
                     .font(.system(size: 11, weight: .bold))
-                    .foregroundColor(Theme.Colors.primary)
+                    .foregroundColor(JourneyVisual.accentStrong)
             }
         }
         .frame(width: 280, alignment: .leading)

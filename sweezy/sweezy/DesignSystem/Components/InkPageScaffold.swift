@@ -17,7 +17,7 @@ struct InkPageScaffold<Header: View, Content: View>: View {
     var body: some View {
         ZStack {
             VStack(spacing: 0) {
-                Theme.Colors.ink
+                JourneyVisual.pageBackground
                 Theme.Colors.paper
             }
             .ignoresSafeArea()
@@ -28,7 +28,7 @@ struct InkPageScaffold<Header: View, Content: View>: View {
                     .padding(.horizontal, Theme.Spacing.md)
                     .padding(.top, Theme.Spacing.xs)
                     .padding(.bottom, Theme.Spacing.md + sheetCornerRadius)
-                    .background(Theme.Colors.ink)
+                    .background(JourneyVisual.pageBackground)
 
                 content()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -55,12 +55,12 @@ struct InkHeaderTitle: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(title)
-                .font(.system(size: 28, weight: .bold, design: .rounded))
-                .foregroundColor(.white)
+                .font(.system(size: 28, weight: .bold, design: .default))
+                .foregroundColor(JourneyVisual.primaryText)
             if let subtitle, !subtitle.isEmpty {
                 Text(subtitle)
                     .font(Theme.Typography.caption)
-                    .foregroundColor(.white.opacity(0.68))
+                    .foregroundColor(JourneyVisual.secondaryText)
             }
         }
     }
@@ -75,10 +75,10 @@ struct InkSearchField: View {
         HStack(spacing: 8) {
             Image(systemName: "magnifyingglass")
                 .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(.white.opacity(0.5))
-            TextField("", text: $text, prompt: Text(prompt).foregroundColor(.white.opacity(0.88)))
+                .foregroundColor(JourneyVisual.secondaryText)
+            TextField("", text: $text, prompt: Text(prompt).foregroundColor(JourneyVisual.secondaryText))
                 .font(.system(size: 15))
-                .foregroundColor(.white)
+                .foregroundColor(JourneyVisual.primaryText)
                 .autocorrectionDisabled()
             if !text.isEmpty {
                 Button {
@@ -86,7 +86,7 @@ struct InkSearchField: View {
                 } label: {
                     Image(systemName: "xmark.circle.fill")
                         .font(.system(size: 14))
-                        .foregroundColor(.white.opacity(0.5))
+                        .foregroundColor(JourneyVisual.secondaryText)
                 }
                 .accessibilityLabel("common.cancel".localized)
             }
@@ -95,11 +95,11 @@ struct InkSearchField: View {
         .padding(.vertical, 11)
         .background(
             RoundedRectangle(cornerRadius: Theme.CornerRadius.lg, style: .continuous)
-                .fill(Theme.Colors.inkElevated)
+                .fill(Theme.Colors.card)
         )
         .overlay(
             RoundedRectangle(cornerRadius: Theme.CornerRadius.lg, style: .continuous)
-                .stroke(Theme.Colors.inkBorder, lineWidth: 1)
+                .stroke(JourneyVisual.softBorder, lineWidth: 1)
                 .allowsHitTesting(false)
         )
     }

@@ -2,7 +2,7 @@
 //  CVBuilderView.swift
 //  sweezy
 //
-//  Professional CV Builder following Swiss standards.
+//  Professional CV Builder following local DACH standards.
 //  Features: step-by-step wizard, DE translation, AI enhancement.
 //
 
@@ -54,6 +54,26 @@ struct CVBuilderView: View {
     @State private var cvFreeActionsUsed = 0
     @State private var pendingPrivateAction: (() -> Void)?
     @FocusState private var isInputFocused: Bool
+
+    private var activeCountry: ResidenceCountry {
+        ResidenceCountry(rawValue: APIClient.countryCode) ?? .switzerland
+    }
+
+    private var locationPlaceholder: String {
+        switch activeCountry {
+        case .switzerland: return "Zürich, ZH"
+        case .germany: return "Berlin, DE-BE"
+        case .austria: return "Wien, AT-9"
+        }
+    }
+
+    private var phonePlaceholder: String {
+        switch activeCountry {
+        case .switzerland: return "+41 79 123 45 67"
+        case .germany: return "+49 151 12345678"
+        case .austria: return "+43 660 1234567"
+        }
+    }
     
     enum PreviewLanguage: String, CaseIterable {
         case ukrainian = "uk"
@@ -107,7 +127,7 @@ struct CVBuilderView: View {
     
     var body: some View {
         ZStack {
-                Color(red: 0.025, green: 0.03, blue: 0.028)
+                JourneyVisual.pageBackground
                     .ignoresSafeArea()
 
                 VStack(spacing: 0) {
@@ -238,12 +258,12 @@ struct CVBuilderView: View {
             } label: {
                 Image(systemName: "chevron.left")
                     .font(.system(size: 17, weight: .bold))
-                    .foregroundColor(.white)
+                    .foregroundColor(JourneyVisual.primaryText)
                     .frame(width: 44, height: 44)
-                    .background(Color.black.opacity(0.42))
+                    .background(Theme.Colors.card)
                     .background(.ultraThinMaterial.opacity(0.55))
                     .clipShape(Circle())
-                    .overlay(Circle().stroke(Color.white.opacity(0.18), lineWidth: 1))
+                    .overlay(Circle().stroke(JourneyVisual.softBorder, lineWidth: 1))
             }
             .buttonStyle(.plain)
             .contentShape(Circle())
@@ -254,13 +274,11 @@ struct CVBuilderView: View {
 
             VStack(spacing: 2) {
                 Text("CV Builder")
-                    .font(.system(size: 17, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
-                    .shadow(color: .black.opacity(0.45), radius: 6, y: 1)
+                    .font(.system(size: 17, weight: .bold, design: .default))
+                    .foregroundColor(JourneyVisual.primaryText)
                 Text("Крок \(currentStep.rawValue + 1) із \(CVStep.allCases.count)")
                     .font(.system(size: 11, weight: .medium))
-                    .foregroundColor(.white.opacity(0.82))
-                    .shadow(color: .black.opacity(0.4), radius: 4, y: 1)
+                    .foregroundColor(JourneyVisual.secondaryText)
             }
 
             Spacer()
@@ -270,12 +288,12 @@ struct CVBuilderView: View {
             } label: {
                 Image(systemName: "lightbulb.fill")
                     .font(.system(size: 17, weight: .semibold))
-                    .foregroundColor(JourneyVisual.lime)
+                    .foregroundColor(Theme.Colors.textPrimary)
                     .frame(width: 44, height: 44)
-                    .background(Color.black.opacity(0.42))
+                    .background(Theme.Colors.card)
                     .background(.ultraThinMaterial.opacity(0.55))
                     .clipShape(Circle())
-                    .overlay(Circle().stroke(Color.white.opacity(0.18), lineWidth: 1))
+                    .overlay(Circle().stroke(JourneyVisual.softBorder, lineWidth: 1))
             }
             .accessibilityLabel("Поради для швейцарського CV")
         }
@@ -295,35 +313,18 @@ struct CVBuilderView: View {
 
     private var cvHero: some View {
         ZStack(alignment: .bottomLeading) {
-            Image("cv-builder-hero")
-                .resizable()
-                .scaledToFill()
-                .frame(maxWidth: .infinity)
-                .frame(height: isInputFocused ? 148 : 276)
-                .clipped()
-
-            LinearGradient(
-                colors: [
-                    Color.black.opacity(0.28),
-                    Color.black.opacity(0.62),
-                    Color(red: 0.025, green: 0.03, blue: 0.028)
-                ],
-                startPoint: .topTrailing,
-                endPoint: .bottomLeading
-            )
+            JourneyVisual.pageBackground
 
             VStack(alignment: .leading, spacing: 10) {
                 if !isInputFocused {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("CV, який\nпомітять")
-                            .font(.system(size: 29, weight: .bold, design: .rounded))
-                            .foregroundColor(.white)
-                            .shadow(color: .black.opacity(0.55), radius: 8, y: 2)
-                            .lineSpacing(-2)
+                            .font(.system(size: 29, weight: .bold, design: .default))
+                            .foregroundColor(JourneyVisual.primaryText)
+                            .lineSpacing(1)
                         Text("Заповни основні дані — ми допоможемо решту.")
                             .font(.system(size: 13, weight: .medium))
-                            .foregroundColor(.white.opacity(0.92))
-                            .shadow(color: .black.opacity(0.5), radius: 6, y: 1)
+                            .foregroundColor(JourneyVisual.secondaryText)
                     }
                 }
                 progressBar
@@ -341,13 +342,13 @@ struct CVBuilderView: View {
         HStack(spacing: 8) {
             HStack(spacing: 6) {
                 Text("\(currentStep.rawValue + 1)")
-                    .font(.system(size: 12, weight: .black, design: .rounded))
+                    .font(.system(size: 12, weight: .black, design: .default))
                     .foregroundColor(.black)
                     .frame(width: 22, height: 22)
                     .background(JourneyVisual.lime)
                     .clipShape(Circle())
                 Text(currentStep.title)
-                    .font(.system(size: 11, weight: .bold, design: .rounded))
+                    .font(.system(size: 11, weight: .bold, design: .default))
                     .foregroundColor(.black)
                     .lineLimit(1)
             }
@@ -367,9 +368,9 @@ struct CVBuilderView: View {
             }
         }
         .padding(6)
-        .background(Color.black.opacity(0.58))
+        .background(Theme.Colors.card)
         .clipShape(Capsule())
-        .overlay(Capsule().stroke(Color.white.opacity(0.12), lineWidth: 1))
+        .overlay(Capsule().stroke(JourneyVisual.softBorder, lineWidth: 1))
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Крок \(currentStep.rawValue + 1) з \(CVStep.allCases.count): \(currentStep.title)")
     }
@@ -381,12 +382,12 @@ struct CVBuilderView: View {
                 CVInputCard {
                     HStack {
                         Text("Про тебе")
-                            .font(.system(size: 17, weight: .bold, design: .rounded))
-                            .foregroundColor(.white)
+                            .font(.system(size: 17, weight: .bold, design: .default))
+                            .foregroundColor(JourneyVisual.primaryText)
                         Spacer()
                         Text("Основне")
-                            .font(.system(size: 10, weight: .bold, design: .rounded))
-                            .foregroundColor(JourneyVisual.lime)
+                            .font(.system(size: 10, weight: .bold, design: .default))
+                            .foregroundColor(Theme.Colors.textPrimary)
                             .padding(.horizontal, 9)
                             .frame(height: 24)
                             .background(JourneyVisual.lime.opacity(0.1))
@@ -411,8 +412,8 @@ struct CVBuilderView: View {
                     
                     CVInputField(
                         icon: "mappin.circle.fill",
-                        title: "Місто, кантон",
-                        placeholder: "Zürich, ZH",
+                        title: "Місто, \(activeCountry.subdivisionTitle.lowercased())",
+                        placeholder: locationPlaceholder,
                         text: $cv.personal.location
                     )
                 }
@@ -420,12 +421,12 @@ struct CVBuilderView: View {
                 CVInputCard {
                     HStack {
                         Text("Контакти")
-                            .font(.system(size: 17, weight: .bold, design: .rounded))
-                            .foregroundColor(.white)
+                            .font(.system(size: 17, weight: .bold, design: .default))
+                            .foregroundColor(JourneyVisual.primaryText)
                         Spacer()
                         Image(systemName: "lock.fill")
                             .font(.system(size: 11, weight: .bold))
-                            .foregroundColor(JourneyVisual.lime)
+                            .foregroundColor(Theme.Colors.textPrimary)
                     }
 
                     CVInputField(
@@ -439,14 +440,14 @@ struct CVBuilderView: View {
                     CVInputField(
                         icon: "phone.fill",
                         title: "Телефон",
-                        placeholder: "+41 79 123 45 67",
+                        placeholder: phonePlaceholder,
                         text: $cv.personal.phone,
                         keyboard: .phonePad,
                         focus: $isInputFocused
                     )
                 }
 
-                swissTip("🇨🇭 У Швейцарії прийнято вказувати повну адресу та дату народження, але для приватності можна обмежитись містом.")
+                swissTip("\(activeCountry.flag) Для CV у \(activeCountry.name) перевір вимоги вакансії. З міркувань приватності адресу можна обмежити містом.")
             }
             .padding(.horizontal, 16)
             .padding(.top, 14)
@@ -465,7 +466,7 @@ struct CVBuilderView: View {
                     } else {
                         Image(systemName: "camera.fill")
                             .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(JourneyVisual.lime)
+                            .foregroundColor(Theme.Colors.textPrimary)
                     }
                 }
                 .frame(width: 48, height: 48)
@@ -476,25 +477,25 @@ struct CVBuilderView: View {
                 VStack(alignment: .leading, spacing: 3) {
                     Text(selectedPhotoData == nil ? "Додай фото профілю" : "Змінити фото")
                         .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(.white)
+                        .foregroundColor(JourneyVisual.primaryText)
                     Text("Необов’язково · фото не входить до ATS PDF")
                         .font(.system(size: 11, weight: .medium))
-                        .foregroundColor(.white.opacity(0.5))
+                        .foregroundColor(JourneyVisual.secondaryText)
                 }
 
                 Spacer()
 
                 Image(systemName: "chevron.right")
                     .font(.system(size: 12, weight: .bold))
-                    .foregroundColor(.white.opacity(0.34))
+                    .foregroundColor(JourneyVisual.secondaryText)
             }
             .padding(.horizontal, 12)
             .frame(minHeight: 66)
-            .background(Color.white.opacity(0.035))
+            .background(Theme.Colors.card)
             .clipShape(RoundedRectangle(cornerRadius: 15, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: 15, style: .continuous)
-                    .stroke(Color.white.opacity(0.11), lineWidth: 1)
+                    .stroke(JourneyVisual.softBorder, lineWidth: 1)
             )
         }
         .buttonStyle(.plain)
@@ -550,7 +551,7 @@ struct CVBuilderView: View {
                         CVInputField(icon: "mappin", title: "Місто", placeholder: "Zürich", text: $cv.experience[index].location)
                         CVTextArea(
                             title: "Досягнення",
-                            placeholder: "• Збільшив конверсію на 25%\n• Керував бюджетом 50K CHF",
+                            placeholder: "• Збільшив конверсію на 25%\n• Керував бюджетом 50K \(activeCountry.currencyCode)",
                             text: $cv.experience[index].achievements,
                             minHeight: 70,
                             focus: $isInputFocused
@@ -567,7 +568,7 @@ struct CVBuilderView: View {
                     cv.experience.append(CVExperience())
                 }
                 
-                swissTip("📊 Швейцарські роботодавці цінують конкретні цифри: %, CHF, кількість проєктів.")
+                swissTip("📊 Роботодавці цінують конкретні цифри: %, \(activeCountry.currencyCode), кількість проєктів.")
             }
             .padding(20)
         }
@@ -595,7 +596,7 @@ struct CVBuilderView: View {
                     cv.education.append(CVEducation())
                 }
                 
-                swissTip("🎓 Якщо ваш диплом ще не визнаний в Швейцарії, вкажіть це та додайте інформацію про процес визнання.")
+                swissTip("🎓 Якщо диплом ще не визнаний у \(activeCountry.name), вкажи це та додай інформацію про процес визнання.")
             }
             .padding(20)
         }
@@ -616,11 +617,11 @@ struct CVBuilderView: View {
                     VStack(alignment: .leading, spacing: 8) {
                         Label("Ключові навички", systemImage: "checkmark.seal.fill")
                             .font(.subheadline.bold())
-                            .foregroundColor(Theme.Colors.primary)
+                            .foregroundColor(JourneyVisual.accentText)
                         
                         Text("Введіть через кому")
                             .font(.caption)
-                            .foregroundColor(.white.opacity(0.5))
+                            .foregroundColor(JourneyVisual.secondaryText)
                         
                         TextField("Excel, SQL, Project Management...", text: Binding(
                             get: { cv.skills.joined(separator: ", ") },
@@ -630,7 +631,7 @@ struct CVBuilderView: View {
                         .font(.subheadline)
                         .foregroundColor(Theme.Colors.textOnPrimary)
                         .padding(12)
-                        .background(Color.white.opacity(0.05))
+                        .background(Theme.Colors.card)
                         .cornerRadius(12)
                     }
                 }
@@ -640,16 +641,16 @@ struct CVBuilderView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         Label("Мови", systemImage: "globe")
                             .font(.subheadline.bold())
-                            .foregroundColor(Theme.Colors.primary)
+                            .foregroundColor(JourneyVisual.accentText)
                         
                         ForEach($cv.languages.indices, id: \.self) { index in
                             HStack(spacing: 12) {
                                 TextField("Мова", text: $cv.languages[index].name)
                                     .focused($isInputFocused)
                                     .font(.subheadline)
-                                    .foregroundColor(.white)
+                                    .foregroundColor(JourneyVisual.primaryText)
                                     .padding(10)
-                                    .background(Color.white.opacity(0.05))
+                                    .background(Theme.Colors.card)
                                     .cornerRadius(10)
                                 
                                 Picker("Рівень", selection: $cv.languages[index].level) {
@@ -662,7 +663,7 @@ struct CVBuilderView: View {
                                     Text("Рідна").tag("Рідна")
                                 }
                                 .pickerStyle(.menu)
-                                .tint(Theme.Colors.primary)
+                                .tint(JourneyVisual.accentText)
                             }
                         }
                         
@@ -698,7 +699,7 @@ struct CVBuilderView: View {
                             .tint(Theme.Colors.primary)
                         Text("Перекладаємо на німецьку...")
                             .font(.caption)
-                            .foregroundColor(.white.opacity(0.7))
+                            .foregroundColor(JourneyVisual.secondaryText)
                     }
                     .padding()
                 }
@@ -712,7 +713,7 @@ struct CVBuilderView: View {
 
                 Text("Німецька версія охоплює профіль, досвід, освіту, навички та мови. Після будь-якої зміни вихідного CV переклад оновлюється.")
                     .font(.caption2)
-                    .foregroundColor(.white.opacity(0.5))
+                    .foregroundColor(JourneyVisual.secondaryText)
                 
                 // Generated CV preview
                 cvPreviewCard
@@ -758,18 +759,18 @@ struct CVBuilderView: View {
                         .font(.subheadline.bold())
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 14)
-                        .background(Color.white.opacity(0.1))
-                        .foregroundColor(.white)
+                        .background(Theme.Colors.card)
+                        .foregroundColor(JourneyVisual.primaryText)
                         .cornerRadius(14)
                         .overlay(
                             RoundedRectangle(cornerRadius: 14)
-                                .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                                .stroke(JourneyVisual.softBorder, lineWidth: 1)
                         )
                     }
                 }
                 Text("PDF — для завантаження файлу роботодавцю. Одноколонковий макет без фото з виділюваним текстом.")
                     .font(.caption)
-                    .foregroundColor(.white.opacity(0.58))
+                    .foregroundColor(JourneyVisual.secondaryText)
             }
             .padding(20)
         }
@@ -796,7 +797,7 @@ struct CVBuilderView: View {
                         Text(lang.name)
                             .font(.subheadline.bold())
                     }
-                    .foregroundColor(previewLanguage == lang ? .white : .white.opacity(0.5))
+                    .foregroundColor(previewLanguage == lang ? JourneyVisual.primaryText : JourneyVisual.primaryText)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 10)
                     .background(
@@ -807,11 +808,11 @@ struct CVBuilderView: View {
                 }
             }
         }
-        .background(Color.white.opacity(0.08))
+        .background(Theme.Colors.card)
         .cornerRadius(12)
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.white.opacity(0.15), lineWidth: 1)
+                .stroke(JourneyVisual.softBorder, lineWidth: 1)
         )
     }
     
@@ -823,23 +824,23 @@ struct CVBuilderView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(displayCV.personal.fullName.isEmpty ? "Ваше ім'я" : displayCV.personal.fullName)
                     .font(.title2.bold())
-                    .foregroundColor(.white)
+                    .foregroundColor(JourneyVisual.primaryText)
                 
                 if !displayCV.personal.title.isEmpty {
                     Text(displayCV.personal.title)
                         .font(.subheadline)
-                        .foregroundColor(Theme.Colors.primary)
+                        .foregroundColor(JourneyVisual.accentText)
                 }
                 
                 let contacts = [displayCV.personal.location, displayCV.personal.phone, displayCV.personal.email].filter { !$0.isEmpty }
                 if !contacts.isEmpty {
                     Text(contacts.joined(separator: " • "))
                         .font(.caption)
-                        .foregroundColor(.white.opacity(0.6))
+                        .foregroundColor(JourneyVisual.secondaryText)
                 }
             }
             
-            Divider().background(Color.white.opacity(0.2))
+            Divider().background(Theme.Colors.card)
             
             // Summary
             if !displayCV.personal.summary.isEmpty {
@@ -851,20 +852,20 @@ struct CVBuilderView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     Text(previewLanguage == .german ? "BERUFSERFAHRUNG" : "ДОСВІД РОБОТИ")
                         .font(.caption.bold())
-                        .foregroundColor(Theme.Colors.primary)
+                        .foregroundColor(JourneyVisual.accentText)
                     
                     ForEach(displayCV.experience.filter { !$0.company.isEmpty }) { exp in
                         VStack(alignment: .leading, spacing: 2) {
                             Text("\(exp.role) — \(exp.company)")
                                 .font(.subheadline.bold())
-                                .foregroundColor(.white)
+                                .foregroundColor(JourneyVisual.primaryText)
                             Text("\(exp.period) • \(exp.location)")
                                 .font(.caption)
-                                .foregroundColor(.white.opacity(0.6))
+                                .foregroundColor(JourneyVisual.secondaryText)
                             if !exp.achievements.isEmpty {
                                 Text(exp.achievements)
                                     .font(.caption)
-                                    .foregroundColor(.white.opacity(0.8))
+                                    .foregroundColor(JourneyVisual.secondaryText)
                             }
                         }
                         .padding(.bottom, 6)
@@ -877,16 +878,16 @@ struct CVBuilderView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     Text(previewLanguage == .german ? "AUSBILDUNG" : "ОСВІТА")
                         .font(.caption.bold())
-                        .foregroundColor(Theme.Colors.primary)
+                        .foregroundColor(JourneyVisual.accentText)
                     
                     ForEach(displayCV.education.filter { !$0.school.isEmpty }) { edu in
                         VStack(alignment: .leading, spacing: 2) {
                             Text(edu.degree)
                                 .font(.subheadline.bold())
-                                .foregroundColor(.white)
+                                .foregroundColor(JourneyVisual.primaryText)
                             Text("\(edu.school) • \(edu.period)")
                                 .font(.caption)
-                                .foregroundColor(.white.opacity(0.6))
+                                .foregroundColor(JourneyVisual.secondaryText)
                         }
                     }
                 }
@@ -902,11 +903,11 @@ struct CVBuilderView: View {
                 VStack(alignment: .leading, spacing: 6) {
                     Text(previewLanguage == .german ? "SPRACHEN" : "МОВИ")
                         .font(.caption.bold())
-                        .foregroundColor(Theme.Colors.primary)
+                        .foregroundColor(JourneyVisual.accentText)
                     
                     Text(displayCV.languages.filter { !$0.name.isEmpty }.map { "\($0.name) — \($0.level)" }.joined(separator: ", "))
                         .font(.caption)
-                        .foregroundColor(.white.opacity(0.8))
+                        .foregroundColor(JourneyVisual.secondaryText)
                 }
             }
         }
@@ -914,7 +915,7 @@ struct CVBuilderView: View {
         .accessibilityIdentifier("cv.preview.card")
         .background(
             RoundedRectangle(cornerRadius: 20)
-                .fill(Color.white.opacity(0.05))
+                .fill(JourneyVisual.softBorder)
                 .overlay(
                     RoundedRectangle(cornerRadius: 20)
                         .stroke(
@@ -933,10 +934,10 @@ struct CVBuilderView: View {
         VStack(alignment: .leading, spacing: 6) {
             Text(title)
                 .font(.caption.bold())
-                .foregroundColor(Theme.Colors.primary)
+                .foregroundColor(JourneyVisual.accentText)
             Text(content)
                 .font(.caption)
-                .foregroundColor(.white.opacity(0.8))
+                .foregroundColor(JourneyVisual.secondaryText)
         }
     }
     
@@ -978,7 +979,7 @@ struct CVBuilderView: View {
             if let aiError {
                 Text(aiError).font(.caption).foregroundColor(.red)
             } else if let aiSuccess {
-                Text(aiSuccess).font(.caption).foregroundColor(JourneyVisual.lime)
+                Text(aiSuccess).font(.caption).foregroundColor(Theme.Colors.textPrimary)
             }
         }
     }
@@ -992,13 +993,13 @@ struct CVBuilderView: View {
                 } label: {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(.white)
+                        .foregroundColor(JourneyVisual.primaryText)
                         .frame(width: 54, height: 54)
-                        .background(Color.white.opacity(0.08))
+                        .background(Theme.Colors.card)
                         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                         .overlay(
                             RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                .stroke(Color.white.opacity(0.14), lineWidth: 1)
+                                .stroke(JourneyVisual.softBorder, lineWidth: 1)
                         )
                 }
                 .accessibilityLabel("Попередній крок")
@@ -1018,7 +1019,7 @@ struct CVBuilderView: View {
                     Spacer()
                     Image(systemName: currentStep == .preview ? "checkmark" : "arrow.right")
                 }
-                .font(.system(size: 15, weight: .bold, design: .rounded))
+                .font(.system(size: 15, weight: .bold, design: .default))
                 .foregroundColor(.black)
                 .padding(.horizontal, 20)
                 .frame(maxWidth: .infinity)
@@ -1032,10 +1033,10 @@ struct CVBuilderView: View {
         .padding(.horizontal, 16)
         .padding(.top, 10)
         .padding(.bottom, 12)
-        .background(Color.black.opacity(0.96))
+        .background(Theme.Colors.card)
         .overlay(alignment: .top) {
             Rectangle()
-                .fill(Color.white.opacity(0.08))
+                .fill(JourneyVisual.softBorder)
                 .frame(height: 1)
         }
     }
@@ -1074,16 +1075,16 @@ struct CVBuilderView: View {
                 
                 Image(systemName: icon)
                     .font(.title3)
-                    .foregroundColor(Theme.Colors.primary)
+                    .foregroundColor(JourneyVisual.accentStrong)
             }
             
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                     .font(.headline)
-                    .foregroundColor(.white)
+                    .foregroundColor(JourneyVisual.primaryText)
                 Text(subtitle)
                     .font(.caption)
-                    .foregroundColor(.white.opacity(0.6))
+                    .foregroundColor(JourneyVisual.secondaryText)
             }
             
             Spacer()
@@ -1093,10 +1094,10 @@ struct CVBuilderView: View {
     private func swissTip(_ text: String) -> some View {
         HStack(alignment: .top, spacing: 10) {
             Image(systemName: "lightbulb.fill")
-                .foregroundColor(Theme.Colors.accent)
+                .foregroundColor(JourneyVisual.accentStrong)
             Text(text)
                 .font(.caption)
-                .foregroundColor(.white.opacity(0.8))
+                .foregroundColor(JourneyVisual.secondaryText)
         }
         .padding(14)
         .background(
@@ -1116,7 +1117,7 @@ struct CVBuilderView: View {
                 Text(title)
             }
             .font(.subheadline.bold())
-            .foregroundColor(Theme.Colors.primary)
+            .foregroundColor(JourneyVisual.accentText)
             .padding(.vertical, 12)
             .frame(maxWidth: .infinity)
             .background(Theme.Colors.primary.opacity(0.1))
@@ -1133,22 +1134,22 @@ struct CVBuilderView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
-                    tipItem(icon: "1.circle.fill", title: "Формат", text: "Стандартний швейцарський CV — 2 сторінки максимум. Чіткий, без зайвої графіки.")
+                    tipItem(icon: "1.circle.fill", title: "Формат", text: "Лаконічний CV для \(activeCountry.nativeName): до 2 сторінок, чітка структура, без зайвої графіки.")
                     tipItem(icon: "2.circle.fill", title: "Фото", text: "Професійне фото бажане, але не обов'язкове. Якщо додаєте — діловий стиль.")
                     tipItem(icon: "3.circle.fill", title: "Мови", text: "Вказуйте рівень за CEFR (A1–C2). Німецька/французька — величезний плюс.")
                     tipItem(icon: "4.circle.fill", title: "Досвід", text: "Від найновішого до найстаршого. Конкретні цифри та досягнення.")
                     tipItem(icon: "5.circle.fill", title: "Рекомендації", text: "'Referenzen auf Anfrage' — рекомендації за запитом.")
-                    tipItem(icon: "6.circle.fill", title: "Дата", text: "У Швейцарії прийнято вказувати дату оновлення CV внизу.")
+                    tipItem(icon: "6.circle.fill", title: "Актуальність", text: "Перевір контакти, дати та відповідність CV конкретній вакансії перед відправленням.")
                 }
                 .padding(20)
             }
             .background(Color.clear)
-            .navigationTitle("Швейцарські стандарти CV")
+            .navigationTitle("CV · \(activeCountry.nativeName)")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Готово") { showTips = false }
-                        .foregroundColor(Theme.Colors.primary)
+                        .foregroundColor(JourneyVisual.accentText)
                 }
             }
         }
@@ -1159,20 +1160,20 @@ struct CVBuilderView: View {
         HStack(alignment: .top, spacing: 12) {
             Image(systemName: icon)
                 .font(.title2)
-                .foregroundColor(Theme.Colors.primary)
+                .foregroundColor(JourneyVisual.accentStrong)
             
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
                     .font(.subheadline.bold())
-                    .foregroundColor(.white)
+                    .foregroundColor(JourneyVisual.primaryText)
                 Text(text)
                     .font(.caption)
-                    .foregroundColor(.white.opacity(0.7))
+                    .foregroundColor(JourneyVisual.secondaryText)
             }
         }
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.white.opacity(0.05))
+        .background(Theme.Colors.card)
         .cornerRadius(14)
     }
     
@@ -1426,7 +1427,7 @@ private struct CVInputCard<Content: View>: View {
             .padding(14)
             .background(
                 RoundedRectangle(cornerRadius: 20, style: .continuous)
-                    .fill(Color(red: 0.075, green: 0.082, blue: 0.078).opacity(0.98))
+                    .fill(Theme.Colors.card)
                     .overlay(
                         RoundedRectangle(cornerRadius: 20, style: .continuous)
                             .stroke(
@@ -1439,7 +1440,6 @@ private struct CVInputCard<Content: View>: View {
                             )
                     )
             )
-            .shadow(color: .black.opacity(0.2), radius: 12, y: 7)
     }
 }
 
@@ -1456,19 +1456,19 @@ private struct CVInputField: View {
         HStack(spacing: 11) {
             Image(systemName: icon)
                 .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(.white.opacity(0.74))
+                .foregroundColor(JourneyVisual.secondaryText)
                 .frame(width: 34, height: 34)
-                .background(Color.white.opacity(0.055))
+                .background(Theme.Colors.card)
                 .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
 
             VStack(alignment: .leading, spacing: 1) {
                 Text(title)
                     .font(.system(size: 10, weight: .semibold))
-                    .foregroundColor(.white.opacity(0.52))
+                    .foregroundColor(JourneyVisual.secondaryText)
 
                 TextField(placeholder, text: $text)
                     .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.white)
+                    .foregroundColor(JourneyVisual.primaryText)
                     .keyboardType(keyboard)
                     .textInputAutocapitalization(keyboard == .emailAddress ? .never : .sentences)
                     .autocorrectionDisabled(keyboard == .emailAddress)
@@ -1478,7 +1478,7 @@ private struct CVInputField: View {
         }
         .padding(.horizontal, 10)
         .frame(minHeight: 58)
-        .background(Color.white.opacity(0.035))
+        .background(Theme.Colors.card)
         .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 14, style: .continuous)
@@ -1498,28 +1498,28 @@ private struct CVTextArea: View {
         VStack(alignment: .leading, spacing: 6) {
             Text(title)
                 .font(.caption.bold())
-                .foregroundColor(Theme.Colors.primary.opacity(0.9))
+                .foregroundColor(JourneyVisual.accentText.opacity(0.9))
             
             ZStack(alignment: .topLeading) {
                 TextEditor(text: $text)
                     .focused(focus)
                     .accessibilityIdentifier("cv.textarea.\(title)")
                     .font(.subheadline)
-                    .foregroundColor(.white)
+                    .foregroundColor(JourneyVisual.primaryText)
                     .scrollContentBackground(.hidden)
                     .frame(minHeight: minHeight)
                     .padding(10)
-                    .background(Color.white.opacity(0.05))
+                    .background(Theme.Colors.card)
                     .cornerRadius(12)
                     .overlay(
                         RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                            .stroke(JourneyVisual.softBorder, lineWidth: 1)
                     )
                 
                 if text.isEmpty {
                     Text(placeholder)
                         .font(.caption)
-                        .foregroundColor(.white.opacity(0.3))
+                        .foregroundColor(JourneyVisual.secondaryText)
                         .padding(.horizontal, 14)
                         .padding(.vertical, 18)
                         .allowsHitTesting(false)

@@ -25,10 +25,24 @@ struct Theme {
         static let accentWarmGreen = JourneyVisual.lime
         static let accentCoral = Color(red: 1.0, green: 0.439, blue: 0.263) // #FF7043 Warm Orange
 
-        // MARK: Surface Colors (Light)
-        static let surface = Color(red: 0.980, green: 0.992, blue: 0.969) // #FAFDF7 spring white-green
-        static let card = Color(red: 1.0, green: 1.0, blue: 1.0).opacity(0.85)
-        static let divider = Color.black.opacity(0.06)
+        // MARK: Semantic surfaces
+        // Keep component code theme-agnostic. Hard-coded white surfaces caused
+        // washed-out cards in dark mode and black islands in light mode.
+        static let surface = Color(UIColor { tc in
+            tc.userInterfaceStyle == .dark
+                ? UIColor(red: 0.055, green: 0.072, blue: 0.052, alpha: 1)
+                : UIColor(red: 0.976, green: 0.969, blue: 0.941, alpha: 1)
+        })
+        static let card = Color(UIColor { tc in
+            tc.userInterfaceStyle == .dark
+                ? UIColor(red: 0.088, green: 0.110, blue: 0.082, alpha: 0.96)
+                : UIColor(white: 1.0, alpha: 0.94)
+        })
+        static let divider = Color(UIColor { tc in
+            tc.userInterfaceStyle == .dark
+                ? UIColor(white: 1.0, alpha: 0.10)
+                : UIColor(white: 0.0, alpha: 0.07)
+        })
 
         // MARK: Ink & Paper (layered surfaces: dark pine header + light sheet)
         /// Deep pine green used for dark header blocks. Same in both schemes —
@@ -41,7 +55,7 @@ struct Theme {
         static let paper = Color(UIColor { tc in
             tc.userInterfaceStyle == .dark
                 ? UIColor(white: 0.02, alpha: 0.38)
-                : UIColor(red: 0.980, green: 0.992, blue: 0.969, alpha: 1.0) // #FAFDF7
+                : UIColor(red: 0.976, green: 0.969, blue: 0.941, alpha: 1.0) // #FAFDF7
         })
         /// Opaque card on paper: solid white in light, elevated green-tinted in dark.
         static let paperCard = Color(UIColor { tc in
@@ -51,8 +65,12 @@ struct Theme {
         })
 
         // MARK: Spring Backgrounds
-        static let backgroundIvory = Color(red: 0.980, green: 0.992, blue: 0.969) // #FAFDF7
-        static let backgroundStone = Color(red: 0.945, green: 0.973, blue: 0.914) // #F1F8E9
+        static let backgroundIvory = surface
+        static let backgroundStone = Color(UIColor { tc in
+            tc.userInterfaceStyle == .dark
+                ? UIColor(red: 0.070, green: 0.092, blue: 0.065, alpha: 1)
+                : UIColor(red: 0.945, green: 0.973, blue: 0.914, alpha: 1)
+        })
 
         // MARK: Text Colors (adaptive: dark text on light bg, white on dark bg)
         static var textPrimary: Color {
@@ -117,7 +135,7 @@ struct Theme {
             Color(UIColor { traitCollection in
                 traitCollection.userInterfaceStyle == .dark
                     ? UIColor(white: 0.015, alpha: 0.24)
-                    : UIColor(red: 0.980, green: 0.992, blue: 0.969, alpha: 1.0) // #FAFDF7
+                    : UIColor(red: 0.976, green: 0.969, blue: 0.941, alpha: 1.0) // #FAFDF7
             })
         }
         
@@ -249,24 +267,28 @@ struct Theme {
                 ? UIColor(white: 1.0, alpha: 0.09)
                 : UIColor(red: 0.180, green: 0.490, blue: 0.196, alpha: 0.06)
         })
-        static let inputBorder = Color(red: 0.878, green: 0.878, blue: 0.878) // #E0E0E0
+        static let inputBorder = Color(UIColor { tc in
+            tc.userInterfaceStyle == .dark
+                ? UIColor(white: 1.0, alpha: 0.16)
+                : UIColor(white: 0.0, alpha: 0.12)
+        })
         static let focusGlow = accentTurquoise.opacity(0.35)
     }
     
     // MARK: - Typography
     struct Typography {
-        // MARK: Display Hierarchy (GoIT-inspired bold scale)
-        static let megaTitle = Font.system(size: 48, weight: .bold, design: .default) // Hero headlines
-        static let largeTitle = Font.system(size: 34, weight: .bold, design: .default)
-        static let title1 = Font.system(size: 28, weight: .bold, design: .default)
-        static let title2 = Font.system(size: 24, weight: .semibold, design: .default)
-        static let headline = Font.system(size: 20, weight: .semibold, design: .default)
+        // Compact SF Pro hierarchy. Display text no longer consumes half a phone.
+        static let megaTitle = Font.system(size: 34, weight: .bold, design: .default)
+        static let largeTitle = Font.system(size: 29, weight: .bold, design: .default)
+        static let title1 = Font.system(size: 24, weight: .bold, design: .default)
+        static let title2 = Font.system(size: 20, weight: .semibold, design: .default)
+        static let headline = Font.system(size: 17, weight: .semibold, design: .default)
         
         // MARK: Body Text
-        static let body = Font.system(size: 17, weight: .regular, design: .default)
-        static let subhead = Font.system(size: 22, weight: .semibold, design: .default)
-        static let callout = Font.system(size: 16, weight: .regular, design: .default)
-        static let subheadline = Font.system(size: 15, weight: .medium, design: .default)
+        static let body = Font.system(size: 16, weight: .regular, design: .default)
+        static let subhead = Font.system(size: 18, weight: .semibold, design: .default)
+        static let callout = Font.system(size: 15, weight: .regular, design: .default)
+        static let subheadline = Font.system(size: 14, weight: .medium, design: .default)
         static let footnote = Font.system(size: 13, weight: .regular, design: .default)
         
         // MARK: Small Text
@@ -274,7 +296,26 @@ struct Theme {
         static let caption2 = Font.system(size: 11, weight: .regular, design: .default)
         
         // MARK: Mono (Numbers/Code)
-        static let mono = Font.system(size: 17, weight: .regular, design: .monospaced)
+        static let mono = Font.system(size: 16, weight: .regular, design: .monospaced)
+    }
+
+    // MARK: - Adaptive Layout
+    struct Layout {
+        static let minimumTouchTarget: CGFloat = 44
+        static let compactWidth: CGFloat = 360
+        static let regularContentMaxWidth: CGFloat = 760
+
+        static func horizontalPadding(for width: CGFloat) -> CGFloat {
+            if width <= compactWidth { return 16 }
+            if width >= 700 { return 28 }
+            return 20
+        }
+
+        static func heroTitleSize(for width: CGFloat) -> CGFloat {
+            if width <= compactWidth { return 26 }
+            if width >= 700 { return 34 }
+            return 29
+        }
     }
     
     // MARK: - Spacing
@@ -347,6 +388,11 @@ struct Theme {
         static let fast = SwiftUI.Animation.easeInOut(duration: 0.25)
         static let normal = SwiftUI.Animation.easeInOut(duration: 0.35)
         static let slow = SwiftUI.Animation.easeInOut(duration: 0.5)
+
+        // Purposeful entrance choreography. Total sequence stays under 0.7 s.
+        static let entrance = SwiftUI.Animation.spring(response: 0.36, dampingFraction: 0.88)
+        static let selection = SwiftUI.Animation.spring(response: 0.30, dampingFraction: 0.82)
+        static let contentSwap = SwiftUI.Animation.easeInOut(duration: 0.22)
     }
 }
 
@@ -494,7 +540,7 @@ private struct LockOverlay: View {
                 
                 Image(systemName: "lock.fill")
                     .font(.system(size: 24, weight: .semibold))
-                    .foregroundColor(Theme.Colors.primary)
+                    .foregroundColor(JourneyVisual.accentStrong)
             }
             
             Text(message)

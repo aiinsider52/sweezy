@@ -7,20 +7,20 @@ struct BusinessProfileOnboarding: View {
         ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: 24) {
                 Spacer(minLength: 48)
-                Text("SWEEZY PRO · PLUS").font(.caption.bold()).tracking(3).foregroundStyle(JourneyVisual.lime)
-                Text("Перетвори профіль\nна робочий бізнес").font(.system(size: 39, weight: .black, design: .rounded)).foregroundStyle(.white)
-                Text("Заявки, клієнти, записи, документи та AI-рецепціоніст — в одному місці.").font(.title3).foregroundStyle(.white.opacity(0.62))
+                Text("SWEEZY PRO · PLUS").font(.caption.bold()).tracking(3).foregroundStyle(Theme.Colors.textPrimary)
+                Text("Перетвори профіль\nна робочий бізнес").font(.system(size: 30, weight: .black, design: .default)).foregroundStyle(JourneyVisual.primaryText)
+                Text("Заявки, клієнти, записи, документи та AI-рецепціоніст — в одному місці.").font(.title3).foregroundStyle(JourneyVisual.secondaryText)
                 VStack(spacing: 0) {
                     benefit("person.crop.circle.badge.plus", "Нові клієнти", "Заявки з Marketplace автоматично потрапляють у CRM")
                     benefit("calendar.badge.clock", "Онлайн-запис", "Реальний графік, статуси й нагадування")
                     benefit("sparkles", "AI-рецепціоніст", "Налаштовується під твої послуги та стиль")
                     benefit("chart.line.uptrend.xyaxis", "Зростання", "Конверсія, перегляди й просування")
-                }.background(.black.opacity(0.5), in: RoundedRectangle(cornerRadius: 25)).overlay(RoundedRectangle(cornerRadius: 25).stroke(JourneyVisual.lime.opacity(0.22)))
+                }.background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 25)).overlay(RoundedRectangle(cornerRadius: 25).stroke(JourneyVisual.lime.opacity(0.22)))
                 Button { showEditor = true } label: { HStack { Text("Створити бізнес-профіль"); Spacer(); Image(systemName: "arrow.right") }.font(.headline).foregroundStyle(.black).padding(.horizontal, 22).frame(height: 60).background(JourneyVisual.lime, in: RoundedRectangle(cornerRadius: 19)) }.buttonStyle(.plain)
             }.padding(24).padding(.bottom, 40)
         }.sheet(isPresented: $showEditor) { BusinessProfileEditor(model: model, isOnboarding: true) }
     }
-    private func benefit(_ icon: String, _ title: String, _ subtitle: String) -> some View { HStack(spacing: 14) { Image(systemName: icon).font(.title3).foregroundStyle(JourneyVisual.lime).frame(width: 42); VStack(alignment: .leading, spacing: 3) { Text(title).font(.headline).foregroundStyle(.white); Text(subtitle).font(.caption).foregroundStyle(.white.opacity(0.52)) }; Spacer() }.padding(17) }
+    private func benefit(_ icon: String, _ title: String, _ subtitle: String) -> some View { HStack(spacing: 14) { Image(systemName: icon).font(.title3).foregroundStyle(Theme.Colors.textPrimary).frame(width: 42); VStack(alignment: .leading, spacing: 3) { Text(title).font(.headline).foregroundStyle(JourneyVisual.primaryText); Text(subtitle).font(.caption).foregroundStyle(JourneyVisual.secondaryText) }; Spacer() }.padding(17) }
 }
 
 struct BusinessProfileEditor: View {
@@ -47,7 +47,7 @@ struct BusinessProfileEditor: View {
             ProField("UID", text: optional($payload.uidNumber))
             ProTextArea("Правила скасування", text: optional($payload.cancellationPolicy), hint: "Наприклад: безкоштовне скасування за 24 години")
             VStack(alignment: .leading, spacing: 10) {
-                Text("Формат роботи").font(.caption.bold()).foregroundStyle(.white.opacity(0.55))
+                Text("Формат роботи").font(.caption.bold()).foregroundStyle(JourneyVisual.secondaryText)
                 HStack { mode("У себе", "onsite"); mode("Онлайн", "remote"); mode("З виїздом", "mobile") }
             }
             if model.profile?.status == "rejected", let reason = model.profile?.rejectionReason { Label(reason, systemImage: "exclamationmark.triangle.fill").foregroundStyle(.orange).padding(14).background(.orange.opacity(0.1), in: RoundedRectangle(cornerRadius: 14)) }
@@ -58,7 +58,7 @@ struct BusinessProfileEditor: View {
         }
     }
     private var valid: Bool { payload.displayName.trimmingCharacters(in: .whitespaces).count >= 2 && payload.description.count >= 10 && !payload.city.isEmpty }
-    private func mode(_ title: String, _ value: String) -> some View { Button { if payload.deliveryModes.contains(value) { payload.deliveryModes.removeAll { $0 == value } } else { payload.deliveryModes.append(value) } } label: { Text(title).font(.caption.bold()).foregroundStyle(payload.deliveryModes.contains(value) ? .black : .white).padding(.horizontal, 12).frame(height: 40).background(payload.deliveryModes.contains(value) ? JourneyVisual.lime : .white.opacity(0.08), in: Capsule()) }.buttonStyle(.plain) }
+    private func mode(_ title: String, _ value: String) -> some View { Button { if payload.deliveryModes.contains(value) { payload.deliveryModes.removeAll { $0 == value } } else { payload.deliveryModes.append(value) } } label: { Text(title).font(.caption.bold()).foregroundStyle(payload.deliveryModes.contains(value) ? .black : JourneyVisual.primaryText).padding(.horizontal, 12).frame(height: 40).background(payload.deliveryModes.contains(value) ? JourneyVisual.lime : JourneyVisual.softSurface, in: Capsule()) }.buttonStyle(.plain) }
     private func save(submit: Bool) { working = true; payload.languages = split(languages); payload.serviceArea = split(serviceArea); Task { if await model.saveProfile(payload, submit: submit) { dismiss() }; working = false } }
     private func split(_ value: String) -> [String] { value.split(separator: ",").map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty } }
     private func optional(_ binding: Binding<String?>) -> Binding<String> { Binding(get: { binding.wrappedValue ?? "" }, set: { binding.wrappedValue = $0.isEmpty ? nil : $0 }) }
@@ -80,14 +80,14 @@ struct BusinessServiceEditor: View {
                     Text(listing.title).tag(Optional(listing.id))
                 }
             }
-            .tint(JourneyVisual.lime)
+            .tint(JourneyVisual.accentText)
             Text("Прив’язка додає клієнтам реальну кнопку запису у картці послуги.")
                 .font(.caption)
-                .foregroundStyle(.white.opacity(0.48))
+                .foregroundStyle(JourneyVisual.secondaryText)
         }
         ProTextArea("Опис", text: $payload.description, hint: "Результат, умови й важливі деталі")
         ProField("Категорія", text: $payload.category)
-        Stepper("Тривалість: \(payload.durationMinutes) хв", value: $payload.durationMinutes, in: 15...480, step: 15).foregroundStyle(.white)
+        Stepper("Тривалість: \(payload.durationMinutes) хв", value: $payload.durationMinutes, in: 15...480, step: 15).foregroundStyle(JourneyVisual.primaryText)
         ProField("Ціна CHF", text: $price, keyboard: .decimalPad)
         Picker("Формат", selection: $payload.deliveryMode) { Text("У себе").tag("onsite"); Text("Онлайн").tag("remote"); Text("З виїздом").tag("mobile") }.pickerStyle(.segmented)
         Button { working = true; payload.priceCents = Double(price).map { Int($0 * 100) }; Task { if await model.addService(payload) { dismiss() }; working = false } } label: { ProSubmitLabel(title: "Додати послугу", working: working) }.disabled(payload.title.count < 2 || working)
@@ -102,8 +102,8 @@ struct BusinessBookingEditor: View {
     @State private var working = false
     var body: some View { ProFormShell(title: "Новий запис") {
         ProField("Ім’я клієнта", text: $payload.customerName)
-        DatePicker("Початок", selection: $payload.startsAt).datePickerStyle(.compact).foregroundStyle(.white)
-        DatePicker("Кінець", selection: $payload.endsAt).datePickerStyle(.compact).foregroundStyle(.white)
+        DatePicker("Початок", selection: $payload.startsAt).datePickerStyle(.compact).foregroundStyle(JourneyVisual.primaryText)
+        DatePicker("Кінець", selection: $payload.endsAt).datePickerStyle(.compact).foregroundStyle(JourneyVisual.primaryText)
         ProField("Місце", text: optional($payload.location))
         ProField("Ціна CHF", text: $price, keyboard: .decimalPad)
         ProTextArea("Нотатки", text: $payload.notes, hint: "Що потрібно підготувати")
@@ -150,7 +150,7 @@ struct BusinessTeamEditor: View {
         ProField("Ім’я", text: $payload.displayName)
         ProField("Email", text: $payload.email, keyboard: .emailAddress)
         Picker("Роль", selection: $payload.role) { Text("Менеджер").tag("manager"); Text("Працівник").tag("staff"); Text("Перегляд").tag("viewer") }.pickerStyle(.segmented)
-        Text("Учасник отримає статус pending. Повноцінні запрошення активуються після підтвердження email.").font(.caption).foregroundStyle(.white.opacity(0.5))
+        Text("Учасник отримає статус pending. Повноцінні запрошення активуються після підтвердження email.").font(.caption).foregroundStyle(JourneyVisual.secondaryText)
         Button { working = true; Task { if await model.addTeam(payload) { dismiss() }; working = false } } label: { ProSubmitLabel(title: "Додати учасника", working: working) }.disabled(payload.displayName.isEmpty || !payload.email.contains("@") || working)
     } }
 }
@@ -164,10 +164,10 @@ struct BusinessAvailabilityEditor: View {
     @State private var working = false
     private let names = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Нд"]
     var body: some View { ProFormShell(title: "Графік роботи") {
-        Text("Робочі дні").font(.caption.bold()).foregroundStyle(.white.opacity(0.55))
-        HStack { ForEach(0..<7) { day in Button { if selected.contains(day) { selected.remove(day) } else { selected.insert(day) } } label: { Text(names[day]).font(.caption.bold()).foregroundStyle(selected.contains(day) ? .black : .white).frame(maxWidth: .infinity).frame(height: 40).background(selected.contains(day) ? JourneyVisual.lime : .white.opacity(0.08), in: Circle()) }.buttonStyle(.plain) } }
-        DatePicker("Початок", selection: $start, displayedComponents: .hourAndMinute).foregroundStyle(.white)
-        DatePicker("Кінець", selection: $end, displayedComponents: .hourAndMinute).foregroundStyle(.white)
+        Text("Робочі дні").font(.caption.bold()).foregroundStyle(JourneyVisual.secondaryText)
+        HStack { ForEach(0..<7) { day in Button { if selected.contains(day) { selected.remove(day) } else { selected.insert(day) } } label: { Text(names[day]).font(.caption.bold()).foregroundStyle(selected.contains(day) ? .black : JourneyVisual.primaryText).frame(maxWidth: .infinity).frame(height: 40).background(selected.contains(day) ? JourneyVisual.lime : JourneyVisual.softSurface, in: Circle()) }.buttonStyle(.plain) } }
+        DatePicker("Початок", selection: $start, displayedComponents: .hourAndMinute).foregroundStyle(JourneyVisual.primaryText)
+        DatePicker("Кінець", selection: $end, displayedComponents: .hourAndMinute).foregroundStyle(JourneyVisual.primaryText)
         Button { working = true; let formatter = DateFormatter(); formatter.dateFormat = "HH:mm"; let rows = selected.sorted().map { BusinessAvailabilityPayload(weekday: $0, startTime: formatter.string(from: start), endTime: formatter.string(from: end), isActive: true) }; Task { if await model.saveAvailability(rows) { dismiss() }; working = false } } label: { ProSubmitLabel(title: "Зберегти графік", working: working) }.disabled(selected.isEmpty || end <= start || working)
     }.onAppear { if !model.availability.isEmpty { selected = Set(model.availability.map(\.weekday)) } } }
 }
@@ -195,31 +195,31 @@ struct BusinessDocumentEditor: View {
                     Text("Без клієнта").tag(String?.none)
                     ForEach(model.clients) { client in Text(client.displayName).tag(Optional(client.id)) }
                 }
-                .tint(JourneyVisual.lime)
+                .tint(JourneyVisual.accentText)
             }
             VStack(alignment: .leading, spacing: 10) {
-                Text("Позиції").font(.caption.bold()).foregroundStyle(.white.opacity(0.55))
+                Text("Позиції").font(.caption.bold()).foregroundStyle(JourneyVisual.secondaryText)
                 ForEach(payload.lineItems) { item in
                     HStack {
                         VStack(alignment: .leading) {
-                            Text(item.title).foregroundStyle(.white)
-                            Text("\(item.quantity) × CHF \(String(format: "%.2f", Double(item.unitPriceCents) / 100))").font(.caption).foregroundStyle(.white.opacity(0.5))
+                            Text(item.title).foregroundStyle(JourneyVisual.primaryText)
+                            Text("\(item.quantity) × CHF \(String(format: "%.2f", Double(item.unitPriceCents) / 100))").font(.caption).foregroundStyle(JourneyVisual.secondaryText)
                         }
                         Spacer()
                         Button(role: .destructive) { payload.lineItems.removeAll { $0.id == item.id } } label: { Image(systemName: "trash") }
                     }
                     .padding(12)
-                    .background(.white.opacity(0.05), in: RoundedRectangle(cornerRadius: 13))
+                    .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 13))
                 }
                 ProField("Послуга або товар", text: $itemTitle)
                 HStack {
                     ProField("Ціна CHF", text: $itemPrice, keyboard: .decimalPad)
                     Stepper("×\(itemQuantity)", value: $itemQuantity, in: 1...100)
-                        .foregroundStyle(.white)
+                        .foregroundStyle(JourneyVisual.primaryText)
                 }
                 Button("Додати позицію") { addLine() }
                     .buttonStyle(.bordered)
-                    .tint(JourneyVisual.lime)
+                    .tint(JourneyVisual.accentText)
                     .disabled(itemTitle.trimmingCharacters(in: .whitespaces).isEmpty || Double(itemPrice) == nil)
             }
             ProTextArea("Нотатки", text: $payload.notes, hint: "Умови, термін дії або платіжні реквізити")
@@ -254,10 +254,10 @@ struct AIReceptionistSettingsView: View {
     @State private var faqAnswer = ""
     @State private var saved = false
     var body: some View {
-        ZStack { Color.black.ignoresSafeArea(); ScrollView { VStack(alignment: .leading, spacing: 18) {
-            Text("Налаштуй AI під себе").font(.system(size: 32, weight: .black, design: .rounded)).foregroundStyle(.white)
-            Toggle("AI-рецепціоніст", isOn: $model.aiSettings.aiEnabled).tint(JourneyVisual.lime).foregroundStyle(.white)
-            Toggle("Автоматично відповідати", isOn: $model.aiSettings.aiAutoReply).tint(JourneyVisual.lime).foregroundStyle(.white)
+        ZStack { JourneyVisual.pageBackground.ignoresSafeArea(); ScrollView { VStack(alignment: .leading, spacing: 18) {
+            Text("Налаштуй AI під себе").font(.system(size: 32, weight: .black, design: .default)).foregroundStyle(JourneyVisual.primaryText)
+            Toggle("AI-рецепціоніст", isOn: $model.aiSettings.aiEnabled).tint(JourneyVisual.lime).foregroundStyle(JourneyVisual.primaryText)
+            Toggle("Автоматично відповідати", isOn: $model.aiSettings.aiAutoReply).tint(JourneyVisual.lime).foregroundStyle(JourneyVisual.primaryText)
             if model.aiSettings.aiAutoReply { Label("Автовідповіді надсилаються лише для звичайних запитів. Складні теми передаються тобі.", systemImage: "shield.checkered").font(.caption).foregroundStyle(.orange) }
             Picker("Тон", selection: $model.aiSettings.aiTone) { Text("Дружньо-професійний").tag("friendly_professional"); Text("Короткий").tag("concise"); Text("Теплий").tag("warm"); Text("Формальний").tag("formal") }.pickerStyle(.menu).tint(JourneyVisual.lime)
             ProTextArea("Факти про бізнес", text: $model.aiSettings.aiBusinessFacts, hint: "Досвід, район роботи, обладнання, сильні сторони")
@@ -274,8 +274,8 @@ struct AIReceptionistSettingsView: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 VStack(alignment: .leading, spacing: 3) {
-                    Text("База знань FAQ").font(.headline).foregroundStyle(.white)
-                    Text("AI використовує лише перевірені тобою відповіді.").font(.caption).foregroundStyle(.white.opacity(0.5))
+                    Text("База знань FAQ").font(.headline).foregroundStyle(JourneyVisual.primaryText)
+                    Text("AI використовує лише перевірені тобою відповіді.").font(.caption).foregroundStyle(JourneyVisual.secondaryText)
                 }
                 Spacer()
                 Text("\(model.aiSettings.aiFAQ.count)").font(.caption.bold()).foregroundStyle(.black).padding(.horizontal, 9).padding(.vertical, 5).background(JourneyVisual.lime, in: Capsule())
@@ -284,16 +284,16 @@ struct AIReceptionistSettingsView: View {
             ForEach(Array(model.aiSettings.aiFAQ.enumerated()), id: \.offset) { index, item in
                 VStack(alignment: .leading, spacing: 7) {
                     HStack(alignment: .top) {
-                        Text(item["question"] ?? "Питання").font(.subheadline.bold()).foregroundStyle(.white)
+                        Text(item["question"] ?? "Питання").font(.subheadline.bold()).foregroundStyle(JourneyVisual.primaryText)
                         Spacer()
                         Button(role: .destructive) { model.aiSettings.aiFAQ.remove(at: index); saved = false } label: {
                             Image(systemName: "trash").foregroundStyle(.red.opacity(0.85))
                         }
                     }
-                    Text(item["answer"] ?? "").font(.caption).foregroundStyle(.white.opacity(0.58)).fixedSize(horizontal: false, vertical: true)
+                    Text(item["answer"] ?? "").font(.caption).foregroundStyle(JourneyVisual.secondaryText).fixedSize(horizontal: false, vertical: true)
                 }
                 .padding(14)
-                .background(.white.opacity(0.055), in: RoundedRectangle(cornerRadius: 16))
+                .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 16))
             }
 
             ProField("Питання клієнта", text: $faqQuestion)
@@ -308,7 +308,7 @@ struct AIReceptionistSettingsView: View {
                 saved = false
             } label: {
                 Label("Додати до бази знань", systemImage: "plus.circle.fill")
-                    .font(.subheadline.bold()).foregroundStyle(JourneyVisual.lime)
+                    .font(.subheadline.bold()).foregroundStyle(Theme.Colors.textPrimary)
                     .frame(maxWidth: .infinity).padding(.vertical, 13)
                     .background(JourneyVisual.lime.opacity(0.09), in: RoundedRectangle(cornerRadius: 15))
             }
@@ -316,7 +316,7 @@ struct AIReceptionistSettingsView: View {
             .disabled(faqQuestion.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || faqAnswer.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
         }
         .padding(16)
-        .background(.black.opacity(0.3), in: RoundedRectangle(cornerRadius: 22))
+        .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 22))
         .overlay(RoundedRectangle(cornerRadius: 22).stroke(JourneyVisual.lime.opacity(0.2)))
     }
     private func split(_ value: String) -> [String] { value.split(separator: ",").map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty } }
@@ -328,11 +328,11 @@ struct AIReceptionistTestView: View {
     @State private var question = ""
     @State private var draft: AIReceptionistDraft?
     @State private var working = false
-    var body: some View { ZStack { Color.black.ignoresSafeArea(); ScrollView { VStack(alignment: .leading, spacing: 18) {
-        Text("Тестова розмова").font(.system(size: 32, weight: .black, design: .rounded)).foregroundStyle(.white)
+    var body: some View { ZStack { JourneyVisual.pageBackground.ignoresSafeArea(); ScrollView { VStack(alignment: .leading, spacing: 18) {
+        Text("Тестова розмова").font(.system(size: 32, weight: .black, design: .default)).foregroundStyle(JourneyVisual.primaryText)
         ProTextArea("Повідомлення клієнта", text: $question, hint: "Наприклад: Guten Tag, haben Sie am Freitag Zeit?")
         Button { working = true; Task { do { draft = try await BusinessProAPI.draftReply(.init(conversationID: nil, customerName: "Тестовий клієнт", customerLanguage: nil, messages: [.init(role: "customer", content: question)])) } catch { model.error = error.localizedDescription }; working = false } } label: { ProSubmitLabel(title: "Створити відповідь", working: working) }.disabled(question.count < 2 || working)
-        if let draft { VStack(alignment: .leading, spacing: 12) { HStack { Label(draft.generatedByAI ? "AI-відповідь" : "Безпечний шаблон", systemImage: "sparkles").foregroundStyle(JourneyVisual.lime); Spacer(); if draft.shouldHandoff { Text("ПЕРЕДАТИ ЛЮДИНІ").font(.caption2.bold()).foregroundStyle(.orange) } }; Text(draft.reply).foregroundStyle(.white).textSelection(.enabled); Divider().overlay(.white.opacity(0.1)); Text(draft.leadSummary).font(.caption).foregroundStyle(.white.opacity(0.55)); if !draft.missingInformation.isEmpty { Text("Уточнити: \(draft.missingInformation.joined(separator: ", "))").font(.caption).foregroundStyle(.cyan) } }.padding(18).background(.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 22)).overlay(RoundedRectangle(cornerRadius: 22).stroke(JourneyVisual.lime.opacity(0.3))) }
+        if let draft { VStack(alignment: .leading, spacing: 12) { HStack { Label(draft.generatedByAI ? "AI-відповідь" : "Безпечний шаблон", systemImage: "sparkles").foregroundStyle(Theme.Colors.textPrimary); Spacer(); if draft.shouldHandoff { Text("ПЕРЕДАТИ ЛЮДИНІ").font(.caption2.bold()).foregroundStyle(.orange) } }; Text(draft.reply).foregroundStyle(JourneyVisual.primaryText).textSelection(.enabled); Divider().overlay(JourneyVisual.softBorder); Text(draft.leadSummary).font(.caption).foregroundStyle(JourneyVisual.secondaryText); if !draft.missingInformation.isEmpty { Text("Уточнити: \(draft.missingInformation.joined(separator: ", "))").font(.caption).foregroundStyle(.cyan) } }.padding(18).background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 22)).overlay(RoundedRectangle(cornerRadius: 22).stroke(JourneyVisual.lime.opacity(0.3))) }
     }.padding(20) } }.navigationTitle("Тест AI").navigationBarTitleDisplayMode(.inline) }
 }
 
@@ -341,7 +341,7 @@ struct ProFormShell<Content: View>: View {
     let title: String
     let content: Content
     init(title: String, @ViewBuilder content: () -> Content) { self.title = title; self.content = content() }
-    var body: some View { NavigationStack { ZStack { Color.black.ignoresSafeArea(); ScrollView { VStack(alignment: .leading, spacing: 17) { content }.padding(20).padding(.bottom, 35) } }.navigationTitle(title).navigationBarTitleDisplayMode(.inline).toolbar { ToolbarItem(placement: .cancellationAction) { Button("Закрити") { dismiss() } } } } }
+    var body: some View { NavigationStack { ZStack { JourneyVisual.pageBackground.ignoresSafeArea(); ScrollView { VStack(alignment: .leading, spacing: 17) { content }.padding(20).padding(.bottom, 35) } }.navigationTitle(title).navigationBarTitleDisplayMode(.inline).toolbar { ToolbarItem(placement: .cancellationAction) { Button("Закрити") { dismiss() } } } } }
 }
 
 struct ProField: View {
@@ -349,7 +349,7 @@ struct ProField: View {
     @Binding var text: String
     var keyboard: UIKeyboardType = .default
     init(_ title: String, text: Binding<String>, keyboard: UIKeyboardType = .default) { self.title = title; _text = text; self.keyboard = keyboard }
-    var body: some View { VStack(alignment: .leading, spacing: 7) { Text(title).font(.caption.bold()).foregroundStyle(.white.opacity(0.55)); TextField(title, text: $text).keyboardType(keyboard).textInputAutocapitalization(keyboard == .emailAddress || keyboard == .URL ? .never : .sentences).foregroundStyle(.white).padding(14).background(.white.opacity(0.07), in: RoundedRectangle(cornerRadius: 14)).overlay(RoundedRectangle(cornerRadius: 14).stroke(.white.opacity(0.08))) } }
+    var body: some View { VStack(alignment: .leading, spacing: 7) { Text(title).font(.caption.bold()).foregroundStyle(JourneyVisual.secondaryText); TextField(title, text: $text).keyboardType(keyboard).textInputAutocapitalization(keyboard == .emailAddress || keyboard == .URL ? .never : .sentences).foregroundStyle(JourneyVisual.primaryText).padding(14).background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 14)).overlay(RoundedRectangle(cornerRadius: 14).stroke(JourneyVisual.softBorder)) } }
 }
 
 struct ProTextArea: View {
@@ -357,7 +357,7 @@ struct ProTextArea: View {
     @Binding var text: String
     let hint: String
     init(_ title: String, text: Binding<String>, hint: String) { self.title = title; _text = text; self.hint = hint }
-    var body: some View { VStack(alignment: .leading, spacing: 7) { Text(title).font(.caption.bold()).foregroundStyle(.white.opacity(0.55)); TextField(hint, text: $text, axis: .vertical).lineLimit(3...7).foregroundStyle(.white).padding(14).background(.white.opacity(0.07), in: RoundedRectangle(cornerRadius: 14)).overlay(RoundedRectangle(cornerRadius: 14).stroke(.white.opacity(0.08))) } }
+    var body: some View { VStack(alignment: .leading, spacing: 7) { Text(title).font(.caption.bold()).foregroundStyle(JourneyVisual.secondaryText); TextField(hint, text: $text, axis: .vertical).lineLimit(3...7).foregroundStyle(JourneyVisual.primaryText).padding(14).background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 14)).overlay(RoundedRectangle(cornerRadius: 14).stroke(JourneyVisual.softBorder)) } }
 }
 
 struct ProSubmitLabel: View { let title: String; let working: Bool; var body: some View { HStack { if working { ProgressView().tint(.black) }; Text(title); Spacer(); Image(systemName: "arrow.right") }.font(.headline).foregroundStyle(.black).padding(.horizontal, 20).frame(maxWidth: .infinity).frame(height: 58).background(JourneyVisual.lime, in: RoundedRectangle(cornerRadius: 18)) } }

@@ -19,7 +19,7 @@ struct TaxSeasonHubView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: Theme.Spacing.lg) {
                 Text("tools.tax.title".localized)
-                    .font(.system(size: 28, weight: .bold, design: .rounded))
+                    .font(.system(size: 28, weight: .bold, design: .default))
                 Text("tools.tax.subtitle".localized)
                     .font(.system(size: 15))
                     .foregroundColor(Theme.Colors.textSecondary)
@@ -60,7 +60,7 @@ struct TaxSeasonHubView: View {
                 .font(.system(size: 16, weight: .bold))
                 .frame(width: 28, height: 28)
                 .background(Theme.Colors.primary.opacity(0.15))
-                .foregroundColor(Theme.Colors.primary)
+                .foregroundColor(JourneyVisual.accentText)
                 .clipShape(Circle())
             Text(title)
                 .font(.system(size: 15))
@@ -85,7 +85,7 @@ struct TaxSeasonHubView: View {
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 12)
                 .background(Theme.Colors.primary.opacity(0.15))
-                .foregroundColor(Theme.Colors.primary)
+                .foregroundColor(JourneyVisual.accentText)
                 .cornerRadius(Theme.CornerRadius.md)
             }
         }
@@ -115,7 +115,7 @@ struct KKSwitchingHelperView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: Theme.Spacing.lg) {
                 Text("tools.kk.title".localized)
-                    .font(.system(size: 28, weight: .bold, design: .rounded))
+                    .font(.system(size: 28, weight: .bold, design: .default))
                 Text("tools.kk.subtitle".localized)
                     .font(.system(size: 15))
                     .foregroundColor(Theme.Colors.textSecondary)
@@ -191,7 +191,7 @@ struct DeadlineTrackerView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: Theme.Spacing.md) {
                 Text("tools.deadlines.title".localized)
-                    .font(.system(size: 28, weight: .bold, design: .rounded))
+                    .font(.system(size: 28, weight: .bold, design: .default))
                 Text("tools.deadlines.subtitle".localized)
                     .font(.system(size: 15))
                     .foregroundColor(Theme.Colors.textSecondary)
@@ -210,7 +210,7 @@ struct DeadlineTrackerView: View {
                         Spacer()
                         Text(item.daysCopy)
                             .font(.system(size: 12, weight: .semibold))
-                            .foregroundColor(Theme.Colors.accent)
+                            .foregroundColor(JourneyVisual.accentText)
                     }
                     .padding(Theme.Spacing.md)
                     .background(

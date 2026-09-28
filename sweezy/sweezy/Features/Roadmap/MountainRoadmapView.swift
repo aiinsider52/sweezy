@@ -36,12 +36,12 @@ struct MountainRoadmapView: View {
 
                     HStack(alignment: .firstTextBaseline) {
                         Text("roadmap.chrome.full_route".localized)
-                            .font(.system(size: 23, weight: .bold, design: .rounded))
-                            .foregroundColor(.white)
+                            .font(.system(size: 23, weight: .bold, design: .default))
+                            .foregroundColor(JourneyVisual.primaryText)
                         Spacer()
                         Text("roadmap.chrome.stage_count".localized)
                             .font(.system(size: 12, weight: .semibold))
-                            .foregroundColor(.white.opacity(0.52))
+                            .foregroundColor(JourneyVisual.secondaryText)
                     }
 
                     mountainPath
@@ -96,12 +96,12 @@ struct MountainRoadmapView: View {
             Button { dismiss() } label: {
                 Image(systemName: "chevron.left")
                     .font(.system(size: 15, weight: .bold))
-                    .foregroundColor(.white)
+                    .foregroundColor(JourneyVisual.primaryText)
                     .frame(width: 40, height: 40)
                     .background(.ultraThinMaterial.opacity(0.8))
-                    .background(Color.black.opacity(0.2))
+                    .background(Theme.Colors.card)
                     .clipShape(Circle())
-                    .overlay(Circle().stroke(Color.white.opacity(0.22), lineWidth: 1))
+                    .overlay(Circle().stroke(JourneyVisual.softBorder, lineWidth: 1))
             }
             .buttonStyle(.plain)
 
@@ -110,7 +110,7 @@ struct MountainRoadmapView: View {
             Text("roadmap.chrome.your_plan".localized)
                 .font(.system(size: 10, weight: .bold))
                 .tracking(1.3)
-                .foregroundColor(.white.opacity(0.62))
+                .foregroundColor(JourneyVisual.secondaryText)
 
             Spacer()
 
@@ -126,13 +126,13 @@ struct MountainRoadmapView: View {
     private var headerSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("roadmap.chrome.hero_title".localized)
-                .font(.system(size: 35, weight: .bold, design: .rounded))
-                .foregroundColor(.white)
-                .lineSpacing(-3)
+                .font(.system(size: 35, weight: .bold, design: .default))
+                .foregroundColor(JourneyVisual.primaryText)
+                .lineSpacing(1)
 
             Text("roadmap.chrome.hero_subtitle".localized)
                 .font(.system(size: 14, weight: .medium))
-                .foregroundColor(.white.opacity(0.66))
+                .foregroundColor(JourneyVisual.secondaryText)
                 .frame(maxWidth: 310, alignment: .leading)
         }
     }
@@ -145,24 +145,24 @@ struct MountainRoadmapView: View {
                         Text("roadmap.chrome.overall_progress".localized)
                             .font(.system(size: 9, weight: .bold))
                             .tracking(0.8)
-                            .foregroundColor(.white.opacity(0.5))
+                            .foregroundColor(JourneyVisual.secondaryText)
                         Text(roadmapService.nextMilestone)
                             .font(.system(size: 14, weight: .semibold))
-                            .foregroundColor(.white)
+                            .foregroundColor(JourneyVisual.primaryText)
                             .lineLimit(2)
                     }
 
                     Spacer(minLength: 10)
 
                     Text("\(Int(roadmapService.overallProgress * 100))%")
-                        .font(.system(size: 31, weight: .bold, design: .rounded))
-                        .foregroundColor(JourneyVisual.lime)
+                        .font(.system(size: 31, weight: .bold, design: .default))
+                        .foregroundColor(Theme.Colors.textPrimary)
                         .monospacedDigit()
                 }
 
                 GeometryReader { geometry in
                     ZStack(alignment: .leading) {
-                        Capsule().fill(Color.white.opacity(0.14))
+                        Capsule().fill(JourneyVisual.softBorder)
                         Capsule()
                             .fill(JourneyVisual.lime)
                             .frame(width: max(geometry.size.width * roadmapService.overallProgress, roadmapService.overallProgress > 0 ? 12 : 0))
@@ -176,7 +176,7 @@ struct MountainRoadmapView: View {
                     Label((roadmapService.currentLevel?.estimatedDays ?? "").localized, systemImage: "clock")
                 }
                 .font(.system(size: 11, weight: .medium))
-                .foregroundColor(.white.opacity(0.58))
+                .foregroundColor(JourneyVisual.secondaryText)
             }
             .padding(16)
         }
@@ -187,18 +187,7 @@ struct MountainRoadmapView: View {
         if let level = roadmapService.currentLevel {
             Button { selectedLevel = level } label: {
                 ZStack(alignment: .bottomLeading) {
-                    Image("cityhub-zurich-landesmuseum")
-                        .resizable()
-                        .scaledToFill()
-                        .frame(height: 254)
-                        .frame(maxWidth: .infinity)
-                        .clipped()
-
-                    LinearGradient(
-                        colors: [.black.opacity(0.04), .black.opacity(0.16), .black.opacity(0.92)],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
+                    Theme.Colors.card
 
                     VStack(alignment: .leading, spacing: 0) {
                         HStack {
@@ -215,10 +204,10 @@ struct MountainRoadmapView: View {
 
                             Text("\(Int(roadmapService.levelProgress(for: level.id) * 100))%")
                                 .font(.system(size: 12, weight: .bold))
-                                .foregroundColor(.white)
+                                .foregroundColor(JourneyVisual.primaryText)
                                 .padding(.horizontal, 11)
                                 .frame(height: 28)
-                                .background(.ultraThinMaterial.opacity(0.82))
+                                .background(Theme.Colors.card)
                                 .clipShape(Capsule())
                         }
 
@@ -226,12 +215,12 @@ struct MountainRoadmapView: View {
 
                         Text("roadmap.chrome.step".localized(with: level.id))
                             .font(.system(size: 11, weight: .bold))
-                            .foregroundColor(JourneyVisual.lime)
+                            .foregroundColor(Theme.Colors.textPrimary)
                             .textCase(.uppercase)
 
                         Text(level.title.localized)
-                            .font(.system(size: 27, weight: .bold, design: .rounded))
-                            .foregroundColor(.white)
+                            .font(.system(size: 27, weight: .bold, design: .default))
+                            .foregroundColor(JourneyVisual.primaryText)
                             .lineLimit(2)
                             .multilineTextAlignment(.leading)
 
@@ -242,18 +231,18 @@ struct MountainRoadmapView: View {
                             Image(systemName: "arrow.right")
                         }
                         .font(.system(size: 11, weight: .semibold))
-                        .foregroundColor(.white.opacity(0.68))
+                        .foregroundColor(JourneyVisual.secondaryText)
                         .padding(.top, 10)
                     }
                     .padding(16)
                 }
-                .frame(height: 254)
+                .frame(height: 190)
                 .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
                 .overlay(
                     RoundedRectangle(cornerRadius: 28, style: .continuous)
-                        .stroke(Color.white.opacity(0.34), lineWidth: 1)
+                        .stroke(JourneyVisual.softBorder, lineWidth: 1)
                 )
-                .shadow(color: .black.opacity(0.34), radius: 20, y: 10)
+
             }
             .buttonStyle(.plain)
         }
@@ -310,8 +299,8 @@ struct LevelNode: View {
                 VStack(alignment: .leading, spacing: 6) {
                     HStack(spacing: 7) {
                         Text(level.title.localized)
-                            .font(.system(size: 16, weight: .bold, design: .rounded))
-                            .foregroundColor(isLocked ? .white.opacity(0.44) : .white)
+                            .font(.system(size: 16, weight: .bold, design: .default))
+                            .foregroundColor(isLocked ? JourneyVisual.primaryText : JourneyVisual.primaryText)
                             .lineLimit(1)
 
                         if isActive {
@@ -327,7 +316,7 @@ struct LevelNode: View {
 
                     Text(level.subtitle.localized)
                         .font(.system(size: 12, weight: .medium))
-                        .foregroundColor(.white.opacity(isLocked ? 0.32 : 0.52))
+                        .foregroundColor(JourneyVisual.primaryText.opacity(isLocked ? 0.32 : 0.52))
                         .lineLimit(1)
 
                     HStack(spacing: 8) {
@@ -338,7 +327,7 @@ struct LevelNode: View {
                         if !isLocked && status != .completed {
                             GeometryReader { geometry in
                                 ZStack(alignment: .leading) {
-                                    Capsule().fill(Color.white.opacity(0.12))
+                                    Capsule().fill(JourneyVisual.softBorder)
                                     Capsule()
                                         .fill(JourneyVisual.lime)
                                         .frame(width: max(geometry.size.width * progress, progress > 0 ? 6 : 0))
@@ -353,7 +342,7 @@ struct LevelNode: View {
 
                 Image(systemName: isLocked ? "lock.fill" : "chevron.right")
                     .font(.system(size: 12, weight: .bold))
-                    .foregroundColor(.white.opacity(isLocked ? 0.24 : 0.58))
+                    .foregroundColor(JourneyVisual.primaryText.opacity(isLocked ? 0.24 : 0.58))
             }
             .padding(12)
             .background(.ultraThinMaterial.opacity(isActive ? 0.88 : 0.7))
@@ -743,7 +732,7 @@ struct LevelDetailSheet: View {
                     if level.tasks.contains(where: { $0.isPremiumOnly }) {
                         Text("PLUS")
                             .font(.caption2.bold())
-                            .foregroundColor(Theme.Colors.accent)
+                            .foregroundColor(JourneyVisual.accentText)
                     }
                 }
                 
@@ -796,8 +785,9 @@ struct LevelDetailSheet: View {
     
     private func guideCategoryInfo(for raw: String) -> (localizedName: String, read: Int, total: Int) {
         let cat = GuideCategory(rawValue: raw) ?? .documents
-        let total = appContainer.contentService.guides.filter { $0.category == cat }.count
-        let read = appContainer.contentService.guides.filter { guide in
+        let guides = appContainer.contentService.getGuidesForLocale(appContainer.currentLocale.identifier)
+        let total = guides.filter { $0.category == cat }.count
+        let read = guides.filter { guide in
             guide.category == cat && appContainer.userStats.allReadGuideIds().contains(guide.id.uuidString)
         }.count
         return (cat.localizedName, read, total)
@@ -889,7 +879,7 @@ struct LevelDetailSheet: View {
                         .frame(maxWidth: .infinity)
                         .padding()
                         .background(Color.orange)
-                        .foregroundColor(.white)
+                        .foregroundColor(JourneyVisual.primaryText)
                         .cornerRadius(12)
                 }
             } else if status == .inProgress {
@@ -901,7 +891,7 @@ struct LevelDetailSheet: View {
                         .frame(maxWidth: .infinity)
                         .padding()
                         .background(Color.blue)
-                        .foregroundColor(.white)
+                        .foregroundColor(JourneyVisual.primaryText)
                         .cornerRadius(12)
                 }
             }
@@ -954,7 +944,7 @@ struct TaskCard: View {
                         if task.isPremiumOnly {
                             Image(systemName: "star.fill")
                                 .font(.caption2)
-                                .foregroundColor(Theme.Colors.accent)
+                                .foregroundColor(JourneyVisual.accentStrong)
                         }
                     }
                     

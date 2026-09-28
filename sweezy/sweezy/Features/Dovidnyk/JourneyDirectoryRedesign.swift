@@ -16,20 +16,20 @@ struct JourneyGuideCompactRow: View {
                 HStack(spacing: 6) {
                     Label(guide.category.localizedName, systemImage: guide.category.iconName)
                         .font(.system(size: 9, weight: .bold))
-                        .foregroundColor(JourneyVisual.lime)
+                        .foregroundColor(JourneyVisual.accentText)
                         .lineLimit(1)
 
                     if guide.source != nil {
                         Image(systemName: "checkmark.seal.fill")
                             .font(.system(size: 9, weight: .bold))
-                            .foregroundColor(JourneyVisual.lime)
+                            .foregroundColor(JourneyVisual.accentStrong)
                     }
                 }
 
                 Text(guide.title)
-                    .font(.system(size: 15, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
-                    .lineLimit(2)
+                    .font(.headline)
+                    .foregroundColor(JourneyVisual.primaryText)
+                    .fixedSize(horizontal: false, vertical: true)
                     .multilineTextAlignment(.leading)
 
                 HStack(spacing: 12) {
@@ -39,7 +39,7 @@ struct JourneyGuideCompactRow: View {
                     }
                 }
                 .font(.system(size: 10, weight: .medium))
-                .foregroundColor(.white.opacity(0.56))
+                .foregroundColor(JourneyVisual.secondaryText)
             }
 
             Spacer(minLength: 6)
@@ -52,9 +52,9 @@ struct JourneyGuideCompactRow: View {
                 .clipShape(Circle())
         }
         .padding(10)
-        .background(Color.black.opacity(0.54))
+        .background(Theme.Colors.card)
         .clipShape(RoundedRectangle(cornerRadius: 21, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 21, style: .continuous).stroke(.white.opacity(0.15), lineWidth: 1))
+        .overlay(RoundedRectangle(cornerRadius: 21, style: .continuous).stroke(JourneyVisual.softBorder, lineWidth: 1))
     }
 }
 
@@ -134,74 +134,62 @@ struct JourneyChecklistWorkspace: View {
         HStack(spacing: 17) {
             ZStack {
                 Circle()
-                    .stroke(.black.opacity(0.14), lineWidth: 8)
+                    .stroke(JourneyVisual.softBorder, lineWidth: 8)
                 Circle()
                     .trim(from: 0, to: progress.fraction)
-                    .stroke(.black, style: StrokeStyle(lineWidth: 8, lineCap: .round))
+                    .stroke(JourneyVisual.accentStrong, style: StrokeStyle(lineWidth: 8, lineCap: .round))
                     .rotationEffect(.degrees(-90))
                 VStack(spacing: 0) {
                     Text("\(Int((progress.fraction * 100).rounded()))%")
-                        .font(.system(size: 22, weight: .black, design: .rounded))
+                        .font(.system(size: 22, weight: .black, design: .default))
                     Text("journey.directory.checklists.done".localized)
                         .font(.system(size: 9, weight: .bold))
                 }
-                .foregroundColor(.black)
+                .foregroundColor(JourneyVisual.primaryText)
             }
             .frame(width: 86, height: 86)
 
             VStack(alignment: .leading, spacing: 6) {
                 Text("journey.directory.checklists.your_progress".localized)
-                    .font(.system(size: 22, weight: .bold, design: .rounded))
-                    .foregroundColor(.black)
+                    .font(.system(size: 22, weight: .bold, design: .default))
+                    .foregroundColor(JourneyVisual.primaryText)
                 Text("journey.directory.checklists.steps_count".localized(with: progress.done, progress.total))
                     .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(.black.opacity(0.72))
+                    .foregroundColor(JourneyVisual.secondaryText)
                 Text(progress.done == 0 ? "journey.directory.checklists.start_simple".localized : "journey.directory.checklists.keep_going".localized)
                     .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(.black.opacity(0.58))
+                    .foregroundColor(JourneyVisual.secondaryText)
             }
 
             Spacer(minLength: 0)
         }
         .padding(18)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(
-            LinearGradient(
-                colors: [JourneyVisual.lime, JourneyVisual.lime.opacity(0.72)],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-        )
+        .background(Theme.Colors.card)
         .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
-        .overlay(alignment: .topTrailing) {
-            Image(systemName: "checklist.checked")
-                .font(.system(size: 58, weight: .thin))
-                .foregroundColor(.black.opacity(0.08))
-                .padding(16)
-        }
+        .overlay(RoundedRectangle(cornerRadius: 28).stroke(JourneyVisual.softBorder))
     }
 
     private func nextActionCard(checklist: Checklist, step: ChecklistStep) -> some View {
         Button { open(checklist) } label: {
             HStack(spacing: 13) {
-                Image(systemName: checklist.category.iconName)
-                    .font(.system(size: 20, weight: .semibold))
-                    .foregroundColor(JourneyVisual.lime)
-                    .frame(width: 46, height: 46)
-                    .background(JourneyVisual.lime.opacity(0.13))
-                    .clipShape(RoundedRectangle(cornerRadius: 15, style: .continuous))
+                JourneyCategoryIcon(
+                    symbol: checklist.category.iconName,
+                    swatch: JourneyCategoryPalette.lime,
+                    size: 46
+                )
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text("journey.directory.checklists.next_step_label".localized)
                         .font(.system(size: 9, weight: .bold))
-                        .foregroundColor(.white.opacity(0.5))
+                        .foregroundColor(JourneyVisual.secondaryText)
                     Text(step.title)
-                        .font(.system(size: 14, weight: .bold, design: .rounded))
-                        .foregroundColor(.white)
-                        .lineLimit(2)
+                        .font(.system(size: 14, weight: .bold, design: .default))
+                        .foregroundColor(JourneyVisual.primaryText)
+                        .fixedSize(horizontal: false, vertical: true)
                     Text(checklist.title)
                         .font(.system(size: 10, weight: .medium))
-                        .foregroundColor(.white.opacity(0.52))
+                        .foregroundColor(JourneyVisual.secondaryText)
                         .lineLimit(1)
                 }
 
@@ -215,9 +203,9 @@ struct JourneyChecklistWorkspace: View {
                     .clipShape(Circle())
             }
             .padding(12)
-            .background(Color.black.opacity(0.58))
+            .background(Theme.Colors.card)
             .clipShape(RoundedRectangle(cornerRadius: 21, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 21, style: .continuous).stroke(.white.opacity(0.16), lineWidth: 1))
+            .overlay(RoundedRectangle(cornerRadius: 21, style: .continuous).stroke(JourneyVisual.softBorder, lineWidth: 1))
         }
         .buttonStyle(.plain)
     }
@@ -229,12 +217,12 @@ struct JourneyChecklistWorkspace: View {
         } label: {
             Label(title, systemImage: icon)
                 .font(.system(size: 11, weight: .bold))
-                .foregroundColor(selected ? .black : .white.opacity(0.76))
+                .foregroundColor(selected ? .black : (category?.swatch.ink ?? JourneyVisual.primaryText))
                 .padding(.horizontal, 13)
                 .frame(height: 39)
-                .background(selected ? JourneyVisual.lime : Color.black.opacity(0.48))
+                .background(selected ? JourneyVisual.lime : Theme.Colors.card)
                 .clipShape(Capsule())
-                .overlay(Capsule().stroke(.white.opacity(selected ? 0 : 0.15), lineWidth: 1))
+                .overlay(Capsule().stroke(selected ? Color.clear : JourneyVisual.softBorder, lineWidth: 1))
         }
         .buttonStyle(.plain)
     }
@@ -256,19 +244,18 @@ private struct JourneyChecklistRow: View {
 
     var body: some View {
         HStack(spacing: 13) {
-            Image(systemName: checklist.category.iconName)
-                .font(.system(size: 20, weight: .semibold))
-                .foregroundColor(checklist.category.swiftUIColor)
-                .frame(width: 54, height: 54)
-                .background(checklist.category.swiftUIColor.opacity(0.16))
-                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            JourneyCategoryIcon(
+                symbol: checklist.category.iconName,
+                swatch: checklist.category.swatch,
+                size: 54
+            )
 
             VStack(alignment: .leading, spacing: 7) {
                 HStack(spacing: 7) {
                     Text(checklist.title)
-                        .font(.system(size: 15, weight: .bold, design: .rounded))
-                        .foregroundColor(.white)
-                        .lineLimit(2)
+                        .font(.headline)
+                        .foregroundColor(JourneyVisual.primaryText)
+                        .fixedSize(horizontal: false, vertical: true)
                         .multilineTextAlignment(.leading)
 
                     if checklist.isNew {
@@ -288,11 +275,11 @@ private struct JourneyChecklistRow: View {
                     Text("journey.directory.checklists.completed_ratio".localized(with: completed, checklist.steps.count))
                 }
                 .font(.system(size: 10, weight: .medium))
-                .foregroundColor(.white.opacity(0.52))
+                .foregroundColor(JourneyVisual.secondaryText)
 
                 GeometryReader { geometry in
                     ZStack(alignment: .leading) {
-                        Capsule().fill(.white.opacity(0.1))
+                        Capsule().fill(JourneyVisual.softBorder)
                         Capsule()
                             .fill(checklist.category.swiftUIColor)
                             .frame(width: geometry.size.width * fraction)
@@ -303,11 +290,11 @@ private struct JourneyChecklistRow: View {
 
             Image(systemName: "chevron.right")
                 .font(.system(size: 12, weight: .bold))
-                .foregroundColor(.white.opacity(0.38))
+                .foregroundColor(JourneyVisual.secondaryText)
         }
         .padding(12)
-        .background(Color.black.opacity(0.56))
+        .background(Theme.Colors.card)
         .clipShape(RoundedRectangle(cornerRadius: 21, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 21, style: .continuous).stroke(.white.opacity(0.14), lineWidth: 1))
+        .overlay(RoundedRectangle(cornerRadius: 21, style: .continuous).stroke(JourneyVisual.softBorder, lineWidth: 1))
     }
 }

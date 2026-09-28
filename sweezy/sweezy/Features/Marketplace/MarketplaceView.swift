@@ -27,6 +27,10 @@ struct MarketplaceView: View {
 
     private static let sheetCornerRadius: CGFloat = 28
 
+    private var activeCountry: ResidenceCountry {
+        ResidenceCountry(rawValue: APIClient.countryCode) ?? .switzerland
+    }
+
     init(initialCategory: ServiceCategory? = nil, initialCanton: String? = nil) {
         _vm = StateObject(wrappedValue: MarketplaceViewModel(initialCategory: initialCategory, initialCanton: initialCanton))
         _itemsVM = StateObject(wrappedValue: MarketplaceViewModel(listingType: .item, initialCanton: initialCanton))
@@ -188,7 +192,7 @@ struct MarketplaceView: View {
         VStack(alignment: .leading, spacing: Theme.Spacing.md) {
             HStack {
                 Text("marketplace.title".localized)
-                    .font(.system(size: 28, weight: .bold, design: .rounded))
+                    .font(.system(size: 28, weight: .bold, design: .default))
                     .foregroundColor(.white)
 
                 Spacer()
@@ -636,9 +640,9 @@ struct MarketplaceView: View {
 
     private var cantonLabel: String {
         if let code = activeSelectedCanton {
-            return SwissCanton.all.first { $0.code == code }?.name ?? code
+            return CountryCatalog.subdivisionName(country: activeCountry, code: code)
         }
-        return "marketplace.canton_filter".localized
+        return activeCountry.subdivisionTitle
     }
 
     private var cantonPickerSheet: some View {
@@ -650,16 +654,16 @@ struct MarketplaceView: View {
                     Task { await applyActiveFilters() }
                 } label: {
                     HStack {
-                        Text("marketplace.canton.all_cantons".localized)
+                        Text("country.whole_country".localized)
                         Spacer()
                         if activeSelectedCanton == nil {
                             Image(systemName: "checkmark")
-                                .foregroundColor(Theme.Colors.primary)
+                                .foregroundColor(JourneyVisual.accentStrong)
                         }
                     }
                 }
 
-                ForEach(SwissCanton.all.dropFirst(), id: \.code) { canton in
+                ForEach(CountryCatalog.subdivisions(for: activeCountry), id: \.code) { canton in
                     Button {
                         setActiveCanton(canton.code)
                         showCantonPicker = false
@@ -670,14 +674,14 @@ struct MarketplaceView: View {
                             Spacer()
                             if activeSelectedCanton == canton.code {
                                 Image(systemName: "checkmark")
-                                    .foregroundColor(Theme.Colors.primary)
+                                    .foregroundColor(JourneyVisual.accentStrong)
                             }
                         }
                     }
                 }
             }
             .journeyForm()
-            .navigationTitle("marketplace.select_canton".localized)
+            .navigationTitle("country.select_subdivision_format".localized(with: activeCountry.subdivisionTitle))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {

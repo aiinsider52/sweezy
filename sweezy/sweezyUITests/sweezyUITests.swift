@@ -10,6 +10,8 @@ import XCTest
 final class sweezyUITests: XCTestCase {
 
     override func setUpWithError() throws {
+        // The simulator can be left in landscape between runs; every layout assertion assumes portrait.
+        XCUIDevice.shared.orientation = .portrait
         // Put setup code here. This method is called before the invocation of each test method in the class.
 
         // In UI tests it is usually best to stop immediately when a failure occurs.

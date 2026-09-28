@@ -3,6 +3,8 @@ import XCTest
 /// Network-independent coverage for the routes every user must be able to reach.
 final class CriticalFlowsUITests: XCTestCase {
     override func setUpWithError() throws {
+        // The simulator can be left in landscape between runs; every layout assertion assumes portrait.
+        XCUIDevice.shared.orientation = .portrait
         continueAfterFailure = false
         XCUIApplication().terminate()
     }
@@ -58,6 +60,8 @@ final class CriticalFlowsUITests: XCTestCase {
     func testEmailVerificationRedesignStartsInSafeState() throws {
         let app = XCUIApplication()
         app.launchArguments = ["--ui-test-email-verification"]
+        // Earlier flows can persist a pending auth sheet that would cover this screen.
+        app.launchArguments += ["-pending_initial_auth_entry", "NO"]
         app.launchEnvironment["UITESTS"] = "1"
         app.launch()
 
@@ -76,6 +80,8 @@ final class CriticalFlowsUITests: XCTestCase {
     func testSwissDiscoveryCatalogEntryIsReachable() throws {
         let app = XCUIApplication()
         app.launchArguments = ["--ui-test-discovery"]
+        // Earlier flows can persist a pending auth sheet that would cover this screen.
+        app.launchArguments += ["-pending_initial_auth_entry", "NO"]
         app.launchEnvironment["UITESTS"] = "1"
         app.launch()
 
@@ -88,6 +94,8 @@ final class CriticalFlowsUITests: XCTestCase {
     func testPlusTripPlannerFitsCurrentDevice() throws {
         let app = XCUIApplication()
         app.launchArguments = ["--ui-test-trip-planner"]
+        // Earlier flows can persist a pending auth sheet that would cover this screen.
+        app.launchArguments += ["-pending_initial_auth_entry", "NO"]
         app.launchEnvironment["UITESTS"] = "1"
         app.launch()
 
@@ -107,6 +115,8 @@ final class CriticalFlowsUITests: XCTestCase {
             "-initial_auth_choice_completed", "YES",
             "--skip-feature-onboarding"
         ]
+        // Earlier flows can persist a pending auth sheet that would cover this screen.
+        app.launchArguments += ["-pending_initial_auth_entry", "NO"]
         app.launchEnvironment["UITESTS"] = "1"
         app.launch()
 
@@ -179,6 +189,8 @@ final class CriticalFlowsUITests: XCTestCase {
     func testCareerHubConnectsCVToJobMatches() throws {
         let app = XCUIApplication()
         app.launchArguments = ["--ui-test-career-hub"]
+        // Earlier flows can persist a pending auth sheet that would cover this screen.
+        app.launchArguments += ["-pending_initial_auth_entry", "NO"]
         app.launchEnvironment["UITESTS"] = "1"
         app.launch()
 
@@ -194,7 +206,8 @@ final class CriticalFlowsUITests: XCTestCase {
     @MainActor
     func testToolsShowCurrentProductsAndNoPassport() throws {
         let app = XCUIApplication()
-        app.launchArguments = ["--ui-test-career-tools"]
+        // Earlier registration tests can leave the initial auth sheet pending over this route.
+        app.launchArguments = ["--ui-test-career-tools", "-pending_initial_auth_entry", "NO"]
         app.launchEnvironment["UITESTS"] = "1"
         app.launch()
 
@@ -214,6 +227,8 @@ final class CriticalFlowsUITests: XCTestCase {
     func testProfessionalNetworkShowsIntentionalDiscoveryExperience() throws {
         let app = XCUIApplication()
         app.launchArguments = ["--ui-test-network"]
+        // Earlier flows can persist a pending auth sheet that would cover this screen.
+        app.launchArguments += ["-pending_initial_auth_entry", "NO"]
         app.launchEnvironment["UITESTS"] = "1"
         app.launch()
 
@@ -228,7 +243,9 @@ final class CriticalFlowsUITests: XCTestCase {
     @MainActor
     func testFriendsHubFitsPhoneViewport() throws {
         let app = XCUIApplication()
-        app.launchArguments = ["--ui-test-friends"]
+        app.launchArguments = ["--ui-test-friends", "-selectedTheme", "light", "-AppleInterfaceStyle", "Light"]
+        // Earlier flows can persist a pending auth sheet that would cover this screen.
+        app.launchArguments += ["-pending_initial_auth_entry", "NO"]
         app.launchEnvironment["UITESTS"] = "1"
         app.launch()
 
@@ -238,16 +255,21 @@ final class CriticalFlowsUITests: XCTestCase {
         XCTAssertTrue(title.waitForExistence(timeout: 5))
         XCTAssertGreaterThanOrEqual(title.frame.minX, 0)
         XCTAssertLessThanOrEqual(title.frame.maxX, app.frame.maxX)
-        XCTAssertTrue(app.descendants(matching: .any)["friends.people.nearbyCount"].exists)
         XCTAssertTrue(app.buttons["friends.people.filters"].exists)
         XCTAssertTrue(app.staticTexts["Anna Keller"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["friends.catalog.toggle"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["friends.swipe.pass"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["friends.swipe.pass"].exists)
         XCTAssertTrue(app.buttons["friends.swipe.like"].exists)
+        XCTAssertTrue(app.buttons["friends.swipe.pass"].isHittable)
+        XCTAssertTrue(app.buttons["friends.swipe.like"].isHittable)
+        XCTAssertLessThanOrEqual(app.buttons["friends.swipe.pass"].frame.maxY, app.frame.maxY)
+        XCTAssertLessThanOrEqual(app.buttons["friends.swipe.like"].frame.maxY, app.frame.maxY)
         keepScreenshot(app, name: "friends-responsive")
 
-        let firstProfile = app.descendants(matching: .any)["friends.profile.preview-anna"]
-        XCTAssertTrue(firstProfile.waitForExistence(timeout: 5))
-        firstProfile.tap()
+        let details = app.buttons["friends.swipe.details"]
+        XCTAssertTrue(details.waitForExistence(timeout: 5))
+        details.tap()
         XCTAssertTrue(app.staticTexts["Anna Keller"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.staticTexts["96% збіг"].exists)
         XCTAssertTrue(app.staticTexts["Демо-профіль · дії вимкнені"].exists)
@@ -258,6 +280,8 @@ final class CriticalFlowsUITests: XCTestCase {
     func testFriendsSwipeDeckAdvancesAfterPass() throws {
         let app = XCUIApplication()
         app.launchArguments = ["--ui-test-friends"]
+        // Earlier flows can persist a pending auth sheet that would cover this screen.
+        app.launchArguments += ["-pending_initial_auth_entry", "NO"]
         app.launchEnvironment["UITESTS"] = "1"
         app.launch()
 
@@ -275,17 +299,28 @@ final class CriticalFlowsUITests: XCTestCase {
     func testFriendsGuestSeesAuthGateAndCanOpenSafeDemoCatalog() throws {
         let app = XCUIApplication()
         app.launchArguments = ["--ui-test-friends-gate"]
+        // Earlier flows can persist a pending auth sheet that would cover this screen.
+        app.launchArguments += ["-pending_initial_auth_entry", "NO"]
         app.launchEnvironment["UITESTS"] = "1"
         app.launch()
 
         XCTAssertTrue(app.buttons["friends.accessGate.signIn"].waitForExistence(timeout: 15))
         XCTAssertFalse(app.alerts.firstMatch.exists)
 
+        let title = app.descendants(matching: .any)["friends.accessGate.title"]
+        XCTAssertTrue(title.exists)
+        XCTAssertGreaterThanOrEqual(title.frame.minX, 0)
+        XCTAssertLessThanOrEqual(title.frame.maxX, app.frame.maxX)
+
+        let signIn = app.buttons["friends.accessGate.signIn"]
+        XCTAssertGreaterThanOrEqual(signIn.frame.height, 44)
+        XCTAssertTrue(signIn.isHittable)
+
         let demo = app.buttons["friends.accessGate.demo"]
         XCTAssertTrue(demo.exists)
         demo.tap()
 
-        XCTAssertTrue(app.staticTexts["Демо-каталог"].waitForExistence(timeout: 8))
+        XCTAssertTrue(app.descendants(matching: .any)["friends.demo.notice"].waitForExistence(timeout: 8))
         XCTAssertTrue(app.staticTexts["Anna Keller"].waitForExistence(timeout: 8))
         XCTAssertFalse(app.alerts.firstMatch.exists)
     }
@@ -301,6 +336,8 @@ final class CriticalFlowsUITests: XCTestCase {
             "--skip-feature-onboarding",
             "--ui-test-cv-builder"
         ]
+        // Earlier flows can persist a pending auth sheet that would cover this screen.
+        app.launchArguments += ["-pending_initial_auth_entry", "NO"]
         app.launchEnvironment["UITESTS"] = "1"
         app.launch()
         return app

@@ -150,17 +150,17 @@ final class AppLockManager: ObservableObject {
     
     private func availabilityMessage(for error: NSError?) -> String {
         guard let error else {
-            return "Biometric authentication is not available on this device."
+            return "settings.biometry.unavailable".localized
         }
         
         if let laError = LAError.Code(rawValue: error.code) {
             switch laError {
             case .biometryNotAvailable:
-                return "Biometric authentication is not available on this device."
+                return "settings.biometry.unavailable".localized
             case .biometryNotEnrolled:
-                return "Set up Face ID or Touch ID in device settings to use app lock."
+                return "settings.biometry.not_enrolled".localized
             case .passcodeNotSet:
-                return "Set a device passcode before enabling biometric lock."
+                return "settings.biometry.no_passcode".localized
             default:
                 break
             }

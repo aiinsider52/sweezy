@@ -34,7 +34,7 @@ struct DailyGermanHomeCard: View {
                     VStack(alignment: .leading, spacing: 9) {
                         HStack(spacing: 8) {
                             Label("daily_german.home.badge".localized, systemImage: "flame.fill")
-                                .font(.system(size: 10, weight: .black, design: .rounded))
+                                .font(.system(size: 10, weight: .black, design: .default))
                                 .tracking(1.1)
                                 .foregroundColor(Theme.Colors.accentYellowSoft)
                                 .padding(.horizontal, 9)
@@ -43,7 +43,7 @@ struct DailyGermanHomeCard: View {
 
                             if service.isFinished {
                                 Text(service.isSolved ? "daily_german.home.done".localized : "daily_german.home.try_tomorrow".localized)
-                                    .font(.system(size: 10, weight: .bold, design: .rounded))
+                                    .font(.system(size: 10, weight: .bold, design: .default))
                                     .foregroundColor(.white.opacity(0.82))
                                     .padding(.horizontal, 9)
                                     .padding(.vertical, 5)
@@ -52,7 +52,7 @@ struct DailyGermanHomeCard: View {
                         }
 
                         Text("daily_german.home.title".localized)
-                            .font(.system(size: 22, weight: .bold, design: .rounded))
+                            .font(.system(size: 22, weight: .bold, design: .default))
                             .foregroundColor(.white)
                             .lineLimit(1)
 
@@ -104,7 +104,7 @@ private struct MiniMetric: View {
             Image(systemName: icon)
                 .font(.system(size: 10, weight: .bold))
             Text(text)
-                .font(.system(size: 11, weight: .bold, design: .rounded))
+                .font(.system(size: 11, weight: .bold, design: .default))
         }
         .foregroundColor(.white.opacity(0.88))
     }

@@ -63,7 +63,16 @@ final class StoreKitSubscriptionTests: XCTestCase {
         session.shouldEnterBillingRetryOnRenewal = true
         try session.buyProduct(productIdentifier: monthlyID)
         try session.forceRenewalOfSubscription(productIdentifier: monthlyID)
-        let graceTransaction = try XCTUnwrap(session.allTransactions().last { $0.hasPurchaseIssue })
+        let deadline = Date().addingTimeInterval(2)
+        var pendingGraceTransaction: SKTestTransaction?
+        repeat {
+            pendingGraceTransaction = session.allTransactions().last { $0.hasPurchaseIssue }
+            if pendingGraceTransaction == nil {
+                RunLoop.current.run(until: Date().addingTimeInterval(0.05))
+            }
+        } while pendingGraceTransaction == nil && Date() < deadline
+
+        let graceTransaction = try XCTUnwrap(pendingGraceTransaction)
         XCTAssertNil(graceTransaction.cancelDate)
 
         session.shouldEnterBillingRetryOnRenewal = false

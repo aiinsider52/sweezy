@@ -88,11 +88,11 @@ struct EmailVerificationSheet: View {
         HStack {
             HStack(spacing: 8) {
                 Image(systemName: verificationComplete ? "checkmark.shield.fill" : "envelope.badge.shield.half.filled")
-                    .foregroundStyle(JourneyVisual.lime)
+                    .foregroundStyle(Theme.Colors.textPrimary)
                 Text("auth.verify.step_label".localized)
                     .font(.caption.weight(.bold))
                     .tracking(1.2)
-                    .foregroundStyle(.white.opacity(0.72))
+                    .foregroundStyle(JourneyVisual.secondaryText)
             }
 
             Spacer()
@@ -100,10 +100,10 @@ struct EmailVerificationSheet: View {
             Button(action: dismiss.callAsFunction) {
                 Image(systemName: "xmark")
                     .font(.system(size: 16, weight: .semibold))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(JourneyVisual.primaryText)
                     .frame(width: 44, height: 44)
-                    .background(Color.black.opacity(0.48), in: Circle())
-                    .overlay(Circle().stroke(.white.opacity(0.18), lineWidth: 1))
+                    .background(Theme.Colors.card, in: Circle())
+                    .overlay(Circle().stroke(JourneyVisual.softBorder, lineWidth: 1))
             }
             .disabled(isLoading)
             .accessibilityLabel("common.close".localized)
@@ -114,14 +114,14 @@ struct EmailVerificationSheet: View {
         VStack(alignment: .leading, spacing: 22) {
             VStack(alignment: .leading, spacing: 10) {
                 Text("auth.verify.editorial_title".localized)
-                    .font(.system(size: 38, weight: .bold, design: .rounded))
-                    .foregroundStyle(.white)
-                    .lineSpacing(-2)
+                    .font(.system(size: 30, weight: .bold, design: .default))
+                    .foregroundStyle(JourneyVisual.primaryText)
+                    .lineSpacing(1)
                     .fixedSize(horizontal: false, vertical: true)
 
                 Text("auth.verify.editorial_subtitle".localized)
                     .font(.subheadline)
-                    .foregroundStyle(.white.opacity(0.7))
+                    .foregroundStyle(JourneyVisual.secondaryText)
                     .fixedSize(horizontal: false, vertical: true)
             }
 
@@ -141,10 +141,10 @@ struct EmailVerificationSheet: View {
             VStack(alignment: .leading, spacing: 3) {
                 Text("auth.verify.sent_to".localized)
                     .font(.caption)
-                    .foregroundStyle(.white.opacity(0.52))
+                    .foregroundStyle(JourneyVisual.secondaryText)
                 Text(email)
                     .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(JourneyVisual.primaryText)
                     .lineLimit(1)
                     .minimumScaleFactor(0.72)
             }
@@ -153,13 +153,13 @@ struct EmailVerificationSheet: View {
 
             Image(systemName: "lock.fill")
                 .font(.caption)
-                .foregroundStyle(.white.opacity(0.4))
+                .foregroundStyle(JourneyVisual.secondaryText)
         }
         .padding(14)
-        .background(Color.black.opacity(0.66), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .stroke(.white.opacity(0.14), lineWidth: 1)
+                .stroke(JourneyVisual.softBorder, lineWidth: 1)
         )
     }
 
@@ -168,10 +168,10 @@ struct EmailVerificationSheet: View {
             VStack(alignment: .leading, spacing: 5) {
                 Text("auth.verify.code_label".localized)
                     .font(.headline)
-                    .foregroundStyle(.white)
+                    .foregroundStyle(JourneyVisual.primaryText)
                 Text("auth.verify.latest_code_hint".localized)
                     .font(.caption)
-                    .foregroundStyle(.white.opacity(0.56))
+                    .foregroundStyle(JourneyVisual.secondaryText)
                     .fixedSize(horizontal: false, vertical: true)
             }
 
@@ -217,7 +217,7 @@ struct EmailVerificationSheet: View {
                     Text(resendButtonTitle)
                 }
                 .font(.subheadline.weight(.semibold))
-                .foregroundStyle(resendSecondsRemaining == 0 ? JourneyVisual.lime : .white.opacity(0.46))
+                .foregroundStyle(resendSecondsRemaining == 0 ? JourneyVisual.lime : JourneyVisual.primaryText)
                 .frame(maxWidth: .infinity)
                 .frame(minHeight: 44)
             }
@@ -227,20 +227,19 @@ struct EmailVerificationSheet: View {
 
             HStack(alignment: .top, spacing: 8) {
                 Image(systemName: "info.circle.fill")
-                    .foregroundStyle(.white.opacity(0.48))
+                    .foregroundStyle(JourneyVisual.secondaryText)
                 Text("auth.verify.resend_warning".localized)
                     .font(.caption2)
-                    .foregroundStyle(.white.opacity(0.48))
+                    .foregroundStyle(JourneyVisual.secondaryText)
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
         .padding(18)
-        .background(Color.black.opacity(0.76), in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .stroke(.white.opacity(0.16), lineWidth: 1)
+                .stroke(JourneyVisual.softBorder, lineWidth: 1)
         )
-        .shadow(color: .black.opacity(0.4), radius: 24, y: 12)
     }
 
     private var otpField: some View {
@@ -273,8 +272,8 @@ struct EmailVerificationSheet: View {
         let isCurrent = min(characters.count, 5) == index && codeIsFocused && characters.count < 6
 
         return Text(hasValue ? String(characters[index]) : "")
-            .font(.system(size: 24, weight: .bold, design: .rounded))
-            .foregroundStyle(.white)
+            .font(.system(size: 24, weight: .bold, design: .default))
+            .foregroundStyle(JourneyVisual.primaryText)
             .frame(maxWidth: .infinity)
             .frame(height: 58)
             .background(Color.white.opacity(hasValue ? 0.1 : 0.055), in: RoundedRectangle(cornerRadius: 13, style: .continuous))
@@ -296,12 +295,12 @@ struct EmailVerificationSheet: View {
                 .background(JourneyVisual.lime, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
 
             Text("auth.verify.success.title".localized)
-                .font(.system(size: 38, weight: .bold, design: .rounded))
-                .foregroundStyle(.white)
+                .font(.system(size: 30, weight: .bold, design: .default))
+                .foregroundStyle(JourneyVisual.primaryText)
 
             Text("auth.verify.success.body".localized)
                 .font(.body)
-                .foregroundStyle(.white.opacity(0.7))
+                .foregroundStyle(JourneyVisual.secondaryText)
                 .fixedSize(horizontal: false, vertical: true)
 
             Button {
@@ -322,10 +321,10 @@ struct EmailVerificationSheet: View {
             .buttonStyle(.plain)
         }
         .padding(20)
-        .background(Color.black.opacity(0.76), in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .stroke(.white.opacity(0.16), lineWidth: 1)
+                .stroke(JourneyVisual.softBorder, lineWidth: 1)
         )
     }
 
@@ -335,7 +334,7 @@ struct EmailVerificationSheet: View {
                 .foregroundStyle(color)
             Text(text)
                 .font(.caption)
-                .foregroundStyle(.white.opacity(0.82))
+                .foregroundStyle(JourneyVisual.secondaryText)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .frame(maxWidth: .infinity, alignment: .leading)

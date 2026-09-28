@@ -23,7 +23,7 @@ struct EventDetailView: View {
 
     var body: some View {
         ZStack(alignment: .topTrailing) {
-            JourneyVisual.black.ignoresSafeArea()
+            JourneyVisual.pageBackground.ignoresSafeArea()
 
             if isLoading {
                 ProgressView()
@@ -93,7 +93,7 @@ struct EventDetailView: View {
                 if let actionMessage {
                     Text(actionMessage)
                         .font(.system(size: 11, weight: .semibold))
-                        .foregroundColor(JourneyVisual.lime)
+                        .foregroundColor(Theme.Colors.textPrimary)
                 }
             }
             .padding(13)
@@ -109,10 +109,10 @@ struct EventDetailView: View {
                     .font(.system(size: 10, weight: .semibold))
                     .lineLimit(1)
             }
-            .foregroundColor(.white)
+            .foregroundColor(JourneyVisual.primaryText)
             .frame(maxWidth: .infinity)
             .frame(height: 62)
-            .background(Color.black.opacity(0.24))
+            .background(Theme.Colors.card)
             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         }
         .buttonStyle(.plain)
@@ -120,12 +120,7 @@ struct EventDetailView: View {
 
     private func heroSection(_ event: EventListing) -> some View {
         ZStack(alignment: .bottomLeading) {
-            Image(eventCoverImageName(event))
-                .resizable()
-                .scaledToFill()
-                .frame(height: 344)
-                .frame(maxWidth: .infinity)
-                .clipped()
+            FittedAssetImage(name: eventCoverImageName(event), height: 344)
 
             LinearGradient(
                 colors: [.black.opacity(0.08), .black.opacity(0.18), JourneyVisual.black],
@@ -155,9 +150,9 @@ struct EventDetailView: View {
                 }
 
                 Text(event.title)
-                    .font(.system(size: 34, weight: .bold, design: .rounded))
+                    .font(.system(size: 34, weight: .bold, design: .default))
                     .foregroundColor(.white)
-                    .lineSpacing(-2)
+                    .lineSpacing(1)
                     .fixedSize(horizontal: false, vertical: true)
 
                 HStack(spacing: 10) {
@@ -185,7 +180,7 @@ struct EventDetailView: View {
                         .foregroundColor(.black.opacity(0.64))
                         .textCase(.uppercase)
                     Text(dayText(event))
-                        .font(.system(size: 28, weight: .bold, design: .rounded))
+                        .font(.system(size: 28, weight: .bold, design: .default))
                         .foregroundColor(.black)
                 }
                 .frame(width: 58, height: 64)
@@ -194,14 +189,14 @@ struct EventDetailView: View {
 
                 VStack(alignment: .leading, spacing: 7) {
                     Text(dateText(event))
-                        .font(.system(size: 16, weight: .bold, design: .rounded))
-                        .foregroundColor(.white)
+                        .font(.system(size: 16, weight: .bold, design: .default))
+                        .foregroundColor(JourneyVisual.primaryText)
                     Label(timeText(event), systemImage: "clock")
                         .font(.system(size: 12, weight: .medium))
-                        .foregroundColor(.white.opacity(0.62))
+                        .foregroundColor(JourneyVisual.secondaryText)
                     Label(fullLocationText(event), systemImage: "mappin.and.ellipse")
                         .font(.system(size: 12, weight: .medium))
-                        .foregroundColor(.white.opacity(0.62))
+                        .foregroundColor(JourneyVisual.secondaryText)
                         .lineLimit(2)
                 }
 
@@ -215,22 +210,22 @@ struct EventDetailView: View {
         HStack(spacing: 13) {
             ZStack {
                 Circle()
-                    .fill(Color.white.opacity(0.1))
+                    .fill(JourneyVisual.softBorder)
                 Text(String(event.organizerName.prefix(1)).uppercased())
                     .font(.system(size: 19, weight: .bold))
-                    .foregroundColor(JourneyVisual.lime)
+                    .foregroundColor(Theme.Colors.textPrimary)
             }
             .frame(width: 50, height: 50)
-            .overlay(Circle().stroke(Color.white.opacity(0.18), lineWidth: 1))
+            .overlay(Circle().stroke(JourneyVisual.softBorder, lineWidth: 1))
 
             VStack(alignment: .leading, spacing: 4) {
                 Text("journey.event.organizer".localized)
                     .font(.system(size: 10, weight: .bold))
-                    .foregroundColor(.white.opacity(0.46))
+                    .foregroundColor(JourneyVisual.secondaryText)
                     .textCase(.uppercase)
                 Text(event.organizerName)
-                    .font(.system(size: 16, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
+                    .font(.system(size: 16, weight: .bold, design: .default))
+                    .foregroundColor(JourneyVisual.primaryText)
                     .lineLimit(2)
             }
 
@@ -238,26 +233,26 @@ struct EventDetailView: View {
 
             Image(systemName: "checkmark.seal.fill")
                 .font(.system(size: 19))
-                .foregroundColor(JourneyVisual.lime)
+                .foregroundColor(Theme.Colors.textPrimary)
         }
         .padding(15)
-        .background(Color.white.opacity(0.065))
+        .background(Theme.Colors.card)
         .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 22, style: .continuous)
-                .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                .stroke(JourneyVisual.softBorder, lineWidth: 1)
         )
     }
 
     private func descriptionCard(_ event: EventListing) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("journey.event.about".localized)
-                .font(.system(size: 22, weight: .bold, design: .rounded))
-                .foregroundColor(.white)
+                .font(.system(size: 22, weight: .bold, design: .default))
+                .foregroundColor(JourneyVisual.primaryText)
 
             Text(event.description)
                 .font(.system(size: 15, weight: .regular))
-                .foregroundColor(.white.opacity(0.72))
+                .foregroundColor(JourneyVisual.secondaryText)
                 .lineSpacing(4)
         }
         .padding(.vertical, 8)
@@ -269,35 +264,30 @@ struct EventDetailView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("journey.event.location".localized)
                         .font(.system(size: 10, weight: .bold))
-                        .foregroundColor(JourneyVisual.lime)
+                        .foregroundColor(Theme.Colors.textPrimary)
                         .textCase(.uppercase)
                     Text(locationTitle(event))
-                        .font(.system(size: 17, weight: .bold, design: .rounded))
-                        .foregroundColor(.white)
+                        .font(.system(size: 17, weight: .bold, design: .default))
+                        .foregroundColor(JourneyVisual.primaryText)
                 }
                 Spacer()
                 Image(systemName: "map.fill")
                     .font(.system(size: 18))
-                    .foregroundColor(.white.opacity(0.5))
+                    .foregroundColor(JourneyVisual.secondaryText)
             }
 
             if let address = event.address, !address.isEmpty {
                 Text(address)
                     .font(.system(size: 13, weight: .medium))
-                    .foregroundColor(.white.opacity(0.58))
+                    .foregroundColor(JourneyVisual.secondaryText)
             }
         }
         .padding(16)
-        .background(
-            Image("cityhub-zurich-limmat")
-                .resizable()
-                .scaledToFill()
-                .overlay(Color.black.opacity(0.68))
-        )
+        .background(Theme.Colors.card)
         .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 22, style: .continuous)
-                .stroke(Color.white.opacity(0.16), lineWidth: 1)
+                .stroke(JourneyVisual.softBorder, lineWidth: 1)
         )
     }
 
@@ -327,30 +317,30 @@ struct EventDetailView: View {
             ShareLink(item: "\(event.title)\n\(event.description)") {
                 Image(systemName: "square.and.arrow.up")
                     .font(.system(size: 17, weight: .semibold))
-                    .foregroundColor(.white)
+                    .foregroundColor(JourneyVisual.primaryText)
                     .frame(width: 54, height: 54)
-                    .background(Color.white.opacity(0.1))
+                    .background(Theme.Colors.card)
                     .clipShape(Circle())
-                    .overlay(Circle().stroke(Color.white.opacity(0.14), lineWidth: 1))
+                    .overlay(Circle().stroke(JourneyVisual.softBorder, lineWidth: 1))
             }
         }
         .padding(.horizontal, 18)
         .padding(.top, 10)
         .padding(.bottom, 6)
         .background(.ultraThinMaterial.opacity(0.9))
-        .background(Color.black.opacity(0.58))
+        .background(Theme.Colors.card)
     }
 
     private var closeButton: some View {
         Button { dismiss() } label: {
             Image(systemName: "xmark")
                 .font(.system(size: 14, weight: .bold))
-                .foregroundColor(.white)
+                .foregroundColor(JourneyVisual.primaryText)
                 .frame(width: 38, height: 38)
                 .background(.ultraThinMaterial.opacity(0.88))
-                .background(Color.black.opacity(0.22))
+                .background(Theme.Colors.card)
                 .clipShape(Circle())
-                .overlay(Circle().stroke(Color.white.opacity(0.28), lineWidth: 1))
+                .overlay(Circle().stroke(JourneyVisual.softBorder, lineWidth: 1))
         }
         .buttonStyle(.plain)
         .padding(.top, 12)
@@ -361,9 +351,9 @@ struct EventDetailView: View {
         VStack(spacing: 12) {
             Image(systemName: "exclamationmark.triangle")
                 .font(.largeTitle)
-                .foregroundColor(JourneyVisual.lime)
+                .foregroundColor(Theme.Colors.textPrimary)
             Text("events.detail_error".localized)
-                .foregroundColor(.white.opacity(0.68))
+                .foregroundColor(JourneyVisual.secondaryText)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }

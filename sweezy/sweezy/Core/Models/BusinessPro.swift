@@ -7,6 +7,8 @@ struct BusinessProfile: Codable, Identifiable {
     var description: String
     var category: String
     var canton: String
+    var countryCode: String?
+    var subdivisionCode: String?
     var city: String
     var address: String?
     var serviceArea: [String]
@@ -31,6 +33,7 @@ struct BusinessProfile: Codable, Identifiable {
 
     enum CodingKeys: String, CodingKey {
         case description, category, canton, city, address, languages, phone, email, website, status
+        case countryCode = "country_code", subdivisionCode = "subdivision_code"
         case userID = "user_id"
         case displayName = "display_name"
         case legalName = "legal_name"
@@ -55,8 +58,10 @@ struct BusinessProfilePayload: Encodable {
     var legalName: String?
     var description = ""
     var category = "other"
-    var canton = "ZH"
-    var city = "Zürich"
+    var canton = APIClient.subdivisionCode
+    var countryCode = APIClient.countryCode
+    var subdivisionCode = APIClient.subdivisionCode
+    var city = ""
     var address: String?
     var serviceArea = ["ZH"]
     var languages = ["de"]
@@ -74,6 +79,8 @@ struct BusinessProfilePayload: Encodable {
     init(profile: BusinessProfile) {
         displayName = profile.displayName; legalName = profile.legalName; description = profile.description
         category = profile.category; canton = profile.canton; city = profile.city; address = profile.address
+        countryCode = profile.countryCode ?? APIClient.countryCode
+        subdivisionCode = profile.subdivisionCode ?? profile.canton
         serviceArea = profile.serviceArea; languages = profile.languages; logoURL = profile.logoURL
         coverURL = profile.coverURL; phone = profile.phone; email = profile.email; website = profile.website
         uidNumber = profile.uidNumber; deliveryModes = profile.deliveryModes
@@ -81,6 +88,7 @@ struct BusinessProfilePayload: Encodable {
     }
     enum CodingKeys: String, CodingKey {
         case description, category, canton, city, address, languages, phone, email, website
+        case countryCode = "country_code", subdivisionCode = "subdivision_code"
         case displayName = "display_name", legalName = "legal_name", serviceArea = "service_area"
         case logoURL = "logo_url", coverURL = "cover_url", uidNumber = "uid_number"
         case deliveryModes = "delivery_modes", cancellationPolicy = "cancellation_policy", paymentLink = "payment_link"
@@ -135,8 +143,8 @@ struct BusinessServiceItem: Codable, Identifiable {
     var priceText: String {
         guard let priceCents else { return "Ціна за домовленістю" }
         let from = Double(priceCents) / 100
-        if let priceToCents { return String(format: "CHF %.2f–%.2f", from, Double(priceToCents) / 100) }
-        return String(format: "CHF %.2f", from)
+        if let priceToCents { return String(format: "%@ %.2f–%.2f", currency, from, Double(priceToCents) / 100) }
+        return String(format: "%@ %.2f", currency, from)
     }
 }
 
@@ -148,7 +156,7 @@ struct BusinessServicePayload: Encodable {
     var durationMinutes = 60
     var priceCents: Int?
     var priceToCents: Int?
-    var currency = "CHF"
+    var currency = APIClient.countryCode == "CH" ? "CHF" : "EUR"
     var deliveryMode = "onsite"
     var bufferMinutes = 0
     var isActive = true

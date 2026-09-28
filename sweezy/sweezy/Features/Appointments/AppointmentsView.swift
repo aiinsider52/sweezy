@@ -74,7 +74,7 @@ struct AppointmentsView: View {
                 EmptyStateView(
                     systemImage: "calendar",
                     title: "appointments.no_appointments".localized,
-                    subtitle: "guides.no_results_subtitle".localized,
+                    subtitle: "appointments.empty_subtitle".localized,
                     actionTitle: "appointments.add".localized
                 ) {
                     showingAddAppointment = true
@@ -176,9 +176,7 @@ struct AppointmentCard: View {
                     
                     Spacer()
                     
-                    Image(systemName: appointment.category.iconName)
-                        .font(.title2)
-                        .foregroundColor(Color(appointment.category.color))
+                    JourneyCategoryIcon(symbol: appointment.category.iconName, swatch: appointment.category.swatch, size: 42)
                 }
                 
                 // Date and time

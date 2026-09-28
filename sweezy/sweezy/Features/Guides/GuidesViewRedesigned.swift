@@ -339,7 +339,7 @@ private struct GuideDetailSheet: View {
                                 HStack {
                                     Image(systemName: guide.category.iconName)
                                         .font(.system(size: 48))
-                                        .foregroundColor(.white)
+                                        .foregroundColor(JourneyVisual.primaryText)
                                     Spacer()
                                 }
                                 .padding(Theme.Spacing.lg)

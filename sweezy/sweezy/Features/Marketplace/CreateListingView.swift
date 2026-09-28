@@ -12,7 +12,7 @@ struct CreateListingView: View {
     @State private var description = ""
     @State private var category: ServiceCategory = .other
     @State private var itemCategory: ItemCategory = .other
-    @State private var canton = "ZH"
+    @State private var canton = APIClient.subdivisionCode
     @State private var priceInfo = ""
     @State private var priceText = ""
     @State private var isFreeItem = false
@@ -103,7 +103,10 @@ struct CreateListingView: View {
                 MyListingsView()
             }
             .sheet(isPresented: $showCantonPicker) {
-                CantonPickerSheet(selectedCanton: $canton)
+                CantonPickerSheet(
+                    selectedCanton: $canton,
+                    country: ResidenceCountry(rawValue: APIClient.countryCode) ?? .switzerland
+                )
             }
             .onChange(of: selectedPhotoItems.map(\.itemIdentifier)) { _, _ in
                 Task { await appendSelectedPhotos(from: selectedPhotoItems) }
@@ -142,7 +145,7 @@ struct CreateListingView: View {
                         VStack(spacing: 10) {
                             Image(systemName: "plus.circle.fill")
                                 .font(.system(size: 28, weight: .semibold))
-                                .foregroundColor(Theme.Colors.primary)
+                                .foregroundColor(JourneyVisual.accentStrong)
                             Text("marketplace.photos_placeholder".localized(with: maxImages))
                                 .font(.subheadline.weight(.semibold))
                                 .foregroundColor(Theme.Colors.textPrimary)
@@ -180,7 +183,7 @@ struct CreateListingView: View {
                                             .font(.caption.weight(.semibold))
                                             .multilineTextAlignment(.center)
                                     }
-                                    .foregroundColor(Theme.Colors.primary)
+                                    .foregroundColor(JourneyVisual.accentText)
                                     .frame(width: 112, height: 112)
                                     .background(fieldBackground)
                                     .overlay(
@@ -272,7 +275,7 @@ struct CreateListingView: View {
                 formLabel("marketplace.field.category".localized, icon: "tag.fill")
 
                 LazyVGrid(columns: [
-                    GridItem(.adaptive(minimum: 100), spacing: 8)
+                    GridItem(.adaptive(minimum: 145), spacing: 8)
                 ], spacing: 8) {
                     if listingType == .item {
                         ForEach(ItemCategory.allCases) { cat in
@@ -302,8 +305,8 @@ struct CreateListingView: View {
                 Image(systemName: cat.icon)
                     .font(.system(size: 11))
                 Text(cat.displayName)
-                    .font(.system(size: 12, weight: .semibold))
-                    .lineLimit(1)
+                    .font(.subheadline.weight(.semibold))
+                    .fixedSize(horizontal: false, vertical: true)
             }
             .padding(.horizontal, 10)
             .padding(.vertical, 9)
@@ -342,7 +345,7 @@ struct CreateListingView: View {
 
                 if !isFreeItem {
                     HStack(spacing: 10) {
-                        Text("CHF")
+                        Text(APIClient.countryCode == "CH" ? "CHF" : "EUR")
                             .font(.system(size: 15, weight: .semibold))
                             .foregroundColor(Theme.Colors.textTertiary)
 
@@ -366,7 +369,7 @@ struct CreateListingView: View {
                             .font(.subheadline.weight(.medium))
                             .foregroundColor(Theme.Colors.textPrimary)
                     }
-                    .tint(Theme.Colors.primary)
+                    .tint(JourneyVisual.accentText)
                 }
 
                 VStack(alignment: .leading, spacing: 8) {
@@ -390,7 +393,7 @@ struct CreateListingView: View {
             }
         } label: {
             Text(cond.displayName)
-                .font(.system(size: 12, weight: .semibold))
+                .font(.subheadline.weight(.semibold))
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 10)
                 .background(
@@ -423,8 +426,8 @@ struct CreateListingView: View {
                 Image(systemName: cat.icon)
                     .font(.system(size: 11))
                 Text(cat.displayName)
-                    .font(.system(size: 12, weight: .semibold))
-                    .lineLimit(1)
+                    .font(.subheadline.weight(.semibold))
+                    .fixedSize(horizontal: false, vertical: true)
             }
             .padding(.horizontal, 10)
             .padding(.vertical, 9)
@@ -466,7 +469,7 @@ struct CreateListingView: View {
     private var cantonCard: some View {
         formCard {
             VStack(alignment: .leading, spacing: 10) {
-                formLabel("marketplace.field.canton".localized, icon: "mappin.and.ellipse")
+                formLabel((ResidenceCountry(rawValue: APIClient.countryCode) ?? .switzerland).subdivisionTitle, icon: "mappin.and.ellipse")
 
                 Button {
                     showCantonPicker = true
@@ -480,7 +483,7 @@ struct CreateListingView: View {
                             )
 
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(cantonDisplayName(canton))
+                            Text(CountryCatalog.subdivisionName(country: ResidenceCountry(rawValue: APIClient.countryCode) ?? .switzerland, code: canton))
                                 .font(.body.weight(.medium))
                                 .foregroundColor(Theme.Colors.textPrimary)
                             Text(canton == "all" ? "" : canton)
@@ -579,7 +582,7 @@ struct CreateListingView: View {
                 HStack(spacing: 10) {
                     Image(systemName: contactType.icon)
                         .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(Theme.Colors.primary)
+                        .foregroundColor(JourneyVisual.accentStrong)
                         .frame(width: 20)
 
                     TextField(contactType.placeholder, text: $contactValue)
@@ -641,7 +644,7 @@ struct CreateListingView: View {
                         .overlay(
                             Text(authorName.isEmpty ? "?" : String(authorName.prefix(1)).uppercased())
                                 .font(.system(size: 15, weight: .bold))
-                                .foregroundColor(Theme.Colors.primary)
+                                .foregroundColor(JourneyVisual.accentText)
                         )
 
                     TextField("marketplace.field.author_placeholder".localized, text: $authorName)
@@ -665,7 +668,7 @@ struct CreateListingView: View {
             HStack(spacing: 10) {
                 if isSubmitting {
                     ProgressView()
-                        .tint(.white)
+                        .tint(JourneyVisual.primaryText)
                     Text(selectedImages.isEmpty ? "marketplace.submit".localized : "marketplace.photos_uploading".localized)
                         .font(.headline)
                 } else {
@@ -685,7 +688,7 @@ struct CreateListingView: View {
                           : LinearGradient(colors: [Color.gray.opacity(0.25), Color.gray.opacity(0.2)],
                                            startPoint: .leading, endPoint: .trailing))
             )
-            .foregroundColor(isValid ? .white : Theme.Colors.textTertiary)
+            .foregroundColor(isValid ? JourneyVisual.primaryText : Theme.Colors.textTertiary)
             .shadow(color: isValid ? Theme.Colors.primary.opacity(0.3) : .clear, radius: 10, y: 5)
         }
         .disabled(!isValid || isSubmitting)
@@ -766,7 +769,7 @@ struct CreateListingView: View {
         HStack(spacing: 6) {
             Image(systemName: icon)
                 .font(.system(size: 13, weight: .medium))
-                .foregroundColor(Theme.Colors.primary)
+                .foregroundColor(JourneyVisual.accentStrong)
             Text(text)
                 .font(.subheadline.bold())
                 .foregroundColor(Theme.Colors.textPrimary)
@@ -811,7 +814,10 @@ struct CreateListingView: View {
     // MARK: - Canton Helpers
 
     private func cantonDisplayName(_ code: String) -> String {
-        SwissCanton.all.first(where: { $0.code == code })?.name ?? code
+        CountryCatalog.subdivisionName(
+            country: ResidenceCountry(rawValue: APIClient.countryCode) ?? .switzerland,
+            code: code
+        )
     }
 
     private func cantonFlag(_ code: String) -> some View {
@@ -821,7 +827,7 @@ struct CreateListingView: View {
 
     private func cantonEmoji(_ code: String) -> String {
         switch code {
-        case "all": return "🇨🇭"
+        case "all": return ResidenceCountry(rawValue: APIClient.countryCode)?.flag ?? "🌍"
         case "ZH": return "🏙️"
         case "BE": return "🐻"
         case "LU": return "⛰️"
@@ -891,6 +897,7 @@ struct CreateListingView: View {
             canton: canton,
             priceInfo: listingType == .service && !priceInfo.isEmpty ? priceInfo : nil,
             priceChf: listingType == .item && !isFreeItem ? parsedPrice : nil,
+            priceMinor: listingType == .item && !isFreeItem ? parsedPrice.map { $0 * 100 } : nil,
             isFree: listingType == .item && isFreeItem,
             condition: listingType == .item ? condition : nil,
             negotiable: listingType == .item && !isFreeItem && negotiable,
@@ -987,13 +994,15 @@ struct CreateListingView: View {
 
 private struct CantonPickerSheet: View {
     @Binding var selectedCanton: String
+    let country: ResidenceCountry
     @Environment(\.dismiss) private var dismiss
     @State private var searchText = ""
 
-    private var filtered: [(code: String, name: String)] {
-        if searchText.isEmpty { return SwissCanton.all }
+    private var filtered: [AdministrativeArea] {
+        let areas = CountryCatalog.subdivisions(for: country)
+        if searchText.isEmpty { return areas }
         let lower = searchText.lowercased()
-        return SwissCanton.all.filter {
+        return areas.filter {
             $0.code.lowercased().contains(lower) || $0.name.lowercased().contains(lower)
         }
     }
@@ -1005,7 +1014,7 @@ private struct CantonPickerSheet: View {
 
                 ScrollView {
                     LazyVStack(spacing: 6) {
-                        ForEach(filtered, id: \.code) { canton in
+                        ForEach(filtered) { canton in
                             cantonRow(canton)
                         }
                     }
@@ -1014,7 +1023,7 @@ private struct CantonPickerSheet: View {
                 }
             }
             .searchable(text: $searchText, prompt: "marketplace.canton.search".localized)
-            .navigationTitle("marketplace.field.canton".localized)
+            .navigationTitle(country.subdivisionTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -1026,14 +1035,14 @@ private struct CantonPickerSheet: View {
         .presentationDetents([.large])
     }
 
-    private func cantonRow(_ canton: (code: String, name: String)) -> some View {
+    private func cantonRow(_ canton: AdministrativeArea) -> some View {
         let isSelected = selectedCanton == canton.code
         return Button {
             selectedCanton = canton.code
             dismiss()
         } label: {
             HStack(spacing: 14) {
-                Text(cantonEmoji(canton.code))
+                Text(country.flag)
                     .font(.title2)
                     .frame(width: 40, height: 40)
                     .background(
@@ -1059,7 +1068,7 @@ private struct CantonPickerSheet: View {
                 if isSelected {
                     Image(systemName: "checkmark.circle.fill")
                         .font(.system(size: 22))
-                        .foregroundColor(Theme.Colors.primary)
+                        .foregroundColor(JourneyVisual.accentStrong)
                 }
             }
             .padding(.horizontal, 14)

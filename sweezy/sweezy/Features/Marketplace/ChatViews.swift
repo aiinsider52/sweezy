@@ -12,7 +12,7 @@ struct ChatInboxView: View {
 
     var body: some View {
         ZStack {
-            JourneyVisual.black.ignoresSafeArea()
+            JourneyAmbientBackground()
             VStack(spacing: 0) {
                 header
                 connectionStatus
@@ -46,8 +46,8 @@ struct ChatInboxView: View {
     private var loadIssue: some View {
         if let message = appContainer.chatStore.conversationLoadError {
             HStack(spacing: 10) {
-                Image(systemName: "wifi.exclamationmark").foregroundColor(JourneyVisual.lime)
-                Text(message).font(.caption).foregroundColor(.white.opacity(0.7))
+                Image(systemName: "wifi.exclamationmark").foregroundColor(JourneyVisual.accentStrong)
+                Text(message).font(.caption).foregroundColor(JourneyVisual.secondaryText)
                 Spacer(minLength: 6)
                 Button("common.retry".localized) {
                     Task { await appContainer.chatStore.refresh() }
@@ -67,24 +67,24 @@ struct ChatInboxView: View {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 18, weight: .bold))
                         .frame(width: 46, height: 46)
-                        .background(Color.white.opacity(0.09))
+                        .background(JourneyVisual.elevatedSurface)
                         .clipShape(Circle())
                 }
                 .buttonStyle(.plain)
                 Spacer()
                 VStack(spacing: 2) {
                     Text("chat.inbox.title".localized)
-                        .font(.system(size: 24, weight: .bold, design: .rounded))
+                        .font(.system(size: 24, weight: .bold, design: .default))
                     Text("chat.inbox.subtitle".localized)
                         .font(.caption)
-                        .foregroundColor(.white.opacity(0.52))
+                        .foregroundColor(JourneyVisual.secondaryText)
                 }
                 Spacer()
                 Button { Task { await appContainer.chatStore.refresh() } } label: {
                     Image(systemName: "arrow.clockwise")
                         .font(.system(size: 17, weight: .bold))
                         .frame(width: 46, height: 46)
-                        .background(Color.white.opacity(0.09))
+                        .background(JourneyVisual.elevatedSurface)
                         .clipShape(Circle())
                 }
                 .buttonStyle(.plain)
@@ -95,10 +95,10 @@ struct ChatInboxView: View {
                 inboxSegment("chat.inbox.archive".localized, selected: showArchived) { showArchived = true }
             }
             .padding(4)
-            .background(Color.white.opacity(0.07))
+            .background(JourneyVisual.elevatedSurface)
             .clipShape(Capsule())
         }
-        .foregroundColor(.white)
+        .foregroundColor(JourneyVisual.primaryText)
         .padding(.horizontal, 18)
         .padding(.top, 8)
         .padding(.bottom, 12)
@@ -108,7 +108,7 @@ struct ChatInboxView: View {
         Button(action: action) {
             Text(title)
                 .font(.subheadline.bold())
-                .foregroundColor(selected ? .black : .white.opacity(0.68))
+                .foregroundColor(selected ? .black : JourneyVisual.secondaryText)
                 .frame(maxWidth: .infinity)
                 .frame(height: 40)
                 .background(selected ? JourneyVisual.lime : .clear)
@@ -125,7 +125,7 @@ struct ChatInboxView: View {
                 Text("chat.connection.reconnecting".localized)
             }
             .font(.caption)
-            .foregroundColor(.white.opacity(0.64))
+            .foregroundColor(JourneyVisual.secondaryText)
             .padding(.horizontal, 18)
             .padding(.bottom, 8)
         }
@@ -150,9 +150,9 @@ struct ChatInboxView: View {
                         } label: {
                             Image(systemName: "ellipsis")
                                 .font(.system(size: 16, weight: .bold))
-                                .foregroundColor(.white.opacity(0.65))
+                                .foregroundColor(JourneyVisual.secondaryText)
                                 .frame(width: 38, height: 66)
-                                .background(Color.white.opacity(0.065))
+                                .background(JourneyVisual.elevatedSurface)
                                 .clipShape(Capsule())
                         }
                     }
@@ -168,7 +168,7 @@ struct ChatInboxView: View {
                             Text("chat.action.show_more".localized)
                         }
                         .font(.subheadline.bold())
-                        .foregroundColor(JourneyVisual.lime)
+                        .foregroundColor(JourneyVisual.accentText)
                         .frame(maxWidth: .infinity)
                         .frame(height: 46)
                         .background(JourneyVisual.lime.opacity(0.08))
@@ -190,28 +190,34 @@ struct ChatInboxView: View {
             ProgressView().controlSize(.large).tint(JourneyVisual.lime)
             Text("chat.inbox.loading".localized)
                 .font(.headline)
-                .foregroundColor(.white)
+                .foregroundColor(JourneyVisual.primaryText)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private var emptyState: some View {
         VStack(spacing: 18) {
-            Image(systemName: showArchived ? "archivebox" : "bubble.left.and.bubble.right.fill")
-                .font(.system(size: 42, weight: .semibold))
-                .foregroundColor(JourneyVisual.lime)
+            if showArchived {
+                Image(systemName: "archivebox")
+                    .font(.system(size: 42, weight: .semibold))
+                    .foregroundColor(JourneyVisual.accentStrong)
+            } else {
+                // Sweezy on a bench smiling at a new message: the inbox is waiting, not broken.
+                StoryScene(name: "chat", height: 210)
+            }
             Text(showArchived ? "chat.inbox.empty_archive.title".localized : "chat.inbox.empty.title".localized)
-                .font(.system(size: 22, weight: .bold, design: .rounded))
-                .foregroundColor(.white)
+                .font(.system(size: 22, weight: .bold, design: .default))
+                .foregroundColor(JourneyVisual.primaryText)
             Text(showArchived
                  ? "chat.inbox.empty_archive.body".localized
                  : "chat.inbox.empty.body".localized)
                 .font(.subheadline)
-                .foregroundColor(.white.opacity(0.6))
+                .foregroundColor(JourneyVisual.secondaryText)
                 .multilineTextAlignment(.center)
         }
-        .padding(28)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(.horizontal, 20)
+        .padding(.vertical, 24)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: showArchived ? .center : .top)
     }
 }
 
@@ -224,22 +230,22 @@ private struct ChatConversationRow: View {
             VStack(alignment: .leading, spacing: 6) {
                 HStack {
                     Text(conversation.otherUserName)
-                        .font(.system(size: 16, weight: .bold, design: .rounded))
-                        .foregroundColor(.white)
+                        .font(.system(size: 16, weight: .bold, design: .default))
+                        .foregroundColor(JourneyVisual.primaryText)
                         .lineLimit(1)
                     Spacer()
                     Text(relativeDate)
                         .font(.caption2)
-                        .foregroundColor(.white.opacity(0.45))
+                        .foregroundColor(JourneyVisual.secondaryText)
                 }
                 Text(conversation.listingTitle)
                     .font(.caption.bold())
-                    .foregroundColor(JourneyVisual.lime)
+                    .foregroundColor(JourneyVisual.accentText)
                     .lineLimit(1)
                 HStack {
                     Text(conversation.lastMessagePreview ?? "chat.conversation.new".localized)
                         .font(.subheadline)
-                        .foregroundColor(.white.opacity(conversation.unreadCount > 0 ? 0.88 : 0.55))
+                        .foregroundColor(JourneyVisual.primaryText.opacity(conversation.unreadCount > 0 ? 0.88 : 0.55))
                         .lineLimit(1)
                     Spacer()
                     if conversation.unreadCount > 0 {
@@ -252,16 +258,16 @@ private struct ChatConversationRow: View {
                     } else if conversation.muted {
                         Image(systemName: "bell.slash.fill")
                             .font(.caption)
-                            .foregroundColor(.white.opacity(0.38))
+                            .foregroundColor(JourneyVisual.secondaryText)
                     }
                 }
             }
         }
         .padding(12)
         .frame(maxWidth: .infinity)
-        .background(Color.white.opacity(0.065))
+        .background(JourneyVisual.elevatedSurface)
         .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 22).stroke(.white.opacity(0.1), lineWidth: 1))
+        .overlay(RoundedRectangle(cornerRadius: 22).stroke(JourneyVisual.softBorder, lineWidth: 1))
     }
 
     @ViewBuilder
@@ -277,7 +283,7 @@ private struct ChatConversationRow: View {
         ZStack {
             JourneyVisual.lime.opacity(0.14)
             Image(systemName: conversation.listingType == "item" ? "shippingbox.fill" : "person.2.fill")
-                .foregroundColor(JourneyVisual.lime)
+                .foregroundColor(JourneyVisual.accentStrong)
         }
         .frame(width: 66, height: 66)
         .clipShape(RoundedRectangle(cornerRadius: 17, style: .continuous))
@@ -315,7 +321,7 @@ struct ChatConversationView: View {
 
     var body: some View {
         ZStack {
-            JourneyVisual.black.ignoresSafeArea()
+            JourneyAmbientBackground()
             VStack(spacing: 0) {
                 conversationHeader
                 listingContext
@@ -382,7 +388,7 @@ struct ChatConversationView: View {
                 Image(systemName: "chevron.left")
                     .font(.system(size: 18, weight: .bold))
                     .frame(width: 44, height: 44)
-                    .background(Color.white.opacity(0.08))
+                    .background(JourneyVisual.elevatedSurface)
                     .clipShape(Circle())
             }
             .buttonStyle(.plain)
@@ -390,7 +396,7 @@ struct ChatConversationView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     HStack(spacing: 5) {
                         Text(currentConversation.otherUserName)
-                            .font(.system(size: 18, weight: .bold, design: .rounded))
+                            .font(.system(size: 18, weight: .bold, design: .default))
                             .lineLimit(1)
                         Image(systemName: "chevron.right").font(.caption2)
                     }
@@ -398,7 +404,7 @@ struct ChatConversationView: View {
                      ? "chat.status.typing".localized
                      : (appContainer.chatStore.isConnected ? "chat.status.secure".localized : "chat.status.connecting".localized))
                     .font(.caption)
-                    .foregroundColor(appContainer.chatStore.typingConversationIDs.contains(conversation.id) ? JourneyVisual.lime : .white.opacity(0.48))
+                    .foregroundColor(appContainer.chatStore.typingConversationIDs.contains(conversation.id) ? JourneyVisual.lime : JourneyVisual.secondaryText)
                 }
             }
             .buttonStyle(.plain)
@@ -426,11 +432,11 @@ struct ChatConversationView: View {
                 Image(systemName: "ellipsis")
                     .font(.system(size: 18, weight: .bold))
                     .frame(width: 44, height: 44)
-                    .background(Color.white.opacity(0.08))
+                    .background(JourneyVisual.elevatedSurface)
                     .clipShape(Circle())
             }
         }
-        .foregroundColor(.white)
+        .foregroundColor(JourneyVisual.primaryText)
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
     }
@@ -440,18 +446,18 @@ struct ChatConversationView: View {
             ZStack {
                 JourneyVisual.lime.opacity(0.14)
                 Image(systemName: currentConversation.listingType == "item" ? "shippingbox.fill" : "person.2.fill")
-                    .foregroundColor(JourneyVisual.lime)
+                    .foregroundColor(JourneyVisual.accentStrong)
             }
             .frame(width: 48, height: 48)
             .clipShape(RoundedRectangle(cornerRadius: 13))
             VStack(alignment: .leading, spacing: 3) {
                 Text(currentConversation.listingTitle)
                     .font(.subheadline.bold())
-                    .foregroundColor(.white)
+                    .foregroundColor(JourneyVisual.primaryText)
                     .lineLimit(1)
                 HStack(spacing: 7) {
                     if let price = currentConversation.listingPrice {
-                        Text(price).foregroundColor(JourneyVisual.lime)
+                        Text(price).foregroundColor(JourneyVisual.accentText)
                     }
                     if currentConversation.isListingUnavailable {
                         Text("chat.listing.closed".localized).foregroundColor(.orange)
@@ -461,11 +467,11 @@ struct ChatConversationView: View {
             }
             Spacer()
             Image(systemName: "checkmark.shield.fill")
-                .foregroundColor(JourneyVisual.lime)
+                .foregroundColor(JourneyVisual.accentStrong)
         }
         .padding(12)
-        .background(Color.white.opacity(0.06))
-        .overlay(alignment: .bottom) { Rectangle().fill(.white.opacity(0.08)).frame(height: 1) }
+        .background(JourneyVisual.elevatedSurface)
+        .overlay(alignment: .bottom) { Rectangle().fill(JourneyVisual.softBorder).frame(height: 1) }
     }
 
     private var messagesList: some View {
@@ -485,7 +491,7 @@ struct ChatConversationView: View {
                                 Text("chat.action.load_older".localized)
                             }
                             .font(.caption.bold())
-                            .foregroundColor(JourneyVisual.lime)
+                            .foregroundColor(JourneyVisual.accentText)
                             .padding(.horizontal, 14)
                             .frame(height: 36)
                             .background(JourneyVisual.lime.opacity(0.08))
@@ -527,10 +533,10 @@ struct ChatConversationView: View {
 
     private var safetyBanner: some View {
         HStack(alignment: .top, spacing: 9) {
-            Image(systemName: "shield.lefthalf.filled").foregroundColor(JourneyVisual.lime)
+            Image(systemName: "shield.lefthalf.filled").foregroundColor(JourneyVisual.accentStrong)
             Text("chat.safety.body".localized)
                 .font(.caption)
-                .foregroundColor(.white.opacity(0.62))
+                .foregroundColor(JourneyVisual.secondaryText)
         }
         .padding(12)
         .background(JourneyVisual.lime.opacity(0.07))
@@ -545,10 +551,10 @@ struct ChatConversationView: View {
                     ForEach(["chat.quick.available".localized, "chat.quick.when".localized, "chat.quick.delivery".localized], id: \.self) { text in
                         Button(text) { draft = text }
                             .font(.caption.bold())
-                            .foregroundColor(.white)
+                            .foregroundColor(JourneyVisual.primaryText)
                             .padding(.horizontal, 13)
                             .frame(height: 34)
-                            .background(Color.white.opacity(0.08))
+                            .background(JourneyVisual.elevatedSurface)
                             .clipShape(Capsule())
                     }
                 }
@@ -562,7 +568,7 @@ struct ChatConversationView: View {
     private var composer: some View {
         if currentConversation.isClosed {
             HStack {
-                Image(systemName: "checkmark.seal.fill").foregroundColor(JourneyVisual.lime)
+                Image(systemName: "checkmark.seal.fill").foregroundColor(JourneyVisual.accentStrong)
                 Text("chat.deal.closed.title".localized)
                     .font(.subheadline.bold())
                 Spacer()
@@ -574,7 +580,7 @@ struct ChatConversationView: View {
                     .background(JourneyVisual.lime)
                     .clipShape(Capsule())
             }
-            .foregroundColor(.white)
+            .foregroundColor(JourneyVisual.primaryText)
             .padding(14)
             .background(.ultraThinMaterial)
         } else {
@@ -583,7 +589,7 @@ struct ChatConversationView: View {
                     .lineLimit(1...5)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 12)
-                    .background(Color.white.opacity(0.09))
+                    .background(JourneyVisual.elevatedSurface)
                     .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
                     .onChange(of: draft) { _, value in typingChanged(!value.isEmpty) }
                 Button { sendDraft() } label: {
@@ -596,7 +602,7 @@ struct ChatConversationView: View {
                 }
                 .disabled(draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
-            .foregroundColor(.white)
+            .foregroundColor(JourneyVisual.primaryText)
             .padding(.horizontal, 12)
             .padding(.top, 9)
             .padding(.bottom, 8)
@@ -660,7 +666,7 @@ private struct ChatMessageBubble: View {
         if message.kind == "system" {
             Text("chat.deal.closed.system".localized)
                 .font(.caption.bold())
-                .foregroundColor(JourneyVisual.lime)
+                .foregroundColor(JourneyVisual.accentText)
                 .padding(.horizontal, 14)
                 .padding(.vertical, 8)
                 .background(JourneyVisual.lime.opacity(0.08))
@@ -671,8 +677,8 @@ private struct ChatMessageBubble: View {
                 if isMine { Spacer(minLength: 54) }
                 VStack(alignment: isMine ? .trailing : .leading, spacing: 5) {
                     Text(message.body)
-                        .font(.system(size: 16, weight: .regular, design: .rounded))
-                        .foregroundColor(isMine ? .black : .white)
+                        .font(.system(size: 16, weight: .regular, design: .default))
+                        .foregroundColor(isMine ? .black : JourneyVisual.primaryText)
                         .textSelection(.enabled)
                     HStack(spacing: 5) {
                         Text(message.createdAt.formatted(date: .omitted, time: .shortened))
@@ -681,7 +687,7 @@ private struct ChatMessageBubble: View {
                         }
                     }
                     .font(.caption2)
-                    .foregroundColor(isMine ? .black.opacity(0.52) : .white.opacity(0.42))
+                    .foregroundColor(isMine ? .black.opacity(0.52) : JourneyVisual.secondaryText)
                     if message.deliveryState == .failed {
                         Button("common.retry".localized, action: retry)
                             .font(.caption.bold())
@@ -690,7 +696,7 @@ private struct ChatMessageBubble: View {
                 }
                 .padding(.horizontal, 14)
                 .padding(.vertical, 10)
-                .background(isMine ? JourneyVisual.lime : Color.white.opacity(0.09))
+                .background(isMine ? JourneyVisual.lime : JourneyVisual.elevatedSurface)
                 .clipShape(RoundedRectangle(cornerRadius: 19, style: .continuous))
                 if !isMine { Spacer(minLength: 54) }
             }
@@ -707,7 +713,7 @@ private struct ChatMessageBubble: View {
         case .delivered:
             Image(systemName: "checkmark.checkmark").foregroundStyle(.black.opacity(0.52))
         case .read:
-            Image(systemName: "checkmark.checkmark").foregroundStyle(JourneyVisual.lime)
+            Image(systemName: "checkmark.checkmark").foregroundStyle(.black)
         case .failed:
             Image(systemName: "exclamationmark.circle.fill").foregroundStyle(.red)
         }
@@ -722,13 +728,13 @@ private struct TypingBubble: View {
             HStack(spacing: 5) {
                 ForEach(0..<3) { index in
                     Circle()
-                        .fill(Color.white.opacity(activeDot == index ? 0.9 : 0.3))
+                        .fill(JourneyVisual.primaryText.opacity(activeDot == index ? 0.9 : 0.3))
                         .frame(width: 7, height: 7)
                         .offset(y: activeDot == index ? -2 : 0)
                 }
             }
             .padding(.horizontal, 15).frame(height: 38)
-            .background(Color.white.opacity(0.09)).clipShape(Capsule())
+            .background(JourneyVisual.elevatedSurface).clipShape(Capsule())
             Spacer()
         }
         .task {
@@ -751,25 +757,25 @@ private struct ChatReviewSheet: View {
 
     var body: some View {
         ZStack {
-            JourneyVisual.black.ignoresSafeArea()
+            JourneyAmbientBackground()
             VStack(spacing: 20) {
                 Text("chat.review.title".localized)
-                    .font(.system(size: 24, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
+                    .font(.system(size: 24, weight: .bold, design: .default))
+                    .foregroundColor(JourneyVisual.primaryText)
                 HStack(spacing: 10) {
                     ForEach(1...5, id: \.self) { value in
                         Button { rating = value } label: {
                             Image(systemName: value <= rating ? "star.fill" : "star")
                                 .font(.system(size: 28))
-                                .foregroundColor(JourneyVisual.lime)
+                                .foregroundColor(JourneyVisual.accentStrong)
                         }
                     }
                 }
                 TextField("chat.review.placeholder".localized, text: $comment, axis: .vertical)
                     .lineLimit(3...5)
                     .padding(14)
-                    .foregroundColor(.white)
-                    .background(Color.white.opacity(0.08))
+                    .foregroundColor(JourneyVisual.primaryText)
+                    .background(JourneyVisual.elevatedSurface)
                     .clipShape(RoundedRectangle(cornerRadius: 18))
                 if let error { Text(error).font(.caption).foregroundColor(.red) }
                 Button {

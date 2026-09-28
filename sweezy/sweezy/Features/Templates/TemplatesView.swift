@@ -61,7 +61,7 @@ struct TemplatesView: View {
                 Button(action: { dismiss() }) {
                     Image(systemName: "xmark.circle.fill")
                         .font(.title3)
-                        .foregroundStyle(.white.opacity(0.7))
+                        .foregroundStyle(JourneyVisual.secondaryText)
                 }
             }
         }
@@ -85,12 +85,12 @@ struct TemplatesView: View {
                         Text("Шаблони документів")
                             .font(.title2)
                             .fontWeight(.bold)
-                            .foregroundColor(.white)
+                            .foregroundColor(JourneyVisual.primaryText)
                     }
                     
                     Text("Готові шаблони для швейцарських документів")
                         .font(.subheadline)
-                        .foregroundColor(.white.opacity(0.7))
+                        .foregroundColor(JourneyVisual.secondaryText)
                 }
                 
                 Spacer()
@@ -136,7 +136,7 @@ struct TemplatesView: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 10) {
                 TemplateCategoryChip(
-                    title: "Усі",
+                    title: "common.all".localized,
                     isSelected: selectedCategory == nil,
                     icon: "doc.on.doc"
                 ) {
@@ -202,7 +202,7 @@ struct TemplatesView: View {
             Button(action: { selectedCategory = nil; searchText = "" }) {
                 Text("Скинути фільтри")
                     .font(.subheadline.weight(.medium))
-                    .foregroundColor(Theme.Colors.accent)
+                    .foregroundColor(JourneyVisual.accentText)
             }
         }
         .padding(Theme.Spacing.xl)
@@ -213,7 +213,7 @@ struct TemplatesView: View {
         VStack(spacing: Theme.Spacing.md) {
             Image(systemName: "lock.fill")
                 .font(.system(size: 40))
-                .foregroundColor(Theme.Colors.accent)
+                .foregroundColor(JourneyVisual.accentStrong)
             
             Text("Зареєструйтесь для доступу")
                 .font(.headline)
@@ -227,7 +227,7 @@ struct TemplatesView: View {
         .padding(Theme.Spacing.xl)
         .background(
             RoundedRectangle(cornerRadius: 20)
-                .fill(Color.black.opacity(0.5))
+                .fill(Theme.Colors.card)
         )
         .padding(Theme.Spacing.xl)
     }
@@ -277,7 +277,7 @@ struct TemplateCategoryChip: View {
             )
             .foregroundColor(
                 isSelected
-                    ? .white
+                    ? .black
                     : Theme.Colors.textPrimary
             )
             .cornerRadius(20)
@@ -527,7 +527,7 @@ struct TemplateDetailView: View {
                         }
                     }
                 )
-                .foregroundColor(.white)
+                .foregroundColor(JourneyVisual.primaryText)
                 .cornerRadius(14)
             }
             .disabled(!allRequiredFieldsFilled || isGenerating)
@@ -816,7 +816,7 @@ struct DocumentPreviewView: View {
                             Text("Копіювати")
                         }
                         .font(.subheadline.weight(.medium))
-                        .foregroundColor(Theme.Colors.accent)
+                        .foregroundColor(JourneyVisual.accentText)
                     }
                     
                     Button(action: shareDocument) {
@@ -825,7 +825,7 @@ struct DocumentPreviewView: View {
                             Text("Експорт")
                         }
                         .font(.subheadline.weight(.medium))
-                        .foregroundColor(Theme.Colors.accent)
+                        .foregroundColor(JourneyVisual.accentText)
                     }
                 }
             }

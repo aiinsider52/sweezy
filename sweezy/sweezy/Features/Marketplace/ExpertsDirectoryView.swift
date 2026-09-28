@@ -42,7 +42,7 @@ struct ExpertsDirectoryView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: Theme.Spacing.lg) {
                 Text("experts.section.title".localized)
-                    .font(.system(size: 26, weight: .bold, design: .rounded))
+                    .font(.system(size: 26, weight: .bold, design: .default))
                     .padding(.horizontal, Theme.Spacing.md)
 
                 filterBar
@@ -179,13 +179,13 @@ struct ExpertDetailView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     HStack {
                         Text(expert.authorName)
-                            .font(.system(size: 28, weight: .bold, design: .rounded))
+                            .font(.system(size: 28, weight: .bold, design: .default))
                         Image(systemName: "checkmark.seal.fill").foregroundColor(.blue)
                     }
                     if let spec = expert.expertSpecialtyEnum {
                         Text("\(spec.emoji) \(spec.localizedName)")
                             .font(.system(size: 14, weight: .semibold))
-                            .foregroundColor(Theme.Colors.primary)
+                            .foregroundColor(JourneyVisual.accentText)
                     }
                 }
 
@@ -274,11 +274,11 @@ private struct BookExpertAppointmentView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 18) {
                         Text("experts.appointment.title".localized)
-                            .font(.system(size: 30, weight: .bold, design: .rounded))
-                            .foregroundColor(.white)
+                            .font(.system(size: 30, weight: .bold, design: .default))
+                            .foregroundColor(JourneyVisual.primaryText)
                         Label(expert.authorName, systemImage: "checkmark.seal.fill")
                             .font(.system(size: 15, weight: .bold))
-                            .foregroundColor(JourneyVisual.lime)
+                            .foregroundColor(Theme.Colors.textPrimary)
 
                         JourneyGlassPanel(cornerRadius: 22) {
                             VStack(alignment: .leading, spacing: 14) {
@@ -287,10 +287,10 @@ private struct BookExpertAppointmentView: View {
                                 TextField("experts.appointment.notes_placeholder".localized, text: $notes, axis: .vertical)
                                     .lineLimit(3...6)
                                     .padding(12)
-                                    .background(Color.black.opacity(0.24))
+                                    .background(Theme.Colors.card)
                                     .clipShape(RoundedRectangle(cornerRadius: 14))
                             }
-                            .foregroundColor(.white)
+                            .foregroundColor(JourneyVisual.primaryText)
                             .padding(16)
                         }
 
@@ -301,7 +301,7 @@ private struct BookExpertAppointmentView: View {
 
                         Text("experts.appointment.disclaimer".localized)
                             .font(.system(size: 11, weight: .medium))
-                            .foregroundColor(.white.opacity(0.58))
+                            .foregroundColor(JourneyVisual.secondaryText)
                     }
                     .padding(20)
                 }
@@ -347,7 +347,7 @@ struct AskExpertView: View {
         NavigationStack {
             VStack(alignment: .leading, spacing: Theme.Spacing.lg) {
                 Text("experts.qa.title".localized)
-                    .font(.system(size: 22, weight: .bold, design: .rounded))
+                    .font(.system(size: 22, weight: .bold, design: .default))
                 Text("experts.qa.replying_to".localized(with: expert.authorName))
                     .font(.system(size: 14))
                     .foregroundColor(Theme.Colors.textSecondary)
@@ -377,12 +377,12 @@ struct AskExpertView: View {
                     Task { await submit() }
                 } label: {
                     HStack {
-                        if isSubmitting { ProgressView().tint(.white) }
+                        if isSubmitting { ProgressView().tint(JourneyVisual.primaryText) }
                         Text("experts.qa.submit".localized).font(.system(size: 16, weight: .semibold))
                     }
                     .frame(maxWidth: .infinity).padding(.vertical, 14)
                     .background(canSubmit ? Theme.Colors.primary : Theme.Colors.primary.opacity(0.4))
-                    .foregroundColor(.white).cornerRadius(Theme.CornerRadius.lg)
+                    .foregroundColor(JourneyVisual.primaryText).cornerRadius(Theme.CornerRadius.lg)
                 }
                 .disabled(!canSubmit)
 

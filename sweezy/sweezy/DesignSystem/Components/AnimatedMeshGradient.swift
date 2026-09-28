@@ -20,7 +20,7 @@ struct AnimatedMeshGradient: View {
                     endPoint: .bottomTrailing
                 )
             } else {
-                TimelineView(.animation) { timeline in
+                TimelineView(.periodic(from: .now, by: 1.0 / 30.0)) { timeline in
                     GeometryReader { geo in
                         let t = timeline.date.timeIntervalSinceReferenceDate * speed
                         ZStack {
@@ -30,8 +30,8 @@ struct AnimatedMeshGradient: View {
                                 let h = geo.size.height
                                 Circle()
                                     .fill(colors[i])
-                                    .frame(width: max(w, h) * 0.9, height: max(w, h) * 0.9)
-                                    .blur(radius: 120)
+                                    .frame(width: max(w, h) * 0.72, height: max(w, h) * 0.72)
+                                    .blur(radius: 82)
                                     .offset(
                                         x: cos(phase * 1.15) * w * 0.25,
                                         y: sin(phase * 0.9) * h * 0.25
@@ -48,5 +48,4 @@ struct AnimatedMeshGradient: View {
         }
     }
 }
-
 

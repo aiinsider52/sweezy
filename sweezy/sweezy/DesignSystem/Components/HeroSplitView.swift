@@ -141,7 +141,7 @@ struct FullBleedAuroraHero: View {
                 // Main greeting
                 VStack(alignment: .leading, spacing: 12) {
                     Text(greeting)
-                        .font(.system(size: 38, weight: .bold, design: .rounded))
+                        .font(.system(size: 30, weight: .bold, design: .default))
                         .foregroundColor(.white)
                         .shadow(color: accentColor.opacity(0.6), radius: 30, x: 0, y: 0)
                     
@@ -194,7 +194,7 @@ struct FullBleedAuroraHero: View {
                                 .rotationEffect(.degrees(-90))
                             
                             Text("\(integrationPercent)%")
-                                .font(.system(size: 12, weight: .bold, design: .rounded))
+                                .font(.system(size: 12, weight: .bold, design: .default))
                                 .foregroundColor(.white)
                         }
                         
@@ -271,7 +271,7 @@ private struct AuroraStatPill: View {
                 .foregroundColor(color)
             
             Text(value)
-                .font(.system(size: 14, weight: .bold, design: .rounded))
+                .font(.system(size: 14, weight: .bold, design: .default))
                 .foregroundColor(.white)
             
             if !label.isEmpty {
@@ -365,10 +365,10 @@ struct HeroSplitView<Right: View, Bottom: View>: View {
                     VStack(alignment: .leading, spacing: 8) {
                         Group {
                             if useTypewriter {
-                                TypewriterText(text: title, font: .system(size: 32, weight: .bold, design: .rounded), color: .white)
+                                TypewriterText(text: title, font: .system(size: 32, weight: .bold, design: .default), color: .white)
                             } else {
                                 Text(title)
-                                    .font(.system(size: 32, weight: .bold, design: .rounded))
+                                    .font(.system(size: 32, weight: .bold, design: .default))
                                     .foregroundColor(.white)
                             }
                         }

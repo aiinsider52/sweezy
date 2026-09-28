@@ -27,7 +27,7 @@ struct LoginView: View {
                     VStack(spacing: 28) {
                         // Top icon
                         loginHeader
-                            .padding(.top, 40)
+                            .padding(.top, 8)
                         
                         // Login form
                         loginFormCard
@@ -48,7 +48,7 @@ struct LoginView: View {
                     } label: {
                         Image(systemName: "xmark.circle.fill")
                             .font(.title3)
-                            .foregroundStyle(.white.opacity(0.6))
+                            .foregroundStyle(JourneyVisual.secondaryText)
                     }
                 }
             }
@@ -84,75 +84,28 @@ struct LoginView: View {
     
     // MARK: - Header
     private var loginHeader: some View {
-        VStack(spacing: 16) {
-            // Animated icon
-            ZStack {
-                // Outer glow
-                Circle()
-                    .fill(
-                        RadialGradient(
-                            colors: [Theme.Colors.primary.opacity(0.25), .clear],
-                            center: .center,
-                            startRadius: 0,
-                            endRadius: 70
-                        )
-                    )
-                    .frame(width: 140, height: 140)
-                    .scaleEffect(animateIcon ? 1.1 : 0.9)
-                    .animation(.easeInOut(duration: 2).repeatForever(autoreverses: true), value: animateIcon)
-                
-                // Inner circle with gradient
-                Circle()
-                    .fill(
-                        LinearGradient(
-                            colors: [Theme.Colors.primary.opacity(0.3), Theme.Colors.primaryDark.opacity(0.2)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                    .frame(width: 90, height: 90)
-                    .overlay(
-                        Circle()
-                            .stroke(
-                                LinearGradient(
-                                    colors: [Theme.Colors.primary.opacity(0.6), Theme.Colors.primaryDark.opacity(0.3)],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                ),
-                                lineWidth: 2
-                            )
-                    )
-                    .scaleEffect(animateIcon ? 1 : 0.8)
-                    .opacity(animateIcon ? 1 : 0)
-                
-                // Icon
-                Image(systemName: "person.crop.circle.badge.checkmark")
-                    .font(.system(size: 40))
-                    .foregroundStyle(
-                        LinearGradient(
-                            colors: [Theme.Colors.primary, .white],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                    .scaleEffect(animateIcon ? 1 : 0.5)
-                    .opacity(animateIcon ? 1 : 0)
-            }
-            
-            VStack(spacing: 8) {
+        VStack(alignment: .leading, spacing: 18) {
+            // Sweezy holding the front door open: "come back in".
+            StoryScene(name: "login", height: 196)
+                .scaleEffect(animateIcon ? 1 : 0.96)
+                .opacity(animateIcon ? 1 : 0)
+
+            VStack(alignment: .leading, spacing: 6) {
                 Text("auth.login.title")
-                    .font(.system(size: 32, weight: .bold))
-                    .foregroundColor(.white)
-                
+                    .font(.system(size: 30, weight: .bold))
+                    .foregroundColor(JourneyVisual.primaryText)
+
                 Text("auth.login.subtitle")
-                    .font(.subheadline)
-                    .foregroundColor(.white.opacity(0.7))
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundColor(JourneyVisual.secondaryText)
+                    .fixedSize(horizontal: false, vertical: true)
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
             .opacity(animateIcon ? 1 : 0)
-            .offset(y: animateIcon ? 0 : 20)
+            .offset(y: animateIcon ? 0 : 12)
         }
     }
-    
+
     // MARK: - Form Card
     private var loginFormCard: some View {
         VStack(spacing: 20) {
@@ -179,7 +132,7 @@ struct LoginView: View {
                 } label: {
                     Text("auth.login.forgot_password")
                         .font(.subheadline.weight(.medium))
-                        .foregroundColor(Theme.Colors.primary)
+                        .foregroundColor(JourneyVisual.accentText)
                 }
             }
             
@@ -235,7 +188,7 @@ struct LoginView: View {
                         }
                     }
                 )
-                .foregroundColor(.white)
+                .foregroundColor(JourneyVisual.primaryText)
                 .cornerRadius(16)
                 .shadow(color: email.isEmpty || password.isEmpty ? .clear : Theme.Colors.primary.opacity(0.4), radius: 12, y: 6)
             }
@@ -255,8 +208,8 @@ struct LoginView: View {
                 .fill(
                     LinearGradient(
                         colors: [
-                            Theme.Colors.darkBackground.opacity(0.96),
-                            Color(red: 0.13, green: 0.17, blue: 0.12).opacity(0.94)
+                            Theme.Colors.card,
+                            Theme.Colors.card
                         ],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
@@ -273,7 +226,6 @@ struct LoginView: View {
                             lineWidth: 1
                         )
                 )
-                .shadow(color: .black.opacity(0.42), radius: 24, y: 12)
         )
     }
     
@@ -283,13 +235,13 @@ struct LoginView: View {
             // Divider
             HStack {
                 Rectangle()
-                    .fill(.white.opacity(0.2))
+                    .fill(JourneyVisual.softBorder)
                     .frame(height: 1)
                 Text("common.or")
                     .font(.caption)
-                    .foregroundColor(.white.opacity(0.5))
+                    .foregroundColor(JourneyVisual.secondaryText)
                 Rectangle()
-                    .fill(.white.opacity(0.2))
+                    .fill(JourneyVisual.softBorder)
                     .frame(height: 1)
             }
             
@@ -302,19 +254,19 @@ struct LoginView: View {
                 HStack(spacing: 10) {
                     Image(systemName: "person.fill.questionmark")
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.white.opacity(0.9))
+                        .foregroundColor(JourneyVisual.secondaryText)
                     Text("auth.login.continue_as_guest")
                         .font(.subheadline.weight(.semibold))
-                        .foregroundColor(.white)
+                        .foregroundColor(JourneyVisual.primaryText)
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)
                 .background(
                     RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .fill(Color.black.opacity(0.14))
+                        .fill(Theme.Colors.card)
                         .overlay(
                             RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                .stroke(Color.white.opacity(0.10), lineWidth: 1)
+                                .stroke(JourneyVisual.softBorder, lineWidth: 1)
                         )
                 )
             }
@@ -332,17 +284,17 @@ struct LoginView: View {
             } label: {
                 Text("auth.login.create_account")
                     .font(.subheadline.weight(.medium))
-                    .foregroundColor(Theme.Colors.primary)
+                    .foregroundColor(JourneyVisual.accentText)
             }
             .buttonStyle(.plain)
 
             // Security note
             HStack(spacing: 8) {
                 Image(systemName: "lock.shield.fill")
-                    .foregroundColor(Theme.Colors.primary.opacity(0.7))
+                    .foregroundColor(JourneyVisual.accentStrong.opacity(0.7))
                 Text("auth.secure_connection")
                     .font(.caption)
-                    .foregroundColor(.white.opacity(0.5))
+                    .foregroundColor(JourneyVisual.secondaryText)
             }
         }
     }
@@ -357,12 +309,12 @@ struct LoginView: View {
         HStack(spacing: 14) {
             Image(systemName: icon)
                 .font(.system(size: 18))
-                .foregroundColor(Theme.Colors.primary.opacity(0.8))
+                .foregroundColor(JourneyVisual.accentStrong.opacity(0.8))
                 .frame(width: 24)
             
-            TextField("", text: text, prompt: Text(LocalizedStringKey(placeholder)).foregroundColor(.white.opacity(0.4)))
+            TextField("", text: text, prompt: Text(LocalizedStringKey(placeholder)).foregroundColor(JourneyVisual.secondaryText))
                 .font(.body)
-                .foregroundColor(.white)
+                .foregroundColor(JourneyVisual.primaryText)
                 .keyboardType(keyboardType)
                 .autocapitalization(.none)
                 .autocorrectionDisabled()
@@ -371,7 +323,7 @@ struct LoginView: View {
         .padding(.vertical, 16)
         .background(
             RoundedRectangle(cornerRadius: 14)
-                .fill(Color.black.opacity(0.16))
+                .fill(Theme.Colors.card)
                 .overlay(
                     RoundedRectangle(cornerRadius: 14)
                         .stroke(
@@ -394,18 +346,18 @@ struct LoginView: View {
         HStack(spacing: 14) {
             Image(systemName: icon)
                 .font(.system(size: 18))
-                .foregroundColor(Theme.Colors.primary.opacity(0.8))
+                .foregroundColor(JourneyVisual.accentStrong.opacity(0.8))
                 .frame(width: 24)
             
             Group {
                 if showPassword {
-                    TextField("", text: text, prompt: Text(LocalizedStringKey(placeholder)).foregroundColor(.white.opacity(0.4)))
+                    TextField("", text: text, prompt: Text(LocalizedStringKey(placeholder)).foregroundColor(JourneyVisual.secondaryText))
                 } else {
-                    SecureField("", text: text, prompt: Text(LocalizedStringKey(placeholder)).foregroundColor(.white.opacity(0.4)))
+                    SecureField("", text: text, prompt: Text(LocalizedStringKey(placeholder)).foregroundColor(JourneyVisual.secondaryText))
                 }
             }
             .font(.body)
-            .foregroundColor(.white)
+            .foregroundColor(JourneyVisual.primaryText)
             .autocapitalization(.none)
             .autocorrectionDisabled()
             
@@ -414,14 +366,14 @@ struct LoginView: View {
             } label: {
                 Image(systemName: showPassword ? "eye.slash.fill" : "eye.fill")
                     .font(.system(size: 16))
-                    .foregroundColor(.white.opacity(0.5))
+                    .foregroundColor(JourneyVisual.secondaryText)
             }
         }
         .padding(.horizontal, 18)
         .padding(.vertical, 16)
         .background(
             RoundedRectangle(cornerRadius: 14)
-                .fill(Color.black.opacity(0.16))
+                .fill(Theme.Colors.card)
                 .overlay(
                     RoundedRectangle(cornerRadius: 14)
                         .stroke(
@@ -653,7 +605,7 @@ struct PasswordResetSheet: View {
                                 Image(systemName: "chevron.left")
                                 Text("common.back".localized)
                             }
-                            .foregroundColor(Theme.Colors.primary)
+                            .foregroundColor(JourneyVisual.accentText)
                         }
                     }
                 }
@@ -663,7 +615,7 @@ struct PasswordResetSheet: View {
                     } label: {
                         Image(systemName: "xmark.circle.fill")
                             .font(.title3)
-                            .foregroundStyle(.white.opacity(0.6))
+                            .foregroundStyle(JourneyVisual.secondaryText)
                     }
                 }
             }
@@ -715,11 +667,11 @@ struct PasswordResetSheet: View {
                     if currentStep.rawValue > step.rawValue {
                         Image(systemName: "checkmark")
                             .font(.system(size: 14, weight: .bold))
-                            .foregroundColor(.white)
+                            .foregroundColor(JourneyVisual.primaryText)
                     } else {
                         Image(systemName: step.icon)
                             .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(currentStep.rawValue >= step.rawValue ? .white : .white.opacity(0.4))
+                            .foregroundColor(currentStep.rawValue >= step.rawValue ? JourneyVisual.primaryText : JourneyVisual.primaryText)
                     }
                 }
                 .scaleEffect(currentStep == step ? 1.1 : 1.0)
@@ -747,28 +699,17 @@ struct PasswordResetSheet: View {
     // MARK: - Email Step
     private var emailStepView: some View {
         VStack(spacing: 20) {
-            // Icon
-            ZStack {
-                Circle()
-                    .fill(LinearGradient(colors: [Theme.Colors.primary.opacity(0.3), Theme.Colors.primaryDark.opacity(0.2)], startPoint: .topLeading, endPoint: .bottomTrailing))
-                    .frame(width: 80, height: 80)
-                
-                Image(systemName: "envelope.badge.shield.half.filled")
-                    .font(.system(size: 36))
-                    .foregroundStyle(
-                        LinearGradient(colors: [Theme.Colors.primary, .white], startPoint: .topLeading, endPoint: .bottomTrailing)
-                    )
-            }
-            .padding(.top, 10)
-            
+            // Sweezy with a spare key by the mailbox: calm, "we'll get you back in".
+            StoryScene(name: "password", height: 170)
+
             VStack(spacing: 8) {
                 Text("auth.reset.title")
                     .font(.title2.bold())
-                    .foregroundColor(.white)
+                    .foregroundColor(JourneyVisual.primaryText)
                 
                 Text("auth.reset.subtitle")
                     .font(.subheadline)
-                    .foregroundColor(.white.opacity(0.7))
+                    .foregroundColor(JourneyVisual.secondaryText)
                     .multilineTextAlignment(.center)
             }
             
@@ -837,7 +778,7 @@ struct PasswordResetSheet: View {
                 .background(
                     LinearGradient(colors: [Theme.Colors.primary, Theme.Colors.primaryDark], startPoint: .leading, endPoint: .trailing)
                 )
-                .foregroundColor(.white)
+                .foregroundColor(JourneyVisual.primaryText)
                 .cornerRadius(14)
                 .shadow(color: Theme.Colors.primary.opacity(0.4), radius: 10, y: 5)
             }
@@ -866,11 +807,11 @@ struct PasswordResetSheet: View {
             VStack(spacing: 8) {
                 Text("auth.reset.enter_code.title")
                     .font(.title2.bold())
-                    .foregroundColor(.white)
+                    .foregroundColor(JourneyVisual.primaryText)
                 
                 Text("auth.reset.enter_code.subtitle_format".localized(with: email))
                     .font(.subheadline)
-                    .foregroundColor(.white.opacity(0.7))
+                    .foregroundColor(JourneyVisual.secondaryText)
                     .multilineTextAlignment(.center)
             }
             
@@ -878,11 +819,11 @@ struct PasswordResetSheet: View {
             VStack(spacing: 16) {
                 HStack {
                     Image(systemName: "key.fill")
-                        .foregroundColor(Theme.Colors.primary)
+                        .foregroundColor(JourneyVisual.accentStrong)
                     
                     TextField("auth.reset.enter_code.placeholder".localized, text: $code)
                         .font(.system(.body, design: .monospaced))
-                        .foregroundColor(.white)
+                        .foregroundColor(JourneyVisual.primaryText)
                         .keyboardType(.numberPad)
                         .textContentType(.oneTimeCode)
                         .autocorrectionDisabled()
@@ -892,7 +833,7 @@ struct PasswordResetSheet: View {
                             code = ""
                         } label: {
                             Image(systemName: "xmark.circle.fill")
-                                .foregroundColor(.white.opacity(0.5))
+                                .foregroundColor(JourneyVisual.secondaryText)
                         }
                     }
                     
@@ -903,7 +844,7 @@ struct PasswordResetSheet: View {
                         }
                     } label: {
                         Image(systemName: "doc.on.clipboard")
-                            .foregroundColor(Theme.Colors.primary)
+                            .foregroundColor(JourneyVisual.accentStrong)
                             .padding(8)
                             .background(Circle().fill(Theme.Colors.primary.opacity(0.2)))
                     }
@@ -911,7 +852,7 @@ struct PasswordResetSheet: View {
                 .padding()
                 .background(
                     RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.white.opacity(0.08))
+                        .fill(JourneyVisual.softBorder)
                         .overlay(
                             RoundedRectangle(cornerRadius: 12)
                                 .stroke(canProceedToPassword ? .green.opacity(0.5) : .white.opacity(0.2), lineWidth: 1)
@@ -931,10 +872,10 @@ struct PasswordResetSheet: View {
                 // Hint
                 HStack(spacing: 6) {
                     Image(systemName: "lightbulb.fill")
-                        .foregroundColor(Theme.Colors.accent.opacity(0.8))
+                        .foregroundColor(JourneyVisual.accentStrong.opacity(0.8))
                     Text("auth.reset.enter_code.hint")
                         .font(.caption)
-                        .foregroundColor(.white.opacity(0.6))
+                        .foregroundColor(JourneyVisual.secondaryText)
                 }
             }
             .padding(20)
@@ -967,7 +908,7 @@ struct PasswordResetSheet: View {
                 .background(
                     LinearGradient(colors: [Theme.Colors.accent, Theme.Colors.accentCoral], startPoint: .leading, endPoint: .trailing)
                 )
-                .foregroundColor(.white)
+                .foregroundColor(JourneyVisual.primaryText)
                 .cornerRadius(14)
                 .shadow(color: Theme.Colors.accent.opacity(0.4), radius: 10, y: 5)
             }
@@ -980,7 +921,7 @@ struct PasswordResetSheet: View {
             } label: {
                 Text("auth.reset.resend_code")
                     .font(.subheadline)
-                    .foregroundColor(Theme.Colors.primary)
+                    .foregroundColor(JourneyVisual.accentText)
             }
             .disabled(isLoading)
         }
@@ -1006,11 +947,11 @@ struct PasswordResetSheet: View {
             VStack(spacing: 8) {
                 Text("auth.reset.new_password.title")
                     .font(.title2.bold())
-                    .foregroundColor(.white)
+                    .foregroundColor(JourneyVisual.primaryText)
                 
                 Text("auth.reset.new_password.subtitle")
                     .font(.subheadline)
-                    .foregroundColor(.white.opacity(0.7))
+                    .foregroundColor(JourneyVisual.secondaryText)
                     .multilineTextAlignment(.center)
             }
             
@@ -1084,7 +1025,7 @@ struct PasswordResetSheet: View {
                 .background(
                     LinearGradient(colors: [Theme.Colors.success, Theme.Colors.primary], startPoint: .leading, endPoint: .trailing)
                 )
-                .foregroundColor(.white)
+                .foregroundColor(JourneyVisual.primaryText)
                 .cornerRadius(14)
                 .shadow(color: Theme.Colors.success.opacity(0.4), radius: 10, y: 5)
             }
@@ -1124,7 +1065,7 @@ struct PasswordResetSheet: View {
                 // Checkmark
                 Image(systemName: "checkmark")
                     .font(.system(size: 50, weight: .bold))
-                    .foregroundColor(.white)
+                    .foregroundColor(JourneyVisual.primaryText)
                     .scaleEffect(showSuccessAnimation ? 1 : 0)
                     .rotationEffect(.degrees(showSuccessAnimation ? 0 : -90))
             }
@@ -1137,11 +1078,11 @@ struct PasswordResetSheet: View {
             VStack(spacing: 12) {
                 Text("auth.reset.success.title")
                     .font(.title.bold())
-                    .foregroundColor(.white)
+                    .foregroundColor(JourneyVisual.primaryText)
                 
                 Text("auth.reset.success.subtitle")
                     .font(.subheadline)
-                    .foregroundColor(.white.opacity(0.7))
+                    .foregroundColor(JourneyVisual.secondaryText)
                     .multilineTextAlignment(.center)
             }
             .opacity(showSuccessAnimation ? 1 : 0)
@@ -1164,7 +1105,7 @@ struct PasswordResetSheet: View {
                 .background(
                     LinearGradient(colors: [Theme.Colors.success, Theme.Colors.primary], startPoint: .leading, endPoint: .trailing)
                 )
-                .foregroundColor(.white)
+                .foregroundColor(JourneyVisual.primaryText)
                 .cornerRadius(14)
                 .shadow(color: Theme.Colors.success.opacity(0.4), radius: 10, y: 5)
             }

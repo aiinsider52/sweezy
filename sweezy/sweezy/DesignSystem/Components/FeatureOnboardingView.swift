@@ -42,28 +42,15 @@ struct FeatureOnboardingView: View {
         }
     }
 
+    private var sceneName: String {
+        let name = content.feature.onboardingBackgroundImageName
+        if name.contains("market") { return "city-scene-market" }
+        if name.contains("community") { return "city-scene-people" }
+        return "city-scene-directory"
+    }
+
     private var onboardingBackground: some View {
-        GeometryReader { geometry in
-            Image(content.feature.onboardingBackgroundImageName)
-                .resizable()
-                .scaledToFill()
-                .frame(width: geometry.size.width, height: geometry.size.height)
-                .clipped()
-                .overlay(Color.black.opacity(0.28))
-                .overlay(
-                    LinearGradient(
-                        colors: [
-                            Color.black.opacity(0.08),
-                            Color.black.opacity(0.18),
-                            JourneyVisual.black.opacity(0.94)
-                        ],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                )
-        }
-        .ignoresSafeArea()
-        .allowsHitTesting(false)
+        JourneyVisual.pageBackground.ignoresSafeArea()
     }
 
     private var header: some View {
@@ -73,17 +60,17 @@ struct FeatureOnboardingView: View {
                     .fill(JourneyVisual.lime)
                     .frame(width: 8, height: 8)
                 Text("SWEEZY")
-                    .font(.system(size: 12, weight: .black, design: .rounded))
+                    .font(.system(size: 12, weight: .black, design: .default))
                     .tracking(1.4)
                 Text("\(currentPage + 1)/\(max(content.slides.count, 1))")
-                    .font(.system(size: 12, weight: .bold, design: .rounded))
-                    .foregroundColor(.white.opacity(0.58))
+                    .font(.system(size: 12, weight: .bold, design: .default))
+                    .foregroundColor(JourneyVisual.secondaryText)
             }
-            .foregroundColor(.white)
+            .foregroundColor(JourneyVisual.primaryText)
             .padding(.horizontal, 14)
             .frame(height: 42)
-            .background(Color.black.opacity(0.46))
-            .background(.ultraThinMaterial.opacity(0.5))
+            .background(Theme.Colors.card)
+
             .clipShape(Capsule())
             .overlay(Capsule().stroke(.white.opacity(0.2), lineWidth: 1))
 
@@ -92,10 +79,10 @@ struct FeatureOnboardingView: View {
             Button(action: finish) {
                 Image(systemName: "xmark")
                     .font(.system(size: 16, weight: .bold))
-                    .foregroundColor(.white)
+                    .foregroundColor(JourneyVisual.primaryText)
                     .frame(width: 48, height: 48)
-                    .background(Color.black.opacity(0.46))
-                    .background(.ultraThinMaterial.opacity(0.5))
+                    .background(Theme.Colors.card)
+
                     .clipShape(Circle())
                     .overlay(Circle().stroke(.white.opacity(0.2), lineWidth: 1))
             }
@@ -113,20 +100,20 @@ struct FeatureOnboardingView: View {
                 Spacer(minLength: 26)
 
                 Text(slide.title)
-                    .font(.system(size: 38, weight: .black, design: .rounded))
-                    .foregroundColor(.white)
-                    .lineSpacing(-3)
+                    .font(.system(size: 30, weight: .black, design: .default))
+                    .foregroundColor(JourneyVisual.primaryText)
+                    .lineSpacing(1)
                     .fixedSize(horizontal: false, vertical: true)
                     .minimumScaleFactor(0.82)
-                    .shadow(color: .black.opacity(0.48), radius: 14, y: 5)
+
 
                 Capsule()
                     .fill(JourneyVisual.lime)
                     .frame(width: 74, height: 7)
 
                 Text(slide.description)
-                    .font(.system(size: 17, weight: .medium, design: .rounded))
-                    .foregroundColor(.white.opacity(0.82))
+                    .font(.system(size: 17, weight: .medium, design: .default))
+                    .foregroundColor(JourneyVisual.secondaryText)
                     .lineSpacing(4)
                     .fixedSize(horizontal: false, vertical: true)
 
@@ -144,7 +131,7 @@ struct FeatureOnboardingView: View {
 
     private func featurePreview(_ slide: OnboardingSlide, index: Int) -> some View {
         ZStack(alignment: .bottomLeading) {
-            Image(content.feature.onboardingPreviewImageName(for: index))
+            Image(sceneName)
                 .resizable()
                 .scaledToFill()
                 .frame(height: 244)
@@ -170,7 +157,7 @@ struct FeatureOnboardingView: View {
                     Spacer()
 
                     Label("\(index + 1)", systemImage: "sparkles")
-                        .font(.system(size: 12, weight: .bold, design: .rounded))
+                        .font(.system(size: 12, weight: .bold, design: .default))
                         .foregroundColor(.black)
                         .padding(.horizontal, 12)
                         .frame(height: 34)
@@ -183,11 +170,11 @@ struct FeatureOnboardingView: View {
                 HStack(alignment: .bottom, spacing: 12) {
                     VStack(alignment: .leading, spacing: 5) {
                         Text(slide.title)
-                            .font(.system(size: 19, weight: .bold, design: .rounded))
+                            .font(.system(size: 19, weight: .bold, design: .default))
                             .foregroundColor(.white)
                             .lineLimit(2)
                         Text(slide.description)
-                            .font(.system(size: 12, weight: .semibold, design: .rounded))
+                            .font(.system(size: 12, weight: .semibold, design: .default))
                             .foregroundColor(.white.opacity(0.62))
                             .lineLimit(1)
                     }
@@ -231,7 +218,7 @@ struct FeatureOnboardingView: View {
             Button(action: advance) {
                 HStack(spacing: 10) {
                     Text(isLastPage ? content.buttonTitle : "onboarding.next".localized)
-                        .font(.system(size: 17, weight: .bold, design: .rounded))
+                        .font(.system(size: 17, weight: .bold, design: .default))
                     Image(systemName: isLastPage ? "checkmark" : "arrow.right")
                         .font(.system(size: 15, weight: .black))
                 }

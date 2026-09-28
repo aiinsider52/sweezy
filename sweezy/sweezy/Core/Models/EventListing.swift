@@ -36,20 +36,22 @@ enum EventCategory: String, Codable, CaseIterable, Identifiable {
         }
     }
 
-    var color: Color {
+    var swatch: JourneyCategorySwatch {
         switch self {
-        case .community: return .cyan
-        case .kids: return .pink
-        case .education: return .indigo
-        case .career: return .orange
-        case .legal: return .brown
-        case .health: return .red
-        case .language: return .green
-        case .culture: return .purple
-        case .sports: return .blue
-        case .other: return .gray
+        case .community: return JourneyCategoryPalette.teal
+        case .kids: return JourneyCategoryPalette.coral
+        case .education: return JourneyCategoryPalette.sky
+        case .career: return JourneyCategoryPalette.sand
+        case .legal: return JourneyCategoryPalette.graphite
+        case .health: return JourneyCategoryPalette.coral
+        case .language: return JourneyCategoryPalette.lime
+        case .culture: return JourneyCategoryPalette.lilac
+        case .sports: return JourneyCategoryPalette.lime
+        case .other: return JourneyCategoryPalette.graphite
         }
     }
+
+    var color: Color { swatch.ink }
 }
 
 enum EventListingStatus: String, Codable {
@@ -62,6 +64,9 @@ struct EventListing: Codable, Identifiable, Equatable {
     let description: String
     let category: EventCategory
     let canton: String
+    let countryCode: String
+    let subdivisionCode: String
+    let currencyCode: String
     let city: String
     let venueName: String?
     let address: String?
@@ -84,6 +89,9 @@ struct EventListing: Codable, Identifiable, Equatable {
 
     private enum CodingKeys: String, CodingKey {
         case id, title, description, category, canton, city, address, status
+        case countryCode = "country_code"
+        case subdivisionCode = "subdivision_code"
+        case currencyCode = "currency_code"
         case venueName = "venue_name"
         case startsAt = "starts_at"
         case endsAt = "ends_at"
@@ -109,6 +117,9 @@ struct EventListing: Codable, Identifiable, Equatable {
         description = try c.decode(String.self, forKey: .description)
         category = (try? c.decode(EventCategory.self, forKey: .category)) ?? .other
         canton = try c.decode(String.self, forKey: .canton)
+        countryCode = (try? c.decode(String.self, forKey: .countryCode)) ?? "CH"
+        subdivisionCode = (try? c.decode(String.self, forKey: .subdivisionCode)) ?? canton
+        currencyCode = (try? c.decode(String.self, forKey: .currencyCode)) ?? "CHF"
         city = (try? c.decode(String.self, forKey: .city)) ?? ""
         venueName = try? c.decode(String.self, forKey: .venueName)
         address = try? c.decode(String.self, forKey: .address)
@@ -179,6 +190,9 @@ struct EventListingCreate: Codable {
     var description: String
     var category: EventCategory
     var canton: String
+    var countryCode: String = APIClient.countryCode
+    var subdivisionCode: String = APIClient.subdivisionCode
+    var currencyCode: String = APIClient.countryCode == "CH" ? "CHF" : "EUR"
     var city: String
     var venueName: String?
     var address: String?
@@ -193,6 +207,9 @@ struct EventListingCreate: Codable {
 
     private enum CodingKeys: String, CodingKey {
         case title, description, category, canton, city, address
+        case countryCode = "country_code"
+        case subdivisionCode = "subdivision_code"
+        case currencyCode = "currency_code"
         case venueName = "venue_name"
         case startsAt = "starts_at"
         case endsAt = "ends_at"

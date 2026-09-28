@@ -228,7 +228,7 @@ struct MapView: View {
     private var mapHeroOverlay: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Знайдіть потрібний сервіс швидше")
-                .font(.system(size: 24, weight: .bold, design: .rounded))
+                .font(.system(size: 24, weight: .bold, design: .default))
                 .foregroundColor(.white)
                 .lineLimit(2)
                 .minimumScaleFactor(0.82)
@@ -268,7 +268,7 @@ struct MapView: View {
                     HStack(spacing: 4) {
                         Image(systemName: "mappin.circle.fill")
                             .font(.system(size: 12))
-                            .foregroundColor(Theme.Colors.primary)
+                            .foregroundColor(JourneyVisual.accentStrong)
                         Text("\(filteredPlaces.count)")
                             .font(.system(size: 13, weight: .semibold))
                             .foregroundColor(.white)
@@ -1020,7 +1020,7 @@ struct WinterPlaceCard: View {
             HStack(spacing: Theme.Spacing.xs) {
                 Image(systemName: "location.fill")
                     .font(.caption)
-                    .foregroundColor(Theme.Colors.primary.opacity(0.7))
+                    .foregroundColor(JourneyVisual.accentStrong.opacity(0.7))
                 
                 Text(place.formattedAddress)
                     .font(Theme.Typography.caption)
@@ -1181,7 +1181,7 @@ struct WinterEmptyState: View {
                 
                 Image(systemName: icon)
                     .font(.system(size: 32))
-                    .foregroundColor(Theme.Colors.primary.opacity(0.7))
+                    .foregroundColor(JourneyVisual.accentStrong.opacity(0.7))
             }
             
             Text(title)
@@ -1233,7 +1233,7 @@ struct WinterPlaceBottomSheet: View {
             VStack(alignment: .leading, spacing: 0) {
                 // Drag handle area
                 Capsule()
-                    .fill(Color.white.opacity(0.18))
+                    .fill(JourneyVisual.softBorder)
                     .frame(width: 36, height: 4)
                     .frame(maxWidth: .infinity)
                     .padding(.top, 12)
@@ -1289,7 +1289,7 @@ struct WinterPlaceBottomSheet: View {
                             Text("\(liveWait) min")
                         }
                         .font(.system(size: 12))
-                        .foregroundColor(Theme.Colors.primary)
+                        .foregroundColor(JourneyVisual.accentText)
                     }
                 }
                 .padding(.bottom, 16)
@@ -1298,7 +1298,7 @@ struct WinterPlaceBottomSheet: View {
                 HStack(alignment: .top, spacing: 10) {
                     Image(systemName: "mappin.circle.fill")
                         .font(.system(size: 18))
-                        .foregroundColor(Theme.Colors.primary)
+                        .foregroundColor(JourneyVisual.accentStrong)
                     VStack(alignment: .leading, spacing: 2) {
                         Text("\(place.address.street) \(place.address.houseNumber)")
                             .font(.system(size: 14, weight: .medium))

@@ -77,16 +77,23 @@ final class FirstWeekChecklistService: ObservableObject {
             new.append(TaskItem(title: title, details: details, dueDate: due))
         }
         
-        add("Реєстрація у громаді", 1, "Зверніться до Gemeinde/Commune за місцем проживання")
+        switch profile.country {
+        case .switzerland:
+            add("Реєстрація у громаді", 1, "Зверніться до Gemeinde/Commune за місцем проживання")
+            add("Перевірити обов’язок медичного страхування", 7, "Зазвичай базове страхування потрібно оформити протягом 3 місяців після поселення; перевірте винятки у кантоні.")
+        case .germany:
+            add("Записатися на Anmeldung", 1, "Знайдіть Bürgeramt/Meldebehörde за адресою житла")
+            add("Звернутися до Ausländerbehörde", 3, "Перевірте статус за §24 AufenthG і право на роботу")
+            add("Уточнити медичне страхування", 5, "Зверніться до Krankenkasse, Jobcenter або Sozialamt за вашою ситуацією")
+        case .austria:
+            add("Подати Meldezettel", 3, "Загальний строк — три дні після заселення; потрібен підпис Unterkunftgeber")
+            add("Зареєструвати тимчасовий захист", 3, "Meldezettel і реєстрація переміщеної особи — окремі процедури")
+            add("Уточнити Grundversorgung і страхування", 5, "Зверніться до компетентного органу федеральної землі")
+        }
         add("Оформити SIM-карту", 1)
         add("Відкрити рахунок у банку", 3)
-        add(
-            "Перевірити обов’язок медичного страхування",
-            7,
-            "Не вважайте це строком оформлення. Зазвичай базове страхування потрібно оформити протягом 3 місяців після поселення; для окремих груп і кантональних процедур діють винятки. Перевірте ch.ch або компетентний орган кантону."
-        )
         if profile.hasChildren { add("Реєстрація дітей до школи", 5) }
-        add("Ознайомитись з транспортом", 3)
+        add("Ознайомитись з місцевим транспортом", 3)
         if profile.goals.contains(.work) { add("Оновити CV / профіль LinkedIn", 5) }
         if profile.goals.contains(.language) { add("Записатись на мовні курси", 4) }
         
@@ -148,5 +155,4 @@ final class FirstWeekChecklistService: ObservableObject {
         }
     }
 }
-
 

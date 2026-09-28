@@ -104,6 +104,7 @@ struct SwissDiscoveryView: View {
                 .padding(.bottom, 128)
             }
         }
+        .statusBarScrim()
         .navigationBarHidden(true)
         .interactiveSwipeBackEnabled()
         .navigationDestination(item: $selectedPlace) { place in
@@ -136,11 +137,11 @@ struct SwissDiscoveryView: View {
                 Button { dismiss() } label: {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 18, weight: .bold))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(JourneyVisual.primaryText)
                         .frame(width: 46, height: 46)
-                        .background(Color.black.opacity(0.5))
+                        .background(Theme.Colors.card)
                         .clipShape(Circle())
-                        .overlay(Circle().stroke(Color.white.opacity(0.28), lineWidth: 1))
+                        .overlay(Circle().stroke(JourneyVisual.softBorder, lineWidth: 1))
                 }
                 .accessibilityIdentifier("swiss.discovery.back")
                 .accessibilityLabel("common.back".localized)
@@ -156,7 +157,7 @@ struct SwissDiscoveryView: View {
                         Image(systemName: showsSavedOnly ? "bookmark.fill" : "bookmark")
                         Text(String(savedPlaceIDs.count))
                     }
-                    .font(.system(size: 14, weight: .bold, design: .rounded))
+                    .font(.system(size: 14, weight: .bold, design: .default))
                     .foregroundStyle(showsSavedOnly ? .black : .white)
                     .padding(.horizontal, 15)
                     .frame(height: 46)
@@ -169,18 +170,18 @@ struct SwissDiscoveryView: View {
 
             VStack(alignment: .leading, spacing: 7) {
                 Text("swiss.discovery.eyebrow".localized.uppercased())
-                    .font(.system(size: 12, weight: .bold, design: .rounded))
+                    .font(.system(size: 12, weight: .bold, design: .default))
                     .tracking(1.6)
-                    .foregroundStyle(JourneyVisual.lime)
+                    .foregroundStyle(Theme.Colors.textPrimary)
 
                 Text("swiss.discovery.title".localized)
-                    .font(.system(size: 40, weight: .bold, design: .rounded))
-                    .foregroundStyle(.white)
-                    .lineSpacing(-3)
+                    .font(.system(size: 29, weight: .bold, design: .default))
+                    .foregroundStyle(JourneyVisual.primaryText)
+                    .lineSpacing(1)
 
                 Text("swiss.discovery.subtitle".localized)
                     .font(.system(size: 15, weight: .medium))
-                    .foregroundStyle(.white.opacity(0.74))
+                    .foregroundStyle(JourneyVisual.secondaryText)
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
@@ -198,8 +199,8 @@ struct SwissDiscoveryView: View {
                         }
                     } label: {
                         Label(option.title, systemImage: option.icon)
-                            .font(.system(size: 13, weight: .bold, design: .rounded))
-                            .foregroundStyle(presentation == option ? .black : .white.opacity(0.72))
+                            .font(.system(size: 13, weight: .bold, design: .default))
+                            .foregroundStyle(presentation == option ? .black : JourneyVisual.secondaryText)
                             .frame(maxWidth: .infinity)
                             .frame(height: 44)
                             .background(presentation == option ? JourneyVisual.lime : Color.white.opacity(0.08))
@@ -210,9 +211,9 @@ struct SwissDiscoveryView: View {
                 }
             }
             .padding(4)
-            .background(Color.black.opacity(0.44))
+            .background(Theme.Colors.card)
             .clipShape(Capsule())
-            .overlay(Capsule().stroke(Color.white.opacity(0.16), lineWidth: 1))
+            .overlay(Capsule().stroke(JourneyVisual.softBorder, lineWidth: 1))
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
@@ -259,11 +260,11 @@ struct SwissDiscoveryView: View {
                 Image(systemName: "sparkles").font(.title2.bold()).foregroundStyle(.black).frame(width: 48, height: 48).background(JourneyVisual.lime).clipShape(RoundedRectangle(cornerRadius: 15))
                 VStack(alignment: .leading, spacing: 4) {
                     HStack { Text("AI-план поїздки").font(.headline); Text("PLUS").font(.caption2.bold()).foregroundStyle(.black).padding(.horizontal, 8).padding(.vertical, 4).background(JourneyVisual.lime).clipShape(Capsule()) }
-                    Text("Бюджет · транспорт · сім’я · погода · спільний план").font(.caption).foregroundStyle(.white.opacity(0.58)).multilineTextAlignment(.leading)
+                    Text("Бюджет · транспорт · сім’я · погода · спільний план").font(.caption).foregroundStyle(JourneyVisual.secondaryText).multilineTextAlignment(.leading)
                 }
                 Spacer(minLength: 4)
                 Image(systemName: "arrow.right").font(.headline.bold())
-                }.foregroundStyle(.white).padding(16).background(Color.black.opacity(0.5)).clipShape(RoundedRectangle(cornerRadius: 22)).overlay(RoundedRectangle(cornerRadius: 22).stroke(JourneyVisual.lime.opacity(0.35)))
+                }.foregroundStyle(JourneyVisual.primaryText).padding(16).background(Theme.Colors.card).clipShape(RoundedRectangle(cornerRadius: 22)).overlay(RoundedRectangle(cornerRadius: 22).stroke(JourneyVisual.lime.opacity(0.35)))
             }.buttonStyle(.plain)
 
             Button {
@@ -275,7 +276,7 @@ struct SwissDiscoveryView: View {
                 }
             } label: {
                 Label(showsHiddenOnly ? "Показати всі місця" : "Приховані місця Sweezy", systemImage: showsHiddenOnly ? "square.grid.2x2" : "eye.slash.fill")
-                    .font(.system(size: 14, weight: .bold, design: .rounded))
+                    .font(.system(size: 14, weight: .bold, design: .default))
                     .foregroundStyle(showsHiddenOnly ? .black : JourneyVisual.lime)
                     .frame(maxWidth: .infinity, minHeight: 46)
                     .background(showsHiddenOnly ? JourneyVisual.lime : Color.black.opacity(0.5))
@@ -288,8 +289,8 @@ struct SwissDiscoveryView: View {
     private var settingCollections: some View {
         VStack(alignment: .leading, spacing: 11) {
             Text("swiss.discovery.collections.title".localized)
-                .font(.system(size: 22, weight: .bold, design: .rounded))
-                .foregroundStyle(.white)
+                .font(.system(size: 22, weight: .bold, design: .default))
+                .foregroundStyle(JourneyVisual.primaryText)
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 10) {
@@ -322,12 +323,12 @@ struct SwissDiscoveryView: View {
     private func sectionHeader(title: String, count: Int) -> some View {
         HStack(alignment: .firstTextBaseline) {
             Text(title)
-                .font(.system(size: 22, weight: .bold, design: .rounded))
-                .foregroundStyle(.white)
+                .font(.system(size: 22, weight: .bold, design: .default))
+                .foregroundStyle(JourneyVisual.primaryText)
             Spacer()
             Text("swiss.discovery.places_count".localized(with: count))
                 .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(.white.opacity(0.54))
+                .foregroundStyle(JourneyVisual.secondaryText)
         }
     }
 
@@ -336,13 +337,13 @@ struct SwissDiscoveryView: View {
             VStack(spacing: 13) {
                 Image(systemName: showsSavedOnly ? "bookmark.slash" : "binoculars.fill")
                     .font(.system(size: 30, weight: .semibold))
-                    .foregroundStyle(JourneyVisual.lime)
+                    .foregroundStyle(Theme.Colors.textPrimary)
                 Text("swiss.discovery.empty.title".localized)
-                    .font(.system(size: 19, weight: .bold, design: .rounded))
-                    .foregroundStyle(.white)
+                    .font(.system(size: 19, weight: .bold, design: .default))
+                    .foregroundStyle(JourneyVisual.primaryText)
                 Text("swiss.discovery.empty.subtitle".localized)
                     .font(.system(size: 14, weight: .medium))
-                    .foregroundStyle(.white.opacity(0.62))
+                    .foregroundStyle(JourneyVisual.secondaryText)
                     .multilineTextAlignment(.center)
                 Button("swiss.discovery.empty.reset".localized) {
                     query = ""
@@ -366,10 +367,10 @@ struct SwissDiscoveryView: View {
     private var sourceFooter: some View {
         HStack(alignment: .top, spacing: 10) {
             Image(systemName: "checkmark.seal.fill")
-                .foregroundStyle(JourneyVisual.lime)
+                .foregroundStyle(Theme.Colors.textPrimary)
             Text("swiss.discovery.source_footer".localized(with: SwissDiscoveryCatalog.verifiedAt))
                 .font(.system(size: 11, weight: .medium))
-                .foregroundStyle(.white.opacity(0.55))
+                .foregroundStyle(JourneyVisual.secondaryText)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .padding(.horizontal, 4)
@@ -410,7 +411,7 @@ private struct SwissDiscoveryMapView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("swiss.discovery.map.title".localized)
-                .font(.system(size: 22, weight: .bold, design: .rounded))
+                .font(.system(size: 22, weight: .bold, design: .default))
                 .foregroundStyle(.white)
 
             Map(position: $position) {
@@ -428,7 +429,7 @@ private struct SwissDiscoveryMapView: View {
                                     .foregroundStyle(.black, JourneyVisual.lime)
                                     .shadow(color: .black.opacity(0.46), radius: 6, y: 4)
                                 Text(place.title)
-                                    .font(.system(size: 9, weight: .bold, design: .rounded))
+                                    .font(.system(size: 9, weight: .bold, design: .default))
                                     .foregroundStyle(.white)
                                     .lineLimit(1)
                                     .padding(.horizontal, 7)
@@ -459,7 +460,7 @@ private struct SwissDiscoveryMapView: View {
                                 .clipShape(RoundedRectangle(cornerRadius: 17, style: .continuous))
                             VStack(alignment: .leading, spacing: 4) {
                                 Text(selectedPlace.title)
-                                    .font(.system(size: 16, weight: .bold, design: .rounded))
+                                    .font(.system(size: 16, weight: .bold, design: .default))
                                     .foregroundStyle(.white)
                                     .lineLimit(2)
                                 Text(selectedPlace.region)
@@ -468,7 +469,7 @@ private struct SwissDiscoveryMapView: View {
                                 if let rating = ratings[selectedPlace.id], rating.reviewCount > 0 {
                                     Label(String(format: "%.1f", rating.averageRating), systemImage: "star.fill")
                                         .font(.system(size: 10, weight: .bold))
-                                        .foregroundStyle(JourneyVisual.lime)
+                                        .foregroundStyle(JourneyVisual.accentText)
                                 }
                             }
                             Spacer()
@@ -518,11 +519,7 @@ private struct SwissDiscoveryFeaturedCard: View {
 
     private var featuredVisual: some View {
         ZStack(alignment: .bottomLeading) {
-                Image(place.imageName)
-                    .resizable()
-                    .scaledToFill()
-                    .frame(height: 322)
-                    .clipped()
+                FittedAssetImage(name: place.imageName, height: 322)
 
                 LinearGradient(
                     colors: [.clear, .black.opacity(0.16), .black.opacity(0.92)],
@@ -540,7 +537,7 @@ private struct SwissDiscoveryFeaturedCard: View {
                         .clipShape(Capsule())
 
                     Text(place.title)
-                        .font(.system(size: 29, weight: .bold, design: .rounded))
+                        .font(.system(size: 29, weight: .bold, design: .default))
                         .foregroundStyle(.white)
                         .multilineTextAlignment(.leading)
                         .lineLimit(2)
@@ -596,7 +593,7 @@ private struct SwissDiscoverySettingCard: View {
                         .clipShape(RoundedRectangle(cornerRadius: 11, style: .continuous))
 
                     Text(setting.title)
-                        .font(.system(size: 17, weight: .bold, design: .rounded))
+                        .font(.system(size: 17, weight: .bold, design: .default))
                         .foregroundStyle(.white)
                 }
                 .padding(13)
@@ -624,11 +621,7 @@ private struct SwissDiscoveryEditorialCard: View {
         ZStack(alignment: .topTrailing) {
             Button(action: action) {
                 ZStack(alignment: .bottomLeading) {
-                Image(place.imageName)
-                    .resizable()
-                    .scaledToFill()
-                        .frame(height: 252)
-                    .clipped()
+                FittedAssetImage(name: place.imageName, height: 252)
 
                 LinearGradient(
                         colors: [.black.opacity(0.06), .clear, .black.opacity(0.92)],
@@ -639,7 +632,7 @@ private struct SwissDiscoveryEditorialCard: View {
                     VStack(alignment: .leading, spacing: 7) {
                         HStack(spacing: 8) {
                             Text(String(format: "%02d", index))
-                                .font(.system(size: 11, weight: .black, design: .rounded))
+                                .font(.system(size: 11, weight: .black, design: .default))
                                 .foregroundStyle(.black)
                                 .frame(width: 34, height: 26)
                                 .background(JourneyVisual.lime)
@@ -653,7 +646,7 @@ private struct SwissDiscoveryEditorialCard: View {
                         }
 
                         Text(place.title)
-                            .font(.system(size: 25, weight: .bold, design: .rounded))
+                            .font(.system(size: 25, weight: .bold, design: .default))
                         .foregroundStyle(.white)
                         .multilineTextAlignment(.leading)
                             .lineLimit(2)
@@ -672,7 +665,7 @@ private struct SwissDiscoveryEditorialCard: View {
                             }
                         }
                         .font(.system(size: 10, weight: .semibold))
-                        .foregroundStyle(JourneyVisual.lime)
+                        .foregroundStyle(JourneyVisual.accentText)
                     }
                     .padding(16)
                 }
@@ -744,7 +737,7 @@ struct SwissDiscoveryDetailView: View {
 
     var body: some View {
         ZStack(alignment: .top) {
-            Color.black.ignoresSafeArea()
+            JourneyVisual.pageBackground.ignoresSafeArea()
 
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 0) {
@@ -844,11 +837,7 @@ struct SwissDiscoveryDetailView: View {
         ZStack(alignment: .bottomLeading) {
             TabView(selection: $selectedPhotoIndex) {
                 ForEach(Array(place.imageNames.enumerated()), id: \.offset) { index, imageName in
-                    Image(imageName)
-                        .resizable()
-                        .scaledToFill()
-                        .frame(height: 430)
-                        .clipped()
+                    FittedAssetImage(name: imageName, height: 430)
                         .tag(index)
                 }
             }
@@ -870,9 +859,9 @@ struct SwissDiscoveryDetailView: View {
                     .clipShape(Capsule())
 
                 Text(place.title)
-                    .font(.system(size: 36, weight: .bold, design: .rounded))
+                    .font(.system(size: 29, weight: .bold, design: .default))
                     .foregroundStyle(.white)
-                    .lineSpacing(-2)
+                    .lineSpacing(1)
                     .fixedSize(horizontal: false, vertical: true)
 
                 Text(place.summary)
@@ -908,11 +897,11 @@ struct SwissDiscoveryDetailView: View {
 
             VStack(alignment: .leading, spacing: 9) {
                 Text("swiss.discovery.detail.why".localized)
-                    .font(.system(size: 22, weight: .bold, design: .rounded))
-                    .foregroundStyle(.white)
+                    .font(.system(size: 22, weight: .bold, design: .default))
+                    .foregroundStyle(JourneyVisual.primaryText)
                 Text(place.details)
                     .font(.system(size: 16, weight: .regular))
-                    .foregroundStyle(.white.opacity(0.78))
+                    .foregroundStyle(JourneyVisual.secondaryText)
                     .lineSpacing(4)
                     .fixedSize(horizontal: false, vertical: true)
                     .accessibilityIdentifier("swiss.discovery.detail.description")
@@ -922,18 +911,18 @@ struct SwissDiscoveryDetailView: View {
                 HStack(alignment: .top, spacing: 13) {
                     Image(systemName: "lightbulb.max.fill")
                         .font(.system(size: 19, weight: .bold))
-                        .foregroundStyle(JourneyVisual.lime)
+                        .foregroundStyle(Theme.Colors.textPrimary)
                         .frame(width: 40, height: 40)
                         .background(JourneyVisual.lime.opacity(0.12))
                         .clipShape(Circle())
 
                     VStack(alignment: .leading, spacing: 6) {
                         Text("swiss.discovery.detail.tip".localized)
-                            .font(.system(size: 15, weight: .bold, design: .rounded))
-                            .foregroundStyle(.white)
+                            .font(.system(size: 15, weight: .bold, design: .default))
+                            .foregroundStyle(JourneyVisual.primaryText)
                         Text(place.tip)
                             .font(.system(size: 14, weight: .medium))
-                            .foregroundStyle(.white.opacity(0.68))
+                            .foregroundStyle(JourneyVisual.secondaryText)
                             .lineSpacing(3)
                     }
                 }
@@ -944,18 +933,18 @@ struct SwissDiscoveryDetailView: View {
                 HStack(alignment: .top, spacing: 13) {
                     Image(systemName: "figure.walk.motion")
                         .font(.system(size: 19, weight: .bold))
-                        .foregroundStyle(JourneyVisual.lime)
+                        .foregroundStyle(Theme.Colors.textPrimary)
                         .frame(width: 40, height: 40)
                         .background(JourneyVisual.lime.opacity(0.12))
                         .clipShape(Circle())
 
                     VStack(alignment: .leading, spacing: 6) {
                         Text("swiss.discovery.detail.route_format".localized)
-                            .font(.system(size: 15, weight: .bold, design: .rounded))
-                            .foregroundStyle(.white)
+                            .font(.system(size: 15, weight: .bold, design: .default))
+                            .foregroundStyle(JourneyVisual.primaryText)
                         Text(place.route)
                             .font(.system(size: 14, weight: .medium))
-                            .foregroundStyle(.white.opacity(0.68))
+                            .foregroundStyle(JourneyVisual.secondaryText)
                     }
                 }
                 .padding(17)
@@ -968,7 +957,7 @@ struct SwissDiscoveryDetailView: View {
                     Spacer()
                     Image(systemName: "arrow.up.right")
                 }
-                .font(.system(size: 16, weight: .bold, design: .rounded))
+                .font(.system(size: 16, weight: .bold, design: .default))
                 .foregroundStyle(.black)
                 .padding(.horizontal, 20)
                 .frame(height: 58)
@@ -989,7 +978,7 @@ struct SwissDiscoveryDetailView: View {
                 }
             } label: {
                 HStack { Image(systemName: offlineCache.hasSnapshot(for: place.id) ? "checkmark.circle.fill" : "arrow.down.circle.fill"); Text(offlineCache.hasSnapshot(for: place.id) ? "Доступно офлайн" : "Зберегти офлайн"); Spacer(); Text("PLUS").font(.caption.bold()) }
-                    .font(.headline).foregroundStyle(JourneyVisual.lime).padding(.horizontal, 18).frame(height: 54).background(JourneyVisual.lime.opacity(0.09)).clipShape(RoundedRectangle(cornerRadius: 18)).overlay(RoundedRectangle(cornerRadius: 18).stroke(JourneyVisual.lime.opacity(0.25)))
+                    .font(.headline).foregroundStyle(Theme.Colors.textPrimary).padding(.horizontal, 18).frame(height: 54).background(JourneyVisual.lime.opacity(0.09)).clipShape(RoundedRectangle(cornerRadius: 18)).overlay(RoundedRectangle(cornerRadius: 18).stroke(JourneyVisual.lime.opacity(0.25)))
             }.buttonStyle(.plain).disabled(downloadingOffline)
 
             Link(destination: place.officialURL) {
@@ -997,20 +986,20 @@ struct SwissDiscoveryDetailView: View {
                     HStack(spacing: 13) {
                         Image(systemName: "checkmark.seal.fill")
                             .font(.system(size: 21, weight: .bold))
-                            .foregroundStyle(JourneyVisual.lime)
+                            .foregroundStyle(Theme.Colors.textPrimary)
 
                         VStack(alignment: .leading, spacing: 4) {
                             Text("swiss.discovery.detail.official_source".localized)
-                                .font(.system(size: 15, weight: .bold, design: .rounded))
-                                .foregroundStyle(.white)
+                                .font(.system(size: 15, weight: .bold, design: .default))
+                                .foregroundStyle(JourneyVisual.primaryText)
                             Text("swiss.discovery.detail.verified".localized(with: SwissDiscoveryCatalog.verifiedAt))
                                 .font(.system(size: 11, weight: .medium))
-                                .foregroundStyle(.white.opacity(0.56))
+                                .foregroundStyle(JourneyVisual.secondaryText)
                         }
 
                         Spacer()
                         Image(systemName: "arrow.up.right")
-                            .foregroundStyle(JourneyVisual.lime)
+                            .foregroundStyle(Theme.Colors.textPrimary)
                     }
                     .padding(17)
                 }
@@ -1023,15 +1012,15 @@ struct SwissDiscoveryDetailView: View {
                     Text(isVisited ? "swiss.discovery.detail.visited".localized : "swiss.discovery.detail.mark_visited".localized)
                     Spacer()
                 }
-                .font(.system(size: 15, weight: .bold, design: .rounded))
-                .foregroundStyle(isVisited ? JourneyVisual.lime : .white)
+                .font(.system(size: 15, weight: .bold, design: .default))
+                .foregroundStyle(isVisited ? Theme.Colors.textPrimary : JourneyVisual.secondaryText)
                 .padding(.horizontal, 17)
                 .frame(height: 52)
-                .background(Color.white.opacity(0.07))
+                .background(Theme.Colors.card)
                 .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
                 .overlay(
                     RoundedRectangle(cornerRadius: 18, style: .continuous)
-                        .stroke(Color.white.opacity(0.16), lineWidth: 1)
+                        .stroke(JourneyVisual.softBorder, lineWidth: 1)
                 )
             }
             .buttonStyle(.plain)
@@ -1040,25 +1029,25 @@ struct SwissDiscoveryDetailView: View {
 
             Text("swiss.discovery.detail.illustration_note".localized)
                 .font(.system(size: 10, weight: .medium))
-                .foregroundStyle(.white.opacity(0.4))
+                .foregroundStyle(JourneyVisual.secondaryText)
                 .frame(maxWidth: .infinity, alignment: .center)
                 .multilineTextAlignment(.center)
         }
         .padding(.horizontal, 20)
         .padding(.bottom, 44)
-        .background(Color.black)
+        .background(Theme.Colors.card)
     }
 
     private var gallery: some View {
         VStack(alignment: .leading, spacing: 11) {
             HStack {
                 Text("swiss.discovery.gallery".localized)
-                    .font(.system(size: 22, weight: .bold, design: .rounded))
-                    .foregroundStyle(.white)
+                    .font(.system(size: 22, weight: .bold, design: .default))
+                    .foregroundStyle(JourneyVisual.primaryText)
                 Spacer()
                 Text("swiss.discovery.photos_count".localized(with: place.imageNames.count))
                     .font(.system(size: 11, weight: .semibold))
-                    .foregroundStyle(.white.opacity(0.5))
+                    .foregroundStyle(JourneyVisual.secondaryText)
             }
 
             ScrollView(.horizontal, showsIndicators: false) {
@@ -1091,20 +1080,20 @@ struct SwissDiscoveryDetailView: View {
             HStack(alignment: .bottom) {
                 VStack(alignment: .leading, spacing: 3) {
                     Text("swiss.discovery.reviews.title".localized)
-                        .font(.system(size: 22, weight: .bold, design: .rounded))
-                        .foregroundStyle(.white)
+                        .font(.system(size: 22, weight: .bold, design: .default))
+                        .foregroundStyle(JourneyVisual.primaryText)
                     Text("swiss.discovery.reviews.count".localized(with: reviewPage?.reviewCount ?? 0))
                         .font(.system(size: 11, weight: .medium))
-                        .foregroundStyle(.white.opacity(0.5))
+                        .foregroundStyle(JourneyVisual.secondaryText)
                 }
                 Spacer()
                 if let reviewPage, reviewPage.reviewCount > 0 {
                     HStack(spacing: 6) {
                         Image(systemName: "star.fill")
-                            .foregroundStyle(JourneyVisual.lime)
+                            .foregroundStyle(Theme.Colors.textPrimary)
                         Text(String(format: "%.1f", reviewPage.averageRating))
-                            .font(.system(size: 20, weight: .bold, design: .rounded))
-                            .foregroundStyle(.white)
+                            .font(.system(size: 20, weight: .bold, design: .default))
+                            .foregroundStyle(JourneyVisual.primaryText)
                     }
                 }
             }
@@ -1118,7 +1107,7 @@ struct SwissDiscoveryDetailView: View {
                     Spacer()
                     Image(systemName: "chevron.right")
                 }
-                .font(.system(size: 15, weight: .bold, design: .rounded))
+                .font(.system(size: 15, weight: .bold, design: .default))
                 .foregroundStyle(.black)
                 .padding(.horizontal, 17)
                 .frame(height: 54)
@@ -1130,19 +1119,19 @@ struct SwissDiscoveryDetailView: View {
             if let reviewNotice {
                 HStack(alignment: .top, spacing: 10) {
                     Image(systemName: "checkmark.circle.fill")
-                        .foregroundStyle(JourneyVisual.lime)
+                        .foregroundStyle(Theme.Colors.textPrimary)
                     Text(reviewNotice)
                         .font(.system(size: 13, weight: .semibold))
-                        .foregroundStyle(.white.opacity(0.76))
+                        .foregroundStyle(JourneyVisual.secondaryText)
                     Spacer()
                     Button { self.reviewNotice = nil } label: {
                         Image(systemName: "xmark")
-                            .foregroundStyle(.white.opacity(0.5))
+                            .foregroundStyle(JourneyVisual.secondaryText)
                     }
                     .buttonStyle(.plain)
                 }
                 .padding(14)
-                .background(Color.white.opacity(0.07))
+                .background(Theme.Colors.card)
                 .clipShape(RoundedRectangle(cornerRadius: 17, style: .continuous))
             }
 
@@ -1154,16 +1143,16 @@ struct SwissDiscoveryDetailView: View {
                             .foregroundStyle(.orange)
                         Text(reviewLoadError)
                             .font(.system(size: 13, weight: .medium))
-                            .foregroundStyle(.white.opacity(0.66))
+                            .foregroundStyle(JourneyVisual.secondaryText)
                         Spacer()
                         Button {
                             Task { await loadReviews() }
                         } label: {
                             Image(systemName: "arrow.clockwise")
                                 .font(.system(size: 15, weight: .bold))
-                                .foregroundStyle(JourneyVisual.lime)
+                                .foregroundStyle(Theme.Colors.textPrimary)
                                 .frame(width: 38, height: 38)
-                                .background(Color.white.opacity(0.08))
+                                .background(Theme.Colors.card)
                                 .clipShape(Circle())
                         }
                         .buttonStyle(.plain)
@@ -1182,7 +1171,7 @@ struct SwissDiscoveryDetailView: View {
             } else if reviewPage != nil {
                 Text("swiss.discovery.reviews.empty".localized)
                     .font(.system(size: 14, weight: .medium))
-                    .foregroundStyle(.white.opacity(0.56))
+                    .foregroundStyle(JourneyVisual.secondaryText)
                     .frame(maxWidth: .infinity, minHeight: 80, alignment: .center)
                     .multilineTextAlignment(.center)
             }
@@ -1196,7 +1185,7 @@ struct SwissDiscoveryDetailView: View {
                 HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 5) {
                         Text(review.authorLabel)
-                            .font(.system(size: 14, weight: .bold, design: .rounded))
+                            .font(.system(size: 14, weight: .bold, design: .default))
                             .foregroundStyle(.white)
                         HStack(spacing: 3) {
                             ForEach(1...5, id: \.self) { value in
@@ -1204,7 +1193,7 @@ struct SwissDiscoveryDetailView: View {
                             }
                         }
                         .font(.system(size: 11, weight: .bold))
-                        .foregroundStyle(JourneyVisual.lime)
+                        .foregroundStyle(JourneyVisual.accentText)
                     }
                     Spacer()
                     if !review.isMine {
@@ -1283,20 +1272,20 @@ struct SwissDiscoveryDetailView: View {
     private func detailMetric(icon: String, value: String) -> some View {
         HStack(spacing: 9) {
             Image(systemName: icon)
-                .foregroundStyle(JourneyVisual.lime)
+                .foregroundStyle(JourneyVisual.accentStrong)
             Text(value)
                 .lineLimit(2)
                 .minimumScaleFactor(0.8)
         }
         .font(.system(size: 12, weight: .semibold))
-        .foregroundStyle(.white)
+        .foregroundStyle(JourneyVisual.primaryText)
         .padding(.horizontal, 13)
         .frame(maxWidth: .infinity, minHeight: 50, alignment: .leading)
-        .background(Color.white.opacity(0.07))
+        .background(JourneyVisual.softSurface)
         .clipShape(RoundedRectangle(cornerRadius: 17, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 17, style: .continuous)
-                .stroke(Color.white.opacity(0.15), lineWidth: 1)
+                .stroke(JourneyVisual.softBorder, lineWidth: 1)
         )
     }
 
@@ -1346,7 +1335,7 @@ private struct SwissDiscoveryReviewEditor: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.black.ignoresSafeArea()
+                JourneyVisual.pageBackground.ignoresSafeArea()
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 22) {
                         HStack(spacing: 13) {
@@ -1357,18 +1346,18 @@ private struct SwissDiscoveryReviewEditor: View {
                                 .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
                             VStack(alignment: .leading, spacing: 4) {
                                 Text(place.title)
-                                    .font(.system(size: 20, weight: .bold, design: .rounded))
-                                    .foregroundStyle(.white)
+                                    .font(.system(size: 20, weight: .bold, design: .default))
+                                    .foregroundStyle(JourneyVisual.primaryText)
                                 Text(place.region)
                                     .font(.system(size: 12, weight: .medium))
-                                    .foregroundStyle(.white.opacity(0.58))
+                                    .foregroundStyle(JourneyVisual.secondaryText)
                             }
                         }
 
                         VStack(alignment: .leading, spacing: 12) {
                             Text("swiss.discovery.reviews.rating".localized)
-                                .font(.system(size: 16, weight: .bold, design: .rounded))
-                                .foregroundStyle(.white)
+                                .font(.system(size: 16, weight: .bold, design: .default))
+                                .foregroundStyle(JourneyVisual.primaryText)
                             HStack(spacing: 11) {
                                 ForEach(1...5, id: \.self) { value in
                                     Button {
@@ -1377,7 +1366,7 @@ private struct SwissDiscoveryReviewEditor: View {
                                     } label: {
                                         Image(systemName: value <= rating ? "star.fill" : "star")
                                             .font(.system(size: 31, weight: .bold))
-                                            .foregroundStyle(value <= rating ? JourneyVisual.lime : .white.opacity(0.3))
+                                            .foregroundStyle(value <= rating ? JourneyVisual.lime : JourneyVisual.softBorder)
                                     }
                                     .buttonStyle(.plain)
                                     .accessibilityLabel("\(value)")
@@ -1387,23 +1376,23 @@ private struct SwissDiscoveryReviewEditor: View {
 
                         VStack(alignment: .leading, spacing: 10) {
                             Text("swiss.discovery.reviews.comment".localized)
-                                .font(.system(size: 16, weight: .bold, design: .rounded))
-                                .foregroundStyle(.white)
+                                .font(.system(size: 16, weight: .bold, design: .default))
+                                .foregroundStyle(JourneyVisual.primaryText)
                             TextEditor(text: $comment)
                                 .font(.system(size: 15, weight: .regular))
-                                .foregroundStyle(.white)
+                                .foregroundStyle(JourneyVisual.primaryText)
                                 .scrollContentBackground(.hidden)
                                 .padding(12)
                                 .frame(minHeight: 150)
-                                .background(Color.white.opacity(0.08))
+                                .background(Theme.Colors.card)
                                 .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-                                .overlay(RoundedRectangle(cornerRadius: 20).stroke(Color.white.opacity(0.17), lineWidth: 1))
+                                .overlay(RoundedRectangle(cornerRadius: 20).stroke(JourneyVisual.softBorder, lineWidth: 1))
                                 .onChange(of: comment) { _, value in
                                     if value.count > 1000 { comment = String(value.prefix(1000)) }
                                 }
                             Text("\(comment.count)/1000")
                                 .font(.system(size: 11, weight: .medium))
-                                .foregroundStyle(.white.opacity(0.45))
+                                .foregroundStyle(JourneyVisual.secondaryText)
                                 .frame(maxWidth: .infinity, alignment: .trailing)
                         }
 
@@ -1418,7 +1407,7 @@ private struct SwissDiscoveryReviewEditor: View {
                                 if isSubmitting { ProgressView().tint(.black) }
                                 Text(existingReview == nil ? "swiss.discovery.reviews.publish".localized : "swiss.discovery.reviews.update".localized)
                             }
-                            .font(.system(size: 16, weight: .bold, design: .rounded))
+                            .font(.system(size: 16, weight: .bold, design: .default))
                             .foregroundStyle(.black)
                             .frame(maxWidth: .infinity)
                             .frame(height: 56)
@@ -1495,7 +1484,7 @@ private struct SwissDiscoveryHeaderButtonStyle: ButtonStyle {
         configuration.label
             .background(Color.black.opacity(configuration.isPressed ? 0.72 : 0.5))
             .clipShape(Circle())
-            .overlay(Circle().stroke(Color.white.opacity(0.24), lineWidth: 1))
+            .overlay(Circle().stroke(JourneyVisual.softBorder, lineWidth: 1))
             .scaleEffect(configuration.isPressed ? 0.94 : 1)
     }
 }

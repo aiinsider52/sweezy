@@ -2248,7 +2248,7 @@
 "swiss.discovery.save" = "Зберегти місце";
 "swiss.discovery.unsave" = "Прибрати зі збережених";
 "swiss.discovery.places_count" = "%d місць";
-"swiss.discovery.filter.all" = "Усі";
+"swiss.discovery.filter.all" = "Усі теми";
 "swiss.discovery.filter.nature" = "Природа";
 "swiss.discovery.filter.culture" = "Культура";
 "swiss.discovery.filter.family" = "З дітьми";
@@ -2479,7 +2479,7 @@
 "swiss.discovery.reviews.delete_confirm.action" = "Видалити";
 "swiss.discovery.reviews.cancel" = "Скасувати";
 
-"swiss.discovery.setting.all" = "Усі";
+"swiss.discovery.setting.all" = "Будь-де";
 "swiss.discovery.setting.city" = "Міста";
 "swiss.discovery.setting.mountain" = "Гори";
 "swiss.discovery.setting.lake" = "Біля озера";
@@ -2582,3 +2582,105 @@
 "journey.directory.toolkit.plan.ready" = "ГОТОВО";
 "journey.directory.toolkit.swiss.eyebrow" = "ПОРУЧ І КОРИСНО";
 "journey.directory.toolkit.swiss.title" = "Швейцарія для тебе";
+
+// Sweezy companion — contextual guidance and document progress
+"companion.open_plan" = "Відкрити мій план";
+"companion.plan.title" = "Мій план";
+"companion.plan.subtitle" = "Разом, крок за кроком. Твої справи, документи та найближчі строки.";
+"companion.documents.title" = "Мої документи";
+"companion.documents.intro" = "Документи без плутанини";
+"companion.documents.subtitle" = "Познач, що вже підготовлено до твого наступного кроку.";
+"companion.documents.privacy" = "Зберігаємо тільки статус і строк. Файли документів не завантажуються.";
+"companion.documents.progress" = "Готовність";
+"companion.documents.done" = "Ще один крок зроблено!";
+"companion.documents.mark" = "Позначити як готовий";
+"companion.documents.unmark" = "Прибрати позначку";
+"companion.documents.expiry" = "Термін дії";
+"companion.documents.remove_expiry" = "Прибрати термін";
+"companion.documents.add_expiry" = "Додати строк";
+"companion.documents.save" = "Зберегти";
+"companion.documents.missing" = "Не готово";
+"companion.documents.ready" = "Готово";
+"companion.documents.expiring" = "Скоро закінчується";
+"companion.documents.expired" = "Строк минув";
+"companion.search.subtitle" = "Пошук у матеріалах довідника з посиланнями на джерела.";
+"companion.search.empty.title" = "Матеріалів не знайдено";
+"companion.search.empty.subtitle" = "Спробуй коротший або точніший запит. Sweezy не вигадує відповідь без джерела.";
+"companion.search.reset" = "Змінити запит";
+
+/* Country context */
+"country.name.ch" = "Швейцарія";
+"country.name.de" = "Німеччина";
+"country.name.at" = "Австрія";
+"country.subdivision.canton" = "Кантон";
+"country.subdivision.federal_state" = "Федеральна земля";
+"country.residence_country" = "Країна проживання";
+"country.country" = "Країна";
+"country.residence_status" = "Статус проживання";
+"country.status" = "Статус";
+"country.whole_country" = "Уся країна";
+"country.select_subdivision_format" = "Обрати: %@";
+"residence.status.ch.s" = "Статус S";
+"residence.status.ch.b" = "Дозвіл B";
+"residence.status.ch.c" = "Дозвіл C";
+"residence.status.ch.f" = "Статус F";
+"residence.status.ch.n" = "Статус N";
+"residence.status.ch.l" = "Дозвіл L";
+"residence.status.other" = "Інший";
+"residence.detail.temporary_protection" = "Тимчасовий захист";
+"residence.detail.residence_permit" = "Дозвіл на проживання";
+"residence.detail.permanent_residence" = "Постійне проживання";
+"residence.detail.provisional_admission" = "Тимчасовий допуск";
+"residence.detail.asylum" = "Процедура притулку";
+"residence.detail.short_term" = "Короткострокове проживання";
+"residence.detail.free_movement" = "Право вільного пересування";
+"residence.detail.work_and_residence" = "Робота й проживання";
+"residence.detail.other" = "Інший статус або дозвіл";
+
+/* Templates */
+"template.category.government" = "Державні органи";
+"template.category.housing" = "Житло";
+"template.category.employment" = "Робота";
+"template.category.insurance" = "Страхування";
+"template.category.healthcare" = "Здоров’я";
+"template.category.education" = "Освіта";
+"template.category.legal" = "Юридичні";
+"template.category.banking" = "Банк";
+"template.category.complaint" = "Скарга";
+"template.category.request" = "Запит";
+"template.category.application" = "Заява";
+"template.category.notification" = "Повідомлення";
+"template.type.letter" = "Лист";
+"template.type.form" = "Форма";
+"template.type.email" = "Email";
+"template.type.application" = "Заява";
+"template.type.complaint" = "Скарга";
+"template.type.notice" = "Повідомлення";
+"appointments.empty_subtitle" = "Додай візит до лікаря, консультацію чи зустріч в органі — Sweezy нагадає вчасно.";
+
+/* Onboarding plan build */
+"onboarding.building.title" = "Складаємо твій план…";
+"onboarding.building.subtitle" = "Підбираємо кроки під твою ситуацію.";
+"onboarding.ready.title" = "Твій план готовий!";
+"onboarding.ready.subtitle" = "Перші кроки вже чекають на головній.";
+"onboarding.profile.editable_hint" = "Ці дані можна змінити будь-коли в налаштуваннях.";
+"onboarding.profile.subtitle_short" = "Кілька деталей — і план буде саме під твою ситуацію.";
+
+/* Home: explore + help */
+"journey.home.explore.title" = "Досліджуй Sweezy";
+"journey.home.explore.subtitle" = "Усе для життя тут — в одному місці";
+"journey.home.explore.directory" = "Гайди, чек-листи та інструменти";
+"journey.home.explore.map" = "Установи й цікаві місця поруч";
+"journey.home.explore.market" = "Послуги, речі та події";
+"journey.home.explore.people" = "Знайомства за спільними інтересами";
+"journey.home.help.title" = "Не знаєш, з чого почати?";
+"journey.home.help.subtitle" = "Покрокові гайди про документи, житло й роботу";
+"journey.home.help.action" = "Відкрити гайди";
+"auth.social.apple" = "Продовжити з Apple";
+"auth.entry.sticker.profile" = "Твій профіль";
+"auth.entry.sticker.progress" = "Твій прогрес";
+"auth.entry.sticker.people" = "Нові друзі";
+"companion.plan.all_done" = "Усе важливе зроблено. Можна видихнути!";
+"settings.biometry.unavailable" = "Біометрія недоступна на цьому пристрої.";
+"settings.biometry.not_enrolled" = "Налаштуй Face ID або Touch ID у параметрах пристрою, щоб блокувати застосунок.";
+"settings.biometry.no_passcode" = "Спершу встанови код-пароль пристрою.";

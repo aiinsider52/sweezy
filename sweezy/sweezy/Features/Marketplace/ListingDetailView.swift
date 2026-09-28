@@ -34,7 +34,7 @@ struct ListingDetailView: View {
 
     var body: some View {
         ZStack(alignment: .top) {
-            Color(red: 0.035, green: 0.055, blue: 0.043)
+            JourneyVisual.pageBackground
                 .ignoresSafeArea()
 
             if let listing {
@@ -202,7 +202,7 @@ struct ListingDetailView: View {
     private func contentSheet(_ listing: ServiceListing) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             Label(listing.categoryDisplayName, systemImage: listing.categoryIcon)
-                .font(.system(size: 13, weight: .bold, design: .rounded))
+                .font(.system(size: 13, weight: .bold, design: .default))
                 .foregroundColor(.black)
                 .padding(.horizontal, 14)
                 .frame(height: 38)
@@ -210,19 +210,19 @@ struct ListingDetailView: View {
                 .clipShape(Capsule())
 
             Text(listing.title)
-                .font(.system(size: 31, weight: .bold, design: .rounded))
-                .foregroundColor(.white)
-                .lineSpacing(-1)
+                .font(.system(size: 31, weight: .bold, design: .default))
+                .foregroundColor(JourneyVisual.primaryText)
+                .lineSpacing(1)
                 .fixedSize(horizontal: false, vertical: true)
                 .padding(.top, 16)
 
             HStack(spacing: 9) {
                 Image(systemName: "mappin")
-                    .foregroundColor(JourneyVisual.lime)
+                    .foregroundColor(Theme.Colors.textPrimary)
                 Text(locationText(for: listing))
-                    .foregroundColor(.white.opacity(0.72))
+                    .foregroundColor(JourneyVisual.secondaryText)
             }
-            .font(.system(size: 16, weight: .medium, design: .rounded))
+            .font(.system(size: 16, weight: .medium, design: .default))
             .padding(.top, 14)
 
             detailDivider
@@ -253,7 +253,7 @@ struct ListingDetailView: View {
         .padding(.top, 30)
         .padding(.bottom, 30)
         .background(.ultraThinMaterial.opacity(0.9))
-        .background(Color(red: 0.035, green: 0.055, blue: 0.043).opacity(0.94))
+        .background(JourneyVisual.pageBackground.opacity(0.94))
         .clipShape(UnevenRoundedRectangle(
             topLeadingRadius: 34,
             bottomLeadingRadius: 0,
@@ -269,7 +269,7 @@ struct ListingDetailView: View {
                 topTrailingRadius: 34,
                 style: .continuous
             )
-            .stroke(Color.white.opacity(0.15), lineWidth: 1)
+            .stroke(JourneyVisual.softBorder, lineWidth: 1)
         }
         .shadow(color: .black.opacity(0.42), radius: 28, y: -8)
     }
@@ -279,23 +279,23 @@ struct ListingDetailView: View {
             Button { if listing.authorID != nil { showPublicProfile = true } } label: {
                 HStack(spacing: 14) {
                     ZStack {
-                        Circle().fill(Color.white.opacity(0.1))
-                        Circle().stroke(Color.white.opacity(0.22), lineWidth: 1)
+                        Circle().fill(JourneyVisual.softBorder)
+                        Circle().stroke(JourneyVisual.softBorder, lineWidth: 1)
                         Text(String(listing.authorName.prefix(1)).uppercased())
-                            .font(.system(size: 21, weight: .bold, design: .rounded))
-                            .foregroundColor(.white)
+                            .font(.system(size: 21, weight: .bold, design: .default))
+                            .foregroundColor(JourneyVisual.primaryText)
                     }
                     .frame(width: 56, height: 56)
                     VStack(alignment: .leading, spacing: 5) {
                         Text(listing.authorName)
-                            .font(.system(size: 18, weight: .bold, design: .rounded))
-                            .foregroundColor(.white).lineLimit(1)
+                            .font(.system(size: 18, weight: .bold, design: .default))
+                            .foregroundColor(JourneyVisual.primaryText).lineLimit(1)
                         Label(
                             listing.isVerified ? "profile.verified".localized : "profile.community".localized,
                             systemImage: listing.isVerified ? "checkmark.seal.fill" : "person.2.fill"
                         )
                         .font(.caption.weight(.semibold))
-                        .foregroundColor(listing.isVerified ? JourneyVisual.lime : .white.opacity(0.58))
+                        .foregroundColor(listing.isVerified ? Theme.Colors.textPrimary : JourneyVisual.secondaryText)
                     }
                 }
             }
@@ -305,7 +305,7 @@ struct ListingDetailView: View {
             Spacer(minLength: 8)
 
             Text(displayPrice(for: listing))
-                .font(.system(size: 17, weight: .heavy, design: .rounded))
+                .font(.system(size: 17, weight: .heavy, design: .default))
                 .foregroundColor(.black)
                 .lineLimit(1)
                 .minimumScaleFactor(0.72)
@@ -322,7 +322,7 @@ struct ListingDetailView: View {
             metadataItem(icon: "eye", text: "\(listing.viewCount) переглядів")
 
             Rectangle()
-                .fill(Color.white.opacity(0.16))
+                .fill(JourneyVisual.softBorder)
                 .frame(width: 1, height: 28)
                 .padding(.horizontal, 16)
 
@@ -344,7 +344,7 @@ struct ListingDetailView: View {
                 .font(.caption.weight(.medium))
                 .lineLimit(2)
         }
-        .foregroundColor(.white.opacity(0.62))
+        .foregroundColor(JourneyVisual.secondaryText)
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
@@ -352,15 +352,15 @@ struct ListingDetailView: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 9) {
                 Image(systemName: "text.alignleft")
-                    .foregroundColor(JourneyVisual.lime)
+                    .foregroundColor(Theme.Colors.textPrimary)
                 Text("marketplace.description".localized)
                     .font(.headline)
-                    .foregroundColor(.white)
+                    .foregroundColor(JourneyVisual.primaryText)
             }
 
             Text(listing.description)
-                .font(.system(size: 16, weight: .regular, design: .rounded))
-                .foregroundColor(.white.opacity(0.84))
+                .font(.system(size: 16, weight: .regular, design: .default))
+                .foregroundColor(JourneyVisual.secondaryText)
                 .lineSpacing(4)
                 .lineLimit(descriptionExpanded ? nil : 5)
                 .fixedSize(horizontal: false, vertical: true)
@@ -372,7 +372,7 @@ struct ListingDetailView: View {
                     }
                 }
                 .font(.subheadline.bold())
-                .foregroundColor(JourneyVisual.lime)
+                .foregroundColor(Theme.Colors.textPrimary)
                 .buttonStyle(.plain)
             }
         }
@@ -387,22 +387,22 @@ struct ListingDetailView: View {
             VStack(alignment: .leading, spacing: 5) {
                 Text(listing.freshnessText)
                     .font(.subheadline.bold())
-                    .foregroundColor(.white)
+                    .foregroundColor(JourneyVisual.primaryText)
                 Text(listing.isStale
                      ? "Дані могли змінитися. Уточніть ціну й умови перед оплатою."
                      : "Модерація Sweezy пройдена. Не переказуйте гроші наперед незнайомим людям.")
                     .font(.caption)
-                    .foregroundColor(.white.opacity(0.58))
+                    .foregroundColor(JourneyVisual.secondaryText)
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.white.opacity(0.055))
+        .background(Theme.Colors.card)
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                .stroke(JourneyVisual.softBorder, lineWidth: 1)
         )
     }
 
@@ -427,7 +427,7 @@ struct ListingDetailView: View {
             .buttonStyle(.bordered)
         }
         .font(.caption.bold())
-        .tint(.white.opacity(0.5))
+        .tint(JourneyVisual.secondaryText)
     }
 
     private var detailsFootnote: some View {
@@ -436,13 +436,13 @@ struct ListingDetailView: View {
             Text("marketplace.detail.footer".localized)
         }
         .font(.caption)
-        .foregroundColor(.white.opacity(0.4))
+        .foregroundColor(JourneyVisual.secondaryText)
         .fixedSize(horizontal: false, vertical: true)
     }
 
     private var detailDivider: some View {
         Rectangle()
-            .fill(Color.white.opacity(0.15))
+            .fill(JourneyVisual.softBorder)
             .frame(height: 1)
     }
 
@@ -483,12 +483,12 @@ struct ListingDetailView: View {
     private func circularControlLabel(icon: String) -> some View {
         Image(systemName: icon)
             .font(.system(size: 19, weight: .semibold))
-            .foregroundColor(.white)
+            .foregroundColor(JourneyVisual.primaryText)
             .frame(width: 52, height: 52)
-            .background(Color.black.opacity(0.48))
+            .background(Theme.Colors.card)
             .background(.ultraThinMaterial.opacity(0.72))
             .clipShape(Circle())
-            .overlay(Circle().stroke(Color.white.opacity(0.2), lineWidth: 1))
+            .overlay(Circle().stroke(JourneyVisual.softBorder, lineWidth: 1))
             .shadow(color: .black.opacity(0.22), radius: 12, y: 5)
     }
 
@@ -527,7 +527,7 @@ struct ListingDetailView: View {
                             ? "chat.listing.own".localized
                             : (bookable ? "Записатися" : (listing.authorID == nil ? "chat.listing.unavailable".localized : "chat.listing.message".localized))
                     )
-                        .font(.system(size: 16, weight: .heavy, design: .rounded))
+                        .font(.system(size: 16, weight: .heavy, design: .default))
                         .lineLimit(1)
                         .minimumScaleFactor(0.78)
                 }
@@ -551,11 +551,11 @@ struct ListingDetailView: View {
                 } label: {
                     Image(systemName: "message.fill")
                         .font(.system(size: 19, weight: .semibold))
-                        .foregroundColor(.white)
+                        .foregroundColor(JourneyVisual.primaryText)
                         .frame(width: 58, height: 58)
-                        .background(Color.white.opacity(0.08))
+                        .background(Theme.Colors.card)
                         .clipShape(Circle())
-                        .overlay(Circle().stroke(Color.white.opacity(0.16), lineWidth: 1))
+                        .overlay(Circle().stroke(JourneyVisual.softBorder, lineWidth: 1))
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel("Написати")
@@ -566,11 +566,11 @@ struct ListingDetailView: View {
             } label: {
                 Image(systemName: appContainer.savedItems.isListingSaved(listing.id) ? "bookmark.fill" : "bookmark")
                     .font(.system(size: 20, weight: .semibold))
-                    .foregroundColor(appContainer.savedItems.isListingSaved(listing.id) ? JourneyVisual.lime : .white)
+                    .foregroundColor(appContainer.savedItems.isListingSaved(listing.id) ? Theme.Colors.textPrimary : JourneyVisual.secondaryText)
                     .frame(width: 58, height: 58)
-                    .background(Color.white.opacity(0.08))
+                    .background(Theme.Colors.card)
                     .clipShape(Circle())
-                    .overlay(Circle().stroke(Color.white.opacity(0.16), lineWidth: 1))
+                    .overlay(Circle().stroke(JourneyVisual.softBorder, lineWidth: 1))
             }
             .buttonStyle(.plain)
             .accessibilityLabel(appContainer.savedItems.isListingSaved(listing.id) ? "Збережено" : "Зберегти")
@@ -579,10 +579,10 @@ struct ListingDetailView: View {
         .padding(.top, 12)
         .padding(.bottom, 10)
         .background(.ultraThinMaterial.opacity(0.96))
-        .background(Color.black.opacity(0.84))
+        .background(Theme.Colors.card)
         .overlay(alignment: .top) {
             Rectangle()
-                .fill(Color.white.opacity(0.1))
+                .fill(JourneyVisual.softBorder)
                 .frame(height: 1)
         }
     }
@@ -638,11 +638,11 @@ struct ListingDetailView: View {
                     .tint(JourneyVisual.lime)
             }
             Text("Відкриваємо послугу")
-                .font(.system(size: 20, weight: .bold, design: .rounded))
-                .foregroundColor(.white)
+                .font(.system(size: 20, weight: .bold, design: .default))
+                .foregroundColor(JourneyVisual.primaryText)
             Text("Завантажуємо актуальні дані автора")
                 .font(.subheadline)
-                .foregroundColor(.white.opacity(0.62))
+                .foregroundColor(JourneyVisual.secondaryText)
         }
         .padding(28)
         .journeyCard(cornerRadius: 28)
@@ -653,14 +653,14 @@ struct ListingDetailView: View {
         VStack(spacing: 16) {
             Image(systemName: "wifi.exclamationmark")
                 .font(.system(size: 34, weight: .semibold))
-                .foregroundColor(JourneyVisual.lime)
+                .foregroundColor(Theme.Colors.textPrimary)
             Text("Не вдалося відкрити послугу")
-                .font(.system(size: 22, weight: .bold, design: .rounded))
-                .foregroundColor(.white)
+                .font(.system(size: 22, weight: .bold, design: .default))
+                .foregroundColor(JourneyVisual.primaryText)
                 .multilineTextAlignment(.center)
             Text("Перевірте з’єднання або спробуйте ще раз.")
                 .font(.subheadline)
-                .foregroundColor(.white.opacity(0.68))
+                .foregroundColor(JourneyVisual.secondaryText)
                 .multilineTextAlignment(.center)
             Button {
                 Task { await loadDetail() }
@@ -681,10 +681,10 @@ struct ListingDetailView: View {
     }
 
     private func locationText(for listing: ServiceListing) -> String {
-        guard listing.canton != "all" else { return "marketplace.canton.all".localized }
-        let name = SwissCanton.all.first(where: { $0.code == listing.canton })?.name
-        guard let name, name != listing.canton else { return listing.canton }
-        return "\(name) · \(listing.canton)"
+        let country = ResidenceCountry(rawValue: listing.countryCode) ?? .switzerland
+        guard listing.subdivisionCode != "all" else { return "country.whole_country".localized }
+        let name = CountryCatalog.subdivisionName(country: country, code: listing.subdivisionCode)
+        return name == listing.subdivisionCode ? name : "\(name) · \(listing.subdivisionCode)"
     }
 
     private func displayPrice(for listing: ServiceListing) -> String {
@@ -693,14 +693,14 @@ struct ListingDetailView: View {
             return "За домовленістю"
         }
 
-        if raw.range(of: "CHF", options: .caseInsensitive) != nil || listing.isFree {
+        if raw.range(of: listing.currencyCode, options: .caseInsensitive) != nil || listing.isFree {
             return raw
         }
 
         let numeric = raw.replacingOccurrences(of: "'", with: "")
             .replacingOccurrences(of: " ", with: "")
         if Decimal(string: numeric) != nil {
-            return "CHF \(raw)"
+            return "\(listing.currencyCode) \(raw)"
         }
         return raw
     }

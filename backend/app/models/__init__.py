@@ -36,6 +36,7 @@ from .chat import (
     PushDevice,
 )
 from .discovery_review import DiscoveryReview, DiscoveryReviewReport
+from .place_suggestion import PlaceSuggestion
 from .incident import Incident
 from .moderation import ModerationAction, ModerationCase, ModerationNotification, UserSanction
 from .business import (
@@ -101,6 +102,7 @@ __all__ = [
     "PushDevice",
     "DiscoveryReview",
     "DiscoveryReviewReport",
+    "PlaceSuggestion",
     "Incident",
     "ModerationAction",
     "ModerationCase",

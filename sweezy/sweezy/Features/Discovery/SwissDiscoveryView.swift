@@ -39,11 +39,7 @@ struct SwissDiscoveryView: View {
 
     var body: some View {
         ZStack {
-            JourneyPhotoBackground(
-                imageName: filteredPlaces.first?.imageName ?? "swiss-discovery-aletsch",
-                blurRadius: 10,
-                darkness: 0.7
-            )
+            JourneyVisual.pageBackground.ignoresSafeArea()
 
             ScrollView(showsIndicators: false) {
                 LazyVStack(alignment: .leading, spacing: 18) {
@@ -156,28 +152,46 @@ struct SwissDiscoveryView: View {
                     HStack(spacing: 7) {
                         Image(systemName: showsSavedOnly ? "bookmark.fill" : "bookmark")
                         Text(String(savedPlaceIDs.count))
+                            .contentTransition(.numericText(value: Double(savedPlaceIDs.count)))
                     }
                     .font(.system(size: 14, weight: .bold, design: .default))
-                    .foregroundStyle(showsSavedOnly ? .black : .white)
+                    .foregroundStyle(showsSavedOnly ? .black : JourneyVisual.primaryText)
                     .padding(.horizontal, 15)
                     .frame(height: 46)
-                    .background(showsSavedOnly ? JourneyVisual.lime : Color.black.opacity(0.5))
+                    .background(showsSavedOnly ? JourneyVisual.lime : Theme.Colors.card)
                     .clipShape(Capsule())
-                    .overlay(Capsule().stroke(Color.white.opacity(showsSavedOnly ? 0 : 0.28), lineWidth: 1))
+                    .overlay(Capsule().stroke(showsSavedOnly ? Color.clear : JourneyVisual.softBorder, lineWidth: 1))
                 }
                 .accessibilityLabel("swiss.discovery.saved".localized)
             }
 
-            VStack(alignment: .leading, spacing: 7) {
-                Text("swiss.discovery.eyebrow".localized.uppercased())
-                    .font(.system(size: 12, weight: .bold, design: .default))
-                    .tracking(1.6)
-                    .foregroundStyle(Theme.Colors.textPrimary)
+            // The promenade with the signpost: "go and explore".
+            FocusedSceneImage(name: "city-scene-map", focusY: 0.35)
+                .frame(height: 190)
+                .frame(maxWidth: .infinity)
+                .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
+                .overlay(alignment: .bottomLeading) {
+                    Label("swiss.discovery.eyebrow".localized, systemImage: "binoculars.fill")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundColor(.black)
+                        .padding(.horizontal, 11)
+                        .frame(height: 28)
+                        .background(JourneyVisual.lime, in: Capsule())
+                        .padding(14)
+                }
+                .overlay(
+                    RoundedRectangle(cornerRadius: 26, style: .continuous)
+                        .stroke(JourneyVisual.softBorder, lineWidth: 1)
+                )
+                .shadow(color: JourneyVisual.black.opacity(0.08), radius: 14, y: 6)
+                .accessibilityHidden(true)
 
+            VStack(alignment: .leading, spacing: 7) {
                 Text("swiss.discovery.title".localized)
-                    .font(.system(size: 29, weight: .bold, design: .default))
+                    .font(.system(size: 28, weight: .bold, design: .default))
                     .foregroundStyle(JourneyVisual.primaryText)
                     .lineSpacing(1)
+                    .fixedSize(horizontal: false, vertical: true)
 
                 Text("swiss.discovery.subtitle".localized)
                     .font(.system(size: 15, weight: .medium))
@@ -187,41 +201,50 @@ struct SwissDiscoveryView: View {
         }
     }
 
+    /// Search and the list/map switch share one row; "where" is a menu at the head of the topic row.
     private var searchAndFilters: some View {
-        VStack(spacing: 12) {
-            JourneySearchField(text: $query, prompt: "swiss.discovery.search".localized)
-
+        VStack(spacing: 10) {
             HStack(spacing: 8) {
-                ForEach(SwissDiscoveryPresentation.allCases) { option in
-                    Button {
-                        withAnimation(.spring(response: 0.32, dampingFraction: 0.82)) {
-                            presentation = option
+                JourneySearchField(text: $query, prompt: "swiss.discovery.search".localized)
+
+                HStack(spacing: 2) {
+                    ForEach(SwissDiscoveryPresentation.allCases) { option in
+                        let selected = presentation == option
+                        Button {
+                            withAnimation(.spring(response: 0.32, dampingFraction: 0.82)) {
+                                presentation = option
+                            }
+                        } label: {
+                            Image(systemName: option.icon)
+                                .font(.system(size: 15, weight: .bold))
+                                .foregroundStyle(selected ? .black : JourneyVisual.secondaryText)
+                                .frame(width: 42, height: 40)
+                                .background(selected ? JourneyVisual.lime : Color.clear, in: Capsule())
                         }
-                    } label: {
-                        Label(option.title, systemImage: option.icon)
-                            .font(.system(size: 13, weight: .bold, design: .default))
-                            .foregroundStyle(presentation == option ? .black : JourneyVisual.secondaryText)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 44)
-                            .background(presentation == option ? JourneyVisual.lime : Color.white.opacity(0.08))
-                            .clipShape(Capsule())
+                        .buttonStyle(.plain)
+                        .accessibilityLabel(option.title)
+                        .accessibilityAddTraits(selected ? .isSelected : [])
                     }
-                    .buttonStyle(.plain)
-                    .accessibilityAddTraits(presentation == option ? .isSelected : [])
                 }
+                .padding(4)
+                .background(Theme.Colors.card, in: Capsule())
+                .overlay(Capsule().stroke(JourneyVisual.softBorder, lineWidth: 1))
             }
-            .padding(4)
-            .background(Theme.Colors.card)
-            .clipShape(Capsule())
-            .overlay(Capsule().stroke(JourneyVisual.softBorder, lineWidth: 1))
 
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 8) {
+                HStack(spacing: 6) {
+                    settingMenu
+
+                    Rectangle()
+                        .fill(JourneyVisual.softBorder)
+                        .frame(width: 1, height: 22)
+                        .padding(.horizontal, 2)
+
                     ForEach(SwissDiscoveryFilter.allCases) { filter in
-                        JourneyFilterChip(
+                        compactChip(
                             title: filter.title,
                             icon: filter.icon,
-                            isSelected: selectedFilter == filter
+                            selected: selectedFilter == filter
                         ) {
                             withAnimation(.easeInOut(duration: 0.2)) {
                                 selectedFilter = filter
@@ -231,59 +254,113 @@ struct SwissDiscoveryView: View {
                 }
             }
             .contentMargins(.horizontal, 0, for: .scrollContent)
-
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 8) {
-                    ForEach(SwissDiscoverySetting.allCases) { setting in
-                        JourneyFilterChip(
-                            title: setting.title,
-                            icon: setting.icon,
-                            isSelected: selectedSetting == setting
-                        ) {
-                            withAnimation(.easeInOut(duration: 0.2)) {
-                                selectedSetting = setting
-                            }
-                        }
-                    }
-                }
-            }
-            .contentMargins(.horizontal, 0, for: .scrollContent)
         }
     }
 
-    private var plusTravelCard: some View {
-        VStack(spacing: 10) {
-            Button {
-                if subscription.isPremium { showPlanner = true } else { showPaywall = true }
-            } label: {
-                HStack(spacing: 14) {
-                Image(systemName: "sparkles").font(.title2.bold()).foregroundStyle(.black).frame(width: 48, height: 48).background(JourneyVisual.lime).clipShape(RoundedRectangle(cornerRadius: 15))
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack { Text("AI-план поїздки").font(.headline); Text("PLUS").font(.caption2.bold()).foregroundStyle(.black).padding(.horizontal, 8).padding(.vertical, 4).background(JourneyVisual.lime).clipShape(Capsule()) }
-                    Text("Бюджет · транспорт · сім’я · погода · спільний план").font(.caption).foregroundStyle(JourneyVisual.secondaryText).multilineTextAlignment(.leading)
+    /// Where to go (anywhere / cities / mountains / lakes) as one menu chip instead of a second chip row.
+    private var settingMenu: some View {
+        let active = selectedSetting != .all
+        return Menu {
+            Picker("swiss.discovery.setting.all".localized, selection: $selectedSetting.animation(.easeInOut(duration: 0.2))) {
+                ForEach(SwissDiscoverySetting.allCases) { setting in
+                    Label(setting.title, systemImage: setting.icon).tag(setting)
                 }
-                Spacer(minLength: 4)
-                Image(systemName: "arrow.right").font(.headline.bold())
-                }.foregroundStyle(JourneyVisual.primaryText).padding(16).background(Theme.Colors.card).clipShape(RoundedRectangle(cornerRadius: 22)).overlay(RoundedRectangle(cornerRadius: 22).stroke(JourneyVisual.lime.opacity(0.35)))
-            }.buttonStyle(.plain)
+            }
+        } label: {
+            HStack(spacing: 5) {
+                Image(systemName: active ? selectedSetting.icon : "mappin.and.ellipse")
+                Text(selectedSetting.title)
+                    .lineLimit(1)
+                Image(systemName: "chevron.down")
+                    .font(.system(size: 9, weight: .black))
+            }
+            .font(.system(size: 12, weight: .semibold))
+            .foregroundColor(active ? JourneyVisual.lime : JourneyVisual.primaryText)
+            .padding(.horizontal, 12)
+            .frame(height: 36)
+            .background(active ? JourneyVisual.black : Theme.Colors.card, in: Capsule())
+            .overlay(Capsule().stroke(active ? Color.clear : JourneyVisual.softBorder, lineWidth: 1))
+        }
+        .accessibilityLabel(selectedSetting.title)
+    }
 
-            Button {
+    private func compactChip(title: String, icon: String, selected: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Label(title, systemImage: icon)
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundColor(selected ? .black : JourneyVisual.primaryText)
+                .lineLimit(1)
+                .padding(.horizontal, 12)
+                .frame(height: 36)
+                .background(selected ? JourneyVisual.lime : Theme.Colors.card, in: Capsule())
+                .overlay(Capsule().stroke(selected ? Color.clear : JourneyVisual.softBorder, lineWidth: 1))
+        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(selected ? .isSelected : [])
+    }
+
+    /// Both Plus extras side by side in one short row.
+    private var plusTravelCard: some View {
+        HStack(spacing: 8) {
+            plusPill(
+                icon: "sparkles",
+                swatch: JourneyCategoryPalette.lime,
+                title: "AI-план поїздки"
+            ) {
+                if subscription.isPremium { showPlanner = true } else { showPaywall = true }
+            }
+
+            plusPill(
+                icon: showsHiddenOnly ? "square.grid.2x2.fill" : "eye.slash.fill",
+                swatch: JourneyCategoryPalette.lilac,
+                title: showsHiddenOnly ? "Усі місця" : "Приховані місця",
+                active: showsHiddenOnly
+            ) {
                 guard subscription.isPremium else { showPaywall = true; return }
                 withAnimation(.easeInOut(duration: 0.2)) {
                     showsHiddenOnly.toggle()
                     showsSavedOnly = false
                     presentation = .list
                 }
-            } label: {
-                Label(showsHiddenOnly ? "Показати всі місця" : "Приховані місця Sweezy", systemImage: showsHiddenOnly ? "square.grid.2x2" : "eye.slash.fill")
-                    .font(.system(size: 14, weight: .bold, design: .default))
-                    .foregroundStyle(showsHiddenOnly ? .black : JourneyVisual.lime)
-                    .frame(maxWidth: .infinity, minHeight: 46)
-                    .background(showsHiddenOnly ? JourneyVisual.lime : Color.black.opacity(0.5))
-                    .clipShape(RoundedRectangle(cornerRadius: 16))
-                    .overlay(RoundedRectangle(cornerRadius: 16).stroke(JourneyVisual.lime.opacity(0.45)))
-            }.buttonStyle(.plain)
+            }
         }
+    }
+
+    private func plusPill(
+        icon: String,
+        swatch: JourneyCategorySwatch,
+        title: String,
+        active: Bool = false,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            HStack(spacing: 9) {
+                JourneyCategoryIcon(symbol: icon, swatch: swatch, size: 30, selected: active)
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(title)
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundStyle(JourneyVisual.primaryText)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                    if !subscription.isPremium {
+                        Text("PLUS")
+                            .font(.system(size: 8, weight: .black))
+                            .tracking(0.6)
+                            .foregroundStyle(JourneyVisual.accentText)
+                    }
+                }
+                Spacer(minLength: 0)
+            }
+            .padding(.leading, 8)
+            .padding(.trailing, 10)
+            .frame(maxWidth: .infinity, minHeight: 50)
+            .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .stroke(active ? JourneyVisual.accentStrong : JourneyVisual.lime.opacity(0.4), lineWidth: active ? 1.5 : 1)
+            )
+        }
+        .buttonStyle(CardPressStyle())
     }
 
     private var settingCollections: some View {
@@ -665,7 +742,7 @@ private struct SwissDiscoveryEditorialCard: View {
                             }
                         }
                         .font(.system(size: 10, weight: .semibold))
-                        .foregroundStyle(JourneyVisual.accentText)
+                        .foregroundStyle(JourneyVisual.lime)
                     }
                     .padding(16)
                 }
@@ -818,17 +895,18 @@ struct SwissDiscoveryDetailView: View {
             }
             .accessibilityLabel(isSaved ? "swiss.discovery.unsave".localized : "swiss.discovery.save".localized)
         }
-        .font(.system(size: 18, weight: .bold))
+        .font(.system(size: 17, weight: .bold))
         .foregroundStyle(.white)
         .padding(.horizontal, 18)
         .padding(.vertical, 8)
         .background(
             LinearGradient(
-                colors: [.black.opacity(0.9), .black.opacity(0.54), .clear],
+                colors: [.black.opacity(0.45), .clear],
                 startPoint: .top,
                 endPoint: .bottom
             )
             .ignoresSafeArea()
+            .allowsHitTesting(false)
         )
         .buttonStyle(SwissDiscoveryHeaderButtonStyle())
     }
@@ -837,7 +915,7 @@ struct SwissDiscoveryDetailView: View {
         ZStack(alignment: .bottomLeading) {
             TabView(selection: $selectedPhotoIndex) {
                 ForEach(Array(place.imageNames.enumerated()), id: \.offset) { index, imageName in
-                    FittedAssetImage(name: imageName, height: 430)
+                    FittedAssetImage(name: imageName, height: 460)
                         .tag(index)
                 }
             }
@@ -870,7 +948,7 @@ struct SwissDiscoveryDetailView: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
             .padding(.horizontal, 22)
-            .padding(.bottom, 24)
+            .padding(.bottom, 52)
 
             HStack(spacing: 5) {
                 ForEach(place.imageNames.indices, id: \.self) { index in
@@ -879,11 +957,11 @@ struct SwissDiscoveryDetailView: View {
                         .frame(width: index == selectedPhotoIndex ? 24 : 7, height: 7)
                 }
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
-            .padding(.trailing, 22)
-            .padding(.top, 108)
+            // Between the summary and the paper sheet, clear of the header buttons.
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+            .padding(.bottom, 38)
         }
-        .frame(height: 430)
+        .frame(height: 460)
     }
 
     private var detailContent: some View {
@@ -907,48 +985,19 @@ struct SwissDiscoveryDetailView: View {
                     .accessibilityIdentifier("swiss.discovery.detail.description")
             }
 
-            JourneyGlassPanel(cornerRadius: 23) {
-                HStack(alignment: .top, spacing: 13) {
-                    Image(systemName: "lightbulb.max.fill")
-                        .font(.system(size: 19, weight: .bold))
-                        .foregroundStyle(Theme.Colors.textPrimary)
-                        .frame(width: 40, height: 40)
-                        .background(JourneyVisual.lime.opacity(0.12))
-                        .clipShape(Circle())
+            detailInfoCard(
+                icon: "lightbulb.max.fill",
+                swatch: JourneyCategoryPalette.lime,
+                title: "swiss.discovery.detail.tip".localized,
+                text: place.tip
+            )
 
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("swiss.discovery.detail.tip".localized)
-                            .font(.system(size: 15, weight: .bold, design: .default))
-                            .foregroundStyle(JourneyVisual.primaryText)
-                        Text(place.tip)
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundStyle(JourneyVisual.secondaryText)
-                            .lineSpacing(3)
-                    }
-                }
-                .padding(17)
-            }
-
-            JourneyGlassPanel(cornerRadius: 23) {
-                HStack(alignment: .top, spacing: 13) {
-                    Image(systemName: "figure.walk.motion")
-                        .font(.system(size: 19, weight: .bold))
-                        .foregroundStyle(Theme.Colors.textPrimary)
-                        .frame(width: 40, height: 40)
-                        .background(JourneyVisual.lime.opacity(0.12))
-                        .clipShape(Circle())
-
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("swiss.discovery.detail.route_format".localized)
-                            .font(.system(size: 15, weight: .bold, design: .default))
-                            .foregroundStyle(JourneyVisual.primaryText)
-                        Text(place.route)
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundStyle(JourneyVisual.secondaryText)
-                    }
-                }
-                .padding(17)
-            }
+            detailInfoCard(
+                icon: "figure.walk.motion",
+                swatch: JourneyCategoryPalette.sky,
+                title: "swiss.discovery.detail.route_format".localized,
+                text: place.route
+            )
 
             Button(action: openInMaps) {
                 HStack(spacing: 10) {
@@ -982,27 +1031,25 @@ struct SwissDiscoveryDetailView: View {
             }.buttonStyle(.plain).disabled(downloadingOffline)
 
             Link(destination: place.officialURL) {
-                JourneyGlassPanel(cornerRadius: 23) {
-                    HStack(spacing: 13) {
-                        Image(systemName: "checkmark.seal.fill")
-                            .font(.system(size: 21, weight: .bold))
-                            .foregroundStyle(Theme.Colors.textPrimary)
-
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("swiss.discovery.detail.official_source".localized)
-                                .font(.system(size: 15, weight: .bold, design: .default))
-                                .foregroundStyle(JourneyVisual.primaryText)
-                            Text("swiss.discovery.detail.verified".localized(with: SwissDiscoveryCatalog.verifiedAt))
-                                .font(.system(size: 11, weight: .medium))
-                                .foregroundStyle(JourneyVisual.secondaryText)
-                        }
-
-                        Spacer()
-                        Image(systemName: "arrow.up.right")
-                            .foregroundStyle(Theme.Colors.textPrimary)
+                HStack(spacing: 12) {
+                    JourneyCategoryIcon(symbol: "checkmark.seal.fill", swatch: JourneyCategoryPalette.teal, size: 40)
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text("swiss.discovery.detail.official_source".localized)
+                            .font(.system(size: 15, weight: .bold, design: .default))
+                            .foregroundStyle(JourneyVisual.primaryText)
+                        Text("swiss.discovery.detail.verified".localized(with: SwissDiscoveryCatalog.verifiedAt))
+                            .font(.system(size: 11, weight: .medium))
+                            .foregroundStyle(JourneyVisual.secondaryText)
                     }
-                    .padding(17)
+                    Spacer()
+                    Image(systemName: "arrow.up.right")
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundStyle(JourneyVisual.primaryText)
                 }
+                .padding(14)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(JourneyVisual.softBorder, lineWidth: 1))
             }
             .buttonStyle(.plain)
 
@@ -1034,8 +1081,35 @@ struct SwissDiscoveryDetailView: View {
                 .multilineTextAlignment(.center)
         }
         .padding(.horizontal, 20)
+        .padding(.top, 22)
         .padding(.bottom, 44)
-        .background(Theme.Colors.card)
+        // Paper sheet that slides over the photo instead of a hard black-to-white edge.
+        .background(
+            JourneyVisual.pageBackground,
+            in: UnevenRoundedRectangle(topLeadingRadius: 28, topTrailingRadius: 28, style: .continuous)
+        )
+        .padding(.top, -28)
+    }
+
+    private func detailInfoCard(icon: String, swatch: JourneyCategorySwatch, title: String, text: String) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            JourneyCategoryIcon(symbol: icon, swatch: swatch, size: 40)
+            VStack(alignment: .leading, spacing: 5) {
+                Text(title)
+                    .font(.system(size: 15, weight: .bold, design: .default))
+                    .foregroundStyle(JourneyVisual.primaryText)
+                Text(text)
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundStyle(JourneyVisual.secondaryText)
+                    .lineSpacing(3)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(14)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(JourneyVisual.softBorder, lineWidth: 1))
     }
 
     private var gallery: some View {
@@ -1271,17 +1345,20 @@ struct SwissDiscoveryDetailView: View {
 
     private func detailMetric(icon: String, value: String) -> some View {
         HStack(spacing: 9) {
-            Image(systemName: icon)
-                .foregroundStyle(JourneyVisual.accentStrong)
+            JourneyCategoryIcon(
+                symbol: icon,
+                swatch: icon == "sun.max.fill" ? JourneyCategoryPalette.sand : JourneyCategoryPalette.teal,
+                size: 30
+            )
             Text(value)
                 .lineLimit(2)
                 .minimumScaleFactor(0.8)
         }
         .font(.system(size: 12, weight: .semibold))
         .foregroundStyle(JourneyVisual.primaryText)
-        .padding(.horizontal, 13)
-        .frame(maxWidth: .infinity, minHeight: 50, alignment: .leading)
-        .background(JourneyVisual.softSurface)
+        .padding(.horizontal, 10)
+        .frame(maxWidth: .infinity, minHeight: 52, alignment: .leading)
+        .background(Theme.Colors.card)
         .clipShape(RoundedRectangle(cornerRadius: 17, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 17, style: .continuous)
@@ -1482,9 +1559,9 @@ private struct SwissDiscoveryReviewEditor: View {
 private struct SwissDiscoveryHeaderButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .background(Color.black.opacity(configuration.isPressed ? 0.72 : 0.5))
-            .clipShape(Circle())
-            .overlay(Circle().stroke(JourneyVisual.softBorder, lineWidth: 1))
+            .background(.ultraThinMaterial, in: Circle())
+            .background(Color.black.opacity(configuration.isPressed ? 0.4 : 0.22), in: Circle())
+            .overlay(Circle().stroke(Color.white.opacity(0.3), lineWidth: 1))
             .scaleEffect(configuration.isPressed ? 0.94 : 1)
     }
 }

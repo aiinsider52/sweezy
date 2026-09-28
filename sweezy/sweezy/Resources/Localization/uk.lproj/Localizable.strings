@@ -1563,7 +1563,7 @@
 "journey.tool.calculator.title" = "Калькулятор";
 "journey.tool.city_hub.subtitle" = "Головне у твоєму місті";
 "journey.tool.city_hub.title" = "Моє місто";
-"journey.tool.cv.subtitle" = "Виплати та субсидії";
+"journey.tool.cv.subtitle" = "Резюме під місцевий ринок праці";
 "journey.tool.cv.title" = "Створити CV";
 "journey.tool.deadlines.subtitle" = "Не пропусти важливі дати";
 "journey.tool.deadlines.title" = "Дедлайни";
@@ -1573,7 +1573,7 @@
 "journey.tool.documents.title" = "Готовність документів";
 "journey.tool.experts.subtitle" = "Фахівці з перевіреними профілями";
 "journey.tool.experts.title" = "Перевірені експерти";
-"journey.tool.jobs.subtitle" = "Документи без помилок";
+"journey.tool.jobs.subtitle" = "Від сильного CV до першого оферу";
 "journey.tool.jobs.title" = "Кар’єрний хаб";
 "journey.tool.language.subtitle" = "Невелика мовна практика";
 "journey.tool.language.title" = "Німецька щодня";
@@ -1582,7 +1582,7 @@
 "journey.tool.my_plan.subtitle" = "Що готово, чого бракує";
 "journey.tool.my_plan.title" = "Мій план";
 "journey.tool.roadmap.subtitle" = "Підвищуй рівень інтеграції";
-"journey.tool.roadmap.title" = "Roadmap";
+"journey.tool.roadmap.title" = "Дорожня карта";
 "journey.tool.templates.subtitle" = "Листи та офіційні форми";
 "journey.tool.templates.title" = "Шаблони";
 "map.center_on_me.label" = "Моє місцезнаходження";

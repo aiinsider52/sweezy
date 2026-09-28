@@ -215,7 +215,9 @@ final class CriticalFlowsUITests: XCTestCase {
         XCTAssertTrue(careerHub.waitForExistence(timeout: 15))
         XCTAssertTrue(app.buttons["journey.tool.discoverSwitzerland"].exists)
         XCTAssertTrue(app.buttons["journey.tool.myPlan"].exists)
-        XCTAssertTrue(app.buttons["journey.tool.ask"].exists)
+        // Ask Sweezy and the daily German game were removed from the toolkit on purpose.
+        XCTAssertFalse(app.buttons["journey.tool.ask"].exists)
+        XCTAssertFalse(app.buttons["journey.tool.language"].exists)
         XCTAssertFalse(app.buttons["journey.tool.passport"].exists)
 
         careerHub.tap()
@@ -270,9 +272,10 @@ final class CriticalFlowsUITests: XCTestCase {
         let details = app.buttons["friends.swipe.details"]
         XCTAssertTrue(details.waitForExistence(timeout: 5))
         details.tap()
-        XCTAssertTrue(app.staticTexts["Anna Keller"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.staticTexts["96% збіг"].exists)
-        XCTAssertTrue(app.staticTexts["Демо-профіль · дії вимкнені"].exists)
+        // "Anna Keller" is already on the card behind the sheet, so wait for sheet-only text instead.
+        XCTAssertTrue(app.staticTexts["96% збіг"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Anna Keller"].exists)
+        XCTAssertTrue(app.staticTexts["Демо-профіль · дії вимкнені"].waitForExistence(timeout: 5))
         keepScreenshot(app, name: "friends-filled-profile")
     }
 

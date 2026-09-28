@@ -1347,7 +1347,7 @@
 "journey.tool.calculator.title" = "Leistungsrechner";
 "journey.tool.city_hub.subtitle" = "Das Wichtigste in deiner Stadt";
 "journey.tool.city_hub.title" = "City Hub";
-"journey.tool.cv.subtitle" = "Schweiz-taugliche CV-Entwürfe";
+"journey.tool.cv.subtitle" = "Lebenslauf für den lokalen Arbeitsmarkt";
 "journey.tool.cv.title" = "Lebenslauf";
 "journey.tool.deadlines.subtitle" = "Wichtige Daten nicht verpassen";
 "journey.tool.deadlines.title" = "Fristen";
@@ -1357,7 +1357,7 @@
 "journey.tool.documents.title" = "Dokumente";
 "journey.tool.experts.subtitle" = "Geprüfte Fachleute";
 "journey.tool.experts.title" = "Expert:innen";
-"journey.tool.jobs.subtitle" = "Hilfe bei der Jobsuche";
+"journey.tool.jobs.subtitle" = "Vom starken Lebenslauf zum ersten Angebot";
 "journey.tool.jobs.title" = "Career Hub";
 "journey.tool.language.subtitle" = "Kleine Sprachübung";
 "journey.tool.language.title" = "Täglich Deutsch";

@@ -140,20 +140,32 @@ struct JourneyDirectoryView: View {
                     #endif
                 }
             }
+            // Scrim sits on this root only: on the whole stack it painted a paper band over
+            // pushed screens with full-bleed photos (Swiss Discovery place pages).
+            .statusBarScrim()
             .navigationBarHidden(true)
             .navigationDestination(item: $selectedGuide) { guide in
                 GuideDetailView(guide: guide)
+                    .statusBarScrim()
                     .interactiveSwipeBackEnabled()
             }
             .navigationDestination(item: $selectedChecklist) { checklist in
                 ChecklistDetailView(checklist: checklist)
+                    .statusBarScrim()
                     .interactiveSwipeBackEnabled()
             }
             .navigationDestination(item: $selectedTool) { route in
-                toolDestination(route)
-                    .interactiveSwipeBackEnabled {
-                        selectedTool = nil
+                Group {
+                    if route == .discoverSwitzerland {
+                        // Manages its own status bar; its place pages are full-bleed photos.
+                        toolDestination(route)
+                    } else {
+                        toolDestination(route).statusBarScrim()
                     }
+                }
+                .interactiveSwipeBackEnabled {
+                    selectedTool = nil
+                }
             }
             .task {
                 if appContainer.contentService.guides.isEmpty || appContainer.contentService.checklists.isEmpty {
@@ -192,7 +204,6 @@ struct JourneyDirectoryView: View {
                 applyRequestedSection()
             }
         }
-        .statusBarScrim()
         .accessibilityIdentifier("directory.screen")
     }
 
@@ -303,26 +314,16 @@ struct JourneyDirectoryView: View {
                 .contentMargins(.horizontal, 0, for: .scrollContent)
             }
 
-            Group {
-                if selectedToolCategory == .all {
-                    JourneyEditorialBento(countryCode: APIClient.countryCode) { route in
-                        selectedTool = route
-                    }
-                } else {
-                    LazyVGrid(
-                        columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible())],
-                        spacing: 10
-                    ) {
-                        ForEach(selectedToolCategory.routes) { route in
-                            JourneyEditorialToolCard(route: route, height: 154) {
-                                selectedTool = route
-                            }
+            if selectedToolCategory == .all {
+                // Two headline tools as illustrated cards, everything else in one even grid.
+                VStack(spacing: 12) {
+                    ForEach(JourneyToolRoute.featured(countryCode: APIClient.countryCode)) { route in
+                        JourneyToolHeroCard(route: route) {
+                            selectedTool = route
                         }
                     }
                 }
-            }
 
-            if selectedToolCategory == .all {
                 VStack(alignment: .leading, spacing: 12) {
                     JourneyToolSectionHeader(
                         eyebrow: "journey.directory.toolkit.current.eyebrow".localized,
@@ -330,15 +331,28 @@ struct JourneyDirectoryView: View {
                     )
                     .id("tools-next-actions")
 
-                    LazyVGrid(
-                        columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible())],
-                        spacing: 10
-                    ) {
-                        ForEach(JourneyToolRoute.secondaryUtilities.filter { $0.isAvailable(countryCode: APIClient.countryCode) }) { route in
-                            JourneyCompactToolTile(route: route, compact: true) {
-                                selectedTool = route
-                            }
+                    toolGrid(JourneyToolRoute.everyday)
+                }
+            } else {
+                toolGrid(selectedToolCategory.routes)
+            }
+        }
+    }
+
+    /// Plain (non-lazy) grid: ten tiles at most, and every tile stays in the accessibility tree.
+    private func toolGrid(_ routes: [JourneyToolRoute]) -> some View {
+        let available = routes.filter { $0.isAvailable(countryCode: APIClient.countryCode) }
+        let rows = stride(from: 0, to: available.count, by: 2).map { Array(available[$0..<min($0 + 2, available.count)]) }
+        return Grid(horizontalSpacing: 10, verticalSpacing: 10) {
+            ForEach(rows, id: \.first) { row in
+                GridRow {
+                    ForEach(row) { route in
+                        JourneyToolTile(route: route) {
+                            selectedTool = route
                         }
+                    }
+                    if row.count == 1 {
+                        Color.clear.gridCellUnsizedAxes([.horizontal, .vertical])
                     }
                 }
             }
@@ -545,10 +559,10 @@ private enum JourneyToolkitCategory: String, CaseIterable, Identifiable {
 
     var routes: [JourneyToolRoute] {
         switch self {
-        case .all: return JourneyToolRoute.editorialUtilities
+        case .all: return JourneyToolRoute.everyday
         case .career: return [.careerHub]
-        case .everyday: return [.myPlan, .documents, .ask, .deadlines, .appointments, .digest, .templates]
-        case .switzerland: return [.discoverSwitzerland, .cityHub, .language, .roadmap]
+        case .everyday: return [.myPlan, .documents, .deadlines, .appointments, .digest, .templates]
+        case .switzerland: return [.discoverSwitzerland, .cityHub, .roadmap]
         case .community: return [.experts, .moments]
         }
     }
@@ -577,13 +591,34 @@ private enum JourneyToolRoute: String, Identifiable, CaseIterable {
 
     var id: String { rawValue }
 
-    static let quickUtilities: [JourneyToolRoute] = [.careerHub, .discoverSwitzerland, .myPlan, .ask]
-    static let editorialUtilities: [JourneyToolRoute] = [.careerHub, .discoverSwitzerland, .myPlan, .documents, .ask, .language, .experts, .moments]
-    static let secondaryUtilities: [JourneyToolRoute] = [.deadlines, .appointments, .digest, .templates, .cityHub, .experts, .moments, .roadmap]
-    static let planningUtilities: [JourneyToolRoute] = [.myPlan, .documents, .deadlines, .appointments, .digest]
-    static let swissUtilities: [JourneyToolRoute] = [.cityHub, .language, .experts, .moments]
-    static let nextActions: [JourneyToolRoute] = [.appointments, .experts, .moments]
-    static let moreUtilities: [JourneyToolRoute] = [.roadmap]
+    /// Headline tools shown as illustrated cards on "All".
+    static func featured(countryCode: String) -> [JourneyToolRoute] {
+        countryCode == "CH" ? [.careerHub, .discoverSwitzerland] : [.careerHub, .cv]
+    }
+
+    /// Everything else, once each. Ask Sweezy and the German word game live elsewhere now.
+    static let everyday: [JourneyToolRoute] = [.myPlan, .documents, .deadlines, .appointments, .templates, .digest, .experts, .cityHub, .moments, .roadmap]
+
+    var swatch: JourneyCategorySwatch {
+        switch self {
+        case .myPlan, .roadmap: return JourneyCategoryPalette.lime
+        case .documents, .cityHub: return JourneyCategoryPalette.sky
+        case .deadlines, .moments: return JourneyCategoryPalette.coral
+        case .appointments, .experts: return JourneyCategoryPalette.teal
+        case .digest, .cv, .careerHub: return JourneyCategoryPalette.sand
+        case .templates, .ask, .language: return JourneyCategoryPalette.lilac
+        case .discoverSwitzerland: return JourneyCategoryPalette.lime
+        }
+    }
+
+    /// Illustrated backdrop for the headline cards.
+    var heroImage: String {
+        switch self {
+        case .careerHub, .cv: return "story-jobs"
+        case .discoverSwitzerland: return "swiss-discovery-aletsch"
+        default: return imageName
+        }
+    }
 
     func isAvailable(countryCode: String) -> Bool {
         if countryCode == "CH" { return true }
@@ -849,89 +884,102 @@ private struct JourneyEditorialPlanCard: View {
     }
 }
 
-private struct JourneyEditorialBento: View {
-    let countryCode: String
-    let action: (JourneyToolRoute) -> Void
+/// Big illustrated tool card: artwork, title and subtitle on a soft dark fade, lime arrow.
+private struct JourneyToolHeroCard: View {
+    let route: JourneyToolRoute
+    let action: () -> Void
 
     var body: some View {
-        VStack(spacing: 10) {
-            JourneyEditorialToolCard(route: .careerHub, height: 96, prominent: true, horizontal: true) {
-                action(.careerHub)
-            }
+        let shape = RoundedRectangle(cornerRadius: 24, style: .continuous)
+        Button(action: action) {
+            ZStack(alignment: .bottomLeading) {
+                FocusedSceneImage(name: route.heroImage, focusY: 0.12)
+                    .allowsHitTesting(false)
 
-            HStack(alignment: .top, spacing: 10) {
-                JourneyEditorialToolCard(
-                    route: countryCode == "CH" ? .discoverSwitzerland : .cv,
-                    height: 204,
-                    prominent: true
-                ) {
-                    action(countryCode == "CH" ? .discoverSwitzerland : .cv)
-                }
+                LinearGradient(
+                    stops: [
+                        .init(color: .clear, location: 0.3),
+                        .init(color: .black.opacity(0.4), location: 0.62),
+                        .init(color: .black.opacity(0.82), location: 1)
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
 
-                VStack(spacing: 10) {
-                    JourneyEditorialToolCard(route: .myPlan, height: 97) {
-                        action(.myPlan)
+                HStack(alignment: .bottom, spacing: 12) {
+                    VStack(alignment: .leading, spacing: 5) {
+                        Label(route.title, systemImage: route.icon)
+                            .font(.system(size: 19, weight: .bold))
+                            .foregroundColor(.white)
+                        Text(route.subtitle)
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundColor(.white.opacity(0.86))
+                            .lineLimit(2)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
-                    JourneyEditorialToolCard(route: .ask, height: 97) {
-                        action(.ask)
-                    }
-                }
-            }
+                    .shadow(color: .black.opacity(0.3), radius: 6, y: 1)
 
-            HStack(spacing: 10) {
-                JourneyEditorialToolCard(route: .documents, height: 126) {
-                    action(.documents)
+                    Spacer(minLength: 0)
+
+                    Image(systemName: "arrow.up.right")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundColor(.black)
+                        .frame(width: 40, height: 40)
+                        .background(JourneyVisual.lime, in: Circle())
                 }
-                JourneyEditorialToolCard(route: .language, height: 126) {
-                    action(.language)
-                }
+                .padding(16)
             }
+            .frame(height: 176)
+            .frame(maxWidth: .infinity)
+            .clipShape(shape)
+            .overlay(shape.stroke(Color.white.opacity(0.3), lineWidth: 1))
+            .contentShape(shape)
+            .shadow(color: JourneyVisual.black.opacity(0.1), radius: 14, y: 6)
         }
+        .buttonStyle(CardPressStyle())
+        .accessibilityLabel("\(route.title). \(route.subtitle)")
+        .accessibilityIdentifier("journey.tool.\(route.rawValue)")
     }
 }
 
-private struct JourneyEditorialToolCard: View {
+/// Even two-column tile: sticker icon, title, one-line purpose.
+private struct JourneyToolTile: View {
     let route: JourneyToolRoute
-    let height: CGFloat
-    var prominent = false
-    var horizontal = false
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
-            VStack(alignment: .leading, spacing: 0) {
-                HStack(alignment: .top, spacing: 9) {
-                    Image(systemName: route.icon)
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(JourneyVisual.primaryText)
-                    VStack(alignment: .leading, spacing: 5) {
-                        Text(route.title)
-                            .font(.system(size: prominent ? 18 : 14, weight: .bold))
-                            .foregroundColor(JourneyVisual.primaryText)
-                            .lineLimit(2)
-                            .minimumScaleFactor(0.85)
-                        if prominent {
-                            Text(route.subtitle)
-                                .font(.system(size: 11))
-                                .foregroundColor(JourneyVisual.secondaryText)
-                                .lineLimit(2)
-                        }
-                    }
-                    Spacer(minLength: 0)
-                    Image(systemName: "chevron.right")
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(alignment: .top) {
+                    JourneyCategoryIcon(symbol: route.icon, swatch: route.swatch, size: 40)
+                    Spacer(minLength: 4)
+                    Image(systemName: "arrow.up.right")
                         .font(.system(size: 11, weight: .bold))
-                        .foregroundColor(JourneyVisual.primaryText)
+                        .foregroundColor(JourneyVisual.secondaryText)
                 }
-                .padding(14)
-                .frame(maxHeight: .infinity, alignment: .center)
+
+                Spacer(minLength: 0)
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(route.title)
+                        .font(.system(size: 15, weight: .bold))
+                        .foregroundColor(JourneyVisual.primaryText)
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.85)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Text(route.subtitle)
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundColor(JourneyVisual.secondaryText)
+                        .lineLimit(2)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .frame(height: height)
-            .background(Theme.Colors.card)
-            .clipShape(RoundedRectangle(cornerRadius: 22))
-            .overlay(RoundedRectangle(cornerRadius: 22).stroke(JourneyVisual.softBorder))
+            .padding(14)
+            .frame(maxWidth: .infinity, minHeight: 128, alignment: .topLeading)
+            .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(JourneyVisual.softBorder, lineWidth: 1))
         }
-        .buttonStyle(.plain)
+        .buttonStyle(CardPressStyle())
         .accessibilityLabel("\(route.title). \(route.subtitle)")
         .accessibilityIdentifier("journey.tool.\(route.rawValue)")
     }
@@ -951,56 +999,6 @@ private struct JourneyToolSectionHeader: View {
                 .font(.system(size: 21, weight: .bold, design: .default))
                 .foregroundColor(JourneyVisual.primaryText)
         }
-    }
-}
-
-private struct JourneyCompactToolTile: View {
-    let route: JourneyToolRoute
-    var compact = false
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            VStack(alignment: .leading, spacing: compact ? 8 : 12) {
-                HStack {
-                    Image(systemName: route.icon)
-                        .font(.system(size: compact ? 15 : 18, weight: .bold))
-                        .foregroundColor(Theme.Colors.textPrimary)
-                        .frame(width: compact ? 34 : 40, height: compact ? 34 : 40)
-                        .background(JourneyVisual.lime.opacity(0.1))
-                        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-
-                    Spacer()
-
-                    Image(systemName: "arrow.up.right")
-                        .font(.system(size: 10, weight: .bold))
-                        .foregroundColor(JourneyVisual.secondaryText)
-                }
-
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(route.title)
-                        .font(.system(size: compact ? 14 : 16, weight: .bold, design: .default))
-                        .foregroundColor(JourneyVisual.primaryText)
-                        .lineLimit(2)
-                    Text(route.subtitle)
-                        .font(.system(size: 10, weight: .medium))
-                        .foregroundColor(JourneyVisual.secondaryText)
-                        .lineLimit(compact ? 1 : 2)
-                }
-            }
-            .padding(compact ? 13 : 15)
-            .frame(maxWidth: .infinity, minHeight: compact ? 112 : 132, alignment: .topLeading)
-            .background(Theme.Colors.card)
-            .background(.ultraThinMaterial.opacity(0.2))
-            .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: 22, style: .continuous)
-                    .stroke(JourneyVisual.softBorder, lineWidth: 1)
-            )
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel("\(route.title). \(route.subtitle)")
-        .accessibilityIdentifier("journey.tool.\(route.rawValue)")
     }
 }
 

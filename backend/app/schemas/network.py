@@ -3,7 +3,9 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+
+from ..core.countries import normalize_country_code, normalize_subdivision_code
 
 
 NetworkRole = Literal["founder", "freelancer", "specialist", "investor", "mentor"]
@@ -18,7 +20,9 @@ class ProfessionalProfileUpsert(BaseModel):
     company_name: str | None = Field(default=None, max_length=120)
     role: NetworkRole
     industry: str = Field(min_length=2, max_length=60)
-    canton: str = Field(min_length=2, max_length=10)
+    canton: str | None = Field(default=None, min_length=1, max_length=10)
+    country_code: str = Field(default="CH", min_length=2, max_length=2)
+    subdivision_code: str | None = Field(default=None, min_length=1, max_length=10)
     city: str = Field(min_length=2, max_length=80)
     bio: str = Field(min_length=30, max_length=800)
     skills: list[str] = Field(default_factory=list, max_length=12)
@@ -29,13 +33,16 @@ class ProfessionalProfileUpsert(BaseModel):
     is_visible: bool = True
     open_to_connections: bool = True
 
-    @field_validator("canton")
-    @classmethod
-    def normalize_canton(cls, value: str) -> str:
-        value = value.strip().upper()
-        if len(value) != 2 or not value.isalpha():
-            raise ValueError("Canton must be a two-letter code")
-        return value
+    @model_validator(mode="after")
+    def normalize_scope(self):
+        self.country_code = normalize_country_code(self.country_code)
+        self.subdivision_code = normalize_subdivision_code(
+            self.country_code, self.subdivision_code or self.canton
+        )
+        if self.subdivision_code is None:
+            raise ValueError("subdivision_code is required")
+        self.canton = self.subdivision_code
+        return self
 
     @field_validator("skills", "languages")
     @classmethod
@@ -71,6 +78,8 @@ class ProfessionalProfileResponse(BaseModel):
     role: str
     industry: str
     canton: str
+    country_code: str = "CH"
+    subdivision_code: str
     city: str
     bio: str
     skills: list[str]

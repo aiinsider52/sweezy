@@ -40,6 +40,7 @@ from .routers.translations import router as translations_router
 from .routers.subscriptions import router as subscriptions_router
 from .routers.telemetry import router as telemetry_router
 from .routers.legal import router as legal_router
+from .routers.country_context import router as country_context_router
 from .routers.marketplace import router as marketplace_router
 from .routers.marketplace import admin_router as marketplace_admin_router
 from .routers.events import router as events_router
@@ -428,6 +429,7 @@ def ready_head() -> None:
 # Routers (versioned)
 API_PREFIX = "/api/v1"
 app.include_router(auth_router, prefix=f"{API_PREFIX}/auth", tags=["auth"])
+app.include_router(country_context_router, prefix=f"{API_PREFIX}/country-context", tags=["country-context"])
 app.include_router(guides_router, prefix=f"{API_PREFIX}/guides", tags=["guides"])
 app.include_router(checklists_router, prefix=f"{API_PREFIX}/checklists", tags=["checklists"])
 app.include_router(templates_router, prefix=f"{API_PREFIX}/templates", tags=["templates"])

@@ -5,6 +5,7 @@ from fastapi import APIRouter, HTTPException, Query, Request
 from ..dependencies import CurrentAdmin, DBSession, OptionalAdmin
 from ..schemas import ChecklistCreate, ChecklistOut, ChecklistUpdate
 from ..services import ChecklistService
+from ..core.countries import normalize_country_code
 
 
 router = APIRouter()
@@ -18,10 +19,19 @@ def list_checklists(
     limit: int = Query(100, ge=1, le=1000),
     status: str | None = None,
     include_drafts: bool = False,
+    country_code: str = Query("CH", min_length=2, max_length=2),
+    language: str | None = Query(None, min_length=2, max_length=10),
 ) -> list[ChecklistOut]:
     if (include_drafts or (status and status != "published")) and not is_admin:
         raise HTTPException(status_code=403, detail="Admin access required")
-    return ChecklistService.list(db, offset=offset, limit=limit, status=status, include_drafts=include_drafts)
+    try:
+        country_code = normalize_country_code(country_code)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    return ChecklistService.list(
+        db, offset=offset, limit=limit, status=status, include_drafts=include_drafts,
+        country_code=country_code, language=language,
+    )
 
 
 @router.get("/{checklist_id}", response_model=ChecklistOut)

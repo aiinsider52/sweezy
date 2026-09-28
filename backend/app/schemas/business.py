@@ -5,6 +5,8 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
+from ..core.countries import default_timezone, normalize_country_code, normalize_subdivision_code
+
 
 BusinessStatus = Literal["draft", "pending", "approved", "rejected", "suspended"]
 LeadStatus = Literal["new", "replied", "qualifying", "quoted", "booked", "completed", "cancelled", "lost"]
@@ -16,7 +18,9 @@ class BusinessProfileUpdate(BaseModel):
     legal_name: str | None = Field(default=None, max_length=180)
     description: str = Field(default="", max_length=4000)
     category: str = Field(default="other", min_length=2, max_length=40)
-    canton: str = Field(min_length=2, max_length=10)
+    canton: str | None = Field(default=None, min_length=1, max_length=10)
+    country_code: str = Field(default="CH", min_length=2, max_length=2)
+    subdivision_code: str | None = Field(default=None, min_length=1, max_length=10)
     city: str = Field(min_length=2, max_length=100)
     address: str | None = Field(default=None, max_length=240)
     service_area: list[str] = Field(default_factory=list, max_length=26)
@@ -30,6 +34,19 @@ class BusinessProfileUpdate(BaseModel):
     delivery_modes: list[str] = Field(default_factory=list, max_length=4)
     cancellation_policy: str | None = Field(default=None, max_length=3000)
     payment_link: str | None = Field(default=None, max_length=1000)
+    timezone: str | None = Field(default=None, max_length=50)
+
+    @model_validator(mode="after")
+    def normalize_scope(self):
+        self.country_code = normalize_country_code(self.country_code)
+        self.subdivision_code = normalize_subdivision_code(
+            self.country_code, self.subdivision_code or self.canton
+        )
+        if self.subdivision_code is None:
+            raise ValueError("subdivision_code is required")
+        self.canton = self.subdivision_code
+        self.timezone = self.timezone or default_timezone(self.country_code)
+        return self
 
     @field_validator("service_area", "languages", "delivery_modes")
     @classmethod
@@ -320,6 +337,8 @@ class PublicBusinessProfileResponse(BaseModel):
     description: str
     category: str
     canton: str
+    country_code: str = "CH"
+    subdivision_code: str
     city: str
     service_area: list[str]
     languages: list[str]

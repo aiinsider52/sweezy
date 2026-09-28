@@ -19,6 +19,8 @@ class ProfessionalProfile(Base):
     role: Mapped[str] = mapped_column(String(30), nullable=False, index=True)
     industry: Mapped[str] = mapped_column(String(60), nullable=False, index=True)
     canton: Mapped[str] = mapped_column(String(10), nullable=False, index=True)
+    country_code: Mapped[str] = mapped_column(String(2), nullable=False, default="CH", index=True)
+    subdivision_code: Mapped[str] = mapped_column(String(10), nullable=False, default="ZH", index=True)
     city: Mapped[str] = mapped_column(String(80), nullable=False)
     bio: Mapped[str] = mapped_column(String(800), nullable=False)
     skills: Mapped[list[str]] = mapped_column(JSON, default=list, nullable=False)

@@ -1,0 +1,307 @@
+{
+  "verifiedAt": "2026-08-25T00:00:00Z",
+  "guides": [
+    {
+      "countryCode": "DE",
+      "language": "uk",
+      "slug": "de-first-72-hours",
+      "title": "Перші 72 години в Німеччині",
+      "description": "Безпечний порядок дій після прибуття: житло, реєстрація, захист і контакти.",
+      "category": "arrival",
+      "content": "## 1. Подбайте про безпечне житло\nЯкщо житла немає, зверніться до місцевого пункту первинного прийому або служби соціальної допомоги.\n\n## 2. Зареєструйте адресу\nAnmeldung робить ваше місце проживання офіційним. Збережіть Meldebestätigung.\n\n## 3. Уточніть статус перебування\nДля тимчасового захисту звертайтесь до відповідної Ausländerbehörde. Правила залежать від вашого громадянства та попереднього статусу.\n\n## 4. Не відкладайте медичне покриття\nВ екстреній ситуації телефонуйте 112. Для регулярної допомоги уточніть страхове покриття у Krankenkasse або Sozialamt/Jobcenter.\n\n> Перевірте локальні інструкції міста: адреси та порядок прийому різняться.",
+      "sourceTitle": "Germany4Ukraine — Registration, residence permit and asylum",
+      "sourceUrl": "https://www.germany4ukraine.de/EN/einreise-aufenthalt-und-rueckkehr/ukraine-aufenthaltserlaubnis/seite_node.html"
+    },
+    {
+      "countryCode": "DE",
+      "language": "uk",
+      "slug": "de-address-registration",
+      "title": "Anmeldung: реєстрація адреси",
+      "description": "Що підготувати до Bürgeramt і навіщо потрібна Meldebestätigung.",
+      "category": "documents",
+      "content": "## Перед візитом\nЗнайдіть Bürgeramt/Meldebehörde за адресою житла та перевірте локальний строк і запис. Зазвичай потрібні паспорт, заповнена Anmeldung та Wohnungsgeberbestätigung від того, хто надає житло.\n\n## Після реєстрації\nПеревірте написання імені й адреси у Meldebestätigung. Документ часто потрібний для банку, мобільного зв’язку та інших договорів.\n\n## Якщо немає документів\nНе вигадуйте дані. Запитайте Bürgeramt, які альтернативні докази приймаються у вашій ситуації.",
+      "sourceTitle": "Germany4Ukraine — Registration",
+      "sourceUrl": "https://www.germany4ukraine.de/EN/einreise-aufenthalt-und-rueckkehr/ukraine-aufenthaltserlaubnis/seite_node.html"
+    },
+    {
+      "countryCode": "DE",
+      "language": "uk",
+      "slug": "de-temporary-protection-24",
+      "title": "Тимчасовий захист за §24 AufenthG",
+      "description": "Заява, Fiktionsbescheinigung і перевірка права на роботу.",
+      "category": "residence",
+      "content": "## Кому підходить\nПраво залежить від громадянства, проживання в Україні до 24.02.2022 та сімейних обставин. Перевірте офіційні критерії, особливо якщо ви не громадянин України.\n\n## Подання\nЗверніться до локальної Ausländerbehörde або використайте офіційний online-service, якщо він доступний у вашій землі.\n\n## Тимчасовий документ\nFiktionsbescheinigung підтверджує законне перебування, поки заяву розглядають. Для роботи перевірте, чи є позначка «Erwerbstätigkeit erlaubt».\n\n## Строки\nЧинні документи за §24 можуть продовжуватися нормативно без нового штампа. Завжди перевіряйте актуальну дату в офіційному джерелі.",
+      "sourceTitle": "Germany4Ukraine — Residence permit",
+      "sourceUrl": "https://www.germany4ukraine.de/EN/einreise-aufenthalt-und-rueckkehr/ukraine-aufenthaltserlaubnis/seite_node.html",
+      "validUntil": "2027-03-04T00:00:00Z"
+    },
+    {
+      "countryCode": "DE",
+      "language": "uk",
+      "slug": "de-health-insurance",
+      "title": "Медичне страхування в Німеччині",
+      "description": "GKV, eGK і покриття для працівників та осіб під тимчасовим захистом.",
+      "category": "health",
+      "content": "У Німеччині медичне страхування обов’язкове. Ваш шлях залежить від роботи, доходу, соціальної допомоги та статусу перебування.\n\n## Практичні кроки\n1. Уточніть, хто реєструє вас у Krankenkasse: роботодавець, Jobcenter/Sozialamt або ви самі.\n2. Порівняйте доступні gesetzliche Krankenkassen.\n3. Після реєстрації дочекайтесь електронної картки eGK.\n4. До отримання картки попросіть тимчасове підтвердження страхування.\n\nДля окремого добровільного вступу до GKV діють строки та умови. Не покладайтеся на загальну пораду — підтвердьте право у страховій касі.",
+      "sourceTitle": "Germany4Ukraine — Statutory health insurance",
+      "sourceUrl": "https://www.germany4ukraine.de/EN/medizinische-versorgung/krankenversicherung-ukrainer/seite_node.html"
+    },
+    {
+      "countryCode": "DE",
+      "language": "uk",
+      "slug": "de-work-rights",
+      "title": "Робота в Німеччині: право та перші кроки",
+      "description": "Дозвіл на роботу, Jobcenter/Agentur für Arbeit і визнання кваліфікацій.",
+      "category": "work",
+      "content": "## Перевірте документ\nНа Aufenthaltstitel або Fiktionsbescheinigung має бути дозвіл на зайнятість.\n\n## Пошук роботи\nСтворіть німецьке CV, підготуйте дипломи й переклади, зареєструйтеся в Agentur für Arbeit або Jobcenter за вашою ситуацією.\n\n## Регульовані професії\nДля лікарів, учителів та інших регульованих професій може бути потрібне офіційне визнання кваліфікації до початку роботи.\n\nНе сплачуйте посереднику за «гарантовану вакансію» і не передавайте оригінал паспорта роботодавцю.",
+      "sourceTitle": "Germany4Ukraine — Labour law",
+      "sourceUrl": "https://www.germany4ukraine.de/EN/arbeit-und-soziales/ukrainer-arbeiten-in-deutschland/seite_node.html",
+      "validUntil": "2027-03-04T00:00:00Z"
+    },
+    {
+      "countryCode": "DE",
+      "language": "uk",
+      "slug": "de-bank-account",
+      "title": "Відкриття Girokonto",
+      "description": "Документи, IBAN, картки та перевірка банківських тарифів.",
+      "category": "banking",
+      "content": "Для зарплати, оренди та регулярних платежів зазвичай потрібен Girokonto. Банк може попросити паспорт, Aufenthaltstitel, Meldebescheinigung та інші докази залежно від типу рахунку.\n\nПеред підписанням перевірте: місячну плату, вартість картки, зняття готівки, SEPA-перекази, overdraft і порядок закриття рахунку. Нікому не передавайте TAN, PIN або повний доступ до online banking.",
+      "sourceTitle": "Make it in Germany — Bank account",
+      "sourceUrl": "https://www.make-it-in-germany.com/en/living-in-germany/money-insurance/bank-account"
+    },
+    {
+      "countryCode": "DE",
+      "language": "uk",
+      "slug": "de-renting-home",
+      "title": "Оренда житла в Німеччині",
+      "description": "Перевірка договору, Kaution, Wohnungsgeberbestätigung і шахрайство.",
+      "category": "housing",
+      "content": "До оплати перевірте особу орендодавця, адресу, строк, Kaltmiete/Warmmiete, Nebenkosten, Kaution та умови Kündigung. Не переказуйте депозит за житло, якого не бачили, через анонімні платіжні сервіси.\n\nПід час передачі квартири зробіть Übergabeprotokoll, фото лічильників і пошкоджень. Попросіть Wohnungsgeberbestätigung для Anmeldung.",
+      "sourceTitle": "Germany4Ukraine — Housing and accommodation",
+      "sourceUrl": "https://www.germany4ukraine.de/EN/wohnen/seite_node.html"
+    },
+    {
+      "countryCode": "DE",
+      "language": "uk",
+      "slug": "de-children-school",
+      "title": "Школа та дитячий садок у Німеччині",
+      "description": "Пошук Schulamt, зарахування й документи дитини.",
+      "category": "family",
+      "content": "Освіта організована землями, тому порядок відрізняється. Зверніться до Schulamt/школи за місцем проживання. Підготуйте паспорт або свідоцтво про народження, адресу, табелі, інформацію про щеплення та особливі потреби.\n\nДля Kita подавайте заявки якомога раніше через місцевий Jugendamt або міський портал. Якщо бракує документів, просіть письмовий список альтернатив.",
+      "sourceTitle": "Germany4Ukraine — School and education",
+      "sourceUrl": "https://www.germany4ukraine.de/EN/familie-und-kind/schule-und-bildung/seite_node.html"
+    },
+    {
+      "countryCode": "DE",
+      "language": "uk",
+      "slug": "de-official-online-services",
+      "title": "Офіційні online-services Німеччини",
+      "description": "Заява на статус, регіональні портали, інтеграційні курси та визнання дипломів.",
+      "category": "digital",
+      "content": "Germany4Ukraine збирає офіційні online-services: заяву на Aufenthaltserlaubnis, регіональні інформаційні портали, інтеграційні курси, eID та перевірку іноземних дипломів.\n\nПеревіряйте домен перед завантаженням документів. Державні сервіси не просять PIN банківської картки або crypto-платіж.",
+      "sourceTitle": "Germany4Ukraine — Online services",
+      "sourceUrl": "https://www.germany4ukraine.de/EN/online-services/seite_node.html"
+    },
+    {
+      "countryCode": "DE",
+      "language": "uk",
+      "slug": "de-emergency-contacts",
+      "title": "Екстрені контакти в Німеччині",
+      "description": "112, 110 та підготовка до дзвінка.",
+      "category": "emergency",
+      "content": "112 — пожежа, швидка допомога, загроза життю. 110 — поліція. Назвіть місто, точну адресу, що сталося, кількість постраждалих і залишайтесь на лінії.\n\nДля неекстрених медичних питань перевірте актуальний номер чергової медичної служби у вашій землі. Sweezy не замінює екстрені служби.",
+      "sourceTitle": "Germany4Ukraine — Medical care",
+      "sourceUrl": "https://www.germany4ukraine.de/EN/medizinische-versorgung/seite_node.html"
+    },
+    {
+      "countryCode": "AT",
+      "language": "uk",
+      "slug": "at-first-72-hours",
+      "title": "Перші 72 години в Австрії",
+      "description": "Житло, Meldezettel, реєстрація переміщеної особи та базова допомога.",
+      "category": "arrival",
+      "content": "## Безпечне житло\nЯкщо вам потрібне організоване розміщення, зверніться до BBU або контактного пункту вашої федеральної землі.\n\n## Meldezettel\nПісля заселення адресу потрібно зареєструвати у Meldebehörde. Загальний строк — три дні.\n\n## Тимчасовий захист\nРеєстрація переміщеної особи та Meldezettel — різні процедури. Для статусу звертайтеся до визначеного пункту реєстрації.\n\n## Негайна допомога\nУ загрозі життю телефонуйте 112 або 144; поліція — 133.",
+      "sourceTitle": "BBU — Information for Ukrainians",
+      "sourceUrl": "https://www.bbu.gv.at/ukraine-info-faq-ukrainian"
+    },
+    {
+      "countryCode": "AT",
+      "language": "uk",
+      "slug": "at-meldezettel",
+      "title": "Meldezettel: реєстрація адреси в Австрії",
+      "description": "Триденний строк, підпис Unterkunftgeber і підтвердження реєстрації.",
+      "category": "documents",
+      "content": "Зареєструйте основне або додаткове місце проживання протягом трьох днів після заселення. Для кожної людини потрібен окремий Meldezettel; Unterkunftgeber має підписати форму.\n\nПодання можливе особисто, поштою, через представника або online за умовами ID Austria. Для першої реєстрації online-service може бути недоступним. Збережіть Meldebestätigung.",
+      "sourceTitle": "oesterreich.gv.at — Registration of a residence",
+      "sourceUrl": "https://eausweise.oesterreich.gv.at/en/themen/persoenliche_dokumente_und_bestaetigungen/an__abmeldung_des_wohnsitzes/Seite.1180200"
+    },
+    {
+      "countryCode": "AT",
+      "language": "uk",
+      "slug": "at-temporary-protection",
+      "title": "Тимчасовий захист в Австрії",
+      "description": "Реєстрація, Ausweis für Vertriebene і попередній статус в іншій країні.",
+      "category": "residence",
+      "content": "Право на тимчасовий захист залежить від громадянства, проживання в Україні та сімейних обставин. Після збору даних BFA видає Ausweis für Vertriebene.\n\nЯкщо захист уже був в іншій країні, орган може попросити доказ його припинення та відсутності соціальних виплат там. Не робіть подвійних заяв без консультації.\n\nСтатус та картка — не те саме: право може існувати за законом до отримання картки, але документ потрібний для багатьох процедур.",
+      "sourceTitle": "BBU — Temporary protection FAQ",
+      "sourceUrl": "https://www.bbu.gv.at/ukraine-neu-info-faq-english-2",
+      "validUntil": "2027-03-04T00:00:00Z"
+    },
+    {
+      "countryCode": "AT",
+      "language": "uk",
+      "slug": "at-work-ams",
+      "title": "Пошук роботи через AMS",
+      "description": "Реєстрація, документи, оцінка навичок і офіційний пошук вакансій.",
+      "category": "work",
+      "content": "AMS консультує щодо вакансій, курсів німецької та кваліфікацій. На першу зустріч візьміть Ausweis für Vertriebene, резюме, дипломи та заповнений skills-assessment, якщо маєте.\n\nПеревірте право на роботу за вашим чинним статусом. Для регульованих професій окремо перевірте Anerkennung. Не передавайте роботодавцю оригінал документа та не сплачуйте за «гарантоване працевлаштування».",
+      "sourceTitle": "AMS — Information for persons from Ukraine",
+      "sourceUrl": "https://www.ams.at/arbeitsuchende/arbeiten-in-oesterreich-und-der-eu/ukraine/ukraine-informationen-eng",
+      "validUntil": "2027-03-04T00:00:00Z"
+    },
+    {
+      "countryCode": "AT",
+      "language": "uk",
+      "slug": "at-health-social-insurance",
+      "title": "Медицина й соціальне страхування в Австрії",
+      "description": "Перевірка покриття, e-card і допомога до отримання документа.",
+      "category": "health",
+      "content": "Ваше покриття залежить від роботи, базового забезпечення та статусу. Попросіть компетентний орган або страхову касу письмово підтвердити початок покриття. Після реєстрації e-card надходить окремо; до неї попросіть Ersatzbeleg, якщо потрібна допомога.\n\n144 — швидка допомога; 112 — єдиний європейський екстрений номер. У невідкладній ситуації не чекайте на e-card.",
+      "sourceTitle": "BBU — Information for Ukrainians",
+      "sourceUrl": "https://www.bbu.gv.at/ukraine-neu-info-faq-english-2"
+    },
+    {
+      "countryCode": "AT",
+      "language": "uk",
+      "slug": "at-basic-care",
+      "title": "Grundversorgung: базове забезпечення",
+      "description": "Організоване або приватне житло, землі та підтвердження потреби.",
+      "category": "support",
+      "content": "Grundversorgung може охоплювати житло, харчування та медичну підтримку залежно від потреби й федеральної землі. Порядок для приватного й організованого житла різниться.\n\nЗберіть Meldezettel, посвідчення особи, Ausweis für Vertriebene або доказ реєстрації, договір/підтвердження житла та банківські дані. Запитайте відповідний орган землі про точний список і вплив доходу.",
+      "sourceTitle": "BBU — Initial arrival options",
+      "sourceUrl": "https://www.bbu.gv.at/ukraine-neu-info-faq-english-2"
+    },
+    {
+      "countryCode": "AT",
+      "language": "uk",
+      "slug": "at-bank-account",
+      "title": "Girokonto в Австрії",
+      "description": "Рахунок для зарплати й платежів, тарифи та безпека.",
+      "category": "banking",
+      "content": "Girokonto використовується для зарплати, оренди та безготівкових платежів. Банк визначає потрібні документи; підготуйте паспорт, Meldebestätigung і документ про статус.\n\nПорівняйте щомісячну плату, картку, банкомати, SEPA, overdraft і умови закриття. Не повідомляйте PIN/TAN та не встановлюйте remote-access за проханням «служби безпеки».",
+      "sourceTitle": "oesterreich.gv.at — Girokonto",
+      "sourceUrl": "https://eausweise.oesterreich.gv.at/de/themen/steuern_und_finanzen/bankgeschaefte/1/Seite.750260"
+    },
+    {
+      "countryCode": "AT",
+      "language": "uk",
+      "slug": "at-renting-home",
+      "title": "Оренда житла в Австрії",
+      "description": "Mietvertrag, Kaution, Betriebskosten, Meldezettel і передача квартири.",
+      "category": "housing",
+      "content": "До оплати перевірте орендодавця, точну адресу, Hauptmietzins, Betriebskosten, Kaution, строк і Kündigung. Не переказуйте гроші до огляду та перевірки договору.\n\nПід час заселення зробіть Übergabeprotokoll, фото стану й лічильників. Отримайте підпис Unterkunftgeber на Meldezettel. Для складного договору зверніться до Mieterberatung.",
+      "sourceTitle": "oesterreich.gv.at — Relocation",
+      "sourceUrl": "https://www.oesterreich.gv.at/en/themen/bauen_und_wohnen/umzug"
+    },
+    {
+      "countryCode": "AT",
+      "language": "uk",
+      "slug": "at-moving-checklist",
+      "title": "Зміна адреси в Австрії",
+      "description": "Кого повідомити після переїзду й як не пропустити локальні обов’язки.",
+      "category": "documents",
+      "content": "Після переїзду оновіть Meldezettel і повідомте організації, для яких адреса має значення: роботодавця, AMS, Finanzamt, страхування, банк, школу, мобільного оператора. Для авто, собаки та ORF-Beitrag можуть діяти окремі правила.\n\nЗберігайте підтвердження подань і дату набрання чинності новою адресою.",
+      "sourceTitle": "oesterreich.gv.at — After moving checklist",
+      "sourceUrl": "https://www.oesterreich.gv.at/de/themen/bauen_und_wohnen/umzug/3/Seite.180520"
+    },
+    {
+      "countryCode": "AT",
+      "language": "uk",
+      "slug": "at-emergency-contacts",
+      "title": "Екстрені контакти в Австрії",
+      "description": "112, 133, 144 та BBU hotline.",
+      "category": "emergency",
+      "content": "112 — єдиний європейський екстрений номер. 133 — поліція. 144 — швидка допомога. Назвіть адресу, подію, кількість постраждалих і залишайтесь на лінії.\n\nДля термінових питань щодо допомоги переміщеним особам використовуйте актуальну BBU hotline з офіційної сторінки. Номери й години консультацій можуть змінюватися.",
+      "sourceTitle": "BBU — Information for Ukrainians",
+      "sourceUrl": "https://www.bbu.gv.at/ukraine-info-faq-ukrainian"
+    }
+  ],
+  "checklists": [
+    {
+      "countryCode": "DE",
+      "language": "uk",
+      "title": "Перший тиждень у Німеччині",
+      "description": "Базовий порядок; локальні вимоги перевіряйте у вашому місті.",
+      "items": ["Знайти безпечне житло", "Записатися на Anmeldung", "Отримати Meldebestätigung", "Звернутися до Ausländerbehörde щодо статусу", "Перевірити право на роботу", "Уточнити медичне страхування", "Відкрити Girokonto за потреби", "Зберегти копії всіх подань"],
+      "sourceTitle": "Germany4Ukraine",
+      "sourceUrl": "https://www.germany4ukraine.de/EN/einreise-aufenthalt-und-rueckkehr/ukraine-aufenthaltserlaubnis/seite_node.html"
+    },
+    {
+      "countryCode": "DE",
+      "language": "uk",
+      "title": "Документи для Anmeldung",
+      "items": ["Паспорт або інший документ особи", "Заповнена Anmeldung", "Wohnungsgeberbestätigung", "Документи дітей", "Підтвердження запису", "Перевірити Meldebestätigung перед виходом"],
+      "sourceTitle": "Germany4Ukraine",
+      "sourceUrl": "https://www.germany4ukraine.de/EN/einreise-aufenthalt-und-rueckkehr/ukraine-aufenthaltserlaubnis/seite_node.html"
+    },
+    {
+      "countryCode": "DE",
+      "language": "uk",
+      "title": "Старт пошуку роботи в Німеччині",
+      "items": ["Перевірити «Erwerbstätigkeit erlaubt»", "Підготувати CV німецькою", "Зібрати дипломи та переклади", "Перевірити Anerkennung професії", "Створити профіль у Agentur für Arbeit/Jobcenter", "Не платити за гарантовану вакансію"],
+      "sourceTitle": "Germany4Ukraine — Labour law",
+      "sourceUrl": "https://www.germany4ukraine.de/EN/arbeit-und-soziales/ukrainer-arbeiten-in-deutschland/seite_node.html"
+    },
+    {
+      "countryCode": "DE",
+      "language": "uk",
+      "title": "Безпечна оренда в Німеччині",
+      "items": ["Оглянути житло", "Перевірити орендодавця", "Звірити Kaltmiete, Warmmiete й Nebenkosten", "Перевірити Kaution та Kündigung", "Підписати Übergabeprotokoll", "Отримати Wohnungsgeberbestätigung"],
+      "sourceTitle": "Germany4Ukraine — Housing",
+      "sourceUrl": "https://www.germany4ukraine.de/EN/wohnen/seite_node.html"
+    },
+    {
+      "countryCode": "AT",
+      "language": "uk",
+      "title": "Перший тиждень в Австрії",
+      "description": "Meldezettel і реєстрація тимчасового захисту — окремі кроки.",
+      "items": ["Знайти безпечне житло", "Подати Meldezettel протягом 3 днів", "Зберегти Meldebestätigung", "Пройти реєстрацію переміщеної особи", "Перевірити Grundversorgung", "Уточнити медичне покриття", "Зареєструватися в AMS для пошуку роботи", "Зберегти копії документів"],
+      "sourceTitle": "BBU — Information for Ukrainians",
+      "sourceUrl": "https://www.bbu.gv.at/ukraine-info-faq-ukrainian"
+    },
+    {
+      "countryCode": "AT",
+      "language": "uk",
+      "title": "Документи для Meldezettel",
+      "items": ["Окремий Meldezettel для кожної людини", "Підпис Unterkunftgeber", "Паспорт/документ особи", "Документи дітей", "Подання у компетентну Meldebehörde", "Зберегти Meldebestätigung"],
+      "sourceTitle": "oesterreich.gv.at — Residence registration",
+      "sourceUrl": "https://eausweise.oesterreich.gv.at/en/themen/persoenliche_dokumente_und_bestaetigungen/an__abmeldung_des_wohnsitzes/Seite.1180200"
+    },
+    {
+      "countryCode": "AT",
+      "language": "uk",
+      "title": "Старт пошуку роботи в Австрії",
+      "items": ["Перевірити право на роботу", "Взяти Ausweis für Vertriebene", "Підготувати CV", "Зібрати дипломи й переклади", "Заповнити AMS skills assessment", "Перевірити Anerkennung професії", "Не платити за гарантовану вакансію"],
+      "sourceTitle": "AMS — Ukraine information",
+      "sourceUrl": "https://www.ams.at/arbeitsuchende/arbeiten-in-oesterreich-und-der-eu/ukraine/ukraine-informationen-eng"
+    },
+    {
+      "countryCode": "AT",
+      "language": "uk",
+      "title": "Безпечна оренда в Австрії",
+      "items": ["Оглянути житло", "Перевірити орендодавця", "Звірити Miete й Betriebskosten", "Перевірити Kaution та Kündigung", "Підписати Übergabeprotokoll", "Отримати підпис на Meldezettel"],
+      "sourceTitle": "oesterreich.gv.at — Relocation",
+      "sourceUrl": "https://www.oesterreich.gv.at/en/themen/bauen_und_wohnen/umzug"
+    }
+  ],
+  "templates": [
+    {"countryCode": "DE", "language": "de", "name": "Termin für Anmeldung anfragen", "category": "authority", "content": "Betreff: Anfrage für einen Termin zur Wohnsitzanmeldung\n\nGuten Tag,\n\nich möchte meinen Wohnsitz in [Ort] anmelden. Ich bin am [Datum] in die Wohnung unter [Adresse] eingezogen. Bitte teilen Sie mir den nächstmöglichen Termin und die benötigten Unterlagen mit.\n\nName: [Vor- und Nachname]\nGeburtsdatum: [TT.MM.JJJJ]\n\nMit freundlichen Grüßen\n[Name]"},
+    {"countryCode": "DE", "language": "de", "name": "Sachstand Aufenthaltstitel §24", "category": "residence", "content": "Betreff: Sachstandsanfrage zu meinem Antrag nach § 24 AufenthG\n\nGuten Tag,\n\nich habe meinen Antrag am [Datum] unter dem Aktenzeichen [Aktenzeichen] eingereicht. Bitte teilen Sie mir den aktuellen Bearbeitungsstand mit. Falls Unterlagen fehlen, senden Sie mir bitte eine vollständige Liste.\n\nMit freundlichen Grüßen\n[Name]"},
+    {"countryCode": "DE", "language": "de", "name": "Wohnungsbesichtigung anfragen", "category": "housing", "content": "Betreff: Interesse an der Wohnung in [Ort/Adresse]\n\nGuten Tag,\n\nich interessiere mich für die angebotene Wohnung. Ist sie noch verfügbar? Ich würde gern einen Besichtigungstermin vereinbaren. Bitte senden Sie mir vorab die Angaben zu Kaltmiete, Nebenkosten, Kaution und Vertragslaufzeit.\n\nMit freundlichen Grüßen\n[Name]"},
+    {"countryCode": "DE", "language": "de", "name": "Versicherungsbestätigung anfragen", "category": "health", "content": "Betreff: Bitte um Bestätigung meines Krankenversicherungsschutzes\n\nGuten Tag,\n\nbitte bestätigen Sie mir schriftlich, ab welchem Datum mein Versicherungsschutz besteht und welche Unterlagen noch fehlen. Meine Versicherungsnummer lautet [Nummer, falls vorhanden].\n\nMit freundlichen Grüßen\n[Name]"},
+    {"countryCode": "AT", "language": "de", "name": "Termin zur Wohnsitzanmeldung anfragen", "category": "authority", "content": "Betreff: Anfrage zur Anmeldung meines Wohnsitzes\n\nGuten Tag,\n\nich bin am [Datum] unter der Adresse [Adresse] eingezogen und möchte meinen Wohnsitz anmelden. Bitte teilen Sie mir mit, ob ein Termin erforderlich ist und welche Unterlagen ich zusätzlich zum unterschriebenen Meldezettel mitbringen soll.\n\nMit freundlichen Grüßen\n[Name]"},
+    {"countryCode": "AT", "language": "de", "name": "Sachstand Ausweis für Vertriebene", "category": "residence", "content": "Betreff: Sachstandsanfrage zu meiner Registrierung\n\nGuten Tag,\n\nmeine Daten wurden am [Datum] für den Status als Vertriebene/r aufgenommen. Bitte teilen Sie mir den aktuellen Stand mit. Falls weitere Unterlagen benötigt werden, senden Sie mir bitte eine vollständige Liste.\n\nMit freundlichen Grüßen\n[Name]"},
+    {"countryCode": "AT", "language": "de", "name": "AMS Beratungstermin anfragen", "category": "work", "content": "Betreff: Anfrage für einen Beratungstermin\n\nGuten Tag,\n\nich möchte mich beim AMS arbeitssuchend melden und einen Beratungstermin vereinbaren. Ich verfüge über einen Ausweis für Vertriebene und bringe Unterlagen zu Ausbildung und Berufserfahrung mit.\n\nMit freundlichen Grüßen\n[Name]"},
+    {"countryCode": "AT", "language": "de", "name": "Bestätigung des Versicherungsschutzes", "category": "health", "content": "Betreff: Bitte um Bestätigung meines Versicherungsschutzes\n\nGuten Tag,\n\nbitte bestätigen Sie mir schriftlich, ob und ab welchem Datum Versicherungsschutz besteht. Falls noch Unterlagen fehlen, senden Sie mir bitte eine vollständige Liste und teilen Sie mir mit, ob ein Ersatzbeleg für die e-card möglich ist.\n\nMit freundlichen Grüßen\n[Name]"}
+  ]
+}

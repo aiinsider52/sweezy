@@ -5,6 +5,8 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, model_validator
 
+from ..core.countries import normalize_country_code, normalize_subdivision_code
+
 
 class JobItem(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -15,6 +17,7 @@ class JobItem(BaseModel):
     company: str | None = None
     location: str | None = None
     canton: str | None = None
+    country: str = "CH"
     url: str
     posted_at: datetime | None = None
     employment_type: str | None = None
@@ -74,7 +77,14 @@ class JobFavoriteIn(BaseModel):
     company: str | None = Field(None, max_length=250)
     location: str | None = Field(None, max_length=300)
     canton: str | None = Field(None, max_length=10)
+    country: str = Field(default="CH", min_length=2, max_length=2)
     url: str = Field(min_length=1, max_length=1200)
+
+    @model_validator(mode="after")
+    def normalize_scope(self):
+        self.country = normalize_country_code(self.country)
+        self.canton = normalize_subdivision_code(self.country, self.canton)
+        return self
 
 
 class JobFavoriteOut(JobFavoriteIn):
@@ -85,6 +95,7 @@ class JobFavoriteOut(JobFavoriteIn):
 class JobSearchEventOut(BaseModel):
     keyword: str
     canton: str | None = None
+    country: str = "CH"
     count: int
 
 
@@ -128,10 +139,17 @@ class JobAlertCreate(BaseModel):
     name: str = Field(min_length=2, max_length=100)
     keywords: str = Field(min_length=2, max_length=300)
     canton: str | None = Field(None, max_length=10)
+    country: str = Field(default="CH", min_length=2, max_length=2)
     employment_type: str | None = Field(None, max_length=60)
     workplace_type: str | None = Field(None, max_length=30)
     min_salary: int | None = Field(None, ge=0, le=1_000_000)
     enabled: bool = True
+
+    @model_validator(mode="after")
+    def normalize_scope(self):
+        self.country = normalize_country_code(self.country)
+        self.canton = normalize_subdivision_code(self.country, self.canton)
+        return self
 
 
 class JobAlertOut(JobAlertCreate):
@@ -146,12 +164,19 @@ class JobMatchProfile(BaseModel):
     desired_position: str = Field(default="", max_length=300)
     skills: list[str] = Field(default_factory=list, max_length=100)
     canton: str | None = Field(None, max_length=10)
+    country: str = Field(default="CH", min_length=2, max_length=2)
     employment_type: str | None = Field(None, max_length=60)
     remote: bool = False
     experience_level: str | None = Field(None, max_length=30)
     permit: str | None = Field(None, max_length=10)
     languages: list[str] = Field(default_factory=list, max_length=20)
     limit: int = Field(default=20, ge=1, le=50)
+
+    @model_validator(mode="after")
+    def normalize_scope(self):
+        self.country = normalize_country_code(self.country)
+        self.canton = normalize_subdivision_code(self.country, self.canton)
+        return self
 
 
 class JobMatchItem(BaseModel):
@@ -197,9 +222,16 @@ class EmployerProfileUpsert(BaseModel):
     company_name: str = Field(min_length=2, max_length=250)
     website: HttpUrl | None = None
     canton: str = Field(min_length=2, max_length=10)
+    country: str = Field(default="CH", min_length=2, max_length=2)
     contact_name: str = Field(min_length=2, max_length=150)
     contact_email: str = Field(min_length=3, max_length=255)
     description: str | None = Field(None, max_length=2000)
+
+    @model_validator(mode="after")
+    def normalize_scope(self):
+        self.country = normalize_country_code(self.country)
+        self.canton = normalize_subdivision_code(self.country, self.canton) or self.canton
+        return self
 
 
 class EmployerProfileOut(EmployerProfileUpsert):
@@ -215,6 +247,7 @@ class EmployerJobCreate(BaseModel):
     description: str = Field(min_length=30, max_length=30_000)
     location: str = Field(min_length=2, max_length=300)
     canton: str = Field(min_length=2, max_length=10)
+    country: str = Field(default="CH", min_length=2, max_length=2)
     employment_type: str | None = Field(None, max_length=60)
     workplace_type: str | None = Field(None, max_length=30)
     workload_min: int | None = Field(None, ge=0, le=100)
@@ -234,6 +267,8 @@ class EmployerJobCreate(BaseModel):
 
     @model_validator(mode="after")
     def validate_ranges(self) -> EmployerJobCreate:
+        self.country = normalize_country_code(self.country)
+        self.canton = normalize_subdivision_code(self.country, self.canton) or self.canton
         if (
             self.workload_min is not None
             and self.workload_max is not None

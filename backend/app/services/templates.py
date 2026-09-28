@@ -11,8 +11,15 @@ from ..schemas import TemplateCreate, TemplateUpdate
 
 class TemplateService:
     @staticmethod
-    def list(db: Session, *, offset: int = 0, limit: int = 100, status: str | None = None, include_drafts: bool = False) -> List[Template]:
+    def list(
+        db: Session, *, offset: int = 0, limit: int = 100,
+        status: str | None = None, include_drafts: bool = False,
+        country_code: str = "CH", language: str | None = None,
+    ) -> List[Template]:
         stmt = select(Template)
+        stmt = stmt.where(Template.country_code == country_code)
+        if language:
+            stmt = stmt.where(Template.language == language)
         if status:
             stmt = stmt.where(getattr(Template, "status", None) == status)  # type: ignore[attr-defined]
         elif not include_drafts and hasattr(Template, "status"):
@@ -45,5 +52,4 @@ class TemplateService:
     def delete(db: Session, template: Template) -> None:
         db.delete(template)
         db.commit()
-
 

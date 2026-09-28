@@ -8,6 +8,7 @@ from ..services.news_service import NewsService
 from ..dependencies import get_db, CurrentAdmin
 from ..core.security import decode_token
 from ..services.users import UserService
+from ..core.countries import normalize_country_code
 
 router = APIRouter()
 _optional_bearer = HTTPBearer(auto_error=False)
@@ -33,10 +34,15 @@ def list_news(
   status: Optional[str] = None,
   include_drafts: bool = False,
   import_source: Optional[str] = None,
+  country_code: str = "CH",
   limit: int = 50,
   db: Session = Depends(get_db),
   is_admin_request: bool = Depends(_is_admin_request),
 ):
+  try:
+    country_code = normalize_country_code(country_code)
+  except ValueError as exc:
+    raise HTTPException(status_code=422, detail=str(exc)) from exc
   if not is_admin_request:
     return NewsService.list_news(
       db,
@@ -45,6 +51,7 @@ def list_news(
       status="published",
       include_drafts=False,
       import_source=import_source,
+      country_code=country_code,
     )
   return NewsService.list_news(
     db,
@@ -53,6 +60,7 @@ def list_news(
     status=status,
     include_drafts=include_drafts,
     import_source=import_source,
+    country_code=country_code,
   )
 
 @router.get("/{news_id}", response_model=NewsOut)

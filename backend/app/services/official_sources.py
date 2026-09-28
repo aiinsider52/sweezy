@@ -26,6 +26,19 @@ TRUSTED_OFFICIAL_HOSTS = {
     "www.ge.ch",
     "vd.ch",
     "www.vd.ch",
+    # Germany
+    "germany4ukraine.de",
+    "www.germany4ukraine.de",
+    "make-it-in-germany.com",
+    "www.make-it-in-germany.com",
+    # Austria
+    "oesterreich.gv.at",
+    "www.oesterreich.gv.at",
+    "eausweise.oesterreich.gv.at",
+    "ams.at",
+    "www.ams.at",
+    "bbu.gv.at",
+    "www.bbu.gv.at",
 }
 
 
@@ -54,7 +67,7 @@ def validate_publishable_source(
     if not published:
         return
     if not is_trusted_official_url(source_url):
-        raise ValueError("Published content requires an HTTPS URL from a trusted Swiss official source")
+        raise ValueError("Published content requires an HTTPS URL from a trusted official source")
     if not source_title or not source_title.strip():
         raise ValueError("Published content requires source_title")
     if verified_at is None:

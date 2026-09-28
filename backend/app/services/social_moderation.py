@@ -21,8 +21,10 @@ async def moderate_social_profile(user_id: str) -> tuple[str, str | None]:
             from openai import AsyncOpenAI
 
             client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
+            country_names = {"CH": "Switzerland", "DE": "Germany", "AT": "Austria"}
+            country_name = country_names.get((profile.country_code or "CH").upper(), "selected country")
             prompt = f"""
-Moderate social profile for adult community app in Switzerland.
+Moderate social profile for adult community app in {country_name}.
 Name: {profile.display_name}
 Bio: {profile.bio}
 Avatar URL: {profile.avatar_url or "none"}

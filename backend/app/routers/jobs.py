@@ -10,6 +10,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
+from ..core.countries import normalize_country_code, normalize_subdivision_code
 from ..core.rate_limit import limiter
 from ..core.security import decode_token
 from ..dependencies import CurrentAdmin, CurrentUser, DBSession
@@ -113,6 +114,7 @@ def search(
     user: CurrentUser,
     q: str | None = Query(None, max_length=300),
     canton: str | None = Query(None, max_length=10),
+    country: str = Query("CH", min_length=2, max_length=2),
     employment_type: str | None = Query(None, max_length=60),
     workplace_type: str | None = Query(None, pattern="^(remote|hybrid|on_site)$"),
     no_experience: bool | None = None,
@@ -121,9 +123,12 @@ def search(
     page: int = Query(1, ge=1),
     per_page: int = Query(20, ge=1, le=100),
 ) -> JobSearchResponse:
+    country = normalize_country_code(country)
+    canton = normalize_subdivision_code(country, canton)
     items, total, sources, is_stale = search_catalog(
         db,
         q=q,
+        country=country,
         canton=canton,
         employment_type=employment_type,
         workplace_type=workplace_type,
@@ -143,7 +148,7 @@ def search(
         try:
             db.add(
                 JobSearchEvent(
-                    keyword=q.strip().lower(), canton=canton, result_count=total
+                    keyword=q.strip().lower(), canton=canton, country=country, result_count=total
                 )
             )
             db.commit()
@@ -172,36 +177,42 @@ def log_event(
     db: DBSession,
     keyword: str = Query(..., min_length=1, max_length=300),
     canton: str | None = None,
+    country: str = Query("CH", min_length=2, max_length=2),
 ):
     try:
-        db.add(JobSearchEvent(keyword=keyword.strip().lower(), canton=canton))
+        country = normalize_country_code(country)
+        canton = normalize_subdivision_code(country, canton)
+        db.add(JobSearchEvent(keyword=keyword.strip().lower(), canton=canton, country=country))
         db.commit()
     except SQLAlchemyError:
         db.rollback()
 
 
 @router.get("/analytics/top", response_model=list[JobSearchEventOut])
-def top_keywords(db: DBSession, limit: int = Query(10, ge=1, le=100)):
+def top_keywords(db: DBSession, country: str = Query("CH", min_length=2, max_length=2), limit: int = Query(10, ge=1, le=100)):
+    country = normalize_country_code(country)
     rows = (
         db.query(
-            JobSearchEvent.keyword, JobSearchEvent.canton, func.count().label("count")
+            JobSearchEvent.keyword, JobSearchEvent.canton, JobSearchEvent.country, func.count().label("count")
         )
-        .group_by(JobSearchEvent.keyword, JobSearchEvent.canton)
+        .filter(JobSearchEvent.country == country)
+        .group_by(JobSearchEvent.keyword, JobSearchEvent.canton, JobSearchEvent.country)
         .order_by(func.count().desc())
         .limit(limit)
         .all()
     )
     return [
-        JobSearchEventOut(keyword=row[0], canton=row[1], count=row[2]) for row in rows
+        JobSearchEventOut(keyword=row[0], canton=row[1], country=row[2], count=row[3]) for row in rows
     ]
 
 
 @router.get("/favorites", response_model=list[JobFavoriteOut])
-def list_favorites(user: CurrentUser, db: DBSession):
+def list_favorites(user: CurrentUser, db: DBSession, country: str = Query("CH", min_length=2, max_length=2)):
+    country = normalize_country_code(country)
     return (
         db.execute(
             select(JobFavorite)
-            .where(JobFavorite.user_id == user.id)
+            .where(JobFavorite.user_id == user.id, JobFavorite.country == country)
             .order_by(JobFavorite.created_at.desc())
         )
         .scalars()
@@ -368,6 +379,7 @@ def create_alert(payload: JobAlertCreate, user: CurrentUser, db: DBSession):
     existing = db.execute(
         select(JobAlert).where(
             JobAlert.user_id == user.id,
+            JobAlert.country == payload.country,
             func.lower(JobAlert.keywords) == payload.keywords.strip().lower(),
             JobAlert.canton == payload.canton,
             JobAlert.employment_type == payload.employment_type,
@@ -512,6 +524,8 @@ def create_employer_job(
     profile = db.get(JobEmployerProfile, user.id)
     if not profile:
         raise HTTPException(status_code=409, detail="Create employer profile first")
+    if payload.country != profile.country:
+        raise HTTPException(status_code=422, detail="Job country must match employer profile country")
     now = datetime.now(timezone.utc)
     job = Job(
         source="sweezy",
@@ -529,6 +543,8 @@ def create_employer_job(
         snippet=payload.description[:1200],
         location=payload.location,
         canton=payload.canton.upper(),
+        country=payload.country,
+        salary_currency="CHF" if payload.country == "CH" else "EUR",
         employment_type=payload.employment_type,
         workplace_type=payload.workplace_type,
         workload_min=payload.workload_min,

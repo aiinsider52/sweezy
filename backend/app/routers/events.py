@@ -23,6 +23,7 @@ from ..schemas.events import (
 from ..services.events_moderation import moderate_event_listing
 from ..services.users import UserService
 from ..services.moderation import ensure_case
+from ..core.countries import normalize_country_code, normalize_subdivision_code
 
 
 router = APIRouter()
@@ -63,21 +64,30 @@ def list_events(
     db: DBSession,
     category: Optional[EventCategory] = None,
     canton: Optional[str] = None,
+    country_code: str = Query("CH", min_length=2, max_length=2),
+    subdivision_code: Optional[str] = Query(None, min_length=1, max_length=10),
     page: int = Query(1, ge=1),
     per_page: int = Query(20, ge=1, le=100),
     upcoming_only: bool = Query(True),
     user_id: str | None = Depends(_get_optional_user_id),
 ) -> EventListingPage:
+    try:
+        country_code = normalize_country_code(country_code)
+        subdivision_code = normalize_subdivision_code(country_code, subdivision_code or canton)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
     stmt = select(EventListing).where(EventListing.status == "approved", EventListing.is_private.is_(False))
     count_stmt = select(func.count()).select_from(EventListing).where(
         EventListing.status == "approved", EventListing.is_private.is_(False))
+    stmt = stmt.where(EventListing.country_code == country_code)
+    count_stmt = count_stmt.where(EventListing.country_code == country_code)
 
     if category:
         stmt = stmt.where(EventListing.category == category.value)
         count_stmt = count_stmt.where(EventListing.category == category.value)
-    if canton:
-        stmt = stmt.where(EventListing.canton == canton)
-        count_stmt = count_stmt.where(EventListing.canton == canton)
+    if subdivision_code:
+        stmt = stmt.where(EventListing.subdivision_code == subdivision_code)
+        count_stmt = count_stmt.where(EventListing.subdivision_code == subdivision_code)
     if upcoming_only:
         now = datetime.utcnow()
         stmt = stmt.where(EventListing.starts_at >= now)
@@ -182,6 +192,9 @@ def create_event(
         description=payload.description,
         category=payload.category.value,
         canton=payload.canton,
+        country_code=payload.country_code,
+        subdivision_code=payload.subdivision_code,
+        currency_code=payload.currency_code,
         city=payload.city,
         venue_name=payload.venue_name,
         address=payload.address,

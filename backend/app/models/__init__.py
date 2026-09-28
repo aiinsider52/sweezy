@@ -13,6 +13,7 @@ from .checklist import Checklist
 from .template import Template
 from .appointment import Appointment
 from .user import PublicUserProfile, User
+from .country_context import UserCountryContext
 from .subscription import PremiumUsage, Subscription, SubscriptionEvent
 from .marketplace import MarketplaceBlock, MarketplaceReport, ServiceListing
 from .network import ProfessionalConnection, ProfessionalProfile, ProfessionalProfileReport
@@ -56,6 +57,7 @@ __all__ = [
     "Appointment",
     "User",
     "PublicUserProfile",
+    "UserCountryContext",
     "Subscription",
     "SubscriptionEvent",
     "PremiumUsage",

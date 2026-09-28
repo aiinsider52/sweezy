@@ -27,7 +27,9 @@ class SocialProfile(Base):
 
     user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
     display_name: Mapped[str] = mapped_column(String(100), nullable=False)
-    canton: Mapped[str] = mapped_column(String(2), nullable=False, index=True)
+    canton: Mapped[str] = mapped_column(String(10), nullable=False, index=True)
+    country_code: Mapped[str] = mapped_column(String(2), nullable=False, default="CH", index=True)
+    subdivision_code: Mapped[str] = mapped_column(String(10), nullable=False, default="ZH", index=True)
     city: Mapped[str] = mapped_column(String(80), nullable=False)
     bio: Mapped[str] = mapped_column(String(600), nullable=False)
     interests: Mapped[list[str]] = mapped_column(JSON, default=list, nullable=False)

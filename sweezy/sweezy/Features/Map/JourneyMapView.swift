@@ -500,7 +500,7 @@ struct JourneyMapView: View {
                     }
                     mapMetaRow(status) {
                         Circle()
-                            .fill(place.isOpen() ? JourneyVisual.accentStrong : Color.orange)
+                            .fill(statusColor(for: place))
                             .frame(width: 7, height: 7)
                     }
                 }
@@ -790,7 +790,7 @@ struct JourneyMapView: View {
 
                     HStack(spacing: 6) {
                         Circle()
-                            .fill(place.isOpen() ? JourneyVisual.lime : Color.orange)
+                            .fill(statusColor(for: place))
                             .frame(width: 6, height: 6)
                         Text(locationLine(for: place))
                             .lineLimit(1)
@@ -1139,6 +1139,12 @@ struct JourneyMapView: View {
     private func locationLine(for place: Place) -> String {
         let city = place.address.city.trimmingCharacters(in: .whitespacesAndNewlines)
         return city.isEmpty ? place.canton.localizedName : "\(city) · \(place.canton.rawValue)"
+    }
+
+    /// Green when open, orange when closed, grey when the hours are simply unknown.
+    private func statusColor(for place: Place) -> Color {
+        if place.openingHours.isEmpty { return JourneyVisual.secondaryText.opacity(0.5) }
+        return place.isOpen() ? JourneyVisual.accentStrong : Color.orange
     }
 
     private func todayHours(for place: Place) -> String {

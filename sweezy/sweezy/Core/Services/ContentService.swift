@@ -503,7 +503,10 @@ class ContentService: ContentServiceProtocol {
         let placeFiles = [
             "places_extra.json",
             "places_new.json",
-            "places_ukrainian_community.json"
+            "places_ukrainian_community.json",
+            // Real points from OpenStreetMap (RAV, migration offices, SEM centres, Red Cross,
+            // Caritas, HEKS, food aid, emergency hospitals); regenerate rather than hand-edit.
+            "places_osm_ch.json"
         ]
         
         for filename in placeFiles {

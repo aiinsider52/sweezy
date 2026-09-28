@@ -76,12 +76,15 @@ struct SwissDiscoveryView: View {
                                 count: filteredPlaces.count - 1
                             )
 
-                            LazyVStack(spacing: 14) {
-                                ForEach(Array(filteredPlaces.dropFirst().enumerated()), id: \.element.id) { index, place in
+                            // Two photo tiles per row: several places visible at once instead of one and a half.
+                            LazyVGrid(
+                                columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)],
+                                spacing: 12
+                            ) {
+                                ForEach(Array(filteredPlaces.dropFirst())) { place in
                                     SwissDiscoveryEditorialCard(
                                         place: place,
                                         rating: ratingSummaries[place.id],
-                                        index: index + 2,
                                         isSaved: savedPlaceIDs.contains(place.id),
                                         action: { selectedPlace = place },
                                         toggleSaved: { toggleSaved(place) }
@@ -596,7 +599,7 @@ private struct SwissDiscoveryFeaturedCard: View {
 
     private var featuredVisual: some View {
         ZStack(alignment: .bottomLeading) {
-                FittedAssetImage(name: place.imageName, height: 322)
+                FittedAssetImage(name: place.imageName, height: 270)
 
                 LinearGradient(
                     colors: [.clear, .black.opacity(0.16), .black.opacity(0.92)],
@@ -631,7 +634,7 @@ private struct SwissDiscoveryFeaturedCard: View {
                 }
                 .padding(18)
         }
-        .frame(height: 322)
+        .frame(height: 270)
         .clipShape(RoundedRectangle(cornerRadius: 30, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 30, style: .continuous)
@@ -686,81 +689,77 @@ private struct SwissDiscoverySettingCard: View {
     }
 }
 
+/// Portrait photo tile for the two-column grid: the photo carries the card, text sits on a short fade.
 private struct SwissDiscoveryEditorialCard: View {
     let place: SwissDiscoveryPlace
     let rating: APIClient.DiscoveryRatingSummary?
-    let index: Int
     let isSaved: Bool
     let action: () -> Void
     let toggleSaved: () -> Void
 
+    private let shape = RoundedRectangle(cornerRadius: 22, style: .continuous)
+
     var body: some View {
-        ZStack(alignment: .topTrailing) {
-            Button(action: action) {
-                ZStack(alignment: .bottomLeading) {
-                FittedAssetImage(name: place.imageName, height: 252)
-
-                LinearGradient(
-                        colors: [.black.opacity(0.06), .clear, .black.opacity(0.92)],
+        Button(action: action) {
+            Color.clear
+                .frame(height: 236)
+                .frame(maxWidth: .infinity)
+                .overlay {
+                    Image(place.imageName)
+                        .resizable()
+                        .scaledToFill()
+                }
+                .overlay(alignment: .bottom) {
+                    LinearGradient(
+                        stops: [
+                            .init(color: .clear, location: 0),
+                            .init(color: .black.opacity(0.45), location: 0.45),
+                            .init(color: .black.opacity(0.85), location: 1)
+                        ],
                         startPoint: .top,
-                    endPoint: .bottom
-                )
-
-                    VStack(alignment: .leading, spacing: 7) {
-                        HStack(spacing: 8) {
-                            Text(String(format: "%02d", index))
-                                .font(.system(size: 11, weight: .black, design: .default))
-                                .foregroundStyle(.black)
-                                .frame(width: 34, height: 26)
-                                .background(JourneyVisual.lime)
-                                .clipShape(Capsule())
-
-                            Text(place.region.uppercased())
-                                .font(.system(size: 9, weight: .bold))
-                                .tracking(0.7)
-                                .foregroundStyle(.white.opacity(0.78))
-                                .lineLimit(1)
-                        }
-
+                        endPoint: .bottom
+                    )
+                    .frame(height: 130)
+                }
+                .overlay(alignment: .bottomLeading) {
+                    VStack(alignment: .leading, spacing: 4) {
                         Text(place.title)
-                            .font(.system(size: 25, weight: .bold, design: .default))
-                        .foregroundStyle(.white)
-                        .multilineTextAlignment(.leading)
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundStyle(.white)
                             .lineLimit(2)
-
-                        Text(place.summary)
-                            .font(.system(size: 12, weight: .medium))
-                            .foregroundStyle(.white.opacity(0.7))
-                            .lineLimit(2)
+                            .minimumScaleFactor(0.85)
+                            .multilineTextAlignment(.leading)
                             .fixedSize(horizontal: false, vertical: true)
-
-                        HStack(spacing: 12) {
-                            Label(place.duration, systemImage: "clock")
-                            Label(place.season, systemImage: "sun.max")
+                        Label(place.region, systemImage: "mappin")
+                            .font(.system(size: 10, weight: .semibold))
+                            .foregroundStyle(.white.opacity(0.82))
+                            .lineLimit(1)
+                        HStack(spacing: 5) {
+                            Image(systemName: "clock")
+                            Text(place.duration)
+                                .lineLimit(1)
                             if let rating, rating.reviewCount > 0 {
-                                Label(String(format: "%.1f", rating.averageRating), systemImage: "star.fill")
+                                Image(systemName: "star.fill")
+                                Text(String(format: "%.1f", rating.averageRating))
                             }
                         }
-                        .font(.system(size: 10, weight: .semibold))
+                        .font(.system(size: 10, weight: .bold))
                         .foregroundStyle(JourneyVisual.lime)
                     }
-                    .padding(16)
+                    .padding(12)
                 }
-                .frame(height: 252)
-                .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 28, style: .continuous)
-                        .stroke(Color.white.opacity(0.28), lineWidth: 1)
-                )
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel("\(place.title), \(place.region)")
-            .accessibilityIdentifier("swiss.discovery.place.\(place.id)")
-
-            SwissDiscoverySaveButton(isSaved: isSaved, action: toggleSaved, compact: true)
-                .padding(13)
+                .clipShape(shape)
+                .overlay(shape.stroke(Color.white.opacity(0.28), lineWidth: 1))
+                .contentShape(shape)
         }
-        .shadow(color: .black.opacity(0.32), radius: 18, y: 9)
+        .buttonStyle(CardPressStyle())
+        .accessibilityLabel("\(place.title), \(place.region)")
+        .accessibilityIdentifier("swiss.discovery.place.\(place.id)")
+        .overlay(alignment: .topTrailing) {
+            SwissDiscoverySaveButton(isSaved: isSaved, action: toggleSaved, compact: true)
+                .padding(8)
+        }
+        .shadow(color: .black.opacity(0.14), radius: 10, y: 5)
     }
 }
 

@@ -499,11 +499,10 @@ class ContentService: ContentServiceProtocol {
         }
     }
     private func loadAdditionalPlaces() async {
-        // Load all additional place files including Ukrainian community hubs
+        // places_unverified.json is intentionally NOT loaded: entries without a source whose phones
+        // were placeholders or whose websites did not exist. Re-add an entry only after checking it.
         let placeFiles = [
             "places_extra.json",
-            "places_new.json",
-            "places_ukrainian_community.json",
             // Real points from OpenStreetMap (RAV, migration offices, SEM centres, Red Cross,
             // Caritas, HEKS, food aid, emergency hospitals); regenerate rather than hand-edit.
             "places_osm_ch.json"

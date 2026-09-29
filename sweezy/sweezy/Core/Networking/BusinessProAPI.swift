@@ -5,7 +5,7 @@ enum BusinessProAPI {
 
     private static func error(_ data: Data, _ response: URLResponse) -> NSError {
         let code = (response as? HTTPURLResponse)?.statusCode ?? 0
-        var message = "Не вдалося виконати запит"
+        var message = "Не вдалося виконати запит".localized
         if let value = try? JSONSerialization.jsonObject(with: data) as? [String: Any], let detail = value["detail"] {
             if let text = detail as? String { message = text }
             if let object = detail as? [String: Any], let errorCode = object["code"] as? String { message = errorCode.replacingOccurrences(of: "_", with: " ") }

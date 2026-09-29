@@ -218,6 +218,104 @@ def _seed_news(db: Session) -> int:
     return len(rows)
 
 
+def _parse_datetime(value: Any) -> datetime | None:
+    if not value:
+        return None
+    try:
+        parsed = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+        return parsed if parsed.tzinfo else parsed.replace(tzinfo=timezone.utc)
+    except (TypeError, ValueError):
+        return None
+
+
+def _seed_country_packs(db: Session) -> dict[str, int]:
+    path = REPO_ROOT / "backend" / "seeds" / "country_packs.json"
+    result = {"country_guides": 0, "country_checklists": 0, "country_templates": 0}
+    if not path.exists():
+        return result
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return result
+    verified_at = _parse_datetime(payload.get("verifiedAt"))
+
+    for raw in payload.get("guides", []):
+        country = str(raw.get("countryCode") or "").upper()
+        slug = str(raw.get("slug") or "").strip()
+        if country not in {"DE", "AT"} or not slug:
+            continue
+        guide_id = str(uuid.uuid5(uuid.NAMESPACE_URL, f"country-guide:{country}:{slug}"))
+        if db.get(Guide, guide_id) is not None:
+            continue
+        db.add(Guide(
+            id=guide_id,
+            title=str(raw.get("title") or slug),
+            slug=slug,
+            description=raw.get("description"),
+            content=raw.get("content"),
+            category=str(raw.get("category") or "general"),
+            country_code=country,
+            subdivision_codes=list(raw.get("subdivisionCodes") or []),
+            language=str(raw.get("language") or "uk"),
+            source_url=raw.get("sourceUrl"),
+            source_title=raw.get("sourceTitle"),
+            verified_at=verified_at,
+            valid_until=_parse_datetime(raw.get("validUntil")),
+            is_published=True,
+            status="published",
+            version=1,
+        ))
+        result["country_guides"] += 1
+
+    for raw in payload.get("checklists", []):
+        country = str(raw.get("countryCode") or "").upper()
+        title = str(raw.get("title") or "").strip()
+        if country not in {"DE", "AT"} or not title:
+            continue
+        checklist_id = str(uuid.uuid5(uuid.NAMESPACE_URL, f"country-checklist:{country}:{title}"))
+        if db.get(Checklist, checklist_id) is not None:
+            continue
+        db.add(Checklist(
+            id=checklist_id,
+            title=title,
+            description=raw.get("description"),
+            items=list(raw.get("items") or []),
+            country_code=country,
+            subdivision_codes=list(raw.get("subdivisionCodes") or []),
+            language=str(raw.get("language") or "uk"),
+            source_url=raw.get("sourceUrl"),
+            source_title=raw.get("sourceTitle"),
+            verified_at=verified_at,
+            is_published=True,
+            status="published",
+        ))
+        result["country_checklists"] += 1
+
+    for raw in payload.get("templates", []):
+        country = str(raw.get("countryCode") or "").upper()
+        name = str(raw.get("name") or "").strip()
+        if country not in {"DE", "AT"} or not name:
+            continue
+        template_id = str(uuid.uuid5(uuid.NAMESPACE_URL, f"country-template:{country}:{name}"))
+        if db.get(Template, template_id) is not None:
+            continue
+        db.add(Template(
+            id=template_id,
+            name=name,
+            category=str(raw.get("category") or "general"),
+            content=str(raw.get("content") or ""),
+            status="published",
+            country_code=country,
+            subdivision_codes=list(raw.get("subdivisionCodes") or []),
+            language=str(raw.get("language") or "de"),
+        ))
+        result["country_templates"] += 1
+
+    if any(result.values()):
+        db.commit()
+    return result
+
+
 def seed_core_content(db: Session) -> dict[str, int]:
     seed_dir = _seed_dir()
     result = {"guides": 0, "checklists": 0, "templates": 0, "news": 0}
@@ -226,4 +324,5 @@ def seed_core_content(db: Session) -> dict[str, int]:
         result["checklists"] = _seed_checklists(db, seed_dir)
         result["templates"] = _seed_templates(db, seed_dir)
     result["news"] = _seed_news(db)
+    result.update(_seed_country_packs(db))
     return result

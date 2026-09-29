@@ -47,18 +47,18 @@ struct HeroListingCardView: View {
                                 HeroCoverBadge(text: badge.text, onPhoto: hasPhoto)
                             }
                             if isNew {
-                                HeroCoverBadge(text: "Нове", onPhoto: hasPhoto)
+                                HeroCoverBadge(text: "Нове".localized, onPhoto: hasPhoto)
                             }
                         }
                         Text(listing.title)
-                            .font(.system(size: 18, weight: .bold, design: .rounded))
+                            .font(.system(size: 18, weight: .bold, design: .default))
                             .foregroundColor(hasPhoto ? .white : Theme.Colors.textPrimary)
                             .lineLimit(2)
                     }
                     Spacer()
                     if let price = listing.priceDisplay, !price.isEmpty {
                         Text(price)
-                            .font(.system(size: 14, weight: .bold, design: .rounded))
+                            .font(.system(size: 14, weight: .bold, design: .default))
                             .monospacedDigit()
                             .foregroundColor(Theme.Colors.ink)
                             .padding(.horizontal, 12)
@@ -89,10 +89,10 @@ struct HeroListingCardView: View {
                         if listing.isVerified {
                             Image(systemName: "checkmark.seal.fill")
                                 .font(.system(size: 12, weight: .semibold))
-                                .foregroundColor(Theme.Colors.primary)
+                                .foregroundColor(JourneyVisual.accentStrong)
                         }
                     }
-                    Text(listing.canton == "all" ? "Вся Швейцарія" : listing.canton)
+                    Text(listing.canton == "all" ? "Вся Швейцарія".localized : listing.canton)
                         .font(.system(size: 12))
                         .foregroundColor(Theme.Colors.textSecondary)
                 }
@@ -161,9 +161,9 @@ struct CompactListingCardView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
 
                 if isNew {
-                    Text("Нове")
+                    Text("Нове".localized)
                         .font(.system(size: 9, weight: .bold))
-                        .foregroundColor(Theme.Colors.primary)
+                        .foregroundColor(JourneyVisual.accentText)
                         .padding(.horizontal, 7)
                         .padding(.vertical, 3)
                         .background(Capsule().fill(Theme.Colors.primary.opacity(0.14)))
@@ -184,9 +184,9 @@ struct CompactListingCardView: View {
 
                 if let price = listing.priceDisplay, !price.isEmpty {
                     Text(price)
-                        .font(.system(size: 13, weight: .bold, design: .rounded))
+                        .font(.system(size: 13, weight: .bold, design: .default))
                         .monospacedDigit()
-                        .foregroundColor(Theme.Colors.primary)
+                        .foregroundColor(JourneyVisual.accentText)
                 } else {
                     Text(listing.categoryDisplayName)
                         .font(.system(size: 11, weight: .medium))
@@ -263,7 +263,7 @@ struct ListingCardView: View {
                             ListingBadgePill(text: listing.categoryDisplayName, color: listing.categoryColor)
                             ListingBadgePill(text: listing.canton == "all" ? "🇨🇭" : listing.canton, color: .orange)
                             if isNew {
-                                ListingBadgePill(text: "Нове", color: .green)
+                                ListingBadgePill(text: "Нове".localized, color: .green)
                             }
                         }
                     }
@@ -274,7 +274,7 @@ struct ListingCardView: View {
                     if let price = listing.priceDisplay, !price.isEmpty {
                         Text(price)
                             .font(.system(size: 15, weight: .bold))
-                            .foregroundColor(Theme.Colors.primary)
+                            .foregroundColor(JourneyVisual.accentText)
                     }
 
                     Spacer()
@@ -466,7 +466,7 @@ struct MarketplaceRemoteImageView: View {
             VStack(spacing: 8) {
                 Image(systemName: "photo.on.rectangle.angled")
                     .font(.system(size: 26, weight: .semibold))
-                    .foregroundColor(Theme.Colors.primary.opacity(0.8))
+                    .foregroundColor(JourneyVisual.accentStrong.opacity(0.8))
                 Text("marketplace.photos_empty".localized)
                     .font(.caption.weight(.semibold))
                     .foregroundColor(Theme.Colors.textSecondary)

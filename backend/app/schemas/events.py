@@ -4,7 +4,9 @@ from datetime import datetime
 from enum import Enum
 from typing import Optional
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
+
+from ..core.countries import normalize_country_code, normalize_subdivision_code, validate_currency
 
 
 class EventCategory(str, Enum):
@@ -31,7 +33,10 @@ class EventListingCreate(BaseModel):
     title: str = Field(..., min_length=3, max_length=120)
     description: str = Field(..., min_length=10, max_length=2000)
     category: EventCategory
-    canton: str = Field(..., min_length=2, max_length=10)
+    canton: Optional[str] = Field(None, min_length=1, max_length=10)
+    country_code: str = Field(default="CH", min_length=2, max_length=2)
+    subdivision_code: Optional[str] = Field(None, min_length=1, max_length=10)
+    currency_code: Optional[str] = Field(None, min_length=3, max_length=3)
     city: str = Field(..., min_length=1, max_length=120)
     venue_name: Optional[str] = Field(None, max_length=150)
     address: Optional[str] = Field(None, max_length=255)
@@ -44,6 +49,18 @@ class EventListingCreate(BaseModel):
     contact_value: str = Field(..., min_length=1, max_length=255)
     organizer_name: str = Field(..., min_length=1, max_length=100)
 
+    @model_validator(mode="after")
+    def validate_scope(self):
+        self.country_code = normalize_country_code(self.country_code)
+        self.subdivision_code = normalize_subdivision_code(
+            self.country_code, self.subdivision_code or self.canton
+        )
+        if self.subdivision_code is None:
+            raise ValueError("subdivision_code is required")
+        self.canton = self.subdivision_code
+        self.currency_code = validate_currency(self.country_code, self.currency_code)
+        return self
+
 
 class EventListingUpdate(BaseModel):
     title: Optional[str] = Field(None, min_length=3, max_length=120)
@@ -55,6 +72,7 @@ class EventListingUpdate(BaseModel):
     is_free: Optional[bool] = None
     is_private: Optional[bool] = None
     price_info: Optional[str] = Field(None, max_length=100)
+    subdivision_code: Optional[str] = Field(None, min_length=1, max_length=10)
 
 
 class EventListingResponse(BaseModel):
@@ -65,6 +83,9 @@ class EventListingResponse(BaseModel):
     description: str
     category: str
     canton: str
+    country_code: str = "CH"
+    subdivision_code: str
+    currency_code: str = "CHF"
     city: str
     venue_name: Optional[str] = None
     address: Optional[str] = None

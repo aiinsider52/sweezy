@@ -102,12 +102,12 @@ struct ItemCardView: View {
         HStack(alignment: .firstTextBaseline, spacing: 4) {
             if listing.isFree {
                 Text("marketplace.price.free".localized)
-                    .font(.system(size: 16, weight: .bold, design: .rounded))
+                    .font(.system(size: 16, weight: .bold, design: .default))
                     .foregroundColor(Theme.Colors.accentCoral)
             } else if let price = listing.priceChf {
-                Text("CHF \(price)")
-                    .font(.system(size: 16, weight: .bold, design: .rounded))
-                    .foregroundColor(Theme.Colors.primary)
+                Text("\(listing.currencyCode) \(price)")
+                    .font(.system(size: 16, weight: .bold, design: .default))
+                    .foregroundColor(JourneyVisual.accentText)
                 if listing.negotiable {
                     Text("marketplace.price.negotiable".localized)
                         .font(.system(size: 10, weight: .medium))

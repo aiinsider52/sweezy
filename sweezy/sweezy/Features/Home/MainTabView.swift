@@ -28,30 +28,47 @@ struct MainTabView: View {
     @State private var showLanguage = false
     @State private var showWhatsNew = false
     @State private var showSettings = false
-    
-    var body: some View {
-        Group {
-            switch router.selectedTab {
-            case 1:
-                JourneyDirectoryView(
-                    requestedSection: router.requestedDirectorySection,
-                    routeID: router.requestedDirectoryRouteID
-                )
-                .featureOnboarding(.dovidnyk)
-            case 2:
-                JourneyMapView()
-                    .featureOnboarding(.map)
-            case 3:
-                JourneyMarketplaceView()
-            case 4:
-                FriendNetworkView(showsDismissButton: false)
-                    .environmentObject(appContainer)
-                    .environmentObject(lockManager)
-                    .environmentObject(sessionManager)
-            default:
-                JourneyHomeView()
-            }
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    @ViewBuilder
+    private var tabContent: some View {
+        switch router.selectedTab {
+        case 1:
+            JourneyDirectoryView(
+                requestedSection: router.requestedDirectorySection,
+                routeID: router.requestedDirectoryRouteID
+            )
+            .featureOnboarding(.dovidnyk)
+        case 2:
+            JourneyMapView()
+                .featureOnboarding(.map)
+        case 3:
+            JourneyMarketplaceView()
+        case 4:
+            FriendNetworkView(showsDismissButton: false)
+                .environmentObject(appContainer)
+                .environmentObject(lockManager)
+                .environmentObject(sessionManager)
+        default:
+            JourneyHomeView()
         }
+    }
+
+    var body: some View {
+        ZStack {
+            tabContent
+                .id(router.selectedTab)
+                // Tabs cross-fade and settle instead of snapping between screens.
+                .transition(
+                    reduceMotion
+                        ? .opacity
+                        : .asymmetric(
+                            insertion: .opacity.combined(with: .scale(scale: 0.985)),
+                            removal: .opacity
+                        )
+                )
+        }
+        .animation(reduceMotion ? nil : .easeOut(duration: 0.24), value: router.selectedTab)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .safeAreaInset(edge: .bottom, spacing: 0) {
             if !router.isBottomBarHidden {
@@ -59,14 +76,8 @@ struct MainTabView: View {
                     get: { router.selectedTab },
                     set: { router.select(tab: $0) }
                 ))
-                    .padding(.horizontal, 14)
-                    .padding(.top, 6)
                     .transition(.move(edge: .bottom).combined(with: .opacity))
-                    .background {
-                        Color.clear
-                            .contentShape(Rectangle())
-                            .allowsHitTesting(false)
-                    }
+                    .background(JourneyVisual.chrome.ignoresSafeArea(edges: .bottom))
             }
         }
         .onAppear {
@@ -104,7 +115,7 @@ struct MainTabView: View {
         }
         .sheet(item: $deepLinkedNews) { NewsDetailView(news: $0) }
         .sheet(isPresented: $showCalculator) { NavigationStack { BenefitsCalculatorView() }.environmentObject(appContainer) }
-        .sheet(isPresented: $showAppointments) { NavigationStack { AppointmentsView() }.environmentObject(appContainer.appointmentRepository) }
+        .sheet(isPresented: $showAppointments) { NavigationStack { AppointmentsView(showsCloseButton: true) }.environmentObject(appContainer.appointmentRepository) }
         .fullScreenCover(isPresented: $showCVBuilder) { CVBuilderView().environmentObject(appContainer) }
         .sheet(isPresented: $showProfile) { ProfileEditView().environmentObject(appContainer) }
         .sheet(isPresented: $showPrivacy) { PrivacyPolicyView() }
@@ -132,12 +143,14 @@ struct MainTabView: View {
         case .template(let id):
             deepLinkedTemplate = appContainer.contentService.templates.first { matches($0.id, id) }
         case .place(let id):
+            guard APIClient.countryCode == "CH" else { break }
             deepLinkedPlace = SwissDiscoveryCatalog.places.first { $0.id.caseInsensitiveCompare(id) == .orderedSame }
         case .map(let filter):
             if let filter, let type = PlaceType(rawValue: filter.lowercased()) {
                 MapDeepLinkRouter.pendingFilter = type
             }
-        case .calculator: showCalculator = true
+        case .calculator:
+            if APIClient.countryCode == "CH" { showCalculator = true }
         case .appointments: showAppointments = true
         case .news:
             deepLinkedNews = appContainer.contentService.latestNews(limit: 1, language: appContainer.currentLocale.language.languageCode?.identifier).first
@@ -703,13 +716,13 @@ struct OptimizedMapView: View {
             VStack(alignment: .leading, spacing: 10) {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("map.hero_title".localized)
-                        .font(.system(size: 24, weight: .bold, design: .rounded))
-                        .foregroundColor(.white)
+                        .font(.system(size: 24, weight: .bold, design: .default))
+                        .foregroundColor(JourneyVisual.primaryText)
                         .lineLimit(2)
                         .minimumScaleFactor(0.82)
                     Text("map.hero_subtitle".localized)
                         .font(.system(size: 12, weight: .medium))
-                        .foregroundColor(.white.opacity(0.84))
+                        .foregroundColor(JourneyVisual.secondaryText)
                         .lineLimit(2)
                         .minimumScaleFactor(0.82)
                         .fixedSize(horizontal: false, vertical: true)
@@ -757,7 +770,7 @@ struct OptimizedMapView: View {
             } label: {
                 Image(systemName: "location.fill")
                     .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(.white)
+                    .foregroundColor(JourneyVisual.primaryText)
                     .frame(width: 36, height: 36)
                     .background(
                         LinearGradient(
@@ -782,9 +795,9 @@ struct OptimizedMapView: View {
             Image(systemName: icon)
                 .font(.system(size: 11, weight: .semibold))
             Text(text)
-                .font(.system(size: 12, weight: .bold, design: .rounded))
+                .font(.system(size: 12, weight: .bold, design: .default))
         }
-        .foregroundColor(.white)
+        .foregroundColor(JourneyVisual.primaryText)
         .padding(.horizontal, 10)
         .padding(.vertical, 7)
         .background(.ultraThinMaterial)
@@ -881,12 +894,12 @@ struct OptimizedMapView: View {
     private func mapSectionHeader(_ title: String, count: Int) -> some View {
         HStack {
             Text(title)
-                .font(.system(size: 20, weight: .bold, design: .rounded))
+                .font(.system(size: 20, weight: .bold, design: .default))
                 .foregroundColor(Theme.Colors.textPrimary)
             Spacer()
             if count > 0 {
                 Text("\(count)")
-                    .font(.system(size: 12, weight: .semibold, design: .rounded))
+                    .font(.system(size: 12, weight: .semibold, design: .default))
                     .foregroundColor(Theme.Colors.textPrimary)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 6)
@@ -1293,7 +1306,7 @@ private struct MapPopularTypeCard: View {
                 .lineLimit(2)
             
             Text("\(count)")
-                .font(.system(size: 22, weight: .bold, design: .rounded))
+                .font(.system(size: 22, weight: .bold, design: .default))
                 .foregroundColor(isSelected ? type.swiftUIColor : Theme.Colors.textPrimary)
         }
         .frame(width: 140, alignment: .leading)
@@ -1319,7 +1332,7 @@ private struct MapLocationPermissionCard: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 10) {
                 Image(systemName: "location.slash.fill")
-                    .foregroundColor(Theme.Colors.primary)
+                    .foregroundColor(JourneyVisual.accentStrong)
                 Text(title)
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(Theme.Colors.textPrimary)
@@ -1463,12 +1476,12 @@ struct PlaceDetailSheet: View {
             VStack(alignment: .leading, spacing: 6) {
                 Text(place.name)
                     .font(.system(size: 20, weight: .bold))
-                    .foregroundColor(.white)
+                    .foregroundColor(JourneyVisual.primaryText)
                     .lineLimit(2)
                 
                 Text(place.type.localizedName)
                     .font(.subheadline)
-                    .foregroundColor(.white.opacity(0.6))
+                    .foregroundColor(JourneyVisual.secondaryText)
                 
                 // Rating if available
                 if let rating = place.rating {
@@ -1481,7 +1494,7 @@ struct PlaceDetailSheet: View {
                             .foregroundColor(.yellow)
                         Text("(\(place.reviewCount))")
                             .font(.caption)
-                            .foregroundColor(.white.opacity(0.5))
+                            .foregroundColor(JourneyVisual.secondaryText)
                     }
                 }
             }
@@ -1535,7 +1548,7 @@ struct PlaceDetailSheet: View {
             }
             Text(text)
                 .font(.caption.bold())
-                .foregroundColor(.white.opacity(0.9))
+                .foregroundColor(JourneyVisual.secondaryText)
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
@@ -1554,18 +1567,18 @@ struct PlaceDetailSheet: View {
         VStack(alignment: .leading, spacing: 8) {
             Label("map.description".localized, systemImage: "text.alignleft")
                 .font(.caption.bold())
-                .foregroundColor(Theme.Colors.primaryLight)
+                .foregroundColor(JourneyVisual.accentText)
             
             Text(text)
                 .font(.subheadline)
-                .foregroundColor(.white.opacity(0.8))
+                .foregroundColor(JourneyVisual.secondaryText)
                 .lineLimit(4)
         }
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
             RoundedRectangle(cornerRadius: 14)
-                .fill(Color.white.opacity(0.05))
+                .fill(JourneyVisual.softBorder)
                 .overlay(
                     RoundedRectangle(cornerRadius: 14)
                         .stroke(Theme.Colors.adaptiveSurface, lineWidth: 1)
@@ -1578,13 +1591,13 @@ struct PlaceDetailSheet: View {
         VStack(alignment: .leading, spacing: 10) {
             Label("map.services_label".localized, systemImage: "checkmark.seal.fill")
                 .font(.caption.bold())
-                .foregroundColor(Theme.Colors.primaryLight)
+                .foregroundColor(JourneyVisual.accentText)
             
             FlowLayout(spacing: 8) {
                 ForEach(place.services.prefix(6), id: \.self) { service in
                     Text(service)
                         .font(.caption)
-                        .foregroundColor(.white.opacity(0.9))
+                        .foregroundColor(JourneyVisual.secondaryText)
                         .padding(.horizontal, 10)
                         .padding(.vertical, 6)
                         .background(
@@ -1598,7 +1611,7 @@ struct PlaceDetailSheet: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
             RoundedRectangle(cornerRadius: 14)
-                .fill(Color.white.opacity(0.05))
+                .fill(JourneyVisual.softBorder)
                 .overlay(
                     RoundedRectangle(cornerRadius: 14)
                         .stroke(Theme.Colors.adaptiveSurface, lineWidth: 1)
@@ -1627,7 +1640,7 @@ struct PlaceDetailSheet: View {
                         endPoint: .trailing
                     )
                 )
-                .foregroundColor(.white)
+                .foregroundColor(JourneyVisual.primaryText)
                 .cornerRadius(14)
                 .shadow(color: Theme.Colors.primary.opacity(0.3), radius: 8, y: 4)
             }
@@ -1647,11 +1660,11 @@ struct PlaceDetailSheet: View {
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
                         .background(Theme.Colors.adaptiveSurface)
-                        .foregroundColor(.white)
+                        .foregroundColor(JourneyVisual.primaryText)
                         .cornerRadius(12)
                         .overlay(
                             RoundedRectangle(cornerRadius: 12)
-                                .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                                .stroke(JourneyVisual.softBorder, lineWidth: 1)
                         )
                     }
                 }
@@ -1669,11 +1682,11 @@ struct PlaceDetailSheet: View {
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
                         .background(Theme.Colors.adaptiveSurface)
-                        .foregroundColor(.white)
+                        .foregroundColor(JourneyVisual.primaryText)
                         .cornerRadius(12)
                         .overlay(
                             RoundedRectangle(cornerRadius: 12)
-                                .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                                .stroke(JourneyVisual.softBorder, lineWidth: 1)
                         )
                     }
                 }
@@ -1688,15 +1701,15 @@ struct PlaceDetailSheet: View {
                     Image(systemName: "mappin.circle.fill")
                         .foregroundColor(.orange)
                     Text(place.formattedAddress)
-                        .foregroundColor(.white.opacity(0.7))
+                        .foregroundColor(JourneyVisual.secondaryText)
                     Spacer()
                     Image(systemName: "doc.on.doc")
                         .font(.caption)
-                        .foregroundColor(.white.opacity(0.4))
+                        .foregroundColor(JourneyVisual.secondaryText)
                 }
                 .font(.caption)
                 .padding(12)
-                .background(Color.white.opacity(0.05))
+                .background(Theme.Colors.card)
                 .cornerRadius(10)
             }
         }
@@ -1834,7 +1847,7 @@ struct PlaceLiteRow: View {
             } label: {
                 Image(systemName: "arrow.triangle.turn.up.right.diamond.fill")
                     .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(Theme.Colors.primary)
+                    .foregroundColor(JourneyVisual.accentStrong)
             }
             .buttonStyle(.plain)
         }
@@ -2147,12 +2160,7 @@ struct GuideRow: View {
     
     var body: some View {
         HStack(spacing: 12) {
-            Image(systemName: guide.category.iconName)
-                .font(.title2)
-                .foregroundColor(guide.category.swiftUIColor)
-                .frame(width: 44, height: 44)
-                .background(guide.category.swiftUIColor.opacity(0.1))
-                .cornerRadius(10)
+            JourneyCategoryIcon(symbol: guide.category.iconName, swatch: guide.category.swatch, size: 44)
             
             VStack(alignment: .leading, spacing: 4) {
                 Text(guide.title)
@@ -2170,7 +2178,7 @@ struct GuideRow: View {
                             .padding(.horizontal, 6)
                             .padding(.vertical, 2)
                             .background(Color.green)
-                            .foregroundColor(.white)
+                            .foregroundColor(JourneyVisual.primaryText)
                             .cornerRadius(4)
                     }
                     
@@ -2180,7 +2188,7 @@ struct GuideRow: View {
                             .padding(.horizontal, 6)
                             .padding(.vertical, 2)
                             .background(Theme.Colors.accent.opacity(0.18))
-                            .foregroundColor(Theme.Colors.accent)
+                            .foregroundColor(JourneyVisual.accentText)
                             .cornerRadius(4)
                     }
                 }
@@ -2308,12 +2316,7 @@ struct ChecklistRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Image(systemName: checklist.category.iconName)
-                    .font(.title2)
-                    .foregroundColor(checklist.category.swiftUIColor)
-                    .frame(width: 40, height: 40)
-                    .background(checklist.category.swiftUIColor.opacity(0.1))
-                    .cornerRadius(8)
+                JourneyCategoryIcon(symbol: checklist.category.iconName, swatch: checklist.category.swatch, size: 40)
                 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(checklist.title)
@@ -2329,7 +2332,7 @@ struct ChecklistRow: View {
                 
                 if progress >= 1.0 {
                     Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(Theme.Colors.primary)
+                        .foregroundColor(JourneyVisual.accentStrong)
                 }
             }
             
@@ -2445,7 +2448,7 @@ struct SettingsLiteView: View {
                             
                             Text(String(userName.prefix(1)).uppercased())
                                 .font(.title2.bold())
-                                .foregroundColor(.white)
+                                .foregroundColor(JourneyVisual.primaryText)
                         }
                         
                         VStack(alignment: .leading, spacing: 4) {
@@ -2634,15 +2637,15 @@ struct NotificationSettingsView: View {
                     Text("settings.notifications.eyebrow".localized)
                         .font(.system(size: 12, weight: .bold))
                         .tracking(1.5)
-                        .foregroundColor(JourneyVisual.lime)
+                        .foregroundColor(Theme.Colors.textPrimary)
 
                     Text("settings.notifications.title".localized)
-                        .font(.system(size: 34, weight: .bold, design: .rounded))
-                        .foregroundColor(.white)
+                        .font(.system(size: 34, weight: .bold, design: .default))
+                        .foregroundColor(JourneyVisual.primaryText)
 
                     Text("settings.notifications.subtitle".localized)
                         .font(.system(size: 15, weight: .medium))
-                        .foregroundColor(.white.opacity(0.68))
+                        .foregroundColor(JourneyVisual.secondaryText)
                         .fixedSize(horizontal: false, vertical: true)
                 }
 
@@ -2651,7 +2654,7 @@ struct NotificationSettingsView: View {
 
                 Text("settings.notifications.privacy".localized)
                     .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(.white.opacity(0.5))
+                    .foregroundColor(JourneyVisual.secondaryText)
                     .padding(.horizontal, 4)
             }
             .padding(.horizontal, 18)
@@ -2663,7 +2666,7 @@ struct NotificationSettingsView: View {
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button("common.done".localized) { dismiss() }
-                    .foregroundColor(JourneyVisual.lime)
+                    .foregroundColor(Theme.Colors.textPrimary)
             }
         }
         .journeyScreen(.city, darkness: 0.72)
@@ -2695,12 +2698,12 @@ struct NotificationSettingsView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("settings.notifications.master".localized)
                             .font(.system(size: 17, weight: .bold))
-                            .foregroundColor(.white)
+                            .foregroundColor(JourneyVisual.primaryText)
                         Text(notificationsEnabled
                              ? "settings.notifications.master_on".localized
                              : "settings.notifications.master_off".localized)
                             .font(.system(size: 12, weight: .medium))
-                            .foregroundColor(.white.opacity(0.58))
+                            .foregroundColor(JourneyVisual.secondaryText)
                     }
 
                     Spacer()
@@ -2713,7 +2716,7 @@ struct NotificationSettingsView: View {
                             set: { newValue in Task { await setNotificationsEnabled(newValue) } }
                         ))
                         .labelsHidden()
-                        .tint(JourneyVisual.lime)
+                        .tint(JourneyVisual.accentText)
                         .accessibilityLabel("settings.notifications.master".localized)
                         .accessibilityIdentifier("settings.notifications.masterToggle")
                     }
@@ -2747,18 +2750,18 @@ struct NotificationSettingsView: View {
                     VStack(alignment: .leading, spacing: 3) {
                         Text("settings.notifications.system_status".localized)
                             .font(.system(size: 14, weight: .bold))
-                            .foregroundColor(.white)
+                            .foregroundColor(JourneyVisual.primaryText)
                         Text(statusTitle)
                             .font(.system(size: 12, weight: .medium))
                             .foregroundColor(statusColor)
                     }
                     Spacer()
                     Text("\(pendingCount)")
-                        .font(.system(size: 19, weight: .bold, design: .rounded))
-                        .foregroundColor(.white)
+                        .font(.system(size: 19, weight: .bold, design: .default))
+                        .foregroundColor(JourneyVisual.primaryText)
                     Text("settings.notifications.pending".localized)
                         .font(.system(size: 10, weight: .medium))
-                        .foregroundColor(.white.opacity(0.48))
+                        .foregroundColor(JourneyVisual.secondaryText)
                 }
                 .padding(17)
 
@@ -2773,7 +2776,7 @@ struct NotificationSettingsView: View {
                             Spacer()
                             Image(systemName: "arrow.up.right")
                         }
-                        .foregroundColor(JourneyVisual.lime)
+                        .foregroundColor(Theme.Colors.textPrimary)
                         .padding(17)
                     }
                     .accessibilityIdentifier("settings.notifications.openSystemSettings")
@@ -2786,10 +2789,10 @@ struct NotificationSettingsView: View {
         VStack(spacing: 7) {
             Image(systemName: icon)
                 .font(.system(size: 16, weight: .semibold))
-                .foregroundColor(JourneyVisual.lime)
+                .foregroundColor(Theme.Colors.textPrimary)
             Text(title)
                 .font(.system(size: 10, weight: .semibold))
-                .foregroundColor(.white.opacity(0.66))
+                .foregroundColor(JourneyVisual.secondaryText)
                 .lineLimit(2)
                 .multilineTextAlignment(.center)
         }

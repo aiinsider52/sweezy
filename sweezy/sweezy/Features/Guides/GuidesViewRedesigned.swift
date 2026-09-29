@@ -132,7 +132,7 @@ struct GuidesViewRedesigned: View {
             HStack(spacing: Theme.Spacing.sm) {
                 // "All" filter
                 CategoryChip(
-                    title: "Всі",
+                    title: "Всі".localized,
                     icon: "square.grid.2x2",
                     isSelected: selectedCategory == nil,
                     namespace: animation
@@ -169,8 +169,8 @@ struct GuidesViewRedesigned: View {
             if filteredGuides.isEmpty {
                 EmptyStateView(
                     systemImage: "doc.text.magnifyingglass",
-                    title: "Нічого не знайдено",
-                    subtitle: "Спробуйте змінити пошуковий запит або фільтр"
+                    title: "Нічого не знайдено".localized,
+                    subtitle: "Спробуйте змінити пошуковий запит або фільтр".localized
                 )
                 .padding(.top, Theme.Spacing.xxl)
             } else {
@@ -180,7 +180,7 @@ struct GuidesViewRedesigned: View {
                         iconGradient: true,
                         title: guide.title,
                         subtitle: guide.subtitle,
-                        badge: (guide.priority >= 5) ? "Важливо" : (guide.isNew ? "Нове" : nil),
+                        badge: (guide.priority >= 5) ? "Важливо".localized : (guide.isNew ? "Нове".localized : nil),
                         badgeColor: (guide.priority >= 5) ? Theme.Colors.warning : Theme.Colors.success
                     ) {
                         selectedGuide = guide
@@ -222,19 +222,19 @@ struct GuidesViewRedesigned: View {
                 }
                 
                 VStack(spacing: Theme.Spacing.sm) {
-                    Text("Зареєструйтесь для доступу")
+                    Text("Зареєструйтесь для доступу".localized)
                         .font(Theme.Typography.title2)
                         .fontWeight(.bold)
                         .foregroundColor(Theme.Colors.textPrimary)
                     
-                    Text("Отримайте повний доступ до всіх довідників, чеклістів та шаблонів")
+                    Text("Отримайте повний доступ до всіх довідників, чеклістів та шаблонів".localized)
                         .font(Theme.Typography.body)
                         .foregroundColor(Theme.Colors.textSecondary)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, Theme.Spacing.xl)
                 }
                 
-                PrimaryButton("Зареєструватись", style: .primary) {
+                PrimaryButton("Зареєструватись".localized, style: .primary) {
                     // Navigate to registration
                 }
                 .frame(maxWidth: 280)
@@ -339,7 +339,7 @@ private struct GuideDetailSheet: View {
                                 HStack {
                                     Image(systemName: guide.category.iconName)
                                         .font(.system(size: 48))
-                                        .foregroundColor(.white)
+                                        .foregroundColor(JourneyVisual.primaryText)
                                     Spacer()
                                 }
                                 .padding(Theme.Spacing.lg)
@@ -390,7 +390,7 @@ private struct GuideDetailSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Закрити") {
+                    Button("Закрити".localized) {
                         dismiss()
                     }
                 }

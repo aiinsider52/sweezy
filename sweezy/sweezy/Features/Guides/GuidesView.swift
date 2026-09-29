@@ -114,7 +114,7 @@ struct GuidesView: View {
             HStack(spacing: 10) {
                 Image(systemName: "magnifyingglass")
                     .foregroundColor(Theme.Colors.textTertiary)
-                TextField("Пошук гідів...", text: $searchText)
+                TextField("Пошук гідів...".localized, text: $searchText)
                     .font(Theme.Typography.body)
                 if !searchText.isEmpty {
                     Button { withAnimation { searchText = "" }; haptic(.light) } label: {
@@ -182,7 +182,7 @@ struct GuidesView: View {
             HStack(spacing: 6) {
                 Image(systemName: category?.iconName ?? "square.grid.2x2")
                     .font(.system(size: 14, weight: .semibold))
-                Text(category?.localizedName ?? "Всі")
+                Text(category?.localizedName ?? "Всі".localized)
                     .font(Theme.Typography.subheadline)
                     .fontWeight(isSelected ? .semibold : .regular)
             }
@@ -217,14 +217,14 @@ struct GuidesView: View {
                 // Decorative icon
                 Image(systemName: guide.category.iconName)
                     .font(.system(size: 120, weight: .thin))
-                    .foregroundColor(.white.opacity(0.15))
+                    .foregroundColor(JourneyVisual.secondaryText)
                     .offset(x: 140, y: -20)
                 
                 // Content
                 VStack(alignment: .leading, spacing: 12) {
                     // Badges
                     HStack(spacing: 8) {
-                        guideBadge("Рекомендовано", color: .white, textColor: guide.category.swiftUIColor)
+                        guideBadge("Рекомендовано".localized, color: .white, textColor: guide.category.swiftUIColor)
                         if guide.isNew {
                             guideBadge("NEW", color: .red, textColor: .white)
                         }
@@ -240,25 +240,25 @@ struct GuidesView: View {
                     Spacer()
                     
                     Text(guide.title)
-                        .font(.system(size: 22, weight: .bold, design: .rounded))
-                        .foregroundColor(.white)
+                        .font(.system(size: 22, weight: .bold, design: .default))
+                        .foregroundColor(JourneyVisual.primaryText)
                         .lineLimit(2)
                     
                     if let subtitle = guide.subtitle {
                         Text(subtitle)
                             .font(Theme.Typography.subheadline)
-                            .foregroundColor(.white.opacity(0.85))
+                            .foregroundColor(JourneyVisual.secondaryText)
                             .lineLimit(2)
                     }
                     
                     HStack(spacing: 16) {
-                        Label("\(guide.estimatedReadingTime) хв", systemImage: "clock")
+                        Label("%@ хв".localized(with: "\(guide.estimatedReadingTime)"), systemImage: "clock")
                         if appContainer.userStats.isGuideRead(id: guide.id) {
-                            Label("Прочитано", systemImage: "checkmark.circle.fill")
+                            Label("Прочитано".localized, systemImage: "checkmark.circle.fill")
                         }
                     }
                     .font(Theme.Typography.caption)
-                    .foregroundColor(.white.opacity(0.8))
+                    .foregroundColor(JourneyVisual.secondaryText)
                 }
                 .padding(20)
             }
@@ -284,9 +284,9 @@ struct GuidesView: View {
                     withAnimation { selectedCategory = category }
                     haptic(.light)
                 } label: {
-                    Text("Всі")
+                    Text("Всі".localized)
                         .font(Theme.Typography.subheadline)
-                        .foregroundColor(Theme.Colors.accent)
+                        .foregroundColor(JourneyVisual.accentText)
                 }
             }
             .padding(.horizontal, Theme.Spacing.md)
@@ -324,20 +324,20 @@ struct GuidesView: View {
                 // Decorative icon
                 Image(systemName: guide.category.iconName)
                     .font(.system(size: 44, weight: .thin))
-                    .foregroundColor(.white.opacity(0.2))
+                    .foregroundColor(JourneyVisual.secondaryText)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .trailing)
                     .offset(x: -8, y: -6)
 
                 // Bottom: time + read badge
                 HStack(spacing: 6) {
-                    Label("\(guide.estimatedReadingTime) хв", systemImage: "clock")
+                    Label("%@ хв".localized(with: "\(guide.estimatedReadingTime)"), systemImage: "clock")
                         .font(.system(size: 10, weight: .medium))
-                        .foregroundColor(.white.opacity(0.9))
+                        .foregroundColor(JourneyVisual.secondaryText)
                     Spacer()
                     if isRead {
                         Image(systemName: "checkmark.circle.fill")
                             .font(.system(size: 14))
-                            .foregroundColor(.white)
+                            .foregroundColor(JourneyVisual.primaryText)
                     } else if guide.isNew {
                         smallBadge("NEW", color: .red)
                     } else if guide.isPremium && !isPremium {
@@ -424,9 +424,9 @@ struct GuidesView: View {
                             .lineLimit(1)
                     }
                     HStack(spacing: 10) {
-                        Label("\(guide.estimatedReadingTime) хв", systemImage: "clock")
+                        Label("%@ хв".localized(with: "\(guide.estimatedReadingTime)"), systemImage: "clock")
                         if isRead {
-                            Label("Прочитано", systemImage: "checkmark.circle.fill")
+                            Label("Прочитано".localized, systemImage: "checkmark.circle.fill")
                                 .foregroundColor(.green)
                         }
                     }
@@ -456,10 +456,10 @@ struct GuidesView: View {
             Image(systemName: "doc.text.magnifyingglass")
                 .font(.system(size: 48))
                 .foregroundColor(Theme.Colors.textTertiary)
-            Text("Нічого не знайдено")
+            Text("Нічого не знайдено".localized)
                 .font(Theme.Typography.headline)
                 .foregroundColor(Theme.Colors.textPrimary)
-            Text("Спробуйте змінити пошук або фільтри")
+            Text("Спробуйте змінити пошук або фільтри".localized)
                 .font(Theme.Typography.subheadline)
                 .foregroundColor(Theme.Colors.textSecondary)
             Button {
@@ -469,10 +469,10 @@ struct GuidesView: View {
                 }
                 haptic(.light)
             } label: {
-                Text("Скинути фільтри")
+                Text("Скинути фільтри".localized)
                     .font(Theme.Typography.subheadline)
                     .fontWeight(.semibold)
-                    .foregroundColor(.white)
+                    .foregroundColor(JourneyVisual.primaryText)
                     .padding(.horizontal, 20)
                     .padding(.vertical, 12)
                     .background(Theme.Colors.accent)
@@ -669,14 +669,14 @@ struct GuideDetailView: View {
             VStack(spacing: 18) {
                 Image(systemName: "lock.shield.fill")
                     .font(.system(size: 34, weight: .bold))
-                    .foregroundColor(JourneyVisual.lime)
+                    .foregroundColor(Theme.Colors.textPrimary)
                 Text(guide.title)
-                    .font(.system(size: 28, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
+                    .font(.system(size: 28, weight: .bold, design: .default))
+                    .foregroundColor(JourneyVisual.primaryText)
                     .multilineTextAlignment(.center)
-                Text("Цей матеріал входить до Sweezy Plus")
-                    .foregroundColor(.white.opacity(0.64))
-                Button("Відкрити Plus") { showSubscription = true }
+                Text("Цей матеріал входить до Sweezy Plus".localized)
+                    .foregroundColor(JourneyVisual.secondaryText)
+                Button("Відкрити Plus".localized) { showSubscription = true }
                     .font(.system(size: 17, weight: .bold))
                     .foregroundColor(.black)
                     .frame(maxWidth: .infinity)
@@ -764,7 +764,7 @@ struct GuideDetailView: View {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button { showShareSheet = true; haptic(.light) } label: {
                     Image(systemName: "square.and.arrow.up")
-                        .foregroundColor(Theme.Colors.accent)
+                        .foregroundColor(JourneyVisual.accentStrong)
                 }
             }
         }
@@ -839,7 +839,7 @@ struct GuideDetailView: View {
             .overlay(
                 Image(systemName: guide.category.iconName)
                     .font(.system(size: 140, weight: .thin))
-                    .foregroundColor(.white.opacity(0.12))
+                    .foregroundColor(JourneyVisual.secondaryText)
                     .offset(x: 100, y: -30)
             )
             .overlay(
@@ -854,7 +854,7 @@ struct GuideDetailView: View {
                     if guide.isNew {
                         Text("NEW")
                             .font(.system(size: 10, weight: .bold))
-                            .foregroundColor(.white)
+                            .foregroundColor(JourneyVisual.primaryText)
                             .padding(.horizontal, 8)
                             .padding(.vertical, 4)
                             .background(Capsule().fill(Color.red))
@@ -870,10 +870,10 @@ struct GuideDetailView: View {
                     if appContainer.userStats.isGuideRead(id: guide.id) {
                         HStack(spacing: 4) {
                             Image(systemName: "checkmark.circle.fill")
-                            Text("Прочитано")
+                            Text("Прочитано".localized)
                         }
                         .font(.system(size: 10, weight: .semibold))
-                        .foregroundColor(.white)
+                        .foregroundColor(JourneyVisual.primaryText)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
                         .background(Capsule().fill(Color.green.opacity(0.8)))
@@ -883,24 +883,24 @@ struct GuideDetailView: View {
                 Spacer()
                 
                 Text(guide.title)
-                    .font(.system(size: 26, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
+                    .font(.system(size: 26, weight: .bold, design: .default))
+                    .foregroundColor(JourneyVisual.primaryText)
                     .lineLimit(3)
                 
                 if let subtitle = guide.subtitle {
                     Text(subtitle)
                         .font(Theme.Typography.subheadline)
-                        .foregroundColor(.white.opacity(0.9))
+                        .foregroundColor(JourneyVisual.secondaryText)
                         .lineLimit(2)
                 }
                 
                 // Meta
                 HStack(spacing: 16) {
-                    Label("≈ \(calculatedReadingMinutes) хв читання", systemImage: "clock")
+                    Label("≈ %@ хв читання".localized(with: "\(calculatedReadingMinutes)"), systemImage: "clock")
                     Label(formatDate(guide.lastUpdated), systemImage: "calendar")
                 }
                 .font(.system(size: 13, weight: .regular))
-                .foregroundColor(.white.opacity(0.8))
+                .foregroundColor(JourneyVisual.secondaryText)
             }
             .padding(20)
         }
@@ -913,7 +913,7 @@ struct GuideDetailView: View {
             Text(guide.category.localizedName)
         }
         .font(.system(size: 11, weight: .semibold))
-        .foregroundColor(.white)
+        .foregroundColor(JourneyVisual.primaryText)
         .padding(.horizontal, 10)
         .padding(.vertical, 6)
         .background(.ultraThinMaterial)
@@ -946,7 +946,7 @@ struct GuideDetailView: View {
                         Spacer()
                         Image(systemName: "arrow.up.right")
                             .font(.system(size: 10, weight: .bold))
-                            .foregroundColor(Theme.Colors.primary)
+                            .foregroundColor(JourneyVisual.accentStrong)
                     }
                 }
                 .buttonStyle(.plain)
@@ -954,7 +954,7 @@ struct GuideDetailView: View {
                 HStack(spacing: 7) {
                     trustSignalContent
                     Spacer()
-                    Text("Джерело потребує перевірки")
+                    Text("Джерело потребує перевірки".localized)
                         .font(.system(size: 10, weight: .semibold))
                         .foregroundColor(.orange)
                 }
@@ -1054,7 +1054,7 @@ struct GuideDetailView: View {
     @ViewBuilder
     private var contentSection: some View {
         if isLocked {
-            Text("Цей матеріал доступний у Sweezy Plus.")
+            Text("Цей матеріал доступний у Sweezy Plus.".localized)
         } else {
             MarkdownContentView(content: guide.bodyMarkdown)
         }
@@ -1063,12 +1063,12 @@ struct GuideDetailView: View {
     // MARK: - Template Steps Section
     private var templateStepsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Документи за кроками")
+            Text("Документи за кроками".localized)
                 .font(Theme.Typography.headline)
                 .fontWeight(.semibold)
                 .foregroundColor(Theme.Colors.textPrimary)
             
-            Text("Заповніть потрібні шаблони одразу під час читання гайда.")
+            Text("Заповніть потрібні шаблони одразу під час читання гайда.".localized)
                 .font(Theme.Typography.subheadline)
                 .foregroundColor(Theme.Colors.textSecondary)
             
@@ -1094,7 +1094,7 @@ struct GuideDetailView: View {
     // MARK: - Links Section
     private var linksSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Корисні посилання")
+            Text("Корисні посилання".localized)
                 .font(Theme.Typography.headline)
                 .fontWeight(.semibold)
                 .foregroundColor(Theme.Colors.textPrimary)
@@ -1108,7 +1108,7 @@ struct GuideDetailView: View {
     // MARK: - Tags Section
     private var tagsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Теги")
+            Text("Теги".localized)
                 .font(Theme.Typography.headline)
                 .fontWeight(.semibold)
                 .foregroundColor(Theme.Colors.textPrimary)
@@ -1143,11 +1143,11 @@ struct GuideDetailView: View {
             }
             
             VStack(alignment: .leading, spacing: 2) {
-                Text("Отримайте +50 XP")
+                Text("Отримайте +50 XP".localized)
                     .font(Theme.Typography.subheadline)
                     .fontWeight(.semibold)
                     .foregroundColor(Theme.Colors.textPrimary)
-                Text("Дочитайте гід до кінця")
+                Text("Дочитайте гід до кінця".localized)
                     .font(Theme.Typography.caption)
                     .foregroundColor(Theme.Colors.textSecondary)
             }
@@ -1174,10 +1174,10 @@ struct GuideDetailView: View {
                     .frame(width: 20, height: 20)
                 Image(systemName: "star.fill")
                     .font(.system(size: 12, weight: .bold))
-                    .foregroundColor(.white)
+                    .foregroundColor(JourneyVisual.primaryText)
             }
             Text("+50 XP")
-                .font(.system(size: 15, weight: .semibold, design: .rounded))
+                .font(.system(size: 15, weight: .semibold, design: .default))
                 .foregroundColor(Theme.Colors.textPrimary)
         }
         .padding(.horizontal, 14)
@@ -1220,7 +1220,7 @@ struct GuideDetailView: View {
 
                 Image(systemName: icon)
                     .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(Theme.Colors.primary)
+                    .foregroundColor(JourneyVisual.accentStrong)
             }
 
             VStack(alignment: .leading, spacing: 3) {
@@ -1303,8 +1303,8 @@ struct TemplateStepCard: View {
                     .frame(width: 32, height: 32)
                     .overlay(
                         Text("\(stepNumber)")
-                            .font(.system(size: 14, weight: .bold, design: .rounded))
-                            .foregroundColor(accent)
+                            .font(.system(size: 14, weight: .bold, design: .default))
+                            .foregroundColor(JourneyVisual.accentText)
                     )
                 
                 VStack(alignment: .leading, spacing: 4) {
@@ -1325,7 +1325,7 @@ struct TemplateStepCard: View {
                 badge(title: template.category.localizedName, icon: template.category.iconName, color: accent.opacity(0.15), textColor: accent)
                 badge(title: template.language.uppercased(), icon: "globe", color: Color.gray.opacity(0.15), textColor: Theme.Colors.textSecondary)
                 if template.isOfficial {
-                    badge(title: "Офіційний", icon: "checkmark.seal.fill", color: Color.green.opacity(0.15), textColor: .green)
+                    badge(title: "Офіційний".localized, icon: "checkmark.seal.fill", color: Color.green.opacity(0.15), textColor: .green)
                 }
             }
             
@@ -1335,13 +1335,13 @@ struct TemplateStepCard: View {
                 } label: {
                     HStack(spacing: 6) {
                         Image(systemName: "eye")
-                        Text("Переглянути")
+                        Text("Переглянути".localized)
                     }
                     .font(.system(size: 14, weight: .semibold))
                     .padding(.vertical, 10)
                     .padding(.horizontal, 14)
                     .background(accent.opacity(0.12))
-                    .foregroundColor(accent)
+                    .foregroundColor(JourneyVisual.accentText)
                     .cornerRadius(12)
                 }
                 
@@ -1353,7 +1353,7 @@ struct TemplateStepCard: View {
                 } label: {
                     HStack(spacing: 6) {
                         Image(systemName: "doc.on.doc.fill")
-                        Text("Скопіювати")
+                        Text("Скопіювати".localized)
                     }
                     .font(.system(size: 14, weight: .semibold))
                     .padding(.vertical, 10)
@@ -1458,7 +1458,7 @@ struct MarkdownContentView: View {
                 blockView(block)
             }
         }
-        .tint(Theme.Colors.primary)
+        .tint(JourneyVisual.accentText)
     }
     
     // MARK: - Block Renderer
@@ -1469,7 +1469,7 @@ struct MarkdownContentView: View {
         case .heading1(let text):
             VStack(alignment: .leading, spacing: 6) {
                 inlineText(text)
-                    .font(.system(size: 24, weight: .bold, design: .rounded))
+                    .font(.system(size: 24, weight: .bold, design: .default))
                     .foregroundColor(Theme.Colors.textPrimary)
                 Rectangle()
                     .fill(Theme.Colors.accent)
@@ -1482,7 +1482,7 @@ struct MarkdownContentView: View {
         case .heading2(let text):
             VStack(alignment: .leading, spacing: 6) {
                 inlineText(text)
-                    .font(.system(size: 20, weight: .bold, design: .rounded))
+                    .font(.system(size: 20, weight: .bold, design: .default))
                     .foregroundColor(Theme.Colors.textPrimary)
                 Rectangle()
                     .fill(Theme.Colors.primary.opacity(0.3))
@@ -1524,8 +1524,8 @@ struct MarkdownContentView: View {
         case .numbered(let number, let text):
             HStack(alignment: .top, spacing: 10) {
                 Text("\(number).")
-                    .font(.system(size: 17, weight: .semibold, design: .rounded))
-                    .foregroundColor(Theme.Colors.primary)
+                    .font(.system(size: 17, weight: .semibold, design: .default))
+                    .foregroundColor(JourneyVisual.accentText)
                     .frame(width: 24, alignment: .trailing)
                 inlineText(text)
                     .font(Theme.Typography.body)
@@ -1706,22 +1706,28 @@ struct FlowLayout: Layout {
     func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
         let result = FlowResult(in: bounds.width, subviews: subviews, spacing: spacing)
         for (index, subview) in subviews.enumerated() {
-            subview.place(at: CGPoint(x: bounds.minX + result.positions[index].x, y: bounds.minY + result.positions[index].y), proposal: .unspecified)
+            subview.place(at: CGPoint(x: bounds.minX + result.positions[index].x, y: bounds.minY + result.positions[index].y), proposal: ProposedViewSize(result.sizes[index]))
         }
     }
     
     struct FlowResult {
         let size: CGSize
         let positions: [CGPoint]
+        let sizes: [CGSize]
         
         init(in maxWidth: CGFloat, subviews: LayoutSubviews, spacing: CGFloat) {
             var positions: [CGPoint] = []
+            var sizes: [CGSize] = []
             var currentPosition = CGPoint.zero
             var lineHeight: CGFloat = 0
             var maxX: CGFloat = 0
             
             for subview in subviews {
-                let subviewSize = subview.sizeThatFits(.unspecified)
+                let ideal = subview.sizeThatFits(.unspecified)
+                let availableWidth = maxWidth.isFinite ? max(0, maxWidth) : ideal.width
+                let subviewSize = subview.sizeThatFits(
+                    ProposedViewSize(width: min(ideal.width, availableWidth), height: nil))
+                sizes.append(subviewSize)
                 
                 if currentPosition.x + subviewSize.width > maxWidth && currentPosition.x > 0 {
                     currentPosition.x = 0
@@ -1736,6 +1742,7 @@ struct FlowLayout: Layout {
             }
             
             self.positions = positions
+            self.sizes = sizes
             self.size = CGSize(width: maxX, height: currentPosition.y + lineHeight)
         }
     }

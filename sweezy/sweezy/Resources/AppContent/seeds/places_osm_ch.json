@@ -1,0 +1,7165 @@
+[
+  {
+    "id": "8d48d9e0-b684-58da-8ed6-9958dd756e13",
+    "name": "RAV Regionales Arbeitsvermittlungszentrum Suhr",
+    "type": "employment",
+    "category": "job_center",
+    "description": "Регіональний центр працевлаштування (RAV/ORP): реєстрація як шукача роботи, консультації, курси.",
+    "address": {
+      "street": "Bernstrasse West",
+      "houseNumber": "73",
+      "postalCode": "5034",
+      "city": "Suhr",
+      "canton": "AG"
+    },
+    "coordinate": {
+      "latitude": 47.369834,
+      "longitude": 8.07966
+    },
+    "canton": "AG",
+    "countryCode": "CH",
+    "subdivisionCode": "AG",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/46626688",
+    "phoneNumber": "+41 62 855 02 02",
+    "website": "https://www.ag.ch/de/dvi/wirtschaft_arbeit/stellensuchende_arbeitslose/rav_beratung___vermittlung/standorte_der_regionalen_arbeitsvermittlungszentren/rav_suhr/rav_suhr_1.jsp"
+  },
+  {
+    "id": "8aa43373-f1a8-57a2-9fa0-45821e58255e",
+    "name": "Amt für Migration und Integration",
+    "type": "government",
+    "category": "migration_office",
+    "description": "Міграційна служба кантону: дозволи на проживання, статус S, продовження документів.",
+    "address": {
+      "street": "Bleichemattstrasse",
+      "houseNumber": "7",
+      "postalCode": "5000",
+      "city": "Aarau",
+      "canton": "AG"
+    },
+    "coordinate": {
+      "latitude": 47.390683,
+      "longitude": 8.05305
+    },
+    "canton": "AG",
+    "countryCode": "CH",
+    "subdivisionCode": "AG",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/6440214910",
+    "phoneNumber": "+41 62 835 18 60",
+    "website": "https://www.ag.ch/mika"
+  },
+  {
+    "id": "c78f9d99-c608-564b-b98b-fcb11d652c16",
+    "name": "Asana Spital Leuggern",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Kommendeweg",
+      "houseNumber": "12",
+      "postalCode": "5316",
+      "city": "Leuggern",
+      "canton": "AG"
+    },
+    "coordinate": {
+      "latitude": 47.580731,
+      "longitude": 8.217323
+    },
+    "canton": "AG",
+    "countryCode": "CH",
+    "subdivisionCode": "AG",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/677041125",
+    "phoneNumber": "+41 56 269 42 30",
+    "website": "http://www.spitalleuggern.ch/"
+  },
+  {
+    "id": "1241195c-2bae-5fa7-b74a-be3b69d9e7bf",
+    "name": "Gesundheitszentrum Fricktal - Spital Rheinfelden",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Riburger Strasse",
+      "houseNumber": "12",
+      "postalCode": "4310",
+      "city": "Rheinfelden",
+      "canton": "AG"
+    },
+    "coordinate": {
+      "latitude": 47.556007,
+      "longitude": 7.806883
+    },
+    "canton": "AG",
+    "countryCode": "CH",
+    "subdivisionCode": "AG",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/675988469",
+    "phoneNumber": "+41 61 835 66 66",
+    "website": "https://www.gzf.ch/startseite.html"
+  },
+  {
+    "id": "75d3448d-ac4b-504a-8376-10ed62965599",
+    "name": "Hirslanden Klinik Aarau",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Schänisweg",
+      "houseNumber": "4",
+      "postalCode": "5000",
+      "city": "Aarau",
+      "canton": "AG"
+    },
+    "coordinate": {
+      "latitude": 47.390703,
+      "longitude": 8.04256
+    },
+    "canton": "AG",
+    "countryCode": "CH",
+    "subdivisionCode": "AG",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": true,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/48747443",
+    "phoneNumber": "+41 62 8367000",
+    "website": "https://www.hirslanden.ch/"
+  },
+  {
+    "id": "ecabc894-09c5-504a-a585-bb17bbf37bbf",
+    "name": "Kantonsspital Aarau",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Tellstrasse",
+      "houseNumber": "25",
+      "postalCode": "5001",
+      "city": "Aarau",
+      "canton": "AG"
+    },
+    "coordinate": {
+      "latitude": 47.388366,
+      "longitude": 8.060293
+    },
+    "canton": "AG",
+    "countryCode": "CH",
+    "subdivisionCode": "AG",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/48459417",
+    "phoneNumber": "+41 62 838 41 41",
+    "website": "https://www.ksa.ch/"
+  },
+  {
+    "id": "c0f418ae-f233-5f5b-954a-8cdf8eebe863",
+    "name": "Kantonsspital Baden",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Im Ergel",
+      "houseNumber": "1",
+      "postalCode": "5404",
+      "city": "Baden",
+      "canton": "AG"
+    },
+    "coordinate": {
+      "latitude": 47.454689,
+      "longitude": 8.278305
+    },
+    "canton": "AG",
+    "countryCode": "CH",
+    "subdivisionCode": "AG",
+    "openingHours": [
+      {
+        "weekday": 1,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 2,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 3,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 4,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 5,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 6,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 7,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      }
+    ],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/672945363",
+    "phoneNumber": "+41 56 486 21 11",
+    "website": "https://www.kantonsspitalbaden.ch/"
+  },
+  {
+    "id": "8bea0649-9afb-5733-8278-739c98e54c81",
+    "name": "Spital Laufenburg",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Spitalstrasse",
+      "houseNumber": "10",
+      "postalCode": "5080",
+      "city": "Laufenburg",
+      "canton": "AG"
+    },
+    "coordinate": {
+      "latitude": 47.562078,
+      "longitude": 8.064403
+    },
+    "canton": "AG",
+    "countryCode": "CH",
+    "subdivisionCode": "AG",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": true,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/681071295",
+    "phoneNumber": "+41 62 874 50 00",
+    "website": "https://www.gzf.ch/"
+  },
+  {
+    "id": "57c643de-1548-5f2c-ba76-a83d2abd1b17",
+    "name": "Caritas · Aarau",
+    "type": "social",
+    "category": "social_services",
+    "description": "Caritas: соціальні та боргові консультації, підтримка сімей і біженців.",
+    "address": {
+      "street": "Bahnhofstrasse",
+      "houseNumber": "86",
+      "postalCode": "5001",
+      "city": "Aarau",
+      "canton": "AG"
+    },
+    "coordinate": {
+      "latitude": 47.39233,
+      "longitude": 8.052487
+    },
+    "canton": "AG",
+    "countryCode": "CH",
+    "subdivisionCode": "AG",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/3642874820",
+    "phoneNumber": "+41 62 824 15 20"
+  },
+  {
+    "id": "44d1b112-9d87-58ff-ac79-316eb268299f",
+    "name": "Rotes Kreuz Aargau",
+    "type": "social",
+    "category": "social_services",
+    "description": "Червоний Хрест: соціальна підтримка, консультації та волонтерські програми, зокрема для людей з досвідом втечі.",
+    "address": {
+      "street": "Nordallee",
+      "houseNumber": "",
+      "postalCode": "5032",
+      "city": "Aarau",
+      "canton": "AG"
+    },
+    "coordinate": {
+      "latitude": 47.390914,
+      "longitude": 8.059849
+    },
+    "canton": "AG",
+    "countryCode": "CH",
+    "subdivisionCode": "AG",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/4421895390"
+  },
+  {
+    "id": "b6f2a49c-34fe-50a8-ac14-c85b727dbda9",
+    "name": "Tischlein deck dich",
+    "type": "social",
+    "category": "food_bank",
+    "description": "Видача продуктів для людей з низьким доходом. Умови отримання уточнюй на місці або в соціальній службі.",
+    "address": {
+      "street": "Aarauerstrasse",
+      "houseNumber": "",
+      "postalCode": "5603",
+      "city": "Staufen",
+      "canton": "AG"
+    },
+    "coordinate": {
+      "latitude": 47.387327,
+      "longitude": 8.155697
+    },
+    "canton": "AG",
+    "countryCode": "CH",
+    "subdivisionCode": "AG",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/12282025186",
+    "website": "https://www.tischlein.ch/ueber-uns/regionen-und-teams/nordwestschweiz/"
+  },
+  {
+    "id": "c0db1b6a-061b-5fcf-8326-3a9069a45f67",
+    "name": "RAV Appenzell Ausserhodeln",
+    "type": "employment",
+    "category": "job_center",
+    "description": "Регіональний центр працевлаштування (RAV/ORP): реєстрація як шукача роботи, консультації, курси.",
+    "address": {
+      "street": "Kasernenstrasse",
+      "houseNumber": "",
+      "postalCode": "9100",
+      "city": "Herisau",
+      "canton": "AR"
+    },
+    "coordinate": {
+      "latitude": 47.385712,
+      "longitude": 9.280595
+    },
+    "canton": "AR",
+    "countryCode": "CH",
+    "subdivisionCode": "AR",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/7953997182"
+  },
+  {
+    "id": "f0752381-5201-52ef-aa34-b105a03c4ba0",
+    "name": "Migrationsamt AR",
+    "type": "government",
+    "category": "migration_office",
+    "description": "Міграційна служба кантону: дозволи на проживання, статус S, продовження документів.",
+    "address": {
+      "street": "Landsgemeindeplatz",
+      "houseNumber": "2",
+      "postalCode": "9043",
+      "city": "Trogen",
+      "canton": "AR"
+    },
+    "coordinate": {
+      "latitude": 47.407836,
+      "longitude": 9.465258
+    },
+    "canton": "AR",
+    "countryCode": "CH",
+    "subdivisionCode": "AR",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/9878426018",
+    "website": "https://ar.ch/verwaltung/departement-inneres-und-sicherheit/amt-fuer-inneres/abteilung-migration/"
+  },
+  {
+    "id": "1daf5bfe-926c-51cf-92ce-c39d381ef264",
+    "name": "Medizinisches Ambulatorium",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Werdstrasse",
+      "houseNumber": "1a",
+      "postalCode": "9410",
+      "city": "Heiden",
+      "canton": "AR"
+    },
+    "coordinate": {
+      "latitude": 47.442515,
+      "longitude": 9.531504
+    },
+    "canton": "AR",
+    "countryCode": "CH",
+    "subdivisionCode": "AR",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": true,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/680289440",
+    "phoneNumber": "+41 71 898 61 11",
+    "website": "https://www.spitalverbund.ch/angebote-heiden-herisau/home-spital-heiden/"
+  },
+  {
+    "id": "267d274e-f973-585d-8f30-81d529e73b13",
+    "name": "RAV Bern West",
+    "type": "employment",
+    "category": "job_center",
+    "description": "Регіональний центр працевлаштування (RAV/ORP): реєстрація як шукача роботи, консультації, курси.",
+    "address": {
+      "street": "Lagerhausweg",
+      "houseNumber": "10",
+      "postalCode": "3018",
+      "city": "Bern",
+      "canton": "BE"
+    },
+    "coordinate": {
+      "latitude": 46.937302,
+      "longitude": 7.394245
+    },
+    "canton": "BE",
+    "countryCode": "CH",
+    "subdivisionCode": "BE",
+    "openingHours": [],
+    "languages": [
+      "de",
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/1088649836",
+    "phoneNumber": "+41 31 6360340",
+    "website": "https://www.vol.be.ch/vol/de/index/arbeit/arbeitsvermittlung/ueber_uns/standorte/rav_bern_west.html"
+  },
+  {
+    "id": "f8b2e6d3-05e3-5231-9fa3-afc024d0ae68",
+    "name": "RAV Bern Zentrum",
+    "type": "employment",
+    "category": "job_center",
+    "description": "Регіональний центр працевлаштування (RAV/ORP): реєстрація як шукача роботи, консультації, курси.",
+    "address": {
+      "street": "Reiterstrasse",
+      "houseNumber": "",
+      "postalCode": "3014",
+      "city": "Bern",
+      "canton": "BE"
+    },
+    "coordinate": {
+      "latitude": 46.954182,
+      "longitude": 7.461329
+    },
+    "canton": "BE",
+    "countryCode": "CH",
+    "subdivisionCode": "BE",
+    "openingHours": [],
+    "languages": [
+      "de",
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/5628719872",
+    "phoneNumber": "+41 31 6360262",
+    "website": "https://www.vol.be.ch/vol/de/index/arbeit/arbeitsvermittlung/ueber_uns/standorte/rav_bern_zentrum.html"
+  },
+  {
+    "id": "e10ab6e4-5738-5923-970b-7d8a33a58f0f",
+    "name": "RAV Lyss",
+    "type": "employment",
+    "category": "job_center",
+    "description": "Регіональний центр працевлаштування (RAV/ORP): реєстрація як шукача роботи, консультації, курси.",
+    "address": {
+      "street": "Bahnhofstrasse",
+      "houseNumber": "9",
+      "postalCode": "3250",
+      "city": "Lyss",
+      "canton": "BE"
+    },
+    "coordinate": {
+      "latitude": 47.075601,
+      "longitude": 7.306032
+    },
+    "canton": "BE",
+    "countryCode": "CH",
+    "subdivisionCode": "BE",
+    "openingHours": [],
+    "languages": [
+      "de",
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/8672202378",
+    "website": "https://www.vol.be.ch/vol/de/index/arbeit/arbeitsvermittlung/ueber_uns/standorte/rav_lyss.html"
+  },
+  {
+    "id": "b25530d5-e8a0-5517-976a-56dbc0033298",
+    "name": "Migrationsdienst des Kantons Bern / Service des migrations du canton de Berne",
+    "type": "government",
+    "category": "migration_office",
+    "description": "Міграційна служба кантону: дозволи на проживання, статус S, продовження документів.",
+    "address": {
+      "street": "Ostermundigenstrasse",
+      "houseNumber": "99B",
+      "postalCode": "3006",
+      "city": "Bern",
+      "canton": "BE"
+    },
+    "coordinate": {
+      "latitude": 46.955512,
+      "longitude": 7.475568
+    },
+    "canton": "BE",
+    "countryCode": "CH",
+    "subdivisionCode": "BE",
+    "openingHours": [],
+    "languages": [
+      "de",
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/13893702957",
+    "phoneNumber": "+41316335315",
+    "website": "https://www.migration.sid.be.ch/de/start.html"
+  },
+  {
+    "id": "74b401cb-246f-50d7-b158-9b3201342b3a",
+    "name": "Office de la population et des migrations du canton de Berne",
+    "type": "government",
+    "category": "migration_office",
+    "description": "Міграційна служба кантону: дозволи на проживання, статус S, продовження документів.",
+    "address": {
+      "street": "Route de Châtillon",
+      "houseNumber": "",
+      "postalCode": "2515",
+      "city": "Plateau de Diesse",
+      "canton": "BE"
+    },
+    "coordinate": {
+      "latitude": 47.097681,
+      "longitude": 7.102533
+    },
+    "canton": "BE",
+    "countryCode": "CH",
+    "subdivisionCode": "BE",
+    "openingHours": [],
+    "languages": [
+      "de",
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/12613119270"
+  },
+  {
+    "id": "5d36f391-e2f8-5109-893b-0abb5481c473",
+    "name": "Посольство України (Botschaft der Ukraine)",
+    "type": "government",
+    "category": "embassy",
+    "description": "Посольство України у Швейцарії: консульські послуги для громадян України — паспорти, довідки, нотаріальні дії.",
+    "address": {
+      "street": "Feldeggweg",
+      "houseNumber": "",
+      "postalCode": "3005",
+      "city": "Bern",
+      "canton": "BE"
+    },
+    "coordinate": {
+      "latitude": 46.943906,
+      "longitude": 7.447115
+    },
+    "canton": "BE",
+    "countryCode": "CH",
+    "subdivisionCode": "BE",
+    "openingHours": [],
+    "languages": [
+      "uk",
+      "en"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/10098527604",
+    "phoneNumber": "+41 31 3522316",
+    "website": "https://switzerland.mfa.gov.ua"
+  },
+  {
+    "id": "da5b47f5-af73-582e-b036-677ae7f414fa",
+    "name": "Centre hospitalier Bienne / Spitalzentrum Biel",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Chante-Merle / Vogelsang",
+      "houseNumber": "84",
+      "postalCode": "2501",
+      "city": "Biel/Bienne",
+      "canton": "BE"
+    },
+    "coordinate": {
+      "latitude": 47.146999,
+      "longitude": 7.244884
+    },
+    "canton": "BE",
+    "countryCode": "CH",
+    "subdivisionCode": "BE",
+    "openingHours": [],
+    "languages": [
+      "de",
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": true,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/relation/15578536",
+    "phoneNumber": "+41 32 324 24 24",
+    "website": "https://www.spitalzentrum-biel.ch"
+  },
+  {
+    "id": "b606c582-f35c-56c4-aff0-decd10cf555d",
+    "name": "Hirslanden - Privatklinik Linde - Clinique des Tilleuls",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Crêt-des-Fleurs / Blumenrain",
+      "houseNumber": "105",
+      "postalCode": "2503",
+      "city": "Biel/Bienne",
+      "canton": "BE"
+    },
+    "coordinate": {
+      "latitude": 47.133193,
+      "longitude": 7.263077
+    },
+    "canton": "BE",
+    "countryCode": "CH",
+    "subdivisionCode": "BE",
+    "openingHours": [],
+    "languages": [
+      "de",
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/680280598",
+    "phoneNumber": "+41 32 366 41 11",
+    "website": "https://www.hirslanden.ch/de/klinik-linde/home.html"
+  },
+  {
+    "id": "8da2ada9-960c-5e29-b1aa-0abb969a6264",
+    "name": "Hirslanden Klinik Permanence",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Bümplizstrasse",
+      "houseNumber": "83",
+      "postalCode": "3018",
+      "city": "Bern",
+      "canton": "BE"
+    },
+    "coordinate": {
+      "latitude": 46.944598,
+      "longitude": 7.39227
+    },
+    "canton": "BE",
+    "countryCode": "CH",
+    "subdivisionCode": "BE",
+    "openingHours": [],
+    "languages": [
+      "de",
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": true,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/675406336",
+    "phoneNumber": "+41 31 990 41 11",
+    "website": "https://www.hirslanden.ch/de/klinik-permanence/home.html"
+  },
+  {
+    "id": "e2a32852-e3cc-5905-93da-382eb5fe0c44",
+    "name": "Inselspital",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Freiburgstrasse",
+      "houseNumber": "18",
+      "postalCode": "3010",
+      "city": "Bern",
+      "canton": "BE"
+    },
+    "coordinate": {
+      "latitude": 46.947309,
+      "longitude": 7.424395
+    },
+    "canton": "BE",
+    "countryCode": "CH",
+    "subdivisionCode": "BE",
+    "openingHours": [],
+    "languages": [
+      "de",
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": true,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/317800156",
+    "phoneNumber": "+41 316322111",
+    "website": "https://www.insel.ch/"
+  },
+  {
+    "id": "dad62455-c960-519e-b99e-2e3f8651c2e5",
+    "name": "Kinderkliniken Inselspital",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Freiburgstrasse",
+      "houseNumber": "18",
+      "postalCode": "3010",
+      "city": "Bern",
+      "canton": "BE"
+    },
+    "coordinate": {
+      "latitude": 46.9469,
+      "longitude": 7.425943
+    },
+    "canton": "BE",
+    "countryCode": "CH",
+    "subdivisionCode": "BE",
+    "openingHours": [],
+    "languages": [
+      "de",
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/11845447220",
+    "phoneNumber": "+41 31 632 21 11",
+    "website": "http://www.kinderkliniken.insel.ch/"
+  },
+  {
+    "id": "a5219205-89ea-5b15-8f76-3f865730b9f3",
+    "name": "Lindenhofspital",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Bremgartenstrasse",
+      "houseNumber": "117",
+      "postalCode": "3012",
+      "city": "Bern",
+      "canton": "BE"
+    },
+    "coordinate": {
+      "latitude": 46.958174,
+      "longitude": 7.427875
+    },
+    "canton": "BE",
+    "countryCode": "CH",
+    "subdivisionCode": "BE",
+    "openingHours": [],
+    "languages": [
+      "de",
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": true,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/91109658",
+    "phoneNumber": "+41 31 3008811",
+    "website": "https://www.lindenhofgruppe.ch/de/standorte/lindenhof/"
+  },
+  {
+    "id": "2fbe387a-1ca4-52cd-9043-bbea219d3ca2",
+    "name": "Notfallzentrum Spital Thun",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Krankenhausstrasse",
+      "houseNumber": "12",
+      "postalCode": "3600",
+      "city": "Thun",
+      "canton": "BE"
+    },
+    "coordinate": {
+      "latitude": 46.761771,
+      "longitude": 7.632259
+    },
+    "canton": "BE",
+    "countryCode": "CH",
+    "subdivisionCode": "BE",
+    "openingHours": [
+      {
+        "weekday": 1,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 2,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 3,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 4,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 5,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 6,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 7,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      }
+    ],
+    "languages": [
+      "de",
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/12495533869",
+    "phoneNumber": "+41 58 636 99 99",
+    "website": "https://www.spitalthun.ch/notfallzentrum",
+    "email": "notfall@spitalstsag.ch"
+  },
+  {
+    "id": "8b799434-7dc7-56d4-804c-b70bd5eba8be",
+    "name": "Regionalspital Interlaken",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Weissenaustrasse",
+      "houseNumber": "27",
+      "postalCode": "3800",
+      "city": "Unterseen",
+      "canton": "BE"
+    },
+    "coordinate": {
+      "latitude": 46.680344,
+      "longitude": 7.843374
+    },
+    "canton": "BE",
+    "countryCode": "CH",
+    "subdivisionCode": "BE",
+    "openingHours": [],
+    "languages": [
+      "de",
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": true,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/relation/9638646",
+    "phoneNumber": "+41 33 826 26 26",
+    "website": "https://www.spitalfmi.ch/index.php?id=2217",
+    "email": "info@spitalfmi.ch"
+  },
+  {
+    "id": "abc1d8c4-6978-53e8-8252-6d111a6c4996",
+    "name": "SRO Spital Oberaargau Langenthal",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "St. Urbanstrasse",
+      "houseNumber": "67",
+      "postalCode": "4900",
+      "city": "Langenthal",
+      "canton": "BE"
+    },
+    "coordinate": {
+      "latitude": 47.215933,
+      "longitude": 7.793667
+    },
+    "canton": "BE",
+    "countryCode": "CH",
+    "subdivisionCode": "BE",
+    "openingHours": [
+      {
+        "weekday": 1,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 2,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 3,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 4,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 5,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 6,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 7,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      }
+    ],
+    "languages": [
+      "de",
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": true,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/22918627",
+    "phoneNumber": "+41 62 916 3131",
+    "website": "https://www.sro.ch/"
+  },
+  {
+    "id": "9a85f638-4d3a-503e-9b7c-b0a5f82e9967",
+    "name": "Sonnenhofspital",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Buchserstrasse",
+      "houseNumber": "30",
+      "postalCode": "3006",
+      "city": "Bern",
+      "canton": "BE"
+    },
+    "coordinate": {
+      "latitude": 46.942742,
+      "longitude": 7.474445
+    },
+    "canton": "BE",
+    "countryCode": "CH",
+    "subdivisionCode": "BE",
+    "openingHours": [],
+    "languages": [
+      "de",
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": true,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/42876491",
+    "phoneNumber": "+41 31 3581111",
+    "website": "https://www.lindenhofgruppe.ch/de/standorte/sonnenhof/"
+  },
+  {
+    "id": "397a12a5-c31b-5bfb-b2b2-2312aec3b867",
+    "name": "Spital Burgdorf",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Oberburgstrasse",
+      "houseNumber": "54",
+      "postalCode": "3400",
+      "city": "Burgdorf",
+      "canton": "BE"
+    },
+    "coordinate": {
+      "latitude": 47.048357,
+      "longitude": 7.620672
+    },
+    "canton": "BE",
+    "countryCode": "CH",
+    "subdivisionCode": "BE",
+    "openingHours": [],
+    "languages": [
+      "de",
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": true,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/34325778",
+    "phoneNumber": "+41 34 421 21 21",
+    "website": "https://www.spital-emmental.ch"
+  },
+  {
+    "id": "3e1ff450-4e10-5e70-bacc-1859238255a3",
+    "name": "Spital Langnau",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Dorfbergstrasse",
+      "houseNumber": "10",
+      "postalCode": "3550",
+      "city": "Langnau im Emmental",
+      "canton": "BE"
+    },
+    "coordinate": {
+      "latitude": 46.943289,
+      "longitude": 7.786573
+    },
+    "canton": "BE",
+    "countryCode": "CH",
+    "subdivisionCode": "BE",
+    "openingHours": [],
+    "languages": [
+      "de",
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/255669527",
+    "website": "https://www.spital-emmental.ch/"
+  },
+  {
+    "id": "081f7d3d-1a06-524c-804a-0a86d75e4053",
+    "name": "Spital Riggisberg",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Eyweg",
+      "houseNumber": "2",
+      "postalCode": "3132",
+      "city": "Riggisberg",
+      "canton": "BE"
+    },
+    "coordinate": {
+      "latitude": 46.813739,
+      "longitude": 7.47816
+    },
+    "canton": "BE",
+    "countryCode": "CH",
+    "subdivisionCode": "BE",
+    "openingHours": [],
+    "languages": [
+      "de",
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/680279114",
+    "website": "https://www.spitalriggisberg.ch/de/"
+  },
+  {
+    "id": "ea2acc1a-a069-5144-b5bd-ee30824cc5fd",
+    "name": "Spital Thun",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Krankenhausstrasse",
+      "houseNumber": "12",
+      "postalCode": "3600",
+      "city": "Thun",
+      "canton": "BE"
+    },
+    "coordinate": {
+      "latitude": 46.761094,
+      "longitude": 7.632495
+    },
+    "canton": "BE",
+    "countryCode": "CH",
+    "subdivisionCode": "BE",
+    "openingHours": [],
+    "languages": [
+      "de",
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": true,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/447694296",
+    "phoneNumber": "+41 33 226 26 26",
+    "website": "https://spitalthun.ch/",
+    "email": "info@spitalstsag.ch"
+  },
+  {
+    "id": "95c612e0-0575-5543-985b-ae01c92be55d",
+    "name": "Caritas Markt · Bern",
+    "type": "social",
+    "category": "food_assistance",
+    "description": "Caritas-магазин: продукти й речі зі знижкою для людей з низьким доходом. Зазвичай потрібна картка покупця від соціальної служби.",
+    "address": {
+      "street": "Könizstrasse",
+      "houseNumber": "19a",
+      "postalCode": "3008",
+      "city": "Bern",
+      "canton": "BE"
+    },
+    "coordinate": {
+      "latitude": 46.94302,
+      "longitude": 7.420488
+    },
+    "canton": "BE",
+    "countryCode": "CH",
+    "subdivisionCode": "BE",
+    "openingHours": [],
+    "languages": [
+      "de",
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/3118355100",
+    "phoneNumber": "+41 31 302 81 80",
+    "website": "https://caritas-regio.ch/angebote/guenstiger-leben/caritas-markt",
+    "email": "markt.bern@caritas-bern.ch"
+  },
+  {
+    "id": "646a0390-b3be-5113-932b-475a42b36887",
+    "name": "Caritas Markt · Thun",
+    "type": "social",
+    "category": "food_assistance",
+    "description": "Caritas-магазин: продукти й речі зі знижкою для людей з низьким доходом. Зазвичай потрібна картка покупця від соціальної служби.",
+    "address": {
+      "street": "Seestrasse",
+      "houseNumber": "18",
+      "postalCode": "3600",
+      "city": "Thun",
+      "canton": "BE"
+    },
+    "coordinate": {
+      "latitude": 46.750843,
+      "longitude": 7.633163
+    },
+    "canton": "BE",
+    "countryCode": "CH",
+    "subdivisionCode": "BE",
+    "openingHours": [],
+    "languages": [
+      "de",
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/13173233793"
+  },
+  {
+    "id": "530c5942-e4bf-580c-9bd5-17a0c68caa0e",
+    "name": "Essen für Alle",
+    "type": "social",
+    "category": "food_bank",
+    "description": "Видача продуктів для людей з низьким доходом. Умови отримання уточнюй на місці або в соціальній службі.",
+    "address": {
+      "street": "Chemin des Saules / Wydenauweg",
+      "houseNumber": "29",
+      "postalCode": "2503",
+      "city": "Biel/Bienne",
+      "canton": "BE"
+    },
+    "coordinate": {
+      "latitude": 47.133385,
+      "longitude": 7.239143
+    },
+    "canton": "BE",
+    "countryCode": "CH",
+    "subdivisionCode": "BE",
+    "openingHours": [],
+    "languages": [
+      "de",
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": true,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/12600249603",
+    "website": "https://www.essenfueralle.org/beziehen/biel-bienne/"
+  },
+  {
+    "id": "8d5a6ffe-b9dd-5fe4-88a6-8f3ca135b3af",
+    "name": "Schweizerisches Rotes Kreuz",
+    "type": "social",
+    "category": "social_services",
+    "description": "Червоний Хрест: соціальна підтримка, консультації та волонтерські програми, зокрема для людей з досвідом втечі.",
+    "address": {
+      "street": "Rainmattstrasse",
+      "houseNumber": "",
+      "postalCode": "3007",
+      "city": "Bern",
+      "canton": "BE"
+    },
+    "coordinate": {
+      "latitude": 46.944747,
+      "longitude": 7.439209
+    },
+    "canton": "BE",
+    "countryCode": "CH",
+    "subdivisionCode": "BE",
+    "openingHours": [],
+    "languages": [
+      "de",
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/6012299980",
+    "phoneNumber": "+41 58 400 41 11",
+    "website": "https://www.redcross.ch"
+  },
+  {
+    "id": "62578870-4739-5e0a-b694-78ddc5fb049e",
+    "name": "Schweizerisches Rotes Kreuz",
+    "type": "social",
+    "category": "social_services",
+    "description": "Червоний Хрест: соціальна підтримка, консультації та волонтерські програми, зокрема для людей з досвідом втечі.",
+    "address": {
+      "street": "Werkstrasse",
+      "houseNumber": "16",
+      "postalCode": "3084",
+      "city": "Wabern",
+      "canton": "BE"
+    },
+    "coordinate": {
+      "latitude": 46.927596,
+      "longitude": 7.450477
+    },
+    "canton": "BE",
+    "countryCode": "CH",
+    "subdivisionCode": "BE",
+    "openingHours": [],
+    "languages": [
+      "de",
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/8434769458"
+  },
+  {
+    "id": "fce0ec5b-9762-5a8e-af7f-6258c80f3333",
+    "name": "Schweizerisches Rotes Kreuz",
+    "type": "social",
+    "category": "social_services",
+    "description": "Червоний Хрест: соціальна підтримка, консультації та волонтерські програми, зокрема для людей з досвідом втечі.",
+    "address": {
+      "street": "Lyssachstrasse",
+      "houseNumber": "91",
+      "postalCode": "3400",
+      "city": "Burgdorf",
+      "canton": "BE"
+    },
+    "coordinate": {
+      "latitude": 47.059537,
+      "longitude": 7.618426
+    },
+    "canton": "BE",
+    "countryCode": "CH",
+    "subdivisionCode": "BE",
+    "openingHours": [],
+    "languages": [
+      "de",
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/11282881821",
+    "phoneNumber": "+41 34 420 07 70",
+    "website": "https://www.srk-bern.ch"
+  },
+  {
+    "id": "acdc4ccb-37c1-53ac-9641-23eb250b0086",
+    "name": "Schweizerisches Rotes Kreuz Kanton Bern",
+    "type": "social",
+    "category": "social_services",
+    "description": "Червоний Хрест: соціальна підтримка, консультації та волонтерські програми, зокрема для людей з досвідом втечі.",
+    "address": {
+      "street": "Bernstrasse",
+      "houseNumber": "162",
+      "postalCode": "3052",
+      "city": "Zollikofen",
+      "canton": "BE"
+    },
+    "coordinate": {
+      "latitude": 46.997933,
+      "longitude": 7.460307
+    },
+    "canton": "BE",
+    "countryCode": "CH",
+    "subdivisionCode": "BE",
+    "openingHours": [],
+    "languages": [
+      "de",
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/11811075828",
+    "phoneNumber": "+41 31 919 09 09",
+    "website": "https://srk-bern.ch/"
+  },
+  {
+    "id": "1eac2bce-f626-5c5c-9448-c7c0998dab9a",
+    "name": "Kantonsspital Liestal",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Rheinstrasse",
+      "houseNumber": "26a",
+      "postalCode": "4410",
+      "city": "Liestal",
+      "canton": "BL"
+    },
+    "coordinate": {
+      "latitude": 47.488448,
+      "longitude": 7.730851
+    },
+    "canton": "BL",
+    "countryCode": "CH",
+    "subdivisionCode": "BL",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": true,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/254959544",
+    "phoneNumber": "+41 61 925 25 25",
+    "website": "http://www.ksbl.ch/das-ksbl/standorte/der-standort-liestal"
+  },
+  {
+    "id": "ed94d113-92b5-5336-a511-febf54d36937",
+    "name": "Klinik Arlesheim",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Pfeffingerweg",
+      "houseNumber": "1",
+      "postalCode": "4144",
+      "city": "Arlesheim",
+      "canton": "BL"
+    },
+    "coordinate": {
+      "latitude": 47.493929,
+      "longitude": 7.614624
+    },
+    "canton": "BL",
+    "countryCode": "CH",
+    "subdivisionCode": "BL",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/675987865",
+    "phoneNumber": "+41 61 705 71 11",
+    "website": "https://www.klinik-arlesheim.ch/"
+  },
+  {
+    "id": "7dde5450-d12f-5855-a1d8-ea958ca0b75e",
+    "name": "Bevölkerungsdienste und Migration",
+    "type": "government",
+    "category": "migration_office",
+    "description": "Міграційна служба кантону: дозволи на проживання, статус S, продовження документів.",
+    "address": {
+      "street": "Spiegelgasse",
+      "houseNumber": "6",
+      "postalCode": "4051",
+      "city": "Basel",
+      "canton": "BS"
+    },
+    "coordinate": {
+      "latitude": 47.560215,
+      "longitude": 7.586595
+    },
+    "canton": "BS",
+    "countryCode": "CH",
+    "subdivisionCode": "BS",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": true,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/5498189525"
+  },
+  {
+    "id": "2a54791c-0f4f-56b7-aeb0-c5b40695f793",
+    "name": "Migrationsamt Basel Stadt",
+    "type": "government",
+    "category": "migration_office",
+    "description": "Міграційна служба кантону: дозволи на проживання, статус S, продовження документів.",
+    "address": {
+      "street": "Spiegelgasse",
+      "houseNumber": "",
+      "postalCode": "4001",
+      "city": "Basel",
+      "canton": "BS"
+    },
+    "coordinate": {
+      "latitude": 47.559524,
+      "longitude": 7.586672
+    },
+    "canton": "BS",
+    "countryCode": "CH",
+    "subdivisionCode": "BS",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/6855233988"
+  },
+  {
+    "id": "f110686e-4027-5b7a-adad-0afc316580ef",
+    "name": "Staatssekretariat für Migration (SEM) Empfangs- und Verfahrenszentrum",
+    "type": "government",
+    "category": "refugee_center",
+    "description": "Федеральний центр SEM: реєстрація прохання про захист і перше розміщення.",
+    "address": {
+      "street": "Freiburgerstrasse",
+      "houseNumber": "50",
+      "postalCode": "4057",
+      "city": "Basel",
+      "canton": "BS"
+    },
+    "coordinate": {
+      "latitude": 47.579108,
+      "longitude": 7.604327
+    },
+    "canton": "BS",
+    "countryCode": "CH",
+    "subdivisionCode": "BS",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/1415327614",
+    "website": "https://www.bfm.admin.ch/bfm/en/home.html"
+  },
+  {
+    "id": "840a5b3f-4e16-510a-ad8c-fb3365ad1287",
+    "name": "Bethesda Spital",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Gellertstrasse",
+      "houseNumber": "144",
+      "postalCode": "4052",
+      "city": "Basel",
+      "canton": "BS"
+    },
+    "coordinate": {
+      "latitude": 47.548004,
+      "longitude": 7.616849
+    },
+    "canton": "BS",
+    "countryCode": "CH",
+    "subdivisionCode": "BS",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/675446039",
+    "phoneNumber": "+41 61 315 21 21",
+    "website": "https://bethesda-spital.ch/"
+  },
+  {
+    "id": "2ea9a158-7e51-5abe-af55-d5baca943dfb",
+    "name": "St. Clara-Spital",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Kleinriehenstrasse",
+      "houseNumber": "30",
+      "postalCode": "4058",
+      "city": "Basel",
+      "canton": "BS"
+    },
+    "coordinate": {
+      "latitude": 47.566115,
+      "longitude": 7.614309
+    },
+    "canton": "BS",
+    "countryCode": "CH",
+    "subdivisionCode": "BS",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": true,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/675950977",
+    "phoneNumber": "+41 61 685 85 85",
+    "website": "https://www.claraspital.ch/"
+  },
+  {
+    "id": "51496670-db43-5495-b9a6-814240e3086a",
+    "name": "Universitäre Psychiatrische Kliniken Basel",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Wilhelm Klein-Strasse",
+      "houseNumber": "",
+      "postalCode": "4056",
+      "city": "Basel",
+      "canton": "BS"
+    },
+    "coordinate": {
+      "latitude": 47.571224,
+      "longitude": 7.565047
+    },
+    "canton": "BS",
+    "countryCode": "CH",
+    "subdivisionCode": "BS",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/26354291",
+    "phoneNumber": "+41 61 325 51 11",
+    "website": "https://www.upk.ch/startseite.html"
+  },
+  {
+    "id": "a0e38143-9b7b-5d6b-b819-f416594f909d",
+    "name": "Universitäts-Kinderspital Beider Basel",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Spitalstrasse",
+      "houseNumber": "33",
+      "postalCode": "4056",
+      "city": "Basel",
+      "canton": "BS"
+    },
+    "coordinate": {
+      "latitude": 47.563595,
+      "longitude": 7.581612
+    },
+    "canton": "BS",
+    "countryCode": "CH",
+    "subdivisionCode": "BS",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": true,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/1046465229",
+    "phoneNumber": "+41617041212",
+    "website": "https://www.ukbb.ch/"
+  },
+  {
+    "id": "83dfb297-a43c-5f84-889c-e0b1c3e403a8",
+    "name": "Universitätsspital Basel",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Spitalstrasse",
+      "houseNumber": "21",
+      "postalCode": "4031",
+      "city": "Basel",
+      "canton": "BS"
+    },
+    "coordinate": {
+      "latitude": 47.561668,
+      "longitude": 7.583386
+    },
+    "canton": "BS",
+    "countryCode": "CH",
+    "subdivisionCode": "BS",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": true,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/675421946",
+    "phoneNumber": "+41 61 265 25 25",
+    "website": "https://www.unispital-basel.ch/"
+  },
+  {
+    "id": "1a36180b-48fb-51a1-9129-b3cce2625cd7",
+    "name": "Foodsharing-Schrank",
+    "type": "social",
+    "category": "food_bank",
+    "description": "Видача продуктів для людей з низьким доходом. Умови отримання уточнюй на місці або в соціальній службі.",
+    "address": {
+      "street": "Gundeldingerfeld",
+      "houseNumber": "",
+      "postalCode": "4053",
+      "city": "Basel",
+      "canton": "BS"
+    },
+    "coordinate": {
+      "latitude": 47.541435,
+      "longitude": 7.593095
+    },
+    "canton": "BS",
+    "countryCode": "CH",
+    "subdivisionCode": "BS",
+    "openingHours": [
+      {
+        "weekday": 1,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 2,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 3,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 4,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 5,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 6,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 7,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      }
+    ],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/11010627533"
+  },
+  {
+    "id": "c68a312a-b71f-500a-85c0-72b0203f253d",
+    "name": "Schweizerisches Rotes Kreuz Kanton Basel-Stadt",
+    "type": "social",
+    "category": "social_services",
+    "description": "Червоний Хрест: соціальна підтримка, консультації та волонтерські програми, зокрема для людей з досвідом втечі.",
+    "address": {
+      "street": "Bruderholzstrasse",
+      "houseNumber": "20",
+      "postalCode": "4053",
+      "city": "Basel",
+      "canton": "BS"
+    },
+    "coordinate": {
+      "latitude": 47.543765,
+      "longitude": 7.594538
+    },
+    "canton": "BS",
+    "countryCode": "CH",
+    "subdivisionCode": "BS",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/13791838182",
+    "phoneNumber": "+41 61 319 56 56",
+    "website": "https://www.srk-basel.ch/",
+    "email": "info@srk-basel.ch"
+  },
+  {
+    "id": "d6d677f5-10e1-53b5-b02a-519559d4c0bb",
+    "name": "Service de la population et des migrants",
+    "type": "government",
+    "category": "migration_office",
+    "description": "Міграційна служба кантону: дозволи на проживання, статус S, продовження документів.",
+    "address": {
+      "street": "Route d'Englisberg",
+      "houseNumber": "11",
+      "postalCode": "1763",
+      "city": "Granges-Paccot",
+      "canton": "FR"
+    },
+    "coordinate": {
+      "latitude": 46.828277,
+      "longitude": 7.147196
+    },
+    "canton": "FR",
+    "countryCode": "CH",
+    "subdivisionCode": "FR",
+    "openingHours": [],
+    "languages": [
+      "de",
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": true,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/4286151989"
+  },
+  {
+    "id": "31173b72-9523-5c44-a700-886162a99a5b",
+    "name": "HFR Spital Tafers",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Maggenberg",
+      "houseNumber": "1",
+      "postalCode": "1712",
+      "city": "Tafers",
+      "canton": "FR"
+    },
+    "coordinate": {
+      "latitude": 46.810213,
+      "longitude": 7.212032
+    },
+    "canton": "FR",
+    "countryCode": "CH",
+    "subdivisionCode": "FR",
+    "openingHours": [],
+    "languages": [
+      "de",
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/680278021",
+    "phoneNumber": "+41 26 306 60 00",
+    "website": "https://www.h-fr.ch/nos-sites-hospitaliers/hfr-tafers"
+  },
+  {
+    "id": "077fce6f-0845-58dc-b20e-b65ef33e616c",
+    "name": "Hôpital Intercantonal de la Broye",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Rue de la Rochette",
+      "houseNumber": "",
+      "postalCode": "1470",
+      "city": "Estavayer-le-Lac",
+      "canton": "FR"
+    },
+    "coordinate": {
+      "latitude": 46.851012,
+      "longitude": 6.844194
+    },
+    "canton": "FR",
+    "countryCode": "CH",
+    "subdivisionCode": "FR",
+    "openingHours": [],
+    "languages": [
+      "de",
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/450574960",
+    "phoneNumber": "+41 26 664 71 11",
+    "website": "https://www.hopital-broye.ch/"
+  },
+  {
+    "id": "e84b0906-080e-5bbb-9363-28e6359e7747",
+    "name": "Spital des Seebezirks",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Chemin du Village",
+      "houseNumber": "24",
+      "postalCode": "3280",
+      "city": "Meyriez",
+      "canton": "FR"
+    },
+    "coordinate": {
+      "latitude": 46.922301,
+      "longitude": 7.107873
+    },
+    "canton": "FR",
+    "countryCode": "CH",
+    "subdivisionCode": "FR",
+    "openingHours": [],
+    "languages": [
+      "de",
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/675995149",
+    "phoneNumber": "+41 26 306 70 00",
+    "website": "https://www.h-fr.ch/de/unsere-standorte/hfr-meyriez-murten"
+  },
+  {
+    "id": "06b3d3be-7774-5be6-8b1a-50914b267a2e",
+    "name": "OCPM Office cantonal de la population et des migrations",
+    "type": "government",
+    "category": "migration_office",
+    "description": "Міграційна служба кантону: дозволи на проживання, статус S, продовження документів.",
+    "address": {
+      "street": "Route de Chancy",
+      "houseNumber": "88",
+      "postalCode": "1213",
+      "city": "Onex",
+      "canton": "GE"
+    },
+    "coordinate": {
+      "latitude": 46.186039,
+      "longitude": 6.105995
+    },
+    "canton": "GE",
+    "countryCode": "CH",
+    "subdivisionCode": "GE",
+    "openingHours": [],
+    "languages": [
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/11085279006",
+    "website": "https://www.ge.ch/ocpm-pratique"
+  },
+  {
+    "id": "3fa04853-b6b5-5cd1-9119-5953ba09fd2d",
+    "name": "Organisation internationale pour les Migrations",
+    "type": "government",
+    "category": "migration_office",
+    "description": "Міграційна служба кантону: дозволи на проживання, статус S, продовження документів.",
+    "address": {
+      "street": "Route des Morillons",
+      "houseNumber": "17",
+      "postalCode": "1218",
+      "city": "Le Grand-Saconnex",
+      "canton": "GE"
+    },
+    "coordinate": {
+      "latitude": 46.231725,
+      "longitude": 6.132103
+    },
+    "canton": "GE",
+    "countryCode": "CH",
+    "subdivisionCode": "GE",
+    "openingHours": [],
+    "languages": [
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/133562015",
+    "website": "https://www.iom.int/fr"
+  },
+  {
+    "id": "e4eed228-bad6-5072-90a0-408cdda24dbf",
+    "name": "Hôpitaux universitaires de Genève",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Boulevard de la Cluse",
+      "houseNumber": "40",
+      "postalCode": "1205",
+      "city": "Genève",
+      "canton": "GE"
+    },
+    "coordinate": {
+      "latitude": 46.192,
+      "longitude": 6.1481
+    },
+    "canton": "GE",
+    "countryCode": "CH",
+    "subdivisionCode": "GE",
+    "openingHours": [],
+    "languages": [
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/49711247",
+    "phoneNumber": "+41 22 37 233 11",
+    "website": "https://www.hug-ge.ch/"
+  },
+  {
+    "id": "976df668-98a4-5eae-b1a0-cc3b2e46acec",
+    "name": "Caritas · Lancy",
+    "type": "social",
+    "category": "social_services",
+    "description": "Caritas: соціальні та боргові консультації, підтримка сімей і біженців.",
+    "address": {
+      "street": "Avenue du Petit-Lancy",
+      "houseNumber": "3",
+      "postalCode": "1213",
+      "city": "Lancy",
+      "canton": "GE"
+    },
+    "coordinate": {
+      "latitude": 46.190052,
+      "longitude": 6.118432
+    },
+    "canton": "GE",
+    "countryCode": "CH",
+    "subdivisionCode": "GE",
+    "openingHours": [
+      {
+        "weekday": 2,
+        "openTime": {
+          "hour": 10,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 18,
+          "minute": 0
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 3,
+        "openTime": {
+          "hour": 10,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 18,
+          "minute": 0
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 4,
+        "openTime": {
+          "hour": 10,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 18,
+          "minute": 0
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 5,
+        "openTime": {
+          "hour": 10,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 18,
+          "minute": 0
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 6,
+        "openTime": {
+          "hour": 10,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 18,
+          "minute": 0
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 7,
+        "openTime": {
+          "hour": 10,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 17,
+          "minute": 0
+        },
+        "isClosed": false
+      }
+    ],
+    "languages": [
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/1318506903",
+    "phoneNumber": "+41223220562",
+    "website": "https://recyclerie.ch/magasins/"
+  },
+  {
+    "id": "65dfaf5a-7c72-51b7-a188-71516598a4c8",
+    "name": "Caritas · Versoix",
+    "type": "social",
+    "category": "social_services",
+    "description": "Caritas: соціальні та боргові консультації, підтримка сімей і біженців.",
+    "address": {
+      "street": "Route de Suisse",
+      "houseNumber": "59",
+      "postalCode": "1290",
+      "city": "Versoix",
+      "canton": "GE"
+    },
+    "coordinate": {
+      "latitude": 46.278695,
+      "longitude": 6.167996
+    },
+    "canton": "GE",
+    "countryCode": "CH",
+    "subdivisionCode": "GE",
+    "openingHours": [],
+    "languages": [
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/366485953"
+  },
+  {
+    "id": "0744d22d-eb07-537a-947a-a25cd39517cc",
+    "name": "Centre Alice (Croix-Rouge Genevois)",
+    "type": "social",
+    "category": "social_services",
+    "description": "Червоний Хрест: соціальна підтримка, консультації та волонтерські програми, зокрема для людей з досвідом втечі.",
+    "address": {
+      "street": "Rue de Chantepoulet",
+      "houseNumber": "8",
+      "postalCode": "1201",
+      "city": "Genève",
+      "canton": "GE"
+    },
+    "coordinate": {
+      "latitude": 46.208424,
+      "longitude": 6.143651
+    },
+    "canton": "GE",
+    "countryCode": "CH",
+    "subdivisionCode": "GE",
+    "openingHours": [],
+    "languages": [
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/82683748"
+  },
+  {
+    "id": "9daad36b-3734-5bac-85df-b5287fad6ab4",
+    "name": "Comité International de la Croix-Rouge",
+    "type": "social",
+    "category": "social_services",
+    "description": "Червоний Хрест: соціальна підтримка, консультації та волонтерські програми, зокрема для людей з досвідом втечі.",
+    "address": {
+      "street": "Avenue de la Paix",
+      "houseNumber": "19",
+      "postalCode": "1202",
+      "city": "Genève",
+      "canton": "GE"
+    },
+    "coordinate": {
+      "latitude": 46.227737,
+      "longitude": 6.137315
+    },
+    "canton": "GE",
+    "countryCode": "CH",
+    "subdivisionCode": "GE",
+    "openingHours": [],
+    "languages": [
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/27752314",
+    "website": "https://www.icrc.org/"
+  },
+  {
+    "id": "4c368a88-fe8b-55fd-99fd-570d7ebce4ba",
+    "name": "Croix-Rouge genevoise",
+    "type": "social",
+    "category": "social_services",
+    "description": "Червоний Хрест: соціальна підтримка, консультації та волонтерські програми, зокрема для людей з досвідом втечі.",
+    "address": {
+      "street": "Route des Acacias",
+      "houseNumber": "",
+      "postalCode": "1205",
+      "city": "Genève",
+      "canton": "GE"
+    },
+    "coordinate": {
+      "latitude": 46.192552,
+      "longitude": 6.137515
+    },
+    "canton": "GE",
+    "countryCode": "CH",
+    "subdivisionCode": "GE",
+    "openingHours": [],
+    "languages": [
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": true,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/5114715156",
+    "website": "https://www.croix-rouge-ge.ch/"
+  },
+  {
+    "id": "4ed37bbc-c0ea-5532-89b5-d86f1fe0b24c",
+    "name": "Epicerie solidaire Lancy",
+    "type": "social",
+    "category": "food_bank",
+    "description": "Видача продуктів для людей з низьким доходом. Умови отримання уточнюй на місці або в соціальній службі.",
+    "address": {
+      "street": "Chemin de l'Adret",
+      "houseNumber": "1",
+      "postalCode": "1212",
+      "city": "Grand-Lancy",
+      "canton": "GE"
+    },
+    "coordinate": {
+      "latitude": 46.1824,
+      "longitude": 6.12311
+    },
+    "canton": "GE",
+    "countryCode": "CH",
+    "subdivisionCode": "GE",
+    "openingHours": [],
+    "languages": [
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/10565283355"
+  },
+  {
+    "id": "f61cf56d-f823-5644-85b5-77e79836dcba",
+    "name": "RAV",
+    "type": "employment",
+    "category": "job_center",
+    "description": "Регіональний центр працевлаштування (RAV/ORP): реєстрація як шукача роботи, консультації, курси.",
+    "address": {
+      "street": "Rathausplatz",
+      "houseNumber": "5",
+      "postalCode": "8750",
+      "city": "Glarus",
+      "canton": "GL"
+    },
+    "coordinate": {
+      "latitude": 47.040255,
+      "longitude": 9.06818
+    },
+    "canton": "GL",
+    "countryCode": "CH",
+    "subdivisionCode": "GL",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/10250704388"
+  },
+  {
+    "id": "706f9237-5de7-5498-a24f-9e6e5b69eaaa",
+    "name": "Kantonsspital Glarus",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Burgstrasse",
+      "houseNumber": "99",
+      "postalCode": "8750",
+      "city": "Glarus",
+      "canton": "GL"
+    },
+    "coordinate": {
+      "latitude": 47.045133,
+      "longitude": 9.065361
+    },
+    "canton": "GL",
+    "countryCode": "CH",
+    "subdivisionCode": "GL",
+    "openingHours": [
+      {
+        "weekday": 1,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 2,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 3,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 4,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 5,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 6,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 7,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      }
+    ],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/676982757",
+    "phoneNumber": "+41 55 646 33 33",
+    "website": "https://www.ksgl.ch"
+  },
+  {
+    "id": "e41ed14a-3fcd-519f-8b58-dc66bae30f4b",
+    "name": "RAV",
+    "type": "employment",
+    "category": "job_center",
+    "description": "Регіональний центр працевлаштування (RAV/ORP): реєстрація як шукача роботи, консультації, курси.",
+    "address": {
+      "street": "Talstrasse",
+      "houseNumber": "2a",
+      "postalCode": "7270",
+      "city": "Davos Platz",
+      "canton": "GR"
+    },
+    "coordinate": {
+      "latitude": 46.7907,
+      "longitude": 9.819893
+    },
+    "canton": "GR",
+    "countryCode": "CH",
+    "subdivisionCode": "GR",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/4538120995"
+  },
+  {
+    "id": "4bec00b6-34c5-5d2f-b78c-292ef3fb4fc4",
+    "name": "Center da sandà Val Müstair",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Via Val Müstair",
+      "houseNumber": "186",
+      "postalCode": "7536",
+      "city": "Val Müstair",
+      "canton": "GR"
+    },
+    "coordinate": {
+      "latitude": 46.606615,
+      "longitude": 10.432719
+    },
+    "canton": "GR",
+    "countryCode": "CH",
+    "subdivisionCode": "GR",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": true,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/677018870",
+    "phoneNumber": "+41 81 851 61 00",
+    "website": "https://www.csvm.ch/"
+  },
+  {
+    "id": "2ca9c287-f59b-551d-974b-5cd6960965ae",
+    "name": "Kantonsspital Graubünden",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Loëstrasse",
+      "houseNumber": "170",
+      "postalCode": "7000",
+      "city": "Chur",
+      "canton": "GR"
+    },
+    "coordinate": {
+      "latitude": 46.863683,
+      "longitude": 9.539687
+    },
+    "canton": "GR",
+    "countryCode": "CH",
+    "subdivisionCode": "GR",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/651229753",
+    "phoneNumber": "+41 812566111",
+    "website": "https://www.ksgr.ch/"
+  },
+  {
+    "id": "794d0954-ae82-520b-93a2-c8409eac42f6",
+    "name": "Ospidal d'Engiadina Bassa",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Via da l'Ospidal",
+      "houseNumber": "280",
+      "postalCode": "7550",
+      "city": "Scuol",
+      "canton": "GR"
+    },
+    "coordinate": {
+      "latitude": 46.799863,
+      "longitude": 10.303821
+    },
+    "canton": "GR",
+    "countryCode": "CH",
+    "subdivisionCode": "GR",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/681047020",
+    "phoneNumber": "+41 81 861 10 00",
+    "website": "https://cseb.ch/"
+  },
+  {
+    "id": "2e4d426d-2d6f-503c-b91e-d8797a161445",
+    "name": "Spital Davos",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Promenade",
+      "houseNumber": "4",
+      "postalCode": "7270",
+      "city": "Davos",
+      "canton": "GR"
+    },
+    "coordinate": {
+      "latitude": 46.787518,
+      "longitude": 9.814512
+    },
+    "canton": "GR",
+    "countryCode": "CH",
+    "subdivisionCode": "GR",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": true,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/117138399"
+  },
+  {
+    "id": "9c8174b2-4e6f-5e02-a3c8-cf30374c61f5",
+    "name": "Spital Oberengadin / Ospidel Engiadin'Ota",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Via Nouva",
+      "houseNumber": "3",
+      "postalCode": "7503",
+      "city": "Samedan",
+      "canton": "GR"
+    },
+    "coordinate": {
+      "latitude": 46.540008,
+      "longitude": 9.878767
+    },
+    "canton": "GR",
+    "countryCode": "CH",
+    "subdivisionCode": "GR",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/136281156",
+    "phoneNumber": "+41 818518111",
+    "website": "https://www.spital-oberengadin.ch/"
+  },
+  {
+    "id": "24f7f669-2334-5d27-8156-09412206fd5d",
+    "name": "Spital Thusis",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Alte Strasse",
+      "houseNumber": "31",
+      "postalCode": "7430",
+      "city": "Thusis",
+      "canton": "GR"
+    },
+    "coordinate": {
+      "latitude": 46.697098,
+      "longitude": 9.436782
+    },
+    "canton": "GR",
+    "countryCode": "CH",
+    "subdivisionCode": "GR",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/677013731",
+    "phoneNumber": "+41 81 632 11 11",
+    "website": "https://www.spitalthusis.ch/"
+  },
+  {
+    "id": "9414280f-6671-58d4-906d-5400b07582b8",
+    "name": "Spital regiunal Surselva",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Via ospedal",
+      "houseNumber": "6",
+      "postalCode": "7130",
+      "city": "Ilanz/Glion",
+      "canton": "GR"
+    },
+    "coordinate": {
+      "latitude": 46.776992,
+      "longitude": 9.205488
+    },
+    "canton": "GR",
+    "countryCode": "CH",
+    "subdivisionCode": "GR",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/676998557",
+    "phoneNumber": "+41 81 926 51 11",
+    "website": "http://www.spitalilanz.ch",
+    "email": "info@spitalilanz.ch"
+  },
+  {
+    "id": "66e10695-b72d-5abd-852e-371dd686c955",
+    "name": "Caritas · Chur",
+    "type": "social",
+    "category": "social_services",
+    "description": "Caritas: соціальні та боргові консультації, підтримка сімей і біженців.",
+    "address": {
+      "street": "Scalettastrasse",
+      "houseNumber": "",
+      "postalCode": "7001",
+      "city": "Chur",
+      "canton": "GR"
+    },
+    "coordinate": {
+      "latitude": 46.854116,
+      "longitude": 9.527153
+    },
+    "canton": "GR",
+    "countryCode": "CH",
+    "subdivisionCode": "GR",
+    "openingHours": [
+      {
+        "weekday": 2,
+        "openTime": {
+          "hour": 8,
+          "minute": 30
+        },
+        "closeTime": {
+          "hour": 18,
+          "minute": 0
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 3,
+        "openTime": {
+          "hour": 8,
+          "minute": 30
+        },
+        "closeTime": {
+          "hour": 18,
+          "minute": 0
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 4,
+        "openTime": {
+          "hour": 8,
+          "minute": 30
+        },
+        "closeTime": {
+          "hour": 18,
+          "minute": 0
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 5,
+        "openTime": {
+          "hour": 8,
+          "minute": 30
+        },
+        "closeTime": {
+          "hour": 18,
+          "minute": 0
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 6,
+        "openTime": {
+          "hour": 8,
+          "minute": 30
+        },
+        "closeTime": {
+          "hour": 18,
+          "minute": 0
+        },
+        "isClosed": false
+      }
+    ],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/13191174591",
+    "website": "https://caritasgr.ch"
+  },
+  {
+    "id": "00f26615-2c0f-5bc3-8401-00f4b8c1477b",
+    "name": "Centre médico-psychologique: enfants et adolescents",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Chemin des Arquebusiers",
+      "houseNumber": "",
+      "postalCode": "2902",
+      "city": "Porrentruy",
+      "canton": "JU"
+    },
+    "coordinate": {
+      "latitude": 47.413149,
+      "longitude": 7.075773
+    },
+    "canton": "JU",
+    "countryCode": "CH",
+    "subdivisionCode": "JU",
+    "openingHours": [],
+    "languages": [
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/1165234785"
+  },
+  {
+    "id": "5a1404eb-8ec2-5c6f-a87a-d5134a2412aa",
+    "name": "Caritas · Delémont",
+    "type": "social",
+    "category": "social_services",
+    "description": "Caritas: соціальні та боргові консультації, підтримка сімей і біженців.",
+    "address": {
+      "street": "Route du Vorbourg",
+      "houseNumber": "20",
+      "postalCode": "2800",
+      "city": "Delémont",
+      "canton": "JU"
+    },
+    "coordinate": {
+      "latitude": 47.36847,
+      "longitude": 7.346605
+    },
+    "canton": "JU",
+    "countryCode": "CH",
+    "subdivisionCode": "JU",
+    "openingHours": [
+      {
+        "weekday": 3,
+        "openTime": {
+          "hour": 13,
+          "minute": 15
+        },
+        "closeTime": {
+          "hour": 16,
+          "minute": 30
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 6,
+        "openTime": {
+          "hour": 13,
+          "minute": 15
+        },
+        "closeTime": {
+          "hour": 16,
+          "minute": 30
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 4,
+        "openTime": {
+          "hour": 13,
+          "minute": 15
+        },
+        "closeTime": {
+          "hour": 18,
+          "minute": 30
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 5,
+        "openTime": {
+          "hour": 13,
+          "minute": 15
+        },
+        "closeTime": {
+          "hour": 18,
+          "minute": 30
+        },
+        "isClosed": false
+      }
+    ],
+    "languages": [
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/4195581792",
+    "phoneNumber": "+41 32 421 35 70",
+    "website": "https://www.caritas-jura.ch/p121001738.html"
+  },
+  {
+    "id": "5145c3f8-3d96-5e97-a98b-8ae407a99fe5",
+    "name": "Croix-Rouge antenne de Porrentruy",
+    "type": "social",
+    "category": "social_services",
+    "description": "Червоний Хрест: соціальна підтримка, консультації та волонтерські програми, зокрема для людей з досвідом втечі.",
+    "address": {
+      "street": "Rue de l'Eglise",
+      "houseNumber": "13",
+      "postalCode": "2900",
+      "city": "Porrentruy",
+      "canton": "JU"
+    },
+    "coordinate": {
+      "latitude": 47.416137,
+      "longitude": 7.076646
+    },
+    "canton": "JU",
+    "countryCode": "CH",
+    "subdivisionCode": "JU",
+    "openingHours": [],
+    "languages": [
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/1222867945",
+    "phoneNumber": "+41 32 465 84 00",
+    "website": "http://www.croix-rouge-jura.ch/",
+    "email": "info@croix-rouge-jura.ch"
+  },
+  {
+    "id": "5f62c223-3f3f-5b7f-a854-492d3ac6a9e4",
+    "name": "Amt für Migration",
+    "type": "government",
+    "category": "migration_office",
+    "description": "Міграційна служба кантону: дозволи на проживання, статус S, продовження документів.",
+    "address": {
+      "street": "Fruttstrasse",
+      "houseNumber": "15",
+      "postalCode": "6002",
+      "city": "Luzern",
+      "canton": "LU"
+    },
+    "coordinate": {
+      "latitude": 47.042648,
+      "longitude": 8.310733
+    },
+    "canton": "LU",
+    "countryCode": "CH",
+    "subdivisionCode": "LU",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/6022622981",
+    "phoneNumber": "+41 41 228 77 80",
+    "website": "https://migration.lu.ch/",
+    "email": "migration@lu.ch"
+  },
+  {
+    "id": "f820cd75-60c2-52b6-afbb-36df9648aaa1",
+    "name": "Haus 33 Kinderspital",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Kantonsspital",
+      "houseNumber": "33",
+      "postalCode": "6004",
+      "city": "Luzern",
+      "canton": "LU"
+    },
+    "coordinate": {
+      "latitude": 47.058681,
+      "longitude": 8.298009
+    },
+    "canton": "LU",
+    "countryCode": "CH",
+    "subdivisionCode": "LU",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": true,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/1161606654",
+    "phoneNumber": "+41 41 205 31 66",
+    "website": "https://www.luks.ch/standorte/standort-luzern/kinderspital"
+  },
+  {
+    "id": "e00cd629-477e-5743-8f3a-a6c4fe94977e",
+    "name": "Klinik St. Anna",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "St.-Anna-Strasse",
+      "houseNumber": "32",
+      "postalCode": "6006",
+      "city": "Luzern",
+      "canton": "LU"
+    },
+    "coordinate": {
+      "latitude": 47.058643,
+      "longitude": 8.326207
+    },
+    "canton": "LU",
+    "countryCode": "CH",
+    "subdivisionCode": "LU",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": true,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/relation/14884948",
+    "website": "https://www.st-anna.ch/"
+  },
+  {
+    "id": "2345e512-4726-5888-a8cb-fd46081c897a",
+    "name": "Luzerner Kantonsspital",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Spitalstrasse",
+      "houseNumber": "30",
+      "postalCode": "6004",
+      "city": "Luzern",
+      "canton": "LU"
+    },
+    "coordinate": {
+      "latitude": 47.05856,
+      "longitude": 8.296978
+    },
+    "canton": "LU",
+    "countryCode": "CH",
+    "subdivisionCode": "LU",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/39193494",
+    "phoneNumber": "+41 41 205 11 11",
+    "website": "https://www.luks.ch"
+  },
+  {
+    "id": "316e9ac2-3911-5b62-ac47-892578fe93b5",
+    "name": "Luzerner Kantonsspital Wolhusen",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Spitalstrasse",
+      "houseNumber": "50",
+      "postalCode": "6110",
+      "city": "Wolhusen",
+      "canton": "LU"
+    },
+    "coordinate": {
+      "latitude": 47.066457,
+      "longitude": 8.073816
+    },
+    "canton": "LU",
+    "countryCode": "CH",
+    "subdivisionCode": "LU",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/675977477",
+    "phoneNumber": "+41 41 492 82 82",
+    "website": "https://www.luks.ch/"
+  },
+  {
+    "id": "f7a997f5-80ed-5836-a880-98f9176d568c",
+    "name": "Luzerner Psychiatrie",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Spitalstrasse",
+      "houseNumber": "",
+      "postalCode": "6004",
+      "city": "Luzern",
+      "canton": "LU"
+    },
+    "coordinate": {
+      "latitude": 47.057246,
+      "longitude": 8.293412
+    },
+    "canton": "LU",
+    "countryCode": "CH",
+    "subdivisionCode": "LU",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/1376669608",
+    "website": "https://www.lups.ch"
+  },
+  {
+    "id": "5e72b3c2-f1f5-5bfc-8604-4023a55e1264",
+    "name": "Schweizer Paraplegiker-Zentrum (SPZ)",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Guido A. Zäch Strasse",
+      "houseNumber": "1",
+      "postalCode": "6207",
+      "city": "Nottwil",
+      "canton": "LU"
+    },
+    "coordinate": {
+      "latitude": 47.142115,
+      "longitude": 8.130855
+    },
+    "canton": "LU",
+    "countryCode": "CH",
+    "subdivisionCode": "LU",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/681063970",
+    "phoneNumber": "+41 41 939 54 54",
+    "website": "https://www.paraplegie.ch/spz/de"
+  },
+  {
+    "id": "7f172c2a-b985-5912-8f4c-f9f26532ef92",
+    "name": "ORP - Office régional de placement",
+    "type": "employment",
+    "category": "job_center",
+    "description": "Регіональний центр працевлаштування (RAV/ORP): реєстрація як шукача роботи, консультації, курси.",
+    "address": {
+      "street": "Rue du Parc",
+      "houseNumber": "",
+      "postalCode": "2300",
+      "city": "La Chaux-de-Fonds",
+      "canton": "NE"
+    },
+    "coordinate": {
+      "latitude": 47.097143,
+      "longitude": 6.81879
+    },
+    "canton": "NE",
+    "countryCode": "CH",
+    "subdivisionCode": "NE",
+    "openingHours": [],
+    "languages": [
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/11733804069",
+    "phoneNumber": "+41 32 889 68 13",
+    "website": "https://www.ne.ch/autorites/DECS/SEMP/organisation/Pages/contact-orp-la-chaux-de-fonds.aspx",
+    "email": "orp@ne.ch"
+  },
+  {
+    "id": "3a5457d3-532b-57e4-8c32-1a5de2461c5e",
+    "name": "Réseau hospitalier neuchâtelois - La Chaux-de-Fonds",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Rue de Chasseral",
+      "houseNumber": "20",
+      "postalCode": "2300",
+      "city": "La Chaux-de-Fonds",
+      "canton": "NE"
+    },
+    "coordinate": {
+      "latitude": 47.113679,
+      "longitude": 6.832978
+    },
+    "canton": "NE",
+    "countryCode": "CH",
+    "subdivisionCode": "NE",
+    "openingHours": [
+      {
+        "weekday": 1,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 2,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 3,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 4,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 5,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 6,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 7,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      }
+    ],
+    "languages": [
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": true,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/49257022",
+    "phoneNumber": "+41 32 967 21 11",
+    "website": "https://www.rhne.ch/"
+  },
+  {
+    "id": "fc146c82-b078-5a86-8294-e8908e594251",
+    "name": "Réseau hospitalier neuchâtelois - Pourtalès",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Rue de la Maladière 45",
+      "houseNumber": "45",
+      "postalCode": "2000",
+      "city": "Neuchâtel",
+      "canton": "NE"
+    },
+    "coordinate": {
+      "latitude": 46.996835,
+      "longitude": 6.94278
+    },
+    "canton": "NE",
+    "countryCode": "CH",
+    "subdivisionCode": "NE",
+    "openingHours": [],
+    "languages": [
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": true,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/31976973",
+    "phoneNumber": "+41 32 713 30 00",
+    "website": "https://www.rhne.ch"
+  },
+  {
+    "id": "a174bf80-11ae-5781-8926-df1db74e069d",
+    "name": "Caritas · La Chaux-de-Fonds",
+    "type": "social",
+    "category": "social_services",
+    "description": "Caritas: соціальні та боргові консультації, підтримка сімей і біженців.",
+    "address": {
+      "street": "Rue du Collège",
+      "houseNumber": "13",
+      "postalCode": "2300",
+      "city": "La Chaux-de-Fonds",
+      "canton": "NE"
+    },
+    "coordinate": {
+      "latitude": 47.105435,
+      "longitude": 6.832671
+    },
+    "canton": "NE",
+    "countryCode": "CH",
+    "subdivisionCode": "NE",
+    "openingHours": [],
+    "languages": [
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/930803209"
+  },
+  {
+    "id": "226032d9-e83d-5937-b321-616a68048a76",
+    "name": "Croix-Rouge neuchâteloise",
+    "type": "social",
+    "category": "social_services",
+    "description": "Червоний Хрест: соціальна підтримка, консультації та волонтерські програми, зокрема для людей з досвідом втечі.",
+    "address": {
+      "street": "Rue de la Paix",
+      "houseNumber": "71",
+      "postalCode": "2300",
+      "city": "La Chaux-de-Fonds",
+      "canton": "NE"
+    },
+    "coordinate": {
+      "latitude": 47.100514,
+      "longitude": 6.82237
+    },
+    "canton": "NE",
+    "countryCode": "CH",
+    "subdivisionCode": "NE",
+    "openingHours": [],
+    "languages": [
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/6988488851",
+    "website": "https://croix-rouge-ne.ch/"
+  },
+  {
+    "id": "4132e50a-a7c0-5195-ab48-f0bd499dedd8",
+    "name": "Épicerie CARITAS · Neuchâtel",
+    "type": "social",
+    "category": "food_assistance",
+    "description": "Caritas-магазин: продукти й речі зі знижкою для людей з низьким доходом. Зазвичай потрібна картка покупця від соціальної служби.",
+    "address": {
+      "street": "Avenue de la Gare",
+      "houseNumber": "39",
+      "postalCode": "2000",
+      "city": "Neuchâtel",
+      "canton": "NE"
+    },
+    "coordinate": {
+      "latitude": 46.993947,
+      "longitude": 6.931836
+    },
+    "canton": "NE",
+    "countryCode": "CH",
+    "subdivisionCode": "NE",
+    "openingHours": [],
+    "languages": [
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/13363652501"
+  },
+  {
+    "id": "85d8a2c6-8b14-564d-9f42-ae047df8d0e7",
+    "name": "Abteilung für Justiz und Migration",
+    "type": "government",
+    "category": "migration_office",
+    "description": "Міграційна служба кантону: дозволи на проживання, статус S, продовження документів.",
+    "address": {
+      "street": "Kreuzstrasse",
+      "houseNumber": "2",
+      "postalCode": "6370",
+      "city": "Oberdorf (NW)",
+      "canton": "NW"
+    },
+    "coordinate": {
+      "latitude": 46.964498,
+      "longitude": 8.385531
+    },
+    "canton": "NW",
+    "countryCode": "CH",
+    "subdivisionCode": "NW",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/308379022"
+  },
+  {
+    "id": "1dfb0826-e9d9-574a-95fd-0fdf1e34d1eb",
+    "name": "Spital Nidwalden",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Ennetmooserstrasse",
+      "houseNumber": "19",
+      "postalCode": "6370",
+      "city": "Stans",
+      "canton": "NW"
+    },
+    "coordinate": {
+      "latitude": 46.959881,
+      "longitude": 8.357408
+    },
+    "canton": "NW",
+    "countryCode": "CH",
+    "subdivisionCode": "NW",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/675593943",
+    "phoneNumber": "+41 41 618 18 18",
+    "website": "https://www.spital-nidwalden.ch/"
+  },
+  {
+    "id": "942c913d-cde1-5208-ae58-3ec651c95767",
+    "name": "Caritas · Stans",
+    "type": "social",
+    "category": "social_services",
+    "description": "Caritas: соціальні та боргові консультації, підтримка сімей і біженців.",
+    "address": {
+      "street": "Spittelgasse",
+      "houseNumber": "7",
+      "postalCode": "6370",
+      "city": "Stans",
+      "canton": "NW"
+    },
+    "coordinate": {
+      "latitude": 46.956683,
+      "longitude": 8.366829
+    },
+    "canton": "NW",
+    "countryCode": "CH",
+    "subdivisionCode": "NW",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/4787033421",
+    "phoneNumber": "+41416104448"
+  },
+  {
+    "id": "59b3fbf7-1a2d-5083-b883-e4b2300aff8b",
+    "name": "Schweizerisches Rotes Kreuz",
+    "type": "social",
+    "category": "social_services",
+    "description": "Червоний Хрест: соціальна підтримка, консультації та волонтерські програми, зокрема для людей з досвідом втечі.",
+    "address": {
+      "street": "Nägeligasse",
+      "houseNumber": "7",
+      "postalCode": "6370",
+      "city": "Stans",
+      "canton": "NW"
+    },
+    "coordinate": {
+      "latitude": 46.95722,
+      "longitude": 8.364432
+    },
+    "canton": "NW",
+    "countryCode": "CH",
+    "subdivisionCode": "NW",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/5838101510"
+  },
+  {
+    "id": "8002cb5b-f164-5a2e-93a8-013360548ca1",
+    "name": "Kantonsspital Obwalden",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Brünigstrasse",
+      "houseNumber": "181",
+      "postalCode": "6060",
+      "city": "Sarnen",
+      "canton": "OW"
+    },
+    "coordinate": {
+      "latitude": 46.889551,
+      "longitude": 8.245999
+    },
+    "canton": "OW",
+    "countryCode": "CH",
+    "subdivisionCode": "OW",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/relation/18877963",
+    "phoneNumber": "+41 41 666 44 22",
+    "website": "https://www.ksow.ch"
+  },
+  {
+    "id": "ec223d26-aea7-5288-9cad-ba93f753e2ee",
+    "name": "RAV",
+    "type": "employment",
+    "category": "job_center",
+    "description": "Регіональний центр працевлаштування (RAV/ORP): реєстрація як шукача роботи, консультації, курси.",
+    "address": {
+      "street": "Bahnhofstrasse",
+      "houseNumber": "",
+      "postalCode": "9630",
+      "city": "Ulisbach",
+      "canton": "SG"
+    },
+    "coordinate": {
+      "latitude": 47.297782,
+      "longitude": 9.090919
+    },
+    "canton": "SG",
+    "countryCode": "CH",
+    "subdivisionCode": "SG",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/4182966750"
+  },
+  {
+    "id": "aa154fbe-6ef7-5100-960b-ee0d6ff9417d",
+    "name": "RAV Sargans",
+    "type": "employment",
+    "category": "job_center",
+    "description": "Регіональний центр працевлаштування (RAV/ORP): реєстрація як шукача роботи, консультації, курси.",
+    "address": {
+      "street": "Langgrabenstrasse",
+      "houseNumber": "",
+      "postalCode": "7320",
+      "city": "Sargans",
+      "canton": "SG"
+    },
+    "coordinate": {
+      "latitude": 47.045005,
+      "longitude": 9.448992
+    },
+    "canton": "SG",
+    "countryCode": "CH",
+    "subdivisionCode": "SG",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/5684844533",
+    "website": "https://www.sg.ch/wirtschaft-arbeit.html"
+  },
+  {
+    "id": "f7a1ce06-2efe-508f-b6b1-2c717ad97267",
+    "name": "RAV, Arbeitsvermittlung",
+    "type": "employment",
+    "category": "job_center",
+    "description": "Регіональний центр працевлаштування (RAV/ORP): реєстрація як шукача роботи, консультації, курси.",
+    "address": {
+      "street": "Bahnhofstrasse",
+      "houseNumber": "20",
+      "postalCode": "9435",
+      "city": "Heerbrugg",
+      "canton": "SG"
+    },
+    "coordinate": {
+      "latitude": 47.41156,
+      "longitude": 9.628006
+    },
+    "canton": "SG",
+    "countryCode": "CH",
+    "subdivisionCode": "SG",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/13884394201",
+    "website": "http://www.kanton.sg"
+  },
+  {
+    "id": "45534462-fc23-5d65-83b2-8c0d593c6179",
+    "name": "RAV-Regionale Arbeitsvermittlung",
+    "type": "employment",
+    "category": "job_center",
+    "description": "Регіональний центр працевлаштування (RAV/ORP): реєстрація як шукача роботи, консультації, курси.",
+    "address": {
+      "street": "Marktgasse",
+      "houseNumber": "3",
+      "postalCode": "8640",
+      "city": "Rapperswil SG",
+      "canton": "SG"
+    },
+    "coordinate": {
+      "latitude": 47.226285,
+      "longitude": 8.815907
+    },
+    "canton": "SG",
+    "countryCode": "CH",
+    "subdivisionCode": "SG",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/5683967467"
+  },
+  {
+    "id": "6aaa51fd-3074-54f2-8676-b811839c186e",
+    "name": "Staatssekretariat für Migration (SEM) Empfangs- und Verfahrenszentrum",
+    "type": "government",
+    "category": "refugee_center",
+    "description": "Федеральний центр SEM: реєстрація прохання про захист і перше розміщення.",
+    "address": {
+      "street": "Bleichemühlistrasse",
+      "houseNumber": "6",
+      "postalCode": "9450",
+      "city": "Altstätten SG",
+      "canton": "SG"
+    },
+    "coordinate": {
+      "latitude": 47.371145,
+      "longitude": 9.560769
+    },
+    "canton": "SG",
+    "countryCode": "CH",
+    "subdivisionCode": "SG",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/372068233",
+    "website": "https://www.bfm.admin.ch/bfm/en/home.html"
+  },
+  {
+    "id": "7be9e45b-3277-5365-97e5-e8c8a024b944",
+    "name": "Ambi Wattwil Berit Klinik",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Steig",
+      "houseNumber": "",
+      "postalCode": "9630",
+      "city": "Wattwil",
+      "canton": "SG"
+    },
+    "coordinate": {
+      "latitude": 47.298102,
+      "longitude": 9.08392
+    },
+    "canton": "SG",
+    "countryCode": "CH",
+    "subdivisionCode": "SG",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/165321481",
+    "website": "https://beritklinik.ch/berit-klinik-wattwil-landingpage/"
+  },
+  {
+    "id": "4ff375d1-7e39-5fec-af74-69fb12527727",
+    "name": "Kantonsspital Graubünden, Standort Walenstadt",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Spitalstrasse",
+      "houseNumber": "5",
+      "postalCode": "8880",
+      "city": "Walenstadt",
+      "canton": "SG"
+    },
+    "coordinate": {
+      "latitude": 47.120806,
+      "longitude": 9.310511
+    },
+    "canton": "SG",
+    "countryCode": "CH",
+    "subdivisionCode": "SG",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/45750557",
+    "phoneNumber": "+41817361111"
+  },
+  {
+    "id": "7d250ce6-7caf-510c-ab54-41f8e95a0687",
+    "name": "Kantonsspital St. Gallen",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Rorschacher Strasse",
+      "houseNumber": "95",
+      "postalCode": "9007",
+      "city": "St. Gallen",
+      "canton": "SG"
+    },
+    "coordinate": {
+      "latitude": 47.430683,
+      "longitude": 9.388578
+    },
+    "canton": "SG",
+    "countryCode": "CH",
+    "subdivisionCode": "SG",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": true,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/125232364",
+    "phoneNumber": "+41 71 494 11 11",
+    "website": "https://www.h-och.ch"
+  },
+  {
+    "id": "ddebf9d1-8b1b-50ac-98da-233f064d5faa",
+    "name": "Klinik Stephanshorn",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Brauerstrasse",
+      "houseNumber": "97",
+      "postalCode": "9016",
+      "city": "St. Gallen",
+      "canton": "SG"
+    },
+    "coordinate": {
+      "latitude": 47.446381,
+      "longitude": 9.412337
+    },
+    "canton": "SG",
+    "countryCode": "CH",
+    "subdivisionCode": "SG",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/681050156",
+    "phoneNumber": "+41 71 282 71 11",
+    "website": "https://www.stephanshorn.ch/"
+  },
+  {
+    "id": "5664e64b-bdf7-5173-8ab4-697e69d50ecd",
+    "name": "Spital Altstätten",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "F.-Marolanistrasse",
+      "houseNumber": "6",
+      "postalCode": "9450",
+      "city": "Altstätten SG",
+      "canton": "SG"
+    },
+    "coordinate": {
+      "latitude": 47.382433,
+      "longitude": 9.541238
+    },
+    "canton": "SG",
+    "countryCode": "CH",
+    "subdivisionCode": "SG",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/680288445",
+    "phoneNumber": "+41 71 757 44 11",
+    "website": "https://www.srrws.ch/ueber-uns/organisation/spitaeler/spital-altstaetten.html"
+  },
+  {
+    "id": "ccdef97a-2f22-56cb-902f-fcc869bc41ce",
+    "name": "Spital Grabs",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Spitalstrasse",
+      "houseNumber": "44",
+      "postalCode": "9472",
+      "city": "Grabs",
+      "canton": "SG"
+    },
+    "coordinate": {
+      "latitude": 47.173503,
+      "longitude": 9.448883
+    },
+    "canton": "SG",
+    "countryCode": "CH",
+    "subdivisionCode": "SG",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": true,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/675972086",
+    "phoneNumber": "+41 81 772 51 11",
+    "website": "https://srrws.ch/"
+  },
+  {
+    "id": "b174287c-0555-5817-a88c-f16037aed0b3",
+    "name": "Spital Linth",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Gasterstrasse",
+      "houseNumber": "25",
+      "postalCode": "8730",
+      "city": "Uznach",
+      "canton": "SG"
+    },
+    "coordinate": {
+      "latitude": 47.223593,
+      "longitude": 8.994834
+    },
+    "canton": "SG",
+    "countryCode": "CH",
+    "subdivisionCode": "SG",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/673816076",
+    "phoneNumber": "+41 55 285 41 11",
+    "website": "https://www.spital-linth.ch/"
+  },
+  {
+    "id": "f930690d-743a-591b-9bbb-7e3601a4757e",
+    "name": "Spital Wil",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Fürstenlandstrasse",
+      "houseNumber": "32",
+      "postalCode": "9500",
+      "city": "Wil SG",
+      "canton": "SG"
+    },
+    "coordinate": {
+      "latitude": 47.465319,
+      "longitude": 9.05791
+    },
+    "canton": "SG",
+    "countryCode": "CH",
+    "subdivisionCode": "SG",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/675594223",
+    "phoneNumber": "+41 71 914 61 11",
+    "website": "https://www.srft.ch/",
+    "email": "info@srft.ch"
+  },
+  {
+    "id": "b3254b0c-f7ee-565b-b7bc-47d15fe2b270",
+    "name": "Gassenküche",
+    "type": "social",
+    "category": "food_bank",
+    "description": "Видача продуктів для людей з низьким доходом. Умови отримання уточнюй на місці або в соціальній службі.",
+    "address": {
+      "street": "Linsebühlstrasse",
+      "houseNumber": "82",
+      "postalCode": "9000",
+      "city": "St.Gallen",
+      "canton": "SG"
+    },
+    "coordinate": {
+      "latitude": 47.425125,
+      "longitude": 9.384046
+    },
+    "canton": "SG",
+    "countryCode": "CH",
+    "subdivisionCode": "SG",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/13586272704",
+    "website": "https://www.stiftung-suchthilfe.ch/gassenkueche.html"
+  },
+  {
+    "id": "8f502388-9829-5f61-8d88-15e05fc0fa9c",
+    "name": "HEKS",
+    "type": "social",
+    "category": "counseling_center",
+    "description": "HEKS: консультації з інтеграції, роботи та правові консультації для біженців.",
+    "address": {
+      "street": "Tellstrasse",
+      "houseNumber": "4",
+      "postalCode": "9000",
+      "city": "St. Gallen",
+      "canton": "SG"
+    },
+    "coordinate": {
+      "latitude": 47.425442,
+      "longitude": 9.370703
+    },
+    "canton": "SG",
+    "countryCode": "CH",
+    "subdivisionCode": "SG",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/13233848508",
+    "website": "https://www.heks.ch/"
+  },
+  {
+    "id": "153c8baf-0761-5d1e-882f-917dc56f296e",
+    "name": "Kantonsspital Schaffhausen",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Geissbergstrasse",
+      "houseNumber": "81",
+      "postalCode": "8208",
+      "city": "Schaffhausen",
+      "canton": "SH"
+    },
+    "coordinate": {
+      "latitude": 47.712281,
+      "longitude": 8.636108
+    },
+    "canton": "SH",
+    "countryCode": "CH",
+    "subdivisionCode": "SH",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/relation/13506524",
+    "phoneNumber": "+41 52 634 34 34",
+    "website": "https://www.spitaeler-sh.ch/Patienten-Besucher/Kantonsspital-SH/index.php"
+  },
+  {
+    "id": "026c3c87-4153-581d-8dad-55f4e9e25e4a",
+    "name": "RestEssBar",
+    "type": "social",
+    "category": "food_bank",
+    "description": "Видача продуктів для людей з низьким доходом. Умови отримання уточнюй на місці або в соціальній службі.",
+    "address": {
+      "street": "Rheinstrasse",
+      "houseNumber": "",
+      "postalCode": "8201",
+      "city": "Schaffhausen",
+      "canton": "SH"
+    },
+    "coordinate": {
+      "latitude": 47.693899,
+      "longitude": 8.634291
+    },
+    "canton": "SH",
+    "countryCode": "CH",
+    "subdivisionCode": "SH",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/10285955761",
+    "website": "http://rebs.ch/"
+  },
+  {
+    "id": "86f944de-1291-570e-960f-907ab97b79d8",
+    "name": "RAV",
+    "type": "employment",
+    "category": "job_center",
+    "description": "Регіональний центр працевлаштування (RAV/ORP): реєстрація як шукача роботи, консультації, курси.",
+    "address": {
+      "street": "Burgunderstrasse",
+      "houseNumber": "",
+      "postalCode": "4509",
+      "city": "Solothurn",
+      "canton": "SO"
+    },
+    "coordinate": {
+      "latitude": 47.202602,
+      "longitude": 7.540074
+    },
+    "canton": "SO",
+    "countryCode": "CH",
+    "subdivisionCode": "SO",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/3077108374"
+  },
+  {
+    "id": "3db6599b-1697-5299-8090-21c0b6354880",
+    "name": "Departement des Innern – Migrationsamt",
+    "type": "government",
+    "category": "migration_office",
+    "description": "Міграційна служба кантону: дозволи на проживання, статус S, продовження документів.",
+    "address": {
+      "street": "Riedholzplatz",
+      "houseNumber": "3",
+      "postalCode": "4500",
+      "city": "Solothurn",
+      "canton": "SO"
+    },
+    "coordinate": {
+      "latitude": 47.209563,
+      "longitude": 7.538297
+    },
+    "canton": "SO",
+    "countryCode": "CH",
+    "subdivisionCode": "SO",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/9672917060"
+  },
+  {
+    "id": "b5bddb26-a5b8-522a-9d01-28c727859b0d",
+    "name": "Bürgerspital Solothurn",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Schöngrünstrasse",
+      "houseNumber": "42",
+      "postalCode": "4500",
+      "city": "Solothurn",
+      "canton": "SO"
+    },
+    "coordinate": {
+      "latitude": 47.1996,
+      "longitude": 7.539468
+    },
+    "canton": "SO",
+    "countryCode": "CH",
+    "subdivisionCode": "SO",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/681557491",
+    "phoneNumber": "+41 32 627 31 21",
+    "website": "https://www.solothurnerspitaeler.ch/unsere-spitaeler/buergerspital-solothurn/",
+    "email": "nicola.jedvaj@helion.ch"
+  },
+  {
+    "id": "e281ad65-2048-5c1e-87e9-f699edb77171",
+    "name": "Kantonsspital Olten",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Fährweg",
+      "houseNumber": "14",
+      "postalCode": "4600",
+      "city": "Olten",
+      "canton": "SO"
+    },
+    "coordinate": {
+      "latitude": 47.356448,
+      "longitude": 7.903713
+    },
+    "canton": "SO",
+    "countryCode": "CH",
+    "subdivisionCode": "SO",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": true,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/relation/18380217",
+    "phoneNumber": "+41 62 311 41 11",
+    "website": "https://www.solothurnerspitaeler.ch/unsere-spitaeler/kantonsspital-olten/"
+  },
+  {
+    "id": "50e6c1ae-efc6-5caa-a6f5-f8d43f8db074",
+    "name": "Spital Dornach",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Spitalweg",
+      "houseNumber": "11",
+      "postalCode": "4143",
+      "city": "Dornach",
+      "canton": "SO"
+    },
+    "coordinate": {
+      "latitude": 47.48627,
+      "longitude": 7.613718
+    },
+    "canton": "SO",
+    "countryCode": "CH",
+    "subdivisionCode": "SO",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/1307307466",
+    "phoneNumber": "+41 61 704 44 44",
+    "website": "https://www.solothurnerspitaeler.ch/unsere-spitaeler/spital-dornach/"
+  },
+  {
+    "id": "726f4008-e70f-5ad9-ac94-7936474aac73",
+    "name": "Caritas · Solothurn",
+    "type": "social",
+    "category": "social_services",
+    "description": "Caritas: соціальні та боргові консультації, підтримка сімей і біженців.",
+    "address": {
+      "street": "Niklaus Konrad-Strasse",
+      "houseNumber": "18",
+      "postalCode": "4501",
+      "city": "Solothurn",
+      "canton": "SO"
+    },
+    "coordinate": {
+      "latitude": 47.204785,
+      "longitude": 7.541964
+    },
+    "canton": "SO",
+    "countryCode": "CH",
+    "subdivisionCode": "SO",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/9758876258",
+    "phoneNumber": "+41 32 623 08 91",
+    "website": "https://www.caritas-solothurn.ch",
+    "email": "info@caritas-solothurn.ch"
+  },
+  {
+    "id": "bf3db229-d858-5259-9cac-be3fa7a3b1b6",
+    "name": "RAV Goldau",
+    "type": "employment",
+    "category": "job_center",
+    "description": "Регіональний центр працевлаштування (RAV/ORP): реєстрація як шукача роботи, консультації, курси.",
+    "address": {
+      "street": "Bahnhofsstrasse",
+      "houseNumber": "8",
+      "postalCode": "6410",
+      "city": "Goldau",
+      "canton": "SZ"
+    },
+    "coordinate": {
+      "latitude": 47.049609,
+      "longitude": 8.54654
+    },
+    "canton": "SZ",
+    "countryCode": "CH",
+    "subdivisionCode": "SZ",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/4737819127",
+    "phoneNumber": "+41 41 819 51 70",
+    "email": "ravgoldau.vd@sz.ch"
+  },
+  {
+    "id": "93a45ac1-80d6-59d9-b8d7-00a7338632d8",
+    "name": "Regionales Arbeitsvermittlungszentrum (RAV)",
+    "type": "employment",
+    "category": "job_center",
+    "description": "Регіональний центр працевлаштування (RAV/ORP): реєстрація як шукача роботи, консультації, курси.",
+    "address": {
+      "street": "Zürcherstrasse",
+      "houseNumber": "8",
+      "postalCode": "8853",
+      "city": "Lachen",
+      "canton": "SZ"
+    },
+    "coordinate": {
+      "latitude": 47.191968,
+      "longitude": 8.850074
+    },
+    "canton": "SZ",
+    "countryCode": "CH",
+    "subdivisionCode": "SZ",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/6919578473"
+  },
+  {
+    "id": "1e138b78-a669-53cd-8b77-4da665af6613",
+    "name": "Amt für Migration",
+    "type": "government",
+    "category": "migration_office",
+    "description": "Міграційна служба кантону: дозволи на проживання, статус S, продовження документів.",
+    "address": {
+      "street": "Steistegstrasse",
+      "houseNumber": "13",
+      "postalCode": "6431",
+      "city": "Schwyz",
+      "canton": "SZ"
+    },
+    "coordinate": {
+      "latitude": 47.020106,
+      "longitude": 8.650182
+    },
+    "canton": "SZ",
+    "countryCode": "CH",
+    "subdivisionCode": "SZ",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/7232531120"
+  },
+  {
+    "id": "fc1a30c2-7993-5da1-88e4-71b6a5193a51",
+    "name": "Spital Lachen",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Oberdorfstrasse",
+      "houseNumber": "41",
+      "postalCode": "8853",
+      "city": "Lachen",
+      "canton": "SZ"
+    },
+    "coordinate": {
+      "latitude": 47.189051,
+      "longitude": 8.859424
+    },
+    "canton": "SZ",
+    "countryCode": "CH",
+    "subdivisionCode": "SZ",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/370366918",
+    "website": "https://www.spital-lachen.ch/"
+  },
+  {
+    "id": "72079941-5049-5abf-94e8-e28cd3691f5a",
+    "name": "Caritas · Goldau",
+    "type": "social",
+    "category": "social_services",
+    "description": "Caritas: соціальні та боргові консультації, підтримка сімей і біженців.",
+    "address": {
+      "street": "Bahnhofstrasse",
+      "houseNumber": "1",
+      "postalCode": "6410",
+      "city": "Goldau",
+      "canton": "SZ"
+    },
+    "coordinate": {
+      "latitude": 47.04918,
+      "longitude": 8.549397
+    },
+    "canton": "SZ",
+    "countryCode": "CH",
+    "subdivisionCode": "SZ",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/10234534833"
+  },
+  {
+    "id": "2efc6bb4-1a87-5037-ba4d-c6f5bcd70c41",
+    "name": "Migrationsamt Thurgau",
+    "type": "government",
+    "category": "migration_office",
+    "description": "Міграційна служба кантону: дозволи на проживання, статус S, продовження документів.",
+    "address": {
+      "street": "Langfeldstrasse",
+      "houseNumber": "53a",
+      "postalCode": "8500",
+      "city": "Frauenfeld",
+      "canton": "TG"
+    },
+    "coordinate": {
+      "latitude": 47.565542,
+      "longitude": 8.904916
+    },
+    "canton": "TG",
+    "countryCode": "CH",
+    "subdivisionCode": "TG",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/4710531499",
+    "website": "https://migrationsamt.tg.ch/"
+  },
+  {
+    "id": "25b6597f-e622-5d70-b151-28ee08dd284f",
+    "name": "Staatssekretariat für Migration Empfangs- und Verfahrenszentrum Refugee Camp",
+    "type": "government",
+    "category": "refugee_center",
+    "description": "Федеральний центр SEM: реєстрація прохання про захист і перше розміщення.",
+    "address": {
+      "street": "Döbelistrasse",
+      "houseNumber": "13",
+      "postalCode": "8280",
+      "city": "Kreuzlingen",
+      "canton": "TG"
+    },
+    "coordinate": {
+      "latitude": 47.654145,
+      "longitude": 9.16634
+    },
+    "canton": "TG",
+    "countryCode": "CH",
+    "subdivisionCode": "TG",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": true,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/136213858",
+    "website": "https://www.bfm.admin.ch/bfm/de/home.html"
+  },
+  {
+    "id": "407411e4-3a15-5acd-bcc4-c7de7459e9cb",
+    "name": "Herz-Neuro-Zentrum Bodensee",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Spitalstrasse",
+      "houseNumber": "15",
+      "postalCode": "8596",
+      "city": "Münsterlingen",
+      "canton": "TG"
+    },
+    "coordinate": {
+      "latitude": 47.629531,
+      "longitude": 9.238288
+    },
+    "canton": "TG",
+    "countryCode": "CH",
+    "subdivisionCode": "TG",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/1031658733",
+    "phoneNumber": "+41 71 677 51 51",
+    "website": "https://www.herz-zentrum.com/muensterlingen/klinik/standorte"
+  },
+  {
+    "id": "e2ec8687-385f-5373-93c7-cfd967bcf73d",
+    "name": "Kantonsspital Frauenfeld",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Pfaffenholzstrasse",
+      "houseNumber": "4",
+      "postalCode": "8501",
+      "city": "Frauenfeld",
+      "canton": "TG"
+    },
+    "coordinate": {
+      "latitude": 47.548984,
+      "longitude": 8.910794
+    },
+    "canton": "TG",
+    "countryCode": "CH",
+    "subdivisionCode": "TG",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/672944584",
+    "phoneNumber": "+41 52 723 77 11",
+    "website": "https://www.stgag.ch/"
+  },
+  {
+    "id": "7190679b-1652-5725-824e-4e2ddc74a995",
+    "name": "Clinica Luganese Moncucco",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Via Moncucco",
+      "houseNumber": "10",
+      "postalCode": "6900",
+      "city": "Lugano",
+      "canton": "TI"
+    },
+    "coordinate": {
+      "latitude": 46.005099,
+      "longitude": 8.939872
+    },
+    "canton": "TI",
+    "countryCode": "CH",
+    "subdivisionCode": "TI",
+    "openingHours": [],
+    "languages": [
+      "it"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/677007953",
+    "phoneNumber": "+41 91 960 81 11",
+    "website": "https://moncucco.ch/",
+    "email": "info@moncucco.ch"
+  },
+  {
+    "id": "683b4512-4bcc-597f-a0af-1554928abaa0",
+    "name": "Ospedale Civico",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Via Tesserete",
+      "houseNumber": "46",
+      "postalCode": "6900",
+      "city": "Lugano",
+      "canton": "TI"
+    },
+    "coordinate": {
+      "latitude": 46.017706,
+      "longitude": 8.952783
+    },
+    "canton": "TI",
+    "countryCode": "CH",
+    "subdivisionCode": "TI",
+    "openingHours": [],
+    "languages": [
+      "it"
+    ],
+    "services": [],
+    "isAccessible": true,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/33621431",
+    "phoneNumber": "+41 91 811 61 11",
+    "website": "https://www.eoc.ch/Ospedali-e-Istituti/Ospedale-Regionale-di-Lugano/Civico-e-Italiano/Presentazione.html"
+  },
+  {
+    "id": "d216a622-1dcb-5dd6-b07f-01356ed517ac",
+    "name": "Ospedale Regionale La Carità",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Via Castelrotto",
+      "houseNumber": "",
+      "postalCode": "6605",
+      "city": "Locarno",
+      "canton": "TI"
+    },
+    "coordinate": {
+      "latitude": 46.168628,
+      "longitude": 8.790747
+    },
+    "canton": "TI",
+    "countryCode": "CH",
+    "subdivisionCode": "TI",
+    "openingHours": [],
+    "languages": [
+      "it"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/680350679",
+    "phoneNumber": "+41 91 811 41 11",
+    "website": "https://www.eoc.ch/Ospedali-e-Istituti/Ospedale-Regionale-di-Locarno/Presentazione.html"
+  },
+  {
+    "id": "37376f5e-768e-5b69-887e-4fe078f713e9",
+    "name": "Ospedale Regionale di Bellinzona e Valli",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Via Athos Gallino",
+      "houseNumber": "12",
+      "postalCode": "6500",
+      "city": "Bellinzona",
+      "canton": "TI"
+    },
+    "coordinate": {
+      "latitude": 46.183493,
+      "longitude": 9.026536
+    },
+    "canton": "TI",
+    "countryCode": "CH",
+    "subdivisionCode": "TI",
+    "openingHours": [],
+    "languages": [
+      "it"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/676000489",
+    "phoneNumber": "+41 91 811 91 11",
+    "website": "https://www.eoc.ch/Ospedali-e-Istituti/Ospedale-Regionale-di-Bellinzona-e-Valli/Bellinzona/Presentazione.html"
+  },
+  {
+    "id": "078c8b88-2927-5f86-b337-358cfe8e210c",
+    "name": "Ospedale Regionale di Lugano",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Via Capelli",
+      "houseNumber": "3",
+      "postalCode": "6900",
+      "city": "Lugano",
+      "canton": "TI"
+    },
+    "coordinate": {
+      "latitude": 46.009827,
+      "longitude": 8.961024
+    },
+    "canton": "TI",
+    "countryCode": "CH",
+    "subdivisionCode": "TI",
+    "openingHours": [],
+    "languages": [
+      "it"
+    ],
+    "services": [],
+    "isAccessible": true,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/28384336",
+    "phoneNumber": "+41 91 811 61 11",
+    "website": "https://www.eoc.ch/Ospedali-e-Istituti/Ospedale-Regionale-di-Lugano/Civico-e-Italiano/Presentazione.html"
+  },
+  {
+    "id": "18c0dc13-da7f-54f9-bd04-e2e15de097b0",
+    "name": "Ospedale Regionale di Mendrisio Beata Vergine",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Via Alfonso Turconi",
+      "houseNumber": "23",
+      "postalCode": "6850",
+      "city": "Mendrisio",
+      "canton": "TI"
+    },
+    "coordinate": {
+      "latitude": 45.867058,
+      "longitude": 8.982424
+    },
+    "canton": "TI",
+    "countryCode": "CH",
+    "subdivisionCode": "TI",
+    "openingHours": [],
+    "languages": [
+      "it"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/302437881",
+    "website": "https://www.eoc.ch/"
+  },
+  {
+    "id": "aef30a3d-5842-5aaa-8277-646bedeab51d",
+    "name": "Caritas · Bellinzona",
+    "type": "social",
+    "category": "social_services",
+    "description": "Caritas: соціальні та боргові консультації, підтримка сімей і біженців.",
+    "address": {
+      "street": "Via Monte Ceneri",
+      "houseNumber": "7",
+      "postalCode": "6512",
+      "city": "Bellinzona",
+      "canton": "TI"
+    },
+    "coordinate": {
+      "latitude": 46.171118,
+      "longitude": 9.009047
+    },
+    "canton": "TI",
+    "countryCode": "CH",
+    "subdivisionCode": "TI",
+    "openingHours": [],
+    "languages": [
+      "it"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/6899809736"
+  },
+  {
+    "id": "23e39b58-ac28-5022-96a7-e3b8e6eb560d",
+    "name": "RAV Uri",
+    "type": "employment",
+    "category": "job_center",
+    "description": "Регіональний центр працевлаштування (RAV/ORP): реєстрація як шукача роботи, консультації, курси.",
+    "address": {
+      "street": "Klausenstrasse",
+      "houseNumber": "4",
+      "postalCode": "6460",
+      "city": "Altdorf (UR)",
+      "canton": "UR"
+    },
+    "coordinate": {
+      "latitude": 46.874314,
+      "longitude": 8.652923
+    },
+    "canton": "UR",
+    "countryCode": "CH",
+    "subdivisionCode": "UR",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/10958166722",
+    "phoneNumber": "+41 41 875 2418"
+  },
+  {
+    "id": "e341bc5b-8554-570b-bf89-9a7ea99ef307",
+    "name": "Amt für Arbeit und Migration Uri",
+    "type": "government",
+    "category": "migration_office",
+    "description": "Міграційна служба кантону: дозволи на проживання, статус S, продовження документів.",
+    "address": {
+      "street": "Klausenstrasse",
+      "houseNumber": "4",
+      "postalCode": "6460",
+      "city": "Altdorf UR",
+      "canton": "UR"
+    },
+    "coordinate": {
+      "latitude": 46.874066,
+      "longitude": 8.652848
+    },
+    "canton": "UR",
+    "countryCode": "CH",
+    "subdivisionCode": "UR",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/360350593",
+    "phoneNumber": "+41 41 875 2418",
+    "website": "https://www.ur.ch/aemter/853"
+  },
+  {
+    "id": "4a3353f3-261a-5eb4-a96d-b36da32bcd90",
+    "name": "Kantonsspital Uri",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Spitalstrasse",
+      "houseNumber": "1",
+      "postalCode": "6460",
+      "city": "Altdorf UR",
+      "canton": "UR"
+    },
+    "coordinate": {
+      "latitude": 46.8823,
+      "longitude": 8.637156
+    },
+    "canton": "UR",
+    "countryCode": "CH",
+    "subdivisionCode": "UR",
+    "openingHours": [
+      {
+        "weekday": 2,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 24,
+          "minute": 0
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 3,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 24,
+          "minute": 0
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 4,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 24,
+          "minute": 0
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 5,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 24,
+          "minute": 0
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 6,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 24,
+          "minute": 0
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 7,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 24,
+          "minute": 0
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 1,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 24,
+          "minute": 0
+        },
+        "isClosed": false
+      }
+    ],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/676983574",
+    "phoneNumber": "+41 41 875 51 51",
+    "website": "https://www.ksuri.ch/",
+    "email": "info@ksuri.ch"
+  },
+  {
+    "id": "bb3fb168-c5dc-59a8-938e-b294aac4c7e4",
+    "name": "Office Régional de Placement",
+    "type": "employment",
+    "category": "job_center",
+    "description": "Регіональний центр працевлаштування (RAV/ORP): реєстрація як шукача роботи, консультації, курси.",
+    "address": {
+      "street": "Chemin de la Zima",
+      "houseNumber": "",
+      "postalCode": "1860",
+      "city": "Aigle",
+      "canton": "VD"
+    },
+    "coordinate": {
+      "latitude": 46.319428,
+      "longitude": 6.9617
+    },
+    "canton": "VD",
+    "countryCode": "CH",
+    "subdivisionCode": "VD",
+    "openingHours": [],
+    "languages": [
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/3053673819",
+    "phoneNumber": "+41 24 557 77 40"
+  },
+  {
+    "id": "25c3de38-f567-56ba-886d-3d416e940dc4",
+    "name": "Office Régional de Placement",
+    "type": "employment",
+    "category": "job_center",
+    "description": "Регіональний центр працевлаштування (RAV/ORP): реєстрація як шукача роботи, консультації, курси.",
+    "address": {
+      "street": "Rue de la Poste",
+      "houseNumber": "",
+      "postalCode": "1350",
+      "city": "Orbe",
+      "canton": "VD"
+    },
+    "coordinate": {
+      "latitude": 46.724118,
+      "longitude": 6.531552
+    },
+    "canton": "VD",
+    "countryCode": "CH",
+    "subdivisionCode": "VD",
+    "openingHours": [],
+    "languages": [
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/7153613358",
+    "phoneNumber": "+41 24 557 79 70"
+  },
+  {
+    "id": "ec92e460-5892-5578-928b-572ba41a02c8",
+    "name": "Office régional de placement Nyon-Rolle",
+    "type": "employment",
+    "category": "job_center",
+    "description": "Регіональний центр працевлаштування (RAV/ORP): реєстрація як шукача роботи, консультації, курси.",
+    "address": {
+      "street": "Chemin des Plantaz",
+      "houseNumber": "36",
+      "postalCode": "1260",
+      "city": "Nyon",
+      "canton": "VD"
+    },
+    "coordinate": {
+      "latitude": 46.392415,
+      "longitude": 6.232671
+    },
+    "canton": "VD",
+    "countryCode": "CH",
+    "subdivisionCode": "VD",
+    "openingHours": [],
+    "languages": [
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/5768913133"
+  },
+  {
+    "id": "a5dcd183-6543-51d0-a079-a03dc689921d",
+    "name": "CEP Office Fédéral des migrations",
+    "type": "government",
+    "category": "refugee_center",
+    "description": "Федеральний центр SEM: реєстрація прохання про захист і перше розміщення.",
+    "address": {
+      "street": "Chemin des Champs de la Croix",
+      "houseNumber": "23",
+      "postalCode": "1337",
+      "city": "Vallorbe",
+      "canton": "VD"
+    },
+    "coordinate": {
+      "latitude": 46.711112,
+      "longitude": 6.367481
+    },
+    "canton": "VD",
+    "countryCode": "CH",
+    "subdivisionCode": "VD",
+    "openingHours": [],
+    "languages": [
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/232021374",
+    "website": "https://www.bfm.admin.ch/bfm/en/home.html"
+  },
+  {
+    "id": "4624ad48-6acf-5297-8971-c86b95a3f4ec",
+    "name": "Centre Médical de Vidy",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Route de Chavannes",
+      "houseNumber": "11",
+      "postalCode": "1007",
+      "city": "Lausanne",
+      "canton": "VD"
+    },
+    "coordinate": {
+      "latitude": 46.518247,
+      "longitude": 6.600501
+    },
+    "canton": "VD",
+    "countryCode": "CH",
+    "subdivisionCode": "VD",
+    "openingHours": [],
+    "languages": [
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/675163028",
+    "phoneNumber": "+41 21 622 88 88",
+    "website": "https://www.vidymed.ch/centre-medical-de-vidy.html"
+  },
+  {
+    "id": "02054316-87de-5a50-a845-1964d37f6b73",
+    "name": "Fondation Asile des aveugles",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Avenue de France",
+      "houseNumber": "15",
+      "postalCode": "1004",
+      "city": "Lausanne",
+      "canton": "VD"
+    },
+    "coordinate": {
+      "latitude": 46.524619,
+      "longitude": 6.622924
+    },
+    "canton": "VD",
+    "countryCode": "CH",
+    "subdivisionCode": "VD",
+    "openingHours": [],
+    "languages": [
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": true,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/675170961"
+  },
+  {
+    "id": "aae109c9-16bf-5199-b5ca-1bee2bca3e05",
+    "name": "HRC Hôpital Riviera-Chablais",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Route du Vieux-Séquoia",
+      "houseNumber": "20",
+      "postalCode": "1847",
+      "city": "Rennaz",
+      "canton": "VD"
+    },
+    "coordinate": {
+      "latitude": 46.379992,
+      "longitude": 6.920674
+    },
+    "canton": "VD",
+    "countryCode": "CH",
+    "subdivisionCode": "VD",
+    "openingHours": [],
+    "languages": [
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": true,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/200580581",
+    "phoneNumber": "+41 58 773 21 12",
+    "website": "https://www.hopitalrivierachablais.ch"
+  },
+  {
+    "id": "c80ffbc6-dd7a-55ec-b503-63732369693f",
+    "name": "Hôpital de Morges",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Chemin du Crêt",
+      "houseNumber": "2",
+      "postalCode": "1110",
+      "city": "Morges",
+      "canton": "VD"
+    },
+    "coordinate": {
+      "latitude": 46.522157,
+      "longitude": 6.500135
+    },
+    "canton": "VD",
+    "countryCode": "CH",
+    "subdivisionCode": "VD",
+    "openingHours": [],
+    "languages": [
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/110004582",
+    "phoneNumber": "+41 21 804 22 11",
+    "website": "https://www.ehc-vd.ch/hopital-morges"
+  },
+  {
+    "id": "2fb246d3-ee40-5f55-9470-f4f3bbe95fda",
+    "name": "Hôpital de Nyon",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Chemin Monastier",
+      "houseNumber": "10",
+      "postalCode": "1260",
+      "city": "Nyon",
+      "canton": "VD"
+    },
+    "coordinate": {
+      "latitude": 46.383217,
+      "longitude": 6.227454
+    },
+    "canton": "VD",
+    "countryCode": "CH",
+    "subdivisionCode": "VD",
+    "openingHours": [],
+    "languages": [
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/295261008",
+    "phoneNumber": "+41 22 994 61 61",
+    "website": "https://www.ghol.ch"
+  },
+  {
+    "id": "9f080deb-5622-5714-b78d-d9ecb2b69132",
+    "name": "Hôpital du Pays d'Enhaut",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Route de l'Hôpital",
+      "houseNumber": "17",
+      "postalCode": "1660",
+      "city": "Château-d'Oex",
+      "canton": "VD"
+    },
+    "coordinate": {
+      "latitude": 46.478179,
+      "longitude": 7.140719
+    },
+    "canton": "VD",
+    "countryCode": "CH",
+    "subdivisionCode": "VD",
+    "openingHours": [],
+    "languages": [
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/675385958",
+    "phoneNumber": "+41 26 923 43 43",
+    "website": "https://www.hopital-pae.ch/jcms/pae_10300/en/bienvenue"
+  },
+  {
+    "id": "004f7452-ae03-535d-a4c5-e1e9f017f67b",
+    "name": "Hôpital intercantonal de la Broye",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Avenue de la Colline",
+      "houseNumber": "3",
+      "postalCode": "1530",
+      "city": "Payerne",
+      "canton": "VD"
+    },
+    "coordinate": {
+      "latitude": 46.818665,
+      "longitude": 6.946254
+    },
+    "canton": "VD",
+    "countryCode": "CH",
+    "subdivisionCode": "VD",
+    "openingHours": [],
+    "languages": [
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/1103638706",
+    "phoneNumber": "+41 26 662 80 11",
+    "website": "https://www.hopital-broye.ch"
+  },
+  {
+    "id": "4c573cea-b5c4-5d4f-b289-8066ab724dc6",
+    "name": "Osteo 7/7",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Place de la Gare",
+      "houseNumber": "4",
+      "postalCode": "1003",
+      "city": "Lausanne",
+      "canton": "VD"
+    },
+    "coordinate": {
+      "latitude": 46.517585,
+      "longitude": 6.629322
+    },
+    "canton": "VD",
+    "countryCode": "CH",
+    "subdivisionCode": "VD",
+    "openingHours": [],
+    "languages": [
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/12806467880",
+    "phoneNumber": "+41 21 510 50 50",
+    "website": "https://osteo7-7.ch"
+  },
+  {
+    "id": "0408f2d6-5f41-513c-a279-f436566bb141",
+    "name": "Epicerie Caritas · Vevey",
+    "type": "social",
+    "category": "social_services",
+    "description": "Caritas: соціальні та боргові консультації, підтримка сімей і біженців.",
+    "address": {
+      "street": "Avenue Reller",
+      "houseNumber": "4",
+      "postalCode": "1800",
+      "city": "Vevey",
+      "canton": "VD"
+    },
+    "coordinate": {
+      "latitude": 46.465739,
+      "longitude": 6.841775
+    },
+    "canton": "VD",
+    "countryCode": "CH",
+    "subdivisionCode": "VD",
+    "openingHours": [],
+    "languages": [
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/11668654444",
+    "phoneNumber": "+41 21 921 78 10",
+    "website": "https://www.caritas.ch/fr/epiceries-caritas/"
+  },
+  {
+    "id": "37d23851-e956-5a78-89b8-11f234c95a2c",
+    "name": "Epicerie solidaire",
+    "type": "social",
+    "category": "food_bank",
+    "description": "Видача продуктів для людей з низьким доходом. Умови отримання уточнюй на місці або в соціальній службі.",
+    "address": {
+      "street": "Parking du Martinet côté ouest,",
+      "houseNumber": "",
+      "postalCode": "1260",
+      "city": "Nyon",
+      "canton": "VD"
+    },
+    "coordinate": {
+      "latitude": 46.384831,
+      "longitude": 6.235633
+    },
+    "canton": "VD",
+    "countryCode": "CH",
+    "subdivisionCode": "VD",
+    "openingHours": [
+      {
+        "weekday": 3,
+        "openTime": {
+          "hour": 15,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 19,
+          "minute": 0
+        },
+        "isClosed": false
+      }
+    ],
+    "languages": [
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/12603432559",
+    "phoneNumber": "+41 77 422 88 29",
+    "website": "https://lasoliderie.ch/",
+    "email": "epicerie@lasoliderie.ch"
+  },
+  {
+    "id": "27d45f41-415d-560c-a491-17f9a295d4fd",
+    "name": "Épicerie Caritas · Renens",
+    "type": "social",
+    "category": "food_assistance",
+    "description": "Caritas-магазин: продукти й речі зі знижкою для людей з низьким доходом. Зазвичай потрібна картка покупця від соціальної служби.",
+    "address": {
+      "street": "Rue du Midi",
+      "houseNumber": "4",
+      "postalCode": "1020",
+      "city": "Renens",
+      "canton": "VD"
+    },
+    "coordinate": {
+      "latitude": 46.537338,
+      "longitude": 6.581816
+    },
+    "canton": "VD",
+    "countryCode": "CH",
+    "subdivisionCode": "VD",
+    "openingHours": [],
+    "languages": [
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/5776408834"
+  },
+  {
+    "id": "2c9a7bfc-7e77-539f-8122-8f766191636d",
+    "name": "ORP Martigny",
+    "type": "employment",
+    "category": "job_center",
+    "description": "Регіональний центр працевлаштування (RAV/ORP): реєстрація як шукача роботи, консультації, курси.",
+    "address": {
+      "street": "Rue des Prés de la Scie",
+      "houseNumber": "",
+      "postalCode": "1920",
+      "city": "Martigny",
+      "canton": "VS"
+    },
+    "coordinate": {
+      "latitude": 46.105641,
+      "longitude": 7.073623
+    },
+    "canton": "VS",
+    "countryCode": "CH",
+    "subdivisionCode": "VS",
+    "openingHours": [],
+    "languages": [
+      "de",
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/9568175307",
+    "phoneNumber": "+41 27 606 92 21",
+    "email": "orpmartigny@admin.vs.ch"
+  },
+  {
+    "id": "4d66f867-c148-5fbd-8a9f-d408fc392928",
+    "name": "Hôpital de Martigny",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Avenue de la Fusion",
+      "houseNumber": "27",
+      "postalCode": "1920",
+      "city": "Martigny",
+      "canton": "VS"
+    },
+    "coordinate": {
+      "latitude": 46.099595,
+      "longitude": 7.06832
+    },
+    "canton": "VS",
+    "countryCode": "CH",
+    "subdivisionCode": "VS",
+    "openingHours": [],
+    "languages": [
+      "de",
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/675359360",
+    "phoneNumber": "+41 27 603 90 00",
+    "website": "https://www.hopitalduvalais.ch/fr/lhopital-du-valais/sites/martigny.html"
+  },
+  {
+    "id": "22f45cee-8362-50c7-9ee3-5c0ad04ea2e1",
+    "name": "Hôpital de Sierre",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Rue Saint-Charles",
+      "houseNumber": "14",
+      "postalCode": "3960",
+      "city": "Sierre",
+      "canton": "VS"
+    },
+    "coordinate": {
+      "latitude": 46.292162,
+      "longitude": 7.521433
+    },
+    "canton": "VS",
+    "countryCode": "CH",
+    "subdivisionCode": "VS",
+    "openingHours": [],
+    "languages": [
+      "de",
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/675378267",
+    "phoneNumber": "+41 27 603 70 00",
+    "website": "https://www.hopitalduvalais.ch/fr/lhopital-du-valais/sites/sierre.html"
+  },
+  {
+    "id": "6fb1269b-56f9-59e1-b8df-fe8b3c3294f5",
+    "name": "Hôpital de Sion",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Avenue du Grand-Champsec",
+      "houseNumber": "80",
+      "postalCode": "1951",
+      "city": "Sion",
+      "canton": "VS"
+    },
+    "coordinate": {
+      "latitude": 46.23534,
+      "longitude": 7.386921
+    },
+    "canton": "VS",
+    "countryCode": "CH",
+    "subdivisionCode": "VS",
+    "openingHours": [],
+    "languages": [
+      "de",
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": true,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/335490255",
+    "website": "https://www.hopitalduvalais.ch/fr/lhopital-du-valais/sites/sion.html"
+  },
+  {
+    "id": "e6f0fe42-b06f-5217-8418-ec3d24afca1a",
+    "name": "Hôpital du Chablais de Monthey",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Route de Morgins",
+      "houseNumber": "54",
+      "postalCode": "1870",
+      "city": "Monthey",
+      "canton": "VS"
+    },
+    "coordinate": {
+      "latitude": 46.251588,
+      "longitude": 6.941115
+    },
+    "canton": "VS",
+    "countryCode": "CH",
+    "subdivisionCode": "VS",
+    "openingHours": [],
+    "languages": [
+      "de",
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/675361853",
+    "phoneNumber": "+41 24 473 17 31",
+    "website": "https://www.hopitalrivierachablais.ch/jcms/c_5020/fr/monthey"
+  },
+  {
+    "id": "c46f0d90-d371-514b-8efb-4408e42d0864",
+    "name": "Maison de la Santé de la Gravenne",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Route de la Gravenne",
+      "houseNumber": "14",
+      "postalCode": "1933",
+      "city": "Sembrancher",
+      "canton": "VS"
+    },
+    "coordinate": {
+      "latitude": 46.078045,
+      "longitude": 7.146294
+    },
+    "canton": "VS",
+    "countryCode": "CH",
+    "subdivisionCode": "VS",
+    "openingHours": [],
+    "languages": [
+      "de",
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": true,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/7383484724",
+    "website": "https://www.medidranse.ch/"
+  },
+  {
+    "id": "7a8d2529-1631-5a67-b16b-5b75b3049193",
+    "name": "Spital Visp",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Pflanzettastrasse",
+      "houseNumber": "8",
+      "postalCode": "3930",
+      "city": "Visp",
+      "canton": "VS"
+    },
+    "coordinate": {
+      "latitude": 46.287362,
+      "longitude": 7.88365
+    },
+    "canton": "VS",
+    "countryCode": "CH",
+    "subdivisionCode": "VS",
+    "openingHours": [],
+    "languages": [
+      "de",
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": true,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/675377223",
+    "phoneNumber": "+41 27 970 33 33",
+    "website": "https://www.hopitalduvalais.ch/de/spital-wallis/standorte/visp.html"
+  },
+  {
+    "id": "ed4e483a-c734-5894-a92d-a7557c2c3ebf",
+    "name": "Spitalzentrum Oberwallis (SZO) Brig",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Ueberlandstrasse",
+      "houseNumber": "14",
+      "postalCode": "3902",
+      "city": "Brig",
+      "canton": "VS"
+    },
+    "coordinate": {
+      "latitude": 46.317056,
+      "longitude": 7.981868
+    },
+    "canton": "VS",
+    "countryCode": "CH",
+    "subdivisionCode": "VS",
+    "openingHours": [],
+    "languages": [
+      "de",
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/274849115",
+    "phoneNumber": "+41 27 604 33 33",
+    "website": "https://www.hopitalvs.ch/de/spital-wallis/standorte/spitalzentrum-oberwallis.html"
+  },
+  {
+    "id": "f9e2254c-64f9-5f3e-8f62-22c9e6c4c766",
+    "name": "Caritas · Sion",
+    "type": "social",
+    "category": "social_services",
+    "description": "Caritas: соціальні та боргові консультації, підтримка сімей і біженців.",
+    "address": {
+      "street": "Rue de Loèche",
+      "houseNumber": "19",
+      "postalCode": "1950",
+      "city": "Sion",
+      "canton": "VS"
+    },
+    "coordinate": {
+      "latitude": 46.237692,
+      "longitude": 7.362145
+    },
+    "canton": "VS",
+    "countryCode": "CH",
+    "subdivisionCode": "VS",
+    "openingHours": [],
+    "languages": [
+      "de",
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/9450670496",
+    "website": "https://www.caritas-valais.ch/fr/boutique-seconde-main-23.html"
+  },
+  {
+    "id": "8718d97f-df94-5902-893f-df48a649bcb2",
+    "name": "Croix-Rouge Valais",
+    "type": "social",
+    "category": "social_services",
+    "description": "Червоний Хрест: соціальна підтримка, консультації та волонтерські програми, зокрема для людей з досвідом втечі.",
+    "address": {
+      "street": "Rue du Chanoine-Berchtold",
+      "houseNumber": "10",
+      "postalCode": "1950",
+      "city": "Sion",
+      "canton": "VS"
+    },
+    "coordinate": {
+      "latitude": 46.229019,
+      "longitude": 7.360546
+    },
+    "canton": "VS",
+    "countryCode": "CH",
+    "subdivisionCode": "VS",
+    "openingHours": [],
+    "languages": [
+      "de",
+      "fr"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/9381486434",
+    "phoneNumber": "+41 27 324 47 50",
+    "website": "https://www.croix-rouge-valais.ch"
+  },
+  {
+    "id": "625d4e09-dbb5-5a95-9933-9f68e49a6c34",
+    "name": "Amt für Migration",
+    "type": "government",
+    "category": "migration_office",
+    "description": "Міграційна служба кантону: дозволи на проживання, статус S, продовження документів.",
+    "address": {
+      "street": "Aabachstrasse",
+      "houseNumber": "1",
+      "postalCode": "6300",
+      "city": "Zug",
+      "canton": "ZG"
+    },
+    "coordinate": {
+      "latitude": 47.17379,
+      "longitude": 8.510379
+    },
+    "canton": "ZG",
+    "countryCode": "CH",
+    "subdivisionCode": "ZG",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/11149949489",
+    "phoneNumber": "+41 41 728 50 50",
+    "website": "https://zg.ch/de/sicherheitsdirektion/amt-fuer-migration"
+  },
+  {
+    "id": "5f8d8faa-caff-51f6-b699-c44186bf32ea",
+    "name": "AndreasKlinik Cham Zug",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Rigistrasse",
+      "houseNumber": "1",
+      "postalCode": "6330",
+      "city": "Cham",
+      "canton": "ZG"
+    },
+    "coordinate": {
+      "latitude": 47.18134,
+      "longitude": 8.455305
+    },
+    "canton": "ZG",
+    "countryCode": "CH",
+    "subdivisionCode": "ZG",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": true,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/relation/13605669",
+    "phoneNumber": "+41 41 784 07 84",
+    "website": "https://www.andreasklinik.ch/"
+  },
+  {
+    "id": "ea3be95b-dd0d-56b7-83b8-51cedd2ec9ef",
+    "name": "RAV",
+    "type": "employment",
+    "category": "job_center",
+    "description": "Регіональний центр працевлаштування (RAV/ORP): реєстрація як шукача роботи, консультації, курси.",
+    "address": {
+      "street": "Luppmenstrasse",
+      "houseNumber": "",
+      "postalCode": "8320",
+      "city": "Fehraltorf",
+      "canton": "ZH"
+    },
+    "coordinate": {
+      "latitude": 47.386839,
+      "longitude": 8.748116
+    },
+    "canton": "ZH",
+    "countryCode": "CH",
+    "subdivisionCode": "ZH",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/2524227524"
+  },
+  {
+    "id": "258f8e31-e425-5a94-aa3f-4f626c8c0305",
+    "name": "RAV Bülach",
+    "type": "employment",
+    "category": "job_center",
+    "description": "Регіональний центр працевлаштування (RAV/ORP): реєстрація як шукача роботи, консультації, курси.",
+    "address": {
+      "street": "Ackerstrasse",
+      "houseNumber": "2",
+      "postalCode": "8180",
+      "city": "Bülach",
+      "canton": "ZH"
+    },
+    "coordinate": {
+      "latitude": 47.508146,
+      "longitude": 8.542229
+    },
+    "canton": "ZH",
+    "countryCode": "CH",
+    "subdivisionCode": "ZH",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/5274359321",
+    "website": "https://awa.zh.ch/internet/volkswirtschaftsdirektion/awa/de/arbeitsmarkt/beratung_im_rav/rav_standorte/rav_buelach.html"
+  },
+  {
+    "id": "30c4b9a6-2e0a-5eb1-ac6b-afc9c5378035",
+    "name": "RAV Dietikon",
+    "type": "employment",
+    "category": "job_center",
+    "description": "Регіональний центр працевлаштування (RAV/ORP): реєстрація як шукача роботи, консультації, курси.",
+    "address": {
+      "street": "Neumattstrasse",
+      "houseNumber": "7",
+      "postalCode": "8953",
+      "city": "Dietikon",
+      "canton": "ZH"
+    },
+    "coordinate": {
+      "latitude": 47.407737,
+      "longitude": 8.402828
+    },
+    "canton": "ZH",
+    "countryCode": "CH",
+    "subdivisionCode": "ZH",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/13063331488",
+    "phoneNumber": "+41432584444",
+    "email": "hotline.ravdietikon@vd.zh.ch"
+  },
+  {
+    "id": "6c800a6b-9b7c-53d0-8f83-aef51bcc48a9",
+    "name": "RAV Regensdorf",
+    "type": "employment",
+    "category": "job_center",
+    "description": "Регіональний центр працевлаштування (RAV/ORP): реєстрація як шукача роботи, консультації, курси.",
+    "address": {
+      "street": "Althardstrasse",
+      "houseNumber": "",
+      "postalCode": "8105",
+      "city": "Regensdorf",
+      "canton": "ZH"
+    },
+    "coordinate": {
+      "latitude": 47.436736,
+      "longitude": 8.473733
+    },
+    "canton": "ZH",
+    "countryCode": "CH",
+    "subdivisionCode": "ZH",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/6291856297",
+    "phoneNumber": "+41 43 259 62 62",
+    "website": "https://awa.zh.ch/internet/volkswirtschaftsdirektion/awa/de/arbeitsmarkt/beratung_im_rav/rav_standorte/rav_regensdorf.html",
+    "email": "hotline.ravregensdorf@vd.zh.ch"
+  },
+  {
+    "id": "730560c9-f62d-5348-a27f-27b763f92206",
+    "name": "RAV Uster",
+    "type": "employment",
+    "category": "job_center",
+    "description": "Регіональний центр працевлаштування (RAV/ORP): реєстрація як шукача роботи, консультації, курси.",
+    "address": {
+      "street": "Industriestrasse",
+      "houseNumber": "",
+      "postalCode": "8616",
+      "city": "Uster",
+      "canton": "ZH"
+    },
+    "coordinate": {
+      "latitude": 47.350407,
+      "longitude": 8.719351
+    },
+    "canton": "ZH",
+    "countryCode": "CH",
+    "subdivisionCode": "ZH",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/13065388292"
+  },
+  {
+    "id": "eda18ebd-3d5b-5316-b5a9-5f61267f7b97",
+    "name": "Regionales Arbeitsvermittlungszentrum",
+    "type": "employment",
+    "category": "job_center",
+    "description": "Регіональний центр працевлаштування (RAV/ORP): реєстрація як шукача роботи, консультації, курси.",
+    "address": {
+      "street": "Nansenstrasse",
+      "houseNumber": "",
+      "postalCode": "8050",
+      "city": "Zürich",
+      "canton": "ZH"
+    },
+    "coordinate": {
+      "latitude": 47.410948,
+      "longitude": 8.544855
+    },
+    "canton": "ZH",
+    "countryCode": "CH",
+    "subdivisionCode": "ZH",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/12841754541"
+  },
+  {
+    "id": "d23ce1ce-fe11-5e28-8f78-0c44a7830779",
+    "name": "Migrationsamt des Kantons Zürich",
+    "type": "government",
+    "category": "migration_office",
+    "description": "Міграційна служба кантону: дозволи на проживання, статус S, продовження документів.",
+    "address": {
+      "street": "Berninastrasse",
+      "houseNumber": "45",
+      "postalCode": "8057",
+      "city": "Zürich",
+      "canton": "ZH"
+    },
+    "coordinate": {
+      "latitude": 47.403642,
+      "longitude": 8.546587
+    },
+    "canton": "ZH",
+    "countryCode": "CH",
+    "subdivisionCode": "ZH",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/1287709990",
+    "phoneNumber": "+41 43 259 88 00",
+    "website": "https://ma.zh.ch/"
+  },
+  {
+    "id": "53899104-c09d-56bc-8931-322f38fc2589",
+    "name": "Kantonsspital Winterthur",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Brauerstrasse",
+      "houseNumber": "15",
+      "postalCode": "8401",
+      "city": "Winterthur",
+      "canton": "ZH"
+    },
+    "coordinate": {
+      "latitude": 47.506883,
+      "longitude": 8.728298
+    },
+    "canton": "ZH",
+    "countryCode": "CH",
+    "subdivisionCode": "ZH",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": true,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/165785776",
+    "phoneNumber": "+41 52 266 21 21",
+    "website": "https://www.ksw.ch/"
+  },
+  {
+    "id": "776a8de0-abc4-5c82-b67e-189f9ae9938f",
+    "name": "See-Spital Horgen",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Asylstrasse",
+      "houseNumber": "19",
+      "postalCode": "8810",
+      "city": "Horgen",
+      "canton": "ZH"
+    },
+    "coordinate": {
+      "latitude": 47.262715,
+      "longitude": 8.589996
+    },
+    "canton": "ZH",
+    "countryCode": "CH",
+    "subdivisionCode": "ZH",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/317763534",
+    "website": "https://www.see-spital.ch/"
+  },
+  {
+    "id": "d7c8bb8a-5e48-568c-bd08-9e22a37621af",
+    "name": "Spital Affoltern am Albis",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Sonnenbergstrasse",
+      "houseNumber": "27",
+      "postalCode": "8910",
+      "city": "Affoltern am Albis",
+      "canton": "ZH"
+    },
+    "coordinate": {
+      "latitude": 47.284741,
+      "longitude": 8.45656
+    },
+    "canton": "ZH",
+    "countryCode": "CH",
+    "subdivisionCode": "ZH",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/relation/9065183",
+    "phoneNumber": "+41 44 714 21 11",
+    "website": "https://www.spitalaffoltern.ch",
+    "email": "kontakt@spitalaffoltern.ch"
+  },
+  {
+    "id": "957fa4e0-44e2-5708-9439-ad499cd8344f",
+    "name": "Spital Bülach",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Spitalstrasse",
+      "houseNumber": "24",
+      "postalCode": "8180",
+      "city": "Bülach",
+      "canton": "ZH"
+    },
+    "coordinate": {
+      "latitude": 47.521322,
+      "longitude": 8.533547
+    },
+    "canton": "ZH",
+    "countryCode": "CH",
+    "subdivisionCode": "ZH",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": true,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/relation/9503571",
+    "phoneNumber": "+41 44 863 22 11",
+    "website": "https://www.spitalbuelach.ch/"
+  },
+  {
+    "id": "2018dcd5-cef0-51f0-a085-68f67de2e56a",
+    "name": "Spital Männedorf",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Asylstrasse",
+      "houseNumber": "10",
+      "postalCode": "8708",
+      "city": "Männedorf",
+      "canton": "ZH"
+    },
+    "coordinate": {
+      "latitude": 47.250895,
+      "longitude": 8.696052
+    },
+    "canton": "ZH",
+    "countryCode": "CH",
+    "subdivisionCode": "ZH",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/236595729",
+    "phoneNumber": "+41 44 922 22 11",
+    "website": "https://www.spitalmaennedorf.ch/"
+  },
+  {
+    "id": "f6571ca3-02bc-52ce-88f0-1e682a502234",
+    "name": "Spital Uster",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Brunnenstrasse",
+      "houseNumber": "42",
+      "postalCode": "8610",
+      "city": "Uster",
+      "canton": "ZH"
+    },
+    "coordinate": {
+      "latitude": 47.352924,
+      "longitude": 8.724131
+    },
+    "canton": "ZH",
+    "countryCode": "CH",
+    "subdivisionCode": "ZH",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/527550642",
+    "phoneNumber": "+41 44 911 11 11",
+    "website": "https://www.spitaluster.ch"
+  },
+  {
+    "id": "50e6249b-7d01-595d-afe7-013e28b5fc9a",
+    "name": "Spital Zollikerberg",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Trichtenhauserstrasse",
+      "houseNumber": "20",
+      "postalCode": "8125",
+      "city": "Zollikerberg",
+      "canton": "ZH"
+    },
+    "coordinate": {
+      "latitude": 47.348697,
+      "longitude": 8.598921
+    },
+    "canton": "ZH",
+    "countryCode": "CH",
+    "subdivisionCode": "ZH",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/675191947",
+    "phoneNumber": "+41 44 397 21 11",
+    "website": "https://www.spitalzollikerberg.ch/"
+  },
+  {
+    "id": "ce443073-4a22-5111-ae44-993f28aa2528",
+    "name": "Stadtspital Triemli",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Birmensdorferstrasse",
+      "houseNumber": "497",
+      "postalCode": "8063",
+      "city": "Zürich",
+      "canton": "ZH"
+    },
+    "coordinate": {
+      "latitude": 47.366477,
+      "longitude": 8.497454
+    },
+    "canton": "ZH",
+    "countryCode": "CH",
+    "subdivisionCode": "ZH",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/555945140",
+    "phoneNumber": "+41 44 416 11 11",
+    "website": "http://www.triemli.ch/"
+  },
+  {
+    "id": "80ac11a0-6c33-5cc3-ad4c-f8edf4920f18",
+    "name": "Universitäts-Kinderspital Zürich",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Lenggstrasse",
+      "houseNumber": "31",
+      "postalCode": "8008",
+      "city": "Zürich",
+      "canton": "ZH"
+    },
+    "coordinate": {
+      "latitude": 47.352396,
+      "longitude": 8.571234
+    },
+    "canton": "ZH",
+    "countryCode": "CH",
+    "subdivisionCode": "ZH",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/relation/18241258",
+    "phoneNumber": "+41 44 249 49 49",
+    "website": "https://www.kispi.uzh.ch/"
+  },
+  {
+    "id": "31d07099-7ed8-5b87-99f9-67c9e072921d",
+    "name": "Universitätsspital Zürich",
+    "type": "healthcare",
+    "category": "emergency_room",
+    "description": "Лікарня з відділенням невідкладної допомоги. Якщо є загроза життю — дзвони 144.",
+    "address": {
+      "street": "Rämistrasse",
+      "houseNumber": "100",
+      "postalCode": "8091",
+      "city": "Zürich",
+      "canton": "ZH"
+    },
+    "coordinate": {
+      "latitude": 47.377754,
+      "longitude": 8.550767
+    },
+    "canton": "ZH",
+    "countryCode": "CH",
+    "subdivisionCode": "ZH",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": true,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/612288154",
+    "phoneNumber": "+41 44 255 11 11",
+    "website": "https://www.usz.ch/"
+  },
+  {
+    "id": "ea73bf91-ef43-5017-98b8-9baf2944fcb9",
+    "name": "Caritas Markt · Zürich",
+    "type": "social",
+    "category": "food_assistance",
+    "description": "Caritas-магазин: продукти й речі зі знижкою для людей з низьким доходом. Зазвичай потрібна картка покупця від соціальної служби.",
+    "address": {
+      "street": "Dörflistrasse",
+      "houseNumber": "67",
+      "postalCode": "8050",
+      "city": "Zürich",
+      "canton": "ZH"
+    },
+    "coordinate": {
+      "latitude": 47.407488,
+      "longitude": 8.550069
+    },
+    "canton": "ZH",
+    "countryCode": "CH",
+    "subdivisionCode": "ZH",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": true,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/942813421"
+  },
+  {
+    "id": "1caea290-7dec-58fb-85fa-c36195c15953",
+    "name": "Caritas · Winterthur",
+    "type": "social",
+    "category": "social_services",
+    "description": "Caritas: соціальні та боргові консультації, підтримка сімей і біженців.",
+    "address": {
+      "street": "Steinberggasse",
+      "houseNumber": "54",
+      "postalCode": "8400",
+      "city": "Winterthur",
+      "canton": "ZH"
+    },
+    "coordinate": {
+      "latitude": 47.498354,
+      "longitude": 8.727233
+    },
+    "canton": "ZH",
+    "countryCode": "CH",
+    "subdivisionCode": "ZH",
+    "openingHours": [
+      {
+        "weekday": 2,
+        "openTime": {
+          "hour": 9,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 18,
+          "minute": 30
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 3,
+        "openTime": {
+          "hour": 9,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 18,
+          "minute": 30
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 4,
+        "openTime": {
+          "hour": 9,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 18,
+          "minute": 30
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 5,
+        "openTime": {
+          "hour": 9,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 18,
+          "minute": 30
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 6,
+        "openTime": {
+          "hour": 9,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 18,
+          "minute": 30
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 7,
+        "openTime": {
+          "hour": 9,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 17,
+          "minute": 0
+        },
+        "isClosed": false
+      }
+    ],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/712608780",
+    "website": "https://www.caritas-zuerich.ch/"
+  },
+  {
+    "id": "c10a2384-ce08-5ec3-b3c2-4aecd6b56ba5",
+    "name": "Caritas-Hospiz Obdachlosenheim",
+    "type": "social",
+    "category": "social_services",
+    "description": "Caritas: нічліжка для людей без житла.",
+    "address": {
+      "street": "Konradstrasse",
+      "houseNumber": "79",
+      "postalCode": "8005",
+      "city": "Zürich",
+      "canton": "ZH"
+    },
+    "coordinate": {
+      "latitude": 47.382217,
+      "longitude": 8.5329
+    },
+    "canton": "ZH",
+    "countryCode": "CH",
+    "subdivisionCode": "ZH",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/way/123448142",
+    "phoneNumber": "+41 44 271 63 39",
+    "website": "http://www.caritas-hospiz.ch/home",
+    "email": "caritas-hospiz@bluewin.ch"
+  },
+  {
+    "id": "333d40cf-0e7d-5745-9da3-7952f46aaf76",
+    "name": "Essen für Alle",
+    "type": "social",
+    "category": "food_bank",
+    "description": "Видача продуктів для людей з низьким доходом. Умови отримання уточнюй на місці або в соціальній службі.",
+    "address": {
+      "street": "Allmendstrasse",
+      "houseNumber": "93",
+      "postalCode": "8038",
+      "city": "Zürich",
+      "canton": "ZH"
+    },
+    "coordinate": {
+      "latitude": 47.341759,
+      "longitude": 8.519547
+    },
+    "canton": "ZH",
+    "countryCode": "CH",
+    "subdivisionCode": "ZH",
+    "openingHours": [
+      {
+        "weekday": 7,
+        "openTime": {
+          "hour": 11,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 16,
+          "minute": 0
+        },
+        "isClosed": false
+      }
+    ],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/12159732327",
+    "website": "https://www.essenfueralle.org/beziehen/zuerich/"
+  },
+  {
+    "id": "b8a99a91-5794-56d4-ac57-319cd1fa80fb",
+    "name": "HEKS Garten-Tandem",
+    "type": "social",
+    "category": "counseling_center",
+    "description": "HEKS: консультації з інтеграції, роботи та правові консультації для біженців.",
+    "address": {
+      "street": "Salzweg",
+      "houseNumber": "50",
+      "postalCode": "8048",
+      "city": "Zürich",
+      "canton": "ZH"
+    },
+    "coordinate": {
+      "latitude": 47.386649,
+      "longitude": 8.468327
+    },
+    "canton": "ZH",
+    "countryCode": "CH",
+    "subdivisionCode": "ZH",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/10270963477",
+    "website": "https://www.heks.ch/begegnung-und-austausch-im-garten"
+  },
+  {
+    "id": "11bc6586-257a-5af1-b967-c487dbc9ebd4",
+    "name": "HEKS/EPER",
+    "type": "social",
+    "category": "counseling_center",
+    "description": "HEKS: консультації з інтеграції, роботи та правові консультації для біженців.",
+    "address": {
+      "street": "Seminarstrasse",
+      "houseNumber": "28",
+      "postalCode": "8057",
+      "city": "Zürich",
+      "canton": "ZH"
+    },
+    "coordinate": {
+      "latitude": 47.392969,
+      "longitude": 8.536808
+    },
+    "canton": "ZH",
+    "countryCode": "CH",
+    "subdivisionCode": "ZH",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/6538977130",
+    "website": "https://www.heks.ch/"
+  },
+  {
+    "id": "5a1393a1-e569-5331-b66d-376352b5f7c6",
+    "name": "Madame Frigo - Wetzikon",
+    "type": "social",
+    "category": "food_bank",
+    "description": "Видача продуктів для людей з низьким доходом. Умови отримання уточнюй на місці або в соціальній службі.",
+    "address": {
+      "street": "Dürntnerstrasse",
+      "houseNumber": "",
+      "postalCode": "8349",
+      "city": "Ringwil",
+      "canton": "ZH"
+    },
+    "coordinate": {
+      "latitude": 47.301361,
+      "longitude": 8.843564
+    },
+    "canton": "ZH",
+    "countryCode": "CH",
+    "subdivisionCode": "ZH",
+    "openingHours": [
+      {
+        "weekday": 1,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 2,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 3,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 4,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 5,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 6,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 7,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      }
+    ],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/11649314675"
+  },
+  {
+    "id": "bb7b6987-8f7c-5b84-a16a-dd334d689669",
+    "name": "Madame Frigo - Zwicky-Fabrik",
+    "type": "social",
+    "category": "food_bank",
+    "description": "Видача продуктів для людей з низьким доходом. Умови отримання уточнюй на місці або в соціальній службі.",
+    "address": {
+      "street": "Wigartenstrasse",
+      "houseNumber": "25",
+      "postalCode": "8117",
+      "city": "Fällanden",
+      "canton": "ZH"
+    },
+    "coordinate": {
+      "latitude": 47.370432,
+      "longitude": 8.64291
+    },
+    "canton": "ZH",
+    "countryCode": "CH",
+    "subdivisionCode": "ZH",
+    "openingHours": [
+      {
+        "weekday": 1,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 2,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 3,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 4,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 5,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 6,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 7,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      }
+    ],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/11026374604"
+  },
+  {
+    "id": "26f546d7-c139-5a92-8b3c-1391d50f5642",
+    "name": "RestEssBar Winti Altstadt",
+    "type": "social",
+    "category": "food_bank",
+    "description": "Видача продуктів для людей з низьким доходом. Умови отримання уточнюй на місці або в соціальній службі.",
+    "address": {
+      "street": "Reitweg",
+      "houseNumber": "",
+      "postalCode": "8403",
+      "city": "Winterthur",
+      "canton": "ZH"
+    },
+    "coordinate": {
+      "latitude": 47.494706,
+      "longitude": 8.732904
+    },
+    "canton": "ZH",
+    "countryCode": "CH",
+    "subdivisionCode": "ZH",
+    "openingHours": [
+      {
+        "weekday": 1,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 2,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 3,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 4,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 5,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 6,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      },
+      {
+        "weekday": 7,
+        "openTime": {
+          "hour": 0,
+          "minute": 0
+        },
+        "closeTime": {
+          "hour": 23,
+          "minute": 59
+        },
+        "isClosed": false
+      }
+    ],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/7052781841",
+    "website": "https://restessbar.ch/de/standorte/winti_altstadt"
+  },
+  {
+    "id": "bdbbeb9f-98ea-5420-bccf-2d8b372e9adc",
+    "name": "Schweiz. Rotes Kreuz Kanton Zürich",
+    "type": "social",
+    "category": "social_services",
+    "description": "Червоний Хрест: соціальна підтримка, консультації та волонтерські програми, зокрема для людей з досвідом втечі.",
+    "address": {
+      "street": "Thurgauerstrasse",
+      "houseNumber": "36",
+      "postalCode": "8050",
+      "city": "Zürich",
+      "canton": "ZH"
+    },
+    "coordinate": {
+      "latitude": 47.413979,
+      "longitude": 8.551497
+    },
+    "canton": "ZH",
+    "countryCode": "CH",
+    "subdivisionCode": "ZH",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/4973673227",
+    "phoneNumber": "+41 44 388 25 25",
+    "website": "https://www.srk-zuerich.ch/srk/index.php"
+  },
+  {
+    "id": "1928562b-e8cd-5436-be83-e06f17b9f458",
+    "name": "Tischlein Deck Dich",
+    "type": "social",
+    "category": "food_bank",
+    "description": "Видача продуктів для людей з низьким доходом. Умови отримання уточнюй на місці або в соціальній службі.",
+    "address": {
+      "street": "Gubelstrasse",
+      "houseNumber": "10",
+      "postalCode": "8050",
+      "city": "Zürich",
+      "canton": "ZH"
+    },
+    "coordinate": {
+      "latitude": 47.407764,
+      "longitude": 8.545689
+    },
+    "canton": "ZH",
+    "countryCode": "CH",
+    "subdivisionCode": "ZH",
+    "openingHours": [
+      {
+        "weekday": 2,
+        "openTime": {
+          "hour": 10,
+          "minute": 30
+        },
+        "closeTime": {
+          "hour": 12,
+          "minute": 0
+        },
+        "isClosed": false
+      }
+    ],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": true,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/8152206419",
+    "website": "https://www.tischlein.ch/"
+  },
+  {
+    "id": "293b7475-b555-518a-91d0-9729467f7b35",
+    "name": "Tischlein deck dich",
+    "type": "social",
+    "category": "food_bank",
+    "description": "Видача продуктів для людей з низьким доходом. Умови отримання уточнюй на місці або в соціальній службі.",
+    "address": {
+      "street": "Rudolf-Diesel-Strasse",
+      "houseNumber": "25",
+      "postalCode": "8404",
+      "city": "Winterthur",
+      "canton": "ZH"
+    },
+    "coordinate": {
+      "latitude": 47.494209,
+      "longitude": 8.759824
+    },
+    "canton": "ZH",
+    "countryCode": "CH",
+    "subdivisionCode": "ZH",
+    "openingHours": [],
+    "languages": [
+      "de"
+    ],
+    "services": [],
+    "isAccessible": false,
+    "reviewCount": 0,
+    "source": "https://www.openstreetmap.org/node/13327110747",
+    "phoneNumber": "+41 52 224 44 88",
+    "website": "https://www.tischlein.ch/ueber-uns/regionen-und-teams/geschaeftsstelle/",
+    "email": "info@tischlein.ch"
+  }
+]

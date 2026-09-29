@@ -130,9 +130,9 @@ struct PrimaryButton: View {
         case .primary:
             return Theme.Colors.textOnPrimary
         case .secondary:
-            return Theme.Colors.primary
+            return JourneyVisual.accentText
         case .outline:
-            return Theme.Colors.primary
+            return JourneyVisual.accentText
         case .coral:
             return .white
         }
@@ -143,9 +143,9 @@ struct PrimaryButton: View {
         case .primary, .coral:
             return Color.clear
         case .secondary:
-            return Theme.Colors.primary
+            return JourneyVisual.accentText
         case .outline:
-            return Theme.Colors.primary
+            return JourneyVisual.accentText
         }
     }
     

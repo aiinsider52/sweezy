@@ -59,4 +59,40 @@ final class LifeAdminServiceTests: XCTestCase {
         XCTAssertEqual(deadline?.urgency, .overdue)
         XCTAssertEqual(deadline?.isCompleted, false)
     }
+
+    func testSwissDocumentProgressSurvivesRelaunchWithLegacyIDs() {
+        let first = LifeAdminService(defaults: defaults)
+        first.prepareDocuments(for: nil)
+        XCTAssertTrue(first.documents.contains { $0.id == "passport" })
+        XCTAssertTrue(first.documents.contains { $0.id == "municipality" })
+        first.toggleDocument("passport")
+
+        let relaunched = LifeAdminService(defaults: defaults)
+        relaunched.prepareDocuments(for: UserProfile(country: .switzerland))
+
+        XCTAssertEqual(relaunched.documents.first { $0.id == "passport" }?.isReady, true)
+    }
+
+    func testSwitchingCountryAndBackKeepsSwissDocumentProgress() {
+        let service = LifeAdminService(defaults: defaults)
+        service.prepareDocuments(for: UserProfile(country: .switzerland))
+        service.toggleDocument("passport")
+
+        service.prepareDocuments(for: UserProfile(country: .germany))
+        XCTAssertEqual(service.documents.first { $0.id == "de.passport" }?.isReady, false)
+
+        service.prepareDocuments(for: UserProfile(country: .switzerland))
+        XCTAssertEqual(service.documents.first { $0.id == "passport" }?.isReady, true)
+    }
+
+    func testSwissDeadlinesKeepLegacyIDsSoCompletionPersists() {
+        let service = LifeAdminService(defaults: defaults)
+        service.setDeadlineCompleted("insurance.health", completed: true)
+
+        let ids = service.deadlines(profile: UserProfile(country: .switzerland), firstWeekTasks: []).map(\.id)
+
+        XCTAssertTrue(ids.contains("registration.municipality"))
+        XCTAssertFalse(ids.contains("insurance.health"))
+        XCTAssertTrue(service.deadlines(profile: UserProfile(country: .germany), firstWeekTasks: []).map(\.id).contains("de.registration"))
+    }
 }

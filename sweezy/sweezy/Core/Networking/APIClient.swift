@@ -14,6 +14,16 @@ private actor TokenRefreshCoordinator {
 }
 
 enum APIClient {
+    static private(set) var countryCode = "CH"
+    static private(set) var subdivisionCode = "ZH"
+    static private(set) var preferredLanguage = "uk"
+
+    static func configureCountry(country: String, subdivision: String, language: String) {
+        countryCode = country.uppercased()
+        subdivisionCode = subdivision.uppercased()
+        preferredLanguage = language.split(whereSeparator: { $0 == "_" || $0 == "-" }).first.map(String.init) ?? "uk"
+    }
+
     /// Base URL for the backend. Defaults to local dev server.
     static var baseURL: URL = {
         if let raw = Bundle.main.object(forInfoDictionaryKey: "API_BASE_URL") as? String,
@@ -43,6 +53,22 @@ enum APIClient {
         }
 
         components.percentEncodedQuery = String(parts[1])
+        return components.url ?? endpoint
+    }
+
+    static func countryScopedURL(_ path: String, includeSubdivision: Bool = false, language: String? = nil) -> URL {
+        let endpoint = url(path)
+        guard var components = URLComponents(url: endpoint, resolvingAgainstBaseURL: false) else { return endpoint }
+        var items = components.queryItems ?? []
+        items.removeAll { ["country_code", "subdivision_code", "language"].contains($0.name) }
+        items.append(URLQueryItem(name: "country_code", value: countryCode))
+        if includeSubdivision {
+            items.append(URLQueryItem(name: "subdivision_code", value: subdivisionCode))
+        }
+        if let language {
+            items.append(URLQueryItem(name: "language", value: language))
+        }
+        components.queryItems = items
         return components.url ?? endpoint
     }
 
@@ -317,36 +343,34 @@ enum APIClient {
     }
 
     // MARK: - Content
-    struct BackendGuide: Decodable { let id: String; let title: String; let slug: String; let description: String?; let content: String?; let category: String?; let image_url: String?; let source_url: String?; let source_title: String?; let verified_at: String?; let is_published: Bool? }
-    struct BackendTemplate: Decodable { let id: String; let name: String; let category: String?; let content: String }
-    struct BackendChecklist: Decodable { let id: String; let title: String; let description: String?; let items: [String]; let source_url: String?; let source_title: String?; let verified_at: String?; let is_published: Bool? }
-    struct BackendNewsItem: Decodable { let id: String; let title: String; let summary: String; let content: String?; let url: String; let source: String; let language: String; let published_at: String; let image_url: String? }
+    struct BackendGuide: Decodable { let id: String; let title: String; let slug: String; let description: String?; let content: String?; let category: String?; let country_code: String?; let subdivision_codes: [String]?; let language: String?; let image_url: String?; let source_url: String?; let source_title: String?; let verified_at: String?; let is_published: Bool? }
+    struct BackendTemplate: Decodable { let id: String; let name: String; let category: String?; let content: String; let country_code: String?; let subdivision_codes: [String]?; let language: String? }
+    struct BackendChecklist: Decodable { let id: String; let title: String; let description: String?; let items: [String]; let country_code: String?; let subdivision_codes: [String]?; let language: String?; let source_url: String?; let source_title: String?; let verified_at: String?; let is_published: Bool? }
+    struct BackendNewsItem: Decodable { let id: String; let title: String; let summary: String; let content: String?; let url: String; let source: String; let language: String; let country_code: String?; let subdivision_codes: [String]?; let published_at: String; let image_url: String? }
 
-    static func fetchGuides(limit: Int = 1000) async throws -> [BackendGuide] {
-        let url = url("guides?limit=\(limit)")
+    static func fetchGuides(limit: Int = 1000, language: String? = nil) async throws -> [BackendGuide] {
+        let url = countryScopedURL("guides?limit=\(limit)", language: language)
         let (data, resp) = try await authorizedData(from: url)
         guard let http = resp as? HTTPURLResponse, (200..<300).contains(http.statusCode) else { return [] }
         return try JSONDecoder().decode([BackendGuide].self, from: data)
     }
 
     static func fetchTemplates(limit: Int = 1000) async throws -> [BackendTemplate] {
-        let url = url("templates?limit=\(limit)")
+        let url = countryScopedURL("templates?limit=\(limit)")
         let (data, resp) = try await authorizedData(from: url)
         guard let http = resp as? HTTPURLResponse, (200..<300).contains(http.statusCode) else { return [] }
         return try JSONDecoder().decode([BackendTemplate].self, from: data)
     }
 
-    static func fetchChecklists(limit: Int = 1000) async throws -> [BackendChecklist] {
-        let url = url("checklists?limit=\(limit)")
+    static func fetchChecklists(limit: Int = 1000, language: String? = nil) async throws -> [BackendChecklist] {
+        let url = countryScopedURL("checklists?limit=\(limit)", language: language)
         let (data, resp) = try await authorizedData(from: url)
         guard let http = resp as? HTTPURLResponse, (200..<300).contains(http.statusCode) else { return [] }
         return try JSONDecoder().decode([BackendChecklist].self, from: data)
     }
     
     static func fetchNews(limit: Int = 50, language: String? = nil) async throws -> [BackendNewsItem] {
-        var path = "news?limit=\(limit)"
-        if let language { path += "&language=\(language)" }
-        let url = url(path)
+        let url = countryScopedURL("news?limit=\(limit)", language: language)
         let (data, resp) = try await authorizedData(from: url)
         guard let http = resp as? HTTPURLResponse, (200..<300).contains(http.statusCode) else { return [] }
         return try JSONDecoder().decode([BackendNewsItem].self, from: data)
@@ -500,6 +524,7 @@ enum APIClient {
         let company: String?
         let location: String?
         let canton: String?
+        let country: String?
         let url: String
         let posted_at: String?
         let employment_type: String?
@@ -564,6 +589,7 @@ enum APIClient {
         var comps = URLComponents(url: url("jobs/search"), resolvingAgainstBaseURL: false)
         var qItems: [URLQueryItem] = [
             URLQueryItem(name: "q", value: keyword),
+            URLQueryItem(name: "country", value: countryCode),
             URLQueryItem(name: "page", value: String(page)),
             URLQueryItem(name: "per_page", value: String(perPage))
         ]
@@ -579,7 +605,7 @@ enum APIClient {
         }
         
         // Catalog is server-backed. Keep short offline cache; never cache empty/provider-error states.
-        let cacheKey = "jobs|q=\(keyword)|canton=\(canton ?? "")|employment=\(employmentType ?? "")|workplace=\(workplaceType ?? "")|experience=\(String(describing: noExperience))|degree=\(String(describing: noDegree))|salary=\(minSalary ?? 0)|page=\(page)|per=\(perPage)"
+        let cacheKey = "jobs|country=\(countryCode)|q=\(keyword)|canton=\(canton ?? "")|employment=\(employmentType ?? "")|workplace=\(workplaceType ?? "")|experience=\(String(describing: noExperience))|degree=\(String(describing: noDegree))|salary=\(minSalary ?? 0)|page=\(page)|per=\(perPage)"
         let ttl: TimeInterval = 300
         
         do {
@@ -704,7 +730,7 @@ enum APIClient {
     }
     
     static func listJobFavorites() async -> [JobFavorite] {
-        let url = url("jobs/favorites")
+        let url = url("jobs/favorites?country=\(countryCode)")
         do {
             let (data, resp) = try await authorizedData(from: url)
             guard let http = resp as? HTTPURLResponse, (200..<300).contains(http.statusCode) else { return [] }
@@ -727,6 +753,7 @@ enum APIClient {
             "company": job.company,
             "location": job.location,
             "canton": job.canton,
+            "country": job.country ?? countryCode,
             "url": job.url
         ]
         req.httpBody = try? JSONSerialization.data(withJSONObject: payload.compactMapValues { $0 })
@@ -1036,6 +1063,7 @@ enum APIClient {
         var payload: [String: Any] = [
             "desired_position": desiredPosition,
             "skills": skills,
+            "country": countryCode,
             "remote": remote,
             "limit": 20
         ]
@@ -1048,6 +1076,45 @@ enum APIClient {
             throw URLError(.badServerResponse)
         }
         return try JSONDecoder().decode(JobMatchResponse.self, from: data)
+    }
+
+    struct CountryContextResponse: Decodable {
+        let country_code: String
+        let subdivision_code: String?
+        let preferred_language: String
+        let currency_code: String
+        let timezone: String
+        let is_active: Bool
+    }
+
+    private struct CountryContextPayload: Encodable {
+        let subdivision_code: String
+        let city: String?
+        let residence_status: String
+        let preferred_language: String
+        let currency_code: String
+        let timezone: String
+        let is_active: Bool
+    }
+
+    static func syncCountryContext(_ profile: UserProfile) async throws -> CountryContextResponse {
+        var request = URLRequest(url: url("country-context/me/\(profile.country.rawValue)"))
+        request.httpMethod = "PUT"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONEncoder().encode(CountryContextPayload(
+            subdivision_code: profile.administrativeAreaCode,
+            city: profile.address?.city,
+            residence_status: profile.residenceStatusCode,
+            preferred_language: profile.preferredLanguage,
+            currency_code: profile.currencyCode,
+            timezone: profile.country.timeZoneIdentifier,
+            is_active: true
+        ))
+        let (data, response) = try await authorizedData(for: request, context: "country_context_sync")
+        guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+            throw makeAPIError(data: data, response: response as? HTTPURLResponse, fallback: "Country context sync failed")
+        }
+        return try JSONDecoder().decode(CountryContextResponse.self, from: data)
     }
     
     // MARK: - Live place status
@@ -1226,7 +1293,10 @@ extension APIClient {
                               listingType: ListingType? = nil,
                               page: Int = 1) async throws -> ServiceListingPage {
         var comps = URLComponents(url: url("marketplace"), resolvingAgainstBaseURL: false)
-        var items: [URLQueryItem] = [URLQueryItem(name: "page", value: String(page))]
+        var items: [URLQueryItem] = [
+            URLQueryItem(name: "page", value: String(page)),
+            URLQueryItem(name: "country_code", value: countryCode)
+        ]
         if let category { items.append(URLQueryItem(name: "category", value: category)) }
         if let listingType { items.append(URLQueryItem(name: "listing_type", value: listingType.rawValue)) }
         if let canton, canton != "all" { items.append(URLQueryItem(name: "canton", value: canton)) }
@@ -1346,6 +1416,7 @@ extension APIClient {
         var items: [URLQueryItem] = [
             URLQueryItem(name: "page", value: String(page)),
             URLQueryItem(name: "upcoming_only", value: "true"),
+            URLQueryItem(name: "country_code", value: countryCode),
         ]
         if let category { items.append(URLQueryItem(name: "category", value: category.rawValue)) }
         if let canton, canton != "all" { items.append(URLQueryItem(name: "canton", value: canton)) }

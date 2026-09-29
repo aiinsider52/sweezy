@@ -91,7 +91,7 @@ struct IntegrationProgressCard: View {
                 // Center: Text content
                 VStack(alignment: .leading, spacing: 4) {
                     Text(title)
-                        .font(.system(size: 17, weight: .bold, design: .rounded))
+                        .font(.system(size: 17, weight: .bold, design: .default))
                         .foregroundColor(inHero ? .white : Theme.Colors.textPrimary)
                         .lineLimit(1)
                     
@@ -131,7 +131,7 @@ struct IntegrationProgressCard: View {
                         .frame(width: 52, height: 36)
                     
                     Text("\(percent)%")
-                        .font(.system(size: 15, weight: .black, design: .rounded))
+                        .font(.system(size: 15, weight: .black, design: .default))
                         .foregroundColor(inHero ? .white : accentColor)
                 }
                 
@@ -190,10 +190,10 @@ struct IntegrationProgressCard: View {
     
     private var subtitleText: String {
         switch percent {
-        case 0..<25: return "Починайте — все вийде! 💪"
-        case 25..<60: return "Гарний прогрес! 🔥"
-        case 60..<90: return "Майже готово! ⚡️"
-        default: return "Фінішна пряма! 🏆"
+        case 0..<25: return "Починайте — все вийде! 💪".localized
+        case 25..<60: return "Гарний прогрес! 🔥".localized
+        case 60..<90: return "Майже готово! ⚡️".localized
+        default: return "Фінішна пряма! 🏆".localized
         }
     }
 }

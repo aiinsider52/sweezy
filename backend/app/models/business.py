@@ -18,6 +18,8 @@ class BusinessProfile(Base):
     description: Mapped[str] = mapped_column(Text, default="", nullable=False)
     category: Mapped[str] = mapped_column(String(40), default="other", nullable=False, index=True)
     canton: Mapped[str] = mapped_column(String(10), nullable=False, index=True)
+    country_code: Mapped[str] = mapped_column(String(2), nullable=False, default="CH", index=True)
+    subdivision_code: Mapped[str] = mapped_column(String(10), nullable=False, default="ZH", index=True)
     city: Mapped[str] = mapped_column(String(100), nullable=False)
     address: Mapped[str | None] = mapped_column(String(240), nullable=True)
     service_area: Mapped[list[str]] = mapped_column(JSON, default=list, nullable=False)

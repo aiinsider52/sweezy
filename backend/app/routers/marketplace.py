@@ -30,6 +30,7 @@ from ..schemas.marketplace import (
 from ..services.marketplace_moderation import moderate_listing
 from ..services.users import UserService
 from ..services.moderation import ensure_case
+from ..core.countries import normalize_country_code, normalize_subdivision_code
 
 
 router = APIRouter()
@@ -125,10 +126,17 @@ def list_listings(
     user_id: str | None = Depends(_get_optional_user_id),
     category: Optional[str] = Query(None, min_length=2, max_length=30),
     canton: Optional[str] = None,
+    country_code: str = Query("CH", min_length=2, max_length=2),
+    subdivision_code: Optional[str] = Query(None, min_length=1, max_length=10),
     listing_type: Optional[ListingType] = None,
     page: int = Query(1, ge=1),
     per_page: int = Query(20, ge=1, le=100),
 ) -> ServiceListingPage:
+    try:
+        country_code = normalize_country_code(country_code)
+        subdivision_code = normalize_subdivision_code(country_code, subdivision_code or canton)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
     now = datetime.now(timezone.utc)
     expired = db.execute(select(ServiceListing).where(
         ServiceListing.is_featured.is_(True),
@@ -143,6 +151,8 @@ def list_listings(
         db.commit()
     stmt = select(ServiceListing).where(ServiceListing.status == "approved")
     count_stmt = select(func.count()).select_from(ServiceListing).where(ServiceListing.status == "approved")
+    stmt = stmt.where(ServiceListing.country_code == country_code)
+    count_stmt = count_stmt.where(ServiceListing.country_code == country_code)
 
     if user_id:
         blocked_authors = select(MarketplaceBlock.blocked_author_id).where(MarketplaceBlock.user_id == user_id)
@@ -156,9 +166,9 @@ def list_listings(
     if category:
         stmt = stmt.where(ServiceListing.category == category)
         count_stmt = count_stmt.where(ServiceListing.category == category)
-    if canton:
-        stmt = stmt.where(ServiceListing.canton == canton)
-        count_stmt = count_stmt.where(ServiceListing.canton == canton)
+    if subdivision_code:
+        stmt = stmt.where(ServiceListing.subdivision_code == subdivision_code)
+        count_stmt = count_stmt.where(ServiceListing.subdivision_code == subdivision_code)
 
     total: int = db.scalar(count_stmt) or 0
     pages = max(1, math.ceil(total / per_page))
@@ -456,8 +466,12 @@ def create_listing(
         description=payload.description,
         category=payload.category,
         canton=payload.canton,
+        country_code=payload.country_code,
+        subdivision_code=payload.subdivision_code,
         price_info=payload.price_info,
         price_chf=payload.price_chf,
+        price_minor=payload.price_minor,
+        currency_code=payload.currency_code,
         is_free=payload.is_free,
         condition=payload.condition.value if payload.condition else None,
         negotiable=payload.negotiable,
@@ -532,6 +546,11 @@ def update_listing(
         listing.is_free = data["is_free"]
         if listing.is_free:
             listing.price_chf = None
+    if "price_minor" in data:
+        listing.price_minor = data["price_minor"]
+    if "subdivision_code" in data and data["subdivision_code"]:
+        listing.subdivision_code = normalize_subdivision_code(listing.country_code, data["subdivision_code"])
+        listing.canton = listing.subdivision_code
     if "condition" in data:
         listing.condition = data["condition"].value if data["condition"] else None
     if "negotiable" in data and data["negotiable"] is not None:

@@ -178,20 +178,22 @@ enum ChecklistCategory: String, CaseIterable, Codable, Hashable {
         }
     }
     
-    var swiftUIColor: Color {
+    var swatch: JourneyCategorySwatch {
         switch self {
-        case .arrival: return .blue
-        case .housing: return .green
-        case .insurance: return .purple
-        case .work: return .orange
-        case .education: return .indigo
-        case .integration: return .cyan
-        case .family: return .pink
-        case .healthcare: return .red
-        case .legal: return .brown
-        case .finance: return .yellow
+        case .arrival: return JourneyCategoryPalette.sky
+        case .housing: return JourneyCategoryPalette.lime
+        case .insurance: return JourneyCategoryPalette.lilac
+        case .work: return JourneyCategoryPalette.sand
+        case .education: return JourneyCategoryPalette.sky
+        case .integration: return JourneyCategoryPalette.teal
+        case .family: return JourneyCategoryPalette.coral
+        case .healthcare: return JourneyCategoryPalette.coral
+        case .legal: return JourneyCategoryPalette.graphite
+        case .finance: return JourneyCategoryPalette.sand
         }
     }
+
+    var swiftUIColor: Color { swatch.ink }
 }
 
 /// Difficulty levels
@@ -202,9 +204,9 @@ enum Difficulty: String, CaseIterable, Codable, Hashable {
     
     var localizedName: String {
         switch self {
-        case .easy: return "Easy"
-        case .medium: return "Medium"
-        case .hard: return "Complex"
+        case .easy: return "checklist.difficulty.easy".localized
+        case .medium: return "checklist.difficulty.medium".localized
+        case .hard: return "checklist.difficulty.hard".localized
         }
     }
     

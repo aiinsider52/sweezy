@@ -41,13 +41,13 @@ struct MomentDetailView: View {
         VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
             HStack(spacing: Theme.Spacing.xs) {
                 Image(systemName: "calendar.badge.clock")
-                    .foregroundColor(Theme.Colors.accent)
+                    .foregroundColor(JourneyVisual.accentStrong)
                 Text(deadlineCopy)
                     .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(Theme.Colors.accent)
+                    .foregroundColor(JourneyVisual.accentText)
             }
             Text(moment.title)
-                .font(.system(size: 28, weight: .bold, design: .rounded))
+                .font(.system(size: 28, weight: .bold, design: .default))
         }
     }
 

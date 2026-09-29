@@ -6,7 +6,7 @@ struct AchievementsView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                Text("Досягнення")
+                Text("Досягнення".localized)
                     .font(Theme.Typography.title1)
                     .padding(.horizontal, Theme.Spacing.lg)
                 
@@ -52,10 +52,10 @@ struct AchievementsView: View {
     }
     private func title(for id: String) -> String {
         switch id {
-        case "reader_1": return "Читач"
-        case "reader_5": return "Книголюб"
-        case "organizer_1": return "Організатор"
-        default: return "Відзнака"
+        case "reader_1": return "Читач".localized
+        case "reader_5": return "Книголюб".localized
+        case "organizer_1": return "Організатор".localized
+        default: return "Відзнака".localized
         }
     }
 }

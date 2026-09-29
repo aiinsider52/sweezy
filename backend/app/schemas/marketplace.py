@@ -6,6 +6,8 @@ from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from ..core.countries import normalize_country_code, normalize_subdivision_code, validate_currency
+
 
 class ListingType(str, Enum):
     service = "service"
@@ -63,9 +65,13 @@ class ServiceListingCreate(BaseModel):
     title: str = Field(..., min_length=3, max_length=100)
     description: str = Field(..., min_length=10, max_length=1000)
     category: str = Field(..., min_length=2, max_length=30)
-    canton: str = Field(..., min_length=2, max_length=10)
+    canton: Optional[str] = Field(None, min_length=1, max_length=10)
+    country_code: str = Field(default="CH", min_length=2, max_length=2)
+    subdivision_code: Optional[str] = Field(None, min_length=1, max_length=10)
     price_info: Optional[str] = Field(None, max_length=100)
     price_chf: Optional[int] = Field(None, ge=0, le=1_000_000)
+    price_minor: Optional[int] = Field(None, ge=0, le=100_000_000)
+    currency_code: Optional[str] = Field(None, min_length=3, max_length=3)
     is_free: bool = False
     condition: Optional[ItemCondition] = None
     negotiable: bool = False
@@ -76,13 +82,24 @@ class ServiceListingCreate(BaseModel):
 
     @model_validator(mode="after")
     def _validate_by_type(self) -> "ServiceListingCreate":
+        self.country_code = normalize_country_code(self.country_code)
+        self.subdivision_code = normalize_subdivision_code(
+            self.country_code, self.subdivision_code or self.canton
+        )
+        if self.subdivision_code is None:
+            raise ValueError("subdivision_code is required")
+        self.canton = self.subdivision_code
+        self.currency_code = validate_currency(self.country_code, self.currency_code)
+        if self.price_minor is None and self.price_chf is not None:
+            self.price_minor = self.price_chf * 100
         if self.category not in _VALID_CATEGORIES[self.listing_type]:
             raise ValueError(f"Invalid category '{self.category}' for listing type '{self.listing_type.value}'")
         if self.listing_type == ListingType.item:
-            if not self.is_free and self.price_chf is None:
-                raise ValueError("Item listings require price_chf or is_free=true")
+            if not self.is_free and self.price_minor is None:
+                raise ValueError("Item listings require price_minor or is_free=true")
             if self.is_free:
                 self.price_chf = None
+                self.price_minor = None
         return self
 
 
@@ -91,6 +108,8 @@ class ServiceListingUpdate(BaseModel):
     description: Optional[str] = Field(None, min_length=10, max_length=1000)
     price_info: Optional[str] = Field(None, max_length=100)
     price_chf: Optional[int] = Field(None, ge=0, le=1_000_000)
+    price_minor: Optional[int] = Field(None, ge=0, le=100_000_000)
+    subdivision_code: Optional[str] = Field(None, min_length=1, max_length=10)
     is_free: Optional[bool] = None
     condition: Optional[ItemCondition] = None
     negotiable: Optional[bool] = None
@@ -106,8 +125,12 @@ class ServiceListingResponse(BaseModel):
     description: str
     category: str
     canton: str
+    country_code: str = "CH"
+    subdivision_code: str
     price_info: Optional[str] = None
     price_chf: Optional[int] = None
+    price_minor: Optional[int] = None
+    currency_code: str = "CHF"
     is_free: bool = False
     condition: Optional[str] = None
     negotiable: bool = False
@@ -188,8 +211,12 @@ class PublicProfileListing(BaseModel):
     title: str
     category: str
     canton: str
+    country_code: str = "CH"
+    subdivision_code: str
     price_info: Optional[str] = None
     price_chf: Optional[int] = None
+    price_minor: Optional[int] = None
+    currency_code: str = "CHF"
     is_free: bool = False
     image_urls: list[str] = Field(default_factory=list)
     is_verified: bool = False

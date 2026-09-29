@@ -7,6 +7,7 @@ from fastapi import APIRouter, HTTPException, Query
 from sqlalchemy import String, and_, cast, func, or_, select
 from sqlalchemy.exc import IntegrityError
 
+from ..core.countries import normalize_country_code, normalize_subdivision_code
 from ..dependencies import CurrentUser, DBSession
 from ..models.chat import ChatConversation, ChatParticipant
 from ..models.event_listing import EventListing
@@ -172,6 +173,7 @@ def _create_friend_conversation(db: DBSession, item: FriendConnection) -> None:
 
 @router.get("/profiles", response_model=SocialProfilePage)
 def profiles(db: DBSession, user: CurrentUser, q: str | None = Query(None, max_length=100), canton: str | None = None,
+             country_code: str = Query("CH", min_length=2, max_length=2), subdivision_code: str | None = None,
              interest: str | None = None, language: str | None = None, age_band: str | None = None,
              residency: str | None = None, max_distance_km: int | None = Query(None, ge=1, le=250),
              nearby: bool = False, event_id: str | None = None, page: int = Query(1, ge=1),
@@ -182,13 +184,16 @@ def profiles(db: DBSession, user: CurrentUser, q: str | None = Query(None, max_l
     if advanced_requested and not premium:
         raise HTTPException(status_code=402, detail={"code": "plus_required", "feature": "advanced_friend_search"})
     blocked, blocked_by = _blocked_ids(db, user.id)
-    conditions = [SocialProfile.user_id != user.id, SocialProfile.is_visible.is_(True), SocialProfile.open_to_friends.is_(True),
+    country_code = normalize_country_code(country_code)
+    subdivision_code = normalize_subdivision_code(country_code, subdivision_code or canton)
+    conditions = [SocialProfile.user_id != user.id, SocialProfile.country_code == country_code,
+                  SocialProfile.is_visible.is_(True), SocialProfile.open_to_friends.is_(True),
                   SocialProfile.moderation_status == "approved", User.is_active.is_(True),
                   SocialProfile.user_id.not_in(blocked), SocialProfile.user_id.not_in(blocked_by)]
     if q:
         pattern = f"%{q.strip()}%"
         conditions.append(or_(SocialProfile.display_name.ilike(pattern), SocialProfile.city.ilike(pattern), SocialProfile.bio.ilike(pattern), cast(SocialProfile.interests, String).ilike(pattern)))
-    if canton: conditions.append(SocialProfile.canton == canton.strip().upper())
+    if subdivision_code: conditions.append(SocialProfile.subdivision_code == subdivision_code)
     if interest: conditions.append(cast(SocialProfile.interests, String).ilike(f'%"{interest}"%'))
     if language: conditions.append(cast(SocialProfile.languages, String).ilike(f'%"{language.strip().upper()}"%'))
     if age_band: conditions.append(SocialProfile.age_band == age_band)
@@ -233,6 +238,8 @@ def swipe_discovery(
     db: DBSession,
     user: CurrentUser,
     canton: str | None = None,
+    country_code: str = Query("CH", min_length=2, max_length=2),
+    subdivision_code: str | None = None,
     interest: str | None = None,
     language: str | None = None,
     nearby: bool = False,
@@ -251,8 +258,11 @@ def swipe_discovery(
     swiped = select(SocialSwipe.target_id).where(SocialSwipe.swiper_id == user.id)
     requested = select(FriendConnection.target_id).where(FriendConnection.requester_id == user.id)
     received = select(FriendConnection.requester_id).where(FriendConnection.target_id == user.id)
+    country_code = normalize_country_code(country_code)
+    subdivision_code = normalize_subdivision_code(country_code, subdivision_code or canton)
     conditions = [
         SocialProfile.user_id != user.id,
+        SocialProfile.country_code == country_code,
         SocialProfile.is_visible.is_(True),
         SocialProfile.open_to_friends.is_(True),
         SocialProfile.moderation_status == "approved",
@@ -263,8 +273,8 @@ def swipe_discovery(
         SocialProfile.user_id.not_in(requested),
         SocialProfile.user_id.not_in(received),
     ]
-    if canton:
-        conditions.append(SocialProfile.canton == canton.strip().upper())
+    if subdivision_code:
+        conditions.append(SocialProfile.subdivision_code == subdivision_code)
     if interest:
         conditions.append(cast(SocialProfile.interests, String).ilike(f'%"{interest}"%'))
     if language:
@@ -299,6 +309,8 @@ def swipe(target_id: str, payload: SocialSwipeCreate, db: DBSession, user: Curre
         raise HTTPException(400, "Cannot swipe your own profile")
     if not target or target.moderation_status != "approved" or not target.is_visible or not target.open_to_friends:
         raise HTTPException(404, "Profile unavailable")
+    if own.country_code != target.country_code:
+        raise HTTPException(409, "Profiles must use the same active country")
     if db.scalar(select(func.count()).select_from(MarketplaceBlock).where(or_(
         and_(MarketplaceBlock.user_id == user.id, MarketplaceBlock.blocked_author_id == target_id),
         and_(MarketplaceBlock.user_id == target_id, MarketplaceBlock.blocked_author_id == user.id),
@@ -557,20 +569,30 @@ def cancel(connection_id: str, db: DBSession, user: CurrentUser):
 
 
 @router.get("/events", response_model=list[SocialEventResponse])
-def social_events(db: DBSession, user: CurrentUser, canton: str | None = None):
+def social_events(
+    db: DBSession,
+    user: CurrentUser,
+    canton: str | None = None,
+    country_code: str = Query("CH", min_length=2, max_length=2),
+    subdivision_code: str | None = None,
+):
+    country_code = normalize_country_code(country_code)
+    subdivision_code = normalize_subdivision_code(country_code, subdivision_code or canton)
     invited = select(SocialEventInvite.event_id).where(SocialEventInvite.invitee_id == user.id)
-    stmt = select(EventListing).where(EventListing.status == "approved", EventListing.starts_at >= _now(),
+    stmt = select(EventListing).where(EventListing.status == "approved", EventListing.country_code == country_code,
+        EventListing.starts_at >= _now(),
         or_(EventListing.is_private.is_(False), EventListing.author_id == user.id, EventListing.id.in_(invited)))
-    if canton: stmt = stmt.where(EventListing.canton == canton.upper())
+    if subdivision_code: stmt = stmt.where(EventListing.subdivision_code == subdivision_code)
     events = db.execute(stmt.order_by(EventListing.starts_at).limit(30)).scalars().all()
     attendance = {a.event_id: a for a in db.execute(select(EventAttendance).where(EventAttendance.user_id == user.id)).scalars().all()}
     counts = dict(db.execute(select(EventAttendance.event_id, func.count()).where(EventAttendance.visible_to_attendees.is_(True)).group_by(EventAttendance.event_id)).all())
     profile = db.get(SocialProfile, user.id)
-    return [SocialEventResponse(event_id=e.id, title=e.title, category=e.category, canton=e.canton, city=e.city,
+    return [SocialEventResponse(event_id=e.id, title=e.title, category=e.category, canton=e.canton,
+        country_code=e.country_code, subdivision_code=e.subdivision_code, city=e.city,
         starts_at=e.starts_at, is_free=e.is_free, attendee_count=counts.get(e.id, 0),
         my_status=attendance[e.id].status if e.id in attendance else None, is_private=e.is_private,
-        is_recommended=bool(profile and (e.canton == profile.canton or e.category in profile.interests)),
-        recommendation_reason=("Твій кантон" if profile and e.canton == profile.canton else
+        is_recommended=bool(profile and (e.subdivision_code == profile.subdivision_code or e.category in profile.interests)),
+        recommendation_reason=("Твій регіон" if profile and e.subdivision_code == profile.subdivision_code else
             ("Збігається з інтересами" if profile and e.category in profile.interests else None)),
         group_chat_available=e.id in attendance and attendance[e.id].status == "going",
         can_invite=e.id in attendance) for e in events]

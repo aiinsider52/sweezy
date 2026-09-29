@@ -52,7 +52,7 @@ struct CityHubView: View {
     }
 
     private var zurichGuides: [Guide] {
-        appContainer.contentService.guides
+        appContainer.contentService.getGuidesForLocale(appContainer.currentLocale.identifier)
             .filter { $0.appliesTo(canton: hub.canton) }
             .sorted { $0.priority > $1.priority }
             .prefix(6)
@@ -66,7 +66,7 @@ struct CityHubView: View {
     var body: some View {
         ZStack {
             VStack(spacing: 0) {
-                Theme.Colors.ink
+                JourneyVisual.pageBackground
                 Theme.Colors.paper
             }
             .ignoresSafeArea()
@@ -139,22 +139,22 @@ struct CityHubView: View {
                 Button { dismiss() } label: {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(.white)
+                        .foregroundColor(JourneyVisual.primaryText)
                         .frame(width: 44, height: 44)
-                        .background(Color.black.opacity(0.36))
+                        .background(Theme.Colors.card)
                         .clipShape(Circle())
-                        .overlay(Circle().stroke(Color.white.opacity(0.22), lineWidth: 1))
+                        .overlay(Circle().stroke(JourneyVisual.softBorder, lineWidth: 1))
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel("common.back".localized)
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(hub.title)
-                        .font(.system(size: 28, weight: .bold, design: .rounded))
+                        .font(.system(size: 28, weight: .bold, design: .default))
                         .foregroundColor(Theme.Colors.textOnPrimary)
                     Text("cityhub.subtitle".localized)
                         .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(.white.opacity(0.72))
+                        .foregroundColor(JourneyVisual.secondaryText)
                 }
 
                 Spacer()
@@ -166,10 +166,10 @@ struct CityHubView: View {
                 ForEach(hub.facts.prefix(3)) { fact in
                     Text(fact.valueKey.localized)
                         .font(.system(size: 11, weight: .semibold))
-                        .foregroundColor(.white.opacity(0.9))
+                        .foregroundColor(JourneyVisual.secondaryText)
                         .padding(.horizontal, 10)
                         .padding(.vertical, 6)
-                        .background(Capsule().fill(Color.white.opacity(0.12)))
+                        .background(Capsule().fill(JourneyVisual.softBorder))
                 }
             }
 
@@ -184,36 +184,20 @@ struct CityHubView: View {
         .padding(.horizontal, Theme.Spacing.lg)
         .padding(.top, Theme.Spacing.sm)
         .padding(.bottom, Theme.Spacing.lg + Self.sheetCornerRadius)
-        .background(
-            ZStack {
-                Theme.Colors.ink
-                Image(hub.heroImageName)
-                    .resizable()
-                    .scaledToFill()
-                    .opacity(0.22)
-                    .blur(radius: 2)
-                    .allowsHitTesting(false)
-                LinearGradient(
-                    colors: [Theme.Colors.ink.opacity(0.55), Theme.Colors.ink],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-                .allowsHitTesting(false)
-            }
-        )
+        .background(JourneyVisual.pageBackground)
     }
 
     private var discoveryBadge: some View {
         ZStack {
             Circle()
-                .stroke(Color.white.opacity(0.15), lineWidth: 4)
+                .stroke(JourneyVisual.softBorder, lineWidth: 4)
             Circle()
                 .trim(from: 0, to: discoveryProgress)
                 .stroke(Theme.Colors.primaryLight, style: StrokeStyle(lineWidth: 4, lineCap: .round))
                 .rotationEffect(.degrees(-90))
             Text("\(visitedSpotIDs.count)")
-                .font(.system(size: 14, weight: .bold, design: .rounded))
-                .foregroundColor(.white)
+                .font(.system(size: 14, weight: .bold, design: .default))
+                .foregroundColor(JourneyVisual.primaryText)
         }
         .frame(width: 44, height: 44)
     }
@@ -259,13 +243,13 @@ struct CityHubView: View {
                         .background(Capsule().fill(Color.black.opacity(0.35)))
 
                     Text(spot.titleKey.localized)
-                        .font(.system(size: 24, weight: .bold, design: .rounded))
+                        .font(.system(size: 24, weight: .bold, design: .default))
                         .foregroundColor(.white)
                         .multilineTextAlignment(.leading)
 
                     Text(spot.whyKey.localized)
                         .font(.system(size: 14))
-                        .foregroundColor(.white.opacity(0.88))
+                        .foregroundColor(.white.opacity(0.82))
                         .lineLimit(2)
                 }
                 .padding(18)
@@ -335,7 +319,7 @@ struct CityHubView: View {
                         Button(action: openCityOnMap) {
                             Text("cityhub.places.view_map".localized)
                                 .font(.system(size: 13, weight: .semibold))
-                                .foregroundColor(Theme.Colors.primary)
+                                .foregroundColor(JourneyVisual.accentText)
                         }
                         .buttonStyle(.plain)
                     }
@@ -358,25 +342,25 @@ struct CityHubView: View {
         VStack(alignment: .leading, spacing: 14) {
             Text("cityhub.live.cost_title".localized)
                 .font(.system(size: 13, weight: .semibold))
-                .foregroundColor(.white.opacity(0.6))
+                .foregroundColor(JourneyVisual.secondaryText)
 
             HStack(spacing: 0) {
                 ForEach(Array(hub.costFacts.enumerated()), id: \.element.id) { index, fact in
                     if index > 0 {
                         Rectangle()
-                            .fill(Color.white.opacity(0.12))
+                            .fill(JourneyVisual.softBorder)
                             .frame(width: 1, height: 36)
                     }
                     VStack(spacing: 4) {
                         Text(fact.valueKey.localized)
                             .font(.system(size: 13, weight: .bold))
-                            .foregroundColor(.white)
+                            .foregroundColor(JourneyVisual.primaryText)
                             .multilineTextAlignment(.center)
                             .lineLimit(2)
                             .minimumScaleFactor(0.8)
                         Text(fact.labelKey.localized)
                             .font(.system(size: 10))
-                            .foregroundColor(.white.opacity(0.55))
+                            .foregroundColor(JourneyVisual.secondaryText)
                             .multilineTextAlignment(.center)
                             .lineLimit(2)
                     }
@@ -532,11 +516,7 @@ private struct CityHubSpotVisual: View {
 
     var body: some View {
         ZStack {
-            Image(resolvedImageName)
-                .resizable()
-                .scaledToFill()
-                .frame(height: height)
-                .clipped()
+            FittedAssetImage(name: resolvedImageName, height: height)
 
             if !hasDedicatedPhoto {
                 LinearGradient(
@@ -548,7 +528,7 @@ private struct CityHubSpotVisual: View {
 
                 Image(systemName: spot.icon)
                     .font(.system(size: 42, weight: .medium))
-                    .foregroundColor(.white.opacity(0.18))
+                    .foregroundColor(.white.opacity(0.7))
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
                     .padding(16)
             }
@@ -578,7 +558,7 @@ private struct CityHubSpotPhotoCard: View {
                     if isVisited {
                         Label("cityhub.spot.visited".localized, systemImage: "checkmark.circle.fill")
                             .font(.system(size: 10, weight: .bold))
-                            .foregroundColor(Theme.Colors.primaryLight)
+                            .foregroundColor(JourneyVisual.accentText)
                     }
                     Text(spot.titleKey.localized)
                         .font(.system(size: 15, weight: .bold))
@@ -612,7 +592,7 @@ private struct CityHubSpotSheet: View {
 
                 VStack(alignment: .leading, spacing: 8) {
                     Text(spot.titleKey.localized)
-                        .font(.system(size: 26, weight: .bold, design: .rounded))
+                        .font(.system(size: 26, weight: .bold, design: .default))
                         .foregroundColor(Theme.Colors.textPrimary)
                     Text(spot.whyKey.localized)
                         .font(.system(size: 16))
@@ -621,10 +601,10 @@ private struct CityHubSpotSheet: View {
                     if let tip = spot.tipKey?.localized {
                         HStack(alignment: .top, spacing: 8) {
                             Image(systemName: "lightbulb.fill")
-                                .foregroundColor(Theme.Colors.primaryLight)
+                                .foregroundColor(JourneyVisual.accentStrong)
                             Text(tip)
                                 .font(.system(size: 14, weight: .medium))
-                                .foregroundColor(Theme.Colors.primary)
+                                .foregroundColor(JourneyVisual.accentText)
                         }
                         .padding(14)
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -642,7 +622,7 @@ private struct CityHubSpotSheet: View {
                             Text(isVisited ? "cityhub.spot.visited".localized : "cityhub.spot.mark_visited".localized)
                                 .font(.system(size: 16, weight: .semibold))
                         }
-                        .foregroundColor(.white)
+                        .foregroundColor(JourneyVisual.primaryText)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 14)
                         .background(Theme.Colors.primary)
@@ -657,7 +637,7 @@ private struct CityHubSpotSheet: View {
                                 Text("cityhub.spot.on_map".localized)
                                     .font(.system(size: 16, weight: .semibold))
                             }
-                            .foregroundColor(Theme.Colors.primary)
+                            .foregroundColor(JourneyVisual.accentText)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 14)
                             .background(
@@ -695,11 +675,11 @@ private struct CityHubInkStepRow: View {
                 VStack(alignment: .leading, spacing: 3) {
                     Text(step.titleKey.localized)
                         .font(.system(size: 14, weight: .bold))
-                        .foregroundColor(.white)
+                        .foregroundColor(JourneyVisual.primaryText)
                         .strikethrough(isCompleted, color: .white.opacity(0.4))
                     Text(step.detailKey.localized)
                         .font(.system(size: 12))
-                        .foregroundColor(.white.opacity(0.52))
+                        .foregroundColor(JourneyVisual.secondaryText)
                         .lineLimit(2)
                 }
 
@@ -735,18 +715,18 @@ private struct CityHubInkPlaceRow: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(place.name)
                         .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(.white)
+                        .foregroundColor(JourneyVisual.primaryText)
                         .lineLimit(1)
                     Text(place.type.localizedName)
                         .font(.system(size: 12))
-                        .foregroundColor(.white.opacity(0.5))
+                        .foregroundColor(JourneyVisual.secondaryText)
                 }
 
                 Spacer(minLength: 0)
 
                 Image(systemName: "arrow.up.right")
                     .font(.system(size: 12, weight: .bold))
-                    .foregroundColor(Theme.Colors.primaryLight)
+                    .foregroundColor(JourneyVisual.accentStrong)
             }
             .padding(12)
             .background(
@@ -777,7 +757,7 @@ private struct CityHubQuickAction: View {
                 }
                 Text(title)
                     .font(.system(size: 13, weight: .bold))
-                    .foregroundColor(.white)
+                    .foregroundColor(JourneyVisual.primaryText)
                     .lineLimit(2)
                     .multilineTextAlignment(.leading)
             }
@@ -809,7 +789,7 @@ private struct CityHubGuideCard: View {
                 .overlay(
                     Image(systemName: "book.fill")
                         .font(.system(size: 22))
-                        .foregroundColor(Theme.Colors.primary)
+                        .foregroundColor(JourneyVisual.accentStrong)
                 )
 
             VStack(alignment: .leading, spacing: 4) {

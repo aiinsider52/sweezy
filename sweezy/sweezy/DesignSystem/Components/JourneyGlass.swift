@@ -3,6 +3,18 @@ import UIKit
 
 enum JourneyVisual {
     static let lime = Color(red: 0.78, green: 1.0, blue: 0.02)
+    /// Brand-colored text on paper (WCAG AA on paper and white cards); lime stays for fills and dark/photo surfaces.
+    static let accentText = Color(UIColor { traits in
+        traits.userInterfaceStyle == .dark
+            ? UIColor(red: 0.78, green: 1.0, blue: 0.02, alpha: 1)
+            : UIColor(red: 0.29, green: 0.48, blue: 0.05, alpha: 1)
+    })
+    /// Brighter brand green for icons and large numerals, where AA-large is enough.
+    static let accentStrong = Color(UIColor { traits in
+        traits.userInterfaceStyle == .dark
+            ? UIColor(red: 0.78, green: 1.0, blue: 0.02, alpha: 1)
+            : UIColor(red: 0.36, green: 0.58, blue: 0.02, alpha: 1)
+    })
     static let coral = Color(red: 1.0, green: 0.39, blue: 0.31)
     static let black = Color(red: 0.025, green: 0.03, blue: 0.025)
     static let glassFill = Color(UIColor { traits in
@@ -18,7 +30,7 @@ enum JourneyVisual {
     static let chrome = Color(UIColor { traits in
         traits.userInterfaceStyle == .dark
             ? UIColor(red: 0.025, green: 0.03, blue: 0.025, alpha: 0.96)
-            : UIColor(red: 0.975, green: 0.985, blue: 0.965, alpha: 0.96)
+            : UIColor(red: 0.976, green: 0.969, blue: 0.941, alpha: 1)
     })
     static let chromeText = Color(UIColor { traits in
         traits.userInterfaceStyle == .dark
@@ -28,7 +40,7 @@ enum JourneyVisual {
     static let pageBackground = Color(UIColor { traits in
         traits.userInterfaceStyle == .dark
             ? UIColor(red: 0.025, green: 0.03, blue: 0.025, alpha: 1)
-            : UIColor(red: 0.955, green: 0.97, blue: 0.945, alpha: 1)
+            : UIColor(red: 0.976, green: 0.969, blue: 0.941, alpha: 1)
     })
     static let primaryText = Color(UIColor { traits in
         traits.userInterfaceStyle == .dark
@@ -50,35 +62,39 @@ enum JourneyVisual {
             ? UIColor(white: 1, alpha: 0.14)
             : UIColor(red: 0.10, green: 0.18, blue: 0.11, alpha: 0.12)
     })
+    static let elevatedSurface = Color(UIColor { traits in
+        traits.userInterfaceStyle == .dark
+            ? UIColor(red: 0.055, green: 0.075, blue: 0.060, alpha: 0.92)
+            : UIColor(white: 1.0, alpha: 0.92)
+    })
+}
+
+/// Lightweight editorial background used by non-photo pages.
+/// Static geometry adds depth without an always-running render loop.
+struct JourneyAmbientBackground: View {
+    @Environment(\.colorScheme) private var colorScheme
+    var accent: Color = JourneyVisual.lime
+
+    var body: some View {
+        JourneyVisual.pageBackground.ignoresSafeArea()
+    }
 }
 
 struct JourneyPhotoBackground: View {
+    @Environment(\.colorScheme) private var colorScheme
     let imageName: String
     var blurRadius: CGFloat = 0
     var darkness: Double = 0.36
 
+    private var cityArtwork: String {
+        if imageName.contains("market") { return "city-scene-market" }
+        if imageName.contains("community") { return "city-scene-people" }
+        if imageName.contains("tool") || imageName.contains("museum") { return "city-scene-directory" }
+        return "city-scene-home"
+    }
+
     var body: some View {
-        GeometryReader { geometry in
-            Image(imageName)
-                .resizable()
-                .scaledToFill()
-                .frame(width: geometry.size.width, height: geometry.size.height)
-                .blur(radius: blurRadius)
-                .overlay(Color.black.opacity(darkness))
-                .overlay(
-                    LinearGradient(
-                        colors: [
-                            Color.black.opacity(0.22),
-                            Color.clear,
-                            Color.black.opacity(0.68)
-                        ],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                )
-                .clipped()
-        }
-        .ignoresSafeArea()
+        CityPageBackground(scene: cityArtwork.replacingOccurrences(of: "city-scene-", with: ""))
     }
 }
 
@@ -94,7 +110,7 @@ struct JourneyGlassPanel<Content: View>: View {
 
     var body: some View {
         content
-            .background(.ultraThinMaterial.opacity(0.76))
+            .background(colorScheme == .dark ? Theme.Colors.card : Color.white.opacity(0.94))
             .background(JourneyVisual.glassFill)
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
             .overlay(
@@ -110,7 +126,7 @@ struct JourneyGlassPanel<Content: View>: View {
                         lineWidth: 1
                     )
             )
-            .shadow(color: Color.black.opacity(colorScheme == .dark ? 0.28 : 0.10), radius: 20, y: 10)
+
     }
 }
 
@@ -168,7 +184,7 @@ struct JourneyFilterChip: View {
             .font(.system(size: 13, weight: .semibold))
             .foregroundColor(isSelected ? .black : JourneyVisual.primaryText)
             .padding(.horizontal, 15)
-            .frame(height: 38)
+            .frame(minHeight: Theme.Layout.minimumTouchTarget)
             .background(isSelected ? JourneyVisual.lime : JourneyVisual.softSurface)
             .background(.ultraThinMaterial.opacity(isSelected ? 0 : 0.72))
             .clipShape(Capsule())
@@ -192,7 +208,7 @@ struct JourneyPrimaryButton: View {
             .font(.system(size: compact ? 13 : 15, weight: .semibold))
             .foregroundColor(.white)
             .padding(.horizontal, compact ? 18 : 22)
-            .frame(height: compact ? 42 : 48)
+            .frame(height: compact ? Theme.Layout.minimumTouchTarget : 50)
             .background(Color.black.opacity(0.92))
             .clipShape(Capsule())
         }
@@ -202,7 +218,9 @@ struct JourneyPrimaryButton: View {
 
 struct JourneyBottomBar: View {
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Binding var selection: Int
+    @Namespace private var selectionNamespace
 
     private let items: [(String, String)] = [
         ("house", "journey.tab.home".localized),
@@ -216,29 +234,36 @@ struct JourneyBottomBar: View {
         HStack(spacing: 0) {
             ForEach(Array(items.enumerated()), id: \.offset) { index, item in
                 Button {
-                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                    withAnimation(.spring(response: 0.34, dampingFraction: 0.78)) {
+                    // ScaleButtonStyle below already plays the light haptic on press.
+                    withAnimation(reduceMotion ? nil : Theme.Animation.selection) {
                         selection = index
                     }
                 } label: {
                     VStack(spacing: 4) {
                         ZStack {
-                            Circle()
-                                .fill(selection == index ? JourneyVisual.lime : Color.clear)
-                                .frame(width: 34, height: 34)
+                            if selection == index {
+                                Circle()
+                                    .fill(JourneyVisual.lime)
+                                    .frame(width: 34, height: 34)
+                                    .matchedGeometryEffect(id: "journey-tab-selection", in: selectionNamespace)
+                            }
                             Image(systemName: iconName(for: index, baseName: item.0))
                                 .font(.system(size: 16, weight: .semibold))
                                 .foregroundColor(selection == index ? .black : JourneyVisual.chromeText)
+                                .contentTransition(.symbolEffect(.replace))
+                                .symbolEffect(.bounce, value: selection == index)
                         }
                         Text(item.1)
-                            .font(.system(size: 8, weight: .medium))
-                            .foregroundColor(selection == index ? (colorScheme == .dark ? JourneyVisual.lime : Theme.Colors.primaryDark) : JourneyVisual.chromeText)
+                            .font(.system(size: 10, weight: selection == index ? .bold : .semibold))
+                            .foregroundColor(selection == index ? JourneyVisual.accentText : JourneyVisual.chromeText)
                             .lineLimit(1)
                             .minimumScaleFactor(0.72)
                     }
                     .frame(maxWidth: .infinity)
+                    .frame(minHeight: 54)
+                    .contentShape(Rectangle())
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(ScaleButtonStyle(scaleAmount: 0.95, hapticStyle: .light))
                 .accessibilityLabel(item.1)
                 .accessibilityValue(selection == index ? "journey.tab.selected".localized : "")
                 .accessibilityAddTraits(selection == index ? [.isSelected] : [])
@@ -248,13 +273,11 @@ struct JourneyBottomBar: View {
         .padding(.horizontal, 8)
         .padding(.top, 7)
         .padding(.bottom, 8)
+        .sensoryFeedback(.selection, trigger: selection)
         .background(JourneyVisual.chrome)
-        .clipShape(RoundedRectangle(cornerRadius: 27, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: 27, style: .continuous)
-                .stroke(colorScheme == .dark ? Color.white.opacity(0.12) : Color.black.opacity(0.08), lineWidth: 1)
-        )
-        .shadow(color: .black.opacity(colorScheme == .dark ? 0.45 : 0.14), radius: 22, y: 10)
+        .overlay(alignment: .top) {
+            Rectangle().fill(JourneyVisual.softBorder).frame(height: 0.5)
+        }
     }
 
     private func iconName(for index: Int, baseName: String) -> String {
@@ -291,6 +314,19 @@ enum JourneyBackdrop: String, CaseIterable {
     case market = "journey-market-consultant"
 }
 
+extension View {
+    /// Paper strip behind the status bar so scrolled content never runs under the clock.
+    func statusBarScrim() -> some View {
+        overlay(alignment: .top) {
+            Color.clear
+                .frame(height: 0)
+                .background(JourneyVisual.pageBackground.ignoresSafeArea(edges: .top))
+                .allowsHitTesting(false)
+                .accessibilityHidden(true)
+        }
+    }
+}
+
 private struct JourneyScreenModifier: ViewModifier {
     @Environment(\.colorScheme) private var colorScheme
     let backdrop: JourneyBackdrop
@@ -306,9 +342,10 @@ private struct JourneyScreenModifier: ViewModifier {
                 )
             }
             .scrollContentBackground(.hidden)
-            .tint(JourneyVisual.lime)
-            .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
-            .toolbarBackground(colorScheme == .dark ? Color.black.opacity(0.34) : Color.white.opacity(0.72), for: .navigationBar)
+            .statusBarScrim()
+            .tint(JourneyVisual.primaryText)
+            .toolbarBackground(JourneyVisual.pageBackground, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
             .toolbarColorScheme(colorScheme, for: .navigationBar)
     }
 }
@@ -321,7 +358,7 @@ private struct JourneyFormModifier: ViewModifier {
             .listRowBackground(colorScheme == .dark ? Color.black.opacity(0.34) : Color.white.opacity(0.82))
             .listRowSeparatorTint(colorScheme == .dark ? Color.white.opacity(0.12) : Color.black.opacity(0.08))
             .foregroundStyle(Theme.Colors.textPrimary)
-            .tint(JourneyVisual.lime)
+            .tint(JourneyVisual.accentText)
     }
 }
 
@@ -338,14 +375,42 @@ extension View {
     }
 
     func journeyCard(cornerRadius: CGFloat = 22) -> some View {
-        background(.ultraThinMaterial.opacity(0.78))
-            .background(Color.black.opacity(0.32))
+        background(Theme.Colors.card)
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .stroke(Color.white.opacity(0.24), lineWidth: 1)
+                    .stroke(JourneyVisual.softBorder, lineWidth: 1)
                     .allowsHitTesting(false)
             )
-            .shadow(color: .black.opacity(0.26), radius: 18, y: 9)
+            .shadow(color: .black.opacity(0.12), radius: 16, y: 8)
+    }
+
+    /// One-time, interruptible entrance. Reduced Motion falls back to no movement.
+    func journeyEntrance(delay: Double = 0, distance: CGFloat = 12) -> some View {
+        modifier(JourneyEntranceModifier(delay: delay, distance: distance))
+    }
+}
+
+private struct JourneyEntranceModifier: ViewModifier {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var appeared = false
+    let delay: Double
+    let distance: CGFloat
+
+    func body(content: Content) -> some View {
+        content
+            .opacity(appeared || reduceMotion ? 1 : 0)
+            .offset(y: appeared || reduceMotion ? 0 : distance)
+            .scaleEffect(appeared || reduceMotion ? 1 : 0.985)
+            .onAppear {
+                guard !appeared else { return }
+                if reduceMotion {
+                    appeared = true
+                } else {
+                    withAnimation(Theme.Animation.entrance.delay(min(delay, 0.28))) {
+                        appeared = true
+                    }
+                }
+            }
     }
 }

@@ -6,10 +6,10 @@ enum SocialInterest: String, Codable, CaseIterable, Identifiable {
   var id: String { rawValue }
   var title: String {
     [
-      "hiking": "Гори", "sports": "Спорт", "books": "Книги", "music": "Музика", "art": "Мистецтво",
-      "food": "Їжа", "travel": "Подорожі", "languages": "Мови", "technology": "Технології",
-      "business": "Бізнес", "family": "Сім’я", "photography": "Фото", "gaming": "Ігри",
-      "wellness": "Wellness", "volunteering": "Волонтерство",
+      "hiking": "Гори".localized, "sports": "Спорт".localized, "books": "Книги".localized, "music": "Музика".localized, "art": "Мистецтво".localized,
+      "food": "Їжа".localized, "travel": "Подорожі".localized, "languages": "Мови".localized, "technology": "Технології".localized,
+      "business": "Бізнес".localized, "family": "Сім’я".localized, "photography": "Фото".localized, "gaming": "Ігри".localized,
+      "wellness": "Wellness", "volunteering": "Волонтерство".localized,
     ][rawValue] ?? rawValue
   }
   var icon: String {
@@ -29,8 +29,8 @@ enum MeetupFormat: String, Codable, CaseIterable, Identifiable {
   var id: String { rawValue }
   var title: String {
     [
-      "coffee": "Кава", "walk": "Прогулянка", "activity": "Активність", "event": "Подія",
-      "online": "Онлайн", "family": "З дітьми",
+      "coffee": "Кава".localized, "walk": "Прогулянка".localized, "activity": "Активність".localized, "event": "Подія".localized,
+      "online": "Онлайн".localized, "family": "З дітьми".localized,
     ][rawValue] ?? rawValue
   }
 }
@@ -42,8 +42,8 @@ enum SocialAvailability: String, Codable, CaseIterable, Identifiable {
   var id: String { rawValue }
   var title: String {
     [
-      "weekday_morning": "Будні зранку", "weekday_evening": "Будні ввечері", "weekend": "Вихідні",
-      "flexible": "Гнучко",
+      "weekday_morning": "Будні зранку".localized, "weekday_evening": "Будні ввечері".localized, "weekend": "Вихідні".localized,
+      "flexible": "Гнучко".localized,
     ][rawValue] ?? rawValue
   }
   var icon: String {
@@ -65,6 +65,7 @@ enum SocialAgeBand: String, Codable, CaseIterable, Identifiable {
 
 struct SocialProfile: Codable, Identifiable, Equatable {
   let userID, displayName, canton, city, bio: String
+  let countryCode, subdivisionCode: String
   let interests: [SocialInterest]
   let languages: [String]
   let meetupFormats: [MeetupFormat]
@@ -90,6 +91,8 @@ struct SocialProfile: Codable, Identifiable, Equatable {
   }
   enum CodingKeys: String, CodingKey {
     case canton, city, bio, interests, languages, availability
+    case countryCode = "country_code"
+    case subdivisionCode = "subdivision_code"
     case userID = "user_id"
     case displayName = "display_name"
     case meetupFormats = "meetup_formats"
@@ -116,6 +119,7 @@ struct SocialProfile: Codable, Identifiable, Equatable {
 
   init(
     userID: String, displayName: String, canton: String, city: String, bio: String,
+    countryCode: String = "CH", subdivisionCode: String? = nil,
     interests: [SocialInterest], languages: [String], meetupFormats: [MeetupFormat],
     availability: [SocialAvailability] = [.flexible], ageBand: String? = nil,
     arrivalYear: Int? = nil, avatarURL: String? = nil, isVisible: Bool = true,
@@ -129,6 +133,8 @@ struct SocialProfile: Codable, Identifiable, Equatable {
     self.userID = userID
     self.displayName = displayName
     self.canton = canton
+    self.countryCode = countryCode
+    self.subdivisionCode = subdivisionCode ?? canton
     self.city = city
     self.bio = bio
     self.interests = interests
@@ -161,6 +167,8 @@ struct SocialProfile: Codable, Identifiable, Equatable {
     userID = try c.decode(String.self, forKey: .userID)
     displayName = try c.decode(String.self, forKey: .displayName)
     canton = try c.decode(String.self, forKey: .canton)
+    countryCode = (try? c.decode(String.self, forKey: .countryCode)) ?? "CH"
+    subdivisionCode = (try? c.decode(String.self, forKey: .subdivisionCode)) ?? canton
     city = try c.decode(String.self, forKey: .city)
     bio = try c.decode(String.self, forKey: .bio)
     interests = try c.decode([SocialInterest].self, forKey: .interests)
@@ -192,14 +200,14 @@ struct SocialProfile: Codable, Identifiable, Equatable {
 #if DEBUG
 enum SocialFriendPreviewFixtures {
   static let profiles: [SocialProfile] = [
-    profile("anna", "Anna Keller", "ZH", "Zürich", "Люблю ранкові прогулянки біля озера, каву та камерні концерти.", [.hiking, .music, .food], ["DE", "UK", "EN"], [.coffee, .walk], 96, 4, true, 2021),
-    profile("dmytro", "Dmytro Melnyk", "ZH", "Winterthur", "Працюю в IT, граю у теніс і шукаю компанію для хайкінгу на вихідних.", [.technology, .sports, .hiking], ["UK", "DE", "EN"], [.activity, .event], 91, 18, true, 2023),
-    profile("sofia", "Sofia Rossi", "TI", "Lugano", "Фотографую міста, вчу українську й організовую невеликі культурні зустрічі.", [.photography, .art, .languages], ["IT", "EN", "UK"], [.coffee, .event], 88, 42, false, 2019),
-    profile("markus", "Markus Frei", "BE", "Bern", "Молодий батько, велосипедист і волонтер. Завжди за сімейну прогулянку.", [.family, .sports, .volunteering], ["DE", "FR", "EN"], [.family, .walk], 84, 7, true, 2017),
-    profile("olena", "Olena Hrytsenko", "VD", "Lausanne", "Нещодавно переїхала. Цікавлять французька, книжкові клуби та подорожі Швейцарією.", [.books, .languages, .travel], ["UK", "FR", "EN"], [.coffee, .event], 82, 29, false, 2026),
-    profile("lucas", "Lucas Meier", "BS", "Basel", "Дизайнер, музикант і фанат музеїв. Шукаю людей для творчих проєктів.", [.art, .music, .technology], ["DE", "EN", "FR"], [.event, .online], 79, 51, true, 2020),
-    profile("iryna", "Iryna Bondar", "LU", "Luzern", "Обожнюю гори, йогу та неспішні розмови за кавою.", [.hiking, .wellness, .travel], ["UK", "DE"], [.walk, .coffee], 77, 12, false, 2024),
-    profile("nicolas", "Nicolas Dubois", "GE", "Genève", "Підприємець у сфері sustainability. Відкритий до спорту, нетворкінгу й волонтерства.", [.business, .sports, .volunteering], ["FR", "EN", "DE"], [.activity, .event], 73, 66, true, 2016),
+    profile("anna", "Anna Keller", "ZH", "Zürich", "Люблю ранкові прогулянки біля озера, каву та камерні концерти.".localized, [.hiking, .music, .food], ["DE", "UK", "EN"], [.coffee, .walk], 96, 4, true, 2021),
+    profile("dmytro", "Dmytro Melnyk", "ZH", "Winterthur", "Працюю в IT, граю у теніс і шукаю компанію для хайкінгу на вихідних.".localized, [.technology, .sports, .hiking], ["UK", "DE", "EN"], [.activity, .event], 91, 18, true, 2023),
+    profile("sofia", "Sofia Rossi", "TI", "Lugano", "Фотографую міста, вчу українську й організовую невеликі культурні зустрічі.".localized, [.photography, .art, .languages], ["IT", "EN", "UK"], [.coffee, .event], 88, 42, false, 2019),
+    profile("markus", "Markus Frei", "BE", "Bern", "Молодий батько, велосипедист і волонтер. Завжди за сімейну прогулянку.".localized, [.family, .sports, .volunteering], ["DE", "FR", "EN"], [.family, .walk], 84, 7, true, 2017),
+    profile("olena", "Olena Hrytsenko", "VD", "Lausanne", "Нещодавно переїхала. Цікавлять французька, книжкові клуби та подорожі Швейцарією.".localized, [.books, .languages, .travel], ["UK", "FR", "EN"], [.coffee, .event], 82, 29, false, 2026),
+    profile("lucas", "Lucas Meier", "BS", "Basel", "Дизайнер, музикант і фанат музеїв. Шукаю людей для творчих проєктів.".localized, [.art, .music, .technology], ["DE", "EN", "FR"], [.event, .online], 79, 51, true, 2020),
+    profile("iryna", "Iryna Bondar", "LU", "Luzern", "Обожнюю гори, йогу та неспішні розмови за кавою.".localized, [.hiking, .wellness, .travel], ["UK", "DE"], [.walk, .coffee], 77, 12, false, 2024),
+    profile("nicolas", "Nicolas Dubois", "GE", "Genève", "Підприємець у сфері sustainability. Відкритий до спорту, нетворкінгу й волонтерства.".localized, [.business, .sports, .volunteering], ["FR", "EN", "DE"], [.activity, .event], 73, 66, true, 2016),
   ]
 
   private static func profile(
@@ -212,7 +220,7 @@ enum SocialFriendPreviewFixtures {
       interests: interests, languages: languages, meetupFormats: formats,
       availability: [.weekdayEvening, .weekend], ageBand: "25-34", arrivalYear: arrivalYear,
       isVerified: verified, matchScore: score,
-      matchReasons: ["Спільні інтереси", "Зручна відстань", "Спільна мова"],
+      matchReasons: ["Спільні інтереси".localized, "Зручна відстань".localized, "Спільна мова".localized],
       distanceKM: distance, residencyStage: arrivalYear >= 2025 ? "newcomer" : "established",
       sharedInterests: Array(interests.prefix(3)))
   }
@@ -268,7 +276,8 @@ struct SocialSwipeResult: Codable {
 }
 
 struct SocialProfileDraft: Codable {
-  var displayName = "", canton = "ZH", city = "Zürich", bio = ""
+  var displayName = "", canton = APIClient.subdivisionCode, city = "", bio = ""
+  var countryCode = APIClient.countryCode, subdivisionCode = APIClient.subdivisionCode
   var interests: [SocialInterest] = [.hiking, .travel]
   var languages = ["UK"]
   var meetupFormats: [MeetupFormat] = [.coffee, .event]
@@ -283,6 +292,8 @@ struct SocialProfileDraft: Codable {
   init(_ p: SocialProfile) {
     displayName = p.displayName
     canton = p.canton
+    countryCode = p.countryCode
+    subdivisionCode = p.subdivisionCode
     city = p.city
     bio = p.bio
     interests = p.interests
@@ -297,6 +308,8 @@ struct SocialProfileDraft: Codable {
   }
   enum CodingKeys: String, CodingKey {
     case canton, city, bio, interests, languages, availability, latitude, longitude
+    case countryCode = "country_code"
+    case subdivisionCode = "subdivision_code"
     case displayName = "display_name"
     case meetupFormats = "meetup_formats"
     case ageBand = "age_band"

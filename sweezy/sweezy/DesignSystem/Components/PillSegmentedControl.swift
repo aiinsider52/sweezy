@@ -48,12 +48,13 @@ struct PillSegmentedControl: View {
             UIImpactFeedbackGenerator(style: .light).impactOccurred()
         } label: {
             Text(items[index])
-                .font(.system(size: 14, weight: isSelected ? .bold : .semibold, design: .rounded))
+                .font(.system(size: 14, weight: isSelected ? .bold : .semibold, design: .default))
                 .foregroundColor(isSelected ? Theme.Colors.ink : Color.white.opacity(0.72))
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
                 .padding(.vertical, 9)
                 .frame(maxWidth: .infinity)
+                .frame(minHeight: Theme.Layout.minimumTouchTarget)
                 .background {
                     if isSelected {
                         Capsule(style: .continuous)

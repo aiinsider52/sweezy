@@ -22,6 +22,7 @@ from ..schemas.network import (
     ProfessionalProfileUpsert,
     ProfileReportCreate,
 )
+from ..core.countries import normalize_country_code, normalize_subdivision_code
 
 
 router = APIRouter()
@@ -103,12 +104,19 @@ def list_profiles(
     user: CurrentUser,
     q: str | None = Query(default=None, max_length=100),
     canton: str | None = Query(default=None, max_length=10),
+    country_code: str = Query(default="CH", min_length=2, max_length=2),
+    subdivision_code: str | None = Query(default=None, max_length=10),
     role: str | None = Query(default=None, max_length=30),
     industry: str | None = Query(default=None, max_length=60),
     goal: str | None = Query(default=None, max_length=30),
     page: int = Query(default=1, ge=1),
     per_page: int = Query(default=20, ge=1, le=50),
 ) -> ProfessionalProfilePage:
+    try:
+        country_code = normalize_country_code(country_code)
+        subdivision_code = normalize_subdivision_code(country_code, subdivision_code or canton)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
     blocked_ids = select(MarketplaceBlock.blocked_author_id).where(MarketplaceBlock.user_id == user.id)
     blocked_by_ids = select(MarketplaceBlock.user_id).where(MarketplaceBlock.blocked_author_id == user.id)
     conditions = [
@@ -118,6 +126,7 @@ def list_profiles(
         User.is_active.is_(True),
         ProfessionalProfile.user_id.not_in(blocked_ids),
         ProfessionalProfile.user_id.not_in(blocked_by_ids),
+        ProfessionalProfile.country_code == country_code,
     ]
     if q:
         pattern = f"%{q.strip()}%"
@@ -131,8 +140,8 @@ def list_profiles(
                 cast(ProfessionalProfile.skills, String).ilike(pattern),
             )
         )
-    if canton:
-        conditions.append(ProfessionalProfile.canton == canton.strip().upper())
+    if subdivision_code:
+        conditions.append(ProfessionalProfile.subdivision_code == subdivision_code)
     if role:
         conditions.append(ProfessionalProfile.role == role)
     if industry:

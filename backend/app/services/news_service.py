@@ -19,8 +19,9 @@ class NewsService:
     status: Optional[str] = None,
     include_drafts: bool = False,
     import_source: Optional[str] = None,
+    country_code: str = "CH",
   ) -> List[News]:
-    query = db.query(News).order_by(News.published_at.desc())
+    query = db.query(News).filter(News.country_code == country_code).order_by(News.published_at.desc())
     if language:
       query = query.filter(News.language == language)
     if import_source:
@@ -45,6 +46,8 @@ class NewsService:
       url=str(data["url"]),
       source=data.get("source", "Sweezy"),
       language=data.get("language", "uk"),
+      country_code=data.get("country_code", "CH"),
+      subdivision_codes=data.get("subdivision_codes", []),
       status=data.get("status", "published"),
       import_source=data.get("import_source", "manual"),
       import_reference_id=data.get("import_reference_id"),
@@ -73,5 +76,4 @@ class NewsService:
   def delete(db: Session, news: News) -> None:
     db.delete(news)
     db.commit()
-
 

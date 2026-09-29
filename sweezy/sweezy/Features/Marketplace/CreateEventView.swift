@@ -10,7 +10,7 @@ struct CreateEventView: View {
     @State private var title = ""
     @State private var description = ""
     @State private var category: EventCategory = .community
-    @State private var canton = "ZH"
+    @State private var canton = APIClient.subdivisionCode
     @State private var city = ""
     @State private var venueName = ""
     @State private var address = ""
@@ -112,13 +112,14 @@ struct CreateEventView: View {
     private var locationCard: some View {
         formCard {
             VStack(alignment: .leading, spacing: 12) {
-                formLabel("marketplace.field.canton".localized, icon: "mappin.and.ellipse")
+                let country = ResidenceCountry(rawValue: APIClient.countryCode) ?? .switzerland
+                formLabel(country.subdivisionTitle, icon: "mappin.and.ellipse")
                 Menu {
-                    ForEach(SwissCanton.all, id: \.code) { cantonOption in
-                        Button(cantonOption.name) { canton = cantonOption.code }
+                    ForEach(CountryCatalog.subdivisions(for: country)) { area in
+                        Button(area.name) { canton = area.code }
                     }
                 } label: {
-                    pickerRow(title: SwissCanton.all.first(where: { $0.code == canton })?.name ?? canton)
+                    pickerRow(title: CountryCatalog.subdivisionName(country: country, code: canton))
                 }
 
                 formLabel("events.city".localized, icon: "building.2.fill")
@@ -168,7 +169,7 @@ struct CreateEventView: View {
                     Label("events.free_toggle".localized, systemImage: "ticket.fill")
                         .foregroundColor(Theme.Colors.textPrimary)
                 }
-                .tint(Theme.Colors.primary)
+                .tint(JourneyVisual.accentText)
 
                 if !isFree {
                     TextField("events.price_placeholder".localized, text: $priceInfo)
@@ -185,10 +186,10 @@ struct CreateEventView: View {
                     }
                 )) {
                     VStack(alignment: .leading, spacing: 3) {
-                        HStack { Text("Закрита подія"); Text("PLUS").font(.caption2.bold()).padding(.horizontal, 7).padding(.vertical, 3).background(JourneyVisual.lime).foregroundColor(.black).clipShape(Capsule()) }
-                        Text("Видима лише запрошеним людям").font(.caption).foregroundColor(Theme.Colors.textSecondary)
+                        HStack { Text("Закрита подія".localized); Text("PLUS").font(.caption2.bold()).padding(.horizontal, 7).padding(.vertical, 3).background(JourneyVisual.lime).foregroundColor(.black).clipShape(Capsule()) }
+                        Text("Видима лише запрошеним людям".localized).font(.caption).foregroundColor(Theme.Colors.textSecondary)
                     }
-                }.tint(JourneyVisual.lime)
+                }.tint(JourneyVisual.accentText)
             }
         }
     }
@@ -234,7 +235,7 @@ struct CreateEventView: View {
             HStack(spacing: 10) {
                 if isSubmitting {
                     ProgressView()
-                        .tint(.white)
+                        .tint(JourneyVisual.primaryText)
                 } else {
                     Image(systemName: "calendar.badge.plus")
                 }
@@ -244,7 +245,7 @@ struct CreateEventView: View {
             .frame(maxWidth: .infinity)
             .padding(.vertical, 15)
             .background(isValid ? Theme.Colors.primary : Theme.Colors.textTertiary.opacity(0.35))
-            .foregroundColor(.white)
+            .foregroundColor(JourneyVisual.primaryText)
             .cornerRadius(16)
         }
         .disabled(!isValid || isSubmitting)
@@ -362,7 +363,7 @@ struct CreateEventView: View {
         HStack(spacing: 6) {
             Image(systemName: icon)
                 .font(.system(size: 13, weight: .medium))
-                .foregroundColor(Theme.Colors.primary)
+                .foregroundColor(JourneyVisual.accentStrong)
             Text(text)
                 .font(.subheadline.bold())
                 .foregroundColor(Theme.Colors.textPrimary)

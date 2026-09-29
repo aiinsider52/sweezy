@@ -49,15 +49,14 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Theme.Colors.primaryBackground
+                JourneyVisual.pageBackground
                     .ignoresSafeArea()
 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 14) {
                         editorialSettingsHero
-                        editorialProfileCard
+                        settingsProfileHero
                         editorialPlanCard
-                        editorialCompletionCard
                         editorialActivityStrip
                         editorialSettingsSections
                     }
@@ -241,47 +240,132 @@ struct SettingsView: View {
 private extension SettingsView {
     var editorialSettingsHero: some View {
         ZStack(alignment: .bottomLeading) {
-            Image("cityhub-zurich-oldtown")
-                .resizable()
-                .scaledToFill()
-                .frame(maxWidth: .infinity)
-                .frame(height: 252)
-                .clipped()
-
-            LinearGradient(
-                colors: [
-                    Color.black.opacity(0.18),
-                    Color.black.opacity(0.3),
-                    Theme.Colors.primaryBackground
-                ],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-
             VStack(alignment: .leading, spacing: 7) {
                 Text("settings.editorial.header".localized)
-                    .font(.system(size: 11, weight: .bold, design: .rounded))
+                    .font(.system(size: 11, weight: .bold, design: .default))
                     .tracking(2)
-                    .foregroundColor(.white.opacity(0.68))
+                    .foregroundColor(JourneyVisual.secondaryText)
 
                 Text("settings.editorial.greeting_format".localized(with: editorialGreetingName))
-                    .font(.system(size: 32, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
+                    .font(.system(size: 32, weight: .bold, design: .default))
+                    .foregroundColor(JourneyVisual.primaryText)
 
                 HStack(spacing: 5) {
                     Text("settings.editorial.profile_ready_label".localized)
-                        .foregroundColor(.white.opacity(0.72))
+                        .foregroundColor(JourneyVisual.secondaryText)
                     Text("\(profileCompletion)%")
                         .fontWeight(.bold)
-                        .foregroundColor(JourneyVisual.lime)
+                        .foregroundColor(Theme.Colors.textPrimary)
                 }
-                .font(.system(size: 14, weight: .medium, design: .rounded))
+                .font(.system(size: 14, weight: .medium, design: .default))
             }
             .padding(.horizontal, 20)
-            .padding(.bottom, 22)
+            .padding(.vertical, 16)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(JourneyVisual.pageBackground)
         }
-        .frame(height: 252)
+        .padding(.top, 56)
         .accessibilityElement(children: .combine)
+    }
+
+    /// Profile scene, avatar and completion in one card: "this is you, and here's what's left".
+    var settingsProfileHero: some View {
+        Button {
+            openProfile()
+        } label: {
+            VStack(alignment: .leading, spacing: 0) {
+                StoryScene(name: "profile", height: 150, cornerRadius: 22)
+                    .padding(6)
+                    // Only the avatar sits on the picture's edge; the text stays on paper below.
+                    .overlay(alignment: .bottomLeading) {
+                        ZStack {
+                            Circle()
+                                .fill(JourneyVisual.lime)
+                            Text(profileInitials)
+                                .font(.system(size: 24, weight: .bold, design: .default))
+                                .foregroundColor(.black)
+                        }
+                        .frame(width: 72, height: 72)
+                        .overlay(Circle().stroke(Theme.Colors.card, lineWidth: 4))
+                        .shadow(color: JourneyVisual.black.opacity(0.12), radius: 8, y: 3)
+                        .offset(x: 18, y: 36)
+                    }
+
+                HStack(alignment: .center, spacing: 12) {
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(profileName)
+                            .font(.system(size: 19, weight: .bold, design: .default))
+                            .foregroundColor(JourneyVisual.primaryText)
+                            .lineLimit(1)
+                        Label(editorialProfileLocation, systemImage: "mappin.and.ellipse")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(JourneyVisual.secondaryText)
+                    }
+
+                    Spacer(minLength: 8)
+
+                    Image(systemName: "pencil")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundColor(JourneyVisual.primaryText)
+                        .frame(width: 40, height: 40)
+                        .background(JourneyVisual.softSurface, in: Circle())
+                        .overlay(Circle().stroke(JourneyVisual.softBorder, lineWidth: 1))
+                }
+                .padding(.leading, 18 + 72 + 12)
+                .padding(.trailing, 16)
+                .padding(.top, 8)
+                .frame(minHeight: 48)
+
+                if profileCompletion < 100 {
+                    VStack(alignment: .leading, spacing: 10) {
+                        HStack {
+                            Text("settings.editorial.complete_profile_title".localized)
+                                .font(.system(size: 15, weight: .bold))
+                                .foregroundColor(JourneyVisual.primaryText)
+                            Spacer()
+                            Text("\(profileCompletion)%")
+                                .font(.system(size: 14, weight: .black).monospacedDigit())
+                                .foregroundColor(JourneyVisual.accentText)
+                        }
+                        GeometryReader { proxy in
+                            ZStack(alignment: .leading) {
+                                Capsule().fill(JourneyVisual.softBorder)
+                                Capsule()
+                                    .fill(JourneyVisual.lime)
+                                    .frame(width: proxy.size.width * CGFloat(profileCompletion) / 100)
+                            }
+                        }
+                        .frame(height: 8)
+                        Text("settings.editorial.complete_profile_subtitle".localized)
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(JourneyVisual.secondaryText)
+                            .fixedSize(horizontal: false, vertical: true)
+
+                        HStack {
+                            Text("settings.editorial.continue_filling".localized)
+                            Spacer()
+                            Image(systemName: "arrow.right")
+                                .frame(width: 30, height: 30)
+                                .background(Color.black.opacity(0.08), in: Circle())
+                        }
+                        .font(.system(size: 14, weight: .bold, design: .default))
+                        .foregroundColor(.black)
+                        .padding(.leading, 16)
+                        .padding(.trailing, 8)
+                        .frame(height: 48)
+                        .background(JourneyVisual.lime, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                        .padding(.top, 4)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.top, 14)
+                }
+            }
+            .padding(.bottom, 16)
+            .editorialSettingsPanel(cornerRadius: 28)
+        }
+        .buttonStyle(CardPressStyle())
+        .padding(.horizontal, 16)
+        .accessibilityHint("settings.editorial.edit_profile_hint".localized)
     }
 
     var editorialProfileCard: some View {
@@ -295,14 +379,14 @@ private extension SettingsView {
                     Circle()
                         .stroke(JourneyVisual.lime.opacity(0.7), lineWidth: 1)
                     Text(profileInitials)
-                        .font(.system(size: 20, weight: .bold, design: .rounded))
+                        .font(.system(size: 20, weight: .bold, design: .default))
                         .foregroundColor(Theme.Colors.textPrimary)
                 }
                 .frame(width: 58, height: 58)
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(profileName)
-                        .font(.system(size: 17, weight: .semibold, design: .rounded))
+                        .font(.system(size: 17, weight: .semibold, design: .default))
                         .foregroundColor(Theme.Colors.textPrimary)
                         .lineLimit(1)
                     Label(editorialProfileLocation, systemImage: "mappin")
@@ -314,7 +398,7 @@ private extension SettingsView {
 
                 Image(systemName: "pencil")
                     .font(.system(size: 15, weight: .bold))
-                    .foregroundColor(JourneyVisual.lime)
+                    .foregroundColor(Theme.Colors.textPrimary)
                     .frame(width: 42, height: 42)
                     .background(Theme.Colors.adaptiveSurface)
                     .clipShape(Circle())
@@ -336,7 +420,7 @@ private extension SettingsView {
                 HStack(alignment: .top, spacing: 14) {
                     VStack(alignment: .leading, spacing: 5) {
                         Text("settings.editorial.complete_profile_title".localized)
-                            .font(.system(size: 18, weight: .bold, design: .rounded))
+                            .font(.system(size: 18, weight: .bold, design: .default))
                             .foregroundColor(Theme.Colors.textPrimary)
                         Text("settings.editorial.complete_profile_subtitle".localized)
                             .font(.system(size: 13, weight: .medium))
@@ -354,7 +438,7 @@ private extension SettingsView {
                             .stroke(JourneyVisual.lime, style: StrokeStyle(lineWidth: 5, lineCap: .round))
                             .rotationEffect(.degrees(-90))
                         Text("\(profileCompletion)%")
-                            .font(.system(size: 14, weight: .bold, design: .rounded))
+                            .font(.system(size: 14, weight: .bold, design: .default))
                             .foregroundColor(Theme.Colors.textPrimary)
                     }
                     .frame(width: 58, height: 58)
@@ -365,7 +449,7 @@ private extension SettingsView {
                     Spacer()
                     Image(systemName: "arrow.right")
                 }
-                .font(.system(size: 14, weight: .bold, design: .rounded))
+                .font(.system(size: 14, weight: .bold, design: .default))
                 .foregroundColor(.black)
                 .padding(.horizontal, 16)
                 .frame(height: 48)
@@ -384,22 +468,19 @@ private extension SettingsView {
             showingSubscription = true
         } label: {
             HStack(spacing: 14) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .fill(subscriptionManager.isPremium ? JourneyVisual.lime : Theme.Colors.adaptiveSurface)
-                    Image(systemName: subscriptionManager.isPremium ? "sparkles" : "star")
-                        .font(.system(size: 20, weight: .bold))
-                        .foregroundColor(subscriptionManager.isPremium ? .black : JourneyVisual.lime)
-                }
-                .frame(width: 52, height: 52)
+                JourneyCategoryIcon(
+                    symbol: subscriptionManager.isPremium ? "sparkles" : "star.fill",
+                    swatch: JourneyCategoryPalette.lime,
+                    size: 50
+                )
 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("ТВІЙ ПЛАН")
-                        .font(.system(size: 10, weight: .bold, design: .rounded))
+                    Text("ТВІЙ ПЛАН".localized)
+                        .font(.system(size: 10, weight: .bold, design: .default))
                         .tracking(1.7)
-                        .foregroundColor(JourneyVisual.lime)
+                        .foregroundColor(JourneyVisual.secondaryText)
                     Text(subscriptionManager.planDisplayName)
-                        .font(.system(size: 18, weight: .bold, design: .rounded))
+                        .font(.system(size: 18, weight: .bold, design: .default))
                         .foregroundColor(Theme.Colors.textPrimary)
                     Text(subscriptionManager.planDetails)
                         .font(.system(size: 12, weight: .medium))
@@ -408,14 +489,26 @@ private extension SettingsView {
 
                 Spacer(minLength: 8)
 
-                Text(subscriptionManager.isPremium ? "ACTIVE" : "FREE")
-                    .font(.system(size: 10, weight: .black, design: .rounded))
-                    .tracking(1)
-                    .foregroundColor(subscriptionManager.isPremium ? .black : Theme.Colors.textPrimary)
-                    .padding(.horizontal, 11)
-                    .frame(height: 30)
-                    .background(subscriptionManager.isPremium ? JourneyVisual.lime : Theme.Colors.adaptiveSurface)
-                    .clipShape(Capsule())
+                if subscriptionManager.isPremium {
+                    Text("ACTIVE")
+                        .font(.system(size: 10, weight: .black, design: .default))
+                        .tracking(1)
+                        .foregroundColor(.black)
+                        .padding(.horizontal, 11)
+                        .frame(height: 30)
+                        .background(JourneyVisual.lime, in: Capsule())
+                } else {
+                    HStack(spacing: 5) {
+                        Text("Plus")
+                        Image(systemName: "arrow.right")
+                            .font(.system(size: 11, weight: .bold))
+                    }
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundColor(JourneyVisual.lime)
+                    .padding(.horizontal, 13)
+                    .frame(height: 34)
+                    .background(JourneyVisual.black, in: Capsule())
+                }
             }
             .padding(15)
             .editorialSettingsPanel(cornerRadius: 22)
@@ -433,8 +526,8 @@ private extension SettingsView {
             editorialActivityDivider
             editorialActivityItem(icon: "target", value: "\(appContainer.userProfile?.goals.count ?? 0)", label: "settings.editorial.stat.goals".localized)
         }
-        .padding(.vertical, 12)
-        .editorialSettingsPanel(cornerRadius: 18)
+        .padding(.vertical, 14)
+        .editorialSettingsPanel(cornerRadius: 22)
         .padding(.horizontal, 16)
     }
 
@@ -445,7 +538,7 @@ private extension SettingsView {
                 editorialSettingsRow(
                     icon: "star.circle.fill",
                     title: "Sweezy Plus",
-                    value: subscriptionManager.isPremium ? "Активна" : "Відкрити"
+                    value: subscriptionManager.isPremium ? "Активна".localized : "Відкрити".localized
                 ) {
                     showingSubscription = true
                 }
@@ -582,20 +675,30 @@ private extension SettingsView {
     }
 
     func editorialActivityItem(icon: String, value: String, label: String) -> some View {
-        VStack(spacing: 3) {
-            HStack(spacing: 6) {
-                Image(systemName: icon)
-                    .foregroundColor(JourneyVisual.lime)
-                Text(value)
-                    .foregroundColor(Theme.Colors.textPrimary)
-            }
-            .font(.system(size: 14, weight: .bold, design: .rounded))
+        VStack(spacing: 6) {
+            JourneyCategoryIcon(symbol: icon, swatch: settingsSwatch(for: icon), size: 34)
+            Text(value)
+                .font(.system(size: 18, weight: .black, design: .default).monospacedDigit())
+                .foregroundColor(JourneyVisual.primaryText)
             Text(label)
-                .font(.system(size: 10, weight: .medium))
-                .foregroundColor(Theme.Colors.textTertiary)
+                .font(.system(size: 11, weight: .medium))
+                .foregroundColor(JourneyVisual.secondaryText)
         }
         .frame(maxWidth: .infinity)
         .accessibilityElement(children: .combine)
+    }
+
+    /// Each settings topic keeps one sticker colour, matching category colours elsewhere.
+    func settingsSwatch(for icon: String) -> JourneyCategorySwatch {
+        switch icon {
+        case "star.circle.fill", "sparkles", "info.circle", "checklist": return JourneyCategoryPalette.lime
+        case "globe", "envelope", "faceid", "touchid", "book.closed": return JourneyCategoryPalette.sky
+        case "moon.stars": return JourneyCategoryPalette.lilac
+        case "bell", "target": return JourneyCategoryPalette.coral
+        case "bubble.left.and.bubble.right.fill": return JourneyCategoryPalette.teal
+        case "chart.bar.xaxis", "star": return JourneyCategoryPalette.sand
+        default: return JourneyCategoryPalette.graphite
+        }
     }
 
     var editorialActivityDivider: some View {
@@ -606,7 +709,7 @@ private extension SettingsView {
 
     func editorialSectionTitle(_ title: String) -> some View {
         Text(title)
-            .font(.system(size: 18, weight: .bold, design: .rounded))
+            .font(.system(size: 18, weight: .bold, design: .default))
             .foregroundColor(Theme.Colors.textPrimary)
             .padding(.horizontal, 2)
     }
@@ -639,13 +742,10 @@ private extension SettingsView {
         showsChevron: Bool = true
     ) -> some View {
         HStack(spacing: 13) {
-            Image(systemName: icon)
-                .font(.system(size: 16, weight: .semibold))
-                .foregroundColor(Theme.Colors.textSecondary)
-                .frame(width: 22)
+            JourneyCategoryIcon(symbol: icon, swatch: settingsSwatch(for: icon), size: 32)
             Text(title)
-                .font(.system(size: 15, weight: .medium))
-                .foregroundColor(Theme.Colors.textPrimary)
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundColor(JourneyVisual.primaryText)
             Spacer()
             if let value {
                 Text(value)
@@ -659,8 +759,8 @@ private extension SettingsView {
                     .foregroundColor(Theme.Colors.textTertiary)
             }
         }
-        .padding(.horizontal, 16)
-        .frame(minHeight: 56)
+        .padding(.horizontal, 14)
+        .frame(minHeight: 60)
         .contentShape(Rectangle())
     }
 
@@ -672,10 +772,8 @@ private extension SettingsView {
         isEnabled: Bool = true
     ) -> some View {
         HStack(spacing: 13) {
-            Image(systemName: icon)
-                .font(.system(size: 16, weight: .semibold))
-                .foregroundColor(isEnabled ? Theme.Colors.textSecondary : Theme.Colors.textTertiary)
-                .frame(width: 22)
+            JourneyCategoryIcon(symbol: icon, swatch: settingsSwatch(for: icon), size: 32)
+                .opacity(isEnabled ? 1 : 0.5)
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                     .font(.system(size: 15, weight: .medium))
@@ -697,36 +795,36 @@ private extension SettingsView {
 
     var editorialSettingsDivider: some View {
         Rectangle()
-            .fill(Theme.Colors.adaptiveBorder)
+            .fill(JourneyVisual.softBorder)
             .frame(height: 1)
-            .padding(.leading, 51)
+            .padding(.leading, 59)
     }
 
     var settingsHero: some View {
         VStack(alignment: .leading, spacing: 14) {
             Text("settings.editorial.header".localized)
-                .font(.system(size: 10, weight: .bold, design: .rounded))
+                .font(.system(size: 10, weight: .bold, design: .default))
                 .tracking(1.4)
-                .foregroundColor(.white.opacity(0.62))
+                .foregroundColor(JourneyVisual.secondaryText)
 
             HStack(alignment: .bottom) {
                 VStack(alignment: .leading, spacing: -2) {
                     Text("settings.editorial.greeting_format".localized(with: profileName))
                     Text("settings.hero.your_situation".localized)
                 }
-                .font(.system(size: 31, weight: .bold, design: .rounded))
-                .foregroundColor(.white)
+                .font(.system(size: 31, weight: .bold, design: .default))
+                .foregroundColor(JourneyVisual.primaryText)
 
                 Spacer()
 
                 Text("\(profileCompletion)%")
-                    .font(.system(size: 28, weight: .bold, design: .rounded))
-                    .foregroundColor(JourneyVisual.lime)
+                    .font(.system(size: 28, weight: .bold, design: .default))
+                    .foregroundColor(Theme.Colors.textPrimary)
             }
 
             GeometryReader { geometry in
                 ZStack(alignment: .leading) {
-                    Capsule().fill(Color.white.opacity(0.18))
+                    Capsule().fill(JourneyVisual.softBorder)
                     Capsule()
                         .fill(JourneyVisual.lime)
                         .frame(width: geometry.size.width * CGFloat(profileCompletion) / 100)
@@ -735,7 +833,6 @@ private extension SettingsView {
             .frame(height: 7)
         }
         .padding(.top, 12)
-        .shadow(color: .black.opacity(0.28), radius: 9, y: 4)
     }
 
     var profileCompletion: Int {
@@ -767,7 +864,7 @@ private extension SettingsView {
         HStack(spacing: 8) {
             Image(systemName: icon)
                 .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(Theme.Colors.primary)
+                .foregroundColor(JourneyVisual.accentStrong)
             Text(text)
                 .font(Theme.Typography.caption)
                 .foregroundColor(Theme.Colors.textSecondary)
@@ -829,8 +926,8 @@ private extension SettingsView {
                         .frame(width: 60, height: 60)
                     
                     Text(profileInitials)
-                        .font(.system(size: 22, weight: .bold, design: .rounded))
-                        .foregroundColor(.white)
+                        .font(.system(size: 22, weight: .bold, design: .default))
+                        .foregroundColor(.black)
                 }
                 
                 // Info
@@ -911,7 +1008,7 @@ private extension SettingsView {
                 HStack(spacing: Theme.Spacing.md) {
                     Image(systemName: "paintbrush.pointed.fill")
                         .font(.system(size: 20, weight: .semibold))
-                        .foregroundColor(Theme.Colors.primary)
+                        .foregroundColor(JourneyVisual.accentStrong)
                         .frame(width: 24)
                     VStack(alignment: .leading, spacing: 3) {
                         Text("settings.theme.title".localized)
@@ -1395,6 +1492,9 @@ struct ProfileEditView: View {
     @State private var fullName: String = ""
     @State private var email: String = ""
     @State private var phoneNumber: String = ""
+    @State private var selectedCountry: ResidenceCountry = .switzerland
+    @State private var selectedSubdivisionCode = ResidenceCountry.switzerland.defaultSubdivisionCode
+    @State private var selectedResidenceStatusCode = ResidenceCountry.switzerland.defaultResidenceStatusCode
     @State private var selectedCanton: Canton = .zurich
     @State private var selectedPermitType: PermitType = .s
     @State private var arrivalDate: Date = Date()
@@ -1436,6 +1536,24 @@ struct ProfileEditView: View {
     private var winterSecondaryText: Color { isDarkTheme ? .white.opacity(0.68) : Theme.Colors.textSecondary }
     private var winterTertiaryText: Color { isDarkTheme ? .white.opacity(0.5) : Theme.Colors.textTertiary }
 
+    private var profileChangeToken: String {
+        [
+            fullName,
+            email,
+            phoneNumber,
+            selectedCountry.rawValue,
+            selectedSubdivisionCode,
+            selectedResidenceStatusCode,
+            selectedCanton.rawValue,
+            selectedPermitType.rawValue,
+            String(arrivalDate.timeIntervalSinceReferenceDate),
+            String(permitExpiry.timeIntervalSinceReferenceDate),
+            selectedGoals.map(\.rawValue).sorted().joined(separator: ","),
+            String(familySize),
+            String(hasChildren)
+        ].joined(separator: "|")
+    }
+
     var body: some View {
         Group {
             if sessionManager.isAuthenticated {
@@ -1445,6 +1563,8 @@ struct ProfileEditView: View {
                         
                         ScrollView(showsIndicators: false) {
                             VStack(spacing: 14) {
+                                // Sweezy arranging a scrapbook of photos and interests: "this is you".
+                                StoryScene(name: "profile", height: 180)
                                 heroSection
                                 profilePersonalCard
                                 profileLocationCard
@@ -1464,11 +1584,11 @@ struct ProfileEditView: View {
                             Button { dismiss() } label: {
                                 Image(systemName: "xmark")
                                     .font(.system(size: 14, weight: .bold))
-                                    .foregroundColor(.white)
+                                    .foregroundColor(JourneyVisual.primaryText)
                                     .frame(width: 38, height: 38)
-                                    .background(Color.black.opacity(0.48))
+                                    .background(Theme.Colors.card)
                                     .clipShape(Circle())
-                                    .overlay(Circle().stroke(Color.white.opacity(0.2), lineWidth: 1))
+                                    .overlay(Circle().stroke(JourneyVisual.softBorder, lineWidth: 1))
                             }
                             .accessibilityLabel("common.cancel".localized)
                         }
@@ -1477,16 +1597,7 @@ struct ProfileEditView: View {
                 }
                 .journeyScreen(.city, darkness: 0.82)
                 .onAppear { loadCurrentProfile() }
-                .onChange(of: fullName) { _, _ in hasChanges = true }
-                .onChange(of: email) { _, _ in hasChanges = true }
-                .onChange(of: phoneNumber) { _, _ in hasChanges = true }
-                .onChange(of: selectedCanton) { _, _ in hasChanges = true }
-                .onChange(of: selectedPermitType) { _, _ in hasChanges = true }
-                .onChange(of: arrivalDate) { _, _ in hasChanges = true }
-                .onChange(of: permitExpiry) { _, _ in hasChanges = true }
-                .onChange(of: selectedGoals) { _, _ in hasChanges = true }
-                .onChange(of: familySize) { _, _ in hasChanges = true }
-                .onChange(of: hasChildren) { _, _ in hasChanges = true }
+                .onChange(of: profileChangeToken) { _, _ in hasChanges = true }
                 .sheet(isPresented: $showCantonPicker) { cantonPickerSheet }
                 .sheet(isPresented: $showPermitPicker) { permitPickerSheet }
             } else {
@@ -1510,15 +1621,15 @@ struct ProfileEditView: View {
                 VStack(spacing: 12) {
                     Image(systemName: "lock.fill")
                         .font(.system(size: 34, weight: .semibold))
-                        .foregroundColor(JourneyVisual.lime)
+                        .foregroundColor(Theme.Colors.textPrimary)
                     
                     Text("auth.login.title")
                         .font(.system(size: 20, weight: .bold))
-                        .foregroundColor(.white)
+                        .foregroundColor(JourneyVisual.primaryText)
                     
                     Text("auth.login.subtitle")
                         .font(.subheadline)
-                        .foregroundColor(.white.opacity(0.62))
+                        .foregroundColor(JourneyVisual.secondaryText)
                         .multilineTextAlignment(.center)
                     
                     Button {
@@ -1540,7 +1651,7 @@ struct ProfileEditView: View {
                     Button { dismiss() } label: {
                         Text("common.close")
                             .font(.subheadline.weight(.medium))
-                            .foregroundColor(.white.opacity(0.62))
+                            .foregroundColor(JourneyVisual.secondaryText)
                     }
                     .buttonStyle(.plain)
                 }
@@ -1551,7 +1662,7 @@ struct ProfileEditView: View {
                         .background(.ultraThinMaterial.opacity(0.72))
                         .overlay(
                             RoundedRectangle(cornerRadius: 24, style: .continuous)
-                                .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                                .stroke(JourneyVisual.softBorder, lineWidth: 1)
                         )
                 )
                 .padding(.horizontal, 20)
@@ -1563,7 +1674,7 @@ struct ProfileEditView: View {
                     Button { dismiss() } label: {
                         Image(systemName: "xmark")
                             .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(.white.opacity(0.7))
+                            .foregroundColor(JourneyVisual.secondaryText)
                     }
                 }
             }
@@ -1578,7 +1689,7 @@ struct ProfileEditView: View {
                     .fill(Color.black.opacity(0.72))
                     .frame(width: 72, height: 72)
                 Circle()
-                    .stroke(Color.white.opacity(0.15), lineWidth: 4)
+                    .stroke(JourneyVisual.softBorder, lineWidth: 4)
                     .frame(width: 76, height: 76)
                 Circle()
                     .trim(from: 0, to: completionPercentage)
@@ -1586,24 +1697,24 @@ struct ProfileEditView: View {
                     .frame(width: 76, height: 76)
                     .rotationEffect(.degrees(-90))
                 Text(initials)
-                    .font(.system(size: 25, weight: .bold, design: .rounded))
+                    .font(.system(size: 25, weight: .bold, design: .default))
                     .foregroundColor(.white)
             }
 
             VStack(alignment: .leading, spacing: 5) {
                 Text(fullName.isEmpty ? "settings.profile.your_name".localized : fullName)
-                    .font(.system(size: 21, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
+                    .font(.system(size: 21, weight: .bold, design: .default))
+                    .foregroundColor(JourneyVisual.primaryText)
                     .lineLimit(1)
                 if !email.isEmpty {
                     Text(email)
                         .font(.system(size: 13, weight: .medium))
-                        .foregroundColor(.white.opacity(0.58))
+                        .foregroundColor(JourneyVisual.secondaryText)
                         .lineLimit(1)
                 }
                 Text("settings.profile.completion_format".localized(with: Int(completionPercentage * 100)))
                     .font(.system(size: 11, weight: .semibold))
-                    .foregroundColor(JourneyVisual.lime)
+                    .foregroundColor(Theme.Colors.textPrimary)
             }
             Spacer(minLength: 0)
         }
@@ -1632,12 +1743,12 @@ struct ProfileEditView: View {
                     .shadow(color: Color.cyan.opacity(0.4), radius: 15, x: 0, y: 8)
                 
                 Text(initials)
-                    .font(.system(size: 36, weight: .bold, design: .rounded))
+                    .font(.system(size: 36, weight: .bold, design: .default))
                     .foregroundColor(.white)
                 
                 // Progress ring border
                 Circle()
-                    .stroke(Color.white.opacity(0.15), lineWidth: 4)
+                    .stroke(JourneyVisual.softBorder, lineWidth: 4)
                     .frame(width: 112, height: 112)
                 
                 // Progress ring
@@ -1661,7 +1772,7 @@ struct ProfileEditView: View {
             
             VStack(spacing: 6) {
                 Text(fullName.isEmpty ? "settings.profile.your_name".localized : fullName)
-                    .font(.system(size: 22, weight: .bold, design: .rounded))
+                    .font(.system(size: 22, weight: .bold, design: .default))
                     .foregroundColor(winterPrimaryText)
                 
                 if !email.isEmpty {
@@ -1738,7 +1849,7 @@ struct ProfileEditView: View {
                         HStack(spacing: 6) {
                             Text(selectedPermitType.rawValue)
                                 .font(.system(size: 13, weight: .bold))
-                                .foregroundColor(.white)
+                                .foregroundColor(JourneyVisual.primaryText)
                                 .padding(.horizontal, 8).padding(.vertical, 4)
                                 .background(selectedPermitType.color).cornerRadius(6)
                             Text(selectedPermitType.shortName).foregroundColor(winterPrimaryText)
@@ -1922,39 +2033,60 @@ struct ProfileEditView: View {
     private var profileLocationCard: some View {
         ProfileSectionCard(icon: "mappin.and.ellipse", title: "settings.profile.section.location".localized, color: .orange) {
             VStack(spacing: 16) {
-                Button { showCantonPicker = true } label: {
+                Menu {
+                    ForEach(ResidenceCountry.allCases) { country in
+                        Button("\(country.flag) \(country.name) · \(country.nativeName)") {
+                            selectedCountry = country
+                            selectedSubdivisionCode = country.defaultSubdivisionCode
+                            selectedResidenceStatusCode = country.defaultResidenceStatusCode
+                            if country == .switzerland {
+                                selectedCanton = .zurich
+                                selectedPermitType = .s
+                            }
+                        }
+                    }
+                } label: {
                     HStack {
-                        Image(systemName: "building.2").foregroundColor(JourneyVisual.lime).frame(width: 24)
-                        Text("calculator.canton".localized).foregroundColor(.white.opacity(0.62))
+                        Image(systemName: "globe.europe.africa.fill").foregroundColor(Theme.Colors.textPrimary).frame(width: 24)
+                        Text("country.country".localized).foregroundColor(JourneyVisual.secondaryText)
                         Spacer()
-                        HStack(spacing: 6) { Text(selectedCanton.flag).font(.system(size: 18)); Text(selectedCanton.localizedName).foregroundColor(.white) }
-                        Image(systemName: "chevron.right").foregroundColor(.white.opacity(0.34))
+                        Text("\(selectedCountry.flag) \(selectedCountry.name)").foregroundColor(JourneyVisual.primaryText)
+                        Image(systemName: "chevron.right").foregroundColor(JourneyVisual.secondaryText)
                     }
                     .padding(14)
-                    .background(Color.white.opacity(0.07))
+                    .background(Theme.Colors.card)
                     .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-                    .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.white.opacity(0.1), lineWidth: 1))
+                    .overlay(RoundedRectangle(cornerRadius: 14).stroke(JourneyVisual.softBorder, lineWidth: 1))
+                }
+
+                Button { showCantonPicker = true } label: {
+                    HStack {
+                        Image(systemName: "building.2").foregroundColor(Theme.Colors.textPrimary).frame(width: 24)
+                        Text(selectedCountry.subdivisionTitle).foregroundColor(JourneyVisual.secondaryText)
+                        Spacer()
+                        Text(CountryCatalog.subdivisionName(country: selectedCountry, code: selectedSubdivisionCode)).foregroundColor(JourneyVisual.primaryText)
+                        Image(systemName: "chevron.right").foregroundColor(JourneyVisual.secondaryText)
+                    }
+                    .padding(14)
+                    .background(Theme.Colors.card)
+                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 14).stroke(JourneyVisual.softBorder, lineWidth: 1))
                 }.buttonStyle(.plain)
                 
                 Button { showPermitPicker = true } label: {
                     HStack {
-                        Image(systemName: "doc.badge.gearshape").foregroundColor(selectedPermitType.color).frame(width: 24)
-                        Text("calculator.permit_type".localized).foregroundColor(.white.opacity(0.62))
+                        Image(systemName: "doc.badge.gearshape").foregroundColor(Theme.Colors.textPrimary).frame(width: 24)
+                        Text("country.status".localized).foregroundColor(JourneyVisual.secondaryText)
                         Spacer()
-                        HStack(spacing: 6) {
-                            Text(selectedPermitType.rawValue)
-                                .font(.system(size: 13, weight: .bold))
-                                .foregroundColor(.white)
-                                .padding(.horizontal, 8).padding(.vertical, 4)
-                                .background(selectedPermitType.color).cornerRadius(6)
-                            Text(selectedPermitType.shortName).foregroundColor(.white)
-                        }
-                        Image(systemName: "chevron.right").foregroundColor(.white.opacity(0.34))
+                        Text(CountryCatalog.statuses(for: selectedCountry).first(where: { $0.code == selectedResidenceStatusCode })?.title ?? selectedResidenceStatusCode)
+                            .foregroundColor(JourneyVisual.primaryText)
+                            .lineLimit(1)
+                        Image(systemName: "chevron.right").foregroundColor(JourneyVisual.secondaryText)
                     }
                     .padding(14)
-                    .background(Color.white.opacity(0.07))
+                    .background(Theme.Colors.card)
                     .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-                    .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.white.opacity(0.1), lineWidth: 1))
+                    .overlay(RoundedRectangle(cornerRadius: 14).stroke(JourneyVisual.softBorder, lineWidth: 1))
                 }.buttonStyle(.plain)
             }
         }
@@ -1965,17 +2097,17 @@ struct ProfileEditView: View {
                 HStack(alignment: .top) {
                     VStack(spacing: 8) {
                         ZStack { Circle().fill(Color.green).frame(width: 16, height: 16); Circle().fill(.white).frame(width: 6, height: 6) }
-                        Text("settings.profile.arrival".localized).font(.system(size: 11, weight: .medium)).foregroundColor(.white.opacity(0.58))
+                        Text("settings.profile.arrival".localized).font(.system(size: 11, weight: .medium)).foregroundColor(JourneyVisual.secondaryText)
                         Text(arrivalDate.formatted(.dateTime.day().month(.abbreviated))).font(.system(size: 13, weight: .semibold))
-                            .foregroundColor(.white)
+                            .foregroundColor(JourneyVisual.primaryText)
                     }.frame(maxWidth: .infinity)
                     VStack { Rectangle().fill(LinearGradient(colors: [.green, permitStatusColor], startPoint: .leading, endPoint: .trailing)).frame(height: 3).cornerRadius(2) }
                         .frame(maxWidth: .infinity).padding(.top, 6)
                     VStack(spacing: 8) {
                         ZStack { Circle().fill(permitStatusColor).frame(width: 16, height: 16); Circle().fill(.white).frame(width: 6, height: 6) }
-                        Text("settings.profile.expiry".localized).font(.system(size: 11, weight: .medium)).foregroundColor(.white.opacity(0.58))
+                        Text("settings.profile.expiry".localized).font(.system(size: 11, weight: .medium)).foregroundColor(JourneyVisual.secondaryText)
                         Text(permitExpiry.formatted(.dateTime.day().month(.abbreviated).year())).font(.system(size: 13, weight: .semibold))
-                            .foregroundColor(.white)
+                            .foregroundColor(JourneyVisual.primaryText)
                     }.frame(maxWidth: .infinity)
                 }
                 HStack(spacing: 8) {
@@ -1987,7 +2119,7 @@ struct ProfileEditView: View {
                 .background(permitStatusColor.opacity(0.15)).cornerRadius(10)
                 HStack(spacing: 12) {
                     DatePicker("", selection: $arrivalDate, displayedComponents: .date).labelsHidden().datePickerStyle(.compact).scaleEffect(0.9)
-                    Text("→").foregroundColor(.white.opacity(0.42))
+                    Text("→").foregroundColor(JourneyVisual.secondaryText)
                     DatePicker("", selection: $permitExpiry, displayedComponents: .date).labelsHidden().datePickerStyle(.compact).scaleEffect(0.9)
                 }
             }
@@ -1997,32 +2129,32 @@ struct ProfileEditView: View {
         ProfileSectionCard(icon: "figure.2.and.child.holdinghands", title: "checklist.category.family".localized, color: .pink) {
             VStack(spacing: 16) {
                 HStack {
-                    Text("settings.profile.family_size".localized).foregroundColor(.white.opacity(0.62))
+                    Text("settings.profile.family_size".localized).foregroundColor(JourneyVisual.secondaryText)
                     Spacer()
                     HStack(spacing: 0) {
                         Button { if familySize > 1 { familySize -= 1 } } label: { Image(systemName: "minus").frame(width: 36, height: 36) }
                             .disabled(familySize <= 1)
                         Divider().frame(height: 20)
                         Text("\(familySize)")
-                            .font(.system(size: 16, weight: .bold, design: .rounded))
+                            .font(.system(size: 16, weight: .bold, design: .default))
                             .frame(width: 38)
                         Divider().frame(height: 20)
                         Button { if familySize < 20 { familySize += 1 } } label: { Image(systemName: "plus").frame(width: 36, height: 36) }
                     }
-                    .foregroundColor(.white)
-                    .background(Color.white.opacity(0.08)).cornerRadius(10)
+                    .foregroundColor(JourneyVisual.primaryText)
+                    .background(Theme.Colors.card).cornerRadius(10)
                 }
                 HStack {
                     HStack(spacing: 10) {
                         Image(systemName: hasChildren ? "figure.and.child.holdinghands" : "figure.2")
-                            .foregroundColor(hasChildren ? JourneyVisual.lime : .white.opacity(0.42)).frame(width: 24)
-                        Text("settings.profile.has_children".localized).foregroundColor(.white)
+                            .foregroundColor(hasChildren ? Theme.Colors.textPrimary : JourneyVisual.secondaryText).frame(width: 24)
+                        Text("settings.profile.has_children".localized).foregroundColor(JourneyVisual.primaryText)
                     }
                     Spacer()
                     Toggle("", isOn: $hasChildren).labelsHidden().tint(JourneyVisual.lime)
                 }
-                .padding(14).background(Color.white.opacity(0.07)).cornerRadius(14)
-                .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.white.opacity(0.1), lineWidth: 1))
+                .padding(14).background(Theme.Colors.card).cornerRadius(14)
+                .overlay(RoundedRectangle(cornerRadius: 14).stroke(JourneyVisual.softBorder, lineWidth: 1))
             }
         }
     }
@@ -2041,7 +2173,7 @@ struct ProfileEditView: View {
                 .font(.system(size: 16, weight: .semibold))
                 .frame(maxWidth: .infinity)
                 .frame(height: 54)
-                .foregroundColor(hasChanges ? .black : .white.opacity(0.42))
+                .foregroundColor(hasChanges ? .black : JourneyVisual.secondaryText)
                 .background(hasChanges ? JourneyVisual.lime : Color.white.opacity(0.09))
                 .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
                 .overlay(
@@ -2054,31 +2186,33 @@ struct ProfileEditView: View {
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
         .background(.ultraThinMaterial.opacity(0.92))
-        .background(Color.black.opacity(0.72))
+        .background(Theme.Colors.card)
     }
     
     // MARK: - Sheets
     private var cantonPickerSheet: some View {
         NavigationStack {
             List {
-                ForEach(Canton.sortedByName, id: \.self) { canton in
+                ForEach(CountryCatalog.subdivisions(for: selectedCountry)) { area in
                     Button {
-                        selectedCanton = canton
+                        selectedSubdivisionCode = area.code
+                        if selectedCountry == .switzerland {
+                            selectedCanton = Canton(rawValue: area.code) ?? .zurich
+                        }
                         showCantonPicker = false
                     } label: {
                         HStack(spacing: 12) {
-                            Text(canton.flag).font(.system(size: 22))
                             VStack(alignment: .leading, spacing: 2) {
-                                Text(canton.localizedName).foregroundColor(Theme.Colors.textPrimary)
-                                Text(canton.rawValue).font(.caption).foregroundColor(Theme.Colors.textTertiary)
+                                Text(area.name).foregroundColor(Theme.Colors.textPrimary)
+                                Text(area.code).font(.caption).foregroundColor(Theme.Colors.textTertiary)
                             }
                             Spacer()
-                            if selectedCanton == canton { Image(systemName: "checkmark.circle.fill").foregroundColor(.green) }
+                            if selectedSubdivisionCode == area.code { Image(systemName: "checkmark.circle.fill").foregroundColor(.green) }
                         }
                     }.buttonStyle(.plain)
                 }
             }
-            .navigationTitle("marketplace.select_canton".localized)
+            .navigationTitle(selectedCountry.subdivisionTitle)
             .toolbar { ToolbarItem(placement: .navigationBarTrailing) { Button("common.done".localized) { showCantonPicker = false } } }
         }
         .presentationDetents([.medium, .large])
@@ -2086,29 +2220,32 @@ struct ProfileEditView: View {
     private var permitPickerSheet: some View {
         NavigationStack {
             List {
-                ForEach(PermitType.allCases, id: \.self) { permit in
+                ForEach(CountryCatalog.statuses(for: selectedCountry)) { status in
                     Button {
-                        selectedPermitType = permit
+                        selectedResidenceStatusCode = status.code
+                        if selectedCountry == .switzerland {
+                            selectedPermitType = PermitType(rawValue: status.code) ?? .other
+                        }
                         showPermitPicker = false
                     } label: {
                         HStack(spacing: 14) {
-                            Text(permit.rawValue)
+                            Text(status.code == "temporary_protection_24" ? "§24" : String(status.title.prefix(3)))
                                 .font(.system(size: 14, weight: .bold))
-                                .foregroundColor(.white)
+                                .foregroundColor(JourneyVisual.primaryText)
                                 .frame(width: 34, height: 34)
-                                .background(permit.color)
+                                .background(JourneyVisual.lime.opacity(0.72))
                                 .cornerRadius(8)
                             VStack(alignment: .leading, spacing: 2) {
-                                Text(permit.localizedName).foregroundColor(Theme.Colors.textPrimary)
-                                Text(permit.description).font(.caption).foregroundColor(Theme.Colors.textSecondary).lineLimit(2)
+                                Text(status.title).foregroundColor(Theme.Colors.textPrimary)
+                                Text(status.detail).font(.caption).foregroundColor(Theme.Colors.textSecondary).lineLimit(2)
                             }
                             Spacer()
-                            if selectedPermitType == permit { Image(systemName: "checkmark.circle.fill").foregroundColor(.green) }
+                            if selectedResidenceStatusCode == status.code { Image(systemName: "checkmark.circle.fill").foregroundColor(.green) }
                         }
                     }.buttonStyle(.plain)
                 }
             }
-            .navigationTitle("calculator.permit_type".localized)
+            .navigationTitle("country.residence_status".localized)
             .toolbar { ToolbarItem(placement: .navigationBarTrailing) { Button("common.done".localized) { showPermitPicker = false } } }
         }
         .presentationDetents([.medium])
@@ -2120,6 +2257,9 @@ struct ProfileEditView: View {
             fullName = profile.fullName
             email = profile.email ?? ""
             phoneNumber = profile.phoneNumber ?? ""
+            selectedCountry = profile.country
+            selectedSubdivisionCode = profile.administrativeAreaCode
+            selectedResidenceStatusCode = profile.residenceStatusCode
             selectedCanton = profile.canton
             selectedPermitType = profile.permitType
             arrivalDate = profile.arrivalDate ?? Date()
@@ -2132,9 +2272,13 @@ struct ProfileEditView: View {
     }
     private func saveProfile() {
         var profile = appContainer.userProfile ?? UserProfile()
+        let countryChanged = profile.country != selectedCountry
         profile.fullName = fullName
         profile.email = email
         profile.phoneNumber = phoneNumber
+        profile.country = selectedCountry
+        profile.administrativeAreaCode = selectedSubdivisionCode
+        profile.residenceStatusCode = selectedResidenceStatusCode
         profile.canton = selectedCanton
         profile.permitType = selectedPermitType
         profile.arrivalDate = arrivalDate
@@ -2144,6 +2288,8 @@ struct ProfileEditView: View {
         profile.hasChildren = hasChildren
         profile.preferredLanguage = appContainer.currentLocale.identifier
         appContainer.userProfile = profile
+        // First-week steps are country-specific; regenerate only on an explicit country change.
+        if countryChanged { appContainer.firstWeekService.generateTasks(for: profile) }
         LiveActivitiesManager.shared.updatePermitDeadline(profile.permitExpiryDate)
         if let next = appContainer.firstWeekService.nextDueTask {
             LiveActivitiesManager.shared.updateNextTask(.init(title: next.title, dueDate: next.dueDate))
@@ -2211,7 +2357,7 @@ private struct WinterQuickStat: View {
         HStack(spacing: 4) {
             Image(systemName: icon)
                 .font(.system(size: 10, weight: .semibold))
-                .foregroundColor(Theme.Colors.primary)
+                .foregroundColor(JourneyVisual.accentStrong)
             Text(value)
                 .font(.system(size: 12, weight: .bold))
                 .foregroundColor(colorScheme == .dark ? .white : Theme.Colors.textPrimary)
@@ -2275,7 +2421,7 @@ private struct GoalChipButton: View {
                 
                 Text(goal.localizedName)
                     .font(.system(size: 13, weight: .medium))
-                    .foregroundColor(isSelected ? .black : .white)
+                    .foregroundColor(isSelected ? .black : JourneyVisual.primaryText)
                     .lineLimit(2)
                     .minimumScaleFactor(0.8)
                 
@@ -2324,8 +2470,8 @@ private struct ProfileSectionCard<Content: View>: View {
                     .background(JourneyVisual.lime)
                     .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                 Text(title)
-                    .font(.system(size: 16, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
+                    .font(.system(size: 16, weight: .bold, design: .default))
+                    .foregroundColor(JourneyVisual.primaryText)
             }
             content
         }
@@ -2349,7 +2495,7 @@ private struct ProfileTextField: View {
                     .frame(width: 24)
                 TextField(placeholder, text: $text)
                     .font(.system(size: 15))
-                    .foregroundColor(.white)
+                    .foregroundColor(JourneyVisual.primaryText)
                     .keyboardType(keyboardType)
                     .autocapitalization(keyboardType == .emailAddress ? .none : .words)
                 if !text.isEmpty {
@@ -2359,7 +2505,7 @@ private struct ProfileTextField: View {
                 }
             }
             .padding(14)
-            .background(Color.white.opacity(0.07))
+            .background(Theme.Colors.card)
             .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: 14, style: .continuous)
@@ -2392,7 +2538,7 @@ private struct WinterSectionCard<Content: View>: View {
             HStack(spacing: 10) {
                 Image(systemName: icon)
                     .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(.white)
+                    .foregroundColor(JourneyVisual.primaryText)
                     .frame(width: 28, height: 28)
                     .background(
                         LinearGradient(
@@ -2814,7 +2960,6 @@ private struct BadgePill: View {
             .background(Color.yellow)
             .foregroundColor(.black)
             .cornerRadius(16)
-            .shadow(color: Color.black.opacity(0.2), radius: 6, x: 0, y: 2)
     }
 }
 
@@ -2825,14 +2970,14 @@ private struct StatusChip: View {
         Text(text)
             .font(Theme.Typography.caption2)
             .fontWeight(.semibold)
-            .foregroundColor(.white)
+            .foregroundColor(JourneyVisual.primaryText)
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
             .background(
                 Capsule().fill(color.opacity(0.25))
             )
             .overlay(
-                Capsule().stroke(Color.white.opacity(0.2), lineWidth: 1)
+                Capsule().stroke(JourneyVisual.softBorder, lineWidth: 1)
             )
     }
 }
@@ -2845,17 +2990,17 @@ private struct PlanChip: View {
         HStack(spacing: 6) {
             Image(systemName: icon)
                 .font(.system(size: 10, weight: .bold))
-                .foregroundColor(.white)
+                .foregroundColor(JourneyVisual.primaryText)
                 .opacity(color == .yellow ? 0.9 : 0.8)
             Text(text)
                 .font(Theme.Typography.caption2)
                 .fontWeight(.semibold)
-                .foregroundColor(.white)
+                .foregroundColor(JourneyVisual.primaryText)
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 4)
         .background(Capsule().fill(color.opacity(0.25)))
-        .overlay(Capsule().stroke(Color.white.opacity(0.2), lineWidth: 1))
+        .overlay(Capsule().stroke(JourneyVisual.softBorder, lineWidth: 1))
     }
 }
 
@@ -2940,7 +3085,9 @@ private struct EditorialSettingsPanelModifier: ViewModifier {
         content
             .background(
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .fill(Theme.Colors.adaptiveCard)
+                    .fill(Theme.Colors.card)
+                    // Shadow belongs to the plate only; on the whole view it haloed every label.
+                    .shadow(color: .black.opacity(colorScheme == .dark ? 0.24 : 0.07), radius: 14, y: 8)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
@@ -2955,7 +3102,6 @@ private struct EditorialSettingsPanelModifier: ViewModifier {
                         lineWidth: 1
                     )
             )
-            .shadow(color: .black.opacity(colorScheme == .dark ? 0.24 : 0.09), radius: 14, y: 8)
     }
 }
 

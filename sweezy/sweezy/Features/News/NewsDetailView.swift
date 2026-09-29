@@ -47,7 +47,7 @@ struct NewsDetailView: View, Identifiable {
             .padding(Theme.Spacing.lg)
         }
         .background(Color.clear)
-        .navigationTitle("Новина")
+        .navigationTitle("Новина".localized)
         .navigationBarTitleDisplayMode(.inline)
         .featureOnboarding(.news)
         .journeyScreen(.city, darkness: 0.72)

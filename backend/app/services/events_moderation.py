@@ -21,8 +21,10 @@ async def moderate_event_listing(event_id: str) -> tuple[str, str | None]:
             from openai import AsyncOpenAI
 
             client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
+            country_names = {"CH": "Швейцарії", "DE": "Німеччині", "AT": "Австрії"}
+            country_name = country_names.get((event.country_code or "CH").upper(), "обраній країні")
             prompt = f"""
-Перевір подію для дошки спільноти іммігрантів у Швейцарії.
+Перевір подію для дошки спільноти іммігрантів у {country_name}.
 
 Назва: {event.title}
 Опис: {event.description}
@@ -36,7 +38,7 @@ async def moderate_event_listing(event_id: str) -> tuple[str, str | None]:
 - шахрайство або підозрілий контент
 - ненависницький або образливий контент
 - незаконна подія або небезпечний контент
-- подія нерелевантна для життя, інтеграції або спільноти у Швейцарії
+- подія нерелевантна для життя, інтеграції або спільноти у {country_name}
 
 Відповідь тільки JSON:
 {{"decision":"approved"|"rejected","reason":"..."|null}}

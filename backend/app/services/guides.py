@@ -12,8 +12,15 @@ from .official_sources import validate_publishable_source
 
 class GuideService:
     @staticmethod
-    def list(db: Session, *, offset: int = 0, limit: int = 100, status: str | None = None, include_drafts: bool = False) -> List[Guide]:
+    def list(
+        db: Session, *, offset: int = 0, limit: int = 100,
+        status: str | None = None, include_drafts: bool = False,
+        country_code: str = "CH", language: str | None = None,
+    ) -> List[Guide]:
         stmt = select(Guide)
+        stmt = stmt.where(Guide.country_code == country_code)
+        if language:
+            stmt = stmt.where(Guide.language == language)
         if status:
             stmt = stmt.where(getattr(Guide, "status", None) == status)  # type: ignore[attr-defined]
         elif not include_drafts:
@@ -70,4 +77,3 @@ class GuideService:
     def delete(db: Session, guide: Guide) -> None:
         db.delete(guide)
         db.commit()
-

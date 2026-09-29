@@ -11,7 +11,7 @@ struct SubtleParticlesOverlay: View {
             if reduceMotion || ProcessInfo.processInfo.isLowPowerModeEnabled {
                 Color.clear
             } else {
-                TimelineView(.animation) { timeline in
+                TimelineView(.periodic(from: .now, by: 1.0 / 30.0)) { timeline in
                     GeometryReader { geo in
                         let t = timeline.date.timeIntervalSinceReferenceDate
                         ZStack {
@@ -37,5 +37,4 @@ struct SubtleParticlesOverlay: View {
         }
     }
 }
-
 

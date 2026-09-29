@@ -173,7 +173,7 @@ struct EditListingView: View {
             HStack(spacing: 10) {
                 if isSaving {
                     ProgressView()
-                        .tint(.white)
+                        .tint(JourneyVisual.primaryText)
                 } else {
                     Image(systemName: "square.and.arrow.down.fill")
                 }
@@ -190,7 +190,7 @@ struct EditListingView: View {
                     endPoint: .trailing
                 )
             )
-            .foregroundColor(.white)
+            .foregroundColor(JourneyVisual.primaryText)
             .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
             .shadow(color: Theme.Colors.primary.opacity(0.3), radius: 14, y: 8)
         }
@@ -202,7 +202,7 @@ struct EditListingView: View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 8) {
                 Image(systemName: icon)
-                    .foregroundColor(Theme.Colors.primary)
+                    .foregroundColor(JourneyVisual.accentStrong)
                 Text(title)
                     .font(.headline)
                     .foregroundColor(Theme.Colors.textPrimary)

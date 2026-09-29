@@ -91,7 +91,7 @@ struct GlassCard<Content: View>: View {
                             .fill(Theme.Colors.primary.opacity(0.15))
                             .frame(width: 50, height: 50)
                         Image(systemName: "star.fill")
-                            .foregroundColor(Theme.Colors.accent)
+                            .foregroundColor(JourneyVisual.accentStrong)
                             .font(.system(size: 24))
                     }
                     VStack(alignment: .leading, spacing: 4) {

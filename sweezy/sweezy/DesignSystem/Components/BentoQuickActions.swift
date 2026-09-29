@@ -173,7 +173,7 @@ private struct BentoFeaturedCard: View {
                     
                     // Title
                     Text(item.title)
-                        .font(.system(size: 20, weight: .bold, design: .rounded))
+                        .font(.system(size: 20, weight: .bold, design: .default))
                         .foregroundColor(Theme.Colors.textPrimary)
                         .lineLimit(2)
                         .opacity(item.isLocked ? 0.6 : 1)
@@ -192,13 +192,13 @@ private struct BentoFeaturedCard: View {
                         HStack(spacing: 6) {
                             Image(systemName: "lock.fill")
                                 .font(.system(size: 11, weight: .bold))
-                            Text("Скоро")
+                            Text("Скоро".localized)
                                 .font(.system(size: 13, weight: .semibold))
                         }
                         .foregroundColor(Color.gray)
                     } else {
                         HStack(spacing: 6) {
-                            Text("Перейти")
+                            Text("Перейти".localized)
                                 .font(.system(size: 13, weight: .semibold))
                             Image(systemName: "arrow.right")
                                 .font(.system(size: 11, weight: .bold))
@@ -330,7 +330,7 @@ private struct BentoCompactCard: View {
                     
                     // Title - адаптивний текст
                     Text(item.title)
-                        .font(.system(size: 13, weight: .semibold, design: .rounded))
+                        .font(.system(size: 13, weight: .semibold, design: .default))
                         .foregroundColor(Theme.Colors.textPrimary)
                         .lineLimit(2)
                         .minimumScaleFactor(0.75)

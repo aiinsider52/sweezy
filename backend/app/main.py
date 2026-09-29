@@ -40,6 +40,7 @@ from .routers.translations import router as translations_router
 from .routers.subscriptions import router as subscriptions_router
 from .routers.telemetry import router as telemetry_router
 from .routers.legal import router as legal_router
+from .routers.country_context import router as country_context_router
 from .routers.marketplace import router as marketplace_router
 from .routers.marketplace import admin_router as marketplace_admin_router
 from .routers.events import router as events_router
@@ -53,6 +54,8 @@ from .routers.chat import admin_router as chat_admin_router
 from .routers.chat import devices_router
 from .routers.discovery import router as discovery_router
 from .routers.discovery import admin_router as discovery_admin_router
+from .routers.place_suggestions import router as place_suggestions_router
+from .routers.place_suggestions import admin_router as place_suggestions_admin_router
 from .routers.incidents import router as incidents_router
 from .routers.network import router as network_router
 from .routers.social import router as social_router
@@ -428,6 +431,7 @@ def ready_head() -> None:
 # Routers (versioned)
 API_PREFIX = "/api/v1"
 app.include_router(auth_router, prefix=f"{API_PREFIX}/auth", tags=["auth"])
+app.include_router(country_context_router, prefix=f"{API_PREFIX}/country-context", tags=["country-context"])
 app.include_router(guides_router, prefix=f"{API_PREFIX}/guides", tags=["guides"])
 app.include_router(checklists_router, prefix=f"{API_PREFIX}/checklists", tags=["checklists"])
 app.include_router(templates_router, prefix=f"{API_PREFIX}/templates", tags=["templates"])
@@ -459,6 +463,8 @@ app.include_router(chat_admin_router, prefix=f"{API_PREFIX}/admin", tags=["admin
 app.include_router(devices_router, prefix=f"{API_PREFIX}/devices", tags=["devices"])
 app.include_router(discovery_router, prefix=f"{API_PREFIX}/discovery", tags=["discovery"])
 app.include_router(discovery_admin_router, prefix=f"{API_PREFIX}/admin", tags=["admin", "discovery"])
+app.include_router(place_suggestions_router, prefix=f"{API_PREFIX}/places", tags=["places"])
+app.include_router(place_suggestions_admin_router, prefix=f"{API_PREFIX}/admin", tags=["admin", "places"])
 app.include_router(network_router, prefix=f"{API_PREFIX}/network", tags=["network"])
 app.include_router(social_router, prefix=f"{API_PREFIX}/friends", tags=["friends"])
 app.include_router(moderation_admin_router, prefix=f"{API_PREFIX}/admin", tags=["admin", "reports-safety"])

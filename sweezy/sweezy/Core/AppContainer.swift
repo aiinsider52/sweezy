@@ -173,6 +173,7 @@ class AppContainer: ObservableObject {
         
         // Load the protected, account-scoped profile (with one-time soft migration).
         loadUserProfileForCurrentScope()
+        configureCountryScope(userProfile)
         lifeAdmin.prepareDocuments(for: userProfile)
         
         setupBindings()
@@ -215,7 +216,8 @@ class AppContainer: ObservableObject {
         
         // Save profile changes
         $userProfile
-            .sink { profile in
+            .sink { [weak self] profile in
+                guard let self else { return }
                 if let profile,
                    let data = try? JSONEncoder().encode(profile) {
                     try? ProtectedLocalStore.write(data, for: AccountScopedStorage.userProfileKey)
@@ -226,6 +228,10 @@ class AppContainer: ObservableObject {
                     )
                 }
                 self.lifeAdmin.prepareDocuments(for: profile)
+                self.configureCountryScope(profile)
+                if let profile, KeychainStore.get("access_token")?.isEmpty == false {
+                    Task { try? await APIClient.syncCountryContext(profile) }
+                }
             }
             .store(in: &cancellables)
 
@@ -261,6 +267,22 @@ class AppContainer: ObservableObject {
     func updateLocale(_ locale: Locale) {
         guard currentLocale.identifier != locale.identifier else { return }
         currentLocale = locale
+    }
+
+    private func configureCountryScope(_ profile: UserProfile?) {
+        let country = profile?.country ?? .switzerland
+        let subdivision = profile?.administrativeAreaCode ?? country.defaultSubdivisionCode
+        let language = profile?.preferredLanguage ?? currentLocale.identifier
+        let previousCountry = APIClient.countryCode
+        APIClient.configureCountry(country: country.rawValue, subdivision: subdivision, language: language)
+        _contentService?.configureCountry(country.rawValue)
+
+        // configureCountry clears the previous country's catalog, so reload it here;
+        // before the initial load there is nothing to replace yet.
+        guard previousCountry != APIClient.countryCode, hasStartedInitialContentLoad else { return }
+        Task { @MainActor [weak self] in
+            await self?.contentService.refreshContent()
+        }
     }
 
     private func startInitialContentLoadIfNeeded() {

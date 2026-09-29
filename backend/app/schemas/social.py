@@ -3,7 +3,9 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+
+from ..core.countries import normalize_country_code, normalize_subdivision_code
 
 Interest = Literal["hiking", "sports", "books", "music", "art", "food", "travel", "languages", "technology", "business", "family", "photography", "gaming", "wellness", "volunteering"]
 MeetupFormat = Literal["coffee", "walk", "activity", "event", "online", "family"]
@@ -14,7 +16,9 @@ AgeBand = Literal["18-24", "25-34", "35-44", "45-54", "55+"]
 class SocialProfileUpsert(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
     display_name: str = Field(min_length=2, max_length=100)
-    canton: str = Field(min_length=2, max_length=2)
+    canton: str | None = Field(default=None, min_length=1, max_length=10)
+    country_code: str = Field(default="CH", min_length=2, max_length=2)
+    subdivision_code: str | None = Field(default=None, min_length=1, max_length=10)
     city: str = Field(min_length=2, max_length=80)
     bio: str = Field(min_length=30, max_length=600)
     interests: list[Interest] = Field(min_length=2, max_length=10)
@@ -23,19 +27,23 @@ class SocialProfileUpsert(BaseModel):
     availability: list[Availability] = Field(default_factory=lambda: ["flexible"], min_length=1, max_length=4)
     age_band: AgeBand | None = None
     arrival_year: int | None = Field(default=None, ge=1950, le=2100)
-    latitude: float | None = Field(default=None, ge=45.7, le=47.9)
-    longitude: float | None = Field(default=None, ge=5.9, le=10.6)
+    latitude: float | None = Field(default=None, ge=45.0, le=56.0)
+    longitude: float | None = Field(default=None, ge=5.0, le=18.0)
     avatar_url: str | None = Field(default=None, max_length=1000)
     is_visible: bool = True
     open_to_friends: bool = True
     guidelines_accepted: bool
 
-    @field_validator("canton")
-    @classmethod
-    def canton_code(cls, value: str) -> str:
-        value = value.upper()
-        if not value.isalpha(): raise ValueError("Invalid canton")
-        return value
+    @model_validator(mode="after")
+    def normalize_scope(self):
+        self.country_code = normalize_country_code(self.country_code)
+        self.subdivision_code = normalize_subdivision_code(
+            self.country_code, self.subdivision_code or self.canton
+        )
+        if self.subdivision_code is None:
+            raise ValueError("subdivision_code is required")
+        self.canton = self.subdivision_code.split("-", 1)[-1]
+        return self
 
     @field_validator("languages")
     @classmethod
@@ -57,6 +65,8 @@ class SocialProfileResponse(BaseModel):
     user_id: str
     display_name: str
     canton: str
+    country_code: str = "CH"
+    subdivision_code: str
     city: str
     bio: str
     interests: list[str]
@@ -155,6 +165,8 @@ class SocialEventResponse(BaseModel):
     title: str
     category: str
     canton: str
+    country_code: str = "CH"
+    subdivision_code: str
     city: str
     starts_at: datetime
     is_free: bool

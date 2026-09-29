@@ -12,8 +12,15 @@ from .official_sources import validate_publishable_source
 
 class ChecklistService:
     @staticmethod
-    def list(db: Session, *, offset: int = 0, limit: int = 100, status: str | None = None, include_drafts: bool = False) -> List[Checklist]:
+    def list(
+        db: Session, *, offset: int = 0, limit: int = 100,
+        status: str | None = None, include_drafts: bool = False,
+        country_code: str = "CH", language: str | None = None,
+    ) -> List[Checklist]:
         stmt = select(Checklist)
+        stmt = stmt.where(Checklist.country_code == country_code)
+        if language:
+            stmt = stmt.where(Checklist.language == language)
         if status:
             stmt = stmt.where(getattr(Checklist, "status", None) == status)  # type: ignore[attr-defined]
         elif not include_drafts and hasattr(Checklist, "status"):
@@ -61,4 +68,3 @@ class ChecklistService:
     def delete(db: Session, checklist: Checklist) -> None:
         db.delete(checklist)
         db.commit()
-

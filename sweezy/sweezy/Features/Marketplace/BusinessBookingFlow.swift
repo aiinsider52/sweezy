@@ -25,7 +25,7 @@ struct BusinessBookingFlow: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color(red: 0.025, green: 0.035, blue: 0.028).ignoresSafeArea()
+                Theme.Colors.card.ignoresSafeArea()
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 24) {
                         hero
@@ -46,12 +46,12 @@ struct BusinessBookingFlow: View {
             }
             .navigationBarTitleDisplayMode(.inline)
             .task(id: "\(selectedServiceID)-\(selectedDay.timeIntervalSince1970)") { await loadSlots() }
-            .alert("Запис надіслано", isPresented: Binding(get: { booked != nil }, set: { if !$0 { booked = nil } })) {
-                Button("Готово") { dismiss() }
+            .alert("Запис надіслано".localized, isPresented: Binding(get: { booked != nil }, set: { if !$0 { booked = nil } })) {
+                Button("Готово".localized) { dismiss() }
             } message: {
-                Text("Бізнес отримав заявку. Після підтвердження статус оновиться у Sweezy.")
+                Text("Бізнес отримав заявку. Після підтвердження статус оновиться у Sweezy.".localized)
             }
-            .alert("Не вдалося записатися", isPresented: Binding(get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } })) {
+            .alert("Не вдалося записатися".localized, isPresented: Binding(get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } })) {
                 Button("OK") { errorMessage = nil }
             } message: { Text(errorMessage ?? "") }
         }
@@ -67,25 +67,25 @@ struct BusinessBookingFlow: View {
                     .background(JourneyVisual.lime, in: RoundedRectangle(cornerRadius: 17))
                 Spacer()
                 if profile.isVerified {
-                    Label("ПЕРЕВІРЕНО", systemImage: "checkmark.seal.fill")
+                    Label("ПЕРЕВІРЕНО".localized, systemImage: "checkmark.seal.fill")
                         .font(.caption2.bold())
-                        .foregroundStyle(JourneyVisual.lime)
+                        .foregroundStyle(Theme.Colors.textPrimary)
                 }
             }
-            Text("Записатися до\n\(profile.displayName)")
-                .font(.system(size: 34, weight: .black, design: .rounded))
-                .foregroundStyle(.white)
+            Text("Записатися до\n%@".localized(with: "\(profile.displayName)"))
+                .font(.system(size: 34, weight: .black, design: .default))
+                .foregroundStyle(JourneyVisual.primaryText)
                 .fixedSize(horizontal: false, vertical: true)
-            Text("Обери послугу та вільний час. Заявка потрапить прямо в календар бізнесу.")
+            Text("Обери послугу та вільний час. Заявка потрапить прямо в календар бізнесу.".localized)
                 .font(.subheadline)
-                .foregroundStyle(.white.opacity(0.58))
+                .foregroundStyle(JourneyVisual.secondaryText)
         }
         .padding(.top, 10)
     }
 
     @ViewBuilder private var servicePicker: some View {
         VStack(alignment: .leading, spacing: 12) {
-            sectionLabel("1 · Послуга")
+            sectionLabel("1 · Послуга".localized)
             ForEach(profile.services) { service in
                 Button {
                     selectedServiceID = service.id
@@ -93,10 +93,10 @@ struct BusinessBookingFlow: View {
                 } label: {
                     HStack(spacing: 13) {
                         Image(systemName: service.id == selectedServiceID ? "checkmark.circle.fill" : "circle")
-                            .foregroundStyle(service.id == selectedServiceID ? JourneyVisual.lime : .white.opacity(0.28))
+                            .foregroundStyle(service.id == selectedServiceID ? JourneyVisual.lime : JourneyVisual.primaryText)
                         VStack(alignment: .leading, spacing: 3) {
-                            Text(service.title).font(.headline).foregroundStyle(.white)
-                            Text("\(service.durationMinutes) хв · \(service.priceText)").font(.caption).foregroundStyle(.white.opacity(0.5))
+                            Text(service.title).font(.headline).foregroundStyle(JourneyVisual.primaryText)
+                            Text("%@ хв · %@".localized(with: "\(service.durationMinutes)", "\(service.priceText)")).font(.caption).foregroundStyle(JourneyVisual.secondaryText)
                         }
                         Spacer()
                     }
@@ -111,7 +111,7 @@ struct BusinessBookingFlow: View {
 
     private var dayPicker: some View {
         VStack(alignment: .leading, spacing: 12) {
-            sectionLabel("2 · День")
+            sectionLabel("2 · День".localized)
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 9) {
                     ForEach(nextDays, id: \.self) { day in
@@ -123,7 +123,7 @@ struct BusinessBookingFlow: View {
                                 Text(day.formatted(.dateTime.weekday(.abbreviated))).font(.caption2.bold())
                                 Text(day.formatted(.dateTime.day())).font(.title3.weight(.black))
                             }
-                            .foregroundStyle(Calendar.current.isDate(day, inSameDayAs: selectedDay) ? .black : .white)
+                            .foregroundStyle(Calendar.current.isDate(day, inSameDayAs: selectedDay) ? .black : JourneyVisual.primaryText)
                             .frame(width: 58, height: 66)
                             .background(Calendar.current.isDate(day, inSameDayAs: selectedDay) ? JourneyVisual.lime : .white.opacity(0.07), in: RoundedRectangle(cornerRadius: 17))
                         }
@@ -136,16 +136,16 @@ struct BusinessBookingFlow: View {
 
     private var slotPicker: some View {
         VStack(alignment: .leading, spacing: 12) {
-            sectionLabel("3 · Час")
+            sectionLabel("3 · Час".localized)
             if loading {
                 ProgressView().tint(JourneyVisual.lime).frame(maxWidth: .infinity).padding(24)
             } else if slots.isEmpty {
-                Text("На цей день вільних слотів немає.")
+                Text("На цей день вільних слотів немає.".localized)
                     .font(.subheadline)
-                    .foregroundStyle(.white.opacity(0.52))
+                    .foregroundStyle(JourneyVisual.secondaryText)
                     .frame(maxWidth: .infinity)
                     .padding(22)
-                    .background(.white.opacity(0.04), in: RoundedRectangle(cornerRadius: 18))
+                    .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 18))
             } else {
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 92), spacing: 9)], spacing: 9) {
                     ForEach(slots) { slot in
@@ -154,7 +154,7 @@ struct BusinessBookingFlow: View {
                         } label: {
                             Text(slot.startsAt.formatted(date: .omitted, time: .shortened))
                                 .font(.subheadline.bold())
-                                .foregroundStyle(selectedSlot == slot ? .black : .white)
+                                .foregroundStyle(selectedSlot == slot ? .black : JourneyVisual.primaryText)
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 46)
                                 .background(selectedSlot == slot ? JourneyVisual.lime : .white.opacity(0.07), in: Capsule())
@@ -168,12 +168,12 @@ struct BusinessBookingFlow: View {
 
     private var notesField: some View {
         VStack(alignment: .leading, spacing: 9) {
-            sectionLabel("4 · Коментар")
-            TextField("Що бізнесу варто знати?", text: $notes, axis: .vertical)
+            sectionLabel("4 · Коментар".localized)
+            TextField("Що бізнесу варто знати?".localized, text: $notes, axis: .vertical)
                 .lineLimit(3...6)
-                .foregroundStyle(.white)
+                .foregroundStyle(JourneyVisual.primaryText)
                 .padding(15)
-                .background(.white.opacity(0.07), in: RoundedRectangle(cornerRadius: 17))
+                .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 17))
         }
     }
 
@@ -182,17 +182,17 @@ struct BusinessBookingFlow: View {
             if let selectedSlot, let service = selectedService {
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text(service.title).font(.headline).foregroundStyle(.white)
-                        Text(selectedSlot.startsAt.formatted(date: .abbreviated, time: .shortened)).font(.caption).foregroundStyle(.white.opacity(0.55))
+                        Text(service.title).font(.headline).foregroundStyle(JourneyVisual.primaryText)
+                        Text(selectedSlot.startsAt.formatted(date: .abbreviated, time: .shortened)).font(.caption).foregroundStyle(JourneyVisual.secondaryText)
                     }
                     Spacer()
-                    Text(service.priceText).font(.caption.bold()).foregroundStyle(JourneyVisual.lime)
+                    Text(service.priceText).font(.caption.bold()).foregroundStyle(Theme.Colors.textPrimary)
                 }
             }
             Button { Task { await submit() } } label: {
                 HStack {
                     if submitting { ProgressView().tint(.black) }
-                    Text(submitting ? "Надсилаємо…" : "Підтвердити запис").font(.headline)
+                    Text(submitting ? "Надсилаємо…".localized : "Підтвердити запис".localized).font(.headline)
                     Spacer()
                     Image(systemName: "arrow.right")
                 }
@@ -205,13 +205,13 @@ struct BusinessBookingFlow: View {
             .buttonStyle(.plain)
             .disabled(selectedSlot == nil || submitting)
             .opacity(selectedSlot == nil ? 0.45 : 1)
-            Text("Запис підтверджує власник. Скасувати можна у Sweezy.")
+            Text("Запис підтверджує власник. Скасувати можна у Sweezy.".localized)
                 .font(.caption2)
-                .foregroundStyle(.white.opacity(0.38))
+                .foregroundStyle(JourneyVisual.secondaryText)
                 .multilineTextAlignment(.center)
         }
         .padding(16)
-        .background(.black.opacity(0.36), in: RoundedRectangle(cornerRadius: 22))
+        .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 22))
         .overlay(RoundedRectangle(cornerRadius: 22).stroke(JourneyVisual.lime.opacity(0.2)))
     }
 
@@ -226,7 +226,7 @@ struct BusinessBookingFlow: View {
     }
 
     private func sectionLabel(_ text: String) -> some View {
-        Text(text.uppercased()).font(.caption.bold()).tracking(1.5).foregroundStyle(JourneyVisual.lime)
+        Text(text.uppercased()).font(.caption.bold()).tracking(1.5).foregroundStyle(Theme.Colors.textPrimary)
     }
 
     private func loadSlots() async {

@@ -10,9 +10,9 @@ final class EventCalendarService: ObservableObject {
 
         var errorDescription: String? {
             switch self {
-            case .missingDate: return "Дата події не вказана"
-            case .denied: return "Доступ до календаря не надано"
-            case .noCalendar: return "Календар недоступний"
+            case .missingDate: return "Дата події не вказана".localized
+            case .denied: return "Доступ до календаря не надано".localized
+            case .noCalendar: return "Календар недоступний".localized
             }
         }
     }

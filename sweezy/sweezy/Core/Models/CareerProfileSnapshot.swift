@@ -47,13 +47,13 @@ struct CareerProfileSnapshot: Equatable {
     var nextMissingSection: String? {
         guard let resume else { return "CV" }
         if !hasText(resume.personal.fullName) || !hasText(resume.personal.email) && !hasText(resume.personal.phone) {
-            return "особисті дані"
+            return "особисті дані".localized
         }
-        if !hasText(resume.personal.title) { return "бажану посаду" }
-        if resume.personal.summary.trimmingCharacters(in: .whitespacesAndNewlines).count < 40 { return "професійний профіль" }
-        if !resume.experience.contains(where: { hasText($0.role) && hasText($0.company) }) { return "досвід роботи" }
-        if normalizedSkills.count < 3 { return "щонайменше 3 навички" }
-        if !resume.languages.contains(where: { hasText($0.name) && hasText($0.level) }) { return "мови" }
+        if !hasText(resume.personal.title) { return "бажану посаду".localized }
+        if resume.personal.summary.trimmingCharacters(in: .whitespacesAndNewlines).count < 40 { return "професійний профіль".localized }
+        if !resume.experience.contains(where: { hasText($0.role) && hasText($0.company) }) { return "досвід роботи".localized }
+        if normalizedSkills.count < 3 { return "щонайменше 3 навички".localized }
+        if !resume.languages.contains(where: { hasText($0.name) && hasText($0.level) }) { return "мови".localized }
         return nil
     }
 

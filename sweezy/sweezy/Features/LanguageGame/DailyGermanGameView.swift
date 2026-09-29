@@ -19,6 +19,9 @@ struct DailyGermanGameView: View {
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: Theme.Spacing.xl) {
+                // Sweezy with picture flashcards at a lakeside café: learning, not an exam.
+                StoryScene(name: "language", height: 180)
+                    .padding(.bottom, -Theme.Spacing.sm)
                 hero
                 board
                 clueCard
@@ -54,61 +57,40 @@ struct DailyGermanGameView: View {
 
     private var hero: some View {
         ZStack(alignment: .bottomLeading) {
-            LinearGradient(
-                colors: [
-                    Theme.Colors.primaryDark,
-                    Theme.Colors.primary,
-                    Theme.Colors.accent.opacity(0.88)
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-
-            Image(systemName: "textformat.abc")
-                .font(.system(size: 160, weight: .bold))
-                .foregroundColor(.white.opacity(0.07))
-                .offset(x: 120, y: 20)
-                .rotationEffect(.degrees(-10))
-
-            RadialGradient(
-                colors: [Theme.Colors.accentYellowSoft.opacity(0.45), .clear],
-                center: .topTrailing,
-                startRadius: 12,
-                endRadius: 220
-            )
+            Theme.Colors.card
 
             VStack(alignment: .leading, spacing: Theme.Spacing.md) {
                 HStack {
                     Label("daily_german.hero.badge".localized, systemImage: "flame.fill")
-                        .font(.system(size: 11, weight: .bold, design: .rounded))
+                        .font(.system(size: 11, weight: .bold, design: .default))
                         .tracking(1)
-                        .foregroundColor(.white.opacity(0.86))
+                        .foregroundColor(JourneyVisual.secondaryText)
                         .padding(.horizontal, 10)
                         .padding(.vertical, 6)
-                        .background(Capsule().fill(Color.white.opacity(0.16)))
+                        .background(Capsule().fill(JourneyVisual.softBorder))
                     Spacer()
                     Text(countdownText)
-                        .font(.system(size: 12, weight: .bold, design: .rounded))
-                        .foregroundColor(.white)
+                        .font(.system(size: 12, weight: .bold, design: .default))
+                        .foregroundColor(JourneyVisual.primaryText)
                         .padding(.horizontal, 10)
                         .padding(.vertical, 6)
-                        .background(Capsule().fill(Color.white.opacity(0.16)))
+                        .background(Capsule().fill(JourneyVisual.softBorder))
                 }
 
                 VStack(alignment: .leading, spacing: 8) {
                     Text("daily_german.hero.title".localized)
-                        .font(.system(size: 31, weight: .bold, design: .rounded))
-                        .foregroundColor(.white)
+                        .font(.system(size: 31, weight: .bold, design: .default))
+                        .foregroundColor(JourneyVisual.primaryText)
                     Text("daily_german.hero.subtitle".localized)
                         .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(.white.opacity(0.84))
+                        .foregroundColor(JourneyVisual.secondaryText)
                         .fixedSize(horizontal: false, vertical: true)
                 }
 
                 HStack(spacing: 10) {
-                    StatCapsule(icon: "square.grid.3x3.fill", value: "\(service.wordLength)", label: "daily_german.stat.letters".localized, color: Theme.Colors.accentYellowSoft)
-                    StatCapsule(icon: "target", value: "\(service.attemptsLeft)", label: "daily_german.stat.tries".localized, color: .white)
-                    StatCapsule(icon: "bolt.fill", value: "+20", label: "XP", color: Theme.Colors.accentYellowSoft)
+                    StatCapsule(icon: "square.grid.3x3.fill", value: "\(service.wordLength)", label: "daily_german.stat.letters".localized, color: JourneyVisual.primaryText)
+                    StatCapsule(icon: "target", value: "\(service.attemptsLeft)", label: "daily_german.stat.tries".localized, color: JourneyVisual.primaryText)
+                    StatCapsule(icon: "bolt.fill", value: "+20", label: "XP", color: JourneyVisual.primaryText)
                 }
             }
             .padding(Theme.Spacing.lg)
@@ -116,9 +98,8 @@ struct DailyGermanGameView: View {
         .clipShape(RoundedRectangle(cornerRadius: 30, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 30, style: .continuous)
-                .stroke(Color.white.opacity(0.18), lineWidth: 1)
+                .stroke(JourneyVisual.softBorder, lineWidth: 1)
         )
-        .shadow(color: Theme.Colors.primary.opacity(0.25), radius: 24, y: 14)
     }
 
     private var board: some View {
@@ -144,12 +125,12 @@ struct DailyGermanGameView: View {
         VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
             HStack {
                 Label("daily_german.clue.title".localized, systemImage: "lightbulb.fill")
-                    .font(.system(size: 14, weight: .bold, design: .rounded))
-                    .foregroundColor(Theme.Colors.accent)
+                    .font(.system(size: 14, weight: .bold, design: .default))
+                    .foregroundColor(JourneyVisual.primaryText)
                 Spacer()
                 Text("daily_german.clue.context".localized)
-                    .font(.system(size: 11, weight: .bold, design: .rounded))
-                    .foregroundColor(Theme.Colors.primary)
+                    .font(.system(size: 11, weight: .bold, design: .default))
+                    .foregroundColor(JourneyVisual.primaryText)
                     .padding(.horizontal, 9)
                     .padding(.vertical, 5)
                     .background(Capsule().fill(Theme.Colors.primary.opacity(0.12)))
@@ -218,7 +199,7 @@ struct DailyGermanGameView: View {
 
                     VStack(alignment: .leading, spacing: 4) {
                         Text(service.isSolved ? "daily_german.result.win_title".localized : "daily_german.result.lose_title".localized)
-                            .font(.system(size: 19, weight: .bold, design: .rounded))
+                            .font(.system(size: 19, weight: .bold, design: .default))
                             .foregroundColor(Theme.Colors.textPrimary)
                         Text(service.isSolved ? "daily_german.result.win_subtitle".localized : "daily_german.result.lose_subtitle".localized)
                             .font(.system(size: 13))
@@ -229,7 +210,7 @@ struct DailyGermanGameView: View {
 
                 VStack(alignment: .leading, spacing: 8) {
                     Text(service.puzzle.word)
-                        .font(.system(size: 28, weight: .black, design: .rounded))
+                        .font(.system(size: 28, weight: .black, design: .default))
                         .tracking(3)
                         .foregroundColor(resultColor)
                     Text(service.puzzle.meaningKey.localized)
@@ -241,7 +222,7 @@ struct DailyGermanGameView: View {
                         .fixedSize(horizontal: false, vertical: true)
                     Label(service.puzzle.contextKey.localized, systemImage: "mappin.and.ellipse")
                         .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(Theme.Colors.primary)
+                        .foregroundColor(JourneyVisual.primaryText)
                 }
                 .padding(Theme.Spacing.md)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -291,23 +272,26 @@ private struct DailyGermanTileView: View {
     let tile: DailyGermanTile
 
     var body: some View {
-        Text(tile.letter)
-            .font(.system(size: 25, weight: .black, design: .rounded))
-            .foregroundColor(foreground)
-            .frame(maxWidth: .infinity)
+        RoundedRectangle(cornerRadius: 12, style: .continuous)
+            .fill(background)
             .aspectRatio(1, contentMode: .fit)
-            .background(background)
+            .overlay {
+                Text(tile.letter)
+                    .font(.system(size: 25, weight: .bold))
+                    .foregroundColor(foreground)
+            }
             .overlay(
                 RoundedRectangle(cornerRadius: 12, style: .continuous)
                     .stroke(border, lineWidth: tile.letter.isEmpty ? 1 : 1.4)
             )
-            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 
     private var foreground: Color {
         switch tile.state {
-        case .correct, .present, .absent:
+        case .correct, .absent:
             return .white
+        case .present:
+            return .black
         case .empty:
             return Theme.Colors.textPrimary
         }
@@ -318,12 +302,12 @@ private struct DailyGermanTileView: View {
         case .correct: return Theme.Colors.success
         case .present: return Theme.Colors.accent
         case .absent: return Theme.Colors.textTertiary.opacity(0.55)
-        case .empty: return Theme.Colors.adaptiveSurface
+        case .empty: return Theme.Colors.card
         }
     }
 
     private var border: Color {
-        tile.letter.isEmpty ? Theme.Colors.adaptiveBorder : Theme.Colors.primary.opacity(0.28)
+        tile.letter.isEmpty ? JourneyVisual.softBorder : JourneyVisual.accentStrong.opacity(0.55)
     }
 }
 
@@ -336,7 +320,7 @@ private struct DailyGermanKeyButton: View {
     var body: some View {
         Button(action: action) {
             Text(title)
-                .font(.system(size: isWide ? 13 : 15, weight: .bold, design: .rounded))
+                .font(.system(size: isWide ? 13 : 15, weight: .bold, design: .default))
                 .foregroundColor(foreground)
                 .frame(maxWidth: isWide ? 120 : .infinity)
                 .frame(height: 46)
@@ -352,8 +336,10 @@ private struct DailyGermanKeyButton: View {
 
     private var foreground: Color {
         switch state {
-        case .correct, .present, .absent:
+        case .correct, .absent:
             return .white
+        case .present:
+            return .black
         case .empty:
             return Theme.Colors.textPrimary
         }
@@ -381,9 +367,9 @@ private struct StatCapsule: View {
                 .font(.system(size: 11, weight: .bold))
             VStack(alignment: .leading, spacing: 1) {
                 Text(value)
-                    .font(.system(size: 13, weight: .black, design: .rounded))
+                    .font(.system(size: 13, weight: .black, design: .default))
                 Text(label)
-                    .font(.system(size: 9, weight: .bold, design: .rounded))
+                    .font(.system(size: 9, weight: .bold, design: .default))
                     .tracking(0.6)
                     .opacity(0.72)
             }
@@ -392,11 +378,11 @@ private struct StatCapsule: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 10)
         .padding(.vertical, 8)
-        .background(Color.white.opacity(0.13))
+        .background(Theme.Colors.card)
         .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .stroke(Color.white.opacity(0.14), lineWidth: 0.8)
+                .stroke(JourneyVisual.softBorder, lineWidth: 0.8)
         )
     }
 }

@@ -308,7 +308,7 @@ struct GuidesContentView: View {
                     Spacer()
 
                     Text(guide.title)
-                        .font(.system(size: 21, weight: .bold, design: .rounded))
+                        .font(.system(size: 21, weight: .bold, design: .default))
                         .foregroundColor(.white)
                         .lineLimit(2)
 
@@ -456,7 +456,7 @@ struct GuideCardCompact: View {
                         if hasRelatedChecklist {
                             Label("+ чек-лист", systemImage: "checklist")
                                 .font(.system(size: 11))
-                                .foregroundColor(Theme.Colors.primary.opacity(0.8))
+                                .foregroundColor(JourneyVisual.accentText.opacity(0.8))
                         }
                     }
                 }
@@ -599,7 +599,7 @@ struct ChecklistsContentView: View {
 
                     VStack(spacing: 1) {
                         Text("\(percent)%")
-                            .font(.system(size: 20, weight: .bold, design: .rounded))
+                            .font(.system(size: 20, weight: .bold, design: .default))
                             .foregroundColor(.white)
                         Text("готово")
                             .font(.system(size: 10))
@@ -609,7 +609,7 @@ struct ChecklistsContentView: View {
 
                 VStack(alignment: .leading, spacing: 6) {
                     Text(isAllDone ? "Все виконано! 🏆" : "Ваш прогрес")
-                        .font(.system(size: 17, weight: .bold, design: .rounded))
+                        .font(.system(size: 17, weight: .bold, design: .default))
                         .foregroundColor(.white)
 
                     Text("\(progress.completed) з \(progress.total) завдань")

@@ -17,7 +17,6 @@ struct AuthEntryView: View {
     private let onComplete: (() -> Void)?
 
     @State private var activeDestination: AuthDestination?
-    @State private var animateIcon = false
     @State private var socialErrorMessage: String?
 
     init(
@@ -30,39 +29,56 @@ struct AuthEntryView: View {
 
     var body: some View {
         NavigationStack {
-            ZStack {
-                JourneyPhotoBackground(imageName: JourneyBackdrop.city.rawValue, blurRadius: 5, darkness: 0.62)
+            ZStack(alignment: .topTrailing) {
+                JourneyVisual.pageBackground.ignoresSafeArea()
 
                 ScrollView(showsIndicators: false) {
-                    VStack(spacing: 28) {
+                    VStack(alignment: .leading, spacing: 0) {
+                        JourneyMascotStage(
+                            pose: .welcome,
+                            stickers: [
+                                JourneyStageSticker(icon: "person.fill", title: "auth.entry.sticker.profile".localized, swatch: JourneyCategoryPalette.sky),
+                                JourneyStageSticker(icon: "chart.bar.fill", title: "auth.entry.sticker.progress".localized, swatch: JourneyCategoryPalette.lime),
+                                JourneyStageSticker(icon: "person.2.fill", title: "auth.entry.sticker.people".localized, swatch: JourneyCategoryPalette.coral)
+                            ],
+                            height: 212,
+                            mascotSize: 168
+                        )
+                        .padding(.top, showsCloseButton ? 58 : 16)
+
                         headerSection
-                            .padding(.top, 40)
+                            .padding(.top, 22)
 
                         benefitsSection
+                            .padding(.top, 20)
 
                         actionsSection
-
-                        Spacer(minLength: 40)
+                            .padding(.top, 22)
                     }
                     .padding(.horizontal, 20)
+                    .padding(.bottom, 32)
                 }
-            }
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
+
                 if showsCloseButton {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button {
-                            dismiss()
-                        } label: {
-                            Image(systemName: "xmark.circle.fill")
-                                .font(.title3)
-                                .foregroundStyle(.white.opacity(0.6))
-                        }
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundColor(JourneyVisual.primaryText)
+                            .frame(width: 40, height: 40)
+                            .background(Theme.Colors.card, in: Circle())
+                            .overlay(Circle().stroke(JourneyVisual.softBorder, lineWidth: 1))
                     }
+                    .buttonStyle(ScaleButtonStyle(scaleAmount: 0.94, hapticStyle: .light))
+                    .padding(.top, 10)
+                    .padding(.trailing, 18)
+                    .accessibilityLabel("common.close".localized)
+                    .accessibilityIdentifier("auth.entry.close")
                 }
             }
+            .toolbar(.hidden, for: .navigationBar)
         }
-        .journeyScreen(.city, darkness: 0.62)
         .environment(\.locale, appContainer.currentLocale)
         .sheet(item: $activeDestination) { destination in
             switch destination {
@@ -90,165 +106,84 @@ struct AuthEntryView: View {
                 dismiss()
             }
         }
-        .onAppear {
-            withAnimation(.easeOut(duration: 0.8).delay(0.2)) {
-                animateIcon = true
-            }
-        }
     }
 
     private var headerSection: some View {
-        VStack(spacing: 16) {
-            ZStack {
-                Circle()
-                    .fill(
-                        RadialGradient(
-                            colors: [Theme.Colors.primary.opacity(0.25), .clear],
-                            center: .center,
-                            startRadius: 0,
-                            endRadius: 70
-                        )
-                    )
-                    .frame(width: 140, height: 140)
-                    .scaleEffect(animateIcon ? 1.1 : 0.9)
-                    .animation(.easeInOut(duration: 2).repeatForever(autoreverses: true), value: animateIcon)
+        VStack(alignment: .leading, spacing: 8) {
+            Text("auth.entry.title")
+                .font(.system(size: 30, weight: .bold))
+                .foregroundColor(JourneyVisual.primaryText)
+                .fixedSize(horizontal: false, vertical: true)
 
-                Circle()
-                    .fill(
-                        LinearGradient(
-                            colors: [Theme.Colors.primary.opacity(0.3), Theme.Colors.primaryDark.opacity(0.2)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                    .frame(width: 90, height: 90)
-                    .overlay(
-                        Circle()
-                            .stroke(
-                                LinearGradient(
-                                    colors: [Theme.Colors.primary.opacity(0.6), Theme.Colors.primaryLight.opacity(0.3)],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                ),
-                                lineWidth: 2
-                            )
-                    )
-                    .scaleEffect(animateIcon ? 1 : 0.8)
-                    .opacity(animateIcon ? 1 : 0)
-
-                Image(systemName: "person.crop.circle.badge.plus")
-                    .font(.system(size: 40))
-                    .foregroundStyle(
-                        LinearGradient(
-                            colors: [Theme.Colors.primary, .white],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                    .scaleEffect(animateIcon ? 1 : 0.5)
-                    .opacity(animateIcon ? 1 : 0)
-            }
-
-            VStack(spacing: 8) {
-                Text("auth.entry.title")
-                    .font(.system(size: 30, weight: .bold))
-                    .foregroundColor(.white)
-
-                Text("auth.entry.subtitle")
-                    .font(.subheadline)
-                    .foregroundColor(.white.opacity(0.7))
-                    .multilineTextAlignment(.center)
-            }
-            .opacity(animateIcon ? 1 : 0)
-            .offset(y: animateIcon ? 0 : 20)
+            Text("auth.entry.subtitle")
+                .font(.system(size: 15, weight: .medium))
+                .foregroundColor(JourneyVisual.secondaryText)
+                .fixedSize(horizontal: false, vertical: true)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private var benefitsSection: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            Text("auth.entry.benefits_title")
-                .font(.headline)
-                .foregroundColor(.white)
-
-            benefitRow(icon: "person.text.rectangle", text: "auth.entry.benefit.profile")
-            benefitRow(icon: "arrow.triangle.2.circlepath", text: "auth.entry.benefit.sync")
-            benefitRow(icon: "star.circle.fill", text: "auth.entry.benefit.features")
+        VStack(spacing: 0) {
+            benefitRow(icon: "person.text.rectangle.fill", swatch: JourneyCategoryPalette.sky, text: "auth.entry.benefit.profile")
+            Divider().overlay(JourneyVisual.softBorder).padding(.leading, 50)
+            benefitRow(icon: "arrow.triangle.2.circlepath", swatch: JourneyCategoryPalette.teal, text: "auth.entry.benefit.sync")
+            Divider().overlay(JourneyVisual.softBorder).padding(.leading, 50)
+            benefitRow(icon: "star.fill", swatch: JourneyCategoryPalette.sand, text: "auth.entry.benefit.features")
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(22)
-        .background(
-            RoundedRectangle(cornerRadius: 24)
-                .fill(
-                    LinearGradient(
-                        colors: [
-                            Theme.Colors.darkBackground.opacity(0.96),
-                            Color(red: 0.13, green: 0.17, blue: 0.12).opacity(0.94)
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 24)
-                        .stroke(
-                            LinearGradient(
-                                colors: [Theme.Colors.primary.opacity(0.24), .white.opacity(0.06)],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            ),
-                            lineWidth: 1
-                        )
-                )
-        )
+        .padding(.horizontal, 14)
+        .padding(.vertical, 4)
+        .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(JourneyVisual.softBorder, lineWidth: 1))
+        .accessibilityElement(children: .contain)
     }
 
     private var actionsSection: some View {
-        VStack(spacing: 14) {
+        VStack(spacing: 12) {
             Button {
                 activeDestination = .register
             } label: {
-                Label("auth.entry.create_account", systemImage: "person.badge.plus")
-                    .font(.subheadline.weight(.semibold))
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-                    .background(
-                        LinearGradient(
-                            colors: [Theme.Colors.primary, Theme.Colors.primaryLight],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
-                    )
-                    .foregroundColor(.white)
-                    .cornerRadius(16)
-                    .shadow(color: Theme.Colors.primary.opacity(0.35), radius: 12, y: 6)
+                HStack {
+                    Text("auth.entry.create_account")
+                        .font(.headline)
+                    Spacer()
+                    Image(systemName: "arrow.right")
+                        .font(.system(size: 15, weight: .bold))
+                        .frame(width: 34, height: 34)
+                        .background(Color.black.opacity(0.08), in: Circle())
+                }
+                .foregroundColor(.black)
+                .padding(.leading, 20)
+                .padding(.trailing, 10)
+                .frame(height: 56)
+                .background(JourneyVisual.lime, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                .shadow(color: JourneyVisual.lime.opacity(0.35), radius: 14, y: 5)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(ScaleButtonStyle(scaleAmount: 0.98, hapticStyle: .medium))
             .accessibilityIdentifier("auth.entry.createAccount")
 
             Button {
                 activeDestination = .login
             } label: {
-                Label("auth.entry.sign_in", systemImage: "arrow.right.circle.fill")
-                    .font(.subheadline.weight(.semibold))
+                Text("auth.entry.sign_in")
+                    .font(.headline)
+                    .foregroundColor(JourneyVisual.primaryText)
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-                    .background(
+                    .frame(height: 52)
+                    .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .overlay(
                         RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .fill(Color.black.opacity(0.14))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                    .stroke(Color.white.opacity(0.10), lineWidth: 1)
-                            )
+                            .stroke(JourneyVisual.softBorder, lineWidth: 1)
                     )
-                    .foregroundColor(.white)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(ScaleButtonStyle(scaleAmount: 0.98))
             .accessibilityIdentifier("auth.entry.signIn")
 
             SocialAuthPanel(
                 errorMessage: $socialErrorMessage,
                 showsDivider: true
             )
+            .padding(.top, 6)
 
             if let socialErrorMessage {
                 Text(socialErrorMessage)
@@ -262,26 +197,32 @@ struct AuthEntryView: View {
                 onComplete?()
                 dismiss()
             } label: {
-                Text("auth.login.continue_as_guest")
-                    .font(.subheadline.weight(.medium))
-                    .foregroundColor(.white.opacity(0.78))
+                HStack(spacing: 6) {
+                    Text("auth.login.continue_as_guest")
+                    Image(systemName: "arrow.right")
+                        .font(.system(size: 12, weight: .bold))
+                }
+                .font(.subheadline.weight(.semibold))
+                .foregroundColor(JourneyVisual.secondaryText)
+                .frame(minHeight: Theme.Layout.minimumTouchTarget)
             }
             .buttonStyle(.plain)
-            .padding(.top, 4)
+            .padding(.top, 2)
             .accessibilityIdentifier("auth.entry.continueAsGuest")
         }
     }
 
-    private func benefitRow(icon: String, text: String) -> some View {
+    private func benefitRow(icon: String, swatch: JourneyCategorySwatch, text: String) -> some View {
         HStack(spacing: 12) {
-            Image(systemName: icon)
-                .font(.system(size: 16, weight: .semibold))
-                .foregroundColor(Theme.Colors.primary)
-                .frame(width: 22)
+            JourneyCategoryIcon(symbol: icon, swatch: swatch, size: 36)
 
             Text(LocalizedStringKey(text))
-                .font(.subheadline)
-                .foregroundColor(.white.opacity(0.88))
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundColor(JourneyVisual.primaryText)
+                .fixedSize(horizontal: false, vertical: true)
+
+            Spacer(minLength: 0)
         }
+        .padding(.vertical, 11)
     }
 }

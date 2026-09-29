@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
-import { LayoutDashboard, Users, BookOpenText, FileText, Activity, CheckSquare, Calendar, SlidersHorizontal, Newspaper, Rss, ListChecks, Languages, Briefcase, CreditCard, Store, CalendarDays, Sparkles, MessageCircleQuestion, ShieldAlert, Siren, BarChart3, ChevronDown, Building2, UserCheck } from 'lucide-react'
+import { LayoutDashboard, Users, BookOpenText, FileText, Activity, CheckSquare, Calendar, SlidersHorizontal, Newspaper, Rss, ListChecks, Languages, Briefcase, CreditCard, Store, CalendarDays, Sparkles, MessageCircleQuestion, ShieldAlert, Siren, BarChart3, ChevronDown, Building2, UserCheck, MapPinPlus } from 'lucide-react'
 
 const groups = [
   {
@@ -37,6 +37,7 @@ const groups = [
       { href: '/admin/marketplace', label: 'Marketplace', icon: Store },
       { href: '/admin/businesses', label: 'Sweezy Pro', icon: Building2 },
       { href: '/admin/profile-moderation', label: 'Social Passports', icon: UserCheck },
+      { href: '/admin/place-suggestions', label: 'Place suggestions', icon: MapPinPlus },
       { href: '/admin/appointments', label: 'Appointments', icon: Calendar },
       { href: '/admin/expert-questions', label: 'Expert Q&A', icon: MessageCircleQuestion },
       { href: '/admin/reports-safety', label: 'Reports & Safety', icon: ShieldAlert },

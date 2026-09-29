@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct JourneyMarketplaceView: View {
+    @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var appContainer: AppContainer
     @EnvironmentObject private var lockManager: AppLockManager
     @EnvironmentObject private var sessionManager: SessionManager
@@ -26,29 +27,22 @@ struct JourneyMarketplaceView: View {
     var body: some View {
         NavigationStack {
             ZStack(alignment: .bottomTrailing) {
-                LinearGradient(
-                    colors: [
-                        Color(UIColor { traits in
-                            traits.userInterfaceStyle == .dark
-                                ? UIColor(red: 0.12, green: 0.10, blue: 0.08, alpha: 1)
-                                : UIColor(red: 0.94, green: 0.91, blue: 0.84, alpha: 1)
-                        }),
-                        JourneyVisual.pageBackground,
-                        JourneyVisual.pageBackground
-                    ],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-                .ignoresSafeArea()
+                JourneyVisual.pageBackground.ignoresSafeArea()
 
                 ScrollView(showsIndicators: false) {
                     LazyVStack(alignment: .leading, spacing: 0) {
                         marketplaceHeader
+                            .journeyEntrance(delay: 0.02, distance: 8)
 
                         VStack(alignment: .leading, spacing: 16) {
                             MarketSearchField(text: searchBinding, prompt: searchPrompt)
+                                .journeyEntrance(delay: 0.06, distance: 8)
                             filters
+                                .journeyEntrance(delay: 0.10, distance: 8)
                             marketContent
+                                .id(selectedMode)
+                                .transition(.opacity.combined(with: .move(edge: .bottom)))
+                                .journeyEntrance(delay: 0.12)
                         }
                         .padding(.horizontal, 18)
                         .padding(.top, 16)
@@ -59,17 +53,16 @@ struct JourneyMarketplaceView: View {
                 .refreshable {
                     await refreshSelectedMode()
                 }
-                .tint(JourneyVisual.lime)
+                .tint(JourneyVisual.accentText)
 
                 Button(action: handleCreateTap) {
                     Image(systemName: "plus")
-                        .font(.system(size: 24, weight: .semibold))
-                        .foregroundColor(.white)
+                        .font(.system(size: 24, weight: .bold))
+                        .foregroundColor(.black)
                         .frame(width: 58, height: 58)
-                        .background(JourneyVisual.coral)
+                        .background(JourneyVisual.lime)
                         .clipShape(Circle())
-                        .overlay(Circle().stroke(.white.opacity(0.22), lineWidth: 1))
-                        .shadow(color: JourneyVisual.coral.opacity(0.38), radius: 18, y: 8)
+                        .shadow(color: JourneyVisual.lime.opacity(0.38), radius: 18, y: 8)
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel(createAccessibilityLabel)
@@ -174,50 +167,65 @@ struct JourneyMarketplaceView: View {
 
     private var marketplaceHeader: some View { marketHero }
 
+    /// The shop scene stays fully visible: heading on the calm sky at the upper left,
+    /// the mode selector below the artwork instead of a paper slab covering it.
     private var marketHero: some View {
-        ZStack(alignment: .bottomLeading) {
-            Image(heroImageName)
-                .resizable()
-                .scaledToFill()
-                .frame(maxWidth: .infinity)
-                .frame(height: 312)
-                .clipped()
+        VStack(alignment: .leading, spacing: 0) {
+            ZStack(alignment: .topLeading) {
+                CityScene(scene: "market", height: 300)
+
+                LinearGradient(
+                    stops: [
+                        .init(color: JourneyVisual.pageBackground.opacity(colorScheme == .dark ? 0.9 : 0.7), location: 0),
+                        .init(color: JourneyVisual.pageBackground.opacity(colorScheme == .dark ? 0.62 : 0.3), location: 0.55),
+                        .init(color: JourneyVisual.pageBackground.opacity(0), location: 1)
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .frame(height: colorScheme == .dark ? 230 : 190)
                 .allowsHitTesting(false)
 
-            LinearGradient(
-                colors: [.black.opacity(0.14), .black.opacity(0.26), JourneyVisual.black],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .allowsHitTesting(false)
+                VStack(spacing: 0) {
+                    Spacer()
+                    LinearGradient(
+                        colors: [JourneyVisual.pageBackground.opacity(0), JourneyVisual.pageBackground],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                    .frame(height: 96)
+                }
+                .allowsHitTesting(false)
 
-            VStack(alignment: .leading, spacing: 12) {
                 Text(heroTitle)
-                    .font(.system(size: 32, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
-                    .lineSpacing(-2)
+                    .font(.system(size: 28, weight: .bold, design: .default))
+                    .foregroundColor(JourneyVisual.primaryText)
+                    .lineSpacing(1)
                     .fixedSize(horizontal: false, vertical: true)
-                    .shadow(color: .black.opacity(0.5), radius: 12, y: 4)
+                    .shadow(color: JourneyVisual.pageBackground.opacity(0.9), radius: 12)
+                    .frame(maxWidth: 250, alignment: .leading)
+                    .padding(.top, 62)
+                    .padding(.horizontal, 18)
                     .allowsHitTesting(false)
-
-                MarketModeSelector(selection: $selectedMode)
-                    .zIndex(5)
             }
-            .padding(.horizontal, 18)
-            .padding(.bottom, 12)
+            .frame(height: 300)
+
+            MarketModeSelector(selection: $selectedMode)
+                .padding(.horizontal, 18)
+                .padding(.top, -24)
+                .zIndex(5)
         }
-        .frame(height: 312)
         .overlay(alignment: .topTrailing) {
             HStack(spacing: 10) {
                 Button { showExperts = true } label: {
                     Image(systemName: "person.3.sequence.fill")
                         .font(.system(size: 17, weight: .bold))
-                        .foregroundColor(.white)
+                        .foregroundColor(JourneyVisual.primaryText)
                         .frame(width: 48, height: 48)
-                        .background(Color.black.opacity(0.5))
-                        .background(.ultraThinMaterial.opacity(0.65))
+                        .background(JourneyVisual.chrome)
                         .clipShape(Circle())
-                        .overlay(Circle().stroke(.white.opacity(0.24), lineWidth: 1))
+                        .overlay(Circle().stroke(JourneyVisual.softBorder, lineWidth: 1))
+                        .shadow(color: .black.opacity(0.12), radius: 10, y: 3)
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel("Swiss Network")
@@ -233,12 +241,12 @@ struct JourneyMarketplaceView: View {
                     ZStack(alignment: .topTrailing) {
                         Image(systemName: "bubble.left.and.bubble.right.fill")
                             .font(.system(size: 18, weight: .bold))
-                            .foregroundColor(.white)
+                            .foregroundColor(JourneyVisual.primaryText)
                             .frame(width: 48, height: 48)
-                            .background(Color.black.opacity(0.5))
-                            .background(.ultraThinMaterial.opacity(0.65))
+                            .background(JourneyVisual.chrome)
                             .clipShape(Circle())
-                            .overlay(Circle().stroke(.white.opacity(0.24), lineWidth: 1))
+                            .overlay(Circle().stroke(JourneyVisual.softBorder, lineWidth: 1))
+                            .shadow(color: .black.opacity(0.12), radius: 10, y: 3)
                         if appContainer.chatStore.unreadCount > 0 {
                             Text("\(min(appContainer.chatStore.unreadCount, 99))")
                                 .font(.system(size: 10, weight: .black))
@@ -272,7 +280,7 @@ struct JourneyMarketplaceView: View {
                         Task { await itemsVM.applyFilters() }
                     }
                     ForEach(itemFilters, id: \.0) { category, title in
-                        MarketFilterChip(title: title, icon: category.icon, selected: itemsVM.selectedItemCategory == category) {
+                        MarketFilterChip(title: title, icon: category.icon, swatch: category.swatch, selected: itemsVM.selectedItemCategory == category) {
                             itemsVM.selectedItemCategory = category
                             Task { await itemsVM.applyFilters() }
                         }
@@ -332,6 +340,7 @@ struct JourneyMarketplaceView: View {
 
                 sectionHeader(
                     "journey.marketplace.popular_nearby".localized,
+                    count: servicesVM.filteredListings.count,
                     trailing: servicesVM.isShowingStaleData ? "journey.marketplace.offline_data".localized : nil
                 )
 
@@ -359,6 +368,7 @@ struct JourneyMarketplaceView: View {
                     MarketDiscoveryCategoryTile(
                         title: filter.title,
                         icon: filter.icon,
+                        swatch: filter.category?.swatch ?? JourneyCategoryPalette.lime,
                         selected: servicesVM.selectedCategory == filter.category
                     ) {
                         servicesVM.selectedCategory = filter.category
@@ -414,7 +424,7 @@ struct JourneyMarketplaceView: View {
                     save: { appContainer.savedItems.toggleListing(featuredItem.id) }
                 )
 
-                sectionHeader("journey.marketplace.more_nearby".localized, trailing: itemsVM.isShowingStaleData ? "journey.marketplace.offline_data".localized : nil)
+                sectionHeader("journey.marketplace.more_nearby".localized, count: itemsVM.filteredListings.count, trailing: itemsVM.isShowingStaleData ? "journey.marketplace.offline_data".localized : nil)
 
                 LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible())], spacing: 10) {
                     ForEach(remainingItems.prefix(8)) { listing in
@@ -434,6 +444,7 @@ struct JourneyMarketplaceView: View {
                     title: "journey.marketplace.items.empty_title".localized,
                     subtitle: "journey.marketplace.items.empty_subtitle".localized,
                     actionTitle: "journey.marketplace.items.add_action".localized,
+                    story: "housing",
                     action: handleCreateTap
                 )
             }
@@ -455,7 +466,7 @@ struct JourneyMarketplaceView: View {
                     }
                 )
 
-                sectionHeader("journey.marketplace.coming_soon".localized, trailing: eventsVM.isShowingStaleData ? "journey.marketplace.offline_data".localized : nil)
+                sectionHeader("journey.marketplace.coming_soon".localized, count: eventsVM.filteredEvents.count, trailing: eventsVM.isShowingStaleData ? "journey.marketplace.offline_data".localized : nil)
 
                 ForEach(remainingEvents.prefix(6)) { event in
                     Button { selectedEvent = event } label: {
@@ -473,22 +484,34 @@ struct JourneyMarketplaceView: View {
                     title: "journey.marketplace.events.empty_title".localized,
                     subtitle: "journey.marketplace.events.empty_subtitle".localized,
                     actionTitle: "journey.marketplace.events.add_action".localized,
+                    story: "events",
                     action: handleCreateTap
                 )
             }
         }
     }
 
-    private func sectionHeader(_ title: String, trailing: String?) -> some View {
-        HStack {
+    private func sectionHeader(_ title: String, count: Int? = nil, trailing: String?) -> some View {
+        HStack(spacing: 8) {
             Text(title)
-                .font(.system(size: 18, weight: .bold, design: .rounded))
+                .font(.system(size: 18, weight: .bold, design: .default))
                 .foregroundColor(JourneyVisual.primaryText)
+            if let count, count > 0 {
+                Text("\(count)")
+                    .font(.system(size: 12, weight: .black).monospacedDigit())
+                    .foregroundColor(.black)
+                    .padding(.horizontal, 9)
+                    .frame(height: 22)
+                    .background(JourneyVisual.lime)
+                    .clipShape(Capsule())
+                    .contentTransition(.numericText(value: Double(count)))
+                    .animation(.spring(response: 0.4, dampingFraction: 0.8), value: count)
+            }
             Spacer()
             if let trailing {
                 Text(trailing)
                     .font(.system(size: 11, weight: .semibold))
-                    .foregroundColor(JourneyVisual.lime)
+                    .foregroundColor(JourneyVisual.accentText)
             }
         }
         .padding(.top, 2)
@@ -559,13 +582,7 @@ struct JourneyMarketplaceView: View {
         }
     }
 
-    private var heroImageName: String {
-        switch selectedMode {
-        case .services: return "journey-market-consultant"
-        case .items: return "cityhub-zurich-viadukt"
-        case .events: return "cityhub-zurich-sechselaeutenplatz"
-        }
-    }
+    private var heroImageName: String { "city-scene-market" }
 
     private var createAccessibilityLabel: String {
         switch selectedMode {
@@ -664,7 +681,9 @@ private enum JourneyMarketMode: String, CaseIterable, Identifiable {
 }
 
 private struct MarketModeSelector: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Binding var selection: JourneyMarketMode
+    @Namespace private var selectionNamespace
 
     var body: some View {
         HStack(spacing: 4) {
@@ -672,28 +691,33 @@ private struct MarketModeSelector: View {
                 let isSelected = selection == mode
                 Button {
                     guard selection != mode else { return }
-                    selection = mode
+                    withAnimation(reduceMotion ? nil : Theme.Animation.selection) {
+                        selection = mode
+                    }
                 } label: {
                     Text(mode.title)
                         .font(.system(size: 12, weight: .bold))
-                        .foregroundStyle(isSelected ? Color.black : Color.white.opacity(0.8))
+                        .foregroundStyle(isSelected ? Color.black : JourneyVisual.secondaryText)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .background {
-                            Capsule()
-                                .fill(isSelected ? JourneyVisual.lime : Color.clear)
+                            if isSelected {
+                                Capsule()
+                                    .fill(JourneyVisual.lime)
+                                    .matchedGeometryEffect(id: "market-mode", in: selectionNamespace)
+                            }
                         }
                         // Full cell must be tappable — not only the text glyphs.
                         .contentShape(Rectangle())
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(ScaleButtonStyle(scaleAmount: 0.97, hapticStyle: .light))
                 .accessibilityLabel(mode.title)
                 .accessibilityAddTraits(isSelected ? .isSelected : [])
             }
         }
         .padding(4)
         .frame(height: 48)
-        .background(Capsule().fill(Color.black.opacity(0.55)))
-        .overlay(Capsule().stroke(.white.opacity(0.18), lineWidth: 1))
+        .background(Capsule().fill(Theme.Colors.card))
+        .overlay(Capsule().stroke(JourneyVisual.softBorder, lineWidth: 1))
         .compositingGroup()
     }
 }
@@ -735,24 +759,29 @@ private struct MarketSearchField: View {
 private struct MarketFilterChip: View {
     let title: String
     let icon: String?
+    var swatch: JourneyCategorySwatch?
     let selected: Bool
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
             HStack(spacing: 6) {
-                if let icon { Image(systemName: icon) }
+                if let icon {
+                    Image(systemName: icon)
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundColor(selected ? .black : (swatch?.ink ?? JourneyVisual.secondaryText))
+                }
                 Text(title)
             }
             .font(.system(size: 12, weight: .semibold))
             .foregroundColor(selected ? .black : JourneyVisual.secondaryText)
             .padding(.horizontal, 13)
-            .frame(height: 36)
+            .frame(minHeight: Theme.Layout.minimumTouchTarget)
             .background(selected ? JourneyVisual.lime : JourneyVisual.softSurface)
             .clipShape(Capsule())
             .overlay(Capsule().stroke(selected ? Color.clear : JourneyVisual.softBorder, lineWidth: 1))
         }
-        .buttonStyle(.plain)
+        .buttonStyle(ScaleButtonStyle(scaleAmount: 0.97, hapticStyle: .light))
         .accessibilityAddTraits(selected ? .isSelected : [])
     }
 }
@@ -768,16 +797,16 @@ private struct DiscoveryServiceFilter: Identifiable {
 private struct MarketDiscoveryCategoryTile: View {
     let title: String
     let icon: String
+    let swatch: JourneyCategorySwatch
     let selected: Bool
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
             VStack(spacing: 9) {
-                Image(systemName: icon)
-                    .font(.system(size: 23, weight: .medium))
+                JourneyCategoryIcon(symbol: icon, swatch: swatch, size: 38, onDark: true, selected: selected)
                 Text(title)
-                    .font(.system(size: 12, weight: .semibold, design: .rounded))
+                    .font(.system(size: 12, weight: .semibold, design: .default))
                     .lineLimit(2)
                     .multilineTextAlignment(.center)
             }
@@ -820,7 +849,7 @@ private struct JourneyServiceDiscoveryHeroCard: View {
                         Spacer()
 
                         Text(listing.title)
-                            .font(.system(size: 30, weight: .black, design: .rounded))
+                            .font(.system(size: 24, weight: .bold, design: .default))
                             .foregroundStyle(.white)
                             .lineLimit(2)
                             .multilineTextAlignment(.leading)
@@ -828,7 +857,7 @@ private struct JourneyServiceDiscoveryHeroCard: View {
                         HStack(spacing: 8) {
                             if listing.isVerified {
                                 Label("map.verified".localized, systemImage: "checkmark.seal.fill")
-                                    .foregroundStyle(JourneyVisual.lime)
+                                    .foregroundStyle(JourneyVisual.accentText)
                             }
 
                             Label(listing.canton == "all" ? "CH" : listing.canton, systemImage: "mappin")
@@ -840,7 +869,7 @@ private struct JourneyServiceDiscoveryHeroCard: View {
                                 .fontWeight(.bold)
                                 .foregroundStyle(.white)
                         }
-                        .font(.system(size: 12, weight: .semibold, design: .rounded))
+                        .font(.system(size: 12, weight: .semibold, design: .default))
 
                         HStack(spacing: 8) {
                             Text(listing.authorName)
@@ -851,14 +880,14 @@ private struct JourneyServiceDiscoveryHeroCard: View {
                                 .foregroundStyle(.white.opacity(0.58))
                                 .lineLimit(1)
                         }
-                        .font(.system(size: 11, weight: .medium, design: .rounded))
+                        .font(.system(size: 11, weight: .medium, design: .default))
 
                         HStack {
                             Text("journey.marketplace.view_service".localized)
                             Spacer()
                             Image(systemName: "arrow.right")
                         }
-                        .font(.system(size: 15, weight: .bold, design: .rounded))
+                        .font(.system(size: 15, weight: .bold, design: .default))
                         .foregroundStyle(.black)
                         .padding(.horizontal, 18)
                         .frame(height: 52)
@@ -925,35 +954,35 @@ private struct JourneyServiceDiscoveryCard: View {
 
             VStack(alignment: .leading, spacing: 7) {
                 Text(listing.title)
-                    .font(.system(size: 16, weight: .bold, design: .rounded))
-                    .foregroundStyle(.white)
+                    .font(.system(size: 16, weight: .bold, design: .default))
+                    .foregroundStyle(JourneyVisual.primaryText)
                     .lineLimit(2)
 
                 Text(listing.authorName)
-                    .font(.system(size: 12, weight: .medium, design: .rounded))
-                    .foregroundStyle(.white.opacity(0.62))
+                    .font(.system(size: 12, weight: .medium, design: .default))
+                    .foregroundStyle(JourneyVisual.secondaryText)
                     .lineLimit(1)
 
                 HStack(spacing: 5) {
                     if listing.isVerified {
                         Image(systemName: "checkmark.seal.fill")
-                            .foregroundStyle(JourneyVisual.lime)
+                            .foregroundStyle(JourneyVisual.accentStrong)
                     }
                     Text(listing.canton == "all" ? "CH" : listing.canton)
                     Spacer(minLength: 4)
                     Text(listing.priceDisplay ?? "journey.marketplace.negotiable_price".localized)
                         .fontWeight(.bold)
-                        .foregroundStyle(.white)
+                        .foregroundStyle(JourneyVisual.primaryText)
                 }
-                .font(.system(size: 11, weight: .semibold, design: .rounded))
-                .foregroundStyle(.white.opacity(0.62))
+                .font(.system(size: 11, weight: .semibold, design: .default))
+                .foregroundStyle(JourneyVisual.secondaryText)
             }
             .padding(12)
         }
-        .background(Color.white.opacity(0.06))
+        .background(Theme.Colors.card)
         .clipShape(RoundedRectangle(cornerRadius: 21, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 21, style: .continuous).stroke(.white.opacity(0.16), lineWidth: 1))
-        .shadow(color: .black.opacity(0.22), radius: 12, y: 6)
+        .overlay(RoundedRectangle(cornerRadius: 21, style: .continuous).stroke(JourneyVisual.softBorder, lineWidth: 1))
+        .shadow(color: JourneyVisual.black.opacity(0.07), radius: 12, y: 6)
         .accessibilityElement(children: .contain)
     }
 }
@@ -990,7 +1019,7 @@ private struct JourneyServiceFeatureCard: View {
                     Spacer()
 
                     Text(listing?.title ?? "journey.marketplace.sample_service_title".localized)
-                        .font(.system(size: 27, weight: .bold, design: .rounded))
+                        .font(.system(size: 27, weight: .bold, design: .default))
                         .foregroundColor(.white)
                         .lineLimit(2)
                         .multilineTextAlignment(.leading)
@@ -1062,7 +1091,7 @@ private struct JourneyServiceSpotlightCard: View {
                         Spacer()
 
                         Text(listing.categoryDisplayName.uppercased())
-                            .font(.system(size: 10, weight: .black, design: .rounded))
+                            .font(.system(size: 10, weight: .black, design: .default))
                             .tracking(0.7)
                             .foregroundColor(.black)
                             .padding(.horizontal, 10)
@@ -1071,7 +1100,7 @@ private struct JourneyServiceSpotlightCard: View {
                             .clipShape(Capsule())
 
                         Text(listing.title)
-                            .font(.system(size: 24, weight: .black, design: .rounded))
+                            .font(.system(size: 24, weight: .black, design: .default))
                             .foregroundColor(.white)
                             .lineLimit(2)
                             .multilineTextAlignment(.leading)
@@ -1084,7 +1113,7 @@ private struct JourneyServiceSpotlightCard: View {
                                 .frame(width: 3, height: 3)
                             Label(listing.canton, systemImage: "mappin")
                         }
-                        .font(.system(size: 12, weight: .medium, design: .rounded))
+                        .font(.system(size: 12, weight: .medium, design: .default))
                         .foregroundColor(.white.opacity(0.72))
                         .lineLimit(1)
 
@@ -1096,7 +1125,7 @@ private struct JourneyServiceSpotlightCard: View {
                                 .fontWeight(.black)
                                 .foregroundColor(.white)
                         }
-                        .font(.system(size: 11, weight: .semibold, design: .rounded))
+                        .font(.system(size: 11, weight: .semibold, design: .default))
                         .foregroundColor(.white.opacity(0.68))
                     }
                     .padding(16)
@@ -1107,7 +1136,7 @@ private struct JourneyServiceSpotlightCard: View {
             HStack(spacing: 8) {
                 if listing.isVerified {
                     Label("map.verified".localized, systemImage: "checkmark.seal.fill")
-                        .font(.system(size: 10, weight: .black, design: .rounded))
+                        .font(.system(size: 10, weight: .black, design: .default))
                         .foregroundColor(.black)
                         .padding(.horizontal, 10)
                         .frame(height: 34)
@@ -1166,10 +1195,11 @@ private struct JourneyServiceMosaicCard: View {
 
                         HStack(spacing: 5) {
                             Image(systemName: listing.categoryIcon)
+                                .font(.system(size: 10, weight: .black))
                             Text(listing.categoryDisplayName.uppercased())
                                 .lineLimit(1)
                         }
-                        .font(.system(size: 9, weight: .black, design: .rounded))
+                        .font(.system(size: 9, weight: .black, design: .default))
                         .foregroundColor(.black)
                         .padding(.horizontal, 9)
                         .frame(height: 26)
@@ -1177,13 +1207,13 @@ private struct JourneyServiceMosaicCard: View {
                         .clipShape(Capsule())
 
                         Text(listing.title)
-                            .font(.system(size: 17, weight: .black, design: .rounded))
+                            .font(.system(size: 17, weight: .black, design: .default))
                             .foregroundColor(.white)
                             .lineLimit(3)
                             .multilineTextAlignment(.leading)
 
                         Text(listing.authorName)
-                            .font(.system(size: 11, weight: .bold, design: .rounded))
+                            .font(.system(size: 11, weight: .bold, design: .default))
                             .foregroundColor(.white.opacity(0.7))
                             .lineLimit(1)
 
@@ -1195,7 +1225,7 @@ private struct JourneyServiceMosaicCard: View {
                                 .foregroundColor(.white)
                                 .lineLimit(1)
                         }
-                        .font(.system(size: 10, weight: .semibold, design: .rounded))
+                        .font(.system(size: 10, weight: .semibold, design: .default))
                         .foregroundColor(.white.opacity(0.64))
                     }
                     .padding(13)
@@ -1248,10 +1278,10 @@ private struct JourneyGoodsFeatureCard: View {
                     }
                     Spacer()
                     Text(listing.priceDisplay ?? "journey.marketplace.free".localized)
-                        .font(.system(size: 23, weight: .bold, design: .rounded))
+                        .font(.system(size: 23, weight: .bold, design: .default))
                         .foregroundColor(.white)
                     Text(listing.title)
-                        .font(.system(size: 19, weight: .bold, design: .rounded))
+                        .font(.system(size: 19, weight: .bold, design: .default))
                         .foregroundColor(.white)
                         .lineLimit(2)
                     HStack {
@@ -1307,11 +1337,11 @@ private struct JourneyGoodsGridCard: View {
             }
             VStack(alignment: .leading, spacing: 5) {
                 Text(listing.priceDisplay ?? "journey.marketplace.free".localized)
-                    .font(.system(size: 14, weight: .bold, design: .rounded))
-                    .foregroundColor(JourneyVisual.lime)
+                    .font(.system(size: 14, weight: .bold, design: .default))
+                    .foregroundColor(JourneyVisual.accentText)
                 Text(listing.title)
                     .font(.system(size: 13, weight: .bold))
-                    .foregroundColor(.white)
+                    .foregroundColor(JourneyVisual.primaryText)
                     .lineLimit(2)
                 HStack {
                     Text(listing.canton)
@@ -1319,13 +1349,13 @@ private struct JourneyGoodsGridCard: View {
                     Text(shortFreshness(listing.freshnessDate))
                 }
                 .font(.system(size: 9, weight: .medium))
-                .foregroundColor(.white.opacity(0.48))
+                .foregroundColor(JourneyVisual.secondaryText)
             }
             .padding(10)
         }
-        .background(Color.white.opacity(0.065))
+        .background(Theme.Colors.card)
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(.white.opacity(0.12), lineWidth: 1))
+        .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(JourneyVisual.softBorder, lineWidth: 1))
     }
 
     private func shortFreshness(_ date: Date?) -> String {
@@ -1344,18 +1374,13 @@ private struct JourneyEventFeatureCard: View {
 
     var body: some View {
         ZStack(alignment: .bottomLeading) {
-            Image(eventImageName)
-                .resizable()
-                .scaledToFill()
-                .frame(height: 270)
-                .frame(maxWidth: .infinity)
-                .clipped()
+            FittedAssetImage(name: eventImageName, height: 270)
             LinearGradient(colors: [.black.opacity(0.06), .black.opacity(0.16), .black.opacity(0.94)], startPoint: .top, endPoint: .bottom)
 
             VStack(alignment: .leading, spacing: 10) {
                 HStack(alignment: .top) {
                     VStack(spacing: -2) {
-                        Text(dayText).font(.system(size: 24, weight: .bold, design: .rounded))
+                        Text(dayText).font(.system(size: 24, weight: .bold, design: .default))
                         Text(monthText).font(.system(size: 10, weight: .bold))
                     }
                     .foregroundColor(.black)
@@ -1376,8 +1401,8 @@ private struct JourneyEventFeatureCard: View {
                 Button(action: open) {
                     VStack(alignment: .leading, spacing: 8) {
                         Text(event.title)
-                            .font(.system(size: 25, weight: .bold, design: .rounded))
-                            .foregroundColor(.white)
+                            .font(.system(size: 25, weight: .bold, design: .default))
+                            .foregroundColor(JourneyVisual.primaryText)
                             .lineLimit(2)
                             .multilineTextAlignment(.leading)
                         Label(scheduleAndPlace, systemImage: "mappin.and.ellipse")
@@ -1385,7 +1410,7 @@ private struct JourneyEventFeatureCard: View {
                             .foregroundColor(.white.opacity(0.74))
                         Label(eventTrustText, systemImage: "checkmark.seal.fill")
                             .font(.system(size: 10, weight: .semibold))
-                            .foregroundColor(JourneyVisual.lime)
+                            .foregroundColor(JourneyVisual.accentText)
                     }
                 }
                 .buttonStyle(.plain)
@@ -1443,7 +1468,7 @@ private struct JourneyUpcomingEventRow: View {
         HStack(spacing: 12) {
             VStack(spacing: -2) {
                 Text((event.startsAt ?? Date()).formatted(.dateTime.day().locale(locale)))
-                    .font(.system(size: 20, weight: .bold, design: .rounded))
+                    .font(.system(size: 20, weight: .bold, design: .default))
                 Text((event.startsAt ?? Date()).formatted(.dateTime.month(.abbreviated).locale(locale)).uppercased())
                     .font(.system(size: 9, weight: .bold))
             }
@@ -1454,45 +1479,42 @@ private struct JourneyUpcomingEventRow: View {
 
             VStack(alignment: .leading, spacing: 5) {
                 Text(event.title)
-                    .font(.system(size: 15, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
+                    .font(.system(size: 15, weight: .bold, design: .default))
+                    .foregroundColor(JourneyVisual.primaryText)
                     .lineLimit(2)
                 Text("\(event.city) · \(event.organizerName)")
                     .font(.system(size: 10, weight: .medium))
-                    .foregroundColor(.white.opacity(0.5))
+                    .foregroundColor(JourneyVisual.secondaryText)
                     .lineLimit(1)
                 Text(event.isVerified ? "journey.marketplace.organizer_verified".localized : "journey.marketplace.moderated_by_sweezy_short".localized)
                     .font(.system(size: 10, weight: .semibold))
-                    .foregroundColor(JourneyVisual.lime)
+                    .foregroundColor(JourneyVisual.accentText)
             }
             Spacer()
             Button(action: save) {
                 Image(systemName: isSaved ? "heart.fill" : "heart")
-                    .foregroundColor(isSaved ? JourneyVisual.lime : .white.opacity(0.7))
+                    .foregroundColor(isSaved ? JourneyVisual.accentStrong : JourneyVisual.secondaryText)
                     .frame(width: 44, height: 44)
             }
             .buttonStyle(.plain)
         }
         .padding(12)
-        .background(Color.white.opacity(0.065))
+        .background(Theme.Colors.card)
         .clipShape(RoundedRectangle(cornerRadius: 21, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 21, style: .continuous).stroke(.white.opacity(0.12), lineWidth: 1))
+        .overlay(RoundedRectangle(cornerRadius: 21, style: .continuous).stroke(JourneyVisual.softBorder, lineWidth: 1))
     }
 }
 
 private struct MarketLoadingView: View {
     let title: String
     var body: some View {
-        HStack(spacing: 12) {
-            ProgressView().tint(JourneyVisual.lime)
+        VStack(alignment: .leading, spacing: 10) {
             Text(title)
                 .font(.system(size: 13, weight: .semibold))
                 .foregroundColor(JourneyVisual.secondaryText)
+            SkeletonList(rows: 3)
         }
-        .frame(maxWidth: .infinity)
-        .frame(height: 120)
-        .background(JourneyVisual.softSurface)
-        .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
@@ -1501,33 +1523,17 @@ private struct MarketEmptyCard: View {
     let title: String
     let subtitle: String
     let actionTitle: String
+    var story: String?
     let action: () -> Void
 
     var body: some View {
-        VStack(spacing: 12) {
-            Image(systemName: icon)
-                .font(.system(size: 30, weight: .medium))
-                .foregroundColor(JourneyVisual.lime)
-            Text(title)
-                .font(.system(size: 19, weight: .bold, design: .rounded))
-                .foregroundColor(JourneyVisual.primaryText)
-            Text(subtitle)
-                .font(.system(size: 13, weight: .medium))
-                .foregroundColor(JourneyVisual.secondaryText)
-                .multilineTextAlignment(.center)
-            Button(actionTitle, action: action)
-                .font(.system(size: 13, weight: .bold))
-                .foregroundColor(.black)
-                .padding(.horizontal, 18)
-                .frame(height: 44)
-                .background(JourneyVisual.lime)
-                .clipShape(Capsule())
-        }
-        .padding(24)
-        .frame(maxWidth: .infinity)
-        .background(JourneyVisual.softSurface)
-        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous).stroke(JourneyVisual.softBorder, lineWidth: 1))
+        MascotEmptyState(
+            title: title,
+            subtitle: subtitle,
+            actionTitle: actionTitle,
+            story: story,
+            action: action
+        )
     }
 }
 

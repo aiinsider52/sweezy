@@ -20,6 +20,8 @@ struct Place: Codable, Identifiable, Hashable {
     let address: Address
     let coordinate: Coordinate
     let canton: Canton
+    let countryCode: String
+    let subdivisionCode: String
     let phoneNumber: String?
     let email: String?
     let website: String?
@@ -34,6 +36,7 @@ struct Place: Codable, Identifiable, Hashable {
     let source: String? // URL or authority reference
     
     init(
+        id: UUID = UUID(),
         name: String,
         type: PlaceType,
         category: PlaceCategory,
@@ -42,6 +45,8 @@ struct Place: Codable, Identifiable, Hashable {
         address: Address,
         coordinate: Coordinate,
         canton: Canton,
+        countryCode: String = "CH",
+        subdivisionCode: String? = nil,
         phoneNumber: String? = nil,
         email: String? = nil,
         website: String? = nil,
@@ -54,7 +59,7 @@ struct Place: Codable, Identifiable, Hashable {
         verifiedAt: Date? = nil,
         source: String? = nil
     ) {
-        self.id = UUID()
+        self.id = id
         self.name = name
         self.type = type
         self.category = category
@@ -63,6 +68,8 @@ struct Place: Codable, Identifiable, Hashable {
         self.address = address
         self.coordinate = coordinate
         self.canton = canton
+        self.countryCode = countryCode.uppercased()
+        self.subdivisionCode = subdivisionCode ?? canton.rawValue
         self.phoneNumber = phoneNumber
         self.email = email
         self.website = website
@@ -79,6 +86,7 @@ struct Place: Codable, Identifiable, Hashable {
     
     private enum CodingKeys: String, CodingKey {
         case id, name, type, category, description, descriptions, address, coordinate, canton,
+             countryCode, subdivisionCode,
              phoneNumber, email, website, openingHours, languages, services,
              isAccessible, rating, reviewCount, lastUpdated, verifiedAt, source
     }
@@ -101,6 +109,8 @@ struct Place: Codable, Identifiable, Hashable {
         self.address = (try? c.decode(Address.self, forKey: .address)) ?? Address(street: "", houseNumber: "", postalCode: "", city: "", canton: .zurich)
         self.coordinate = (try? c.decode(Coordinate.self, forKey: .coordinate)) ?? Coordinate(latitude: 0, longitude: 0)
         self.canton = (try? c.decode(Canton.self, forKey: .canton)) ?? .zurich
+        self.countryCode = ((try? c.decode(String.self, forKey: .countryCode)) ?? "CH").uppercased()
+        self.subdivisionCode = (try? c.decode(String.self, forKey: .subdivisionCode)) ?? self.canton.rawValue
         self.phoneNumber = try? c.decode(String.self, forKey: .phoneNumber)
         self.email = try? c.decode(String.self, forKey: .email)
         self.website = try? c.decode(String.self, forKey: .website)

@@ -75,7 +75,7 @@ extension LiveActivitiesManager {
     private func updatePermitActivity(_ date: Date?) async {
         let existing = Activity<SweezyAttributes>.activities.filter { $0.attributes.kind == "permit_deadline" }
         if let date {
-            let state = SweezyAttributes.ContentState(title: "Дедлайн дозволу", due: date)
+            let state = SweezyAttributes.ContentState(title: "Дедлайн дозволу".localized, due: date)
             let content = ActivityContent<SweezyAttributes.ContentState>(
                 state: state,
                 staleDate: nil

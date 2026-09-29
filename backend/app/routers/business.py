@@ -8,6 +8,7 @@ from fastapi import APIRouter, HTTPException, Query, Request
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 
+from ..core.countries import default_currency
 from ..core.rate_limit import limiter
 from ..dependencies import CurrentAdmin, CurrentUser, DBSession, require_premium
 from ..models.business import (
@@ -284,7 +285,7 @@ def list_services(db: DBSession, user: CurrentUser) -> list[BusinessService]:
 
 @router.post("/services", response_model=BusinessServiceResponse, status_code=201)
 def create_service(payload: BusinessServiceCreate, db: DBSession, user: CurrentUser) -> BusinessService:
-    _profile(db, user.id)
+    profile = _profile(db, user.id)
     count = db.scalar(select(func.count()).select_from(BusinessService).where(BusinessService.business_user_id == user.id)) or 0
     if count >= 20:
         raise HTTPException(status_code=409, detail={"code": "business_service_limit", "limit": 20})
@@ -292,7 +293,16 @@ def create_service(payload: BusinessServiceCreate, db: DBSession, user: CurrentU
         listing = db.get(ServiceListing, payload.listing_id)
         if not listing or listing.author_id != user.id or listing.listing_type != "service":
             raise HTTPException(status_code=404, detail="Listing not found")
-    row = BusinessService(business_user_id=user.id, **payload.model_dump())
+    values = payload.model_dump()
+    expected_currency = default_currency(profile.country_code)
+    if "currency" not in payload.model_fields_set:
+        values["currency"] = expected_currency
+    if values["currency"] != expected_currency:
+        raise HTTPException(
+            status_code=422,
+            detail={"code": "currency_country_mismatch", "expected": expected_currency},
+        )
+    row = BusinessService(business_user_id=user.id, **values)
     db.add(row)
     try:
         db.commit()
@@ -829,6 +839,8 @@ def public_business_profile(user_id: str, db: DBSession) -> PublicBusinessProfil
         description=profile.description,
         category=profile.category,
         canton=profile.canton,
+        country_code=profile.country_code,
+        subdivision_code=profile.subdivision_code,
         city=profile.city,
         service_area=profile.service_area,
         languages=profile.languages,

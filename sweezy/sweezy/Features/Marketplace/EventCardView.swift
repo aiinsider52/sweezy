@@ -12,11 +12,11 @@ struct EventCardView: View {
             VStack(alignment: .leading, spacing: 9) {
                 Text(scheduleText)
                     .font(.system(size: 11, weight: .bold))
-                    .foregroundColor(JourneyVisual.lime)
+                    .foregroundColor(JourneyVisual.accentText)
                     .textCase(.uppercase)
 
                 Text(event.title)
-                    .font(.system(size: 17, weight: .bold, design: .rounded))
+                    .font(.system(size: 17, weight: .bold, design: .default))
                     .foregroundColor(.white)
                     .lineLimit(2)
                     .fixedSize(horizontal: false, vertical: true)
@@ -36,7 +36,7 @@ struct EventCardView: View {
                             .font(.system(size: 11, weight: .semibold))
                             .foregroundColor(.white.opacity(0.88))
                             .lineLimit(1)
-                        Text("\(event.viewCount) переглядів")
+                        Text("%@ переглядів".localized(with: "\(event.viewCount)"))
                             .font(.system(size: 10, weight: .medium))
                             .foregroundColor(.white.opacity(0.48))
                     }
@@ -80,7 +80,7 @@ struct EventCardView: View {
 
             VStack(spacing: 0) {
                 Text(dayText)
-                    .font(.system(size: 20, weight: .bold, design: .rounded))
+                    .font(.system(size: 20, weight: .bold, design: .default))
                 Text(monthText)
                     .font(.system(size: 9, weight: .bold))
                     .textCase(.uppercase)
@@ -109,7 +109,7 @@ struct EventCardView: View {
                 .fill(Color.white.opacity(0.12))
             Text(String(event.organizerName.prefix(1)).uppercased())
                 .font(.system(size: 11, weight: .bold))
-                .foregroundColor(JourneyVisual.lime)
+                .foregroundColor(JourneyVisual.accentText)
         }
         .frame(width: 28, height: 28)
         .overlay(Circle().stroke(Color.white.opacity(0.18), lineWidth: 1))
@@ -141,7 +141,7 @@ struct EventCardView: View {
     }
 
     private var priceText: String {
-        event.isFree ? "Безкоштовно" : (event.priceInfo ?? "Квиток")
+        event.isFree ? "Безкоштовно".localized : (event.priceInfo ?? "Квиток".localized)
     }
 
     private var eventCoverImageName: String {

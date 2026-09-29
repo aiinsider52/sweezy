@@ -3,6 +3,8 @@ import XCTest
 /// Focused smoke coverage for settings that affect privacy and retention.
 final class Phase2SmokeUITests: XCTestCase {
     override func setUpWithError() throws {
+        // The simulator can be left in landscape between runs; every layout assertion assumes portrait.
+        XCUIDevice.shared.orientation = .portrait
         continueAfterFailure = false
     }
 

@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Optional
 
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import String, DateTime, Text
+from sqlalchemy import String, DateTime, JSON, Text
 
 from ..core.database import Base
 
@@ -19,6 +19,8 @@ class News(Base):
     url: Mapped[str] = mapped_column(String(500), nullable=False)
     source: Mapped[str] = mapped_column(String(120), nullable=False, default="Sweezy")
     language: Mapped[str] = mapped_column(String(8), nullable=False, default="uk")
+    country_code: Mapped[str] = mapped_column(String(2), nullable=False, default="CH", index=True)
+    subdivision_codes: Mapped[list[str]] = mapped_column(JSON, default=list, nullable=False)
     status: Mapped[str] = mapped_column(String(16), nullable=False, default="published")  # 'draft' | 'published' | 'archived'
     import_source: Mapped[str] = mapped_column(String(24), nullable=False, default="manual")
     import_reference_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
@@ -26,5 +28,4 @@ class News(Base):
     image_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=False), nullable=False, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=False), nullable=False, default=datetime.utcnow)
-
 

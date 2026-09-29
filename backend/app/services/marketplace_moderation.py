@@ -51,8 +51,10 @@ def _call_openai(listing: ServiceListing) -> tuple[str, str | None, int | None, 
 
         client = OpenAI(api_key=api_key)
 
+        country_names = {"CH": "Швейцарії", "DE": "Німеччині", "AT": "Австрії"}
+        country_name = country_names.get((listing.country_code or "CH").upper(), "обраній країні")
         prompt = (
-            "Перевір оголошення про послугу для дошки оголошень іммігрантів у Швейцарії.\n\n"
+            f"Перевір оголошення про послугу для дошки оголошень іммігрантів у {country_name}.\n\n"
             f"Заголовок: {listing.title}\n"
             f"Опис: {listing.description}\n"
             f"Категорія: {listing.category}\n\n"
@@ -65,7 +67,7 @@ def _call_openai(listing: ServiceListing) -> tuple[str, str | None, int | None, 
             "- Шахрайство або підозрілий контент\n"
             "- Ненависницький або образливий контент\n"
             "- Незаконні послуги\n"
-            "- Нерелевантно для іммігрантів у Швейцарії\n\n"
+            f"- Нерелевантно для іммігрантів у {country_name}\n\n"
             "Також оціни, наскільки оголошення виглядає реальним і добросовісним, за шкалою від 0 до 10.\n"
             "0 = майже напевно фейк/спам, 10 = дуже правдоподібне оголошення.\n\n"
             'Відповідь тільки JSON: {"decision": "approved" | "rejected", "reason": "..." | null, "ai_score": 0-10, "ai_score_reason": "..."}'

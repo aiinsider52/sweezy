@@ -6,11 +6,11 @@ enum ProfessionalRole: String, Codable, CaseIterable, Identifiable {
     var id: String { rawValue }
     var title: String {
         switch self {
-        case .founder: return "Засновник"
-        case .freelancer: return "Фрилансер"
-        case .specialist: return "Спеціаліст"
-        case .investor: return "Інвестор"
-        case .mentor: return "Ментор"
+        case .founder: return "Засновник".localized
+        case .freelancer: return "Фрилансер".localized
+        case .specialist: return "Спеціаліст".localized
+        case .investor: return "Інвестор".localized
+        case .mentor: return "Ментор".localized
         }
     }
     var icon: String {
@@ -30,13 +30,13 @@ enum ProfessionalGoal: String, Codable, CaseIterable, Identifiable {
     var id: String { rawValue }
     var title: String {
         switch self {
-        case .clients: return "Клієнти"
-        case .partners: return "Партнери"
+        case .clients: return "Клієнти".localized
+        case .partners: return "Партнери".localized
         case .cofounder: return "Co-founder"
-        case .hiring: return "Команда"
-        case .investing: return "Інвестиції"
-        case .mentoring: return "Менторство"
-        case .events: return "Події"
+        case .hiring: return "Команда".localized
+        case .investing: return "Інвестиції".localized
+        case .mentoring: return "Менторство".localized
+        case .events: return "Події".localized
         }
     }
     var icon: String {
@@ -60,6 +60,8 @@ struct ProfessionalProfile: Codable, Identifiable, Equatable {
     let role: ProfessionalRole
     let industry: String
     let canton: String
+    let countryCode: String? = nil
+    let subdivisionCode: String? = nil
     let city: String
     let bio: String
     let skills: [String]
@@ -87,6 +89,8 @@ struct ProfessionalProfile: Codable, Identifiable, Equatable {
 
     private enum CodingKeys: String, CodingKey {
         case headline, role, industry, canton, city, bio, skills, languages, goals
+        case countryCode = "country_code"
+        case subdivisionCode = "subdivision_code"
         case userID = "user_id"
         case displayName = "display_name"
         case companyName = "company_name"
@@ -125,7 +129,9 @@ struct ProfessionalProfileDraft: Codable, Equatable {
     var companyName = ""
     var role: ProfessionalRole = .founder
     var industry = ""
-    var canton = "ZH"
+    var canton = APIClient.subdivisionCode
+    var countryCode = APIClient.countryCode
+    var subdivisionCode = APIClient.subdivisionCode
     var city = "Zürich"
     var bio = ""
     var skills: [String] = []
@@ -145,6 +151,8 @@ struct ProfessionalProfileDraft: Codable, Equatable {
         role = profile.role
         industry = profile.industry
         canton = profile.canton
+        countryCode = profile.countryCode ?? APIClient.countryCode
+        subdivisionCode = profile.subdivisionCode ?? profile.canton
         city = profile.city
         bio = profile.bio
         skills = profile.skills
@@ -158,6 +166,8 @@ struct ProfessionalProfileDraft: Codable, Equatable {
 
     private enum CodingKeys: String, CodingKey {
         case headline, role, industry, canton, city, bio, skills, languages, goals
+        case countryCode = "country_code"
+        case subdivisionCode = "subdivision_code"
         case displayName = "display_name"
         case companyName = "company_name"
         case avatarURL = "avatar_url"

@@ -171,6 +171,22 @@ enum AppointmentCategory: String, CaseIterable, Codable, Hashable {
         }
     }
     
+    var swatch: JourneyCategorySwatch {
+        switch self {
+        case .government: return JourneyCategoryPalette.sky
+        case .healthcare: return JourneyCategoryPalette.coral
+        case .education: return JourneyCategoryPalette.sky
+        case .legal: return JourneyCategoryPalette.graphite
+        case .employment: return JourneyCategoryPalette.sand
+        case .housing: return JourneyCategoryPalette.lime
+        case .banking: return JourneyCategoryPalette.sand
+        case .insurance: return JourneyCategoryPalette.lilac
+        case .integration: return JourneyCategoryPalette.teal
+        case .personal: return JourneyCategoryPalette.teal
+        case .other: return JourneyCategoryPalette.graphite
+        }
+    }
+
     var color: String {
         switch self {
         case .government: return "blue"

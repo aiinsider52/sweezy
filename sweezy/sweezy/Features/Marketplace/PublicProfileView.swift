@@ -12,7 +12,7 @@ struct PublicProfileView: View {
 
     var body: some View {
         ZStack {
-            JourneyVisual.black.ignoresSafeArea()
+            JourneyAmbientBackground()
             if let profile {
                 ScrollView {
                     VStack(spacing: 22) {
@@ -23,12 +23,12 @@ struct PublicProfileView: View {
                                 systemImage: "rectangle.stack",
                                 description: Text("profile.listings.empty.body".localized)
                             )
-                            .foregroundStyle(.white)
+                            .foregroundStyle(JourneyVisual.primaryText)
                         } else {
                             VStack(alignment: .leading, spacing: 12) {
                                 Text("profile.listings.title".localized)
                                     .font(.title3.bold())
-                                    .foregroundStyle(.white)
+                                    .foregroundStyle(JourneyVisual.primaryText)
                                 ForEach(profile.activeListings) { listing in
                                     Button { selectedListing = listing } label: {
                                         PublicProfileListingCard(listing: listing)
@@ -48,17 +48,20 @@ struct PublicProfileView: View {
                 } actions: {
                     Button("common.retry".localized) { Task { await load() } }
                 }
-                .foregroundStyle(.white)
+                .foregroundStyle(JourneyVisual.primaryText)
             } else {
-                ProgressView("profile.loading".localized).tint(JourneyVisual.lime).foregroundStyle(.white)
+                ProgressView("profile.loading".localized)
+                    .tint(JourneyVisual.lime)
+                    .foregroundStyle(JourneyVisual.primaryText)
             }
         }
+        .statusBarScrim()
         .overlay(alignment: .topLeading) {
             Button { dismiss() } label: {
                 Image(systemName: "chevron.left").frame(width: 44, height: 44)
                     .background(.ultraThinMaterial).clipShape(Circle())
             }
-            .foregroundStyle(.white).padding(16)
+            .foregroundStyle(JourneyVisual.primaryText).padding(16)
         }
         .task { await load() }
         .fullScreenCover(item: $selectedListing) { listing in
@@ -69,14 +72,14 @@ struct PublicProfileView: View {
     private func profileHeader(_ profile: PublicUserProfile) -> some View {
         VStack(spacing: 12) {
             Text(profile.initials)
-                .font(.system(size: 34, weight: .bold, design: .rounded))
+                .font(.system(size: 34, weight: .bold, design: .default))
                 .foregroundStyle(.black)
                 .frame(width: 88, height: 88)
                 .background(JourneyVisual.lime)
                 .clipShape(Circle())
-            Text(profile.displayName).font(.title2.bold()).foregroundStyle(.white)
+            Text(profile.displayName).font(.title2.bold()).foregroundStyle(JourneyVisual.primaryText)
             Text(String(format: "profile.member_since.format".localized, profile.registeredMonth))
-                .font(.caption).foregroundStyle(.white.opacity(0.55))
+                .font(.caption).foregroundStyle(JourneyVisual.secondaryText)
             HStack(spacing: 10) {
                 if profile.isVerified {
                     Label("profile.verified".localized, systemImage: "checkmark.seal.fill")
@@ -85,7 +88,7 @@ struct PublicProfileView: View {
                     Label(String(format: "%.1f (%d)", rating, profile.reviewCount), systemImage: "star.fill")
                 }
             }
-            .font(.caption.bold()).foregroundStyle(JourneyVisual.lime)
+            .font(.caption.bold()).foregroundStyle(JourneyVisual.accentText)
         }
         .frame(maxWidth: .infinity).padding(.top, 54)
     }
@@ -112,17 +115,20 @@ private struct PublicProfileListingCard: View {
             ZStack {
                 JourneyVisual.lime.opacity(0.12)
                 Image(systemName: listing.listingType == "item" ? "shippingbox.fill" : "person.2.fill")
-                    .foregroundStyle(JourneyVisual.lime)
+                    .foregroundStyle(JourneyVisual.accentStrong)
             }
             .frame(width: 58, height: 58).clipShape(RoundedRectangle(cornerRadius: 15))
             VStack(alignment: .leading, spacing: 5) {
-                Text(listing.title).font(.headline).foregroundStyle(.white).lineLimit(2)
+                Text(listing.title).font(.headline).foregroundStyle(JourneyVisual.primaryText).lineLimit(2)
                 Text(listing.isFree ? "marketplace.free".localized : (listing.priceInfo ?? listing.priceCHF.map { "CHF \($0)" } ?? ""))
-                    .font(.caption.bold()).foregroundStyle(JourneyVisual.lime)
+                    .font(.caption.bold()).foregroundStyle(JourneyVisual.accentText)
             }
             Spacer()
-            Image(systemName: "chevron.right").foregroundStyle(.white.opacity(0.35))
+            Image(systemName: "chevron.right").foregroundStyle(JourneyVisual.secondaryText)
         }
-        .padding(13).background(.white.opacity(0.07)).clipShape(RoundedRectangle(cornerRadius: 20))
+        .padding(13)
+        .background(JourneyVisual.elevatedSurface)
+        .clipShape(RoundedRectangle(cornerRadius: 20))
+        .overlay(RoundedRectangle(cornerRadius: 20).stroke(JourneyVisual.softBorder))
     }
 }

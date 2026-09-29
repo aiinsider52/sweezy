@@ -32,7 +32,8 @@ struct SecurityHardeningTests {
         #expect(DeepLink.cvBuilder.rootTabIndex == 1)
         #expect(DeepLink.map(filter: "nature").rootTabIndex == 2)
         #expect(DeepLink.place(id: "zurich").rootTabIndex == 2)
-        #expect(DeepLink.profile.rootTabIndex == 4)
+        // Profile opens as a sheet from Home. Tab 4 now belongs to Sweezy Circle.
+        #expect(DeepLink.profile.rootTabIndex == 0)
         #expect(DeepLink.news.rootTabIndex == 0)
         #expect(DeepLink.chat(id: "conversation_1").rootTabIndex == nil)
     }

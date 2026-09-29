@@ -101,6 +101,58 @@ _CANTON_COORDS = {
     "JU": (47.3656, 7.3444),
 }
 
+_COUNTRY_LOCATIONS = {
+    "CH": ("switzerland", "schweiz", "suisse", "svizzera"),
+    "DE": ("germany", "deutschland"),
+    "AT": ("austria", "österreich", "oesterreich"),
+}
+
+_REGION_TERMS = {
+    "CH": _CANTON_TERMS,
+    "DE": {
+        "DE-BW": ("baden-württemberg", "baden württemberg", "stuttgart", "karlsruhe", "freiburg im breisgau"),
+        "DE-BY": ("bayern", "bavaria", "münchen", "munich", "nürnberg", "augsburg"),
+        "DE-BE": ("berlin",),
+        "DE-BB": ("brandenburg", "potsdam"),
+        "DE-HB": ("bremen", "bremerhaven"),
+        "DE-HH": ("hamburg",),
+        "DE-HE": ("hessen", "frankfurt", "wiesbaden", "darmstadt"),
+        "DE-MV": ("mecklenburg-vorpommern", "rostock", "schwerin"),
+        "DE-NI": ("niedersachsen", "hannover", "braunschweig", "oldenburg"),
+        "DE-NW": ("nordrhein-westfalen", "köln", "cologne", "düsseldorf", "dortmund", "essen", "bonn"),
+        "DE-RP": ("rheinland-pfalz", "mainz", "koblenz"),
+        "DE-SL": ("saarland", "saarbrücken"),
+        "DE-SN": ("sachsen", "dresden", "leipzig", "chemnitz"),
+        "DE-ST": ("sachsen-anhalt", "magdeburg", "halle"),
+        "DE-SH": ("schleswig-holstein", "kiel", "lübeck"),
+        "DE-TH": ("thüringen", "erfurt", "jena"),
+    },
+    "AT": {
+        "AT-1": ("burgenland", "eisenstadt"),
+        "AT-2": ("kärnten", "kaernten", "klagenfurt", "villach"),
+        "AT-3": ("niederösterreich", "st. pölten", "st pölten"),
+        "AT-4": ("oberösterreich", "linz", "wels"),
+        "AT-5": ("salzburg",),
+        "AT-6": ("steiermark", "styria", "graz"),
+        "AT-7": ("tirol", "tyrol", "innsbruck"),
+        "AT-8": ("vorarlberg", "bregenz", "dornbirn"),
+        "AT-9": ("wien", "vienna"),
+    },
+}
+
+_REGION_COORDS = {
+    **_CANTON_COORDS,
+    "DE-BW": (48.7758, 9.1829), "DE-BY": (48.1351, 11.5820), "DE-BE": (52.5200, 13.4050),
+    "DE-BB": (52.3906, 13.0645), "DE-HB": (53.0793, 8.8017), "DE-HH": (53.5511, 9.9937),
+    "DE-HE": (50.0826, 8.2493), "DE-MV": (53.6355, 11.4012), "DE-NI": (52.3759, 9.7320),
+    "DE-NW": (51.2277, 6.7735), "DE-RP": (49.9929, 8.2473), "DE-SL": (49.2402, 6.9969),
+    "DE-SN": (51.0504, 13.7373), "DE-ST": (52.1205, 11.6276), "DE-SH": (54.3233, 10.1228),
+    "DE-TH": (50.9848, 11.0299),
+    "AT-1": (47.8454, 16.5270), "AT-2": (46.6247, 14.3053), "AT-3": (48.2035, 15.6382),
+    "AT-4": (48.3069, 14.2858), "AT-5": (47.8095, 13.0550), "AT-6": (47.0707, 15.4395),
+    "AT-7": (47.2692, 11.4041), "AT-8": (47.5031, 9.7471), "AT-9": (48.2082, 16.3738),
+}
+
 
 @dataclass
 class NormalizedJob:
@@ -113,6 +165,7 @@ class NormalizedJob:
     snippet: str | None = None
     location: str | None = None
     canton: str | None = None
+    country: str = "CH"
     employment_type: str | None = None
     workplace_type: str | None = None
     salary_text: str | None = None
@@ -186,10 +239,27 @@ def job_fingerprint(title: str, company: str | None, location: str | None) -> st
 
 
 def _infer_canton(location: str | None) -> str | None:
+    return _infer_subdivision("CH", location)
+
+
+def _infer_country(location: str | None, default: str | None = "CH") -> str | None:
+    if not location:
+        return default
+    value = location.casefold()
+    for country, terms in _COUNTRY_LOCATIONS.items():
+        if any(term in value for term in terms):
+            return country
+    for country, regions in _REGION_TERMS.items():
+        if any(any(term in value for term in terms) for terms in regions.values()):
+            return country
+    return default
+
+
+def _infer_subdivision(country: str, location: str | None) -> str | None:
     if not location:
         return None
-    value = location.lower()
-    for code, terms in _CANTON_TERMS.items():
+    value = location.casefold()
+    for code, terms in _REGION_TERMS.get(country, {}).items():
         if re.search(rf"\b{re.escape(code.lower())}\b", value) or any(
             term in value for term in terms
         ):
@@ -317,67 +387,77 @@ async def _fetch_jooble(client: httpx.AsyncClient) -> list[NormalizedJob]:
     pages = max(1, min(int(os.getenv("JOOBLE_SYNC_PAGES", "5")), 20))
     per_page = max(10, min(int(os.getenv("JOOBLE_RESULTS_PER_PAGE", "50")), 100))
     queries = _csv_env("JOOBLE_SYNC_QUERIES") or [""]
+    countries = [
+        code.upper()
+        for code in (_csv_env("JOBS_COUNTRIES") or ["CH", "DE", "AT"])
+        if code.upper() in _COUNTRY_LOCATIONS
+    ]
+    country_locations = {"CH": "Switzerland", "DE": "Germany", "AT": "Austria"}
     output: list[NormalizedJob] = []
-    for query in queries:
-        for page in range(1, pages + 1):
-            response = await client.post(
-                f"{base_url}/{key}",
-                json={
-                    "keywords": query,
-                    "location": "Switzerland",
-                    "radius": "80",
-                    "page": str(page),
-                    "ResultOnPage": str(per_page),
-                    "SearchMode": "0",
-                    "companysearch": "false",
-                },
-            )
-            response.raise_for_status()
-            payload = response.json()
-            rows = payload.get("jobs") or []
-            for row in rows:
-                title = _clean_text(row.get("title"), 300) or ""
-                url = str(row.get("link") or "")
-                if not title or not url:
-                    continue
-                description = _clean_text(row.get("snippet"), 30_000)
-                location = _clean_text(row.get("location"), 300)
-                salary_text = _clean_text(row.get("salary"), 180)
-                salary_min, salary_max, salary_period = _parse_salary(salary_text)
-                permits, no_experience, degree, recognition = _infer_requirements(
-                    f"{title} {description or ''}"
+    for country in countries:
+        for query in queries:
+            for page in range(1, pages + 1):
+                response = await client.post(
+                    f"{base_url}/{key}",
+                    json={
+                        "keywords": query,
+                        "location": country_locations[country],
+                        "radius": "80",
+                        "page": str(page),
+                        "ResultOnPage": str(per_page),
+                        "SearchMode": "0",
+                        "companysearch": "false",
+                    },
                 )
-                output.append(
-                    NormalizedJob(
-                        source="jooble",
-                        source_job_id=_source_id(
-                            "jooble", row.get("id"), url, title, row.get("company")
-                        ),
-                        title=title,
-                        company=_clean_text(row.get("company"), 250),
-                        apply_url=url,
-                        description=description,
-                        snippet=_clean_text(description, 1200),
-                        location=location,
-                        canton=_infer_canton(location),
-                        employment_type=_clean_text(row.get("type"), 60),
-                        workplace_type=_infer_workplace(f"{title} {description or ''}"),
-                        salary_text=salary_text,
-                        salary_min=salary_min,
-                        salary_max=salary_max,
-                        salary_currency=_salary_currency(salary_text),
-                        salary_period=salary_period,
-                        languages=_infer_languages(description or ""),
-                        permit_requirements=permits,
-                        no_experience_required=no_experience,
-                        degree_required=degree,
-                        recognition_required=recognition,
-                        posted_at=_parse_date(row.get("updated")),
-                        source_updated_at=_parse_date(row.get("updated")),
+                response.raise_for_status()
+                payload = response.json()
+                rows = payload.get("jobs") or []
+                for row in rows:
+                    title = _clean_text(row.get("title"), 300) or ""
+                    url = str(row.get("link") or "")
+                    if not title or not url:
+                        continue
+                    description = _clean_text(row.get("snippet"), 30_000)
+                    location = _clean_text(row.get("location"), 300)
+                    salary_text = _clean_text(row.get("salary"), 180)
+                    salary_min, salary_max, salary_period = _parse_salary(salary_text)
+                    permits, no_experience, degree, recognition = _infer_requirements(
+                        f"{title} {description or ''}"
                     )
-                )
-            if len(rows) < per_page:
-                break
+                    output.append(
+                        NormalizedJob(
+                            source="jooble",
+                            source_job_id=_source_id(
+                                "jooble", row.get("id"), url, title, row.get("company")
+                            ),
+                            title=title,
+                            company=_clean_text(row.get("company"), 250),
+                            apply_url=url,
+                            description=description,
+                            snippet=_clean_text(description, 1200),
+                            location=location,
+                            country=country,
+                            canton=_infer_subdivision(country, location),
+                            employment_type=_clean_text(row.get("type"), 60),
+                            workplace_type=_infer_workplace(f"{title} {description or ''}"),
+                            salary_text=salary_text,
+                            salary_min=salary_min,
+                            salary_max=salary_max,
+                            salary_currency=_salary_currency(
+                                salary_text, "CHF" if country == "CH" else "EUR"
+                            ),
+                            salary_period=salary_period,
+                            languages=_infer_languages(description or ""),
+                            permit_requirements=permits,
+                            no_experience_required=no_experience,
+                            degree_required=degree,
+                            recognition_required=recognition,
+                            posted_at=_parse_date(row.get("updated")),
+                            source_updated_at=_parse_date(row.get("updated")),
+                        )
+                    )
+                if len(rows) < per_page:
+                    break
     return output
 
 
@@ -394,15 +474,10 @@ async def _fetch_greenhouse(client: httpx.AsyncClient) -> list[NormalizedJob]:
         response.raise_for_status()
         for row in response.json().get("jobs", []):
             location = _clean_text((row.get("location") or {}).get("name"), 300)
-            if (
-                location
-                and not _infer_canton(location)
-                and not any(
-                    term in location.lower()
-                    for term in ("switzerland", "schweiz", "suisse", "remote")
-                )
-            ):
+            country = _infer_country(location, None)
+            if country is None and location and "remote" not in location.casefold():
                 continue
+            country = country or "CH"
             title = _clean_text(row.get("title"), 300) or ""
             url = str(row.get("absolute_url") or "")
             if not title or not url:
@@ -425,7 +500,9 @@ async def _fetch_greenhouse(client: httpx.AsyncClient) -> list[NormalizedJob]:
                     description=description,
                     snippet=_clean_text(description, 1200),
                     location=location,
-                    canton=_infer_canton(location),
+                    country=country,
+                    canton=_infer_subdivision(country, location),
+                    salary_currency="CHF" if country == "CH" else "EUR",
                     workplace_type=_infer_workplace(
                         f"{location or ''} {description or ''}"
                     ),
@@ -455,15 +532,10 @@ async def _fetch_lever(client: httpx.AsyncClient) -> list[NormalizedJob]:
         for row in response.json():
             categories = row.get("categories") or {}
             location = _clean_text(categories.get("location"), 300)
-            if (
-                location
-                and not _infer_canton(location)
-                and not any(
-                    term in location.lower()
-                    for term in ("switzerland", "schweiz", "suisse", "remote")
-                )
-            ):
+            country = _infer_country(location, None)
+            if country is None and location and "remote" not in location.casefold():
                 continue
+            country = country or "CH"
             title = _clean_text(row.get("text"), 300) or ""
             url = str(row.get("hostedUrl") or row.get("applyUrl") or "")
             if not title or not url:
@@ -495,7 +567,8 @@ async def _fetch_lever(client: httpx.AsyncClient) -> list[NormalizedJob]:
                     description=description,
                     snippet=_clean_text(description, 1200),
                     location=location,
-                    canton=_infer_canton(location),
+                    country=country,
+                    canton=_infer_subdivision(country, location),
                     employment_type=_clean_text(categories.get("commitment"), 60),
                     workplace_type=_clean_text(row.get("workplaceType"), 30)
                     or _infer_workplace(f"{location or ''} {description or ''}"),
@@ -503,7 +576,7 @@ async def _fetch_lever(client: httpx.AsyncClient) -> list[NormalizedJob]:
                     salary_min=salary_range.get("min"),
                     salary_max=salary_range.get("max"),
                     salary_currency=_salary_currency(
-                        salary_text, str(salary_range.get("currency") or "CHF")[:3]
+                        salary_text, str(salary_range.get("currency") or ("CHF" if country == "CH" else "EUR"))[:3]
                     ),
                     salary_period=salary_range.get("interval"),
                     languages=_infer_languages(description or ""),
@@ -541,6 +614,7 @@ async def _fetch_personio(client: httpx.AsyncClient) -> list[NormalizedJob]:
             title = _clean_text(_xml_value(row, ("name", "title")), 300) or ""
             raw_id = _xml_value(row, ("id", "positionId"))
             location = _clean_text(_xml_value(row, ("office", "location", "city")), 300)
+            country = _infer_country(location, None) or "CH"
             url = (
                 _xml_value(row, ("url", "jobUrl"))
                 or f"https://{company}.jobs.personio.de/job/{raw_id or ''}"
@@ -563,7 +637,9 @@ async def _fetch_personio(client: httpx.AsyncClient) -> list[NormalizedJob]:
                     description=description,
                     snippet=_clean_text(description, 1200),
                     location=location,
-                    canton=_infer_canton(location),
+                    country=country,
+                    canton=_infer_subdivision(country, location),
+                    salary_currency="CHF" if country == "CH" else "EUR",
                     employment_type=_clean_text(
                         _xml_value(row, ("employmentType", "schedule")), 60
                     ),
@@ -617,13 +693,13 @@ def _upsert_jobs(
             # Cross-provider dedupe. Keep first canonical record and refresh it.
             job = db.execute(
                 select(Job).where(
-                    Job.canonical_url == canonical, Job.employer_id.is_(None)
+                    Job.canonical_url == canonical, Job.country == item.country, Job.employer_id.is_(None)
                 ).order_by(Job.updated_at.desc(), Job.id).limit(1)
             ).scalar_one_or_none()
         if job is None:
             job = db.execute(
                 select(Job).where(
-                    Job.dedupe_key == dedupe_key, Job.employer_id.is_(None)
+                    Job.dedupe_key == dedupe_key, Job.country == item.country, Job.employer_id.is_(None)
                 ).order_by(Job.updated_at.desc(), Job.id).limit(1)
             ).scalar_one_or_none()
         is_new = job is None
@@ -645,6 +721,7 @@ def _upsert_jobs(
         job.snippet = item.snippet
         job.location = item.location
         job.canton = item.canton
+        job.country = item.country
         job.apply_url = item.apply_url
         job.employment_type = item.employment_type
         job.workplace_type = item.workplace_type
@@ -661,8 +738,8 @@ def _upsert_jobs(
         job.no_experience_required = item.no_experience_required
         job.degree_required = item.degree_required
         job.recognition_required = item.recognition_required
-        if item.canton and item.canton in _CANTON_COORDS:
-            job.latitude, job.longitude = _CANTON_COORDS[item.canton]
+        if item.canton and item.canton in _REGION_COORDS:
+            job.latitude, job.longitude = _REGION_COORDS[item.canton]
         job.last_seen_at = now
         job.status = "active"
         job.is_verified = item.source.startswith(("greenhouse:", "lever:", "personio:"))
@@ -737,6 +814,7 @@ def _matches_alert(job: Job, alert: JobAlert) -> bool:
     ]
     return (
         (not words or any(word in text for word in words))
+        and alert.country == job.country
         and (not alert.canton or alert.canton == job.canton)
         and (
             not alert.employment_type
@@ -901,6 +979,7 @@ def job_to_item(job: Job, now: datetime | None = None) -> JobItem:
         company=job.company,
         location=job.location,
         canton=job.canton,
+        country=job.country,
         url=job.apply_url,
         posted_at=job.posted_at,
         employment_type=job.employment_type,
@@ -936,6 +1015,7 @@ def search_catalog(
     db: Session,
     *,
     q: str | None,
+    country: str = "CH",
     canton: str | None,
     employment_type: str | None,
     workplace_type: str | None,
@@ -948,6 +1028,7 @@ def search_catalog(
     now = datetime.now(timezone.utc)
     conditions = [
         Job.status == "active",
+        Job.country == country,
         or_(Job.expires_at.is_(None), Job.expires_at > now),
     ]
     if q and q.strip():
@@ -1079,7 +1160,7 @@ def _explainable_score(
 
 
 async def match_jobs(db: Session, profile: JobMatchProfile) -> JobMatchResponse:
-    conditions = [Job.status == "active"]
+    conditions = [Job.status == "active", Job.country == profile.country]
     if profile.canton:
         conditions.append(
             or_(Job.canton == profile.canton, Job.workplace_type == "remote")
@@ -1176,6 +1257,7 @@ async def search_jobs(
         items, _, sources, _ = search_catalog(
             db,
             q=q,
+            country="CH",
             canton=canton,
             employment_type=None,
             workplace_type=None,

@@ -16,13 +16,13 @@ enum FriendsAPI {
     let message: String
     switch status {
     case 401:
-      message = "Сесія завершилась. Увійди знову — введені дані залишаться на екрані."
+      message = "Сесія завершилась. Увійди знову — введені дані залишаться на екрані.".localized
     case 403:
-      message = "Для цієї дії потрібен підтверджений акаунт. Перевір email та повтори."
+      message = "Для цієї дії потрібен підтверджений акаунт. Перевір email та повтори.".localized
     case 404:
-      message = "Розділ тимчасово недоступний на сервері. Онови застосунок або повтори пізніше."
+      message = "Розділ тимчасово недоступний на сервері. Онови застосунок або повтори пізніше.".localized
     case 500...599:
-      message = "Сервер не зміг виконати дію. Дані не втрачено — повтори через хвилину."
+      message = "Сервер не зміг виконати дію. Дані не втрачено — повтори через хвилину.".localized
     default:
       message = fallback
     }
@@ -84,6 +84,7 @@ enum FriendsAPI {
   ) async throws -> SocialProfilePage {
     var c = URLComponents(url: APIClient.url("friends/profiles"), resolvingAgainstBaseURL: false)!
     c.queryItems = [
+      URLQueryItem(name: "country_code", value: APIClient.countryCode),
       query.isEmpty ? nil : URLQueryItem(name: "q", value: query),
       canton.map { URLQueryItem(name: "canton", value: $0) },
       interest.map { URLQueryItem(name: "interest", value: $0.rawValue) },
@@ -109,6 +110,7 @@ enum FriendsAPI {
     var components = URLComponents(
       url: APIClient.url("friends/swipes/discovery"), resolvingAgainstBaseURL: false)!
     components.queryItems = [
+      URLQueryItem(name: "country_code", value: APIClient.countryCode),
       canton.map { URLQueryItem(name: "canton", value: $0) },
       interest.map { URLQueryItem(name: "interest", value: $0.rawValue) },
       language.map { URLQueryItem(name: "language", value: $0) },
@@ -119,7 +121,7 @@ enum FriendsAPI {
     let (data, response) = try await APIClient.authorizedData(
       for: request, context: "friends_swipe_deck")
     guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
-      throw responseError(data, response: response, fallback: "Не вдалося завантажити нові знайомства")
+      throw responseError(data, response: response, fallback: "Не вдалося завантажити нові знайомства".localized)
     }
     return try ChatAPI.decoder.decode(SocialSwipeDeck.self, from: data)
   }
@@ -135,7 +137,7 @@ enum FriendsAPI {
     let (data, response) = try await APIClient.authorizedData(
       for: request, context: "friends_swipe_undo")
     guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
-      throw responseError(data, response: response, fallback: "Не вдалося повернути профіль")
+      throw responseError(data, response: response, fallback: "Не вдалося повернути профіль".localized)
     }
   }
   static func myProfile() async throws -> SocialProfile { try await call("friends/profile/me") }
@@ -158,7 +160,9 @@ enum FriendsAPI {
       body: try JSONEncoder().encode(Decision(status: accept ? "accepted" : "declined")))
   }
   static func events(canton: String? = nil) async throws -> [SocialEvent] {
-    try await call("friends/events" + (canton.map { "?canton=\($0)" } ?? ""))
+    var path = "friends/events?country_code=\(APIClient.countryCode)"
+    if let canton { path += "&canton=\(canton)" }
+    return try await call(path)
   }
   static func attend(_ id: String, status: String, visible: Bool = true) async throws
     -> SocialAction

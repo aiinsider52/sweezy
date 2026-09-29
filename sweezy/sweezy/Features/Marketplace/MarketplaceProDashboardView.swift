@@ -28,7 +28,7 @@ struct MarketplaceProDashboardView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                JourneyPhotoBackground(imageName: JourneyBackdrop.market.rawValue, blurRadius: 12, darkness: 0.84)
+                JourneyVisual.pageBackground.ignoresSafeArea()
                 if model.isLoading && model.profile == nil {
                     ProgressView().tint(JourneyVisual.lime)
                 } else if model.profile == nil {
@@ -86,12 +86,12 @@ struct MarketplaceProDashboardView: View {
         HStack(spacing: 12) {
             ZStack { RoundedRectangle(cornerRadius: 16).fill(JourneyVisual.lime); Image(systemName: "briefcase.fill").font(.title3.bold()).foregroundStyle(.black) }.frame(width: 50, height: 50)
             VStack(alignment: .leading, spacing: 2) {
-                HStack(spacing: 7) { Text(model.profile?.displayName ?? "Sweezy Pro").font(.headline).foregroundStyle(.white).lineLimit(1); if model.profile?.isVerified == true { Image(systemName: "checkmark.seal.fill").foregroundStyle(JourneyVisual.lime) } }
+                HStack(spacing: 7) { Text(model.profile?.displayName ?? "Sweezy Pro").font(.headline).foregroundStyle(JourneyVisual.primaryText).lineLimit(1); if model.profile?.isVerified == true { Image(systemName: "checkmark.seal.fill").foregroundStyle(Theme.Colors.textPrimary) } }
                 Text(profileStatus).font(.caption).foregroundStyle(profileStatusColor)
             }
             Spacer()
-            if workspace == nil { Button { editor = .profile } label: { Image(systemName: "slider.horizontal.3").foregroundStyle(.white).frame(width: 42, height: 42).background(.white.opacity(0.08)).clipShape(Circle()) } }
-        }.padding(.horizontal, 18).padding(.top, 8).padding(.bottom, 12).background(.black.opacity(0.42))
+            if workspace == nil { Button { editor = .profile } label: { Image(systemName: "slider.horizontal.3").foregroundStyle(JourneyVisual.primaryText).frame(width: 42, height: 42).background(Theme.Colors.card).clipShape(Circle()) } }
+        }.padding(.horizontal, 18).padding(.top, 8).padding(.bottom, 12).background(Theme.Colors.card)
     }
 
     private var tabRail: some View {
@@ -100,19 +100,19 @@ struct MarketplaceProDashboardView: View {
                 ForEach(availableTabs) { item in
                     Button { withAnimation(.snappy) { tab = item } } label: {
                         Label(item.title, systemImage: item.icon).font(.caption.weight(.bold)).padding(.horizontal, 14).frame(height: 44)
-                            .foregroundStyle(tab == item ? .black : .white.opacity(0.62)).background(tab == item ? JourneyVisual.lime : .white.opacity(0.07), in: Capsule())
+                            .foregroundStyle(tab == item ? .black : JourneyVisual.primaryText).background(tab == item ? JourneyVisual.lime : JourneyVisual.softSurface, in: Capsule())
                     }.buttonStyle(.plain)
                 }
             }.padding(.horizontal, 18).padding(.bottom, 10)
-        }.background(.black.opacity(0.42))
+        }.background(Theme.Colors.card)
     }
 
     private var todayView: some View {
         VStack(alignment: .leading, spacing: 18) {
             VStack(alignment: .leading, spacing: 10) {
-                Text("СЬОГОДНІ У БІЗНЕСІ").font(.caption.bold()).tracking(2).foregroundStyle(JourneyVisual.lime)
-                Text(todayHeadline).font(.system(size: 30, weight: .black, design: .rounded)).foregroundStyle(.white)
-                Text(todayAdvice).foregroundStyle(.white.opacity(0.62))
+                Text("СЬОГОДНІ У БІЗНЕСІ".localized).font(.caption.bold()).tracking(2).foregroundStyle(Theme.Colors.textPrimary)
+                Text(todayHeadline).font(.system(size: 25, weight: .bold, design: .default)).foregroundStyle(JourneyVisual.primaryText)
+                Text(todayAdvice).foregroundStyle(JourneyVisual.secondaryText)
             }
             metricsGrid
             if let next = model.dashboard?.bookings.first(where: { $0.startsAt >= Date() }) { nextBookingCard(next) }
@@ -123,18 +123,18 @@ struct MarketplaceProDashboardView: View {
 
     private var metricsGrid: some View {
         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 11) {
-            metric("Нові заявки", model.dashboard?.openLeads ?? 0, "bubble.left.and.exclamationmark.bubble.right.fill", JourneyVisual.lime)
-            metric("Записи сьогодні", model.dashboard?.bookingsToday ?? 0, "calendar.badge.clock", .cyan)
-            metric("Перегляди", model.dashboard?.totalViews ?? listings.reduce(0) { $0 + $1.viewCount }, "eye.fill", .white)
-            metric("Конверсія", model.dashboard?.conversionPercent ?? 0, "chart.line.uptrend.xyaxis", .orange, suffix: "%")
+            metric("Нові заявки".localized, model.dashboard?.openLeads ?? 0, "bubble.left.and.exclamationmark.bubble.right.fill", JourneyCategoryPalette.lime)
+            metric("Записи сьогодні".localized, model.dashboard?.bookingsToday ?? 0, "calendar.badge.clock", JourneyCategoryPalette.teal)
+            metric("Перегляди".localized, model.dashboard?.totalViews ?? listings.reduce(0) { $0 + $1.viewCount }, "eye.fill", JourneyCategoryPalette.sky)
+            metric("Конверсія".localized, model.dashboard?.conversionPercent ?? 0, "chart.line.uptrend.xyaxis", JourneyCategoryPalette.sand, suffix: "%")
         }
     }
 
-    private func metric(_ title: String, _ value: Int, _ icon: String, _ color: Color, suffix: String = "") -> some View {
+    private func metric(_ title: String, _ value: Int, _ icon: String, _ swatch: JourneyCategorySwatch, suffix: String = "") -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            Image(systemName: icon).foregroundStyle(color).font(.headline)
-            Text("\(value)\(suffix)").font(.system(size: 27, weight: .black, design: .rounded)).foregroundStyle(.white)
-            Text(title).font(.caption).foregroundStyle(.white.opacity(0.55))
+            JourneyCategoryIcon(symbol: icon, swatch: swatch, size: 36)
+            Text("\(value)\(suffix)").font(.system(size: 23, weight: .bold, design: .default)).foregroundStyle(JourneyVisual.primaryText)
+            Text(title).font(.caption).foregroundStyle(JourneyVisual.secondaryText)
         }.frame(maxWidth: .infinity, alignment: .leading).padding(16).proCard()
     }
 
@@ -142,8 +142,8 @@ struct MarketplaceProDashboardView: View {
         Button { tab = .calendar } label: {
             HStack(spacing: 14) {
                 ProDateBadge(date: booking.startsAt)
-                VStack(alignment: .leading, spacing: 4) { Text("Наступний запис").font(.caption.bold()).foregroundStyle(JourneyVisual.lime); Text(booking.customerName).font(.headline).foregroundStyle(.white); Text(booking.startsAt.formatted(date: .abbreviated, time: .shortened)).font(.caption).foregroundStyle(.white.opacity(0.55)) }
-                Spacer(); Image(systemName: "arrow.right").foregroundStyle(JourneyVisual.lime)
+                VStack(alignment: .leading, spacing: 4) { Text("Наступний запис".localized).font(.caption.bold()).foregroundStyle(Theme.Colors.textPrimary); Text(booking.customerName).font(.headline).foregroundStyle(JourneyVisual.primaryText); Text(booking.startsAt.formatted(date: .abbreviated, time: .shortened)).font(.caption).foregroundStyle(JourneyVisual.secondaryText) }
+                Spacer(); Image(systemName: "arrow.right").foregroundStyle(Theme.Colors.textPrimary)
             }.padding(16).proCard(stroke: JourneyVisual.lime.opacity(0.28))
         }.buttonStyle(.plain)
     }
@@ -152,39 +152,39 @@ struct MarketplaceProDashboardView: View {
         Button { Task { await openConversation(lead) } } label: {
             HStack(spacing: 14) {
                 Image(systemName: "person.crop.circle.badge.exclamationmark").font(.title2).foregroundStyle(.black).frame(width: 50, height: 50).background(JourneyVisual.lime).clipShape(RoundedRectangle(cornerRadius: 15))
-                VStack(alignment: .leading, spacing: 4) { Text("Потрібна відповідь").font(.caption.bold()).foregroundStyle(JourneyVisual.lime); Text(lead.customerName).font(.headline).foregroundStyle(.white); Text(lead.nextAction ?? "Відкрити діалог").font(.caption).foregroundStyle(.white.opacity(0.55)).lineLimit(1) }
-                Spacer(); Image(systemName: "message.fill").foregroundStyle(JourneyVisual.lime)
+                VStack(alignment: .leading, spacing: 4) { Text("Потрібна відповідь".localized).font(.caption.bold()).foregroundStyle(Theme.Colors.textPrimary); Text(lead.customerName).font(.headline).foregroundStyle(JourneyVisual.primaryText); Text(lead.nextAction ?? "Відкрити діалог".localized).font(.caption).foregroundStyle(JourneyVisual.secondaryText).lineLimit(1) }
+                Spacer(); Image(systemName: "message.fill").foregroundStyle(Theme.Colors.textPrimary)
             }.padding(16).proCard(stroke: JourneyVisual.lime.opacity(0.28))
         }.buttonStyle(.plain)
     }
 
     private var businessHealth: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Стан бізнесу").font(.title3.bold()).foregroundStyle(.white)
-            healthRow("Швидкість відповіді", model.dashboard?.responseRatePercent ?? 0)
-            healthRow("Заповнення профілю", profileCompletion)
-            healthRow("Активні послуги", min(100, model.services.filter(\.isActive).count * 25))
+            Text("Стан бізнесу".localized).font(.title3.bold()).foregroundStyle(JourneyVisual.primaryText)
+            healthRow("Швидкість відповіді".localized, model.dashboard?.responseRatePercent ?? 0)
+            healthRow("Заповнення профілю".localized, profileCompletion)
+            healthRow("Активні послуги".localized, min(100, model.services.filter(\.isActive).count * 25))
         }.padding(17).proCard()
     }
 
     private func healthRow(_ title: String, _ value: Int) -> some View {
         VStack(spacing: 7) {
-            HStack { Text(title).font(.subheadline).foregroundStyle(.white.opacity(0.72)); Spacer(); Text("\(value)%").font(.caption.bold()).foregroundStyle(JourneyVisual.lime) }
-            GeometryReader { geo in Capsule().fill(.white.opacity(0.08)).overlay(alignment: .leading) { Capsule().fill(JourneyVisual.lime).frame(width: geo.size.width * CGFloat(value) / 100) } }.frame(height: 5)
+            HStack { Text(title).font(.subheadline).foregroundStyle(JourneyVisual.secondaryText); Spacer(); Text("\(value)%").font(.caption.bold()).foregroundStyle(Theme.Colors.textPrimary) }
+            GeometryReader { geo in Capsule().fill(JourneyVisual.softBorder).overlay(alignment: .leading) { Capsule().fill(JourneyVisual.lime).frame(width: geo.size.width * CGFloat(value) / 100) } }.frame(height: 5)
         }
     }
 
     private var leadsView: some View {
         VStack(alignment: .leading, spacing: 16) {
-            sectionTitle("Заявки", "Веди клієнта від першого повідомлення до виконаної роботи")
-            if model.leads.isEmpty { proEmpty("Нових заявок немає", "Звернення з Marketplace автоматично з’являться тут.", "bubble.left.and.bubble.right") }
+            sectionTitle("Заявки".localized, "Веди клієнта від першого повідомлення до виконаної роботи".localized)
+            if model.leads.isEmpty { proEmpty("Нових заявок немає".localized, "Звернення з Marketplace автоматично з’являться тут.".localized, "bubble.left.and.bubble.right") }
             ForEach(model.leads) { lead in
                 VStack(alignment: .leading, spacing: 12) {
-                    HStack { VStack(alignment: .leading, spacing: 3) { Text(lead.customerName).font(.headline).foregroundStyle(.white); Text(lead.source.capitalized).font(.caption).foregroundStyle(.white.opacity(0.45)) }; Spacer(); ProStatusPill(status: lead.status) }
-                    if let action = lead.nextAction { Label(action, systemImage: "arrow.turn.down.right").font(.caption).foregroundStyle(.white.opacity(0.62)) }
+                    HStack { VStack(alignment: .leading, spacing: 3) { Text(lead.customerName).font(.headline).foregroundStyle(JourneyVisual.primaryText); Text(lead.source.capitalized).font(.caption).foregroundStyle(JourneyVisual.secondaryText) }; Spacer(); ProStatusPill(status: lead.status) }
+                    if let action = lead.nextAction { Label(action, systemImage: "arrow.turn.down.right").font(.caption).foregroundStyle(JourneyVisual.secondaryText) }
                     HStack {
-                        if workspace == nil, lead.conversationID != nil { Button("Відкрити чат") { Task { await openConversation(lead) } }.buttonStyle(ProOutlineButton()) }
-                        Menu("Змінити етап") { ForEach(ProLeadStage.allCases) { stage in Button(stage.title) { Task { await model.changeLead(lead, to: stage.rawValue) } } } }.buttonStyle(ProLimeButton()).disabled(model.isReadOnly)
+                        if workspace == nil, lead.conversationID != nil { Button("Відкрити чат".localized) { Task { await openConversation(lead) } }.buttonStyle(ProOutlineButton()) }
+                        Menu("Змінити етап".localized) { ForEach(ProLeadStage.allCases) { stage in Button(stage.title) { Task { await model.changeLead(lead, to: stage.rawValue) } } } }.buttonStyle(ProLimeButton()).disabled(model.isReadOnly)
                     }
                 }.padding(16).proCard(stroke: lead.status == "new" ? JourneyVisual.lime.opacity(0.35) : .clear)
             }
@@ -193,12 +193,12 @@ struct MarketplaceProDashboardView: View {
 
     private var calendarView: some View {
         VStack(alignment: .leading, spacing: 16) {
-            HStack { sectionTitle("Календар", "Записи, нагадування та статуси"); Spacer(); plusButton { editor = .booking } }
-            if model.bookings.isEmpty { proEmpty("Календар порожній", "Створи перший запис або перетвори заявку на бронювання.", "calendar.badge.plus") }
+            HStack { sectionTitle("Календар".localized, "Записи, нагадування та статуси".localized); Spacer(); plusButton { editor = .booking } }
+            if model.bookings.isEmpty { proEmpty("Календар порожній".localized, "Створи перший запис або перетвори заявку на бронювання.".localized, "calendar.badge.plus") }
             ForEach(model.bookings.sorted { $0.startsAt < $1.startsAt }) { booking in
                 HStack(alignment: .top, spacing: 14) {
                     ProDateBadge(date: booking.startsAt)
-                    VStack(alignment: .leading, spacing: 5) { Text(booking.customerName).font(.headline).foregroundStyle(.white); Text(booking.startsAt.formatted(date: .abbreviated, time: .shortened)).foregroundStyle(.white.opacity(0.65)); if let location = booking.location, !location.isEmpty { Label(location, systemImage: "mappin").font(.caption).foregroundStyle(.white.opacity(0.48)) } }
+                    VStack(alignment: .leading, spacing: 5) { Text(booking.customerName).font(.headline).foregroundStyle(JourneyVisual.primaryText); Text(booking.startsAt.formatted(date: .abbreviated, time: .shortened)).foregroundStyle(JourneyVisual.secondaryText); if let location = booking.location, !location.isEmpty { Label(location, systemImage: "mappin").font(.caption).foregroundStyle(JourneyVisual.secondaryText) } }
                     Spacer(); Menu { ForEach(["confirmed", "completed", "cancelled", "no_show"], id: \.self) { status in Button(status.capitalized) { Task { await model.changeBooking(booking, to: status) } } } } label: { ProStatusPill(status: booking.status) }.disabled(model.isReadOnly)
                 }.padding(16).proCard()
             }
@@ -207,13 +207,13 @@ struct MarketplaceProDashboardView: View {
 
     private var clientsView: some View {
         VStack(alignment: .leading, spacing: 16) {
-            HStack { sectionTitle("Клієнти", "Історія, нотатки та повторні звернення"); Spacer(); plusButton { editor = .client } }
-            if model.clients.isEmpty { proEmpty("Клієнтів ще немає", "Додай клієнта вручну або створи його із заявки.", "person.2") }
+            HStack { sectionTitle("Клієнти".localized, "Історія, нотатки та повторні звернення".localized); Spacer(); plusButton { editor = .client } }
+            if model.clients.isEmpty { proEmpty("Клієнтів ще немає".localized, "Додай клієнта вручну або створи його із заявки.".localized, "person.2") }
             ForEach(model.clients) { client in
                 HStack(spacing: 13) {
                     Text(client.displayName.prefix(1).uppercased()).font(.title3.bold()).foregroundStyle(.black).frame(width: 48, height: 48).background(JourneyVisual.lime).clipShape(Circle())
-                    VStack(alignment: .leading, spacing: 3) { Text(client.displayName).font(.headline).foregroundStyle(.white); Text("\(client.completedCount) виконано · CHF \(Double(client.totalSpendCents) / 100, specifier: "%.0f")").font(.caption).foregroundStyle(.white.opacity(0.52)) }
-                    Spacer(); Image(systemName: "chevron.right").foregroundStyle(.white.opacity(0.3))
+                    VStack(alignment: .leading, spacing: 3) { Text(client.displayName).font(.headline).foregroundStyle(JourneyVisual.primaryText); Text("\(client.completedCount) виконано · CHF \(Double(client.totalSpendCents) / 100, specifier: "%.0f")").font(.caption).foregroundStyle(JourneyVisual.secondaryText) }
+                    Spacer(); Image(systemName: "chevron.right").foregroundStyle(JourneyVisual.secondaryText)
                 }.padding(15).proCard()
             }
         }
@@ -221,28 +221,28 @@ struct MarketplaceProDashboardView: View {
 
     private var receptionistView: some View {
         VStack(alignment: .leading, spacing: 16) {
-            sectionTitle("AI-рецепціоніст", "Знає твої послуги, правила й стиль спілкування")
+            sectionTitle("AI-рецепціоніст".localized, "Знає твої послуги, правила й стиль спілкування".localized)
             HStack(spacing: 13) {
                 ZStack { Circle().fill(JourneyVisual.lime); Image(systemName: "sparkles").font(.title2.bold()).foregroundStyle(.black) }.frame(width: 58, height: 58)
-                VStack(alignment: .leading, spacing: 4) { Text(model.aiSettings.aiEnabled ? "Рецепціоніст активний" : "Рецепціоніст вимкнений").font(.headline).foregroundStyle(.white); Text(model.aiSettings.aiAutoReply ? "Автовідповіді увімкнені" : "Відповіді спочатку підтверджуєш ти").font(.caption).foregroundStyle(.white.opacity(0.55)) }
+                VStack(alignment: .leading, spacing: 4) { Text(model.aiSettings.aiEnabled ? "Рецепціоніст активний".localized : "Рецепціоніст вимкнений".localized).font(.headline).foregroundStyle(JourneyVisual.primaryText); Text(model.aiSettings.aiAutoReply ? "Автовідповіді увімкнені".localized : "Відповіді спочатку підтверджуєш ти".localized).font(.caption).foregroundStyle(JourneyVisual.secondaryText) }
                 Spacer(); Toggle("", isOn: Binding(get: { model.aiSettings.aiEnabled }, set: { model.aiSettings.aiEnabled = $0; Task { await model.saveAI() } })).labelsHidden().tint(JourneyVisual.lime)
             }.padding(17).proCard(stroke: JourneyVisual.lime.opacity(0.35))
-            NavigationLink { AIReceptionistSettingsView(model: model) } label: { proAction("Налаштувати характер і знання", "slider.horizontal.3", "Факти, правила, мови, тон та передача людині") }.buttonStyle(.plain)
-            NavigationLink { AIReceptionistTestView(model: model) } label: { proAction("Протестувати відповідь", "message.badge.waveform", "Напиши запит клієнта й перевір результат") }.buttonStyle(.plain)
-            VStack(alignment: .leading, spacing: 10) { Label("Контроль власника", systemImage: "hand.raised.fill").foregroundStyle(JourneyVisual.lime).font(.headline); Text("AI не вигадує ціни, не підтверджує вільний час і передає тобі скарги, повернення коштів та складні випадки.").foregroundStyle(.white.opacity(0.6)).font(.subheadline) }.padding(17).proCard()
+            NavigationLink { AIReceptionistSettingsView(model: model) } label: { proAction("Налаштувати характер і знання".localized, "slider.horizontal.3", "Факти, правила, мови, тон та передача людині".localized) }.buttonStyle(.plain)
+            NavigationLink { AIReceptionistTestView(model: model) } label: { proAction("Протестувати відповідь".localized, "message.badge.waveform", "Напиши запит клієнта й перевір результат".localized) }.buttonStyle(.plain)
+            VStack(alignment: .leading, spacing: 10) { Label("Контроль власника".localized, systemImage: "hand.raised.fill").foregroundStyle(Theme.Colors.textPrimary).font(.headline); Text("AI не вигадує ціни, не підтверджує вільний час і передає тобі скарги, повернення коштів та складні випадки.".localized).foregroundStyle(JourneyVisual.secondaryText).font(.subheadline) }.padding(17).proCard()
         }
     }
 
     private var moreView: some View {
         VStack(alignment: .leading, spacing: 18) {
-            sectionTitle("Керування", "Усе, що формує роботу твого бізнесу")
-            proGroup("Послуги", count: model.services.count, icon: "square.grid.2x2.fill", action: { editor = .service }) { ForEach(model.services.prefix(4)) { item in ProCompactRow(title: item.title, subtitle: "\(item.durationMinutes) хв · \(item.priceText)", active: item.isActive) } }
-            Button { editor = .availability } label: { proAction("Графік роботи", "clock.fill", "\(model.availability.count) активних часових вікон") }.buttonStyle(.plain)
-            proGroup("Швидкі відповіді", count: model.quickReplies.count, icon: "text.bubble.fill", action: { editor = .quickReply }) { ForEach(model.quickReplies.prefix(3)) { item in ProCompactRow(title: item.title, subtitle: item.body, active: item.isActive) } }
-            proGroup("Команда", count: model.team.count, icon: "person.3.fill", action: { editor = .team }) { ForEach(model.team.prefix(3)) { item in ProCompactRow(title: item.displayName, subtitle: "\(item.role) · \(item.status)", active: item.status == "active") } }
+            sectionTitle("Керування".localized, "Усе, що формує роботу твого бізнесу".localized)
+            proGroup("Послуги".localized, count: model.services.count, icon: "square.grid.2x2.fill", action: { editor = .service }) { ForEach(model.services.prefix(4)) { item in ProCompactRow(title: item.title, subtitle: "%@ хв · %@".localized(with: "\(item.durationMinutes)", "\(item.priceText)"), active: item.isActive) } }
+            Button { editor = .availability } label: { proAction("Графік роботи".localized, "clock.fill", "%@ активних часових вікон".localized(with: "\(model.availability.count)")) }.buttonStyle(.plain)
+            proGroup("Швидкі відповіді".localized, count: model.quickReplies.count, icon: "text.bubble.fill", action: { editor = .quickReply }) { ForEach(model.quickReplies.prefix(3)) { item in ProCompactRow(title: item.title, subtitle: item.body, active: item.isActive) } }
+            proGroup("Команда".localized, count: model.team.count, icon: "person.3.fill", action: { editor = .team }) { ForEach(model.team.prefix(3)) { item in ProCompactRow(title: item.displayName, subtitle: "\(item.role) · \(item.status)", active: item.status == "active") } }
             VStack(alignment: .leading, spacing: 12) {
-                HStack { Label("Документи", systemImage: "doc.text.fill").font(.headline).foregroundStyle(.white); Spacer(); Text("\(model.documents.count)").foregroundStyle(JourneyVisual.lime); plusButton { editor = .document } }
-                Text("Пропозиції, підтвердження та рахунки зберігаються тут.").font(.caption).foregroundStyle(.white.opacity(0.52))
+                HStack { Label("Документи".localized, systemImage: "doc.text.fill").font(.headline).foregroundStyle(JourneyVisual.primaryText); Spacer(); Text("\(model.documents.count)").foregroundStyle(Theme.Colors.textPrimary); plusButton { editor = .document } }
+                Text("Пропозиції, підтвердження та рахунки зберігаються тут.".localized).font(.caption).foregroundStyle(JourneyVisual.secondaryText)
                 ForEach(model.documents.prefix(3)) { item in
                     ProCompactRow(
                         title: item.title,
@@ -252,23 +252,23 @@ struct MarketplaceProDashboardView: View {
                 }
             }.padding(17).proCard()
             VStack(alignment: .leading, spacing: 12) {
-                Text("Просування").font(.headline).foregroundStyle(.white)
-                ForEach(listings.filter { $0.status == .approved }) { listing in HStack { Text(listing.title).foregroundStyle(.white).lineLimit(1); Spacer(); Button(listing.isFeatured ? "Активне" : "Підняти") { Task { await promote(listing) } }.font(.caption.bold()).foregroundStyle(.black).padding(.horizontal, 12).padding(.vertical, 8).background(JourneyVisual.lime, in: Capsule()).disabled(listing.isFeatured) } }
+                Text("Просування".localized).font(.headline).foregroundStyle(JourneyVisual.primaryText)
+                ForEach(listings.filter { $0.status == .approved }) { listing in HStack { Text(listing.title).foregroundStyle(JourneyVisual.primaryText).lineLimit(1); Spacer(); Button(listing.isFeatured ? "Активне".localized : "Підняти".localized) { Task { await promote(listing) } }.font(.caption.bold()).foregroundStyle(.black).padding(.horizontal, 12).padding(.vertical, 8).background(JourneyVisual.lime, in: Capsule()).disabled(listing.isFeatured) } }
             }.padding(17).proCard()
         }
     }
 
     private func proGroup<Content: View>(_ title: String, count: Int, icon: String, action: @escaping () -> Void, @ViewBuilder content: () -> Content) -> some View {
-        VStack(alignment: .leading, spacing: 12) { HStack { Label(title, systemImage: icon).font(.headline).foregroundStyle(.white); Spacer(); Text("\(count)").foregroundStyle(JourneyVisual.lime); plusButton(action) }; content() }.padding(17).proCard()
+        VStack(alignment: .leading, spacing: 12) { HStack { Label(title, systemImage: icon).font(.headline).foregroundStyle(JourneyVisual.primaryText); Spacer(); Text("\(count)").foregroundStyle(Theme.Colors.textPrimary); plusButton(action) }; content() }.padding(17).proCard()
     }
-    private func proAction(_ title: String, _ icon: String, _ subtitle: String) -> some View { HStack(spacing: 14) { Image(systemName: icon).font(.title3.bold()).foregroundStyle(.black).frame(width: 48, height: 48).background(JourneyVisual.lime).clipShape(RoundedRectangle(cornerRadius: 15)); VStack(alignment: .leading, spacing: 3) { Text(title).font(.headline).foregroundStyle(.white); Text(subtitle).font(.caption).foregroundStyle(.white.opacity(0.52)).lineLimit(2) }; Spacer(); Image(systemName: "arrow.right").foregroundStyle(JourneyVisual.lime) }.padding(16).proCard() }
-    private func sectionTitle(_ title: String, _ subtitle: String) -> some View { VStack(alignment: .leading, spacing: 4) { Text(title).font(.system(size: 27, weight: .black, design: .rounded)).foregroundStyle(.white); Text(subtitle).font(.subheadline).foregroundStyle(.white.opacity(0.55)) } }
-    private func proEmpty(_ title: String, _ subtitle: String, _ icon: String) -> some View { VStack(spacing: 12) { Image(systemName: icon).font(.largeTitle).foregroundStyle(JourneyVisual.lime); Text(title).font(.headline).foregroundStyle(.white); Text(subtitle).font(.subheadline).foregroundStyle(.white.opacity(0.55)).multilineTextAlignment(.center) }.frame(maxWidth: .infinity).padding(30).proCard() }
+    private func proAction(_ title: String, _ icon: String, _ subtitle: String) -> some View { HStack(spacing: 14) { Image(systemName: icon).font(.title3.bold()).foregroundStyle(.black).frame(width: 48, height: 48).background(JourneyVisual.lime).clipShape(RoundedRectangle(cornerRadius: 15)); VStack(alignment: .leading, spacing: 3) { Text(title).font(.headline).foregroundStyle(JourneyVisual.primaryText); Text(subtitle).font(.caption).foregroundStyle(JourneyVisual.secondaryText).lineLimit(2) }; Spacer(); Image(systemName: "arrow.right").foregroundStyle(Theme.Colors.textPrimary) }.padding(16).proCard() }
+    private func sectionTitle(_ title: String, _ subtitle: String) -> some View { VStack(alignment: .leading, spacing: 4) { Text(title).font(.system(size: 27, weight: .black, design: .default)).foregroundStyle(JourneyVisual.primaryText); Text(subtitle).font(.subheadline).foregroundStyle(JourneyVisual.secondaryText) } }
+    private func proEmpty(_ title: String, _ subtitle: String, _ icon: String) -> some View { VStack(spacing: 12) { Image(systemName: icon).font(.largeTitle).foregroundStyle(Theme.Colors.textPrimary); Text(title).font(.headline).foregroundStyle(JourneyVisual.primaryText); Text(subtitle).font(.subheadline).foregroundStyle(JourneyVisual.secondaryText).multilineTextAlignment(.center) }.frame(maxWidth: .infinity).padding(30).proCard() }
     private func plusButton(_ action: @escaping () -> Void) -> some View { Button(action: action) { Image(systemName: "plus").font(.headline).foregroundStyle(.black).frame(width: 38, height: 38).background(JourneyVisual.lime).clipShape(Circle()) } }
-    private var todayHeadline: String { (model.dashboard?.openLeads ?? 0) > 0 ? "Є клієнти, які чекають" : "Бізнес під контролем" }
-    private var todayAdvice: String { (model.dashboard?.openLeads ?? 0) > 0 ? "Відповідай швидше — це напряму впливає на конверсію." : "Нові заявки, записи й важливі дії з’являться тут." }
+    private var todayHeadline: String { (model.dashboard?.openLeads ?? 0) > 0 ? "Є клієнти, які чекають".localized : "Бізнес під контролем".localized }
+    private var todayAdvice: String { (model.dashboard?.openLeads ?? 0) > 0 ? "Відповідай швидше — це напряму впливає на конверсію.".localized : "Нові заявки, записи й важливі дії з’являться тут.".localized }
     private var profileCompletion: Int { guard let p = model.profile else { return 0 }; return [!p.displayName.isEmpty, !p.description.isEmpty, !p.languages.isEmpty, !p.deliveryModes.isEmpty, p.phone != nil || p.email != nil, p.logoURL != nil].filter { $0 }.count * 100 / 6 }
-    private var profileStatus: String { switch model.profile?.status { case "approved": "Перевірений бізнес · Plus"; case "pending": "Профіль на перевірці"; case "rejected": "Потрібні зміни"; case "suspended": "Профіль призупинено"; default: "Чернетка профілю" } }
+    private var profileStatus: String { switch model.profile?.status { case "approved": "Перевірений бізнес · Plus".localized; case "pending": "Профіль на перевірці".localized; case "rejected": "Потрібні зміни".localized; case "suspended": "Профіль призупинено".localized; default: "Чернетка профілю".localized } }
     private var profileStatusColor: Color { model.profile?.status == "approved" ? JourneyVisual.lime : .orange }
     private var availableTabs: [ProTab] { workspace == nil ? ProTab.allCases : [.today, .leads, .calendar, .clients] }
     private func openConversation(_ lead: BusinessLead) async { guard let id = lead.conversationID else { return }; do { selectedConversation = try await ChatAPI.conversation(id: id) } catch { model.error = error.localizedDescription } }
@@ -318,12 +318,12 @@ struct MarketplaceProDashboardView: View {
     func changeBooking(_ booking: BusinessBooking, to status: String) async { do { let updated = if let workspace { try await BusinessProAPI.updateWorkspaceBooking(ownerID: workspace.ownerUserID, id: booking.id, status: status) } else { try await BusinessProAPI.updateBooking(id: booking.id, status: status) }; if let i = bookings.firstIndex(where: { $0.id == booking.id }) { bookings[i] = updated } } catch { self.error = error.localizedDescription } }
 }
 
-private enum ProTab: String, CaseIterable, Identifiable { case today, leads, calendar, clients, receptionist, more; var id: String { rawValue }; var title: String { switch self { case .today: "Сьогодні"; case .leads: "Заявки"; case .calendar: "Календар"; case .clients: "Клієнти"; case .receptionist: "AI"; case .more: "Ще" } }; var icon: String { switch self { case .today: "sparkles"; case .leads: "rectangle.3.group.bubble.left.fill"; case .calendar: "calendar"; case .clients: "person.2.fill"; case .receptionist: "waveform.and.mic"; case .more: "square.grid.2x2" } } }
+private enum ProTab: String, CaseIterable, Identifiable { case today, leads, calendar, clients, receptionist, more; var id: String { rawValue }; var title: String { switch self { case .today: "Сьогодні".localized; case .leads: "Заявки".localized; case .calendar: "Календар".localized; case .clients: "Клієнти".localized; case .receptionist: "AI"; case .more: "Ще".localized } }; var icon: String { switch self { case .today: "sparkles"; case .leads: "rectangle.3.group.bubble.left.fill"; case .calendar: "calendar"; case .clients: "person.2.fill"; case .receptionist: "waveform.and.mic"; case .more: "square.grid.2x2" } } }
 private enum ProSheet: String, Identifiable { case profile, service, booking, client, quickReply, team, availability, document; var id: String { rawValue } }
-private enum ProLeadStage: String, CaseIterable, Identifiable { case new, replied, qualifying, quoted, booked, completed, lost; var id: String { rawValue }; var title: String { switch self { case .new: "Нова"; case .replied: "Відповіли"; case .qualifying: "Уточнення"; case .quoted: "Пропозиція"; case .booked: "Заброньовано"; case .completed: "Виконано"; case .lost: "Втрачено" } } }
-private struct ProStatusPill: View { let status: String; var body: some View { Text(label).font(.caption2.bold()).padding(.horizontal, 9).padding(.vertical, 6).foregroundStyle(color).background(color.opacity(0.13), in: Capsule()) }; private var label: String { switch status { case "new": "НОВА"; case "replied": "ВІДПОВІЛИ"; case "qualifying": "УТОЧНЕННЯ"; case "quoted": "ПРОПОЗИЦІЯ"; case "booked", "confirmed": "ЗАПИС"; case "completed": "ГОТОВО"; case "cancelled": "СКАСОВАНО"; case "no_show": "НЕ ПРИЙШОВ"; default: status.uppercased() } }; private var color: Color { ["new", "requested"].contains(status) ? JourneyVisual.lime : (status == "completed" ? .green : (["cancelled", "lost", "no_show"].contains(status) ? .red : .cyan)) } }
+private enum ProLeadStage: String, CaseIterable, Identifiable { case new, replied, qualifying, quoted, booked, completed, lost; var id: String { rawValue }; var title: String { switch self { case .new: "Нова".localized; case .replied: "Відповіли".localized; case .qualifying: "Уточнення".localized; case .quoted: "Пропозиція".localized; case .booked: "Заброньовано".localized; case .completed: "Виконано".localized; case .lost: "Втрачено".localized } } }
+private struct ProStatusPill: View { let status: String; var body: some View { Text(label).font(.caption2.bold()).padding(.horizontal, 9).padding(.vertical, 6).foregroundStyle(color).background(color.opacity(0.13), in: Capsule()) }; private var label: String { switch status { case "new": "НОВА".localized; case "replied": "ВІДПОВІЛИ".localized; case "qualifying": "УТОЧНЕННЯ".localized; case "quoted": "ПРОПОЗИЦІЯ".localized; case "booked", "confirmed": "ЗАПИС".localized; case "completed": "ГОТОВО".localized; case "cancelled": "СКАСОВАНО".localized; case "no_show": "НЕ ПРИЙШОВ".localized; default: status.uppercased() } }; private var color: Color { ["new", "requested"].contains(status) ? JourneyVisual.lime : (status == "completed" ? .green : (["cancelled", "lost", "no_show"].contains(status) ? .red : .cyan)) } }
 private struct ProDateBadge: View { let date: Date; var body: some View { VStack(spacing: 1) { Text(date.formatted(.dateTime.day())).font(.title2.weight(.black)); Text(date.formatted(.dateTime.month(.abbreviated))).font(.caption2.bold()).textCase(.uppercase) }.foregroundStyle(.black).frame(width: 54, height: 58).background(JourneyVisual.lime).clipShape(RoundedRectangle(cornerRadius: 15)) } }
-private struct ProCompactRow: View { let title: String; let subtitle: String; let active: Bool; var body: some View { HStack { Circle().fill(active ? JourneyVisual.lime : .white.opacity(0.2)).frame(width: 7, height: 7); VStack(alignment: .leading, spacing: 2) { Text(title).font(.subheadline.weight(.semibold)).foregroundStyle(.white); Text(subtitle).font(.caption).foregroundStyle(.white.opacity(0.45)).lineLimit(1) }; Spacer() }.padding(.vertical, 3) } }
+private struct ProCompactRow: View { let title: String; let subtitle: String; let active: Bool; var body: some View { HStack { Circle().fill(active ? JourneyVisual.lime : JourneyVisual.softBorder).frame(width: 7, height: 7); VStack(alignment: .leading, spacing: 2) { Text(title).font(.subheadline.weight(.semibold)).foregroundStyle(JourneyVisual.primaryText); Text(subtitle).font(.caption).foregroundStyle(JourneyVisual.secondaryText).lineLimit(1) }; Spacer() }.padding(.vertical, 3) } }
 private struct ProLimeButton: ButtonStyle { func makeBody(configuration: Configuration) -> some View { configuration.label.font(.caption.bold()).foregroundStyle(.black).padding(.horizontal, 14).frame(height: 38).background(JourneyVisual.lime.opacity(configuration.isPressed ? 0.7 : 1), in: Capsule()) } }
-private struct ProOutlineButton: ButtonStyle { func makeBody(configuration: Configuration) -> some View { configuration.label.font(.caption.bold()).foregroundStyle(.white).padding(.horizontal, 14).frame(height: 38).background(.white.opacity(configuration.isPressed ? 0.14 : 0.08), in: Capsule()) } }
-private extension View { func proCard(stroke: Color = .white.opacity(0.08)) -> some View { background(.black.opacity(0.48), in: RoundedRectangle(cornerRadius: 22)).overlay(RoundedRectangle(cornerRadius: 22).stroke(stroke)) } }
+private struct ProOutlineButton: ButtonStyle { func makeBody(configuration: Configuration) -> some View { configuration.label.font(.caption.bold()).foregroundStyle(JourneyVisual.primaryText).padding(.horizontal, 14).frame(height: 38).background(JourneyVisual.primaryText.opacity(configuration.isPressed ? 0.14 : 0.08), in: Capsule()) } }
+private extension View { func proCard(stroke: Color = JourneyVisual.softBorder) -> some View { background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 22)).overlay(RoundedRectangle(cornerRadius: 22).stroke(stroke)) } }

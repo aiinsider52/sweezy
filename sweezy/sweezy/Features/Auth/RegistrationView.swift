@@ -73,10 +73,10 @@ struct RegistrationView: View {
                 Text("SWEEZY")
                     .font(.caption.weight(.black))
                     .tracking(2.2)
-                    .foregroundStyle(JourneyVisual.lime)
+                    .foregroundStyle(Theme.Colors.textPrimary)
                 Text("auth.registration.account_label".localized)
                     .font(.caption)
-                    .foregroundStyle(.white.opacity(0.62))
+                    .foregroundStyle(JourneyVisual.secondaryText)
             }
 
             Spacer()
@@ -84,10 +84,10 @@ struct RegistrationView: View {
             Button(action: dismiss.callAsFunction) {
                 Image(systemName: "xmark")
                     .font(.system(size: 16, weight: .semibold))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(JourneyVisual.primaryText)
                     .frame(width: 44, height: 44)
-                    .background(Color.black.opacity(0.48), in: Circle())
-                    .overlay(Circle().stroke(.white.opacity(0.18), lineWidth: 1))
+                    .background(Theme.Colors.card, in: Circle())
+                    .overlay(Circle().stroke(JourneyVisual.softBorder, lineWidth: 1))
             }
             .accessibilityLabel("common.close".localized)
         }
@@ -95,15 +95,19 @@ struct RegistrationView: View {
 
     private var hero: some View {
         VStack(alignment: .leading, spacing: 10) {
+            // Sweezy at the welcome desk with a fresh notebook: a new start.
+            StoryScene(name: "registration", height: 190)
+                .padding(.bottom, 8)
+
             Text("auth.registration.hero_title".localized)
-                .font(.system(size: 36, weight: .bold, design: .rounded))
-                .foregroundStyle(.white)
-                .lineSpacing(-2)
+                .font(.system(size: 29, weight: .bold, design: .default))
+                .foregroundStyle(JourneyVisual.primaryText)
+                .lineSpacing(1)
                 .fixedSize(horizontal: false, vertical: true)
 
             Text("auth.registration.hero_subtitle".localized)
                 .font(.subheadline)
-                .foregroundStyle(.white.opacity(0.72))
+                .foregroundStyle(JourneyVisual.secondaryText)
                 .fixedSize(horizontal: false, vertical: true)
         }
     }
@@ -113,10 +117,10 @@ struct RegistrationView: View {
             VStack(alignment: .leading, spacing: 6) {
                 Text("auth.registration.form_title".localized)
                     .font(.title3.weight(.bold))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(JourneyVisual.primaryText)
                 Text("auth.registration.form_subtitle".localized)
                     .font(.caption)
-                    .foregroundStyle(.white.opacity(0.58))
+                    .foregroundStyle(JourneyVisual.secondaryText)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -193,10 +197,10 @@ struct RegistrationView: View {
             } label: {
                 HStack(spacing: 5) {
                     Text("auth.registration.have_account".localized)
-                        .foregroundStyle(.white.opacity(0.62))
+                        .foregroundStyle(JourneyVisual.secondaryText)
                     Text("auth.registration.login".localized)
                         .fontWeight(.semibold)
-                        .foregroundStyle(JourneyVisual.lime)
+                        .foregroundStyle(Theme.Colors.textPrimary)
                 }
                 .font(.subheadline)
                 .frame(maxWidth: .infinity)
@@ -205,23 +209,22 @@ struct RegistrationView: View {
             .accessibilityIdentifier("auth.registration.openLogin")
         }
         .padding(18)
-        .background(Color.black.opacity(0.72), in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .stroke(.white.opacity(0.16), lineWidth: 1)
+                .stroke(JourneyVisual.softBorder, lineWidth: 1)
         )
-        .shadow(color: .black.opacity(0.36), radius: 22, y: 12)
     }
 
     private var passwordField: some View {
         VStack(alignment: .leading, spacing: 7) {
             Text("auth.registration.password".localized)
                 .font(.caption.weight(.semibold))
-                .foregroundStyle(.white.opacity(0.68))
+                .foregroundStyle(JourneyVisual.secondaryText)
 
             HStack(spacing: 12) {
                 Image(systemName: "lock")
-                    .foregroundStyle(JourneyVisual.lime)
+                    .foregroundStyle(Theme.Colors.textPrimary)
                     .frame(width: 22)
 
                 Group {
@@ -246,15 +249,15 @@ struct RegistrationView: View {
                     showPassword.toggle()
                 } label: {
                     Image(systemName: showPassword ? "eye.slash" : "eye")
-                        .foregroundStyle(.white.opacity(0.52))
+                        .foregroundStyle(JourneyVisual.secondaryText)
                         .frame(width: 32, height: 32)
                 }
                 .accessibilityLabel(showPassword ? "auth.password.hide".localized : "auth.password.show".localized)
             }
-            .foregroundStyle(.white)
+            .foregroundStyle(JourneyVisual.primaryText)
             .padding(.horizontal, 14)
             .frame(height: 56)
-            .background(Color.white.opacity(0.07), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: 14, style: .continuous)
                     .stroke(focusedField == .password ? JourneyVisual.lime.opacity(0.78) : .white.opacity(0.12), lineWidth: 1)
@@ -267,11 +270,11 @@ struct RegistrationView: View {
             HStack {
                 Text(passwordIsStrong ? "auth.password.ready".localized : "auth.password.requirements".localized)
                     .font(.caption.weight(.semibold))
-                    .foregroundStyle(passwordIsStrong ? JourneyVisual.lime : .white.opacity(0.7))
+                    .foregroundStyle(passwordIsStrong ? JourneyVisual.lime : JourneyVisual.primaryText)
                 Spacer()
                 Text("\(passwordScore)/6")
                     .font(.caption.monospacedDigit())
-                    .foregroundStyle(.white.opacity(0.55))
+                    .foregroundStyle(JourneyVisual.secondaryText)
             }
 
             HStack(spacing: 5) {
@@ -284,7 +287,7 @@ struct RegistrationView: View {
 
             Text("auth.password.compact_rules".localized)
                 .font(.caption2)
-                .foregroundStyle(.white.opacity(0.48))
+                .foregroundStyle(JourneyVisual.secondaryText)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .padding(.horizontal, 2)
@@ -293,10 +296,10 @@ struct RegistrationView: View {
     private var securityNote: some View {
         HStack(alignment: .top, spacing: 10) {
             Image(systemName: "lock.shield.fill")
-                .foregroundStyle(JourneyVisual.lime)
+                .foregroundStyle(Theme.Colors.textPrimary)
             Text("auth.registration.secure_storage".localized)
                 .font(.caption)
-                .foregroundStyle(.white.opacity(0.62))
+                .foregroundStyle(JourneyVisual.secondaryText)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .padding(.horizontal, 4)
@@ -315,11 +318,11 @@ struct RegistrationView: View {
         VStack(alignment: .leading, spacing: 7) {
             Text(title)
                 .font(.caption.weight(.semibold))
-                .foregroundStyle(.white.opacity(0.68))
+                .foregroundStyle(JourneyVisual.secondaryText)
 
             HStack(spacing: 12) {
                 Image(systemName: icon)
-                    .foregroundStyle(JourneyVisual.lime)
+                    .foregroundStyle(Theme.Colors.textPrimary)
                     .frame(width: 22)
 
                 TextField(placeholder, text: text)
@@ -338,10 +341,10 @@ struct RegistrationView: View {
                     }
                     .accessibilityIdentifier(identifier)
             }
-            .foregroundStyle(.white)
+            .foregroundStyle(JourneyVisual.primaryText)
             .padding(.horizontal, 14)
             .frame(height: 56)
-            .background(Color.white.opacity(0.07), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: 14, style: .continuous)
                     .stroke(focusedField == field ? JourneyVisual.lime.opacity(0.78) : .white.opacity(0.12), lineWidth: 1)
@@ -355,7 +358,7 @@ struct RegistrationView: View {
                 .foregroundStyle(color)
             Text(text)
                 .font(.caption)
-                .foregroundStyle(.white.opacity(0.82))
+                .foregroundStyle(JourneyVisual.secondaryText)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .frame(maxWidth: .infinity, alignment: .leading)

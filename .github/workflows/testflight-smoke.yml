@@ -14,7 +14,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Select Xcode
-        run: sudo xcode-select -s /Applications/Xcode_16.4.app || sudo xcode-select -s /Applications/Xcode.app
+        # The app targets iOS 26, so CI needs the newest Xcode 26 installed on the runner.
+        run: |
+          XCODE_APP=$(ls -d /Applications/Xcode_26*.app | sort -V | tail -n 1)
+          sudo xcode-select -s "$XCODE_APP/Contents/Developer"
+          xcodebuild -version
       - name: Build & test
         run: |
           xcodebuild \
@@ -22,7 +26,7 @@ jobs:
             -project sweezy/sweezy.xcodeproj \
             -configuration Debug \
             -sdk iphonesimulator \
-            -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
+            -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=latest' \
             test
       - name: Metadata presence check
         run: |

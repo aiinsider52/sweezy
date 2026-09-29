@@ -29,7 +29,7 @@ struct AccentTextField: View {
                 .focused($focused)
         }
         .padding(.horizontal, Theme.Spacing.md)
-        .padding(.vertical, Theme.Spacing.sm)
+        .frame(minHeight: 52)
         .background(
             RoundedRectangle(cornerRadius: Theme.CornerRadius.lg, style: .continuous)
                 .fill(Theme.Colors.primaryBackground)
@@ -40,6 +40,8 @@ struct AccentTextField: View {
                 .shadow(color: focused ? Theme.Colors.focusGlow : .clear, radius: focused ? 10 : 0)
                 .allowsHitTesting(false)
         )
+        .contentShape(Rectangle())
+        .onTapGesture { focused = true }
     }
 }
 

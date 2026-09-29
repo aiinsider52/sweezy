@@ -13,6 +13,7 @@ from .checklist import Checklist
 from .template import Template
 from .appointment import Appointment
 from .user import PublicUserProfile, User
+from .country_context import UserCountryContext
 from .subscription import PremiumUsage, Subscription, SubscriptionEvent
 from .marketplace import MarketplaceBlock, MarketplaceReport, ServiceListing
 from .network import ProfessionalConnection, ProfessionalProfile, ProfessionalProfileReport
@@ -35,6 +36,7 @@ from .chat import (
     PushDevice,
 )
 from .discovery_review import DiscoveryReview, DiscoveryReviewReport
+from .place_suggestion import PlaceSuggestion
 from .incident import Incident
 from .moderation import ModerationAction, ModerationCase, ModerationNotification, UserSanction
 from .business import (
@@ -56,6 +58,7 @@ __all__ = [
     "Appointment",
     "User",
     "PublicUserProfile",
+    "UserCountryContext",
     "Subscription",
     "SubscriptionEvent",
     "PremiumUsage",
@@ -99,6 +102,7 @@ __all__ = [
     "PushDevice",
     "DiscoveryReview",
     "DiscoveryReviewReport",
+    "PlaceSuggestion",
     "Incident",
     "ModerationAction",
     "ModerationCase",

@@ -155,6 +155,7 @@ class UserService:
         from ..models.job import JobFavorite
         from ..models.marketplace import MarketplaceBlock, MarketplaceReport, ServiceListing
         from ..models.network import ProfessionalConnection, ProfessionalProfile, ProfessionalProfileReport
+        from ..models.place_suggestion import PlaceSuggestion
         from ..models.social import EventAttendance, FriendConnection, SocialProfile, SocialProfileReport
         from ..models.subscription import PremiumUsage, Subscription, SubscriptionEvent
 
@@ -164,6 +165,10 @@ class UserService:
         db.query(FriendConnection).filter(or_(FriendConnection.requester_id == user_id, FriendConnection.target_id == user_id)).delete(synchronize_session=False)
         db.query(EventAttendance).filter(EventAttendance.user_id == user_id).delete(synchronize_session=False)
         db.query(SocialProfile).filter(SocialProfile.user_id == user_id).delete(synchronize_session=False)
+        # Approved places are public community data with no author shown; unpublished drafts are removed.
+        db.query(PlaceSuggestion).filter(
+            PlaceSuggestion.user_id == user_id, PlaceSuggestion.status != "approved"
+        ).delete(synchronize_session=False)
 
         db.query(ProfessionalProfileReport).filter(
             or_(
@@ -265,7 +270,7 @@ class UserService:
         db.query(Subscription).filter(Subscription.user_id == user_id).delete(synchronize_session=False)
         db.query(SubscriptionEvent).filter(SubscriptionEvent.user_id == user_id).delete(synchronize_session=False)
         db.query(PremiumUsage).filter(PremiumUsage.user_id == user_id).delete(synchronize_session=False)
-        db.query(JobFavorite).filter(JobFavorite.user_id == uuid.UUID(user_id)).delete(synchronize_session=False)
+        db.query(JobFavorite).filter(JobFavorite.user_id == user_id).delete(synchronize_session=False)
 
         # Erase Sweezy Pro workspace and remove access to workspaces owned by others.
         db.query(BusinessDocument).filter(BusinessDocument.business_user_id == user_id).delete(synchronize_session=False)

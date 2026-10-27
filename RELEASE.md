@@ -23,6 +23,25 @@ Do not declare IAP products in App Store Connect until StoreKit is re‑enabled 
 5. Screenshots: `./scripts/capture-journey-screenshots.sh` → `fastlane/metadata/<locale>/screenshots/`
 6. Review notes: `fastlane/metadata/review_information/notes.txt` (states free / no IAP)
 
+## Business accounts (In‑App Purchases)
+
+Business pages, the directory, bookings and reviews are free. Paid placement uses three products
+in a separate subscription group **Sweezy Business**:
+
+| Product ID | Type | Effect |
+|---|---|---|
+| `sweezy_business_pro_monthly` | Auto‑renewable, 1 month | Plan **Pro**: higher ranking, 20 services, 5 offers, 90‑day insights, documents |
+| `sweezy_business_max_monthly` | Auto‑renewable, 1 month | Plan **Business**: top ranking, AI receptionist, team of 10, 50 services, 20 offers |
+| `sweezy_business_boost_7d` | Consumable | 7 days at the top of directory, map and guide tips, labelled «Реклама/Anzeige» |
+
+Backend must verify purchases server-side, otherwise `/business/plan/apple` answers 503:
+`APPLE_IAP_ENABLED=true`, `APPLE_IAP_APP_APPLE_ID`, `APPLE_IAP_ROOT_CERTIFICATES_BASE64`
+(product IDs default to the table above via `APPLE_IAP_BUSINESS_PRODUCT_IDS`).
+Set the App Store Server Notifications V2 URL to `https://sweezy-api.onrender.com/api/v1/subscriptions/apple/notifications`
+so renewals, refunds and expirations reach the business plan.
+
+Launch partners can get a free plan without a purchase: admin → Businesses → *Launch plan grant*.
+
 ## Secrets (iOS)
 
 - Add `SENTRY_DSN` and `AMPLITUDE_API_KEY` to Info.plist / xcconfig

@@ -9,6 +9,7 @@ struct JourneyMarketplaceView: View {
     @StateObject private var servicesVM = MarketplaceViewModel()
     @StateObject private var itemsVM = MarketplaceViewModel(listingType: .item)
     @StateObject private var eventsVM = EventsViewModel()
+    @StateObject private var businessVM = BusinessDirectoryModel()
     @StateObject private var calendarService = EventCalendarService()
 
     @State private var selectedMode: JourneyMarketMode = .services
@@ -23,6 +24,9 @@ struct JourneyMarketplaceView: View {
     @State private var calendarMessage: String?
     @State private var showInbox = false
     @State private var pendingInbox = false
+    @State private var selectedBusiness: BusinessPageTarget?
+    @State private var showOwnerHub = false
+    @State private var pendingOwnerHub = false
 
     var body: some View {
         NavigationStack {
@@ -103,6 +107,18 @@ struct JourneyMarketplaceView: View {
                 ChatInboxView()
                     .environmentObject(appContainer)
             }
+            .fullScreenCover(item: $selectedBusiness) { target in
+                BusinessPageView(businessID: target.id)
+                    .environmentObject(appContainer)
+                    .environmentObject(lockManager)
+                    .environmentObject(sessionManager)
+            }
+            .fullScreenCover(isPresented: $showOwnerHub, onDismiss: { Task { await businessVM.load() } }) {
+                MarketplaceProDashboardView(dashboard: nil, listings: servicesVM.listings.filter { $0.authorID != nil && $0.authorID == KeychainStore.get("user_id") }) { _ in }
+                    .environmentObject(appContainer)
+                    .environmentObject(lockManager)
+                    .environmentObject(sessionManager)
+            }
             .alert("journey.marketplace.calendar".localized, isPresented: Binding(
                 get: { calendarMessage != nil },
                 set: { if !$0 { calendarMessage = nil } }
@@ -147,10 +163,17 @@ struct JourneyMarketplaceView: View {
                     pendingInbox = false
                     showAuth = false
                     showInbox = true
+                } else if pendingOwnerHub {
+                    pendingOwnerHub = false
+                    showAuth = false
+                    showOwnerHub = true
                 }
             }
             .onChange(of: selectedMode) { _, _ in
                 loadSelectedModeIfNeeded()
+            }
+            .onChange(of: businessVM.query.search) { _, _ in
+                businessVM.searchChanged()
             }
             #if DEBUG
             .onChange(of: servicesVM.listings) { _, listings in
@@ -287,6 +310,8 @@ struct JourneyMarketplaceView: View {
                     }
                 }
             }
+        case .businesses:
+            EmptyView()
         case .events:
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
@@ -309,6 +334,12 @@ struct JourneyMarketplaceView: View {
     private var marketContent: some View {
         switch selectedMode {
         case .services: servicesContent
+        case .businesses:
+            BusinessDirectoryContent(
+                model: businessVM,
+                openBusiness: { selectedBusiness = BusinessPageTarget(id: $0) },
+                openOwnerHub: openOwnerHub
+            )
         case .items: itemsContent
         case .events: eventsContent
         }
@@ -561,6 +592,7 @@ struct JourneyMarketplaceView: View {
     private var searchBinding: Binding<String> {
         switch selectedMode {
         case .services: return $servicesVM.searchText
+        case .businesses: return $businessVM.query.search
         case .items: return $itemsVM.searchText
         case .events: return $eventsVM.searchText
         }
@@ -569,6 +601,7 @@ struct JourneyMarketplaceView: View {
     private var searchPrompt: String {
         switch selectedMode {
         case .services: return "journey.marketplace.search.services".localized
+        case .businesses: return "business.directory.search".localized
         case .items: return "journey.marketplace.search.items".localized
         case .events: return "events.search".localized
         }
@@ -577,6 +610,7 @@ struct JourneyMarketplaceView: View {
     private var heroTitle: String {
         switch selectedMode {
         case .services: return "journey.marketplace.hero.services".localized
+        case .businesses: return "business.directory.hero".localized
         case .items: return "journey.marketplace.hero.items".localized
         case .events: return "journey.marketplace.hero.events".localized
         }
@@ -587,6 +621,7 @@ struct JourneyMarketplaceView: View {
     private var createAccessibilityLabel: String {
         switch selectedMode {
         case .services: return "journey.marketplace.services.add_action".localized
+        case .businesses: return "business.invite.cta".localized
         case .items: return "journey.marketplace.items.add_action".localized
         case .events: return "journey.marketplace.events.add_action".localized
         }
@@ -623,9 +658,19 @@ struct JourneyMarketplaceView: View {
         presentCreateFlow()
     }
 
+    private func openOwnerHub() {
+        guard sessionManager.isAuthenticated else {
+            pendingOwnerHub = true
+            showAuth = true
+            return
+        }
+        showOwnerHub = true
+    }
+
     private func presentCreateFlow() {
         switch selectedMode {
         case .services: showCreateListing = true
+        case .businesses: showOwnerHub = true
         case .items: showCreateItem = true
         case .events: showCreateEvent = true
         }
@@ -640,6 +685,7 @@ struct JourneyMarketplaceView: View {
     private func loadSelectedMode() async {
         switch selectedMode {
         case .services where servicesVM.listings.isEmpty: await servicesVM.loadListings(refresh: true)
+        case .businesses: await businessVM.loadIfNeeded()
         case .items where itemsVM.listings.isEmpty: await itemsVM.loadListings(refresh: true)
         case .events where eventsVM.events.isEmpty: await eventsVM.loadEvents(refresh: true)
         default: break
@@ -649,6 +695,7 @@ struct JourneyMarketplaceView: View {
     private func refreshSelectedMode() async {
         switch selectedMode {
         case .services: await servicesVM.refresh()
+        case .businesses: await businessVM.load()
         case .items: await itemsVM.refresh()
         case .events: await eventsVM.refresh()
         }
@@ -667,6 +714,7 @@ struct JourneyMarketplaceView: View {
 
 private enum JourneyMarketMode: String, CaseIterable, Identifiable {
     case services
+    case businesses
     case items
     case events
 
@@ -674,6 +722,7 @@ private enum JourneyMarketMode: String, CaseIterable, Identifiable {
     var title: String {
         switch self {
         case .services: return "journey.marketplace.mode.services".localized
+        case .businesses: return "journey.marketplace.mode.businesses".localized
         case .items: return "journey.marketplace.mode.items".localized
         case .events: return "journey.marketplace.mode.events".localized
         }

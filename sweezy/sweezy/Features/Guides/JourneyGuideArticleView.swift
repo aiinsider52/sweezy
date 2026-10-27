@@ -83,6 +83,10 @@ struct JourneyGuideArticleView: View {
                             if let relatedChecklist {
                                 nextStepCard(relatedChecklist)
                             }
+
+                            if let topic = guide.category.businessTopic {
+                                BusinessHelpersCard(topic: topic)
+                            }
                         }
                         .frame(width: contentWidth, alignment: .leading)
                         .padding(.horizontal, horizontalInset)

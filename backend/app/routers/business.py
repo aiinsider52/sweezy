@@ -10,7 +10,7 @@ from sqlalchemy.exc import IntegrityError
 
 from ..core.countries import default_currency
 from ..core.rate_limit import limiter
-from ..dependencies import CurrentAdmin, CurrentUser, DBSession, require_premium
+from ..dependencies import CurrentAdmin, CurrentUser, DBSession
 from ..models.business import (
     BusinessAvailabilityRule,
     BusinessBooking,
@@ -22,12 +22,13 @@ from ..models.business import (
     BusinessService,
     BusinessTeamMember,
 )
-from ..models.chat import ChatConversation, MarketplaceReview
+from ..models.chat import ChatConversation
 from ..models.marketplace import ServiceListing
 from ..models.user import PublicUserProfile, User
 from ..schemas.business import (
     AIReceptionistDraftRequest,
     AIReceptionistDraftResponse,
+    AdminBusinessPlanGrant,
     AdminBusinessProfileResponse,
     AdminBusinessReview,
     AvailabilityRuleCreate,
@@ -61,12 +62,14 @@ from ..schemas.business import (
     TeamMemberCreate,
     TeamMemberResponse,
 )
+from ..services.business_directory import public_profile_response
+from ..services.business_plans import effective_plan, limits_for, require_plan
 from ..services.business_receptionist import generate_receptionist_draft, sync_marketplace_leads
 from ..services.audit import log_audit
 from ..services.push_notifications import enqueue_account_notification
 
 
-router = APIRouter(dependencies=[require_premium()])
+router = APIRouter()
 public_router = APIRouter()
 admin_router = APIRouter()
 
@@ -98,20 +101,10 @@ def _apply(row, payload) -> None:
         setattr(row, key, value)
 
 
-def _premium_active(user: User | None) -> bool:
-    if not user or user.subscription_status not in {"trial", "premium"}:
-        return False
-    expires = user.subscription_expire_at
-    if expires is None:
-        return True
-    comparable = expires if expires.tzinfo else expires.replace(tzinfo=timezone.utc)
-    return comparable > _now()
-
-
 def _approved_business(db: DBSession, user_id: str) -> tuple[BusinessProfile, User]:
     profile = db.get(BusinessProfile, user_id)
     owner = db.get(User, user_id)
-    if not profile or profile.status != "approved" or not profile.is_verified or not _premium_active(owner):
+    if not profile or not owner or not owner.is_active or profile.status != "approved":
         raise HTTPException(status_code=404, detail="Business not found")
     return profile, owner
 
@@ -119,10 +112,12 @@ def _approved_business(db: DBSession, user_id: str) -> tuple[BusinessProfile, Us
 def _workspace_role(db: DBSession, user: User, owner_id: str, *, write: bool = False) -> str:
     owner = db.get(User, owner_id)
     profile = db.get(BusinessProfile, owner_id)
-    if not owner or not profile or not _premium_active(owner):
+    if not owner or not profile:
         raise HTTPException(status_code=404, detail="Business workspace not found")
     if user.id == owner_id:
         return "owner"
+    if effective_plan(profile) != "business":
+        raise HTTPException(status_code=404, detail="Business workspace not found")
     member = db.execute(
         select(BusinessTeamMember).where(
             BusinessTeamMember.business_user_id == owner_id,
@@ -205,9 +200,9 @@ def save_profile(request: Request, payload: BusinessProfileUpdate, db: DBSession
     if profile is None:
         profile = BusinessProfile(user_id=user.id, **payload.model_dump())
     else:
-        previous_identity = (profile.display_name, profile.legal_name, profile.category, profile.canton, profile.uid_number)
+        previous_identity = (profile.kind, profile.display_name, profile.legal_name, profile.category, profile.canton, profile.uid_number)
         _apply(profile, payload)
-        new_identity = (profile.display_name, profile.legal_name, profile.category, profile.canton, profile.uid_number)
+        new_identity = (profile.kind, profile.display_name, profile.legal_name, profile.category, profile.canton, profile.uid_number)
         if profile.status in {"pending", "rejected"} or (profile.status == "approved" and previous_identity != new_identity):
             profile.status = "draft"
             profile.rejection_reason = None
@@ -244,6 +239,7 @@ def get_ai_settings(db: DBSession, user: CurrentUser) -> BusinessAISettingsRespo
 @router.put("/ai-settings", response_model=BusinessAISettingsResponse)
 def save_ai_settings(payload: BusinessAISettingsUpdate, db: DBSession, user: CurrentUser) -> BusinessAISettingsResponse:
     profile = _profile(db, user.id)
+    require_plan(profile, "business")
     _apply(profile, payload)
     db.add(profile)
     db.commit()
@@ -260,6 +256,7 @@ def ai_receptionist_draft(
     user: CurrentUser,
 ) -> AIReceptionistDraftResponse:
     profile = _profile(db, user.id)
+    require_plan(profile, "business")
     if not profile.ai_enabled:
         raise HTTPException(status_code=409, detail={"code": "ai_receptionist_disabled"})
     if payload.conversation_id:
@@ -287,8 +284,9 @@ def list_services(db: DBSession, user: CurrentUser) -> list[BusinessService]:
 def create_service(payload: BusinessServiceCreate, db: DBSession, user: CurrentUser) -> BusinessService:
     profile = _profile(db, user.id)
     count = db.scalar(select(func.count()).select_from(BusinessService).where(BusinessService.business_user_id == user.id)) or 0
-    if count >= 20:
-        raise HTTPException(status_code=409, detail={"code": "business_service_limit", "limit": 20})
+    limit = limits_for(profile).services
+    if count >= limit:
+        raise HTTPException(status_code=409, detail={"code": "business_service_limit", "limit": limit, "plan": effective_plan(profile)})
     if payload.listing_id:
         listing = db.get(ServiceListing, payload.listing_id)
         if not listing or listing.author_id != user.id or listing.listing_type != "service":
@@ -526,10 +524,11 @@ def list_quick_replies(db: DBSession, user: CurrentUser) -> list[BusinessQuickRe
 
 @router.post("/quick-replies", response_model=QuickReplyResponse, status_code=201)
 def create_quick_reply(payload: QuickReplyCreate, db: DBSession, user: CurrentUser) -> BusinessQuickReply:
-    _profile(db, user.id)
+    profile = _profile(db, user.id)
     count = db.scalar(select(func.count()).select_from(BusinessQuickReply).where(BusinessQuickReply.business_user_id == user.id)) or 0
-    if count >= 50:
-        raise HTTPException(status_code=409, detail={"code": "quick_reply_limit", "limit": 50})
+    limit = limits_for(profile).quick_replies
+    if count >= limit:
+        raise HTTPException(status_code=409, detail={"code": "quick_reply_limit", "limit": limit})
     row = BusinessQuickReply(business_user_id=user.id, **payload.model_dump())
     db.add(row)
     db.commit()
@@ -562,7 +561,11 @@ def list_team(db: DBSession, user: CurrentUser) -> list[BusinessTeamMember]:
 
 @router.post("/team", response_model=TeamMemberResponse, status_code=201)
 def add_team_member(payload: TeamMemberCreate, db: DBSession, user: CurrentUser) -> BusinessTeamMember:
-    _profile(db, user.id)
+    profile = _profile(db, user.id)
+    require_plan(profile, "business")
+    members = db.scalar(select(func.count()).select_from(BusinessTeamMember).where(BusinessTeamMember.business_user_id == user.id)) or 0
+    if members >= limits_for(profile).team_members:
+        raise HTTPException(status_code=409, detail={"code": "team_member_limit", "limit": limits_for(profile).team_members})
     normalized_email = payload.email.lower().strip()
     member_user = db.execute(select(User).where(func.lower(User.email) == normalized_email)).scalar_one_or_none()
     row = BusinessTeamMember(
@@ -612,7 +615,8 @@ def list_documents(db: DBSession, user: CurrentUser) -> list[BusinessDocument]:
 
 @router.post("/documents", response_model=BusinessDocumentResponse, status_code=201)
 def create_document(payload: BusinessDocumentCreate, db: DBSession, user: CurrentUser) -> BusinessDocument:
-    _profile(db, user.id)
+    profile = _profile(db, user.id)
+    require_plan(profile, "pro")
     if payload.client_id:
         _owned(db, BusinessClient, payload.client_id, user.id)
     if payload.lead_id:
@@ -659,7 +663,6 @@ def _dashboard_response(db: DBSession, owner_id: str) -> BusinessDashboardRespon
         ChatConversation.seller_id == owner_id,
         ChatConversation.listing_id.is_not(None),
     )).scalars().all()
-    ratings = db.execute(select(MarketplaceReview.rating).where(MarketplaceReview.reviewed_user_id == owner_id)).scalars().all()
     today = _now().date()
     active_leads = [lead for lead in leads if lead.status not in {"completed", "cancelled", "lost"}]
     booked = [lead for lead in leads if lead.status in {"booked", "completed"}]
@@ -674,8 +677,8 @@ def _dashboard_response(db: DBSession, owner_id: str) -> BusinessDashboardRespon
         bookings_today=sum(_aware_utc(item.starts_at).date() == today and item.status not in {"cancelled", "no_show"} for item in bookings),
         upcoming_bookings=sum(_aware_utc(item.starts_at) >= _now() and item.status in {"requested", "confirmed"} for item in bookings),
         clients_total=len(clients),
-        average_rating=round(sum(ratings) / len(ratings), 1) if ratings else None,
-        review_count=len(ratings),
+        average_rating=profile.average_rating,
+        review_count=profile.review_count or 0,
         response_rate_percent=round((replied / len(conversations)) * 100) if conversations else 0,
         conversion_percent=round((len(booked) / len(leads)) * 100) if leads else 0,
         leads=leads[:20],
@@ -716,7 +719,7 @@ def my_business_bookings(db: DBSession, user: CurrentUser) -> list[CustomerBooki
 def my_business_workspaces(db: DBSession, user: CurrentUser) -> list[BusinessWorkspaceResponse]:
     result: list[BusinessWorkspaceResponse] = []
     own_profile = db.get(BusinessProfile, user.id)
-    if own_profile and _premium_active(user):
+    if own_profile:
         result.append(BusinessWorkspaceResponse(
             owner_user_id=user.id,
             display_name=own_profile.display_name,
@@ -746,8 +749,7 @@ def my_business_workspaces(db: DBSession, user: CurrentUser) -> list[BusinessWor
     ).scalars().all()
     for membership in memberships:
         profile = db.get(BusinessProfile, membership.business_user_id)
-        owner = db.get(User, membership.business_user_id)
-        if profile and _premium_active(owner):
+        if profile and effective_plan(profile) == "business":
             result.append(BusinessWorkspaceResponse(
                 owner_user_id=membership.business_user_id,
                 display_name=profile.display_name,
@@ -825,35 +827,7 @@ def cancel_my_business_booking(booking_id: str, db: DBSession, user: CurrentUser
 @public_router.get("/{user_id}", response_model=PublicBusinessProfileResponse)
 def public_business_profile(user_id: str, db: DBSession) -> PublicBusinessProfileResponse:
     profile, _ = _approved_business(db, user_id)
-    services = db.execute(
-        select(BusinessService)
-        .where(BusinessService.business_user_id == user_id, BusinessService.is_active.is_(True))
-        .order_by(BusinessService.created_at.asc())
-    ).scalars().all()
-    ratings = db.execute(
-        select(MarketplaceReview.rating).where(MarketplaceReview.reviewed_user_id == user_id)
-    ).scalars().all()
-    return PublicBusinessProfileResponse(
-        user_id=profile.user_id,
-        display_name=profile.display_name,
-        description=profile.description,
-        category=profile.category,
-        canton=profile.canton,
-        country_code=profile.country_code,
-        subdivision_code=profile.subdivision_code,
-        city=profile.city,
-        service_area=profile.service_area,
-        languages=profile.languages,
-        logo_url=profile.logo_url,
-        cover_url=profile.cover_url,
-        website=profile.website,
-        delivery_modes=profile.delivery_modes,
-        cancellation_policy=profile.cancellation_policy,
-        is_verified=profile.is_verified,
-        services=services,
-        average_rating=round(sum(ratings) / len(ratings), 1) if ratings else None,
-        review_count=len(ratings),
-    )
+    return public_profile_response(db, profile)
 
 
 @public_router.get("/{user_id}/slots", response_model=list[PublicBookingSlot])
@@ -966,6 +940,28 @@ def request_public_booking(
     return row
 
 
+def _admin_response(db: DBSession, profile: BusinessProfile) -> AdminBusinessProfileResponse:
+    owner = db.get(User, profile.user_id)
+
+    def count(model) -> int:
+        return db.scalar(select(func.count()).select_from(model).where(model.business_user_id == profile.user_id)) or 0
+
+    return AdminBusinessProfileResponse(
+        **BusinessProfileResponse.model_validate(profile).model_dump(),
+        owner_email=owner.email if owner else "deleted",
+        subscription_status=owner.subscription_status if owner else "free",
+        subscription_expire_at=owner.subscription_expire_at if owner else None,
+        ai_enabled=profile.ai_enabled,
+        ai_auto_reply=profile.ai_auto_reply,
+        services_count=count(BusinessService),
+        leads_count=count(BusinessLead),
+        bookings_count=count(BusinessBooking),
+        clients_count=count(BusinessClient),
+        documents_count=count(BusinessDocument),
+        team_members_count=count(BusinessTeamMember),
+    )
+
+
 @admin_router.get("/businesses", response_model=list[AdminBusinessProfileResponse])
 def admin_list_businesses(
     db: DBSession,
@@ -975,25 +971,7 @@ def admin_list_businesses(
     stmt = select(BusinessProfile).order_by(BusinessProfile.submitted_at.desc().nullslast(), BusinessProfile.created_at.desc())
     if business_status:
         stmt = stmt.where(BusinessProfile.status == business_status)
-    rows = db.execute(stmt).scalars().all()
-    result: list[AdminBusinessProfileResponse] = []
-    for profile in rows:
-        owner = db.get(User, profile.user_id)
-        result.append(AdminBusinessProfileResponse(
-            **BusinessProfileResponse.model_validate(profile).model_dump(),
-            owner_email=owner.email if owner else "deleted",
-            subscription_status=owner.subscription_status if owner else "free",
-            subscription_expire_at=owner.subscription_expire_at if owner else None,
-            ai_enabled=profile.ai_enabled,
-            ai_auto_reply=profile.ai_auto_reply,
-            services_count=db.scalar(select(func.count()).select_from(BusinessService).where(BusinessService.business_user_id == profile.user_id)) or 0,
-            leads_count=db.scalar(select(func.count()).select_from(BusinessLead).where(BusinessLead.business_user_id == profile.user_id)) or 0,
-            bookings_count=db.scalar(select(func.count()).select_from(BusinessBooking).where(BusinessBooking.business_user_id == profile.user_id)) or 0,
-            clients_count=db.scalar(select(func.count()).select_from(BusinessClient).where(BusinessClient.business_user_id == profile.user_id)) or 0,
-            documents_count=db.scalar(select(func.count()).select_from(BusinessDocument).where(BusinessDocument.business_user_id == profile.user_id)) or 0,
-            team_members_count=db.scalar(select(func.count()).select_from(BusinessTeamMember).where(BusinessTeamMember.business_user_id == profile.user_id)) or 0,
-        ))
-    return result
+    return [_admin_response(db, profile) for profile in db.execute(stmt).scalars().all()]
 
 
 @admin_router.patch("/businesses/{user_id}/review", response_model=AdminBusinessProfileResponse)
@@ -1017,8 +995,8 @@ def admin_review_business(
         event_type="business_profile_review",
         title="Перевірка бізнес-профілю",
         body={
-            "approved": "Профіль схвалено — бронювання та Pro-функції активні.",
-            "rejected": "Потрібні зміни у бізнес-профілі. Відкрий Sweezy Pro для деталей.",
+            "approved": "Профіль схвалено — сторінка бізнесу вже в каталозі Sweezy.",
+            "rejected": "Потрібні зміни у бізнес-профілі. Відкрий кабінет бізнесу для деталей.",
             "suspended": "Публікацію бізнес-профілю тимчасово призупинено.",
         }[profile.status],
         data={"business_user_id": user_id, "status": profile.status},
@@ -1026,7 +1004,6 @@ def admin_review_business(
     db.add(profile)
     db.commit()
     db.refresh(profile)
-    owner = db.get(User, user_id)
     actor = db.get(User, admin.get("sub"))
     log_audit(
         db,
@@ -1037,17 +1014,33 @@ def admin_review_business(
         before=before,
         after={"status": profile.status, "is_verified": profile.is_verified, "comment": payload.comment},
     )
-    return AdminBusinessProfileResponse(
-        **BusinessProfileResponse.model_validate(profile).model_dump(),
-        owner_email=owner.email if owner else "deleted",
-        subscription_status=owner.subscription_status if owner else "free",
-        subscription_expire_at=owner.subscription_expire_at if owner else None,
-        ai_enabled=profile.ai_enabled,
-        ai_auto_reply=profile.ai_auto_reply,
-        services_count=db.scalar(select(func.count()).select_from(BusinessService).where(BusinessService.business_user_id == user_id)) or 0,
-        leads_count=db.scalar(select(func.count()).select_from(BusinessLead).where(BusinessLead.business_user_id == user_id)) or 0,
-        bookings_count=db.scalar(select(func.count()).select_from(BusinessBooking).where(BusinessBooking.business_user_id == user_id)) or 0,
-        clients_count=db.scalar(select(func.count()).select_from(BusinessClient).where(BusinessClient.business_user_id == user_id)) or 0,
-        documents_count=db.scalar(select(func.count()).select_from(BusinessDocument).where(BusinessDocument.business_user_id == user_id)) or 0,
-        team_members_count=db.scalar(select(func.count()).select_from(BusinessTeamMember).where(BusinessTeamMember.business_user_id == user_id)) or 0,
+    return _admin_response(db, profile)
+
+
+@admin_router.patch("/businesses/{user_id}/plan", response_model=AdminBusinessProfileResponse)
+def admin_grant_business_plan(
+    user_id: str,
+    payload: AdminBusinessPlanGrant,
+    db: DBSession,
+    admin: CurrentAdmin,
+) -> AdminBusinessProfileResponse:
+    """Manual plan grants for launch partners; App Store purchases always take precedence once made."""
+    profile = _profile(db, user_id)
+    before = {"plan": profile.plan, "plan_expires_at": profile.plan_expires_at.isoformat() if profile.plan_expires_at else None}
+    profile.plan = payload.plan
+    profile.plan_expires_at = None if payload.plan == "free" else _now() + timedelta(days=payload.days)
+    profile.plan_source = "admin"
+    db.add(profile)
+    db.commit()
+    db.refresh(profile)
+    actor = db.get(User, admin.get("sub"))
+    log_audit(
+        db,
+        user_email=actor.email if actor else f"admin:{admin.get('sub', 'unknown')}",
+        action="business_plan_grant",
+        entity="business_profile",
+        entity_id=user_id,
+        before=before,
+        after={"plan": profile.plan, "plan_expires_at": profile.plan_expires_at.isoformat() if profile.plan_expires_at else None},
     )
+    return _admin_response(db, profile)

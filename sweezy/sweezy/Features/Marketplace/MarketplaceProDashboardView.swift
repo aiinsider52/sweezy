@@ -3,12 +3,17 @@ import SwiftUI
 struct MarketplaceProDashboardView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var appContainer: AppContainer
+    @EnvironmentObject private var lockManager: AppLockManager
+    @EnvironmentObject private var sessionManager: SessionManager
     let dashboard: MarketplaceProDashboard?
     let listings: [ServiceListing]
     let workspace: BusinessWorkspace?
     let onPromoted: (ServiceListing) -> Void
     @StateObject private var model: BusinessProViewModel
+    @StateObject private var growth = BusinessGrowthModel()
     @State private var tab: ProTab = .today
+    @State private var showPlans = false
+    @State private var publicPage: BusinessPageTarget?
     @State private var editor: ProSheet?
     @State private var selectedConversation: ChatConversation?
 
@@ -32,7 +37,7 @@ struct MarketplaceProDashboardView: View {
                 if model.isLoading && model.profile == nil {
                     ProgressView().tint(JourneyVisual.lime)
                 } else if model.profile == nil {
-                    BusinessProfileOnboarding(model: model)
+                    BusinessOnboardingFlow(model: model) { tab = .growth }
                 } else {
                     mainContent
                 }
@@ -47,7 +52,13 @@ struct MarketplaceProDashboardView: View {
             } message: { Text(model.error ?? "") }
             .sheet(item: $editor) { sheet in
                 switch sheet {
-                case .profile: BusinessProfileEditor(model: model)
+                case .profile:
+                    NavigationStack {
+                        BusinessOnboardingFlow(model: model, startsAtIntro: false) { editor = nil }
+                            .navigationTitle("business.growth.edit_page".localized)
+                            .navigationBarTitleDisplayMode(.inline)
+                            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("common.close".localized) { editor = nil } } }
+                    }
                 case .service: BusinessServiceEditor(model: model, listings: listings)
                 case .booking: BusinessBookingEditor(model: model)
                 case .client: BusinessClientEditor(model: model)
@@ -58,8 +69,19 @@ struct MarketplaceProDashboardView: View {
                 }
             }
             .fullScreenCover(item: $selectedConversation) { ChatConversationView(conversation: $0).environmentObject(appContainer) }
+            .sheet(isPresented: $showPlans) { BusinessPlansView(growth: growth) }
+            .fullScreenCover(item: $publicPage) { target in
+                BusinessPageView(businessID: target.id)
+                    .environmentObject(appContainer)
+                    .environmentObject(lockManager)
+                    .environmentObject(sessionManager)
+            }
         }
         .task { await model.load() }
+        .task(id: model.profile?.userID) {
+            guard workspace == nil, let profile = model.profile else { return }
+            await growth.load(isClub: profile.businessKind == .club)
+        }
     }
 
     private var mainContent: some View {
@@ -70,6 +92,21 @@ struct MarketplaceProDashboardView: View {
                 Group {
                     switch tab {
                     case .today: todayView
+                    case .growth:
+                        if let profile = model.profile {
+                            BusinessPromotionPanel(
+                                growth: growth,
+                                profile: profile,
+                                openPublicPage: { publicPage = BusinessPageTarget(id: profile.userID) },
+                                openPlans: { showPlans = true },
+                                editProfile: { editor = .profile }
+                            )
+                            BusinessMyClubsCard(memberships: growth.myClubs)
+                        }
+                    case .offers: BusinessOffersPanel(growth: growth) { showPlans = true }
+                    case .reviews:
+                        if let profile = model.profile { BusinessReviewsPanel(growth: growth, profile: profile) }
+                    case .club: BusinessClubPanel(growth: growth)
                     case .leads: leadsView
                     case .calendar: calendarView
                     case .clients: clientsView
@@ -219,7 +256,21 @@ struct MarketplaceProDashboardView: View {
         }
     }
 
+    @ViewBuilder
     private var receptionistView: some View {
+        if growth.tier < .business {
+            VStack(alignment: .leading, spacing: 16) {
+                sectionTitle("AI-рецепціоніст".localized, "Знає твої послуги, правила й стиль спілкування".localized)
+                Button { showPlans = true } label: {
+                    proAction("business.plans.ai_locked".localized, "lock.fill", "business.plans.ai_locked_subtitle".localized)
+                }.buttonStyle(.plain)
+            }
+        } else {
+            unlockedReceptionistView
+        }
+    }
+
+    private var unlockedReceptionistView: some View {
         VStack(alignment: .leading, spacing: 16) {
             sectionTitle("AI-рецепціоніст".localized, "Знає твої послуги, правила й стиль спілкування".localized)
             HStack(spacing: 13) {
@@ -268,9 +319,12 @@ struct MarketplaceProDashboardView: View {
     private var todayHeadline: String { (model.dashboard?.openLeads ?? 0) > 0 ? "Є клієнти, які чекають".localized : "Бізнес під контролем".localized }
     private var todayAdvice: String { (model.dashboard?.openLeads ?? 0) > 0 ? "Відповідай швидше — це напряму впливає на конверсію.".localized : "Нові заявки, записи й важливі дії з’являться тут.".localized }
     private var profileCompletion: Int { guard let p = model.profile else { return 0 }; return [!p.displayName.isEmpty, !p.description.isEmpty, !p.languages.isEmpty, !p.deliveryModes.isEmpty, p.phone != nil || p.email != nil, p.logoURL != nil].filter { $0 }.count * 100 / 6 }
-    private var profileStatus: String { switch model.profile?.status { case "approved": "Перевірений бізнес · Plus".localized; case "pending": "Профіль на перевірці".localized; case "rejected": "Потрібні зміни".localized; case "suspended": "Профіль призупинено".localized; default: "Чернетка профілю".localized } }
-    private var profileStatusColor: Color { model.profile?.status == "approved" ? JourneyVisual.lime : .orange }
-    private var availableTabs: [ProTab] { workspace == nil ? ProTab.allCases : [.today, .leads, .calendar, .clients] }
+    private var profileStatus: String { switch model.profile?.status { case "approved": "business.status.approved_plan".localized(with: growth.tier.title); case "pending": "Профіль на перевірці".localized; case "rejected": "Потрібні зміни".localized; case "suspended": "Профіль призупинено".localized; default: "Чернетка профілю".localized } }
+    private var profileStatusColor: Color { model.profile?.status == "approved" ? JourneyVisual.accentText : .orange }
+    private var availableTabs: [ProTab] {
+        guard workspace == nil else { return [.today, .leads, .calendar, .clients] }
+        return ProTab.allCases.filter { $0 != .club || model.profile?.businessKind == .club }
+    }
     private func openConversation(_ lead: BusinessLead) async { guard let id = lead.conversationID else { return }; do { selectedConversation = try await ChatAPI.conversation(id: id) } catch { model.error = error.localizedDescription } }
     private func promote(_ listing: ServiceListing) async { do { onPromoted(try await APIClient.promoteListing(id: listing.id)) } catch { model.error = error.localizedDescription } }
 }
@@ -318,7 +372,7 @@ struct MarketplaceProDashboardView: View {
     func changeBooking(_ booking: BusinessBooking, to status: String) async { do { let updated = if let workspace { try await BusinessProAPI.updateWorkspaceBooking(ownerID: workspace.ownerUserID, id: booking.id, status: status) } else { try await BusinessProAPI.updateBooking(id: booking.id, status: status) }; if let i = bookings.firstIndex(where: { $0.id == booking.id }) { bookings[i] = updated } } catch { self.error = error.localizedDescription } }
 }
 
-private enum ProTab: String, CaseIterable, Identifiable { case today, leads, calendar, clients, receptionist, more; var id: String { rawValue }; var title: String { switch self { case .today: "Сьогодні".localized; case .leads: "Заявки".localized; case .calendar: "Календар".localized; case .clients: "Клієнти".localized; case .receptionist: "AI"; case .more: "Ще".localized } }; var icon: String { switch self { case .today: "sparkles"; case .leads: "rectangle.3.group.bubble.left.fill"; case .calendar: "calendar"; case .clients: "person.2.fill"; case .receptionist: "waveform.and.mic"; case .more: "square.grid.2x2" } } }
+private enum ProTab: String, CaseIterable, Identifiable { case today, growth, leads, calendar, clients, offers, reviews, club, receptionist, more; var id: String { rawValue }; var title: String { switch self { case .today: "Сьогодні".localized; case .growth: "business.tab.growth".localized; case .leads: "Заявки".localized; case .calendar: "Календар".localized; case .clients: "Клієнти".localized; case .offers: "business.tab.offers".localized; case .reviews: "business.tab.reviews".localized; case .club: "business.tab.club".localized; case .receptionist: "AI"; case .more: "Ще".localized } }; var icon: String { switch self { case .today: "sparkles"; case .growth: "chart.line.uptrend.xyaxis"; case .leads: "rectangle.3.group.bubble.left.fill"; case .calendar: "calendar"; case .clients: "person.2.fill"; case .offers: "tag.fill"; case .reviews: "star.bubble.fill"; case .club: "person.3.fill"; case .receptionist: "waveform.and.mic"; case .more: "square.grid.2x2" } } }
 private enum ProSheet: String, Identifiable { case profile, service, booking, client, quickReply, team, availability, document; var id: String { rawValue } }
 private enum ProLeadStage: String, CaseIterable, Identifiable { case new, replied, qualifying, quoted, booked, completed, lost; var id: String { rawValue }; var title: String { switch self { case .new: "Нова".localized; case .replied: "Відповіли".localized; case .qualifying: "Уточнення".localized; case .quoted: "Пропозиція".localized; case .booked: "Заброньовано".localized; case .completed: "Виконано".localized; case .lost: "Втрачено".localized } } }
 private struct ProStatusPill: View { let status: String; var body: some View { Text(label).font(.caption2.bold()).padding(.horizontal, 9).padding(.vertical, 6).foregroundStyle(color).background(color.opacity(0.13), in: Capsule()) }; private var label: String { switch status { case "new": "НОВА".localized; case "replied": "ВІДПОВІЛИ".localized; case "qualifying": "УТОЧНЕННЯ".localized; case "quoted": "ПРОПОЗИЦІЯ".localized; case "booked", "confirmed": "ЗАПИС".localized; case "completed": "ГОТОВО".localized; case "cancelled": "СКАСОВАНО".localized; case "no_show": "НЕ ПРИЙШОВ".localized; default: status.uppercased() } }; private var color: Color { ["new", "requested"].contains(status) ? JourneyVisual.lime : (status == "completed" ? .green : (["cancelled", "lost", "no_show"].contains(status) ? .red : .cyan)) } }

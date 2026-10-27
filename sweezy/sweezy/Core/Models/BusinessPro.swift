@@ -29,10 +29,32 @@ struct BusinessProfile: Codable, Identifiable {
     let reviewedAt: Date?
     let createdAt: Date
     let updatedAt: Date
+    var kind: String?
+    var tagline: String?
+    var latitude: Double?
+    var longitude: Double?
+    var photoURLs: [String]?
+    var socialLinks: [String: String]?
+    var openingHoursNote: String?
+    var representedBy: String?
+    let plan: String?
+    let planExpiresAt: Date?
+    let boostUntil: Date?
+    let effectivePlan: String?
+    let isBoosted: Bool?
+    let averageRating: Double?
+    let reviewCount: Int?
     var id: String { userID }
+    var businessKind: BusinessKind { BusinessKind(rawValue: kind ?? "") ?? .business }
+    var tier: BusinessPlanTier { BusinessPlanTier(rawValue: effectivePlan ?? "") ?? .free }
 
     enum CodingKeys: String, CodingKey {
         case description, category, canton, city, address, languages, phone, email, website, status
+        case kind, tagline, latitude, longitude, plan
+        case photoURLs = "photo_urls", socialLinks = "social_links", openingHoursNote = "opening_hours_note"
+        case representedBy = "represented_by", planExpiresAt = "plan_expires_at", boostUntil = "boost_until"
+        case effectivePlan = "effective_plan", isBoosted = "is_boosted", averageRating = "average_rating"
+        case reviewCount = "review_count"
         case countryCode = "country_code", subdivisionCode = "subdivision_code"
         case userID = "user_id"
         case displayName = "display_name"
@@ -54,7 +76,9 @@ struct BusinessProfile: Codable, Identifiable {
 }
 
 struct BusinessProfilePayload: Encodable {
+    var kind = BusinessKind.business.rawValue
     var displayName = ""
+    var tagline: String?
     var legalName: String?
     var description = ""
     var category = "other"
@@ -74,9 +98,19 @@ struct BusinessProfilePayload: Encodable {
     var deliveryModes = ["mobile"]
     var cancellationPolicy: String?
     var paymentLink: String?
+    var latitude: Double?
+    var longitude: Double?
+    var photoURLs: [String] = []
+    var socialLinks: [String: String] = [:]
+    var openingHoursNote: String?
+    var representedBy: String?
 
     init() {}
     init(profile: BusinessProfile) {
+        kind = profile.businessKind.rawValue; tagline = profile.tagline
+        latitude = profile.latitude; longitude = profile.longitude
+        photoURLs = profile.photoURLs ?? []; socialLinks = profile.socialLinks ?? [:]
+        openingHoursNote = profile.openingHoursNote; representedBy = profile.representedBy
         displayName = profile.displayName; legalName = profile.legalName; description = profile.description
         category = profile.category; canton = profile.canton; city = profile.city; address = profile.address
         countryCode = profile.countryCode ?? APIClient.countryCode
@@ -88,6 +122,9 @@ struct BusinessProfilePayload: Encodable {
     }
     enum CodingKeys: String, CodingKey {
         case description, category, canton, city, address, languages, phone, email, website
+        case kind, tagline, latitude, longitude
+        case photoURLs = "photo_urls", socialLinks = "social_links", openingHoursNote = "opening_hours_note"
+        case representedBy = "represented_by"
         case countryCode = "country_code", subdivisionCode = "subdivision_code"
         case displayName = "display_name", legalName = "legal_name", serviceArea = "service_area"
         case logoURL = "logo_url", coverURL = "cover_url", uidNumber = "uid_number"
@@ -423,13 +460,38 @@ struct PublicBusinessProfile: Codable, Identifiable {
     let services: [BusinessServiceItem]
     let averageRating: Double?
     let reviewCount: Int
+    let kind: String?
+    let tagline: String?
+    let countryCode: String?
+    let subdivisionCode: String?
+    let address: String?
+    let latitude: Double?
+    let longitude: Double?
+    let photoURLs: [String]?
+    let phone: String?
+    let email: String?
+    let socialLinks: [String: String]?
+    let openingHoursNote: String?
+    let plan: String?
+    let isSponsored: Bool?
+    let offers: [BusinessOffer]?
+    let reviews: [BusinessReview]?
+    let clubs: [BusinessSummary]?
+    let members: [BusinessSummary]?
+    let impressum: BusinessImpressum?
     var id: String { userID }
+    var businessKind: BusinessKind { BusinessKind(rawValue: kind ?? "") ?? .business }
+    var businessCategory: BusinessCategory { BusinessCategory(rawValue: category) ?? .other }
+    var tier: BusinessPlanTier { BusinessPlanTier(rawValue: plan ?? "") ?? .free }
     enum CodingKeys: String, CodingKey {
         case description, category, canton, city, languages, website, services
+        case kind, tagline, address, latitude, longitude, phone, email, plan, offers, reviews, clubs, members, impressum
         case userID = "user_id", displayName = "display_name", serviceArea = "service_area"
         case logoURL = "logo_url", coverURL = "cover_url", deliveryModes = "delivery_modes"
         case cancellationPolicy = "cancellation_policy", isVerified = "is_verified"
         case averageRating = "average_rating", reviewCount = "review_count"
+        case countryCode = "country_code", subdivisionCode = "subdivision_code", photoURLs = "photo_urls"
+        case socialLinks = "social_links", openingHoursNote = "opening_hours_note", isSponsored = "is_sponsored"
     }
 }
 

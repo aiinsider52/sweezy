@@ -135,11 +135,16 @@ class UserService:
             BusinessAvailabilityRule,
             BusinessBooking,
             BusinessClient,
+            BusinessClubMember,
             BusinessDocument,
             BusinessLead,
+            BusinessOffer,
             BusinessProfile,
+            BusinessPurchase,
             BusinessQuickReply,
+            BusinessReview,
             BusinessService,
+            BusinessStatDaily,
             BusinessTeamMember,
         )
         from ..models.chat import (
@@ -158,6 +163,7 @@ class UserService:
         from ..models.place_suggestion import PlaceSuggestion
         from ..models.social import EventAttendance, FriendConnection, SocialProfile, SocialProfileReport
         from ..models.subscription import PremiumUsage, Subscription, SubscriptionEvent
+        from .business_plans import refresh_rating
 
         user_id = user.id
 
@@ -271,6 +277,24 @@ class UserService:
         db.query(SubscriptionEvent).filter(SubscriptionEvent.user_id == user_id).delete(synchronize_session=False)
         db.query(PremiumUsage).filter(PremiumUsage.user_id == user_id).delete(synchronize_session=False)
         db.query(JobFavorite).filter(JobFavorite.user_id == user_id).delete(synchronize_session=False)
+
+        # Reviews this user wrote elsewhere disappear, so those businesses' ratings are recomputed.
+        reviewed_business_ids = [
+            row[0]
+            for row in db.query(BusinessReview.business_user_id).filter(BusinessReview.author_id == user_id).all()
+        ]
+        db.query(BusinessReview).filter(
+            or_(BusinessReview.author_id == user_id, BusinessReview.business_user_id == user_id)
+        ).delete(synchronize_session=False)
+        for business_id in reviewed_business_ids:
+            if business_id != user_id:
+                refresh_rating(db, business_id)
+        db.query(BusinessClubMember).filter(
+            or_(BusinessClubMember.club_user_id == user_id, BusinessClubMember.member_user_id == user_id)
+        ).delete(synchronize_session=False)
+        db.query(BusinessOffer).filter(BusinessOffer.business_user_id == user_id).delete(synchronize_session=False)
+        db.query(BusinessStatDaily).filter(BusinessStatDaily.business_user_id == user_id).delete(synchronize_session=False)
+        db.query(BusinessPurchase).filter(BusinessPurchase.business_user_id == user_id).delete(synchronize_session=False)
 
         # Erase Sweezy Pro workspace and remove access to workspaces owned by others.
         db.query(BusinessDocument).filter(BusinessDocument.business_user_id == user_id).delete(synchronize_session=False)

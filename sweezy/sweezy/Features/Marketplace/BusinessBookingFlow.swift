@@ -15,10 +15,12 @@ struct BusinessBookingFlow: View {
     @State private var errorMessage: String?
     @State private var booked: BusinessBooking?
 
-    init(profile: PublicBusinessProfile, listingID: String) {
+    init(profile: PublicBusinessProfile, listingID: String, preferredServiceID: String? = nil) {
         self.profile = profile
         self.listingID = listingID
-        let preferred = profile.services.first(where: { $0.listingID == listingID }) ?? profile.services.first
+        let preferred = profile.services.first(where: { $0.id == preferredServiceID })
+            ?? profile.services.first(where: { $0.listingID == listingID })
+            ?? profile.services.first
         _selectedServiceID = State(initialValue: preferred?.id ?? "")
     }
 

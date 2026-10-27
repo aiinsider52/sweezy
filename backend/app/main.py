@@ -60,6 +60,11 @@ from .routers.incidents import router as incidents_router
 from .routers.network import router as network_router
 from .routers.social import router as social_router
 from .routers.moderation import admin_router as moderation_admin_router, router as moderation_router
+from .routers.business_discovery import (
+    admin_router as business_discovery_admin_router,
+    owner_router as business_owner_router,
+    public_router as business_discovery_router,
+)
 from .routers.business import (
     admin_router as business_admin_router,
     public_router as business_public_router,
@@ -470,8 +475,12 @@ app.include_router(social_router, prefix=f"{API_PREFIX}/friends", tags=["friends
 app.include_router(moderation_admin_router, prefix=f"{API_PREFIX}/admin", tags=["admin", "reports-safety"])
 app.include_router(moderation_router, prefix=f"{API_PREFIX}", tags=["moderation"])
 app.include_router(business_router, prefix=f"{API_PREFIX}/business", tags=["business"])
+app.include_router(business_owner_router, prefix=f"{API_PREFIX}/business", tags=["business"])
+# Static discovery paths (/directory, /offers, ...) must be registered before the /{user_id} catch-all.
+app.include_router(business_discovery_router, prefix=f"{API_PREFIX}/businesses", tags=["business", "public"])
 app.include_router(business_public_router, prefix=f"{API_PREFIX}/businesses", tags=["business", "public"])
 app.include_router(business_admin_router, prefix=f"{API_PREFIX}/admin", tags=["admin", "business"])
+app.include_router(business_discovery_admin_router, prefix=f"{API_PREFIX}/admin", tags=["admin", "business"])
 app.include_router(media_public_router)
 
 # Public pages (App Store / legal)

@@ -1,12 +1,15 @@
 "use client"
 
 import { useCallback, useEffect, useMemo, useState } from "react"
-import { Bot, Building2, CalendarClock, CheckCircle2, RefreshCw, Search, ShieldCheck, Users } from "lucide-react"
+import { Bot, Building2, CalendarClock, CheckCircle2, Crown, Flame, RefreshCw, Search, ShieldCheck, Star, Users } from "lucide-react"
 import toast from "react-hot-toast"
+
+type Plan = "free" | "pro" | "business"
 
 type BusinessRow = {
   user_id: string
   owner_email: string
+  kind: "business" | "specialist" | "club"
   display_name: string
   legal_name?: string | null
   description: string
@@ -32,6 +35,13 @@ type BusinessRow = {
   team_members_count: number
   ai_enabled: boolean
   ai_auto_reply: boolean
+  plan: Plan
+  effective_plan: Plan
+  plan_expires_at?: string | null
+  is_boosted: boolean
+  boost_until?: string | null
+  average_rating?: number | null
+  review_count: number
 }
 
 const dateTime = (value?: string | null) => value
@@ -87,15 +97,34 @@ export default function BusinessesPage() {
     } finally { setSaving(false) }
   }
 
+  async function grantPlan(plan: Plan, days: number) {
+    if (!selected) return
+    setSaving(true)
+    try {
+      const response = await fetch(`/api/admin/businesses/${selected.user_id}/plan`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan, days }),
+      })
+      const body = await response.json().catch(() => ({}))
+      if (!response.ok) throw new Error(body.detail || "Plan update failed")
+      setRows(current => current.map(row => row.user_id === body.user_id ? body : row))
+      setSelected(body)
+      toast.success(plan === "free" ? "Plan removed" : `${plan} granted for ${days} days`)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Plan update failed")
+    } finally { setSaving(false) }
+  }
+
   const pending = rows.filter(row => row.status === "pending").length
   const approved = rows.filter(row => row.status === "approved").length
-  const activePlus = rows.filter(row => ["premium", "trial"].includes(row.subscription_status)).length
+  const paidPlans = rows.filter(row => row.effective_plan !== "free").length
 
   return <section className="space-y-6 pb-12">
     <header className="relative overflow-hidden rounded-[28px] border border-lime-300/20 bg-[#0d140e] p-6 md:p-8">
       <div className="absolute -right-16 -top-16 h-64 w-64 rounded-full border border-lime-300/15" />
       <div className="relative flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
-        <div><div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[.22em] text-lime-300"><Building2 size={16} /> Sweezy Pro</div><h1 className="mt-3 text-3xl font-black md:text-5xl">Business control</h1><p className="mt-3 max-w-2xl text-sm leading-6 text-white/55">Moderation, Plus entitlement, services, CRM activity and AI receptionist readiness.</p></div>
+        <div><div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[.22em] text-lime-300"><Building2 size={16} /> Sweezy Pro</div><h1 className="mt-3 text-3xl font-black md:text-5xl">Business control</h1><p className="mt-3 max-w-2xl text-sm leading-6 text-white/55">Moderation, business plans and boosts, services, CRM activity and AI receptionist readiness.</p></div>
         <button onClick={() => void load()} disabled={loading} className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[.05] px-4 text-sm font-semibold"><RefreshCw size={16} className={loading ? "animate-spin" : ""} /> Refresh</button>
       </div>
     </header>
@@ -103,7 +132,7 @@ export default function BusinessesPage() {
     <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
       <Metric icon={<CalendarClock />} label="Waiting review" value={pending} accent />
       <Metric icon={<ShieldCheck />} label="Approved" value={approved} />
-      <Metric icon={<CheckCircle2 />} label="Active Plus" value={activePlus} />
+      <Metric icon={<CheckCircle2 />} label="Paid plans" value={paidPlans} />
       <Metric icon={<Users />} label="CRM leads" value={rows.reduce((sum, row) => sum + row.leads_count, 0)} />
     </div>
 
@@ -117,22 +146,33 @@ export default function BusinessesPage() {
         {filtered.map(row => <button key={row.user_id} onClick={() => { setSelected(row); setComment("") }} className={`rounded-[22px] border p-5 text-left transition hover:border-lime-300/40 ${selected?.user_id === row.user_id ? "border-lime-300 bg-lime-300/[.06]" : "border-white/10 bg-white/[.03]"}`}>
           <div className="flex items-start justify-between gap-3"><div className="min-w-0"><h2 className="truncate text-lg font-bold">{row.display_name}</h2><p className="truncate text-xs text-white/40">{row.owner_email}</p></div><StatusBadge status={row.status} /></div>
           <p className="mt-4 line-clamp-2 text-sm leading-6 text-white/55">{row.description}</p>
-          <div className="mt-4 flex flex-wrap gap-2 text-[11px]"><Pill>{row.city} · {row.canton}</Pill><Pill>{row.services_count} services</Pill><Pill>{row.leads_count} leads</Pill><Pill accent>{row.subscription_status === "premium" ? "Plus" : row.subscription_status}</Pill></div>
+          <div className="mt-4 flex flex-wrap gap-2 text-[11px]"><Pill>{row.city} · {row.canton}</Pill><Pill>{row.services_count} services</Pill><Pill>{row.leads_count} leads</Pill><Pill>{row.kind}</Pill><Pill accent>{row.effective_plan}</Pill>{row.is_boosted && <Pill accent>boosted</Pill>}</div>
         </button>)}
         {!filtered.length && <div className="col-span-full rounded-[22px] border border-dashed border-white/10 p-12 text-center text-sm text-white/40">No businesses match filters.</div>}
       </div>
       <aside className="xl:sticky xl:top-6 xl:self-start">
-        {selected ? <ReviewPanel row={selected} comment={comment} setComment={setComment} saving={saving} review={review} /> : <div className="rounded-[24px] border border-white/10 bg-white/[.03] p-8 text-center"><Building2 className="mx-auto text-white/25" size={38} /><p className="mt-4 text-sm text-white/45">Select business to inspect profile and moderation state.</p></div>}
+        {selected ? <ReviewPanel key={selected.user_id} row={selected} comment={comment} setComment={setComment} saving={saving} review={review} grantPlan={grantPlan} /> : <div className="rounded-[24px] border border-white/10 bg-white/[.03] p-8 text-center"><Building2 className="mx-auto text-white/25" size={38} /><p className="mt-4 text-sm text-white/45">Select business to inspect profile and moderation state.</p></div>}
       </aside>
     </div>
   </section>
 }
 
-function ReviewPanel({ row, comment, setComment, saving, review }: { row: BusinessRow; comment: string; setComment: (value: string) => void; saving: boolean; review: (decision: "approve" | "reject" | "suspend") => Promise<void> }) {
+function ReviewPanel({ row, comment, setComment, saving, review, grantPlan }: { row: BusinessRow; comment: string; setComment: (value: string) => void; saving: boolean; review: (decision: "approve" | "reject" | "suspend") => Promise<void>; grantPlan: (plan: Plan, days: number) => Promise<void> }) {
+  const [plan, setPlan] = useState<Plan>(row.effective_plan === "free" ? "pro" : row.effective_plan)
+  const [days, setDays] = useState(90)
   return <div className="space-y-5 rounded-[26px] border border-white/10 bg-[#101410] p-5 md:p-6">
     <div className="flex items-start justify-between gap-3"><div><p className="text-xs font-bold uppercase tracking-[.18em] text-lime-300">Moderation record</p><h2 className="mt-2 text-2xl font-black">{row.display_name}</h2></div><StatusBadge status={row.status} /></div>
-    <dl className="grid grid-cols-2 gap-3 text-xs"><Fact label="Owner" value={row.owner_email} /><Fact label="Location" value={`${row.city} · ${row.canton}`} /><Fact label="Submitted" value={dateTime(row.submitted_at)} /><Fact label="Reviewed" value={dateTime(row.reviewed_at)} /><Fact label="Plus access" value={`${row.subscription_status} · ${dateTime(row.subscription_expire_at)}`} /><Fact label="UID" value={row.uid_number || "—"} /></dl>
+    <dl className="grid grid-cols-2 gap-3 text-xs"><Fact label="Owner" value={row.owner_email} /><Fact label="Location" value={`${row.city} · ${row.canton}`} /><Fact label="Submitted" value={dateTime(row.submitted_at)} /><Fact label="Reviewed" value={dateTime(row.reviewed_at)} /><Fact label="Plan" value={`${row.effective_plan} · ${dateTime(row.plan_expires_at)}`} /><Fact label="Boost" value={row.is_boosted ? `until ${dateTime(row.boost_until)}` : "—"} /><Fact label="Kind" value={row.kind} /><Fact label="Rating" value={row.review_count ? `${row.average_rating?.toFixed(1)} · ${row.review_count} reviews` : "No reviews"} /><Fact label="UID" value={row.uid_number || "—"} /></dl>
     <div className="rounded-2xl border border-white/10 bg-black/20 p-4"><div className="flex items-center gap-2 font-semibold"><Bot size={17} className="text-lime-300" /> Product readiness</div><div className="mt-3 grid grid-cols-2 gap-2 text-xs text-white/55"><span>{row.services_count} services</span><span>{row.leads_count} CRM leads</span><span>{row.bookings_count} bookings</span><span>{row.clients_count} clients</span><span>{row.documents_count} documents</span><span>{row.team_members_count} team members</span><span className={row.ai_enabled ? "text-lime-300" : "text-white/35"}>AI {row.ai_enabled ? (row.ai_auto_reply ? "auto-reply" : "draft mode") : "off"}</span><span>{row.languages.join(", ") || "No languages"}</span><span>{row.delivery_modes.join(", ") || "No delivery mode"}</span></div></div>
+    <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+      <div className="flex items-center gap-2 font-semibold"><Crown size={17} className="text-lime-300" /> Launch plan grant</div>
+      <p className="mt-2 text-xs leading-5 text-white/45">Give early partners a free paid plan. A later App Store purchase replaces it.</p>
+      <div className="mt-3 grid grid-cols-[1fr_96px] gap-2">
+        <select aria-label="Plan" value={plan} onChange={event => setPlan(event.target.value as Plan)} className="h-11 rounded-xl border border-white/10 bg-[#111511] px-3 capitalize">{(["pro", "business", "free"] as Plan[]).map(value => <option key={value} value={value}>{value}</option>)}</select>
+        <input aria-label="Days" type="number" min={1} max={730} value={days} onChange={event => setDays(Math.max(1, Math.min(730, Number(event.target.value) || 1)))} className="h-11 rounded-xl border border-white/10 bg-black/20 px-3" />
+      </div>
+      <button disabled={saving} onClick={() => void grantPlan(plan, days)} className="mt-2 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-lime-300/30 text-sm font-semibold text-lime-200 disabled:opacity-40">{plan === "free" ? <><Flame size={15} /> Remove plan</> : <><Star size={15} /> Grant {plan} for {days} days</>}</button>
+    </div>
     {row.rejection_reason && <div className="rounded-2xl border border-amber-300/20 bg-amber-300/[.06] p-4 text-sm text-amber-100/70">{row.rejection_reason}</div>}
     <label className="block text-sm"><span className="mb-2 block text-white/50">Moderator comment</span><textarea value={comment} onChange={event => setComment(event.target.value)} maxLength={2000} placeholder="Required for reject or suspend" className="min-h-24 w-full rounded-xl border border-white/10 bg-black/20 p-3 outline-none focus:border-lime-300/60" /></label>
     <div className="grid grid-cols-2 gap-2"><button disabled={saving} onClick={() => void review("reject")} className="min-h-11 rounded-xl border border-amber-300/30 text-sm font-semibold text-amber-200 disabled:opacity-40">Request changes</button><button disabled={saving} onClick={() => void review("suspend")} className="min-h-11 rounded-xl border border-red-300/30 text-sm font-semibold text-red-200 disabled:opacity-40">Suspend</button><button disabled={saving} onClick={() => void review("approve")} className="col-span-2 min-h-12 rounded-xl bg-lime-300 font-bold text-black disabled:opacity-40">{saving ? "Saving…" : "Approve business"}</button></div>

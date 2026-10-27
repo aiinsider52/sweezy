@@ -1,4 +1,4 @@
-export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://sweezy-9xyk.onrender.com/api/v1'
+export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://sweezy-api.onrender.com/api/v1'
 
 export async function apiLogin(email: string, password: string) {
   const res = await fetch('/api/auth/login', {

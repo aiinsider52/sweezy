@@ -5,7 +5,7 @@
 - [ ] Apple Developer account access for team owning `com.sweezy.mobile`
 - [ ] App Store Connect app created; bundle id matches Xcode
 - [ ] Signing: Release APS environment = production
-- [ ] API live: https://sweezy-9xyk.onrender.com/ready → `ready`
+- [ ] API live: https://sweezy-api.onrender.com/ready → `ready`
 - [ ] Privacy/Terms/Support URLs open
 - [ ] Optional: APNs secrets on Render → then set `PUSH_NOTIFICATIONS_ENABLED=true`
 

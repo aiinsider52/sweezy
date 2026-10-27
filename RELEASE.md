@@ -17,9 +17,9 @@ Do not declare IAP products in App Store Connect until StoreKit is re‑enabled 
 2. Do **not** add IAP SKUs for this build
 3. Fill App Privacy from `docs/asc-app-privacy-answers.md` + `PrivacyInfo.xcprivacy`
 4. URLs (also in `fastlane/metadata/`):
-   - Privacy: https://sweezy-9xyk.onrender.com/legal/privacy
-   - Terms: https://sweezy-9xyk.onrender.com/legal/terms
-   - Support: https://sweezy-9xyk.onrender.com/support
+   - Privacy: https://sweezy-api.onrender.com/legal/privacy
+   - Terms: https://sweezy-api.onrender.com/legal/terms
+   - Support: https://sweezy-api.onrender.com/support
 5. Screenshots: `./scripts/capture-journey-screenshots.sh` → `fastlane/metadata/<locale>/screenshots/`
 6. Review notes: `fastlane/metadata/review_information/notes.txt` (states free / no IAP)
 

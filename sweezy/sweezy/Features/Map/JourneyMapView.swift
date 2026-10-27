@@ -44,6 +44,7 @@ struct JourneyMapView: View {
     @State private var isCalculatingRoute = false
     @State private var showsPlaceList = false
     @State private var showsSuggestPlace = false
+    @State private var businessPage: BusinessPageTarget?
     @State private var showsNearbyRail = true
 
     private let filters: [(PlaceType?, String, String)] = [
@@ -111,6 +112,12 @@ struct JourneyMapView: View {
             moveCamera(to: Self.defaultCenter, distance: Self.defaultCameraDistance)
             selectFirstVisiblePlace()
         }
+        .fullScreenCover(item: $businessPage) { target in
+            BusinessPageView(businessID: target.id)
+                .environmentObject(appContainer)
+                .environmentObject(lockManager)
+                .environmentObject(sessionManager)
+        }
         .onChange(of: selectedPlace?.id) { _, _ in
             guard let selectedPlace else {
                 activeRoute = nil
@@ -158,7 +165,7 @@ struct JourneyMapView: View {
             UserAnnotation()
 
             if !showsDiscoveryOnly {
-                ForEach(displayedPlaces.prefix(24)) { place in
+                ForEach(mapAnnotationPlaces) { place in
                     Annotation(place.name, coordinate: place.coordinate.clLocationCoordinate) {
                         Button {
                             focus(on: place)
@@ -500,6 +507,9 @@ struct JourneyMapView: View {
                     if place.isCommunitySuggested {
                         communityBadge
                     }
+                    if place.businessID != nil {
+                        businessBadge
+                    }
                     mapMetaRow(locationLine(for: place)) {
                         Image(systemName: "mappin.and.ellipse")
                             .font(.system(size: 10, weight: .semibold))
@@ -521,6 +531,16 @@ struct JourneyMapView: View {
                         loading: isCalculatingRoute && selectedPlace?.id == place.id
                     ) {
                         openDirections(to: place)
+                    }
+
+                    if let businessID = place.businessID {
+                        mapCardCircleButton(
+                            icon: "storefront.fill",
+                            size: 40,
+                            label: "business.open_page".localized
+                        ) {
+                            businessPage = BusinessPageTarget(id: businessID)
+                        }
                     }
 
                     if let bookingURL = bookingURL(for: place) {
@@ -842,6 +862,9 @@ struct JourneyMapView: View {
                         if place.isCommunitySuggested {
                             communityBadge
                         }
+                        if place.businessID != nil {
+                            businessBadge
+                        }
                     }
                     .font(.system(size: 10, weight: .bold))
                     .foregroundColor(JourneyVisual.accentText)
@@ -881,6 +904,18 @@ struct JourneyMapView: View {
             )
         }
         .buttonStyle(.plain)
+    }
+
+    private var businessBadge: some View {
+        Label("business.map.badge".localized, systemImage: "storefront.fill")
+            .labelStyle(.titleAndIcon)
+            .font(.system(size: 9, weight: .bold))
+            .foregroundStyle(JourneyCategoryPalette.sky.ink)
+            .padding(.horizontal, 7)
+            .frame(height: 18)
+            .background(JourneyCategoryPalette.sky.fill)
+            .clipShape(Capsule())
+            .lineLimit(1)
     }
 
     private var communityBadge: some View {
@@ -962,6 +997,15 @@ struct JourneyMapView: View {
             return matches
         }
         return matches.sorted { $0.distance(from: location) < $1.distance(from: location) }
+    }
+
+    /// Nearest official places plus every business page in view, so businesses never drop off the map
+    /// just because the list is long or the user's location is unknown.
+    private var mapAnnotationPlaces: [Place] {
+        let places = displayedPlaces
+        let nearest = places.prefix(24)
+        let businesses = places.dropFirst(24).filter { $0.businessID != nil }.prefix(40)
+        return Array(nearest) + Array(businesses)
     }
 
     private var displayedDiscoveryPlaces: [SwissDiscoveryPlace] {

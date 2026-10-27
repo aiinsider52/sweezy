@@ -2,7 +2,7 @@
 """API smoke for marketplace chat (one or two verified accounts).
 
 One-user (buyer against an existing listing):
-  BASE_URL=https://sweezy-9xyk.onrender.com \\
+  BASE_URL=https://sweezy-api.onrender.com \\
   BUYER_EMAIL=... BUYER_PASSWORD=... \\
   ./scripts/chat-api-smoke.py
 
@@ -19,7 +19,7 @@ import urllib.request
 import uuid
 from typing import Any, Dict, Optional, Tuple
 
-BASE_URL = os.environ.get("BASE_URL", "https://sweezy-9xyk.onrender.com").rstrip("/")
+BASE_URL = os.environ.get("BASE_URL", "https://sweezy-api.onrender.com").rstrip("/")
 API = f"{BASE_URL}/api/v1"
 
 

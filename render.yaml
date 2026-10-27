@@ -3,10 +3,10 @@ previews:
 
 services:
   - type: web
-    name: sweezy
+    name: sweezy-api
     runtime: python
-    plan: starter
-    region: oregon
+    plan: free
+    region: frankfurt
     branch: main
     autoDeployTrigger: checksPass
     buildCommand: pip install --upgrade pip && pip install -r backend/requirements.txt
@@ -27,7 +27,8 @@ services:
       - key: CHAT_ENABLED
         value: "true"
       - key: CORS_ORIGINS
-        value: '["https://sweezy-admin.onrender.com"]'
+        value: '["https://sweezy-admin-0twt.onrender.com"]'
+      # Use postgresql+psycopg2:// — the default postgresql:// dialect needs psycopg 3.
       - key: DATABASE_URL
         sync: false
       - key: REDIS_URL
@@ -124,10 +125,10 @@ services:
         value: app.crash,security.critical,data_loss
 
   - type: web
-    name: sweezy_admin
+    name: sweezy-admin
     runtime: node
-    plan: starter
-    region: oregon
+    plan: free
+    region: frankfurt
     branch: main
     rootDir: admin
     autoDeployTrigger: checksPass
@@ -142,15 +143,13 @@ services:
     envVars:
       - key: NODE_VERSION
         value: 20.19.2
-      - key: NODE_ENV
-        value: production
       - key: NEXT_PUBLIC_API_URL
-        value: https://sweezy-9xyk.onrender.com/api/v1
+        value: https://sweezy-api.onrender.com/api/v1
 
   - type: keyvalue
     name: sweezy-chat-realtime
-    plan: starter
-    region: oregon
+    plan: free
+    region: frankfurt
     ipAllowList: []
     maxmemoryPolicy: allkeys-lru
     # Pub/sub only — persistence not required for chat fan-out.

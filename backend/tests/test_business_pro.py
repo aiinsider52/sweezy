@@ -9,6 +9,7 @@ from backend.app.core.config import get_settings
 from backend.app.core.database import SessionLocal
 from backend.app.core.security import create_access_token, decode_token
 from backend.app.main import app
+from backend.app.models.business import BusinessProfile
 from backend.app.models.user import User
 from backend.app.services.users import UserService
 
@@ -56,10 +57,37 @@ def _subject(headers: dict[str, str]) -> str:
     return decode_token(headers["Authorization"].split(" ", 1)[1])["sub"]
 
 
-def test_business_requires_plus() -> None:
+def _grant_plan(headers: dict[str, str], plan: str) -> None:
+    with SessionLocal() as db:
+        profile = db.get(BusinessProfile, _subject(headers))
+        profile.plan = plan
+        profile.plan_expires_at = datetime.now(timezone.utc) + timedelta(days=30)
+        db.add(profile)
+        db.commit()
+
+
+def test_free_business_profile_gates_paid_tools() -> None:
     headers = _headers(premium=False)
-    response = client.get("/api/v1/business/profile", headers=headers)
-    assert response.status_code == 402
+    assert client.get("/api/v1/business/profile", headers=headers).status_code == 404
+    _profile(headers)
+
+    ai = client.put("/api/v1/business/ai-settings", headers=headers, json={"ai_enabled": True})
+    assert ai.status_code == 402
+    assert ai.json()["detail"] == {"code": "business_plan_required", "required_plan": "business"}
+    document = client.post("/api/v1/business/documents", headers=headers, json={"title": "Quote", "line_items": []})
+    assert document.status_code == 402
+    team = client.post("/api/v1/business/team", headers=headers, json={"email": "x@example.test", "display_name": "X", "role": "staff"})
+    assert team.status_code == 402
+
+    for index in range(3):
+        created = client.post("/api/v1/business/services", headers=headers, json={"title": f"Service {index}"})
+        assert created.status_code == 201, created.text
+    limited = client.post("/api/v1/business/services", headers=headers, json={"title": "Service 4"})
+    assert limited.status_code == 409
+    assert limited.json()["detail"]["limit"] == 3
+
+    _grant_plan(headers, "pro")
+    assert client.post("/api/v1/business/services", headers=headers, json={"title": "Service 4"}).status_code == 201
 
 
 def test_business_profile_services_dashboard_and_review() -> None:
@@ -129,6 +157,7 @@ def test_booking_conflict_and_completion_updates_client() -> None:
 def test_custom_ai_receptionist_fallback_is_safe(monkeypatch) -> None:
     headers = _headers()
     _profile(headers)
+    _grant_plan(headers, "business")
     settings = get_settings()
     monkeypatch.setattr(settings, "OPENAI_API_KEY", None)
     configured = client.put("/api/v1/business/ai-settings", headers=headers, json={
@@ -214,10 +243,11 @@ def test_public_profile_slots_booking_and_customer_cancellation() -> None:
     assert cancelled.json()["status"] == "cancelled"
 
 
-def test_team_member_can_manage_workspace_without_own_plus() -> None:
+def test_team_member_can_manage_business_plan_workspace() -> None:
     owner_headers = _headers()
     member_headers = _headers(premium=False)
     owner = _profile(owner_headers)
+    _grant_plan(owner_headers, "business")
     member_id = _subject(member_headers)
     with SessionLocal() as db:
         member = db.get(User, member_id)

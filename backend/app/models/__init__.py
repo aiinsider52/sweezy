@@ -43,11 +43,16 @@ from .business import (
     BusinessAvailabilityRule,
     BusinessBooking,
     BusinessClient,
+    BusinessClubMember,
     BusinessDocument,
     BusinessLead,
+    BusinessOffer,
     BusinessProfile,
+    BusinessPurchase,
     BusinessQuickReply,
+    BusinessReview,
     BusinessService,
+    BusinessStatDaily,
     BusinessTeamMember,
 )
 
@@ -117,4 +122,9 @@ __all__ = [
     "BusinessQuickReply",
     "BusinessTeamMember",
     "BusinessDocument",
+    "BusinessReview",
+    "BusinessOffer",
+    "BusinessStatDaily",
+    "BusinessPurchase",
+    "BusinessClubMember",
 ]

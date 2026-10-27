@@ -197,7 +197,9 @@ final class SubscriptionManager: ObservableObject {
         Task { [weak self] in
             for await result in Transaction.updates {
                 guard !Task.isCancelled else { return }
-                guard case .verified(let transaction) = result else { continue }
+                // Business placement products are credited and finished by BusinessStoreManager.
+                guard case .verified(let transaction) = result,
+                      ProductID.all.contains(transaction.productID) else { continue }
                 await self?.syncWithBackend(result.jwsRepresentation)
                 await transaction.finish()
                 await self?.refreshEntitlements()

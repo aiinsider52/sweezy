@@ -40,7 +40,7 @@ Product IDs must match exactly. App loads localized price and currency from Stor
   - `STRIPE_SUBSCRIPTIONS_ENABLED=false` for iOS digital subscriptions.
 - Download required Apple root certificates from Apple PKI. Convert each DER file with `base64 < certificate.cer | tr -d '\n'`; join values with commas. Never commit certificates or secrets.
 - Configure App Store Server Notifications V2 production and sandbox URL:
-  `https://sweezy-9xyk.onrender.com/api/v1/subscriptions/apple/notifications`
+  `https://sweezy-api.onrender.com/api/v1/subscriptions/apple/notifications`
 - Deploy backend, confirm migration `0031_apple_subscriptions` applied, then test authenticated transaction sync:
   `POST /api/v1/subscriptions/apple/transactions`.
 - Confirm purchased user changes to `trial` or `premium` in `GET /api/v1/subscriptions/entitlements`.

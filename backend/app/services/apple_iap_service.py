@@ -253,21 +253,33 @@ def process_notification(db: Session, signed_payload: str) -> tuple[str, str | N
     if event_id and db.query(SubscriptionEvent.id).filter(SubscriptionEvent.external_event_id == event_id).first():
         return "duplicate", None
 
+    from . import business_plans
+
     data = notification.data
     user: User | None = None
     decoded = None
     renewal = None
+    is_business = False
     try:
         if data and data.signedTransactionInfo:
             decoded = _verifier(environment).verify_and_decode_signed_transaction(data.signedTransactionInfo)
-            _validate_transaction(decoded)
-            user = _resolve_notification_user(db, decoded)
+            is_business = business_plans.is_business_product(decoded.productId)
+            if is_business:
+                user = business_plans.resolve_business_purchase_user(db, decoded)
+            else:
+                _validate_transaction(decoded)
+                user = _resolve_notification_user(db, decoded)
         if data and data.signedRenewalInfo:
             renewal = _verifier(environment).verify_and_decode_renewal_info(data.signedRenewalInfo)
     except VerificationException as exc:
         raise AppleIAPError("Apple notification transaction verification failed") from exc
 
-    if user and decoded:
+    if user and decoded and is_business:
+        try:
+            business_plans.apply_business_transaction(db, user, decoded)
+        except business_plans.BusinessPurchaseError as exc:
+            raise AppleIAPError(str(exc)) from exc
+    elif user and decoded:
         apply_verified_transaction(db, user, decoded, renewal=renewal, notification_status=data.status if data else None)
 
     event = SubscriptionEvent(

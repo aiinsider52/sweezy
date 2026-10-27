@@ -94,6 +94,8 @@ struct MainAppContent: View {
                 SwissTripPlannerView()
             } else if isSuggestPlaceUITest {
                 SuggestPlaceView()
+            } else if let businessScreen = businessUITestScreen {
+                BusinessUITestHost(screen: businessScreen)
             } else if isCareerHubUITest || isJobsGateUITest {
                 JobsView()
             } else if isCareerToolsUITest {
@@ -295,6 +297,21 @@ struct MainAppContent: View {
         #endif
     }
 
+    private var businessUITestScreen: BusinessUITestHost.Screen? {
+        #if DEBUG
+        let environment = ProcessInfo.processInfo.environment
+        let arguments = ProcessInfo.processInfo.arguments
+        guard environment["UITESTS"] == "1" else { return nil }
+        if arguments.contains("--ui-test-business-onboarding") { return .onboarding }
+        if arguments.contains("--ui-test-business-plans") { return .plans }
+        if arguments.contains("--ui-test-business-dashboard") { return .dashboard }
+        if arguments.contains("--ui-test-business-page"), let id = environment["UITEST_BUSINESS_ID"] { return .page(id) }
+        return nil
+        #else
+        return nil
+        #endif
+    }
+
     private var isSuggestPlaceUITest: Bool {
         #if DEBUG
         ProcessInfo.processInfo.environment["UITESTS"] == "1" &&
@@ -436,6 +453,8 @@ struct MainAppContent: View {
     private func startAccountServicesIfNeeded() async {
         guard sessionManager.isAuthenticated else { return }
         await SubscriptionManager.shared.load()
+        // Starts the business transaction listener so interrupted boosts/plans get credited.
+        _ = BusinessStoreManager.shared
         await appContainer.chatStore.start()
         if NotificationPreference.isEnabled {
             await SweezyAppDelegate.registerForChatPush()

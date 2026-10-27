@@ -3,7 +3,23 @@ from __future__ import annotations
 from datetime import datetime
 from uuid import uuid4
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Index, Integer, JSON, String, Text, UniqueConstraint, func
+from datetime import date
+
+from sqlalchemy import (
+    Boolean,
+    CheckConstraint,
+    Date,
+    DateTime,
+    Float,
+    ForeignKey,
+    Index,
+    Integer,
+    JSON,
+    String,
+    Text,
+    UniqueConstraint,
+    func,
+)
 from sqlalchemy.orm import Mapped, mapped_column
 
 from ..core.database import Base
@@ -13,7 +29,10 @@ class BusinessProfile(Base):
     __tablename__ = "business_profiles"
 
     user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
+    # business | specialist | club
+    kind: Mapped[str] = mapped_column(String(20), default="business", nullable=False, index=True)
     display_name: Mapped[str] = mapped_column(String(120), nullable=False)
+    tagline: Mapped[str | None] = mapped_column(String(140), nullable=True)
     legal_name: Mapped[str | None] = mapped_column(String(180), nullable=True)
     description: Mapped[str] = mapped_column(Text, default="", nullable=False)
     category: Mapped[str] = mapped_column(String(40), default="other", nullable=False, index=True)
@@ -34,6 +53,23 @@ class BusinessProfile(Base):
     cancellation_policy: Mapped[str | None] = mapped_column(Text, nullable=True)
     payment_link: Mapped[str | None] = mapped_column(String(1000), nullable=True)
     timezone: Mapped[str] = mapped_column(String(50), default="Europe/Zurich", nullable=False)
+    latitude: Mapped[float | None] = mapped_column(Float, nullable=True)
+    longitude: Mapped[float | None] = mapped_column(Float, nullable=True)
+    photo_urls: Mapped[list[str]] = mapped_column(JSON, default=list, nullable=False)
+    social_links: Mapped[dict[str, str]] = mapped_column(JSON, default=dict, nullable=False)
+    opening_hours_note: Mapped[str | None] = mapped_column(String(240), nullable=True)
+    # Impressum: person legally responsible for the published business page.
+    represented_by: Mapped[str | None] = mapped_column(String(120), nullable=True)
+
+    # Paid placement. `plan` is only honoured while `plan_expires_at` is in the future.
+    plan: Mapped[str] = mapped_column(String(20), default="free", nullable=False, index=True)
+    plan_expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    plan_source: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    plan_original_transaction_id: Mapped[str | None] = mapped_column(String(160), nullable=True, index=True)
+    boost_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True, index=True)
+    average_rating: Mapped[float | None] = mapped_column(Float, nullable=True)
+    review_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+
     status: Mapped[str] = mapped_column(String(20), default="draft", nullable=False, index=True)
     rejection_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
     is_verified: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False, index=True)
@@ -220,6 +256,91 @@ class BusinessDocument(Base):
     total_cents: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     currency: Mapped[str] = mapped_column(String(3), default="CHF", nullable=False)
     due_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
+    )
+
+
+class BusinessReview(Base):
+    __tablename__ = "business_reviews"
+    __table_args__ = (
+        UniqueConstraint("business_user_id", "author_id", name="uq_business_review_author"),
+        CheckConstraint("rating BETWEEN 1 AND 5", name="ck_business_review_rating"),
+        Index("ix_business_reviews_public", "business_user_id", "status", "created_at"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid4()))
+    business_user_id: Mapped[str] = mapped_column(ForeignKey("business_profiles.user_id", ondelete="CASCADE"), index=True)
+    author_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    booking_id: Mapped[str | None] = mapped_column(ForeignKey("business_bookings.id", ondelete="SET NULL"), nullable=True)
+    author_name: Mapped[str] = mapped_column(String(120), nullable=False)
+    rating: Mapped[int] = mapped_column(Integer, nullable=False)
+    text: Mapped[str] = mapped_column(Text, default="", nullable=False)
+    owner_reply: Mapped[str | None] = mapped_column(Text, nullable=True)
+    owner_replied_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    # published | hidden
+    status: Mapped[str] = mapped_column(String(20), default="published", nullable=False, index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
+    )
+
+
+class BusinessOffer(Base):
+    __tablename__ = "business_offers"
+    __table_args__ = (Index("ix_business_offers_owner_active", "business_user_id", "is_active"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid4()))
+    business_user_id: Mapped[str] = mapped_column(ForeignKey("business_profiles.user_id", ondelete="CASCADE"), index=True)
+    title: Mapped[str] = mapped_column(String(120), nullable=False)
+    description: Mapped[str] = mapped_column(Text, default="", nullable=False)
+    discount_label: Mapped[str] = mapped_column(String(40), nullable=False)
+    promo_code: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    ends_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True, index=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
+    )
+
+
+class BusinessStatDaily(Base):
+    __tablename__ = "business_stats_daily"
+    __table_args__ = (UniqueConstraint("business_user_id", "day", "metric", name="uq_business_stat_day_metric"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid4()))
+    business_user_id: Mapped[str] = mapped_column(ForeignKey("business_profiles.user_id", ondelete="CASCADE"), index=True)
+    day: Mapped[date] = mapped_column(Date, nullable=False)
+    metric: Mapped[str] = mapped_column(String(30), nullable=False)
+    count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+
+
+class BusinessPurchase(Base):
+    __tablename__ = "business_purchases"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid4()))
+    business_user_id: Mapped[str] = mapped_column(ForeignKey("business_profiles.user_id", ondelete="CASCADE"), index=True)
+    provider: Mapped[str] = mapped_column(String(20), default="apple", nullable=False)
+    product_id: Mapped[str] = mapped_column(String(160), nullable=False)
+    # plan | boost
+    kind: Mapped[str] = mapped_column(String(20), nullable=False)
+    transaction_id: Mapped[str] = mapped_column(String(160), nullable=False, unique=True)
+    original_transaction_id: Mapped[str | None] = mapped_column(String(160), nullable=True, index=True)
+    environment: Mapped[str | None] = mapped_column(String(24), nullable=True)
+    expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+
+class BusinessClubMember(Base):
+    __tablename__ = "business_club_members"
+    __table_args__ = (UniqueConstraint("club_user_id", "member_user_id", name="uq_business_club_member"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid4()))
+    club_user_id: Mapped[str] = mapped_column(ForeignKey("business_profiles.user_id", ondelete="CASCADE"), index=True)
+    member_user_id: Mapped[str] = mapped_column(ForeignKey("business_profiles.user_id", ondelete="CASCADE"), index=True)
+    # pending | approved | rejected
+    status: Mapped[str] = mapped_column(String(20), default="pending", nullable=False, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False

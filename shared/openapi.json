@@ -146,6 +146,31 @@
         "title": "AIReceptionistMessage",
         "type": "object"
       },
+      "AdminBusinessPlanGrant": {
+        "properties": {
+          "days": {
+            "default": 30,
+            "maximum": 730.0,
+            "minimum": 1.0,
+            "title": "Days",
+            "type": "integer"
+          },
+          "plan": {
+            "enum": [
+              "free",
+              "pro",
+              "business"
+            ],
+            "title": "Plan",
+            "type": "string"
+          }
+        },
+        "required": [
+          "plan"
+        ],
+        "title": "AdminBusinessPlanGrant",
+        "type": "object"
+      },
       "AdminBusinessProfileResponse": {
         "properties": {
           "address": {
@@ -168,10 +193,33 @@
             "title": "Ai Enabled",
             "type": "boolean"
           },
+          "average_rating": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Average Rating"
+          },
           "bookings_count": {
             "default": 0,
             "title": "Bookings Count",
             "type": "integer"
+          },
+          "boost_until": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Boost Until"
           },
           "cancellation_policy": {
             "anyOf": [
@@ -265,6 +313,16 @@
             "title": "Documents Count",
             "type": "integer"
           },
+          "effective_plan": {
+            "default": "free",
+            "enum": [
+              "free",
+              "pro",
+              "business"
+            ],
+            "title": "Effective Plan",
+            "type": "string"
+          },
           "email": {
             "anyOf": [
               {
@@ -277,9 +335,24 @@
             ],
             "title": "Email"
           },
+          "is_boosted": {
+            "default": false,
+            "title": "Is Boosted",
+            "type": "boolean"
+          },
           "is_verified": {
             "title": "Is Verified",
             "type": "boolean"
+          },
+          "kind": {
+            "default": "business",
+            "enum": [
+              "business",
+              "specialist",
+              "club"
+            ],
+            "title": "Kind",
+            "type": "string"
           },
           "languages": {
             "items": {
@@ -288,6 +361,19 @@
             "maxItems": 12,
             "title": "Languages",
             "type": "array"
+          },
+          "latitude": {
+            "anyOf": [
+              {
+                "maximum": 90.0,
+                "minimum": -90.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latitude"
           },
           "leads_count": {
             "default": 0,
@@ -318,6 +404,31 @@
             ],
             "title": "Logo Url"
           },
+          "longitude": {
+            "anyOf": [
+              {
+                "maximum": 180.0,
+                "minimum": -180.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Longitude"
+          },
+          "opening_hours_note": {
+            "anyOf": [
+              {
+                "maxLength": 240,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Opening Hours Note"
+          },
           "owner_email": {
             "title": "Owner Email",
             "type": "string"
@@ -346,6 +457,36 @@
             ],
             "title": "Phone"
           },
+          "photo_urls": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 8,
+            "title": "Photo Urls",
+            "type": "array"
+          },
+          "plan": {
+            "default": "free",
+            "enum": [
+              "free",
+              "pro",
+              "business"
+            ],
+            "title": "Plan",
+            "type": "string"
+          },
+          "plan_expires_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plan Expires At"
+          },
           "rejection_reason": {
             "anyOf": [
               {
@@ -356,6 +497,23 @@
               }
             ],
             "title": "Rejection Reason"
+          },
+          "represented_by": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Represented By"
+          },
+          "review_count": {
+            "default": 0,
+            "title": "Review Count",
+            "type": "integer"
           },
           "reviewed_at": {
             "anyOf": [
@@ -381,6 +539,13 @@
             "default": 0,
             "title": "Services Count",
             "type": "integer"
+          },
+          "social_links": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Social Links",
+            "type": "object"
           },
           "status": {
             "enum": [
@@ -433,6 +598,18 @@
           "subscription_status": {
             "title": "Subscription Status",
             "type": "string"
+          },
+          "tagline": {
+            "anyOf": [
+              {
+                "maxLength": 140,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tagline"
           },
           "team_members_count": {
             "default": 0,
@@ -533,6 +710,23 @@
           "decision"
         ],
         "title": "AdminBusinessReview",
+        "type": "object"
+      },
+      "AdminBusinessReviewModeration": {
+        "properties": {
+          "status": {
+            "enum": [
+              "published",
+              "hidden"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "title": "AdminBusinessReviewModeration",
         "type": "object"
       },
       "AdminChatReportResponse": {
@@ -1903,6 +2097,21 @@
         "title": "BusinessAISettingsUpdate",
         "type": "object"
       },
+      "BusinessAppleTransaction": {
+        "properties": {
+          "signed_transaction": {
+            "maxLength": 100000,
+            "minLength": 10,
+            "title": "Signed Transaction",
+            "type": "string"
+          }
+        },
+        "required": [
+          "signed_transaction"
+        ],
+        "title": "BusinessAppleTransaction",
+        "type": "object"
+      },
       "BusinessBookingCreate": {
         "properties": {
           "client_id": {
@@ -2669,6 +2878,27 @@
         "title": "BusinessDashboardResponse",
         "type": "object"
       },
+      "BusinessDirectoryResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/BusinessSummary"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total"
+        ],
+        "title": "BusinessDirectoryResponse",
+        "type": "object"
+      },
       "BusinessDocumentCreate": {
         "properties": {
           "client_id": {
@@ -2893,6 +3123,78 @@
           "updated_at"
         ],
         "title": "BusinessDocumentResponse",
+        "type": "object"
+      },
+      "BusinessImpressum": {
+        "properties": {
+          "address": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Address"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "legal_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Legal Name"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "represented_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Represented By"
+          },
+          "uid_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Uid Number"
+          }
+        },
+        "title": "BusinessImpressum",
         "type": "object"
       },
       "BusinessLeadCreate": {
@@ -3386,6 +3688,349 @@
         "title": "BusinessLeadUpdate",
         "type": "object"
       },
+      "BusinessOfferCreate": {
+        "properties": {
+          "description": {
+            "default": "",
+            "maxLength": 2000,
+            "title": "Description",
+            "type": "string"
+          },
+          "discount_label": {
+            "maxLength": 40,
+            "minLength": 1,
+            "title": "Discount Label",
+            "type": "string"
+          },
+          "ends_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ends At"
+          },
+          "is_active": {
+            "default": true,
+            "title": "Is Active",
+            "type": "boolean"
+          },
+          "promo_code": {
+            "anyOf": [
+              {
+                "maxLength": 40,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Promo Code"
+          },
+          "title": {
+            "maxLength": 120,
+            "minLength": 2,
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "discount_label"
+        ],
+        "title": "BusinessOfferCreate",
+        "type": "object"
+      },
+      "BusinessOfferResponse": {
+        "properties": {
+          "business_user_id": {
+            "title": "Business User Id",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "description": {
+            "default": "",
+            "maxLength": 2000,
+            "title": "Description",
+            "type": "string"
+          },
+          "discount_label": {
+            "maxLength": 40,
+            "minLength": 1,
+            "title": "Discount Label",
+            "type": "string"
+          },
+          "ends_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ends At"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "is_active": {
+            "default": true,
+            "title": "Is Active",
+            "type": "boolean"
+          },
+          "promo_code": {
+            "anyOf": [
+              {
+                "maxLength": 40,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Promo Code"
+          },
+          "title": {
+            "maxLength": 120,
+            "minLength": 2,
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "discount_label",
+          "id",
+          "business_user_id",
+          "created_at"
+        ],
+        "title": "BusinessOfferResponse",
+        "type": "object"
+      },
+      "BusinessOfferUpdate": {
+        "properties": {
+          "description": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "discount_label": {
+            "anyOf": [
+              {
+                "maxLength": 40,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Discount Label"
+          },
+          "ends_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ends At"
+          },
+          "is_active": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Active"
+          },
+          "promo_code": {
+            "anyOf": [
+              {
+                "maxLength": 40,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Promo Code"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "minLength": 2,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          }
+        },
+        "title": "BusinessOfferUpdate",
+        "type": "object"
+      },
+      "BusinessPlanLimits": {
+        "properties": {
+          "ai_receptionist": {
+            "title": "Ai Receptionist",
+            "type": "boolean"
+          },
+          "documents": {
+            "title": "Documents",
+            "type": "boolean"
+          },
+          "offers": {
+            "title": "Offers",
+            "type": "integer"
+          },
+          "quick_replies": {
+            "title": "Quick Replies",
+            "type": "integer"
+          },
+          "services": {
+            "title": "Services",
+            "type": "integer"
+          },
+          "stats_days": {
+            "title": "Stats Days",
+            "type": "integer"
+          },
+          "team_members": {
+            "title": "Team Members",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "services",
+          "offers",
+          "quick_replies",
+          "stats_days",
+          "documents",
+          "ai_receptionist",
+          "team_members"
+        ],
+        "title": "BusinessPlanLimits",
+        "type": "object"
+      },
+      "BusinessPlanResponse": {
+        "properties": {
+          "boost_until": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Boost Until"
+          },
+          "effective_plan": {
+            "enum": [
+              "free",
+              "pro",
+              "business"
+            ],
+            "title": "Effective Plan",
+            "type": "string"
+          },
+          "is_boosted": {
+            "title": "Is Boosted",
+            "type": "boolean"
+          },
+          "limits": {
+            "$ref": "#/components/schemas/BusinessPlanLimits"
+          },
+          "plan": {
+            "enum": [
+              "free",
+              "pro",
+              "business"
+            ],
+            "title": "Plan",
+            "type": "string"
+          },
+          "plan_expires_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plan Expires At"
+          },
+          "plan_source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plan Source"
+          },
+          "product_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Product Ids",
+            "type": "array"
+          },
+          "usage": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Usage",
+            "type": "object"
+          }
+        },
+        "required": [
+          "plan",
+          "effective_plan",
+          "plan_expires_at",
+          "plan_source",
+          "boost_until",
+          "is_boosted",
+          "limits",
+          "usage",
+          "product_ids"
+        ],
+        "title": "BusinessPlanResponse",
+        "type": "object"
+      },
       "BusinessProfileResponse": {
         "properties": {
           "address": {
@@ -3399,6 +4044,29 @@
               }
             ],
             "title": "Address"
+          },
+          "average_rating": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Average Rating"
+          },
+          "boost_until": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Boost Until"
           },
           "cancellation_policy": {
             "anyOf": [
@@ -3482,6 +4150,16 @@
             "title": "Display Name",
             "type": "string"
           },
+          "effective_plan": {
+            "default": "free",
+            "enum": [
+              "free",
+              "pro",
+              "business"
+            ],
+            "title": "Effective Plan",
+            "type": "string"
+          },
           "email": {
             "anyOf": [
               {
@@ -3494,9 +4172,24 @@
             ],
             "title": "Email"
           },
+          "is_boosted": {
+            "default": false,
+            "title": "Is Boosted",
+            "type": "boolean"
+          },
           "is_verified": {
             "title": "Is Verified",
             "type": "boolean"
+          },
+          "kind": {
+            "default": "business",
+            "enum": [
+              "business",
+              "specialist",
+              "club"
+            ],
+            "title": "Kind",
+            "type": "string"
           },
           "languages": {
             "items": {
@@ -3505,6 +4198,19 @@
             "maxItems": 12,
             "title": "Languages",
             "type": "array"
+          },
+          "latitude": {
+            "anyOf": [
+              {
+                "maximum": 90.0,
+                "minimum": -90.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latitude"
           },
           "legal_name": {
             "anyOf": [
@@ -3530,6 +4236,31 @@
             ],
             "title": "Logo Url"
           },
+          "longitude": {
+            "anyOf": [
+              {
+                "maximum": 180.0,
+                "minimum": -180.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Longitude"
+          },
+          "opening_hours_note": {
+            "anyOf": [
+              {
+                "maxLength": 240,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Opening Hours Note"
+          },
           "payment_link": {
             "anyOf": [
               {
@@ -3554,6 +4285,36 @@
             ],
             "title": "Phone"
           },
+          "photo_urls": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 8,
+            "title": "Photo Urls",
+            "type": "array"
+          },
+          "plan": {
+            "default": "free",
+            "enum": [
+              "free",
+              "pro",
+              "business"
+            ],
+            "title": "Plan",
+            "type": "string"
+          },
+          "plan_expires_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plan Expires At"
+          },
           "rejection_reason": {
             "anyOf": [
               {
@@ -3564,6 +4325,23 @@
               }
             ],
             "title": "Rejection Reason"
+          },
+          "represented_by": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Represented By"
+          },
+          "review_count": {
+            "default": 0,
+            "title": "Review Count",
+            "type": "integer"
           },
           "reviewed_at": {
             "anyOf": [
@@ -3584,6 +4362,13 @@
             "maxItems": 26,
             "title": "Service Area",
             "type": "array"
+          },
+          "social_links": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Social Links",
+            "type": "object"
           },
           "status": {
             "enum": [
@@ -3620,6 +4405,18 @@
               }
             ],
             "title": "Submitted At"
+          },
+          "tagline": {
+            "anyOf": [
+              {
+                "maxLength": 140,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tagline"
           },
           "timezone": {
             "anyOf": [
@@ -3785,6 +4582,16 @@
             ],
             "title": "Email"
           },
+          "kind": {
+            "default": "business",
+            "enum": [
+              "business",
+              "specialist",
+              "club"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
           "languages": {
             "items": {
               "type": "string"
@@ -3792,6 +4599,19 @@
             "maxItems": 12,
             "title": "Languages",
             "type": "array"
+          },
+          "latitude": {
+            "anyOf": [
+              {
+                "maximum": 90.0,
+                "minimum": -90.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latitude"
           },
           "legal_name": {
             "anyOf": [
@@ -3817,6 +4637,31 @@
             ],
             "title": "Logo Url"
           },
+          "longitude": {
+            "anyOf": [
+              {
+                "maximum": 180.0,
+                "minimum": -180.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Longitude"
+          },
+          "opening_hours_note": {
+            "anyOf": [
+              {
+                "maxLength": 240,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Opening Hours Note"
+          },
           "payment_link": {
             "anyOf": [
               {
@@ -3841,6 +4686,26 @@
             ],
             "title": "Phone"
           },
+          "photo_urls": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 8,
+            "title": "Photo Urls",
+            "type": "array"
+          },
+          "represented_by": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Represented By"
+          },
           "service_area": {
             "items": {
               "type": "string"
@@ -3848,6 +4713,13 @@
             "maxItems": 26,
             "title": "Service Area",
             "type": "array"
+          },
+          "social_links": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Social Links",
+            "type": "object"
           },
           "subdivision_code": {
             "anyOf": [
@@ -3861,6 +4733,18 @@
               }
             ],
             "title": "Subdivision Code"
+          },
+          "tagline": {
+            "anyOf": [
+              {
+                "maxLength": 140,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tagline"
           },
           "timezone": {
             "anyOf": [
@@ -3904,6 +4788,149 @@
           "city"
         ],
         "title": "BusinessProfileUpdate",
+        "type": "object"
+      },
+      "BusinessReviewCreate": {
+        "properties": {
+          "rating": {
+            "maximum": 5.0,
+            "minimum": 1.0,
+            "title": "Rating",
+            "type": "integer"
+          },
+          "text": {
+            "default": "",
+            "maxLength": 2000,
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "rating"
+        ],
+        "title": "BusinessReviewCreate",
+        "type": "object"
+      },
+      "BusinessReviewEligibility": {
+        "properties": {
+          "can_review": {
+            "title": "Can Review",
+            "type": "boolean"
+          },
+          "existing": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BusinessReviewResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "required": [
+          "can_review"
+        ],
+        "title": "BusinessReviewEligibility",
+        "type": "object"
+      },
+      "BusinessReviewReply": {
+        "properties": {
+          "text": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "title": "BusinessReviewReply",
+        "type": "object"
+      },
+      "BusinessReviewResponse": {
+        "properties": {
+          "author_name": {
+            "title": "Author Name",
+            "type": "string"
+          },
+          "business_user_id": {
+            "title": "Business User Id",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "owner_replied_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Owner Replied At"
+          },
+          "owner_reply": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Owner Reply"
+          },
+          "rating": {
+            "title": "Rating",
+            "type": "integer"
+          },
+          "status": {
+            "enum": [
+              "published",
+              "hidden"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "business_user_id",
+          "author_name",
+          "rating",
+          "text",
+          "owner_reply",
+          "owner_replied_at",
+          "status",
+          "created_at"
+        ],
+        "title": "BusinessReviewResponse",
         "type": "object"
       },
       "BusinessServiceCreate": {
@@ -4252,6 +5279,244 @@
           }
         },
         "title": "BusinessServiceUpdate",
+        "type": "object"
+      },
+      "BusinessStatsDay": {
+        "properties": {
+          "actions": {
+            "title": "Actions",
+            "type": "integer"
+          },
+          "day": {
+            "title": "Day",
+            "type": "string"
+          },
+          "views": {
+            "title": "Views",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "day",
+          "views",
+          "actions"
+        ],
+        "title": "BusinessStatsDay",
+        "type": "object"
+      },
+      "BusinessStatsResponse": {
+        "properties": {
+          "days": {
+            "title": "Days",
+            "type": "integer"
+          },
+          "max_days": {
+            "title": "Max Days",
+            "type": "integer"
+          },
+          "series": {
+            "items": {
+              "$ref": "#/components/schemas/BusinessStatsDay"
+            },
+            "title": "Series",
+            "type": "array"
+          },
+          "totals": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Totals",
+            "type": "object"
+          }
+        },
+        "required": [
+          "days",
+          "max_days",
+          "totals",
+          "series"
+        ],
+        "title": "BusinessStatsResponse",
+        "type": "object"
+      },
+      "BusinessSummary": {
+        "description": "Compact business card used by the directory, map, offers feed and club lists.",
+        "properties": {
+          "average_rating": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Average Rating"
+          },
+          "category": {
+            "title": "Category",
+            "type": "string"
+          },
+          "city": {
+            "title": "City",
+            "type": "string"
+          },
+          "country_code": {
+            "default": "CH",
+            "title": "Country Code",
+            "type": "string"
+          },
+          "cover_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cover Url"
+          },
+          "display_name": {
+            "title": "Display Name",
+            "type": "string"
+          },
+          "is_sponsored": {
+            "default": false,
+            "title": "Is Sponsored",
+            "type": "boolean"
+          },
+          "is_verified": {
+            "default": false,
+            "title": "Is Verified",
+            "type": "boolean"
+          },
+          "kind": {
+            "default": "business",
+            "enum": [
+              "business",
+              "specialist",
+              "club"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "languages": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Languages",
+            "type": "array"
+          },
+          "latitude": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latitude"
+          },
+          "logo_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Logo Url"
+          },
+          "longitude": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Longitude"
+          },
+          "plan": {
+            "default": "free",
+            "enum": [
+              "free",
+              "pro",
+              "business"
+            ],
+            "title": "Plan",
+            "type": "string"
+          },
+          "review_count": {
+            "default": 0,
+            "title": "Review Count",
+            "type": "integer"
+          },
+          "subdivision_code": {
+            "title": "Subdivision Code",
+            "type": "string"
+          },
+          "tagline": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tagline"
+          },
+          "top_offer_label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Top Offer Label"
+          },
+          "user_id": {
+            "title": "User Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "user_id",
+          "display_name",
+          "category",
+          "subdivision_code",
+          "city"
+        ],
+        "title": "BusinessSummary",
+        "type": "object"
+      },
+      "BusinessTrackEvent": {
+        "properties": {
+          "event": {
+            "enum": [
+              "view",
+              "call",
+              "website",
+              "route",
+              "message",
+              "booking",
+              "offer",
+              "share"
+            ],
+            "title": "Event",
+            "type": "string"
+          }
+        },
+        "required": [
+          "event"
+        ],
+        "title": "BusinessTrackEvent",
         "type": "object"
       },
       "BusinessWorkspaceResponse": {
@@ -5271,6 +6536,56 @@
           "url"
         ],
         "title": "CheckoutOut",
+        "type": "object"
+      },
+      "ClubMemberResponse": {
+        "properties": {
+          "business": {
+            "$ref": "#/components/schemas/BusinessSummary"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "pending",
+              "approved",
+              "rejected"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "business",
+          "created_at"
+        ],
+        "title": "ClubMemberResponse",
+        "type": "object"
+      },
+      "ClubMembershipUpdate": {
+        "properties": {
+          "status": {
+            "enum": [
+              "approved",
+              "rejected"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "title": "ClubMembershipUpdate",
         "type": "object"
       },
       "CommunityPlaceResponse": {
@@ -11517,6 +12832,17 @@
       },
       "PublicBusinessProfileResponse": {
         "properties": {
+          "address": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Address"
+          },
           "average_rating": {
             "anyOf": [
               {
@@ -11551,6 +12877,13 @@
             "title": "City",
             "type": "string"
           },
+          "clubs": {
+            "items": {
+              "$ref": "#/components/schemas/BusinessSummary"
+            },
+            "title": "Clubs",
+            "type": "array"
+          },
           "country_code": {
             "default": "CH",
             "title": "Country Code",
@@ -11582,9 +12915,38 @@
             "title": "Display Name",
             "type": "string"
           },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "impressum": {
+            "$ref": "#/components/schemas/BusinessImpressum"
+          },
+          "is_sponsored": {
+            "default": false,
+            "title": "Is Sponsored",
+            "type": "boolean"
+          },
           "is_verified": {
             "title": "Is Verified",
             "type": "boolean"
+          },
+          "kind": {
+            "default": "business",
+            "enum": [
+              "business",
+              "specialist",
+              "club"
+            ],
+            "title": "Kind",
+            "type": "string"
           },
           "languages": {
             "items": {
@@ -11592,6 +12954,17 @@
             },
             "title": "Languages",
             "type": "array"
+          },
+          "latitude": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latitude"
           },
           "logo_url": {
             "anyOf": [
@@ -11604,10 +12977,81 @@
             ],
             "title": "Logo Url"
           },
+          "longitude": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Longitude"
+          },
+          "members": {
+            "items": {
+              "$ref": "#/components/schemas/BusinessSummary"
+            },
+            "title": "Members",
+            "type": "array"
+          },
+          "offers": {
+            "items": {
+              "$ref": "#/components/schemas/BusinessOfferResponse"
+            },
+            "title": "Offers",
+            "type": "array"
+          },
+          "opening_hours_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Opening Hours Note"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "photo_urls": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Photo Urls",
+            "type": "array"
+          },
+          "plan": {
+            "default": "free",
+            "enum": [
+              "free",
+              "pro",
+              "business"
+            ],
+            "title": "Plan",
+            "type": "string"
+          },
           "review_count": {
             "default": 0,
             "title": "Review Count",
             "type": "integer"
+          },
+          "reviews": {
+            "items": {
+              "$ref": "#/components/schemas/BusinessReviewResponse"
+            },
+            "title": "Reviews",
+            "type": "array"
           },
           "service_area": {
             "items": {
@@ -11623,9 +13067,27 @@
             "title": "Services",
             "type": "array"
           },
+          "social_links": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Social Links",
+            "type": "object"
+          },
           "subdivision_code": {
             "title": "Subdivision Code",
             "type": "string"
+          },
+          "tagline": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tagline"
           },
           "user_id": {
             "title": "User Id",
@@ -11661,6 +13123,83 @@
           "is_verified"
         ],
         "title": "PublicBusinessProfileResponse",
+        "type": "object"
+      },
+      "PublicOfferResponse": {
+        "properties": {
+          "business": {
+            "$ref": "#/components/schemas/BusinessSummary"
+          },
+          "business_user_id": {
+            "title": "Business User Id",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "description": {
+            "default": "",
+            "maxLength": 2000,
+            "title": "Description",
+            "type": "string"
+          },
+          "discount_label": {
+            "maxLength": 40,
+            "minLength": 1,
+            "title": "Discount Label",
+            "type": "string"
+          },
+          "ends_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ends At"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "is_active": {
+            "default": true,
+            "title": "Is Active",
+            "type": "boolean"
+          },
+          "promo_code": {
+            "anyOf": [
+              {
+                "maxLength": 40,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Promo Code"
+          },
+          "title": {
+            "maxLength": 120,
+            "minLength": 2,
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "discount_label",
+          "id",
+          "business_user_id",
+          "created_at",
+          "business"
+        ],
+        "title": "PublicOfferResponse",
         "type": "object"
       },
       "PublicProfileListing": {
@@ -15826,6 +17365,124 @@
         ]
       }
     },
+    "/api/v1/admin/business-reviews": {
+      "get": {
+        "operationId": "admin_business_reviews_api_v1_admin_business_reviews_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "pattern": "^(published|hidden)$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/BusinessReviewResponse"
+                  },
+                  "title": "Response Admin Business Reviews Api V1 Admin Business Reviews Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Admin Business Reviews",
+        "tags": [
+          "admin",
+          "business"
+        ]
+      }
+    },
+    "/api/v1/admin/business-reviews/{review_id}": {
+      "patch": {
+        "operationId": "admin_moderate_business_review_api_v1_admin_business_reviews__review_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "review_id",
+            "required": true,
+            "schema": {
+              "title": "Review Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminBusinessReviewModeration"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessReviewResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Admin Moderate Business Review",
+        "tags": [
+          "admin",
+          "business"
+        ]
+      }
+    },
     "/api/v1/admin/businesses": {
       "get": {
         "operationId": "admin_list_businesses_api_v1_admin_businesses_get",
@@ -15880,6 +17537,65 @@
           }
         ],
         "summary": "Admin List Businesses",
+        "tags": [
+          "admin",
+          "business"
+        ]
+      }
+    },
+    "/api/v1/admin/businesses/{user_id}/plan": {
+      "patch": {
+        "description": "Manual plan grants for launch partners; App Store purchases always take precedence once made.",
+        "operationId": "admin_grant_business_plan_api_v1_admin_businesses__user_id__plan_patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "schema": {
+              "title": "User Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminBusinessPlanGrant"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminBusinessProfileResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Admin Grant Business Plan",
         "tags": [
           "admin",
           "business"
@@ -21143,6 +22859,208 @@
         ]
       }
     },
+    "/api/v1/business/club/members": {
+      "get": {
+        "operationId": "club_members_api_v1_business_club_members_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ClubMemberResponse"
+                  },
+                  "title": "Response Club Members Api V1 Business Club Members Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Club Members",
+        "tags": [
+          "business"
+        ]
+      }
+    },
+    "/api/v1/business/club/members/{membership_id}": {
+      "delete": {
+        "operationId": "remove_club_member_api_v1_business_club_members__membership_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "membership_id",
+            "required": true,
+            "schema": {
+              "title": "Membership Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Remove Club Member",
+        "tags": [
+          "business"
+        ]
+      },
+      "patch": {
+        "operationId": "review_club_member_api_v1_business_club_members__membership_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "membership_id",
+            "required": true,
+            "schema": {
+              "title": "Membership Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClubMembershipUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClubMemberResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Review Club Member",
+        "tags": [
+          "business"
+        ]
+      }
+    },
+    "/api/v1/business/clubs/mine": {
+      "get": {
+        "operationId": "my_club_memberships_api_v1_business_clubs_mine_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ClubMemberResponse"
+                  },
+                  "title": "Response My Club Memberships Api V1 Business Clubs Mine Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "My Club Memberships",
+        "tags": [
+          "business"
+        ]
+      }
+    },
+    "/api/v1/business/clubs/{club_user_id}/join": {
+      "post": {
+        "operationId": "join_club_api_v1_business_clubs__club_user_id__join_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "club_user_id",
+            "required": true,
+            "schema": {
+              "title": "Club User Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClubMemberResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Join Club",
+        "tags": [
+          "business"
+        ]
+      }
+    },
     "/api/v1/business/dashboard": {
       "get": {
         "operationId": "dashboard_api_v1_business_dashboard_get",
@@ -21398,6 +23316,247 @@
           }
         ],
         "summary": "Update Lead",
+        "tags": [
+          "business"
+        ]
+      }
+    },
+    "/api/v1/business/offers": {
+      "get": {
+        "operationId": "list_offers_api_v1_business_offers_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/BusinessOfferResponse"
+                  },
+                  "title": "Response List Offers Api V1 Business Offers Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Offers",
+        "tags": [
+          "business"
+        ]
+      },
+      "post": {
+        "operationId": "create_offer_api_v1_business_offers_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BusinessOfferCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessOfferResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Offer",
+        "tags": [
+          "business"
+        ]
+      }
+    },
+    "/api/v1/business/offers/{offer_id}": {
+      "delete": {
+        "operationId": "delete_offer_api_v1_business_offers__offer_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "offer_id",
+            "required": true,
+            "schema": {
+              "title": "Offer Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Delete Offer",
+        "tags": [
+          "business"
+        ]
+      },
+      "patch": {
+        "operationId": "update_offer_api_v1_business_offers__offer_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "offer_id",
+            "required": true,
+            "schema": {
+              "title": "Offer Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BusinessOfferUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessOfferResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Update Offer",
+        "tags": [
+          "business"
+        ]
+      }
+    },
+    "/api/v1/business/plan": {
+      "get": {
+        "operationId": "business_plan_api_v1_business_plan_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessPlanResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Business Plan",
+        "tags": [
+          "business"
+        ]
+      }
+    },
+    "/api/v1/business/plan/apple": {
+      "post": {
+        "operationId": "sync_business_purchase_api_v1_business_plan_apple_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BusinessAppleTransaction"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessPlanResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Sync Business Purchase",
         "tags": [
           "business"
         ]
@@ -21668,6 +23827,93 @@
         ]
       }
     },
+    "/api/v1/business/reviews": {
+      "get": {
+        "operationId": "my_reviews_api_v1_business_reviews_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/BusinessReviewResponse"
+                  },
+                  "title": "Response My Reviews Api V1 Business Reviews Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "My Reviews",
+        "tags": [
+          "business"
+        ]
+      }
+    },
+    "/api/v1/business/reviews/{review_id}/reply": {
+      "post": {
+        "operationId": "reply_to_review_api_v1_business_reviews__review_id__reply_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "review_id",
+            "required": true,
+            "schema": {
+              "title": "Review Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BusinessReviewReply"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessReviewResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Reply To Review",
+        "tags": [
+          "business"
+        ]
+      }
+    },
     "/api/v1/business/services": {
       "get": {
         "operationId": "list_services_api_v1_business_services_get",
@@ -21837,6 +24083,56 @@
         ]
       }
     },
+    "/api/v1/business/stats": {
+      "get": {
+        "operationId": "business_stats_api_v1_business_stats_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "days",
+            "required": false,
+            "schema": {
+              "default": 30,
+              "maximum": 365,
+              "minimum": 1,
+              "title": "Days",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessStatsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Business Stats",
+        "tags": [
+          "business"
+        ]
+      }
+    },
     "/api/v1/business/team": {
       "get": {
         "operationId": "list_team_api_v1_business_team_get",
@@ -21951,6 +24247,300 @@
         ]
       }
     },
+    "/api/v1/businesses/contextual": {
+      "get": {
+        "operationId": "contextual_businesses_api_v1_businesses_contextual_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "topic",
+            "required": true,
+            "schema": {
+              "maxLength": 40,
+              "minLength": 2,
+              "title": "Topic",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "country",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 2,
+                  "minLength": 2,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Country"
+            }
+          },
+          {
+            "in": "query",
+            "name": "subdivision",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 10,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Subdivision"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 3,
+              "maximum": 10,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/BusinessSummary"
+                  },
+                  "title": "Response Contextual Businesses Api V1 Businesses Contextual Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Contextual Businesses",
+        "tags": [
+          "business",
+          "public"
+        ]
+      }
+    },
+    "/api/v1/businesses/directory": {
+      "get": {
+        "operationId": "business_directory_api_v1_businesses_directory_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "country",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 2,
+                  "minLength": 2,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Country"
+            }
+          },
+          {
+            "in": "query",
+            "name": "subdivision",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 10,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Subdivision"
+            }
+          },
+          {
+            "in": "query",
+            "name": "city",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 100,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "City"
+            }
+          },
+          {
+            "in": "query",
+            "name": "category",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 40,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Category"
+            }
+          },
+          {
+            "in": "query",
+            "name": "kind",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "pattern": "^(business|specialist|club)$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Kind"
+            }
+          },
+          {
+            "in": "query",
+            "name": "language",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 10,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Language"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 100,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Q"
+            }
+          },
+          {
+            "in": "query",
+            "name": "verified",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Verified",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "with_location",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "With Location",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 30,
+              "maximum": 500,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "maximum": 5000,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessDirectoryResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Business Directory",
+        "tags": [
+          "business",
+          "public"
+        ]
+      }
+    },
     "/api/v1/businesses/me/bookings": {
       "get": {
         "operationId": "my_business_bookings_api_v1_businesses_me_bookings_get",
@@ -22055,6 +24645,91 @@
           }
         ],
         "summary": "My Business Workspaces",
+        "tags": [
+          "business",
+          "public"
+        ]
+      }
+    },
+    "/api/v1/businesses/offers": {
+      "get": {
+        "operationId": "offers_feed_api_v1_businesses_offers_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "country",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 2,
+                  "minLength": 2,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Country"
+            }
+          },
+          {
+            "in": "query",
+            "name": "subdivision",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 10,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Subdivision"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 30,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PublicOfferResponse"
+                  },
+                  "title": "Response Offers Feed Api V1 Businesses Offers Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Offers Feed",
         "tags": [
           "business",
           "public"
@@ -22344,6 +25019,180 @@
         ]
       }
     },
+    "/api/v1/businesses/{user_id}/reviews": {
+      "get": {
+        "operationId": "business_reviews_api_v1_businesses__user_id__reviews_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "schema": {
+              "title": "User Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/BusinessReviewResponse"
+                  },
+                  "title": "Response Business Reviews Api V1 Businesses  User Id  Reviews Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Business Reviews",
+        "tags": [
+          "business",
+          "public"
+        ]
+      },
+      "post": {
+        "operationId": "write_review_api_v1_businesses__user_id__reviews_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "schema": {
+              "title": "User Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BusinessReviewCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessReviewResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Write Review",
+        "tags": [
+          "business",
+          "public"
+        ]
+      }
+    },
+    "/api/v1/businesses/{user_id}/reviews/eligibility": {
+      "get": {
+        "operationId": "review_eligibility_api_v1_businesses__user_id__reviews_eligibility_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "schema": {
+              "title": "User Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessReviewEligibility"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Review Eligibility",
+        "tags": [
+          "business",
+          "public"
+        ]
+      }
+    },
     "/api/v1/businesses/{user_id}/slots": {
       "get": {
         "operationId": "public_business_slots_api_v1_businesses__user_id__slots_get",
@@ -22406,6 +25255,52 @@
           }
         },
         "summary": "Public Business Slots",
+        "tags": [
+          "business",
+          "public"
+        ]
+      }
+    },
+    "/api/v1/businesses/{user_id}/track": {
+      "post": {
+        "operationId": "track_business_event_api_v1_businesses__user_id__track_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "schema": {
+              "title": "User Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BusinessTrackEvent"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Track Business Event",
         "tags": [
           "business",
           "public"

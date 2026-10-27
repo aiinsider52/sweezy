@@ -340,6 +340,7 @@ class ContentService: ContentServiceProtocol {
             places = []
         }
         await mergeCommunityPlaces()
+        await mergeBusinessPlaces()
     }
 
     /// Places suggested by users and approved by a moderator. Falls back to the last cached copy offline.
@@ -357,6 +358,24 @@ class ContentService: ContentServiceProtocol {
         places.append(contentsOf: community.filter { !existingIDs.contains($0.id) })
     }
     
+    /// Approved business pages with a location appear on the map next to official places.
+    private func mergeBusinessPlaces() async {
+        let filename = cacheName("places_business.json")
+        var businesses: [Place] = []
+        var query = BusinessProAPI.DirectoryQuery()
+        query.withLocation = true
+        query.limit = 500
+        if let remote = try? await BusinessProAPI.directory(query) {
+            businesses = remote.items.compactMap(Place.init(business:))
+            try? saveToCache(businesses, filename: filename)
+        } else if let cached = try? loadFromCache(filename, type: [Place].self) {
+            businesses = cached
+        }
+        guard !businesses.isEmpty else { return }
+        let existingIDs = Set(places.map(\.id))
+        places.append(contentsOf: businesses.filter { !existingIDs.contains($0.id) })
+    }
+
     private func loadTemplates() async {
         do {
             do {

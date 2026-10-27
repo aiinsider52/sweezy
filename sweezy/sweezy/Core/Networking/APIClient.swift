@@ -31,7 +31,7 @@ enum APIClient {
             return url
         }
         // Default (validated) - production backend
-        if let url = URL(string: "https://sweezy-9xyk.onrender.com") {
+        if let url = URL(string: "https://sweezy-api.onrender.com") {
             return url
         }
         // Last-resort fallback (never used, but avoids force‑unwrap)

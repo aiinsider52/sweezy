@@ -178,3 +178,45 @@ extension Place {
         )
     }
 }
+
+extension Place {
+    static let businessSourcePrefix = "sweezy-business:"
+
+    /// Owner user ID when this map place is a Sweezy business page.
+    var businessID: String? {
+        guard let source, source.hasPrefix(Self.businessSourcePrefix) else { return nil }
+        return String(source.dropFirst(Self.businessSourcePrefix.count))
+    }
+
+    init?(business: BusinessSummary) {
+        guard let latitude = business.latitude, let longitude = business.longitude else { return nil }
+        let kind: (PlaceType, PlaceCategory)
+        switch business.businessCategory {
+        case .health: kind = (.healthcare, .clinic)
+        case .legal: kind = (.legal, .lawyer)
+        case .finance: kind = (.banking, .bank)
+        case .education, .translation: kind = (.education, .languageSchool)
+        case .food: kind = (.community, .communityCafe)
+        case .community, .events: kind = (.community, .communityCenter)
+        default: kind = (.shopping, .supermarket)
+        }
+        let country = business.countryCode.uppercased()
+        let canton = country == "CH" ? (Canton(rawValue: business.subdivisionCode) ?? .zurich) : .zurich
+        self.init(
+            id: UUID(uuidString: business.userID) ?? UUID(),
+            name: business.displayName,
+            type: kind.0,
+            category: kind.1,
+            description: business.tagline,
+            address: Address(street: "", houseNumber: "", postalCode: "", city: business.city, canton: canton),
+            coordinate: Coordinate(latitude: latitude, longitude: longitude),
+            canton: canton,
+            countryCode: country,
+            subdivisionCode: business.subdivisionCode,
+            languages: business.languages,
+            rating: business.averageRating,
+            reviewCount: business.reviewCount,
+            source: Self.businessSourcePrefix + business.userID
+        )
+    }
+}

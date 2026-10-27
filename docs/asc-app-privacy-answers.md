@@ -2,7 +2,7 @@
 
 Fill ASC **App Privacy** to match `sweezy/sweezy/Resources/PrivacyInfo.xcprivacy` and the live privacy page.
 
-**Privacy Policy URL:** https://sweezy-9xyk.onrender.com/legal/privacy  
+**Privacy Policy URL:** https://sweezy-api.onrender.com/legal/privacy  
 **Tracking:** No (`NSPrivacyTracking = false`)
 
 ## Data collected

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from datetime import datetime
+import re
+from datetime import datetime, timezone
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
@@ -9,12 +10,29 @@ from ..core.countries import default_timezone, normalize_country_code, normalize
 
 
 BusinessStatus = Literal["draft", "pending", "approved", "rejected", "suspended"]
+BusinessKind = Literal["business", "specialist", "club"]
+BusinessPlan = Literal["free", "pro", "business"]
+SOCIAL_LINK_KEYS = {"instagram", "telegram", "facebook", "linkedin", "tiktok", "youtube", "whatsapp"}
+_UPLOADED_MEDIA = re.compile(r"/media/[a-f0-9]{32}\.(?:jpg|png|webp)")
+
+
+def _is_uploaded_media(value: str) -> bool:
+    """Paths returned by POST /media/upload are served by our media proxy."""
+    return bool(_UPLOADED_MEDIA.fullmatch(value))
+
+
+def _https_url(value: str) -> str:
+    if value.startswith("https://") or value.startswith(("http://localhost", "http://127.0.0.1")):
+        return value
+    raise ValueError("URL must use HTTPS")
 LeadStatus = Literal["new", "replied", "qualifying", "quoted", "booked", "completed", "cancelled", "lost"]
 BookingStatus = Literal["requested", "confirmed", "completed", "cancelled", "no_show"]
 
 
 class BusinessProfileUpdate(BaseModel):
+    kind: BusinessKind = "business"
     display_name: str = Field(min_length=2, max_length=120)
+    tagline: str | None = Field(default=None, max_length=140)
     legal_name: str | None = Field(default=None, max_length=180)
     description: str = Field(default="", max_length=4000)
     category: str = Field(default="other", min_length=2, max_length=40)
@@ -35,6 +53,12 @@ class BusinessProfileUpdate(BaseModel):
     cancellation_policy: str | None = Field(default=None, max_length=3000)
     payment_link: str | None = Field(default=None, max_length=1000)
     timezone: str | None = Field(default=None, max_length=50)
+    latitude: float | None = Field(default=None, ge=-90, le=90)
+    longitude: float | None = Field(default=None, ge=-180, le=180)
+    photo_urls: list[str] = Field(default_factory=list, max_length=8)
+    social_links: dict[str, str] = Field(default_factory=dict)
+    opening_hours_note: str | None = Field(default=None, max_length=240)
+    represented_by: str | None = Field(default=None, max_length=120)
 
     @model_validator(mode="after")
     def normalize_scope(self):
@@ -53,23 +77,57 @@ class BusinessProfileUpdate(BaseModel):
     def clean_list(cls, values: list[str]) -> list[str]:
         return list(dict.fromkeys(item.strip()[:40] for item in values if item.strip()))
 
-    @field_validator("logo_url", "cover_url", "website", "payment_link")
+    @field_validator("logo_url", "cover_url")
+    @classmethod
+    def secure_image_url(cls, value: str | None) -> str | None:
+        if value is None or not value.strip():
+            return None
+        normalized = value.strip()
+        return normalized if _is_uploaded_media(normalized) else _https_url(normalized)
+
+    @field_validator("website", "payment_link")
     @classmethod
     def secure_url(cls, value: str | None) -> str | None:
         if value is None or not value.strip():
             return None
-        normalized = value.strip()
-        if normalized.startswith("https://"):
-            return normalized
-        if normalized.startswith(("http://localhost", "http://127.0.0.1")):
-            return normalized
-        raise ValueError("URL must use HTTPS")
+        return _https_url(value.strip())
+
+    @field_validator("photo_urls")
+    @classmethod
+    def secure_photos(cls, values: list[str]) -> list[str]:
+        cleaned = [item.strip() for item in values if item and item.strip()]
+        if any(not (item.startswith("https://") or _is_uploaded_media(item)) for item in cleaned):
+            raise ValueError("Photo URLs must use HTTPS or Sweezy media")
+        return list(dict.fromkeys(cleaned))
+
+    @field_validator("social_links")
+    @classmethod
+    def clean_social_links(cls, values: dict[str, str]) -> dict[str, str]:
+        result: dict[str, str] = {}
+        for key, raw in values.items():
+            name = key.strip().lower()
+            value = (raw or "").strip()
+            if not value:
+                continue
+            if name not in SOCIAL_LINK_KEYS:
+                raise ValueError(f"Unsupported social link: {key}")
+            if len(value) > 200 or ("://" in value and not value.startswith("https://")):
+                raise ValueError(f"Invalid {name} link")
+            result[name] = value
+        return result
 
 
 class BusinessProfileResponse(BusinessProfileUpdate):
     model_config = ConfigDict(from_attributes=True)
 
     user_id: str
+    plan: BusinessPlan = "free"
+    plan_expires_at: datetime | None = None
+    boost_until: datetime | None = None
+    effective_plan: BusinessPlan = "free"
+    is_boosted: bool = False
+    average_rating: float | None = None
+    review_count: int = 0
     status: BusinessStatus
     rejection_reason: str | None
     is_verified: bool
@@ -77,6 +135,19 @@ class BusinessProfileResponse(BusinessProfileUpdate):
     reviewed_at: datetime | None
     created_at: datetime
     updated_at: datetime
+
+    @model_validator(mode="after")
+    def derive_placement(self):
+        now = datetime.now(timezone.utc)
+
+        def active(value: datetime | None) -> bool:
+            if value is None:
+                return False
+            return (value if value.tzinfo else value.replace(tzinfo=timezone.utc)) > now
+
+        self.effective_plan = self.plan if self.plan != "free" and active(self.plan_expires_at) else "free"
+        self.is_boosted = active(self.boost_until)
+        return self
 
 
 class BusinessAISettingsUpdate(BaseModel):
@@ -331,26 +402,210 @@ class BusinessDocumentResponse(BusinessDocumentCreate):
     updated_at: datetime
 
 
+class BusinessSummary(BaseModel):
+    """Compact business card used by the directory, map, offers feed and club lists."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    user_id: str
+    kind: BusinessKind = "business"
+    display_name: str
+    tagline: str | None = None
+    category: str
+    country_code: str = "CH"
+    subdivision_code: str
+    city: str
+    languages: list[str] = Field(default_factory=list)
+    logo_url: str | None = None
+    cover_url: str | None = None
+    latitude: float | None = None
+    longitude: float | None = None
+    is_verified: bool = False
+    average_rating: float | None = None
+    review_count: int = 0
+    plan: BusinessPlan = "free"
+    is_sponsored: bool = False
+    top_offer_label: str | None = None
+
+
+class BusinessDirectoryResponse(BaseModel):
+    items: list[BusinessSummary]
+    total: int
+
+
+class BusinessReviewCreate(BaseModel):
+    rating: int = Field(ge=1, le=5)
+    text: str = Field(default="", max_length=2000)
+
+    @field_validator("text")
+    @classmethod
+    def strip_text(cls, value: str) -> str:
+        return value.strip()
+
+
+class BusinessReviewReply(BaseModel):
+    text: str = Field(min_length=1, max_length=2000)
+
+
+class BusinessReviewResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    business_user_id: str
+    author_name: str
+    rating: int
+    text: str
+    owner_reply: str | None
+    owner_replied_at: datetime | None
+    status: Literal["published", "hidden"]
+    created_at: datetime
+
+
+class BusinessReviewEligibility(BaseModel):
+    can_review: bool
+    reason: str | None = None
+    existing: BusinessReviewResponse | None = None
+
+
+class BusinessOfferCreate(BaseModel):
+    title: str = Field(min_length=2, max_length=120)
+    description: str = Field(default="", max_length=2000)
+    discount_label: str = Field(min_length=1, max_length=40)
+    promo_code: str | None = Field(default=None, max_length=40)
+    ends_at: datetime | None = None
+    is_active: bool = True
+
+
+class BusinessOfferUpdate(BaseModel):
+    title: str | None = Field(default=None, min_length=2, max_length=120)
+    description: str | None = Field(default=None, max_length=2000)
+    discount_label: str | None = Field(default=None, min_length=1, max_length=40)
+    promo_code: str | None = Field(default=None, max_length=40)
+    ends_at: datetime | None = None
+    is_active: bool | None = None
+
+
+class BusinessOfferResponse(BusinessOfferCreate):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    business_user_id: str
+    created_at: datetime
+
+
+class PublicOfferResponse(BusinessOfferResponse):
+    business: BusinessSummary
+
+
+class BusinessImpressum(BaseModel):
+    legal_name: str | None = None
+    represented_by: str | None = None
+    address: str | None = None
+    uid_number: str | None = None
+    email: str | None = None
+    phone: str | None = None
+
+
 class PublicBusinessProfileResponse(BaseModel):
     user_id: str
+    kind: BusinessKind = "business"
     display_name: str
+    tagline: str | None = None
     description: str
     category: str
     canton: str
     country_code: str = "CH"
     subdivision_code: str
     city: str
+    address: str | None = None
+    latitude: float | None = None
+    longitude: float | None = None
     service_area: list[str]
     languages: list[str]
     logo_url: str | None
     cover_url: str | None
+    photo_urls: list[str] = Field(default_factory=list)
     website: str | None
+    phone: str | None = None
+    email: str | None = None
+    social_links: dict[str, str] = Field(default_factory=dict)
+    opening_hours_note: str | None = None
     delivery_modes: list[str]
     cancellation_policy: str | None
     is_verified: bool
+    plan: BusinessPlan = "free"
+    is_sponsored: bool = False
     services: list[BusinessServiceResponse] = Field(default_factory=list)
+    offers: list[BusinessOfferResponse] = Field(default_factory=list)
+    reviews: list[BusinessReviewResponse] = Field(default_factory=list)
     average_rating: float | None = None
     review_count: int = 0
+    clubs: list[BusinessSummary] = Field(default_factory=list)
+    members: list[BusinessSummary] = Field(default_factory=list)
+    impressum: BusinessImpressum = Field(default_factory=BusinessImpressum)
+
+
+class BusinessTrackEvent(BaseModel):
+    event: Literal["view", "call", "website", "route", "message", "booking", "offer", "share"]
+
+
+class BusinessStatsDay(BaseModel):
+    day: str
+    views: int
+    actions: int
+
+
+class BusinessStatsResponse(BaseModel):
+    days: int
+    max_days: int
+    totals: dict[str, int]
+    series: list[BusinessStatsDay]
+
+
+class BusinessPlanLimits(BaseModel):
+    services: int
+    offers: int
+    quick_replies: int
+    stats_days: int
+    documents: bool
+    ai_receptionist: bool
+    team_members: int
+
+
+class BusinessPlanResponse(BaseModel):
+    plan: BusinessPlan
+    effective_plan: BusinessPlan
+    plan_expires_at: datetime | None
+    plan_source: str | None
+    boost_until: datetime | None
+    is_boosted: bool
+    limits: BusinessPlanLimits
+    usage: dict[str, int]
+    product_ids: list[str]
+
+
+class BusinessAppleTransaction(BaseModel):
+    signed_transaction: str = Field(min_length=10, max_length=100_000)
+
+
+class ClubMemberResponse(BaseModel):
+    id: str
+    status: Literal["pending", "approved", "rejected"]
+    business: BusinessSummary
+    created_at: datetime
+
+
+class ClubMembershipUpdate(BaseModel):
+    status: Literal["approved", "rejected"]
+
+
+class AdminBusinessPlanGrant(BaseModel):
+    plan: BusinessPlan
+    days: int = Field(default=30, ge=1, le=730)
+
+
+class AdminBusinessReviewModeration(BaseModel):
+    status: Literal["published", "hidden"]
 
 
 class PublicBookingSlot(BaseModel):

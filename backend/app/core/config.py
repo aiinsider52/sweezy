@@ -99,6 +99,8 @@ class Settings(BaseSettings):
     APPLE_IAP_ENABLE_ONLINE_CHECKS: bool = True
     APPLE_IAP_ALLOW_SANDBOX: bool = True
     APPLE_IAP_PRODUCT_IDS: str = "sweezy_plus_monthly,sweezy_plus_yearly"
+    # Business placement products: auto-renewable plans (*_pro_*, *_max_*) and consumable boosts (*boost*).
+    APPLE_IAP_BUSINESS_PRODUCT_IDS: str = "sweezy_business_pro_monthly,sweezy_business_max_monthly,sweezy_business_boost_7d"
 
     # Incident management / Telegram operations channel
     INCIDENTS_ENABLED: bool = True
@@ -236,6 +238,9 @@ class Settings(BaseSettings):
 
     def parsed_apple_iap_product_ids(self) -> List[str]:
         return [part.strip() for part in self.APPLE_IAP_PRODUCT_IDS.split(",") if part.strip()]
+
+    def parsed_apple_business_product_ids(self) -> List[str]:
+        return [part.strip() for part in self.APPLE_IAP_BUSINESS_PRODUCT_IDS.split(",") if part.strip()]
 
 
 

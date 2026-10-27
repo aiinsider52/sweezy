@@ -3,7 +3,7 @@ import { ADMIN_VERIFIED_HEADER } from '@/lib/admin-api-guard'
 import { cookies, headers as requestHeaders } from 'next/headers'
 
 export async function serverFetch(path: string, init?: RequestInit) {
-  const base = process.env.NEXT_PUBLIC_API_URL || 'https://sweezy-9xyk.onrender.com/api/v1'
+  const base = process.env.NEXT_PUBLIC_API_URL || 'https://sweezy-api.onrender.com/api/v1'
   const verifiedByApiGuard = (await requestHeaders()).get(ADMIN_VERIFIED_HEADER) === '1'
   const token = verifiedByApiGuard
     ? (await cookies()).get('access_token')?.value ?? null

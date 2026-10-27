@@ -244,6 +244,8 @@ final class CompanionUITests: XCTestCase {
 
     @MainActor
     private func reveal(_ element: XCUIElement, in app: XCUIApplication) {
+        // Slow CI simulators may still be pushing the destination screen.
+        _ = element.waitForExistence(timeout: 8)
         for _ in 0..<10 {
             if !element.exists { app.swipeUp(); continue }
             let tab = app.buttons["tab.home"]

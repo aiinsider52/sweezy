@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
 import jwt
@@ -30,7 +30,7 @@ def test_typed_tokens_only_decode_as_their_expected_type() -> None:
 
 def test_backend_token_rejects_unconfigured_algorithm() -> None:
     settings = get_settings()
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     token = jwt.encode(
         {
             "sub": str(uuid4()),
@@ -53,7 +53,7 @@ def _provider_token(*, algorithm: str = "RS256", issuer: str = "https://accounts
     private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
     public_jwk = RSAAlgorithm.to_jwk(private_key.public_key(), as_dict=True)
     public_jwk.update({"kid": "provider-key", "alg": "RS256", "use": "sig"})
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     token = jwt.encode(
         {
             "sub": "provider-subject",

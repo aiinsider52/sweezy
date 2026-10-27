@@ -355,7 +355,7 @@ private struct FriendSwipeDeck: View {
       let scale = min(1, max(0.82, (proxy.size.width - 32) / 250))
       HStack(alignment: .top, spacing: 15 * scale) {
         swipeActionButton(
-          label: "PASS", icon: "xmark", size: 68 * scale, primary: false,
+          label: "friends.swipe.pass".localized, icon: "xmark", size: 68 * scale, primary: false,
           enabled: topProfile != nil && !busy, identifier: "friends.swipe.pass"
         ) {
           if let topProfile { commit(topProfile, decision: "pass") }
@@ -376,7 +376,7 @@ private struct FriendSwipeDeck: View {
         }
         .padding(.top, 22 * scale)
         swipeActionButton(
-          label: "LIKE", icon: "heart.fill", size: 76 * scale, primary: true,
+          label: "friends.swipe.like".localized, icon: "heart.fill", size: 76 * scale, primary: true,
           enabled: topProfile != nil && !busy, identifier: "friends.swipe.like"
         ) {
           if let topProfile { commit(topProfile, decision: "like") }
@@ -393,8 +393,8 @@ private struct FriendSwipeDeck: View {
     action: @escaping () -> Void
   ) -> some View {
     VStack(spacing: 8) {
-      Text(label)
-        .font(.caption.bold()).tracking(2)
+      Text(label.uppercased())
+        .font(.caption.bold()).tracking(1.4)
         .foregroundColor(primary ? JourneyVisual.accentText : JourneyVisual.secondaryText)
       actionButton(
         icon: icon, size: size, primary: primary, enabled: enabled, identifier: identifier,
@@ -535,7 +535,7 @@ private struct FriendSwipeCard: View {
       VStack {
         HStack(alignment: .top) {
           Spacer()
-          verticalMatchScore.padding(.top, 72).padding(.trailing, 16)
+          verticalMatchScore.padding(.top, 16).padding(.trailing, 16)
         }
         Spacer()
       }
@@ -611,18 +611,20 @@ private struct FriendSwipeCard: View {
   }
 
   private var verticalMatchScore: some View {
-    VStack(spacing: -3) {
-      Text("\(profile.matchScore)")
-        .font(.system(size: 50, weight: .bold, design: .default))
-        .minimumScaleFactor(0.7)
-      Text("M\nA\nT\nC\nH")
-        .font(.system(size: 13, weight: .black, design: .default))
-        .tracking(1.2)
-        .multilineTextAlignment(.center)
-        .lineSpacing(1)
+    VStack(spacing: 0) {
+      Text("\(profile.matchScore)%")
+        .font(.system(size: 22, weight: .black, design: .default))
+        .foregroundColor(.black)
+      Text("friends.match.label".localized)
+        .font(.system(size: 9, weight: .black))
+        .tracking(0.8)
+        .foregroundColor(.black.opacity(0.7))
     }
-    .foregroundColor(lime)
-    .shadow(color: .black.opacity(0.45), radius: 8)
+    .frame(width: 66, height: 66)
+    .background(lime, in: Circle())
+    .overlay(Circle().stroke(.white.opacity(0.6), lineWidth: 2))
+    .shadow(color: .black.opacity(0.3), radius: 10, y: 4)
+    .accessibilityHidden(true)
   }
 
   private var swipeStamp: some View {
@@ -1007,13 +1009,17 @@ struct FriendNetworkView: View {
         }
         .accessibilityLabel("Назад".localized)
       }
-      Text("SWEEZY CIRCLE")
-        .font(.system(size: 15, weight: .black))
-        .tracking(3.2)
-        .foregroundColor(JourneyVisual.primaryText)
-        .lineLimit(1)
-        .minimumScaleFactor(0.8)
-        .accessibilityIdentifier("friends.people.title")
+      VStack(alignment: .leading, spacing: 3) {
+        Text("journey.tab.people".localized)
+          .font(.system(size: 30, weight: .bold))
+          .foregroundColor(JourneyVisual.primaryText)
+          .accessibilityIdentifier("friends.people.title")
+        Text("friends.header.subtitle".localized)
+          .font(.system(size: 13, weight: .medium))
+          .foregroundColor(JourneyVisual.secondaryText)
+          .lineLimit(2)
+          .fixedSize(horizontal: false, vertical: true)
+      }
       Spacer(minLength: 8)
       if !vm.incoming.isEmpty {
         Button { tab = 2 } label: {
@@ -1026,17 +1032,17 @@ struct FriendNetworkView: View {
         Image(systemName: "slider.horizontal.3")
           .font(.headline)
           .foregroundColor(JourneyVisual.primaryText)
-          .frame(width: 48, height: 48)
-          .background(JourneyVisual.softSurface)
+          .frame(width: 46, height: 46)
+          .background(Theme.Colors.card)
           .clipShape(Circle())
-          .overlay(Circle().stroke(limeAccent.opacity(0.58), lineWidth: 1))
+          .overlay(Circle().stroke(JourneyVisual.softBorder, lineWidth: 1))
       }
       .accessibilityLabel("Фільтри знайомств".localized)
       .accessibilityIdentifier("friends.people.filters")
     }
     .padding(.horizontal, 18)
-    .padding(.top, 10)
-    .padding(.bottom, 10)
+    .padding(.top, 12)
+    .padding(.bottom, 12)
   }
   private var isUITestPreview: Bool {
     #if DEBUG
@@ -1080,35 +1086,14 @@ struct FriendNetworkView: View {
     #endif
   }
   private var tabs: some View {
-    HStack(spacing: 0) {
-      ForEach(
-        Array(
-          [
-            ("Люди".localized, "sparkles"), ("Події".localized, "calendar"), ("Друзі".localized, "person.2.fill"),
-            ("Я".localized, "person.crop.circle"),
-          ].enumerated()), id: \.offset
-      ) { i, x in
-        Button {
-          withAnimation(reduceMotion ? nil : Theme.Animation.selection) { tab = i }
-        } label: {
-          VStack(spacing: 10) {
-            Text(x.0)
-              .font(.system(size: 14, weight: tab == i ? .bold : .semibold))
-            Capsule()
-              .fill(tab == i ? limeAccent : Color.clear)
-              .frame(width: 44, height: 3)
-          }
-          .foregroundColor(tab == i ? JourneyVisual.primaryText : JourneyVisual.secondaryText)
-          .frame(maxWidth: .infinity)
-          .frame(height: 54)
-        }
-        .buttonStyle(ScaleButtonStyle(scaleAmount: 0.97, hapticStyle: .light))
-      }
-    }
+    JourneyWorkspaceSwitcher(
+      items: [0, 1, 2, 3],
+      selection: $tab,
+      title: { ["Люди".localized, "Події".localized, "Друзі".localized, "Я".localized][$0] },
+      icon: { ["sparkles", "calendar", "person.2.fill", "person.crop.circle"][$0] }
+    )
     .padding(.horizontal, 18)
-    .overlay(alignment: .bottom) {
-      Rectangle().fill(JourneyVisual.softBorder).frame(height: 1)
-    }
+    .padding(.bottom, 4)
   }
   private var peopleMetrics: some View {
     HStack(spacing: 10) {
@@ -1141,6 +1126,7 @@ struct FriendNetworkView: View {
   }
   private func discover(screenHeight: CGFloat) -> some View {
     VStack(alignment: .leading, spacing: 15) {
+      discoverModePicker
       if vm.isShowingDemoProfiles {
         demoNotice
       }
@@ -1170,20 +1156,6 @@ struct FriendNetworkView: View {
           onDetails: openProfile)
       }
       }
-      Button {
-        showPeopleCatalog.toggle()
-      } label: {
-        HStack {
-          Label(showPeopleCatalog ? "Картки знайомств".localized : "Пошук і каталог".localized, systemImage: "rectangle.grid.1x2")
-          Spacer()
-          Image(systemName: showPeopleCatalog ? "chevron.up" : "chevron.down")
-        }
-        .font(.subheadline.bold()).foregroundColor(JourneyVisual.primaryText)
-        .padding(.horizontal, 16).frame(height: 52)
-        .background(JourneyVisual.elevatedSurface).clipShape(RoundedRectangle(cornerRadius: 17))
-        .overlay(RoundedRectangle(cornerRadius: 17).stroke(JourneyVisual.softBorder))
-      }
-      .accessibilityIdentifier("friends.catalog.toggle")
       if showPeopleCatalog {
         search
         if vm.loading && vm.profiles.isEmpty {
@@ -1215,6 +1187,51 @@ struct FriendNetworkView: View {
       }
       }
     }.padding(.horizontal, 18)
+  }
+  /// Cards for one-by-one introductions, search for browsing everyone at once.
+  private var discoverModePicker: some View {
+    HStack(spacing: 10) {
+      discoverModeButton(
+        title: "friends.mode.cards".localized, subtitle: "friends.mode.cards.subtitle".localized,
+        icon: "rectangle.stack.fill", selected: !showPeopleCatalog, identifier: "friends.mode.cards"
+      ) { showPeopleCatalog = false }
+      discoverModeButton(
+        title: "friends.mode.search".localized, subtitle: "friends.mode.search.subtitle".localized,
+        icon: "magnifyingglass", selected: showPeopleCatalog, identifier: "friends.catalog.toggle"
+      ) { showPeopleCatalog = true }
+    }
+  }
+  private func discoverModeButton(
+    title: String, subtitle: String, icon: String, selected: Bool, identifier: String,
+    action: @escaping () -> Void
+  ) -> some View {
+    Button {
+      withAnimation(reduceMotion ? nil : .spring(response: 0.32, dampingFraction: 0.84)) { action() }
+    } label: {
+      HStack(spacing: 10) {
+        Image(systemName: icon)
+          .font(.system(size: 15, weight: .bold))
+          .foregroundColor(selected ? .black : JourneyVisual.accentStrong)
+          .frame(width: 36, height: 36)
+          .background(selected ? Color.white.opacity(0.55) : JourneyVisual.softSurface, in: Circle())
+        VStack(alignment: .leading, spacing: 1) {
+          Text(title).font(.system(size: 14, weight: .bold))
+          Text(subtitle).font(.system(size: 11, weight: .medium)).opacity(0.7)
+            .lineLimit(1).minimumScaleFactor(0.8)
+        }
+        .foregroundColor(selected ? .black : JourneyVisual.primaryText)
+        Spacer(minLength: 0)
+      }
+      .padding(10)
+      .frame(maxWidth: .infinity)
+      .background(selected ? limeAccent : Theme.Colors.card, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+      .overlay(
+        RoundedRectangle(cornerRadius: 20, style: .continuous)
+          .stroke(selected ? Color.clear : JourneyVisual.softBorder, lineWidth: 1))
+    }
+    .buttonStyle(ScaleButtonStyle(scaleAmount: 0.97, hapticStyle: .light))
+    .accessibilityAddTraits(selected ? .isSelected : [])
+    .accessibilityIdentifier(identifier)
   }
   private var swipeHeader: some View {
     HStack(alignment: .top, spacing: 14) {
@@ -1278,66 +1295,39 @@ struct FriendNetworkView: View {
       .font(.caption).foregroundColor(JourneyVisual.secondaryText)
       .accessibilityIdentifier("friends.demo.notice")
   }
-  private var orbit: some View {
-    ZStack {
-      RoundedRectangle(cornerRadius: 28).fill(
-        LinearGradient(
-          colors: [forest, Theme.Colors.card],
-          startPoint: .topLeading, endPoint: .bottomTrailing))
-      HStack {
-        VStack(alignment: .leading, spacing: 6) {
-          Text("SWISS CIRCLE").font(.caption2.bold()).tracking(1.7).foregroundColor(JourneyVisual.accentText)
-          Text("%@ збігів поруч".localized(with: "\(vm.profiles.count)")).font(.title3.bold()).foregroundColor(JourneyVisual.primaryText)
-          Text("Люди, з якими вже є про що поговорити".localized).font(.caption).foregroundColor(JourneyVisual.primaryText)
-        }
-        Spacer()
-        ZStack {
-          Circle().stroke(limeAccent.opacity(0.22), lineWidth: 1).frame(width: 92, height: 92)
-          Circle().stroke(mintGlow.opacity(0.28), lineWidth: 1).frame(width: 58, height: 58)
-          Circle().fill(limeAccent).frame(width: 15, height: 15).offset(x: 34, y: -24)
-          Circle().fill(mintGlow).frame(width: 11, height: 11).offset(x: -22, y: 18)
-          Text("CH").font(.caption.bold()).foregroundColor(JourneyVisual.secondaryText)
-        }
-      }.padding(20)
-    }.frame(height: 145).overlay(
-      RoundedRectangle(cornerRadius: 28).stroke(limeAccent.opacity(0.28)))
-  }
   private var search: some View {
-    VStack(spacing: 10) {
-      HStack(alignment: .bottom) {
-        VStack(alignment: .leading, spacing: 6) {
-          Text("Люди поруч".localized).font(.title2.bold())
-          Text("Шукаємо спільне".localized).font(.subheadline)
-        }.foregroundColor(JourneyVisual.primaryText).padding(.bottom, 18)
-        Spacer(minLength: 8)
-        if vm.loading || !vm.profiles.isEmpty {
-          SocialCompanion(pose: .guide, size: 78, portrait: true, trigger: vm.loading ? 1 : 0)
+    VStack(alignment: .leading, spacing: 12) {
+      HStack(spacing: 10) {
+        HStack(spacing: 10) {
+          Image(systemName: "magnifyingglass").foregroundColor(JourneyVisual.secondaryText)
+          TextField("Ім’я, місто або інтерес".localized, text: $vm.query)
+            .foregroundColor(JourneyVisual.primaryText)
+            .submitLabel(.search)
+            .onSubmit { Task { await vm.reload() } }
+            .accessibilityIdentifier("friends.search.query")
+          if !vm.query.isEmpty {
+            Button {
+              vm.query = ""
+              Task { await vm.reload() }
+            } label: {
+              Image(systemName: "xmark.circle.fill").foregroundColor(JourneyVisual.secondaryText)
+            }
+            .accessibilityLabel("common.clear".localized)
+          }
         }
-      }.padding(.horizontal, 18).padding(.top, 10)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 20))
-      HStack {
-        Image(systemName: "magnifyingglass").foregroundColor(JourneyVisual.secondaryText)
-        TextField("Ім’я, місто або інтерес".localized, text: $vm.query).foregroundColor(JourneyVisual.primaryText).submitLabel(
-          .search
-        ).onSubmit { Task { await vm.reload() } }
-          .accessibilityIdentifier("friends.search.query")
-      }.padding(.horizontal, 16).frame(height: 56).background(JourneyVisual.elevatedSurface).clipShape(
-        RoundedRectangle(cornerRadius: 18)
-      ).overlay(RoundedRectangle(cornerRadius: 18).stroke(JourneyVisual.softBorder))
-      HStack {
-        Button {
-          filters = true
-        } label: {
-          Label("Фільтри".localized, systemImage: "slider.horizontal.3").font(.subheadline.bold())
+        .padding(.horizontal, 16)
+        .frame(height: 52)
+        .background(Theme.Colors.card, in: Capsule())
+        .overlay(Capsule().stroke(JourneyVisual.softBorder))
+        Button { filters = true } label: {
+          Image(systemName: "slider.horizontal.3")
+            .font(.headline)
+            .foregroundColor(.black)
+            .frame(width: 52, height: 52)
+            .background(limeAccent, in: Circle())
         }
-        Spacer()
-        if let remaining = vm.searchMeta?.requestsRemaining {
-          Text("%@ запитів цього тижня".localized(with: "\(remaining)")).font(.caption).foregroundColor(JourneyVisual.secondaryText)
-        } else if vm.searchMeta?.advancedFiltersAvailable == true {
-          Label("PLUS", systemImage: "star.fill").font(.caption.bold()).foregroundColor(JourneyVisual.primaryText)
-        }
-      }.foregroundColor(JourneyVisual.primaryText)
+        .accessibilityLabel("Фільтри".localized)
+      }
       ScrollView(.horizontal, showsIndicators: false) {
         HStack {
           chip("Усі".localized, active: vm.interest == nil) { vm.interest = nil }
@@ -1347,7 +1337,17 @@ struct FriendNetworkView: View {
             }
           }
         }
-      }.onChange(of: vm.interest) { _, _ in Task { await vm.reload() } }
+      }
+      .scrollClipDisabled()
+      .onChange(of: vm.interest) { _, _ in Task { await vm.reload() } }
+      HStack(spacing: 10) {
+        buddyTile(title: "friends.buddy.travel".localized, subtitle: "friends.buddy.travel.subtitle".localized, icon: "airplane", interest: .travel)
+        buddyTile(title: "friends.buddy.activity".localized, subtitle: "friends.buddy.activity.subtitle".localized, icon: "figure.run", interest: .sports)
+      }
+      if let remaining = vm.searchMeta?.requestsRemaining {
+        Label("%@ запитів цього тижня".localized(with: "\(remaining)"), systemImage: "paperplane")
+          .font(.caption).foregroundColor(JourneyVisual.secondaryText)
+      }
       if vm.searchMeta?.isLimited == true {
         Button {
           paywall = true
@@ -1357,29 +1357,44 @@ struct FriendNetworkView: View {
             Spacer()
             Image(systemName: "arrow.right")
           }
-          .font(.subheadline.bold()).foregroundColor(.black).padding(.horizontal, 16).frame(
-            height: 48
-          )
-          .background(limeAccent).clipShape(RoundedRectangle(cornerRadius: 16))
+          .font(.subheadline.bold()).foregroundColor(.black).padding(.horizontal, 16)
+          .frame(height: 48)
+          .background(limeAccent).clipShape(Capsule())
         }
       }
-      HStack(spacing: 10) {
-        Button {
-          guard subscription.isPremium else { paywall = true; return }
-          vm.interest = .travel; vm.nearby = true
-          Task { await vm.reload() }
-        } label: {
-          Label("Travel buddy", systemImage: "airplane").frame(maxWidth: .infinity, minHeight: 44)
-        }
-        Button {
-          guard subscription.isPremium else { paywall = true; return }
-          vm.interest = .sports; vm.nearby = true
-          Task { await vm.reload() }
-        } label: {
-          Label("Activity buddy", systemImage: "figure.run").frame(maxWidth: .infinity, minHeight: 44)
-        }
-      }.font(.caption.bold()).foregroundColor(JourneyVisual.primaryText).background(limeAccent.opacity(0.07)).clipShape(RoundedRectangle(cornerRadius: 15))
     }
+  }
+  private func buddyTile(title: String, subtitle: String, icon: String, interest: SocialInterest) -> some View {
+    Button {
+      guard subscription.isPremium else { paywall = true; return }
+      vm.interest = interest; vm.nearby = true
+      Task { await vm.reload() }
+    } label: {
+      HStack(spacing: 10) {
+        Image(systemName: icon)
+          .font(.system(size: 14, weight: .bold))
+          .foregroundColor(JourneyVisual.accentStrong)
+          .frame(width: 34, height: 34)
+          .background(JourneyVisual.softSurface, in: Circle())
+        VStack(alignment: .leading, spacing: 1) {
+          HStack(spacing: 4) {
+            Text(title).font(.system(size: 13, weight: .bold))
+            if !subscription.isPremium {
+              Image(systemName: "star.fill").font(.system(size: 9)).foregroundColor(JourneyVisual.accentStrong)
+            }
+          }
+          Text(subtitle).font(.system(size: 10, weight: .medium)).foregroundColor(JourneyVisual.secondaryText)
+            .lineLimit(1).minimumScaleFactor(0.8)
+        }
+        .foregroundColor(JourneyVisual.primaryText)
+        Spacer(minLength: 0)
+      }
+      .padding(10)
+      .frame(maxWidth: .infinity)
+      .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+      .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(JourneyVisual.softBorder))
+    }
+    .buttonStyle(ScaleButtonStyle(scaleAmount: 0.97, hapticStyle: .light))
   }
   private var events: some View {
     VStack(alignment: .leading, spacing: 16) {
@@ -1719,7 +1734,8 @@ private struct FriendCard: View {
 
   private var previewImageName: String? {
     guard profile.id.hasPrefix("preview-") else { return nil }
-    return profile.id.replacingOccurrences(of: "preview-", with: "friend-preview-")
+    let name = profile.id.replacingOccurrences(of: "preview-", with: "friend-preview-")
+    return UIImage(named: name) == nil ? nil : name
   }
 
   var body: some View {
@@ -1755,11 +1771,12 @@ private struct FriendCard: View {
         .lineLimit(1)
 
         HStack(spacing: 6) {
-          ForEach(Array(profile.sharedInterests.prefix(3))) { interest in
+          ForEach(Array(profile.sharedInterests.prefix(2))) { interest in
             Label(interest.title, systemImage: interest.icon)
               .font(.system(size: 10, weight: .bold))
               .foregroundColor(JourneyVisual.primaryText)
               .lineLimit(1)
+              .fixedSize()
               .padding(.horizontal, 8)
               .frame(height: 24)
               .background(JourneyVisual.softSurface)

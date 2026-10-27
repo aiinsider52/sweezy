@@ -29,17 +29,10 @@ struct JourneyDirectoryView: View {
     @State private var isSchedulingReminders = false
     @State private var reminderMessage: String?
     @State private var contentRevision = 0
+    @State private var visibleGuideCount = 12
     #if DEBUG
     @State private var didApplyUITestRoute = false
     #endif
-
-    private let featuredCategories: [(GuideCategory?, String, String)] = [
-        (nil, "common.all".localized, "sparkles"),
-        (.documents, "journey.directory.category.documents".localized, "doc.text"),
-        (.housing, "journey.directory.category.housing".localized, "house"),
-        (.work, "journey.directory.category.work".localized, "briefcase"),
-        (.healthcare, "journey.directory.category.healthcare".localized, "cross.case")
-    ]
 
     var body: some View {
         NavigationStack {
@@ -49,78 +42,41 @@ struct JourneyDirectoryView: View {
                 ScrollViewReader { proxy in
                     ScrollView(showsIndicators: false) {
                         VStack(alignment: .leading, spacing: 18) {
-                        HStack(alignment: .top, spacing: 14) {
-                            VStack(alignment: .leading, spacing: 5) {
-                                Text(selectedWorkspace == .guides ? "journey.tab.directory".localized : workspaceTitle)
-                                    .font(.system(size: 28, weight: .bold, design: .default))
-                                    .foregroundColor(JourneyVisual.primaryText)
-                                    .lineSpacing(1)
-                                    .lineLimit(selectedWorkspace == .tools ? 2 : 3)
-                                    .minimumScaleFactor(0.76)
-                                    .fixedSize(horizontal: false, vertical: true)
-
-
-                                if selectedWorkspace == .tools {
-                                    Text("journey.directory.toolkit.hero.subtitle".localized)
-                                        .font(.system(size: 14, weight: .medium, design: .default))
-                                        .foregroundColor(JourneyVisual.secondaryText)
-                                }
-                            }
-
-                            Spacer()
-
-                            Image(systemName: selectedWorkspace.icon)
-                                .font(.system(size: 17, weight: .semibold))
-                                .foregroundColor(JourneyVisual.accentStrong)
-                                .frame(width: 42, height: 42)
-                                .background(Theme.Colors.card)
-                                .clipShape(Circle())
-                                .overlay(Circle().stroke(Color.white.opacity(0.25), lineWidth: 1))
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(selectedWorkspace == .guides ? "journey.tab.directory".localized : workspaceTitle)
+                                .font(.system(size: 30, weight: .bold, design: .default))
+                                .foregroundColor(JourneyVisual.primaryText)
+                                .lineLimit(2)
+                                .minimumScaleFactor(0.76)
+                                .fixedSize(horizontal: false, vertical: true)
+                            Text(headerSubtitle)
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(JourneyVisual.secondaryText)
+                                .fixedSize(horizontal: false, vertical: true)
                         }
                         .padding(.top, 16)
 
-                        // The picture follows the topic: moving in for housing, the desk for documents…
-                        Color.clear
-                            .frame(height: 150)
-                            .frame(maxWidth: .infinity)
-                            .overlay {
-                                FocusedSceneImage(name: directoryHeroAsset, focusY: 0.25)
-                                    .id(directoryHeroAsset)
-                                    .transition(.opacity)
-                            }
-                            .animation(.easeInOut(duration: 0.35), value: directoryHeroAsset)
-                            .clipShape(RoundedRectangle(cornerRadius: 22))
-                            .allowsHitTesting(false)
-                            .accessibilityHidden(true)
+                        JourneyWorkspaceSwitcher(
+                            items: JourneyDirectoryWorkspace.allCases,
+                            selection: $selectedWorkspace,
+                            title: \.title,
+                            icon: \.icon
+                        )
 
-                        HStack(spacing: 7) {
-                            ForEach(JourneyDirectoryWorkspace.allCases) { workspace in
-                                Button {
-                                    withAnimation(.easeInOut(duration: 0.2)) {
-                                        selectedWorkspace = workspace
-                                    }
-                                } label: {
-                                    VStack(spacing: 5) {
-                                        Image(systemName: workspace.icon)
-                                            .font(.system(size: 13, weight: .bold))
-                                        Text(workspace.title)
-                                            .font(.system(size: 11, weight: .bold, design: .default))
-                                            .lineLimit(1)
-                                            .minimumScaleFactor(0.7)
-                                    }
-                                    .foregroundColor(selectedWorkspace == workspace ? .black : JourneyVisual.primaryText)
-                                    .frame(maxWidth: .infinity)
-                                    .frame(height: 58)
-                                    .background(selectedWorkspace == workspace ? JourneyVisual.lime : Theme.Colors.card)
-
-                                    .clipShape(RoundedRectangle(cornerRadius: 19, style: .continuous))
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 19, style: .continuous)
-                                            .stroke(Color.white.opacity(selectedWorkspace == workspace ? 0 : 0.24), lineWidth: 1)
-                                    )
+                        // Tools and checklists keep the topic picture; guides open with their own cover.
+                        if selectedWorkspace != .guides {
+                            Color.clear
+                                .frame(height: 150)
+                                .frame(maxWidth: .infinity)
+                                .overlay {
+                                    FocusedSceneImage(name: directoryHeroAsset, focusY: 0.25)
+                                        .id(directoryHeroAsset)
+                                        .transition(.opacity)
                                 }
-                                .buttonStyle(.plain)
-                            }
+                                .animation(.easeInOut(duration: 0.35), value: directoryHeroAsset)
+                                .clipShape(RoundedRectangle(cornerRadius: 22))
+                                .allowsHitTesting(false)
+                                .accessibilityHidden(true)
                         }
 
                         workspaceContent
@@ -220,62 +176,114 @@ struct JourneyDirectoryView: View {
     }
 
     private var guidesWorkspace: some View {
-        VStack(alignment: .leading, spacing: 18) {
+        let guides = filteredGuides
+        let isSearching = !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        let featured = isSearching ? nil : guides.first
+        let rest = featured == nil ? guides : Array(guides.dropFirst())
+
+        return VStack(alignment: .leading, spacing: 18) {
             JourneySearchField(text: $searchText, prompt: "journey.directory.search_placeholder".localized)
 
+            if guides.isEmpty, appContainer.contentService.isLoading, localeGuides.isEmpty {
+                SkeletonList(rows: 3)
+            } else {
+                if let featured {
+                    JourneyGuideFeatureCard(guide: featured) { selectedGuide = featured }
+                        .transition(.opacity)
+                }
+
+                topicRail
+
+                if guides.isEmpty {
+                    MascotEmptyState(
+                        title: "journey.directory.no_guides.title".localized,
+                        subtitle: "journey.directory.no_guides.subtitle".localized,
+                        spot: .noResults
+                    )
+                } else if !rest.isEmpty {
+                    HStack(alignment: .firstTextBaseline) {
+                        Text(isSearching ? "journey.directory.results".localized : "journey.directory.all_guides".localized)
+                            .font(.system(size: 19, weight: .bold))
+                            .foregroundColor(JourneyVisual.primaryText)
+                        Text("\(rest.count)")
+                            .font(.system(size: 13, weight: .bold))
+                            .foregroundColor(JourneyVisual.secondaryText)
+                        Spacer()
+                        Label("journey.directory.official_sources".localized, systemImage: "checkmark.seal.fill")
+                            .font(.system(size: 10, weight: .semibold))
+                            .foregroundColor(JourneyVisual.accentText)
+                    }
+
+                    LazyVStack(spacing: 10) {
+                        ForEach(rest.prefix(visibleGuideCount)) { guide in
+                            Button { selectedGuide = guide } label: {
+                                JourneyGuideCompactRow(guide: guide, imageName: guide.category.coverAsset)
+                            }
+                            .buttonStyle(ScaleButtonStyle(scaleAmount: 0.985, hapticStyle: .light))
+                        }
+                    }
+
+                    if rest.count > visibleGuideCount {
+                        Button {
+                            withAnimation(.easeOut(duration: 0.25)) { visibleGuideCount += 12 }
+                        } label: {
+                            HStack(spacing: 8) {
+                                Text("journey.directory.show_more".localized(with: min(12, rest.count - visibleGuideCount)))
+                                Image(systemName: "chevron.down")
+                            }
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundColor(JourneyVisual.primaryText)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 50)
+                            .background(Theme.Colors.card, in: Capsule())
+                            .overlay(Capsule().stroke(JourneyVisual.softBorder, lineWidth: 1))
+                        }
+                        .buttonStyle(ScaleButtonStyle(scaleAmount: 0.98, hapticStyle: .light))
+                    }
+                }
+            }
+        }
+        .onChange(of: selectedCategory) { _, _ in visibleGuideCount = 12 }
+        .onChange(of: searchText) { _, _ in visibleGuideCount = 12 }
+    }
+
+    private var topicRail: some View {
+        let all = localeGuides
+        let counts = Dictionary(grouping: all, by: \.category).mapValues(\.count)
+        let topics = GuideCategory.allCases.filter { (counts[$0] ?? 0) > 0 }
+            .sorted { (counts[$0] ?? 0) > (counts[$1] ?? 0) }
+
+        return VStack(alignment: .leading, spacing: 10) {
+            Text("journey.directory.topics".localized)
+                .font(.system(size: 19, weight: .bold))
+                .foregroundColor(JourneyVisual.primaryText)
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 8) {
-                    ForEach(featuredCategories, id: \.1) { category, title, icon in
-                        JourneyFilterChip(
-                            title: title,
-                            icon: icon,
-                            isSelected: selectedCategory == category
+                HStack(spacing: 10) {
+                    JourneyGuideTopicTile(
+                        title: "common.all".localized,
+                        icon: "square.grid.2x2.fill",
+                        swatch: JourneyCategoryPalette.lime,
+                        count: all.count,
+                        selected: selectedCategory == nil
+                    ) {
+                        withAnimation(.easeInOut(duration: 0.2)) { selectedCategory = nil }
+                    }
+                    ForEach(topics, id: \.self) { category in
+                        JourneyGuideTopicTile(
+                            title: category.localizedName,
+                            icon: category.iconName,
+                            swatch: category.swatch,
+                            count: counts[category] ?? 0,
+                            selected: selectedCategory == category
                         ) {
                             withAnimation(.easeInOut(duration: 0.2)) {
-                                selectedCategory = category
+                                selectedCategory = selectedCategory == category ? nil : category
                             }
                         }
                     }
                 }
             }
-            .contentMargins(.horizontal, 0, for: .scrollContent)
-
-            JourneyGuideDeck(
-                guides: Array(filteredGuides.prefix(3)),
-                imageNames: cardImages
-            ) { guide in
-                selectedGuide = guide
-            }
-            .frame(maxWidth: .infinity)
-
-            if filteredGuides.isEmpty, appContainer.contentService.isLoading {
-                SkeletonList(rows: 3)
-            } else if filteredGuides.isEmpty {
-                MascotEmptyState(
-                    title: "journey.directory.no_guides.title".localized,
-                    subtitle: "journey.directory.no_guides.subtitle".localized,
-                    spot: .noResults
-                )
-            } else {
-                HStack {
-                    Text("journey.directory.verified_materials".localized)
-                        .font(.system(size: 17, weight: .bold, design: .default))
-                        .foregroundColor(JourneyVisual.primaryText)
-                    Spacer()
-                    Label("journey.directory.official_sources".localized, systemImage: "checkmark.seal.fill")
-                        .font(.system(size: 10, weight: .semibold))
-                        .foregroundColor(JourneyVisual.accentText)
-                }
-
-                VStack(spacing: 10) {
-                    ForEach(filteredGuides.dropFirst(3).prefix(5)) { guide in
-                        Button { selectedGuide = guide } label: {
-                            JourneyGuideCompactRow(guide: guide, imageName: imageName(for: guide))
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
-            }
+            .scrollClipDisabled()
         }
     }
 
@@ -471,10 +479,21 @@ struct JourneyDirectoryView: View {
             .eraseToAnyPublisher()
     }
 
-    private var filteredGuides: [Guide] {
+    /// Every guide in the reader's language, before topic and search filters.
+    private var localeGuides: [Guide] {
         let _ = contentRevision
-        // The catalog holds every bundled language; show only the reader's language (Ukrainian fallback).
         return appContainer.contentService.getGuidesForLocale(appContainer.currentLocale.identifier)
+    }
+
+    private var headerSubtitle: String {
+        switch selectedWorkspace {
+        case .guides: return "journey.directory.subtitle.guides".localized(with: localeGuides.count)
+        case .tools, .tasks: return selectedWorkspace == .tools ? "journey.directory.toolkit.hero.subtitle".localized : "journey.directory.subtitle.tasks".localized
+        }
+    }
+
+    private var filteredGuides: [Guide] {
+        localeGuides
             .filter { guide in
                 let matchesCategory = selectedCategory == nil || guide.category == selectedCategory
                 let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -486,23 +505,10 @@ struct JourneyDirectoryView: View {
 
     private var localizedChecklists: [Checklist] {
         let _ = contentRevision
-        let localized = appContainer.contentService.getChecklistsForLocale(appContainer.currentLocale.identifier)
-        return (localized.isEmpty ? appContainer.contentService.checklists : localized)
+        return appContainer.contentService.getChecklistsForLocale(appContainer.currentLocale.identifier)
             .sorted { $0.priority > $1.priority }
     }
 
-    private func imageName(for guide: Guide) -> String {
-        switch guide.category {
-        case .housing: return "cityhub-zurich-oldtown"
-        case .healthcare, .insurance: return "swiss-moment-luzern"
-        case .work: return "cityhub-zurich-viadukt"
-        default: return "swiss-moment-grindelwald"
-        }
-    }
-
-    private var cardImages: [String] {
-        ["swiss-moment-grindelwald", "cityhub-zurich-lake", "swiss-moment-luzern", "cityhub-zurich-oldtown"]
-    }
 }
 
 private enum JourneyDirectoryWorkspace: String, CaseIterable, Identifiable {
@@ -1447,24 +1453,5 @@ private struct JourneyMomentsView: View {
             }
         }
         .navigationBarTitleDisplayMode(.inline)
-    }
-}
-
-private struct JourneyGuideDeck: View {
-    let guides: [Guide]
-    let imageNames: [String]
-    let action: (Guide) -> Void
-
-    var body: some View {
-        VStack(spacing: 10) {
-            ForEach(Array(guides.enumerated()), id: \.element.id) { index, guide in
-                Button { action(guide) } label: {
-                    JourneyGuideCompactRow(
-                        guide: guide,
-                        imageName: imageNames.indices.contains(index) ? imageNames[index] : CityArtwork.name("directory"))
-                }
-                .buttonStyle(.plain)
-            }
-        }
     }
 }

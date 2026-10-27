@@ -46,7 +46,9 @@ enum DeepLink: Equatable {
             return 1
         case .map, .place:
             return 2
-        case .settings, .profile, .privacy, .language:
+        case .settings:
+            return MainTabRouter.settingsTab
+        case .profile, .privacy, .language:
             return 0
         case .onboarding, .passwordReset, .chat:
             return nil

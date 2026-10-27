@@ -55,58 +55,91 @@ struct CreateListingView: View {
         return value
     }
 
+    private var currencyCode: String { APIClient.countryCode == "CH" ? "CHF" : "EUR" }
+    private var country: ResidenceCountry { ResidenceCountry(rawValue: APIClient.countryCode) ?? .switzerland }
+
+    private var hasAbout: Bool {
+        !title.trimmingCharacters(in: .whitespaces).isEmpty && description.trimmingCharacters(in: .whitespaces).count >= 20
+    }
+    private var hasPrice: Bool { listingType == .service || isFreeItem || parsedPrice != nil }
+    private var hasContact: Bool {
+        !contactValue.trimmingCharacters(in: .whitespaces).isEmpty && !authorName.trimmingCharacters(in: .whitespaces).isEmpty
+    }
+    private var hasCategory: Bool { listingType == .item ? itemCategory != .other : category != .other }
+
+    /// Required steps only; photos and category stay optional.
+    private var progress: (done: Int, total: Int) {
+        let steps = [hasAbout, hasPrice, hasContact]
+        return (steps.filter { $0 }.count, steps.count)
+    }
+
+    private var missingHint: String {
+        var missing: [String] = []
+        if title.trimmingCharacters(in: .whitespaces).isEmpty { missing.append("marketplace.field.title".localized) }
+        if description.trimmingCharacters(in: .whitespaces).count < 20 { missing.append("marketplace.field.description".localized) }
+        if !hasPrice { missing.append("marketplace.field.price".localized) }
+        if contactValue.trimmingCharacters(in: .whitespaces).isEmpty { missing.append("marketplace.field.contact".localized) }
+        if authorName.trimmingCharacters(in: .whitespaces).isEmpty { missing.append("marketplace.field.author".localized) }
+        return "marketplace.create.missing".localized(with: missing.joined(separator: ", ").lowercased())
+    }
+
+    private var previewPrice: String {
+        if listingType == .item {
+            if isFreeItem { return "marketplace.free".localized }
+            if let parsedPrice { return "\(currencyCode) \(parsedPrice)" }
+            return "\(currencyCode) —"
+        }
+        let trimmed = priceInfo.trimmingCharacters(in: .whitespaces)
+        return trimmed.isEmpty ? "marketplace.create.price_on_request".localized : trimmed
+    }
+
+    private var previewCategory: (title: String, icon: String) {
+        listingType == .item ? (itemCategory.displayName, itemCategory.icon) : (category.displayName, category.icon)
+    }
+
     var body: some View {
         NavigationStack {
-            ZStack {
-                JourneyPhotoBackground(imageName: JourneyBackdrop.market.rawValue, blurRadius: 7, darkness: 0.72)
+            ZStack(alignment: .bottom) {
+                JourneyVisual.pageBackground.ignoresSafeArea()
 
                 ScrollView(showsIndicators: false) {
-                    VStack(spacing: 20) {
-                        titleCard
-                        photosCard
-                        categoryCard
-                        cantonCard
-                        descriptionCard
-                        if listingType == .item {
-                            itemPriceCard
-                        } else {
-                            priceCard
+                    VStack(spacing: 14) {
+                        header
+                        previewCard
+                        stepCard(1, title: "marketplace.field.photos".localized, icon: "photo.on.rectangle.angled", done: !selectedImages.isEmpty, optional: true) {
+                            photosContent
                         }
-                        contactCard
-                        authorCard
-                        submitButton
+                        stepCard(2, title: "marketplace.step.about".localized, icon: "text.alignleft", done: hasAbout) {
+                            titleField
+                            descriptionField
+                        }
+                        stepCard(3, title: "marketplace.field.category".localized, icon: "tag.fill", done: hasCategory) {
+                            categoryGrid
+                        }
+                        stepCard(4, title: "marketplace.field.price".localized, icon: "banknote.fill", done: hasPrice && (listingType == .item || !priceInfo.isEmpty), optional: listingType == .service) {
+                            if listingType == .item { itemPriceContent } else { servicePriceField }
+                        }
+                        stepCard(5, title: country.subdivisionTitle, icon: "mappin.and.ellipse", done: true) {
+                            cantonButton
+                        }
+                        stepCard(6, title: "marketplace.field.contact".localized, icon: "bubble.left.fill", done: hasContact) {
+                            contactContent
+                            authorField
+                        }
                     }
                     .padding(.horizontal, 16)
-                    .padding(.vertical, 12)
-                    .padding(.bottom, 40)
+                    .padding(.top, 8)
+                    .padding(.bottom, 132)
                 }
+                .scrollDismissesKeyboard(.interactively)
+
+                publishBar
             }
-            .navigationTitle(listingType == .item
-                             ? "marketplace.create_item_title".localized
-                             : "marketplace.create_title".localized)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("common.cancel".localized) { dismiss() }
-                }
-                ToolbarItem(placement: .primaryAction) {
-                    Button("marketplace.my_listings".localized) {
-                        showMyListings = true
-                    }
-                    .font(.subheadline)
-                }
-            }
-            .sheet(isPresented: $showSuccess) {
-                successSheet
-            }
-            .sheet(isPresented: $showMyListings) {
-                MyListingsView()
-            }
+            .toolbar(.hidden, for: .navigationBar)
+            .sheet(isPresented: $showSuccess) { successSheet }
+            .sheet(isPresented: $showMyListings) { MyListingsView() }
             .sheet(isPresented: $showCantonPicker) {
-                CantonPickerSheet(
-                    selectedCanton: $canton,
-                    country: ResidenceCountry(rawValue: APIClient.countryCode) ?? .switzerland
-                )
+                CantonPickerSheet(selectedCanton: $canton, country: country)
             }
             .onChange(of: selectedPhotoItems.map(\.itemIdentifier)) { _, _ in
                 Task { await appendSelectedPhotos(from: selectedPhotoItems) }
@@ -115,107 +148,241 @@ struct CreateListingView: View {
                 get: { errorMessage != nil },
                 set: { if !$0 { errorMessage = nil } }
             )) {
-                Button("OK") { errorMessage = nil }
+                Button("common.ok".localized) { errorMessage = nil }
             } message: {
                 Text(errorMessage ?? "")
             }
         }
-        .journeyScreen(.market, darkness: 0.72)
     }
 
-    // MARK: - Photos Card
+    // MARK: - Header & preview
 
-    private var photosCard: some View {
-        formCard {
-            VStack(alignment: .leading, spacing: 12) {
-                HStack {
-                    formLabel("marketplace.field.photos".localized, icon: "photo.on.rectangle.angled", optional: true)
-                    Spacer()
-                    Text("\(selectedImages.count)/\(maxImages)")
-                        .font(.caption2.weight(.semibold))
-                        .foregroundColor(Theme.Colors.textTertiary)
-                }
+    private var header: some View {
+        HStack(spacing: 12) {
+            Button { dismiss() } label: {
+                Image(systemName: "xmark")
+                    .font(.system(size: 15, weight: .bold))
+                    .foregroundColor(JourneyVisual.primaryText)
+                    .frame(width: 44, height: 44)
+                    .background(Theme.Colors.card, in: Circle())
+                    .overlay(Circle().stroke(JourneyVisual.softBorder))
+            }
+            .accessibilityLabel("common.cancel".localized)
 
-                if selectedImages.isEmpty {
-                    PhotosPicker(
-                        selection: $selectedPhotoItems,
-                        maxSelectionCount: maxImages,
-                        matching: .images
-                    ) {
-                        VStack(spacing: 10) {
-                            Image(systemName: "plus.circle.fill")
-                                .font(.system(size: 28, weight: .semibold))
-                                .foregroundColor(JourneyVisual.accentStrong)
-                            Text("marketplace.photos_placeholder".localized(with: maxImages))
-                                .font(.subheadline.weight(.semibold))
-                                .foregroundColor(Theme.Colors.textPrimary)
-                            Text("marketplace.photos_hint".localized)
-                                .font(.caption)
-                                .foregroundColor(Theme.Colors.textSecondary)
-                                .multilineTextAlignment(.center)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 24)
-                        .background(fieldBackground)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                .stroke(Theme.Colors.adaptiveBorder, style: StrokeStyle(lineWidth: 1, dash: [6]))
-                        )
+            VStack(alignment: .leading, spacing: 1) {
+                Text(listingType == .item ? "marketplace.create_item_title".localized : "marketplace.create_title".localized)
+                    .font(.system(size: 22, weight: .bold))
+                    .foregroundColor(JourneyVisual.primaryText)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+                Text("marketplace.create.progress".localized(with: progress.done, progress.total))
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(JourneyVisual.secondaryText)
+            }
+
+            Spacer(minLength: 8)
+
+            Button { showMyListings = true } label: {
+                Image(systemName: "list.bullet.rectangle")
+                    .font(.system(size: 15, weight: .bold))
+                    .foregroundColor(JourneyVisual.primaryText)
+                    .frame(width: 44, height: 44)
+                    .background(Theme.Colors.card, in: Circle())
+                    .overlay(Circle().stroke(JourneyVisual.softBorder))
+            }
+            .accessibilityLabel("marketplace.my_listings".localized)
+        }
+        .padding(.top, 8)
+    }
+
+    /// How the listing will look in the feed, updated while the form is filled.
+    private var previewCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("marketplace.create.preview".localized.uppercased())
+                    .font(.system(size: 10, weight: .black))
+                    .tracking(1.2)
+                    .foregroundColor(JourneyVisual.accentText)
+                Spacer()
+                GeometryReader { proxy in
+                    ZStack(alignment: .leading) {
+                        Capsule().fill(JourneyVisual.softSurface)
+                        Capsule().fill(JourneyVisual.lime)
+                            .frame(width: proxy.size.width * CGFloat(progress.done) / CGFloat(max(progress.total, 1)))
                     }
-                    .buttonStyle(.plain)
-                } else {
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 12) {
-                            ForEach(selectedImages) { image in
-                                photoThumbnail(image)
-                            }
+                }
+                .frame(width: 84, height: 6)
+                .animation(.easeOut(duration: 0.25), value: progress.done)
+            }
 
-                            if selectedImages.count < maxImages {
-                                PhotosPicker(
-                                    selection: $selectedPhotoItems,
-                                    maxSelectionCount: maxImages - selectedImages.count,
-                                    matching: .images
-                                ) {
-                                    VStack(spacing: 8) {
-                                        Image(systemName: "plus")
-                                            .font(.system(size: 22, weight: .bold))
-                                        Text("marketplace.photos_add_more".localized)
-                                            .font(.caption.weight(.semibold))
-                                            .multilineTextAlignment(.center)
-                                    }
-                                    .foregroundColor(JourneyVisual.accentText)
-                                    .frame(width: 112, height: 112)
-                                    .background(fieldBackground)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                            .stroke(Theme.Colors.adaptiveBorder, style: StrokeStyle(lineWidth: 1, dash: [6]))
-                                    )
-                                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            HStack(spacing: 14) {
+                ZStack {
+                    if let first = selectedImages.first {
+                        Image(uiImage: first.image).resizable().scaledToFill()
+                    } else {
+                        JourneyVisual.softSurface
+                        Image(systemName: previewCategory.icon)
+                            .font(.system(size: 26, weight: .semibold))
+                            .foregroundColor(JourneyVisual.accentStrong)
+                    }
+                }
+                .frame(width: 92, height: 92)
+                .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+
+                VStack(alignment: .leading, spacing: 6) {
+                    Label(previewCategory.title, systemImage: previewCategory.icon)
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundColor(JourneyVisual.accentText)
+                        .lineLimit(1)
+                    Text(title.isEmpty ? "marketplace.create.preview_title".localized : title)
+                        .font(.system(size: 17, weight: .bold))
+                        .foregroundColor(title.isEmpty ? JourneyVisual.secondaryText : JourneyVisual.primaryText)
+                        .lineLimit(2)
+                    HStack(spacing: 8) {
+                        Text(previewPrice)
+                            .font(.system(size: 13, weight: .black))
+                            .foregroundColor(.black)
+                            .padding(.horizontal, 9)
+                            .frame(height: 24)
+                            .background(JourneyVisual.lime, in: Capsule())
+                        Label(canton == "all" ? country.flag : canton, systemImage: "mappin")
+                            .font(.system(size: 11, weight: .semibold))
+                            .foregroundColor(JourneyVisual.secondaryText)
+                    }
+                }
+                Spacer(minLength: 0)
+            }
+        }
+        .padding(14)
+        .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous).stroke(JourneyVisual.lime.opacity(0.55), lineWidth: 1.5))
+        .animation(.easeOut(duration: 0.2), value: title)
+        .animation(.easeOut(duration: 0.2), value: selectedImages.count)
+    }
+
+    // MARK: - Steps
+
+    private func stepCard<Content: View>(
+        _ number: Int, title: String, icon: String, done: Bool, optional: Bool = false,
+        @ViewBuilder content: () -> Content
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(spacing: 10) {
+                ZStack {
+                    Circle().fill(done ? JourneyVisual.lime : JourneyVisual.softSurface)
+                    if done {
+                        Image(systemName: "checkmark").font(.system(size: 12, weight: .black)).foregroundColor(.black)
+                    } else {
+                        Text("\(number)").font(.system(size: 13, weight: .black)).foregroundColor(JourneyVisual.primaryText)
+                    }
+                }
+                .frame(width: 28, height: 28)
+                .animation(.spring(response: 0.3, dampingFraction: 0.7), value: done)
+
+                Text(title)
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundColor(JourneyVisual.primaryText)
+                if optional {
+                    Text("marketplace.optional".localized)
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundColor(JourneyVisual.secondaryText)
+                        .padding(.horizontal, 8)
+                        .frame(height: 20)
+                        .background(JourneyVisual.softSurface, in: Capsule())
+                }
+                Spacer(minLength: 0)
+                Image(systemName: icon)
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundColor(JourneyVisual.secondaryText)
+            }
+            content()
+        }
+        .padding(16)
+        .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(JourneyVisual.softBorder, lineWidth: 1))
+    }
+
+    // MARK: - Photos
+
+    private var photosContent: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            if selectedImages.isEmpty {
+                PhotosPicker(selection: $selectedPhotoItems, maxSelectionCount: maxImages, matching: .images) {
+                    VStack(spacing: 10) {
+                        Image(systemName: "camera.fill")
+                            .font(.system(size: 22, weight: .bold))
+                            .foregroundColor(.black)
+                            .frame(width: 54, height: 54)
+                            .background(JourneyVisual.lime, in: Circle())
+                        Text("marketplace.photos_placeholder".localized(with: maxImages))
+                            .font(.system(size: 15, weight: .bold))
+                            .foregroundColor(JourneyVisual.primaryText)
+                        Text("marketplace.photos_hint".localized)
+                            .font(.caption)
+                            .foregroundColor(JourneyVisual.secondaryText)
+                            .multilineTextAlignment(.center)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 26)
+                    .padding(.horizontal, 12)
+                    .background(JourneyVisual.softSurface, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 18, style: .continuous)
+                            .stroke(JourneyVisual.accentStrong.opacity(0.35), style: StrokeStyle(lineWidth: 1.5, dash: [7, 5]))
+                    )
+                }
+                .buttonStyle(.plain)
+            } else {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 10) {
+                        ForEach(Array(selectedImages.enumerated()), id: \.element.id) { index, image in
+                            photoThumbnail(image, isCover: index == 0)
+                        }
+                        if selectedImages.count < maxImages {
+                            PhotosPicker(
+                                selection: $selectedPhotoItems,
+                                maxSelectionCount: maxImages - selectedImages.count,
+                                matching: .images
+                            ) {
+                                VStack(spacing: 6) {
+                                    Image(systemName: "plus").font(.system(size: 20, weight: .bold))
+                                    Text("\(selectedImages.count)/\(maxImages)").font(.caption.weight(.bold))
                                 }
-                                .buttonStyle(.plain)
+                                .foregroundColor(JourneyVisual.accentText)
+                                .frame(width: 104, height: 104)
+                                .background(JourneyVisual.softSurface, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                        .stroke(JourneyVisual.accentStrong.opacity(0.35), style: StrokeStyle(lineWidth: 1.5, dash: [7, 5]))
+                                )
                             }
+                            .buttonStyle(.plain)
                         }
                     }
-
-                    Text("marketplace.photos_hint".localized)
-                        .font(.caption)
-                        .foregroundColor(Theme.Colors.textSecondary)
                 }
+                .scrollClipDisabled()
             }
         }
     }
 
-    private func photoThumbnail(_ image: SelectedListingImage) -> some View {
+    private func photoThumbnail(_ image: SelectedListingImage, isCover: Bool) -> some View {
         ZStack(alignment: .topTrailing) {
             Image(uiImage: image.image)
                 .resizable()
                 .scaledToFill()
-                .frame(width: 112, height: 112)
+                .frame(width: 104, height: 104)
                 .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .stroke(Theme.Colors.adaptiveBorder.opacity(0.45), lineWidth: 1)
-                )
+                .overlay(alignment: .bottomLeading) {
+                    if isCover {
+                        Text("marketplace.photo_cover".localized)
+                            .font(.system(size: 9, weight: .black))
+                            .foregroundColor(.black)
+                            .padding(.horizontal, 7)
+                            .frame(height: 18)
+                            .background(JourneyVisual.lime, in: Capsule())
+                            .padding(6)
+                    }
+                }
 
             Button {
                 removeSelectedImage(image)
@@ -224,561 +391,395 @@ struct CreateListingView: View {
                     .font(.system(size: 22))
                     .symbolRenderingMode(.hierarchical)
                     .foregroundStyle(.white, Color.black.opacity(0.55))
-                    .padding(6)
+                    .padding(5)
             }
             .accessibilityLabel("marketplace.photo_remove".localized)
         }
     }
 
-    // MARK: - Title Card
+    // MARK: - About
 
-    private var titleCard: some View {
-        formCard {
-            VStack(alignment: .leading, spacing: 10) {
-                formLabel("marketplace.field.title".localized, icon: "pencil.line")
-
-                TextField("marketplace.field.title_placeholder".localized, text: $title)
-                    .focused($focusedField, equals: .title)
-                    .font(.body)
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 12)
-                    .background(fieldBackground)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                    .onChange(of: title) { _, newValue in
-                        if newValue.count > 100 { title = String(newValue.prefix(100)) }
-                        updateCategorySuggestion(for: newValue)
-                    }
-
-                HStack {
-                    if let suggested = suggestedCategory, categorySuggestionVisible, suggested != category {
-                        suggestedCategoryBadge(suggested)
-                            .transition(.asymmetric(
-                                insertion: .scale(scale: 0.8).combined(with: .opacity),
-                                removal: .opacity
-                            ))
-                    }
-                    Spacer()
-                    Text("\(title.count)/100")
-                        .font(.caption2)
-                        .foregroundColor(title.count > 90 ? Theme.Colors.error : Theme.Colors.textTertiary)
-                }
-                .animation(.spring(response: 0.4, dampingFraction: 0.7), value: categorySuggestionVisible)
-            }
-        }
-    }
-
-    // MARK: - Category Card
-
-    private var categoryCard: some View {
-        formCard {
-            VStack(alignment: .leading, spacing: 10) {
-                formLabel("marketplace.field.category".localized, icon: "tag.fill")
-
-                LazyVGrid(columns: [
-                    GridItem(.adaptive(minimum: 145), spacing: 8)
-                ], spacing: 8) {
-                    if listingType == .item {
-                        ForEach(ItemCategory.allCases) { cat in
-                            itemCategoryChip(cat)
-                        }
-                    } else {
-                        ForEach(ServiceCategory.allCases) { cat in
-                            categoryChip(cat)
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private func itemCategoryChip(_ cat: ItemCategory) -> some View {
-        let isSelected = itemCategory == cat
-        return Button {
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                itemCategory = cat
-                if cat == .free {
-                    isFreeItem = true
-                }
-            }
-        } label: {
-            HStack(spacing: 5) {
-                Image(systemName: cat.icon)
-                    .font(.system(size: 11))
-                Text(cat.displayName)
-                    .font(.subheadline.weight(.semibold))
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            .padding(.horizontal, 10)
-            .padding(.vertical, 9)
-            .frame(maxWidth: .infinity)
-            .background(
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(isSelected ? cat.color.opacity(0.2) : Theme.Colors.adaptiveCard.opacity(0.6))
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 10)
-                    .stroke(isSelected ? cat.color.opacity(0.6) : Color.clear, lineWidth: isSelected ? 1.5 : 1)
-            )
-            .foregroundColor(isSelected ? cat.color : Theme.Colors.textSecondary)
-        }
-        .buttonStyle(.plain)
-    }
-
-    // MARK: - Item Price Card
-
-    private var itemPriceCard: some View {
-        formCard {
-            VStack(alignment: .leading, spacing: 12) {
-                formLabel("marketplace.field.price".localized, icon: "banknote.fill")
-
-                Toggle(isOn: $isFreeItem.animation(.easeInOut(duration: 0.2))) {
-                    HStack(spacing: 6) {
-                        Image(systemName: "gift.fill")
-                            .font(.system(size: 13))
-                            .foregroundColor(Theme.Colors.accentCoral)
-                        Text("marketplace.field.give_away".localized)
-                            .font(.subheadline.weight(.medium))
-                            .foregroundColor(Theme.Colors.textPrimary)
-                    }
-                }
-                .tint(Theme.Colors.accentCoral)
-
-                if !isFreeItem {
-                    HStack(spacing: 10) {
-                        Text(APIClient.countryCode == "CH" ? "CHF" : "EUR")
-                            .font(.system(size: 15, weight: .semibold))
-                            .foregroundColor(Theme.Colors.textTertiary)
-
-                        TextField("marketplace.field.item_price_placeholder".localized, text: $priceText)
-                            .focused($focusedField, equals: .price)
-                            .font(.body)
-                            .keyboardType(.numberPad)
-                            .onChange(of: priceText) { _, newValue in
-                                let digits = newValue.filter(\.isNumber)
-                                if digits != newValue { priceText = digits }
-                                if digits.count > 7 { priceText = String(digits.prefix(7)) }
-                            }
-                    }
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 12)
-                    .background(fieldBackground)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-
-                    Toggle(isOn: $negotiable) {
-                        Text("marketplace.field.negotiable".localized)
-                            .font(.subheadline.weight(.medium))
-                            .foregroundColor(Theme.Colors.textPrimary)
-                    }
-                    .tint(JourneyVisual.accentText)
-                }
-
-                VStack(alignment: .leading, spacing: 8) {
-                    formLabel("marketplace.field.condition".localized, icon: "checkmark.seal")
-
-                    HStack(spacing: 6) {
-                        ForEach(ItemCondition.allCases) { cond in
-                            conditionButton(cond)
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private func conditionButton(_ cond: ItemCondition) -> some View {
-        let isSelected = condition == cond
-        return Button {
-            withAnimation(.easeInOut(duration: 0.2)) {
-                condition = cond
-            }
-        } label: {
-            Text(cond.displayName)
-                .font(.subheadline.weight(.semibold))
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 10)
-                .background(
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(isSelected ? Theme.Colors.primary.opacity(0.15) : Color.clear)
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 10)
-                        .stroke(isSelected ? Theme.Colors.primary.opacity(0.4) : Theme.Colors.adaptiveBorder,
-                                lineWidth: isSelected ? 1.5 : 0.5)
-                )
-                .foregroundColor(isSelected ? Theme.Colors.primary : Theme.Colors.textSecondary)
-        }
-        .buttonStyle(.plain)
-    }
-
-    private func categoryChip(_ cat: ServiceCategory) -> some View {
-        let isSelected = category == cat
-        let isSuggested = suggestedCategory == cat && categorySuggestionVisible && !isSelected
-
-        return Button {
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                category = cat
-                if suggestedCategory == cat {
-                    categorySuggestionVisible = false
-                }
-            }
-        } label: {
-            HStack(spacing: 5) {
-                Image(systemName: cat.icon)
-                    .font(.system(size: 11))
-                Text(cat.displayName)
-                    .font(.subheadline.weight(.semibold))
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            .padding(.horizontal, 10)
-            .padding(.vertical, 9)
-            .frame(maxWidth: .infinity)
-            .background(
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(isSelected
-                          ? cat.color.opacity(0.2)
-                          : isSuggested
-                            ? cat.color.opacity(0.08)
-                            : Theme.Colors.adaptiveCard.opacity(0.6))
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 10)
-                    .stroke(isSelected
-                            ? cat.color.opacity(0.6)
-                            : isSuggested
-                              ? cat.color.opacity(0.4)
-                              : Color.clear,
-                            lineWidth: isSelected ? 1.5 : 1)
-            )
-            .overlay(alignment: .topTrailing) {
-                if isSuggested {
-                    Image(systemName: "sparkle")
-                        .font(.system(size: 7, weight: .bold))
-                        .foregroundColor(cat.color)
-                        .padding(4)
-                }
-            }
-            .foregroundColor(isSelected ? cat.color : isSuggested ? cat.color.opacity(0.8) : Theme.Colors.textSecondary)
-        }
-        .buttonStyle(.plain)
-        .scaleEffect(isSelected ? 1.0 : 0.98)
-        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isSelected)
-    }
-
-    // MARK: - Canton Card
-
-    private var cantonCard: some View {
-        formCard {
-            VStack(alignment: .leading, spacing: 10) {
-                formLabel((ResidenceCountry(rawValue: APIClient.countryCode) ?? .switzerland).subdivisionTitle, icon: "mappin.and.ellipse")
-
-                Button {
-                    showCantonPicker = true
-                } label: {
-                    HStack(spacing: 12) {
-                        cantonFlag(canton)
-                            .frame(width: 36, height: 36)
-                            .background(
-                                Circle()
-                                    .fill(Theme.Colors.primary.opacity(0.1))
-                            )
-
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(CountryCatalog.subdivisionName(country: ResidenceCountry(rawValue: APIClient.countryCode) ?? .switzerland, code: canton))
-                                .font(.body.weight(.medium))
-                                .foregroundColor(Theme.Colors.textPrimary)
-                            Text(canton == "all" ? "" : canton)
-                                .font(.caption)
-                                .foregroundColor(Theme.Colors.textTertiary)
-                        }
-
-                        Spacer()
-
-                        Image(systemName: "chevron.right")
-                            .font(.system(size: 13, weight: .semibold))
-                            .foregroundColor(Theme.Colors.textTertiary)
-                    }
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 10)
-                    .background(fieldBackground)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                }
-                .buttonStyle(.plain)
-            }
-        }
-    }
-
-    // MARK: - Description Card
-
-    private var descriptionCard: some View {
-        formCard {
-            VStack(alignment: .leading, spacing: 10) {
-                formLabel("marketplace.field.description".localized, icon: "text.alignleft")
-
-                TextEditor(text: $description)
-                    .focused($focusedField, equals: .description)
-                    .font(.body)
-                    .frame(minHeight: 100, maxHeight: 180)
-                    .scrollContentBackground(.hidden)
-                    .padding(12)
-                    .background(fieldBackground)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                    .onChange(of: description) { _, newValue in
-                        if newValue.count > 1000 { description = String(newValue.prefix(1000)) }
-                    }
-
-                HStack {
-                    if description.count < 20 && !description.isEmpty {
-                        Label("marketplace.field.description_min".localized, systemImage: "exclamationmark.circle")
-                            .font(.caption2)
-                            .foregroundColor(Theme.Colors.warning)
-                    }
-                    Spacer()
-                    Text("\(description.count)/1000")
-                        .font(.caption2)
-                        .foregroundColor(description.count > 950 ? Theme.Colors.error : Theme.Colors.textTertiary)
-                }
-            }
-        }
-    }
-
-    // MARK: - Price Card
-
-    private var priceCard: some View {
-        formCard {
-            VStack(alignment: .leading, spacing: 10) {
-                formLabel("marketplace.field.price".localized, icon: "banknote.fill", optional: true)
-
-                HStack(spacing: 10) {
-                    Image(systemName: "swiss.franc.sign")
-                        .font(.system(size: 15, weight: .medium))
-                        .foregroundColor(Theme.Colors.textTertiary)
-                        .frame(width: 20)
-
-                    TextField("marketplace.field.price_placeholder".localized, text: $priceInfo)
-                        .focused($focusedField, equals: .price)
-                        .font(.body)
-                }
+    private var titleField: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            fieldCaption("marketplace.field.title".localized, counter: "\(title.count)/100", warn: title.count > 90)
+            TextField("marketplace.field.title_placeholder".localized, text: $title)
+                .focused($focusedField, equals: .title)
+                .font(.body.weight(.medium))
                 .padding(.horizontal, 14)
-                .padding(.vertical, 12)
+                .frame(height: 50)
                 .background(fieldBackground)
-                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .overlay(fieldBorder(.title))
+                .onChange(of: title) { _, newValue in
+                    if newValue.count > 100 { title = String(newValue.prefix(100)) }
+                    updateCategorySuggestion(for: newValue)
+                }
+            if let suggested = suggestedCategory, categorySuggestionVisible, suggested != category {
+                suggestedCategoryBadge(suggested)
+                    .transition(.scale(scale: 0.85).combined(with: .opacity))
+            }
+        }
+        .animation(.spring(response: 0.4, dampingFraction: 0.7), value: categorySuggestionVisible)
+    }
+
+    private var descriptionField: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            fieldCaption("marketplace.field.description".localized, counter: "\(description.count)/1000", warn: description.count > 950)
+            TextEditor(text: $description)
+                .focused($focusedField, equals: .description)
+                .font(.body)
+                .frame(minHeight: 110, maxHeight: 180)
+                .scrollContentBackground(.hidden)
+                .padding(10)
+                .background(fieldBackground)
+                .overlay(fieldBorder(.description))
+                .onChange(of: description) { _, newValue in
+                    if newValue.count > 1000 { description = String(newValue.prefix(1000)) }
+                }
+            if description.count < 20 && !description.isEmpty {
+                Label("marketplace.field.description_min".localized, systemImage: "exclamationmark.circle")
+                    .font(.caption2)
+                    .foregroundColor(Theme.Colors.warning)
             }
         }
     }
 
-    // MARK: - Contact Card
+    // MARK: - Category
 
-    private var contactCard: some View {
-        formCard {
-            VStack(alignment: .leading, spacing: 12) {
-                formLabel("marketplace.field.contact".localized, icon: "bubble.left.fill")
-
-                HStack(spacing: 6) {
-                    ForEach(ContactType.allCases) { type in
-                        contactTypeButton(type)
+    private var categoryGrid: some View {
+        LazyVGrid(columns: [GridItem(.adaptive(minimum: 140), spacing: 8)], spacing: 8) {
+            if listingType == .item {
+                ForEach(ItemCategory.allCases) { cat in
+                    categoryChip(title: cat.displayName, icon: cat.icon, selected: itemCategory == cat, suggested: false) {
+                        itemCategory = cat
+                        if cat == .free { isFreeItem = true }
                     }
                 }
-
-                HStack(spacing: 10) {
-                    Image(systemName: contactType.icon)
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(JourneyVisual.accentStrong)
-                        .frame(width: 20)
-
-                    TextField(contactType.placeholder, text: $contactValue)
-                        .focused($focusedField, equals: .contact)
-                        .font(.body)
-                        .keyboardType(contactType == .email ? .emailAddress : contactType == .telegram ? .default : .phonePad)
-                        .textContentType(contactType == .email ? .emailAddress : contactType == .phone ? .telephoneNumber : nil)
+            } else {
+                ForEach(ServiceCategory.allCases) { cat in
+                    categoryChip(
+                        title: cat.displayName, icon: cat.icon, selected: category == cat,
+                        suggested: suggestedCategory == cat && categorySuggestionVisible && category != cat
+                    ) {
+                        category = cat
+                        if suggestedCategory == cat { categorySuggestionVisible = false }
+                    }
                 }
-                .padding(.horizontal, 14)
-                .padding(.vertical, 12)
-                .background(fieldBackground)
-                .clipShape(RoundedRectangle(cornerRadius: 12))
             }
         }
     }
 
-    private func contactTypeButton(_ type: ContactType) -> some View {
-        let isSelected = contactType == type
-        return Button {
-            withAnimation(.easeInOut(duration: 0.2)) {
-                contactType = type
-            }
-        } label: {
-            VStack(spacing: 4) {
-                Image(systemName: type.icon)
-                    .font(.system(size: 16))
-                Text(type.displayName)
-                    .font(.system(size: 10, weight: .medium))
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 10)
-            .background(
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(isSelected
-                          ? Theme.Colors.primary.opacity(0.15)
-                          : Color.clear)
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 10)
-                    .stroke(isSelected ? Theme.Colors.primary.opacity(0.4) : Theme.Colors.adaptiveBorder,
-                            lineWidth: isSelected ? 1.5 : 0.5)
-            )
-            .foregroundColor(isSelected ? Theme.Colors.primary : Theme.Colors.textSecondary)
-        }
-        .buttonStyle(.plain)
-    }
-
-    // MARK: - Author Card
-
-    private var authorCard: some View {
-        formCard {
-            VStack(alignment: .leading, spacing: 10) {
-                formLabel("marketplace.field.author".localized, icon: "person.fill")
-
-                HStack(spacing: 10) {
-                    Circle()
-                        .fill(Theme.Colors.primary.opacity(0.12))
-                        .frame(width: 36, height: 36)
-                        .overlay(
-                            Text(authorName.isEmpty ? "?" : String(authorName.prefix(1)).uppercased())
-                                .font(.system(size: 15, weight: .bold))
-                                .foregroundColor(JourneyVisual.accentText)
-                        )
-
-                    TextField("marketplace.field.author_placeholder".localized, text: $authorName)
-                        .focused($focusedField, equals: .author)
-                        .font(.body)
-                }
-                .padding(.horizontal, 14)
-                .padding(.vertical, 10)
-                .background(fieldBackground)
-                .clipShape(RoundedRectangle(cornerRadius: 12))
-            }
-        }
-    }
-
-    // MARK: - Submit
-
-    private var submitButton: some View {
+    private func categoryChip(title: String, icon: String, selected: Bool, suggested: Bool, action: @escaping () -> Void) -> some View {
         Button {
-            Task { await submit() }
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) { action() }
         } label: {
-            HStack(spacing: 10) {
-                if isSubmitting {
-                    ProgressView()
-                        .tint(JourneyVisual.primaryText)
-                    Text(selectedImages.isEmpty ? "marketplace.submit".localized : "marketplace.photos_uploading".localized)
-                        .font(.headline)
-                } else {
-                    Image(systemName: "paperplane.fill")
-                        .font(.system(size: 15))
-                    Text("marketplace.submit".localized)
-                        .font(.headline)
+            HStack(spacing: 7) {
+                Image(systemName: icon).font(.system(size: 12, weight: .bold))
+                Text(title)
+                    .font(.system(size: 13, weight: .semibold))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+                Spacer(minLength: 0)
+                if suggested {
+                    Image(systemName: "sparkle").font(.system(size: 9, weight: .bold))
                 }
             }
+            .foregroundColor(selected ? .black : JourneyVisual.primaryText)
+            .padding(.horizontal, 12)
+            .frame(height: 44)
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 16)
-            .background(
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(isValid
-                          ? LinearGradient(colors: [Theme.Colors.primary, Theme.Colors.primaryDark],
-                                           startPoint: .leading, endPoint: .trailing)
-                          : LinearGradient(colors: [Color.gray.opacity(0.25), Color.gray.opacity(0.2)],
-                                           startPoint: .leading, endPoint: .trailing))
+            .background(selected ? JourneyVisual.lime : JourneyVisual.softSurface, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .stroke(suggested ? JourneyVisual.accentStrong.opacity(0.6) : Color.clear, style: StrokeStyle(lineWidth: 1.5, dash: [4, 3]))
             )
-            .foregroundColor(isValid ? JourneyVisual.primaryText : Theme.Colors.textTertiary)
-            .shadow(color: isValid ? Theme.Colors.primary.opacity(0.3) : .clear, radius: 10, y: 5)
         }
-        .disabled(!isValid || isSubmitting)
-        .padding(.top, 4)
+        .buttonStyle(ScaleButtonStyle(scaleAmount: 0.97, hapticStyle: .light))
+        .accessibilityAddTraits(selected ? .isSelected : [])
+    }
+
+    // MARK: - Price
+
+    private var itemPriceContent: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 8) {
+                segment("marketplace.create.sell".localized, icon: "banknote", selected: !isFreeItem) { isFreeItem = false }
+                segment("marketplace.field.give_away".localized, icon: "gift.fill", selected: isFreeItem) { isFreeItem = true }
+            }
+
+            if !isFreeItem {
+                HStack(spacing: 10) {
+                    Text(currencyCode)
+                        .font(.system(size: 15, weight: .black))
+                        .foregroundColor(JourneyVisual.accentText)
+                    TextField("marketplace.field.item_price_placeholder".localized, text: $priceText)
+                        .focused($focusedField, equals: .price)
+                        .font(.system(size: 22, weight: .bold))
+                        .keyboardType(.numberPad)
+                        .onChange(of: priceText) { _, newValue in
+                            let digits = newValue.filter(\.isNumber)
+                            if digits != newValue { priceText = digits }
+                            if digits.count > 7 { priceText = String(digits.prefix(7)) }
+                        }
+                }
+                .padding(.horizontal, 14)
+                .frame(height: 56)
+                .background(fieldBackground)
+                .overlay(fieldBorder(.price))
+
+                Toggle(isOn: $negotiable) {
+                    Text("marketplace.field.negotiable".localized)
+                        .font(.subheadline.weight(.medium))
+                        .foregroundColor(JourneyVisual.primaryText)
+                }
+                .tint(JourneyVisual.accentStrong)
+            }
+
+            fieldCaption("marketplace.field.condition".localized)
+            HStack(spacing: 8) {
+                ForEach(ItemCondition.allCases) { cond in
+                    segment(cond.displayName, icon: nil, selected: condition == cond) { condition = cond }
+                }
+            }
+        }
+    }
+
+    private var servicePriceField: some View {
+        HStack(spacing: 10) {
+            Text(currencyCode)
+                .font(.system(size: 15, weight: .black))
+                .foregroundColor(JourneyVisual.accentText)
+            TextField("marketplace.field.price_placeholder".localized, text: $priceInfo)
+                .focused($focusedField, equals: .price)
+                .font(.body.weight(.medium))
+        }
+        .padding(.horizontal, 14)
+        .frame(height: 50)
+        .background(fieldBackground)
+        .overlay(fieldBorder(.price))
+    }
+
+    // MARK: - Location
+
+    private var cantonButton: some View {
+        Button {
+            showCantonPicker = true
+        } label: {
+            HStack(spacing: 12) {
+                Text(canton == "all" ? country.flag : canton)
+                    .font(.system(size: 13, weight: .black))
+                    .foregroundColor(.black)
+                    .frame(width: 40, height: 40)
+                    .background(JourneyVisual.lime, in: Circle())
+                Text(CountryCatalog.subdivisionName(country: country, code: canton))
+                    .font(.body.weight(.semibold))
+                    .foregroundColor(JourneyVisual.primaryText)
+                Spacer()
+                Text("common.change".localized)
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundColor(JourneyVisual.accentText)
+            }
+            .padding(.horizontal, 12)
+            .frame(height: 58)
+            .background(fieldBackground)
+        }
+        .buttonStyle(.plain)
+    }
+
+    // MARK: - Contact
+
+    private var contactContent: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 8) {
+                ForEach(ContactType.allCases) { type in
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.2)) { contactType = type }
+                    } label: {
+                        VStack(spacing: 5) {
+                            Image(systemName: type.icon).font(.system(size: 15, weight: .semibold))
+                            Text(type.displayName)
+                                .font(.system(size: 11, weight: .semibold))
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.75)
+                        }
+                        .foregroundColor(contactType == type ? .black : JourneyVisual.primaryText)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 58)
+                        .background(contactType == type ? JourneyVisual.lime : JourneyVisual.softSurface, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    }
+                    .buttonStyle(ScaleButtonStyle(scaleAmount: 0.96, hapticStyle: .light))
+                    .accessibilityAddTraits(contactType == type ? .isSelected : [])
+                }
+            }
+
+            HStack(spacing: 10) {
+                Image(systemName: contactType.icon)
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(JourneyVisual.accentStrong)
+                    .frame(width: 20)
+                TextField(contactType.placeholder, text: $contactValue)
+                    .focused($focusedField, equals: .contact)
+                    .font(.body.weight(.medium))
+                    .keyboardType(contactType == .email ? .emailAddress : contactType == .telegram ? .default : .phonePad)
+                    .textContentType(contactType == .email ? .emailAddress : contactType == .phone ? .telephoneNumber : nil)
+                    .textInputAutocapitalization(.never)
+            }
+            .padding(.horizontal, 14)
+            .frame(height: 50)
+            .background(fieldBackground)
+            .overlay(fieldBorder(.contact))
+        }
+    }
+
+    private var authorField: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            fieldCaption("marketplace.field.author".localized)
+            HStack(spacing: 10) {
+                Text(authorName.isEmpty ? "?" : String(authorName.prefix(1)).uppercased())
+                    .font(.system(size: 14, weight: .black))
+                    .foregroundColor(.black)
+                    .frame(width: 32, height: 32)
+                    .background(JourneyVisual.lime, in: Circle())
+                TextField("marketplace.field.author_placeholder".localized, text: $authorName)
+                    .focused($focusedField, equals: .author)
+                    .font(.body.weight(.medium))
+                    .textContentType(.name)
+            }
+            .padding(.horizontal, 10)
+            .frame(height: 50)
+            .background(fieldBackground)
+            .overlay(fieldBorder(.author))
+        }
+    }
+
+    // MARK: - Publish
+
+    private var publishBar: some View {
+        VStack(spacing: 8) {
+            if !isValid {
+                Text(missingHint)
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundColor(JourneyVisual.secondaryText)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+                    .transition(.opacity)
+            }
+            Button {
+                focusedField = nil
+                Task { await submit() }
+            } label: {
+                HStack(spacing: 10) {
+                    if isSubmitting {
+                        ProgressView().tint(.black)
+                        Text(selectedImages.isEmpty ? "marketplace.submit".localized : "marketplace.photos_uploading".localized)
+                    } else {
+                        Text("marketplace.submit".localized)
+                        Image(systemName: "arrow.right")
+                    }
+                }
+                .font(.headline)
+                .foregroundColor(isValid ? .black : JourneyVisual.secondaryText)
+                .frame(maxWidth: .infinity)
+                .frame(height: 56)
+                .background(isValid ? JourneyVisual.lime : JourneyVisual.softSurface, in: Capsule())
+                .shadow(color: isValid ? JourneyVisual.lime.opacity(0.35) : .clear, radius: 14, y: 6)
+            }
+            .buttonStyle(ScaleButtonStyle(scaleAmount: 0.98, hapticStyle: .medium))
+            .disabled(!isValid || isSubmitting)
+            .accessibilityIdentifier("marketplace.create.submit")
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 12)
+        .padding(.bottom, 10)
+        .background(
+            JourneyVisual.pageBackground
+                .opacity(0.96)
+                .ignoresSafeArea(edges: .bottom)
+                .shadow(color: .black.opacity(0.06), radius: 10, y: -4)
+        )
+        .animation(.easeOut(duration: 0.2), value: isValid)
     }
 
     // MARK: - Success Sheet
 
     private var successSheet: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: 18) {
             Spacer()
-
-            Image(systemName: "checkmark.seal.fill")
-                .font(.system(size: 64))
-                .foregroundStyle(
-                    LinearGradient(
-                        colors: [Theme.Colors.primary, Theme.Colors.primaryLight],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
-
+            Image(systemName: "checkmark")
+                .font(.system(size: 34, weight: .black))
+                .foregroundColor(.black)
+                .frame(width: 88, height: 88)
+                .background(JourneyVisual.lime, in: Circle())
+                .shadow(color: JourneyVisual.lime.opacity(0.45), radius: 20, y: 8)
             Text("marketplace.success_title".localized)
                 .font(.title2.bold())
-                .foregroundColor(Theme.Colors.textPrimary)
-
+                .foregroundColor(JourneyVisual.primaryText)
             Text("marketplace.success_subtitle".localized)
                 .font(.subheadline)
-                .foregroundColor(Theme.Colors.textSecondary)
+                .foregroundColor(JourneyVisual.secondaryText)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 32)
-
             Spacer()
-
             Button {
                 showSuccess = false
                 dismiss()
             } label: {
                 Text("common.ok".localized)
                     .font(.headline)
+                    .foregroundColor(.black)
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 14)
-                    .background(Theme.Colors.primary)
-                    .foregroundColor(Theme.Colors.textOnPrimary)
-                    .cornerRadius(14)
+                    .frame(height: 54)
+                    .background(JourneyVisual.lime, in: Capsule())
             }
             .padding(.horizontal, 24)
-            .padding(.bottom, 32)
+            .padding(.bottom, 28)
         }
+        .frame(maxWidth: .infinity)
+        .background(JourneyVisual.pageBackground)
         .presentationDetents([.medium])
     }
 
     // MARK: - Shared Components
 
     private var fieldBackground: some View {
-        RoundedRectangle(cornerRadius: 12)
-            .fill(colorScheme == .dark
-                  ? Color.white.opacity(0.06)
-                  : Color.black.opacity(0.03))
+        RoundedRectangle(cornerRadius: 14, style: .continuous)
+            .fill(colorScheme == .dark ? Color.white.opacity(0.06) : Color.black.opacity(0.035))
     }
 
-    private func formCard<Content: View>(@ViewBuilder content: () -> Content) -> some View {
-        VStack(alignment: .leading, spacing: 0) {
-            content()
-        }
-        .padding(16)
-        .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(Theme.Colors.adaptiveCard)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 16)
-                .stroke(Theme.Colors.adaptiveBorder, lineWidth: 0.5)
-        )
+    private func fieldBorder(_ field: FormField) -> some View {
+        RoundedRectangle(cornerRadius: 14, style: .continuous)
+            .stroke(focusedField == field ? JourneyVisual.accentStrong : Color.clear, lineWidth: 1.5)
+            .animation(.easeOut(duration: 0.15), value: focusedField)
     }
 
-    private func formLabel(_ text: String, icon: String, optional: Bool = false) -> some View {
-        HStack(spacing: 6) {
-            Image(systemName: icon)
-                .font(.system(size: 13, weight: .medium))
-                .foregroundColor(JourneyVisual.accentStrong)
+    private func fieldCaption(_ text: String, counter: String? = nil, warn: Bool = false) -> some View {
+        HStack {
             Text(text)
-                .font(.subheadline.bold())
-                .foregroundColor(Theme.Colors.textPrimary)
-            if optional {
-                Text("(\("marketplace.optional".localized))")
-                    .font(.caption)
-                    .foregroundColor(Theme.Colors.textTertiary)
+                .font(.system(size: 12, weight: .bold))
+                .foregroundColor(JourneyVisual.secondaryText)
+            Spacer()
+            if let counter {
+                Text(counter)
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundColor(warn ? Theme.Colors.error : JourneyVisual.secondaryText)
             }
         }
+    }
+
+    private func segment(_ title: String, icon: String?, selected: Bool, action: @escaping () -> Void) -> some View {
+        Button {
+            withAnimation(.easeInOut(duration: 0.2)) { action() }
+        } label: {
+            HStack(spacing: 6) {
+                if let icon { Image(systemName: icon).font(.system(size: 12, weight: .bold)) }
+                Text(title).font(.system(size: 13, weight: .semibold)).lineLimit(1).minimumScaleFactor(0.8)
+            }
+            .foregroundColor(selected ? .black : JourneyVisual.primaryText)
+            .frame(maxWidth: .infinity)
+            .frame(height: 42)
+            .background(selected ? JourneyVisual.lime : JourneyVisual.softSurface, in: Capsule())
+        }
+        .buttonStyle(ScaleButtonStyle(scaleAmount: 0.97, hapticStyle: .light))
+        .accessibilityAddTraits(selected ? .isSelected : [])
     }
 
     private func suggestedCategoryBadge(_ cat: ServiceCategory) -> some View {
@@ -788,59 +789,17 @@ struct CreateListingView: View {
                 categorySuggestionVisible = false
             }
         } label: {
-            HStack(spacing: 4) {
-                Image(systemName: "sparkle")
-                    .font(.system(size: 9, weight: .bold))
-                Image(systemName: cat.icon)
-                    .font(.system(size: 10))
-                Text(cat.displayName)
-                    .font(.system(size: 11, weight: .semibold))
+            HStack(spacing: 5) {
+                Image(systemName: "sparkle").font(.system(size: 9, weight: .bold))
+                Text("marketplace.create.suggested".localized(with: cat.displayName))
+                    .font(.system(size: 12, weight: .semibold))
             }
-            .padding(.horizontal, 10)
-            .padding(.vertical, 5)
-            .background(
-                Capsule()
-                    .fill(cat.color.opacity(0.15))
-            )
-            .overlay(
-                Capsule()
-                    .stroke(cat.color.opacity(0.3), lineWidth: 1)
-            )
-            .foregroundColor(cat.color)
+            .padding(.horizontal, 11)
+            .frame(height: 28)
+            .background(JourneyVisual.lime.opacity(0.35), in: Capsule())
+            .foregroundColor(JourneyVisual.primaryText)
         }
         .buttonStyle(.plain)
-    }
-
-    // MARK: - Canton Helpers
-
-    private func cantonDisplayName(_ code: String) -> String {
-        CountryCatalog.subdivisionName(
-            country: ResidenceCountry(rawValue: APIClient.countryCode) ?? .switzerland,
-            code: code
-        )
-    }
-
-    private func cantonFlag(_ code: String) -> some View {
-        Text(cantonEmoji(code))
-            .font(.system(size: 20))
-    }
-
-    private func cantonEmoji(_ code: String) -> String {
-        switch code {
-        case "all": return ResidenceCountry(rawValue: APIClient.countryCode)?.flag ?? "🌍"
-        case "ZH": return "🏙️"
-        case "BE": return "🐻"
-        case "LU": return "⛰️"
-        case "GE": return "⛲"
-        case "BS": return "🏛️"
-        case "TI": return "🌴"
-        case "VD": return "🍇"
-        case "AG": return "🏰"
-        case "SG": return "⭐"
-        case "GR": return "🦌"
-        case "VS": return "🏔️"
-        default: return "📍"
-        }
     }
 
     // MARK: - Auto-Suggest Category
@@ -1085,24 +1044,6 @@ private struct CantonPickerSheet: View {
             )
         }
         .buttonStyle(.plain)
-    }
-
-    private func cantonEmoji(_ code: String) -> String {
-        switch code {
-        case "all": return "🇨🇭"
-        case "ZH": return "🏙️"
-        case "BE": return "🐻"
-        case "LU": return "⛰️"
-        case "GE": return "⛲"
-        case "BS": return "🏛️"
-        case "TI": return "🌴"
-        case "VD": return "🍇"
-        case "AG": return "🏰"
-        case "SG": return "⭐"
-        case "GR": return "🦌"
-        case "VS": return "🏔️"
-        default: return "📍"
-        }
     }
 }
 

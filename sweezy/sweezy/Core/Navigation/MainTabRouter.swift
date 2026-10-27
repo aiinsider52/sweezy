@@ -8,12 +8,14 @@ final class MainTabRouter: ObservableObject {
     @Published private(set) var requestedDirectoryRouteID = UUID()
     @Published private(set) var activeDeepLink: DeepLink?
 
+    static let settingsTab = 5
+
     func select(tab: Int) {
-        selectedTab = min(max(tab, 0), 4)
+        selectedTab = min(max(tab, 0), Self.settingsTab)
     }
 
     func open(_ payload: SwitchTabPayload) {
-        selectedTab = min(max(payload.tab, 0), 4)
+        selectedTab = min(max(payload.tab, 0), Self.settingsTab)
         guard payload.tab == 1 else { return }
         requestedDirectorySection = payload.section
         requestedDirectoryRouteID = payload.routeID

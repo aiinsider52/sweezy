@@ -231,6 +231,12 @@ class ContentService: ContentServiceProtocol {
     // MARK: - Private Loading Methods
     
     private func loadGuides() async {
+        // Show the cached or bundled catalog right away; a cold backend can take a minute to answer.
+        if guides.isEmpty, let local = try? loadCountryCacheOrBundle("guides.json", type: [Guide].self) {
+            guides = local
+            if countryCode == "CH" { await loadAdditionalGuides() }
+            guides = guides.filter(safetyPolicy.allows)
+        }
         do {
             // 1) Пробуем забрать всі гайды з бекенду (публічний ендпоінт /api/v1/guides).
             //    Якщо є access_token у Keychain — він буде доданий автоматично як Bearer.
@@ -282,6 +288,10 @@ class ContentService: ContentServiceProtocol {
     }
     
     private func loadChecklists() async {
+        if checklists.isEmpty, let local = try? loadCountryCacheOrBundle("checklists.json", type: [Checklist].self) {
+            checklists = local
+            if countryCode == "CH" { await loadAdditionalChecklists() }
+        }
         do {
             do {
                 let remote = try await APIClient.fetchChecklists(language: preferredLanguage)

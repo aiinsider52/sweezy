@@ -27,7 +27,6 @@ struct MainTabView: View {
     @State private var showPrivacy = false
     @State private var showLanguage = false
     @State private var showWhatsNew = false
-    @State private var showSettings = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     @ViewBuilder
@@ -47,6 +46,13 @@ struct MainTabView: View {
         case 4:
             FriendNetworkView(showsDismissButton: false)
                 .environmentObject(appContainer)
+                .environmentObject(lockManager)
+                .environmentObject(sessionManager)
+                .featureOnboarding(.people)
+        case MainTabRouter.settingsTab:
+            SettingsView()
+                .environmentObject(appContainer)
+                .environmentObject(themeManager)
                 .environmentObject(lockManager)
                 .environmentObject(sessionManager)
         default:
@@ -121,13 +127,6 @@ struct MainTabView: View {
         .sheet(isPresented: $showPrivacy) { PrivacyPolicyView() }
         .sheet(isPresented: $showLanguage) { LanguageSelectionSheet().environmentObject(appContainer) }
         .sheet(isPresented: $showWhatsNew) { WhatsNewView() }
-        .sheet(isPresented: $showSettings) {
-            SettingsView()
-                .environmentObject(appContainer)
-                .environmentObject(themeManager)
-                .environmentObject(lockManager)
-                .environmentObject(sessionManager)
-        }
     }
 
     @MainActor
@@ -155,7 +154,7 @@ struct MainTabView: View {
         case .news:
             deepLinkedNews = appContainer.contentService.latestNews(limit: 1, language: appContainer.currentLocale.language.languageCode?.identifier).first
         case .cvBuilder: showCVBuilder = true
-        case .settings: showSettings = true
+        case .settings: break
         case .profile: showProfile = true
         case .privacy: showPrivacy = true
         case .language: showLanguage = true

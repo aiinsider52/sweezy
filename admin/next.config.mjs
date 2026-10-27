@@ -7,7 +7,7 @@ const nextConfig = {
   async headers() {
     const apiOrigin = process.env.NEXT_PUBLIC_API_URL
       ? new URL(process.env.NEXT_PUBLIC_API_URL).origin
-      : 'https://sweezy-9xyk.onrender.com'
+      : 'https://sweezy-api.onrender.com'
     const contentSecurityPolicy = [
       "default-src 'self'",
       "base-uri 'self'",

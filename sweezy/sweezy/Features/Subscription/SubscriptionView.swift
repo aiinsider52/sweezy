@@ -474,10 +474,10 @@ struct SubscriptionView: View {
             ? AnyLayout(VStackLayout(spacing: 8))
             : AnyLayout(HStackLayout(spacing: 20))
         return layout {
-            Link(destination: URL(string: "https://sweezy-9xyk.onrender.com/legal/terms")!) {
+            Link(destination: URL(string: "https://sweezy-api.onrender.com/legal/terms")!) {
                 Text("Умови".localized).font(.subheadline).frame(minHeight: 44)
             }
-            Link(destination: URL(string: "https://sweezy-9xyk.onrender.com/legal/privacy")!) {
+            Link(destination: URL(string: "https://sweezy-api.onrender.com/legal/privacy")!) {
                 Text("Конфіденційність".localized).font(.subheadline)
                     .lineLimit(1).minimumScaleFactor(0.8).frame(minHeight: 44)
             }

@@ -1018,7 +1018,7 @@ Do not simply “turn back on” old endpoints. The codebase is too drifted for 
 Custom FastAPI backend under `backend/app`, versioned under `/api/v1`.
 
 Default production URL from iOS:
-- `https://sweezy-9xyk.onrender.com`
+- `https://sweezy-api.onrender.com`
 
 ## Which API services exist
 Backend routers include:

@@ -390,7 +390,7 @@ function InfoBlock({ label, value }: { label: string; value: string }) {
 
 function resolveMediaUrl(rawUrl: string) {
   if (/^https?:\/\//i.test(rawUrl)) return rawUrl
-  const apiBase = process.env.NEXT_PUBLIC_API_URL || "https://sweezy-9xyk.onrender.com/api/v1"
+  const apiBase = process.env.NEXT_PUBLIC_API_URL || "https://sweezy-api.onrender.com/api/v1"
   const origin = apiBase.replace(/\/api\/v1\/?$/, "")
   return rawUrl.startsWith("/") ? `${origin}${rawUrl}` : `${origin}/${rawUrl}`
 }

@@ -1,11 +1,11 @@
 import Card from '@/components/Card'
 
 function apiOrigin(): string {
-  const base = process.env.NEXT_PUBLIC_API_URL || 'https://sweezy-9xyk.onrender.com/api/v1'
+  const base = process.env.NEXT_PUBLIC_API_URL || 'https://sweezy-api.onrender.com/api/v1'
   try {
     return new URL(base).origin
   } catch {
-    return 'https://sweezy-9xyk.onrender.com'
+    return 'https://sweezy-api.onrender.com'
   }
 }
 

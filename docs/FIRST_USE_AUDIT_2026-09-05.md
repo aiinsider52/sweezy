@@ -40,7 +40,7 @@ SWEEEZY уже содержит полезный продукт: справоч�
 
 ### F01. Сервер приложения недоступен — S4
 
-**Подтверждено HTTP-проверками.** Сервер `https://sweezy-9xyk.onrender.com` отвечает 503. Тело: `Service Suspended`; заголовок: `x-render-routing: suspend`. Повторная проверка точного URL гайдов с `country_code=CH&language=uk` также дала 503. Причина приостановки неизвестна.
+**Подтверждено HTTP-проверками.** Сервер `https://sweezy-api.onrender.com` отвечает 503. Тело: `Service Suspended`; заголовок: `x-render-routing: suspend`. Повторная проверка точного URL гайдов с `country_code=CH&language=uk` также дала 503. Причина приостановки неизвестна.
 
 В собранном Info.plist значение API_BASE_URL пустое; используется адрес по умолчанию из `sweezy/sweezy/Core/Networking/APIClient.swift:28`. Поэтому проверка относится к backend этой сборки, а не случайному старому адресу.
 

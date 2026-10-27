@@ -37,7 +37,7 @@ class RSSImporter:
   ) -> Dict[str, int]:
     validate_public_http_url(feed_url)
     client = httpx.Client(timeout=10, follow_redirects=False, headers={
-      "User-Agent": "SweezyRSS/1.0 (+https://sweezy-9xyk.onrender.com)"
+      "User-Agent": "SweezyRSS/1.0 (+https://sweezy-api.onrender.com)"
     })
     text = RSSImporter._fetch_text(client, feed_url)
     parsed = feedparser.parse(text or feed_url)

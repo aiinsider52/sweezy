@@ -5,7 +5,7 @@ import { cookies } from "next/headers"
 export async function DELETE(_req: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   const token = (await cookies()).get("access_token")?.value || ""
-  const base = process.env.NEXT_PUBLIC_API_URL || "https://sweezy-9xyk.onrender.com/api/v1"
+  const base = process.env.NEXT_PUBLIC_API_URL || "https://sweezy-api.onrender.com/api/v1"
   const res = await fetch(`${base}/admin/marketplace/${params.id}`, {
     method: "DELETE",
     headers: {

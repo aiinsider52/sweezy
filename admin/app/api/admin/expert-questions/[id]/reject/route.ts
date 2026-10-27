@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { cookies } from "next/headers"
 
-const BASE = process.env.NEXT_PUBLIC_API_URL || "https://sweezy-9xyk.onrender.com/api/v1"
+const BASE = process.env.NEXT_PUBLIC_API_URL || "https://sweezy-api.onrender.com/api/v1"
 
 export async function PATCH(_req: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;

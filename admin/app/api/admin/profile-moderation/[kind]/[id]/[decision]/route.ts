@@ -8,7 +8,7 @@ export async function PATCH(req: NextRequest, props: { params: Promise<{ kind: s
     return NextResponse.json({ detail: "Invalid moderation action" }, { status: 400 })
   }
   const token = (await cookies()).get("access_token")?.value || ""
-  const base = process.env.NEXT_PUBLIC_API_URL || "https://sweezy-9xyk.onrender.com/api/v1"
+  const base = process.env.NEXT_PUBLIC_API_URL || "https://sweezy-api.onrender.com/api/v1"
   const body = await req.text()
   const res = await fetch(`${base}/admin/profile-moderation/${kind}/${id}/${decision}`, {
     method: "PATCH",

@@ -195,7 +195,7 @@ struct JourneyMarketplaceView: View {
     private var marketHero: some View {
         VStack(alignment: .leading, spacing: 0) {
             ZStack(alignment: .topLeading) {
-                CityScene(scene: "market", height: 300)
+                CityScene(scene: selectedMode == .businesses ? "business" : "market", height: 300)
 
                 LinearGradient(
                     stops: [
@@ -355,6 +355,7 @@ struct JourneyMarketplaceView: View {
                     title: "journey.marketplace.services.empty_title".localized,
                     subtitle: "journey.marketplace.services.empty_subtitle".localized,
                     actionTitle: "journey.marketplace.services.add_action".localized,
+                    spot: .noResults,
                     action: handleCreateTap
                 )
             } else {
@@ -615,8 +616,6 @@ struct JourneyMarketplaceView: View {
         case .events: return "journey.marketplace.hero.events".localized
         }
     }
-
-    private var heroImageName: String { "city-scene-market" }
 
     private var createAccessibilityLabel: String {
         switch selectedMode {
@@ -1573,6 +1572,7 @@ private struct MarketEmptyCard: View {
     let subtitle: String
     let actionTitle: String
     var story: String?
+    var spot: EmptyStateSpot?
     let action: () -> Void
 
     var body: some View {
@@ -1581,6 +1581,7 @@ private struct MarketEmptyCard: View {
             subtitle: subtitle,
             actionTitle: actionTitle,
             story: story,
+            spot: spot,
             action: action
         )
     }

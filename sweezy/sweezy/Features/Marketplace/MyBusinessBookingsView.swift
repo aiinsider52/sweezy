@@ -46,7 +46,7 @@ struct MyBusinessBookingsView: View {
 
     private var emptyState: some View {
         VStack(spacing: 13) {
-            Image(systemName: "calendar.badge.plus").font(.system(size: 40)).foregroundStyle(Theme.Colors.textPrimary)
+            Image(EmptyStateSpot.noBookings.asset).resizable().scaledToFit().frame(width: 128, height: 128).accessibilityHidden(true)
             Text("Записів поки немає".localized).font(.title3.bold()).foregroundStyle(JourneyVisual.primaryText)
             Text("Відкрий послугу перевіреного бізнесу та обери вільний час.".localized).font(.subheadline).foregroundStyle(JourneyVisual.secondaryText).multilineTextAlignment(.center)
         }

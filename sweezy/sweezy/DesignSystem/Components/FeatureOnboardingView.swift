@@ -44,9 +44,9 @@ struct FeatureOnboardingView: View {
 
     private var sceneName: String {
         let name = content.feature.onboardingBackgroundImageName
-        if name.contains("market") { return "city-scene-market" }
-        if name.contains("community") { return "city-scene-people" }
-        return "city-scene-directory"
+        if name.contains("market") { return CityArtwork.name("market") }
+        if name.contains("community") { return CityArtwork.name("people") }
+        return CityArtwork.name("directory")
     }
 
     private var onboardingBackground: some View {

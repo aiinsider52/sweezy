@@ -27,6 +27,8 @@ enum BusinessCategory: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
     var title: String { "business.category.\(rawValue)".localized }
+    /// Illustrated cover shown until the owner uploads their own.
+    var coverAsset: String { "business-cover-\(rawValue)" }
     var icon: String {
         switch self {
         case .beauty: return "scissors"

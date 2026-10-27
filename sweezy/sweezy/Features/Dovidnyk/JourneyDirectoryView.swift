@@ -12,13 +12,13 @@ struct JourneyDirectoryView: View {
 
     private var directoryHeroAsset: String {
         if selectedWorkspace == .tasks { return "story-documents" }
-        guard selectedWorkspace == .guides else { return "city-scene-directory" }
+        guard selectedWorkspace == .guides else { return CityArtwork.name("directory") }
         switch selectedCategory {
         case .housing: return "story-housing"
         case .documents, .legal: return "story-documents"
         case .work, .finance, .banking: return "story-jobs"
         case .education, .integration: return "story-language"
-        default: return "city-scene-directory"
+        default: return CityArtwork.name("directory")
         }
     }
     @State private var selectedGuide: Guide?
@@ -253,7 +253,8 @@ struct JourneyDirectoryView: View {
             } else if filteredGuides.isEmpty {
                 MascotEmptyState(
                     title: "journey.directory.no_guides.title".localized,
-                    subtitle: "journey.directory.no_guides.subtitle".localized
+                    subtitle: "journey.directory.no_guides.subtitle".localized,
+                    spot: .noResults
                 )
             } else {
                 HStack {
@@ -1460,7 +1461,7 @@ private struct JourneyGuideDeck: View {
                 Button { action(guide) } label: {
                     JourneyGuideCompactRow(
                         guide: guide,
-                        imageName: imageNames.indices.contains(index) ? imageNames[index] : "city-scene-directory")
+                        imageName: imageNames.indices.contains(index) ? imageNames[index] : CityArtwork.name("directory"))
                 }
                 .buttonStyle(.plain)
             }

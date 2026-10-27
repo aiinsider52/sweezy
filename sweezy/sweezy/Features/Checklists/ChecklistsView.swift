@@ -400,7 +400,8 @@ struct ChecklistsView: View {
     private var emptyState: some View {
         MascotEmptyState(
             title: "Немає чек-листів".localized,
-            subtitle: "Спробуйте змінити фільтр категорії".localized
+            subtitle: "Спробуйте змінити фільтр категорії".localized,
+            spot: .noResults
         )
         .padding(.vertical, 20)
     }

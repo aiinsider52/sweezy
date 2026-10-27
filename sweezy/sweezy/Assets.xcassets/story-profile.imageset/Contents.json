@@ -1,12 +1,12 @@
 {
-  "images": [
+  "images" : [
     {
-      "filename": "scene.jpg",
-      "idiom": "universal"
+      "filename" : "story-profile.jpg",
+      "idiom" : "universal"
     }
   ],
-  "info": {
-    "author": "xcode",
-    "version": 1
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
   }
 }

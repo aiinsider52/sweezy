@@ -198,11 +198,13 @@ struct ChatInboxView: View {
     private var emptyState: some View {
         VStack(spacing: 18) {
             if showArchived {
-                Image(systemName: "archivebox")
-                    .font(.system(size: 42, weight: .semibold))
-                    .foregroundColor(JourneyVisual.accentStrong)
+                Image(EmptyStateSpot.emptyInbox.asset)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 132, height: 132)
+                    .accessibilityHidden(true)
             } else {
-                // Sweezy on a bench smiling at a new message: the inbox is waiting, not broken.
+                // Someone on a lakeside bench smiling at a new message: the inbox is waiting, not broken.
                 StoryScene(name: "chat", height: 210)
             }
             Text(showArchived ? "chat.inbox.empty_archive.title".localized : "chat.inbox.empty.title".localized)

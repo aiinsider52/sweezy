@@ -1,5 +1,21 @@
 import SwiftUI
 
+/// Object illustrations for empty states, so the mascot is kept for the few moments that matter.
+enum EmptyStateSpot: String {
+    case noResults = "no-results"
+    case offline
+    case emptyInbox = "empty-inbox"
+    case noBookings = "no-bookings"
+    case noOffers = "no-offers"
+    case noReviews = "no-reviews"
+    case club
+    case sent
+    case locked
+    case savedEmpty = "saved-empty"
+
+    var asset: String { "spot-\(rawValue)" }
+}
+
 /// Shared empty state: mascot, one clear sentence, one action.
 /// Used instead of bare "nothing here" text so empty screens still feel part of the app.
 struct MascotEmptyState: View {
@@ -10,6 +26,8 @@ struct MascotEmptyState: View {
     var actionIdentifier: String?
     /// `story-<name>` scene to show instead of the standalone mascot, when the screen has one.
     var story: String?
+    /// Object illustration shown instead of the mascot.
+    var spot: EmptyStateSpot?
     var action: (() -> Void)?
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -20,6 +38,13 @@ struct MascotEmptyState: View {
             if let story {
                 StoryScene(name: story, height: 168, cornerRadius: 20)
                     .padding(.bottom, 4)
+            } else if let spot {
+                Image(spot.asset)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 136, height: 136)
+                    .idleFloat(enabled: !reduceMotion)
+                    .accessibilityHidden(true)
             } else {
                 ZStack {
                     Circle()

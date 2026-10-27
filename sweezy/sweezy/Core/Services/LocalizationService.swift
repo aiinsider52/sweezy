@@ -9,6 +9,27 @@ import Foundation
 import Combine
 import SwiftUI
 
+/// The only languages the app ships. Every stored or incoming identifier ("uk_UA", "de-CH", "")
+/// is reduced to one of them, so strings, content and formatting can never resolve to different
+/// languages and nothing silently falls back to the device language.
+enum AppLanguage: String, CaseIterable {
+    case uk, de, en
+
+    init(identifier: String?) {
+        let code = identifier?
+            .split(whereSeparator: { $0 == "_" || $0 == "-" })
+            .first
+            .map { String($0).lowercased() }
+        self = AppLanguage(rawValue: code ?? "") ?? .uk
+    }
+
+    static var current: AppLanguage {
+        AppLanguage(identifier: UserDefaults.standard.string(forKey: "selected_locale"))
+    }
+
+    var locale: Locale { Locale(identifier: rawValue) }
+}
+
 /// Protocol for localization services
 @MainActor
 protocol LocalizationServiceProtocol: ObservableObject {
@@ -36,16 +57,18 @@ class LocalizationService: LocalizationServiceProtocol {
     private var bundle: Bundle
     
     init() {
-        let savedLocale = UserDefaults.standard.string(forKey: "selected_locale") ?? "uk"
-        self.currentLocale = Locale(identifier: savedLocale)
+        self.currentLocale = AppLanguage.current.locale
         self.bundle = Bundle.main
-        
+
         updateBundle()
     }
-    
+
     func setLocale(_ locale: Locale) {
-        currentLocale = locale
-        UserDefaults.standard.set(locale.identifier, forKey: "selected_locale")
+        let language = AppLanguage(identifier: locale.identifier)
+        currentLocale = language.locale
+        UserDefaults.standard.set(language.rawValue, forKey: "selected_locale")
+        // System-provided text (permission prompts, built-in controls) follows the app language too.
+        UserDefaults.standard.set([language.rawValue], forKey: "AppleLanguages")
         updateBundle()
     }
     
@@ -66,17 +89,9 @@ class LocalizationService: LocalizationServiceProtocol {
     }
     
     private func updateBundle() {
-        let languageCode = currentLocale.identifier
-        
-        if let path = Bundle.main.path(forResource: languageCode, ofType: "lproj"),
-           let bundle = Bundle(path: path) {
-            self.bundle = bundle
-            LocalizationBundleProvider.shared.bundle = bundle
-        } else {
-            // Fallback to main bundle if language not found
-            self.bundle = Bundle.main
-            LocalizationBundleProvider.shared.bundle = Bundle.main
-        }
+        let bundle = LocalizationBundleProvider.bundle(for: AppLanguage(identifier: currentLocale.identifier))
+        self.bundle = bundle
+        LocalizationBundleProvider.shared.bundle = bundle
     }
 }
 
@@ -279,10 +294,39 @@ struct LocalizationKeys {
 
 final class LocalizationBundleProvider {
     static let shared = LocalizationBundleProvider()
-    var bundle: Bundle = .main
+    var bundle: Bundle = LocalizationBundleProvider.bundle(for: .current)
+
+    /// The `.lproj` bundle of an app language. Never `Bundle.main`, which would follow the device language.
+    static func bundle(for language: AppLanguage) -> Bundle {
+        for code in [language.rawValue, AppLanguage.uk.rawValue] {
+            if let path = Bundle.main.path(forResource: code, ofType: "lproj"), let bundle = Bundle(path: path) {
+                return bundle
+            }
+        }
+        return .main
+    }
+
+    /// Stored text (plan tasks, document lists) may have been saved already translated into the
+    /// language that was active at the time. Map any shipped translation back to its key.
+    static let keysByTranslation: [String: String] = {
+        var result: [String: String] = [:]
+        for language in AppLanguage.allCases {
+            guard let path = Bundle.main.path(forResource: "Localizable", ofType: "strings", inDirectory: nil, forLocalization: language.rawValue),
+                  let table = NSDictionary(contentsOfFile: path) as? [String: String] else { continue }
+            for (key, value) in table where result[value] == nil {
+                result[value] = key
+            }
+        }
+        return result
+    }()
 }
 
 extension String {
+    /// The localization key for text that may already be a translation; unknown text is returned unchanged.
+    var localizationKey: String {
+        LocalizationBundleProvider.keysByTranslation[self] ?? self
+    }
+
     var localized: String {
         let bundle = LocalizationBundleProvider.shared.bundle
         return bundle.localizedString(forKey: self, value: self, table: nil)

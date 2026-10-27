@@ -105,6 +105,7 @@ struct Appointment: Codable, Identifiable, Hashable {
     /// Formatted date string
     var formattedDate: String {
         let formatter = DateFormatter()
+        formatter.locale = AppLanguage.current.locale
         formatter.dateStyle = .medium
         formatter.timeStyle = .short
         return formatter.string(from: dateTime)

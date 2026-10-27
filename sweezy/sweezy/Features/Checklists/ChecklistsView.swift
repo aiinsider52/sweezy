@@ -28,11 +28,7 @@ struct ChecklistsView: View {
     
     private var allChecklists: [Checklist] {
         let locale = appContainer.currentLocale.identifier
-        let localized = appContainer.contentService.getChecklistsForLocale(locale)
-        if !localized.isEmpty {
-            return localized
-        }
-        return appContainer.contentService.checklists.sorted { $0.priority > $1.priority }
+        return appContainer.contentService.getChecklistsForLocale(locale)
     }
     
     private var filteredChecklists: [Checklist] {

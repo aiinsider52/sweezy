@@ -442,7 +442,7 @@ struct OpeningHours: Codable, Hashable, Equatable {
     
     var weekdayName: String {
         let formatter = DateFormatter()
-        formatter.locale = Locale.current
+        formatter.locale = AppLanguage.current.locale
         return formatter.weekdaySymbols[weekday - 1]
     }
 }

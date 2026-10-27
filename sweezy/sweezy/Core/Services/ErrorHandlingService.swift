@@ -48,7 +48,7 @@ enum AppError: LocalizedError {
         case .cacheWriteFailed:
             return "errors.recovery.free_space".localized
         case .missingLocalization:
-            return "Please update the app to the latest version"
+            return "errors.update_required".localized
         }
     }
 }

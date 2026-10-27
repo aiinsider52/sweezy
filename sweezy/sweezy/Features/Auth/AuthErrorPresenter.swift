@@ -38,7 +38,7 @@ enum AuthErrorPresenter {
             return "auth.error.rate_limited".localized
         }
 
-        let rawMessage = nsError.localizedDescription.lowercased()
+        let rawMessage = ((nsError.userInfo["api.detail"] as? String) ?? nsError.localizedDescription).lowercased()
         if rawMessage.contains("invalid credentials") {
             return "auth.error.invalid_credentials".localized
         }

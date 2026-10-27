@@ -55,7 +55,7 @@ struct NewsDetailView: View, Identifiable {
     
     private func formattedDate(_ date: Date) -> String {
         let df = DateFormatter()
-        df.locale = Locale.current
+        df.locale = AppLanguage.current.locale
         df.dateStyle = .long
         return df.string(from: date)
     }

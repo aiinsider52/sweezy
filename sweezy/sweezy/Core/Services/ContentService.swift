@@ -56,7 +56,7 @@ class ContentService: ContentServiceProtocol {
     private let decoder = JSONDecoder()
     private let encoder = JSONEncoder()
     // Preferred language for localized content; defaults to Ukrainian until user explicitly changes язык
-    private var preferredLanguage: String = (UserDefaults.standard.string(forKey: "selected_locale") ?? "uk")
+    private var preferredLanguage: String = AppLanguage.current.rawValue
     private var countryCode: String = APIClient.countryCode
     // Флаг: guides были успешно загружены з бекенду (Render). Если true — не перезаписываем их локальними JSON.
     private var didLoadRemoteGuides: Bool = false
@@ -107,6 +107,7 @@ class ContentService: ContentServiceProtocol {
     
     private func setupDecoder() {
         let formatter = DateFormatter()
+        formatter.locale = AppLanguage.current.locale
         formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss'Z'"
         formatter.timeZone = TimeZone(abbreviation: "UTC")
         decoder.dateDecodingStrategy = .formatted(formatter)
@@ -428,6 +429,7 @@ class ContentService: ContentServiceProtocol {
                                 let iso = ISO8601DateFormatter()
                                 if let d = iso.date(from: n.published_at) { return d }
                                 let f = DateFormatter()
+                                f.locale = AppLanguage.current.locale
                                 f.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
                                 f.timeZone = TimeZone(abbreviation: "UTC")
                                 return f.date(from: n.published_at) ?? Date()
@@ -679,68 +681,30 @@ class ContentService: ContentServiceProtocol {
     
     // MARK: - Multi-language Content Access
     
-    /// Get guides for a specific locale.
-    ///
-    /// Returns guides in the following priority:
-    /// 1. Exact language match (e.g., "en" for English)
-    /// 2. Fallback to Ukrainian ("uk") if no translation exists
-    /// 3. Any guide without language specified
-    ///
-    /// Each unique guide topic is shown only once in the best available language.
+    /// Guides in exactly the requested language. There is deliberately no fallback to another
+    /// language: a screen in German must never list Ukrainian or English articles.
     func getGuidesForLocale(_ locale: String) -> [Guide] {
-        let normalizedLocale = normalizeLocale(locale)
-        
-        // First, try to get guides matching the requested language
-        let matchingGuides = guides.filter { guide in
-            // Bundled guides without a language are the original Ukrainian set.
-            let lang = guide.language?.lowercased() ?? "uk"
-            return lang == normalizedLocale || guide.tags.contains("lang:\(normalizedLocale)")
-        }
-        
-        if !matchingGuides.isEmpty {
-            return matchingGuides.sorted { lhs, rhs in
+        let language = normalizeLocale(locale)
+        return guides
+            .filter { guide in
+                // Bundled guides without a language are the original Ukrainian set.
+                let lang = guide.language?.lowercased() ?? "uk"
+                return lang == language || guide.tags.contains("lang:\(language)")
+            }
+            .sorted { lhs, rhs in
                 if lhs.priority != rhs.priority { return lhs.priority > rhs.priority }
                 return lhs.lastUpdated > rhs.lastUpdated
             }
-        }
-        
-        // Fallback to Ukrainian if no exact match
-        let ukrainianGuides = guides.filter { guide in
-            guard let lang = guide.language?.lowercased() else { return true } // nil = Ukrainian
-            return lang == "uk" || guide.tags.contains("lang:uk")
-        }
-        
-        if !ukrainianGuides.isEmpty {
-            return ukrainianGuides.sorted { lhs, rhs in
-                if lhs.priority != rhs.priority { return lhs.priority > rhs.priority }
-                return lhs.lastUpdated > rhs.lastUpdated
-            }
-        }
-        
-        // Ultimate fallback: return all guides sorted by priority
-        return guides.sorted { lhs, rhs in
-            if lhs.priority != rhs.priority { return lhs.priority > rhs.priority }
-            return lhs.lastUpdated > rhs.lastUpdated
-        }
     }
-    
-    /// Get checklists for a specific locale with fallback to Ukrainian
+
+    /// Checklists in exactly the requested language (no cross-language fallback).
     func getChecklistsForLocale(_ locale: String) -> [Checklist] {
-        let normalizedLocale = normalizeLocale(locale)
-        
-        let exactMatches = checklists.filter { $0.language == normalizedLocale }
-        if !exactMatches.isEmpty {
-            return exactMatches.sorted { $0.priority > $1.priority }
-        }
-        
-        let ukrainianMatches = checklists.filter { $0.language == "uk" || $0.language == nil }
-        if !ukrainianMatches.isEmpty {
-            return ukrainianMatches.sorted { $0.priority > $1.priority }
-        }
-        
-        return checklists.sorted { $0.priority > $1.priority }
+        let language = normalizeLocale(locale)
+        return checklists
+            .filter { ($0.language ?? "uk") == language }
+            .sorted { $0.priority > $1.priority }
     }
-    
+
     /// Get templates for a specific locale with fallback
     func getTemplatesForLocale(_ locale: String) -> [DocumentTemplate] {
         let normalizedLocale = normalizeLocale(locale)
@@ -760,32 +724,17 @@ class ContentService: ContentServiceProtocol {
         return templates
     }
     
-    /// Get benefit rules for a specific locale with fallback
+    /// Benefit rules in exactly the requested language (no cross-language fallback).
     func getBenefitRulesForLocale(_ locale: String) -> [BenefitRule] {
-        let normalizedLocale = normalizeLocale(locale)
-        
-        let exactMatches = benefitRules.filter { $0.language == normalizedLocale }
-        if !exactMatches.isEmpty {
-            return exactMatches
-        }
-        
-        let ukrainianMatches = benefitRules.filter { $0.language == "uk" || $0.language == nil }
-        if !ukrainianMatches.isEmpty {
-            return ukrainianMatches
-        }
-        
-        return benefitRules
+        let language = normalizeLocale(locale)
+        return benefitRules.filter { ($0.language ?? "uk") == language }
     }
-    
+
     // MARK: - Helpers
     
     /// Normalize locale code (e.g., "en_US" -> "en", "ru-RU" -> "ru")
     private func normalizeLocale(_ locale: String) -> String {
-        let components = locale.split(separator: "_")
-        if let first = components.first {
-            return String(first).lowercased()
-        }
-        return locale.lowercased()
+        AppLanguage(identifier: locale).rawValue
     }
 
     private static func parseBackendDate(_ raw: String?) -> Date? {

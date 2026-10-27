@@ -359,7 +359,7 @@ struct ProfessionalNetworkView: View {
     }
 
     private var editorialHeadline: some View {
-        Text("Знайди людину,\nяка \(Text("прискорить\nтвій бізнес").foregroundColor(Theme.Colors.textPrimary))")
+        (Text("network.headline.lead".localized) + Text("network.headline.accent".localized).foregroundColor(Theme.Colors.textPrimary))
         .foregroundColor(JourneyVisual.primaryText)
         .font(.system(size: 29, weight: .bold, design: .default))
         .tracking(-0.6)

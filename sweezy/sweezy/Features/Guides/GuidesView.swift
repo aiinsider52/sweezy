@@ -134,7 +134,7 @@ struct GuidesView: View {
     private var audienceChips: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 10) {
-                audienceChip(nil, title: "All stages")
+                audienceChip(nil, title: "guides.audience.all".localized)
                 ForEach(GuideAudienceStage.allCases) { stage in
                     audienceChip(stage, title: stage.title)
                 }

@@ -166,8 +166,7 @@ class AppContainer: ObservableObject {
         // We intentionally do NOT follow system language so that:
         // - First launch: все контенты и UI будут українською
         // - Only after explicit language selection in onboarding мы змінюємо мову
-        let savedLocale = UserDefaults.standard.string(forKey: "selected_locale") ?? "uk"
-        self.currentLocale = Locale(identifier: savedLocale)
+        self.currentLocale = AppLanguage.current.locale
         // Keep localization service in sync with the same initial locale
         self.localizationService.setLocale(self.currentLocale)
         
@@ -205,7 +204,6 @@ class AppContainer: ObservableObject {
             .dropFirst() // Skip initial value
             .sink { [weak self] locale in
                 guard let self else { return }
-                UserDefaults.standard.set(locale.identifier, forKey: "selected_locale")
                 self.localizationService.setLocale(locale)
                 guard self.isOnboardingCompleted else { return }
                 Task { @MainActor in
@@ -265,14 +263,16 @@ class AppContainer: ObservableObject {
     }
     
     func updateLocale(_ locale: Locale) {
-        guard currentLocale.identifier != locale.identifier else { return }
-        currentLocale = locale
+        let normalized = AppLanguage(identifier: locale.identifier).locale
+        guard currentLocale.identifier != normalized.identifier else { return }
+        currentLocale = normalized
     }
 
     private func configureCountryScope(_ profile: UserProfile?) {
         let country = profile?.country ?? .switzerland
         let subdivision = profile?.administrativeAreaCode ?? country.defaultSubdivisionCode
-        let language = profile?.preferredLanguage ?? currentLocale.identifier
+        // The app language is the single source of truth; a profile synced from another device never overrides it.
+        let language = currentLocale.identifier
         let previousCountry = APIClient.countryCode
         APIClient.configureCountry(country: country.rawValue, subdivision: subdivision, language: language)
         _contentService?.configureCountry(country.rawValue)

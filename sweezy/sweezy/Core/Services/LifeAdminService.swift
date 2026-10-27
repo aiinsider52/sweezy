@@ -89,6 +89,9 @@ struct ReadinessDocument: Codable, Identifiable, Hashable {
     var expiryDate: Date?
 
     var sourceURL: URL? { URL(string: sourceURLString) }
+    /// Stored already translated; shown in the current app language.
+    var displayTitle: String { title.localizationKey.localized }
+    var displayRequiredFor: String { requiredFor.localizationKey.localized }
 
     var status: ReadinessDocumentStatus {
         guard isReady else { return .missing }
@@ -216,7 +219,7 @@ final class LifeAdminService: ObservableObject {
         switch country {
         case .switzerland:
             add(id: countryID("registration.municipality", "registration"), title: "Реєстрація у громаді".localized, detail: "Перевір термін реєстрації у своєму кантоні та громаді.".localized, date: calendar.date(byAdding: .day, value: 14, to: arrival), category: .registration, sourceTitle: "ch.ch", sourceURL: "https://www.ch.ch/en/foreign-nationals-in-switzerland/entry-and-stay-in-switzerland/")
-            add(id: countryID("insurance.health", "insurance"), title: "Оформити медичне страхування".localized, detail: "Базове страхування зазвичай потрібно оформити протягом трьох місяців після переїзду.".localized, date: calendar.date(byAdding: .month, value: 3, to: arrival), category: .insurance, sourceTitle: "Federal Office of Public Health", sourceURL: "https://www.bag.admin.ch/bag/en/home/versicherungen/krankenversicherung.html")
+            add(id: countryID("insurance.health", "insurance"), title: "Оформити медичне страхування".localized, detail: "Базове страхування зазвичай потрібно оформити протягом трьох місяців після переїзду.".localized, date: calendar.date(byAdding: .month, value: 3, to: arrival), category: .insurance, sourceTitle: "life.source.foph".localized, sourceURL: "https://www.bag.admin.ch/bag/en/home/versicherungen/krankenversicherung.html")
         case .germany:
             add(id: "\(prefix).registration", title: "Завершити Anmeldung".localized, detail: "Зареєструйте адресу у Bürgeramt/Meldebehörde; локальний порядок і запис різняться.".localized, date: calendar.date(byAdding: .day, value: 14, to: arrival), category: .registration, sourceTitle: "Germany4Ukraine", sourceURL: "https://www.germany4ukraine.de/EN/einreise-aufenthalt-und-rueckkehr/ukraine-aufenthaltserlaubnis/seite_node.html")
             add(id: "\(prefix).insurance.review", title: "Підтвердити медичне покриття".localized, detail: "Контрольна дата Sweezy, не законний строк. Отримайте підтвердження Krankenkasse/Jobcenter/Sozialamt.".localized, date: calendar.date(byAdding: .day, value: 7, to: arrival), category: .insurance, sourceTitle: "Germany4Ukraine", sourceURL: "https://www.germany4ukraine.de/EN/medizinische-versorgung/krankenversicherung-ukrainer/seite_node.html")
@@ -244,7 +247,7 @@ final class LifeAdminService: ObservableObject {
                 taxComponents.year = year + 1
                 taxDate = calendar.date(from: taxComponents)
             }
-            add(id: "tax.declaration.\(taxComponents.year ?? year)", title: "Перевірити податкову декларацію".localized, detail: "Кантональні строки різняться. Перевір особистий лист або портал кантону.".localized, date: taxDate, category: .tax, sourceTitle: "Federal Tax Administration", sourceURL: "https://www.estv.admin.ch/estv/en/home.html")
+            add(id: "tax.declaration.\(taxComponents.year ?? year)", title: "Перевірити податкову декларацію".localized, detail: "Кантональні строки різняться. Перевір особистий лист або портал кантону.".localized, date: taxDate, category: .tax, sourceTitle: "life.source.fta".localized, sourceURL: "https://www.estv.admin.ch/estv/en/home.html")
         }
 
         for task in firstWeekTasks {
@@ -252,11 +255,11 @@ final class LifeAdminService: ObservableObject {
             result.append(
                 LifeDeadline(
                     id: deadlineID,
-                    title: task.title,
-                    detail: task.details ?? "Наступний крок персонального плану.".localized,
+                    title: task.displayTitle,
+                    detail: task.displayDetails ?? "Наступний крок персонального плану.".localized,
                     dueDate: task.dueDate,
                     category: .personal,
-                    sourceTitle: "Sweezy My Plan",
+                    sourceTitle: "life.source.my_plan".localized,
                     sourceURL: nil,
                     isCompleted: task.isDone || completedDeadlineIDs.contains(deadlineID)
                 )
@@ -270,7 +273,7 @@ final class LifeAdminService: ObservableObject {
                 detail: moment.descriptionMd.split(separator: "\n").first.map(String.init) ?? "",
                 date: moment.endsAt,
                 category: .personal,
-                sourceTitle: "Sweezy verified moment",
+                sourceTitle: "life.source.verified_moment".localized,
                 sourceURL: country == .switzerland ? "https://www.ch.ch/en/" : (country == .germany ? "https://www.germany4ukraine.de/EN/home/home_node.html" : "https://www.oesterreich.gv.at/en/")
             )
         }
@@ -294,8 +297,8 @@ final class LifeAdminService: ObservableObject {
             guard let expiry = document.expiryDate else { continue }
             add(
                 id: "document.\(document.id)",
-                title: "Оновити: %@".localized(with: "\(document.title)"),
-                detail: document.requiredFor,
+                title: "Оновити: %@".localized(with: document.displayTitle),
+                detail: document.displayRequiredFor,
                 date: calendar.date(byAdding: .day, value: -30, to: expiry),
                 category: .document,
                 sourceTitle: document.sourceTitle,

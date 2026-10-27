@@ -311,7 +311,7 @@ struct SocialAuthPanel: View {
             throw NSError(
                 domain: "Auth",
                 code: 0,
-                userInfo: [NSLocalizedDescriptionKey: response.message ?? "auth.social.error.generic".localized]
+                userInfo: [NSLocalizedDescriptionKey: "auth.social.error.generic".localized]
             )
         }
 
@@ -507,7 +507,7 @@ struct SocialLinkConfirmationSheet: View {
         do {
             let linkResponse = try await APIClient.confirmSocialLink(email: email, password: password, linkToken: linkToken)
             guard let tokens = linkResponse.tokenPair, let resolvedEmail = linkResponse.email else {
-                throw NSError(domain: "Auth", code: 0, userInfo: [NSLocalizedDescriptionKey: linkResponse.message ?? "auth.social.error.generic".localized])
+                throw NSError(domain: "Auth", code: 0, userInfo: [NSLocalizedDescriptionKey: "auth.social.error.generic".localized])
             }
 
             try await MainActor.run {
@@ -537,7 +537,7 @@ private extension APIClient.SocialAuthResponse {
         switch provider {
         case "apple": return "Apple"
         case "google": return "Google"
-        default: return "social sign-in"
+        default: return "auth.social.provider_generic".localized
         }
     }
 }

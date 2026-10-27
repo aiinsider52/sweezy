@@ -1,68 +1,6 @@
 import SwiftUI
 
-// MARK: - Mascot guide
-
-/// Sweezy walks the user through the spacious onboarding steps.
-/// Decorative only: VoiceOver and hit testing skip it, and Reduce Motion keeps it still.
-struct OnboardingMascotStage: View {
-    let page: Int
-
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-
-    /// Form-heavy steps and the final page stage their own content, so the mascot steps aside there.
-    private var pose: SweezyCompanionPose? {
-        switch page {
-        case 0: return .welcome
-        case 1, 5: return .guide
-        case 2: return .documents
-        default: return nil
-        }
-    }
-
-    private func size(for height: CGFloat) -> CGFloat {
-        // The theme step has taller controls, so its mascot is smaller.
-        let factor: CGFloat = page == 5 ? 0.16 : 0.23
-        return min(210, height * factor)
-    }
-
-    var body: some View {
-        GeometryReader { geometry in
-            // Short phones keep the full content; the mascot would collide with it.
-            let fits = geometry.size.height >= 720
-            let side = size(for: geometry.size.height)
-
-            ZStack {
-                if let pose, fits {
-                    ZStack {
-                        Circle()
-                            .fill(JourneyVisual.lime.opacity(0.24))
-                            .frame(width: side * 0.86, height: side * 0.86)
-                            .blur(radius: 30)
-                        Image(pose.assetName)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: side, height: side)
-                    }
-                    .idleFloat(enabled: !reduceMotion)
-                    .id(pose)
-                    .transition(
-                        reduceMotion
-                            ? .opacity
-                            : .asymmetric(
-                                insertion: .scale(scale: 0.72, anchor: .bottom).combined(with: .opacity),
-                                removal: .scale(scale: 0.9, anchor: .bottom).combined(with: .opacity)
-                            )
-                    )
-                }
-            }
-            .frame(width: geometry.size.width)
-            .padding(.top, 78)
-            .animation(reduceMotion ? .easeOut(duration: 0.2) : .spring(response: 0.5, dampingFraction: 0.7), value: pose)
-        }
-        .allowsHitTesting(false)
-        .accessibilityHidden(true)
-    }
-}
+// MARK: - Idle float
 
 private struct IdleFloatModifier: ViewModifier {
     let enabled: Bool

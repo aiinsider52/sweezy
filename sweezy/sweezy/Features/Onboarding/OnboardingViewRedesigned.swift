@@ -100,8 +100,6 @@ struct OnboardingViewRedesigned: View {
             .tabViewStyle(.page(indexDisplayMode: .never))
             .ignoresSafeArea()
 
-            OnboardingMascotStage(page: currentPage)
-
             VStack {
                 HStack {
                     HStack(spacing: 8) {
@@ -423,15 +421,15 @@ struct OnboardingViewRedesigned: View {
 
 private struct AnalyticsConsentPage: View {
     @EnvironmentObject private var appContainer: AppContainer
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     let onDecision: () -> Void
 
     var body: some View {
-        OnboardingDetailsBackground {
+        OnboardingDetailsBackground(step: 6) {
             VStack(alignment: .leading, spacing: 22) {
                 Spacer().frame(height: 96)
-                SweezyCompanion(pose: .guide, size: 104)
-                    .idleFloat(enabled: !reduceMotion)
+                OnboardingHeroSlot {
+                    OnboardingPrivacyHero()
+                }
                 Text("onboarding.analytics.title".localized)
                     .font(.system(size: 29, weight: .bold, design: .default))
                     .foregroundStyle(JourneyVisual.primaryText)
@@ -486,24 +484,19 @@ private struct NotificationPermissionPage: View {
     @State private var titleAppeared = false
     
     var body: some View {
-        OnboardingDetailsBackground {
+        OnboardingDetailsBackground(step: 7) {
             VStack(alignment: .leading, spacing: 0) {
-                Spacer().frame(height: 118)
+                Spacer().frame(height: 96)
 
-                HStack(spacing: 12) {
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .fill(JourneyVisual.lime)
-                        .frame(width: 48, height: 48)
-                        .overlay {
-                            Image(systemName: "bell.badge.fill")
-                                .font(.system(size: 20, weight: .bold))
-                                .foregroundStyle(.black)
-                        }
-                    Text("onboarding.notifications.eyebrow".localized)
-                        .font(.system(size: 12, weight: .bold))
-                        .tracking(1.4)
-                        .foregroundStyle(Theme.Colors.textPrimary)
+                OnboardingHeroSlot(maxHeight: 160) {
+                    OnboardingBellHero()
                 }
+
+                Text("onboarding.notifications.eyebrow".localized)
+                    .font(.system(size: 12, weight: .bold))
+                    .tracking(1.4)
+                    .foregroundStyle(Theme.Colors.textPrimary)
+                    .padding(.top, 10)
 
                 VStack(alignment: .leading, spacing: 8) {
                         Text("onboarding.notifications_title".localized)
@@ -624,14 +617,18 @@ private struct ThemePickerPage: View {
     
     var body: some View {
         ZStack {
-            JourneyPhotoBackground(imageName: JourneyBackdrop.alpine.rawValue, blurRadius: 2, darkness: 0.62)
-                .allowsHitTesting(false)
-            OnboardingScrim(middle: 0.26, bottom: 0.96)
-            
+            OnboardingAmbientBackground(step: 5)
+
             VStack(alignment: .leading, spacing: 0) {
-                Spacer(minLength: 170)
+                Spacer().frame(height: 104)
+
+                OnboardingHeroSlot {
+                    OnboardingThemeHero(theme: selectedTheme)
+                }
+                .onboardingReveal(revealed, order: 0)
 
                 Text("onboarding.style.eyebrow".localized)
+                    .padding(.top, 14)
                     .font(.system(size: 12, weight: .bold))
                     .tracking(1.4)
                     .foregroundStyle(Theme.Colors.textPrimary)
@@ -689,51 +686,13 @@ private struct ThemePickerPage: View {
                 .padding(.top, 24)
                 .onboardingReveal(revealed, order: 2)
 
-                HStack(spacing: Theme.Spacing.md) {
-                    ThemePreviewCard(isDark: false, isSelected: selectedTheme == .light)
-                        .onTapGesture { withAnimation { selectedTheme = .light } }
-                    ThemePreviewCard(isDark: true, isSelected: selectedTheme == .dark)
-                        .onTapGesture { withAnimation { selectedTheme = .dark } }
-                }
-                .padding(.top, 16)
-                .onboardingReveal(revealed, order: 3)
-
+                Spacer(minLength: 0)
                 Spacer().frame(height: 154)
             }
             .padding(.horizontal, 20)
         }
         .onAppear { revealed = true }
         .onDisappear { revealed = false }
-    }
-}
-
-private struct ThemePreviewCard: View {
-    let isDark: Bool
-    let isSelected: Bool
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            RoundedRectangle(cornerRadius: 10).fill(isDark ? Color.white.opacity(0.12) : Color.black.opacity(0.06)).frame(height: 10)
-            RoundedRectangle(cornerRadius: 6).fill(isDark ? Color.white.opacity(0.18) : Color.black.opacity(0.08)).frame(height: 6)
-            HStack(spacing: 6) {
-                Circle().fill(isDark ? Color.green.opacity(0.7) : Theme.Colors.accentTurquoise).frame(width: 10, height: 10)
-                RoundedRectangle(cornerRadius: 4).fill(isDark ? Color.white.opacity(0.18) : Color.black.opacity(0.08)).frame(height: 6)
-            }
-            Spacer(minLength: 0)
-        }
-        .padding(16)
-        .frame(width: 150, height: 120)
-        .background(
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .fill(isDark ? Theme.Colors.darkBackground : Color.white)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .stroke(isSelected ? LinearGradient(colors: [Theme.Colors.primary, Theme.Colors.accent], startPoint: .leading, endPoint: .trailing) : LinearGradient(colors: [Color.black.opacity(0.06)], startPoint: .leading, endPoint: .trailing), lineWidth: isSelected ? 2 : 1)
-        )
-        .shadow(color: .black.opacity(isDark ? 0.4 : 0.1), radius: 12, x: 0, y: 8)
-        .scaleEffect(isSelected ? 1.03 : 0.97)
-        .animation(.spring(response: 0.38, dampingFraction: 0.72), value: isSelected)
     }
 }
 
@@ -762,21 +721,17 @@ private struct ProfileDetailsPage: View {
     @State private var titleAppeared = false
 
     var body: some View {
-        OnboardingDetailsBackground {
+        OnboardingDetailsBackground(step: 3) {
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 18) {
                     Spacer().frame(height: 92)
 
-                    HStack(alignment: .center, spacing: 14) {
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                .fill(JourneyVisual.lime)
-                                .frame(width: 48, height: 48)
-                            Image(systemName: "person.text.rectangle")
-                                .font(.system(size: 20, weight: .bold))
-                                .foregroundColor(.black)
-                        }
+                    OnboardingHeroSlot(maxHeight: 140, share: 0.16) {
+                        OnboardingProfileHero()
+                    }
+                    .onboardingReveal(titleAppeared, order: 0)
 
+                    HStack(alignment: .center, spacing: 14) {
                         VStack(alignment: .leading, spacing: 4) {
                             Text("onboarding.profile_title".localized)
                                 .font(.system(size: 26, weight: .bold, design: .default))
@@ -966,23 +921,17 @@ private struct FamilyDetailsPage: View {
     @State private var titleAppeared = false
     
     var body: some View {
-        OnboardingDetailsBackground {
+        OnboardingDetailsBackground(step: 4) {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 14) {
                     Spacer().frame(height: 92)
-                    
+
+                    OnboardingHeroSlot(maxHeight: 140, share: 0.16) {
+                        OnboardingFamilyHero()
+                    }
+                    .opacity(titleAppeared ? 1 : 0)
+
                     HStack(alignment: .top, spacing: 14) {
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                .fill(JourneyVisual.lime)
-                                .frame(width: 54, height: 54)
-                            Image(systemName: "figure.2.and.child.holdinghands")
-                                .font(.system(size: 22, weight: .bold))
-                                .foregroundColor(.black)
-                        }
-                        .opacity(titleAppeared ? 1 : 0)
-                        .scaleEffect(titleAppeared ? 1 : 0.5)
-                        
                         VStack(alignment: .leading, spacing: 5) {
                             Text("onboarding.family_title".localized)
                                 .font(.system(size: 28, weight: .bold, design: .default))
@@ -1052,45 +1001,14 @@ private struct FamilyDetailsPage: View {
 }
 
 private struct OnboardingDetailsBackground<Content: View>: View {
+    let step: Int
     @ViewBuilder let content: Content
-    
+
     var body: some View {
         ZStack {
-            JourneyPhotoBackground(imageName: JourneyBackdrop.alpine.rawValue, blurRadius: 2, darkness: 0.64)
-                .allowsHitTesting(false)
-            OnboardingScrim(top: 0.10, middle: 0.42, bottom: 0.96)
-
-            RadialGradient(
-                colors: [JourneyVisual.lime.opacity(0.11), .clear],
-                center: .bottomLeading,
-                startRadius: 10,
-                endRadius: 360
-            )
-            .ignoresSafeArea()
-            .allowsHitTesting(false)
-
+            OnboardingAmbientBackground(step: step)
             content
         }
-    }
-}
-
-/// Night scrim in dark mode; in light mode the illustration fades into paper so dark text stays readable.
-private struct OnboardingScrim: View {
-    @Environment(\.colorScheme) private var colorScheme
-    var top: Double = 0
-    let middle: Double
-    let bottom: Double
-
-    var body: some View {
-        LinearGradient(
-            colors: colorScheme == .dark
-                ? [Color.black.opacity(top), Color.black.opacity(middle), Color.black.opacity(bottom)]
-                : [.clear, JourneyVisual.pageBackground.opacity(0.7), JourneyVisual.pageBackground],
-            startPoint: .top,
-            endPoint: .bottom
-        )
-        .ignoresSafeArea()
-        .allowsHitTesting(false)
     }
 }
 
@@ -1231,10 +1149,6 @@ private struct OnboardingV2PageView: View {
     let page: OnboardingV2Page
     @State private var revealed = false
 
-    private var backdrop: JourneyBackdrop {
-        page.id == 1 ? .city : .alpine
-    }
-
     private var featureRows: [(String, String)] {
         if page.id == 1 {
             return [
@@ -1252,29 +1166,22 @@ private struct OnboardingV2PageView: View {
     
     var body: some View {
         ZStack {
-            JourneyPhotoBackground(imageName: backdrop.rawValue, blurRadius: 1.5, darkness: 0.46)
-                .allowsHitTesting(false)
-
-            OnboardingScrim(middle: 0.18, bottom: 0.94)
+            OnboardingAmbientBackground(step: page.id == 1 ? 0 : 2)
 
             VStack(alignment: .leading, spacing: 0) {
-                Spacer(minLength: 190)
+                Spacer().frame(height: 104)
 
-                HStack(spacing: 10) {
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 13, style: .continuous)
-                            .fill(JourneyVisual.lime)
-                            .frame(width: 46, height: 46)
-                    Image(systemName: page.icon)
-                            .font(.system(size: 20, weight: .bold))
-                            .foregroundColor(.black)
-                    }
-                    Text("onboarding.hero.eyebrow".localized)
-                        .font(.system(size: 12, weight: .bold))
-                        .tracking(1.4)
-                        .foregroundStyle(Theme.Colors.textPrimary)
+                OnboardingHeroSlot {
+                    if page.id == 1 { OnboardingGlobeHero() } else { OnboardingRouteHero() }
                 }
                 .onboardingReveal(revealed, order: 0)
+
+                Text("onboarding.hero.eyebrow".localized)
+                    .font(.system(size: 12, weight: .bold))
+                    .tracking(1.4)
+                    .foregroundStyle(Theme.Colors.textPrimary)
+                    .padding(.top, 14)
+                    .onboardingReveal(revealed, order: 0)
 
                 VStack(alignment: .leading, spacing: 10) {
                     Text(LocalizedStringKey(page.titleKey))
@@ -1324,6 +1231,7 @@ private struct OnboardingV2PageView: View {
                 .padding(.top, 24)
                 .onboardingReveal(revealed, order: 2)
 
+                Spacer(minLength: 0)
                 Spacer().frame(height: 154)
             }
             .padding(.horizontal, 20)
@@ -1412,14 +1320,18 @@ private struct LanguagePickerPage: View {
     
     var body: some View {
         ZStack {
-            JourneyPhotoBackground(imageName: JourneyBackdrop.city.rawValue, blurRadius: 2, darkness: 0.56)
-                .allowsHitTesting(false)
-            OnboardingScrim(middle: 0.22, bottom: 0.94)
-            
+            OnboardingAmbientBackground(step: 1)
+
             VStack(alignment: .leading, spacing: 0) {
-                Spacer(minLength: 180)
+                Spacer().frame(height: 104)
+
+                OnboardingHeroSlot {
+                    OnboardingGreetingsHero(selected: selectedLanguage)
+                }
+                .onboardingReveal(revealed, order: 0)
 
                 Text("onboarding.language.eyebrow".localized)
+                    .padding(.top, 14)
                     .font(.system(size: 12, weight: .bold))
                     .tracking(1.4)
                     .foregroundStyle(Theme.Colors.textPrimary)
@@ -1482,6 +1394,7 @@ private struct LanguagePickerPage: View {
                 .padding(.top, 24)
                 .onboardingReveal(revealed, order: 3)
 
+                Spacer(minLength: 0)
                 Spacer().frame(height: 158)
             }
             .padding(.horizontal, 20)
@@ -1510,36 +1423,17 @@ private struct SuccessPageView: View {
 
     var body: some View {
         ZStack {
-            JourneyPhotoBackground(imageName: JourneyBackdrop.zurich.rawValue, blurRadius: 2, darkness: 0.58)
-                .allowsHitTesting(false)
-            OnboardingScrim(middle: 0.32, bottom: 0.96)
+            OnboardingAmbientBackground(step: 8)
 
             VStack(spacing: 0) {
                 Spacer().frame(height: 104)
 
-                ZStack {
-                    Circle()
-                        .fill(JourneyVisual.lime.opacity(phase == .ready ? 0.3 : 0.18))
-                        .frame(width: 210, height: 210)
-                        .blur(radius: 34)
-
-                    Image((phase == .ready ? SweezyCompanionPose.celebrate : .documents).assetName)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 172, height: 172)
-                        .id(phase)
-                        .transition(
-                            reduceMotion
-                                ? .opacity
-                                : .asymmetric(
-                                    insertion: .scale(scale: 0.62, anchor: .bottom).combined(with: .opacity),
-                                    removal: .scale(scale: 0.9).combined(with: .opacity)
-                                )
-                        )
-                }
+                OnboardingBloomHero(
+                    progress: Double(checkedCount) / Double(features.count),
+                    ready: phase == .ready
+                )
                 .frame(height: 212)
-                .idleFloat(enabled: !reduceMotion && phase == .building)
-                .animation(reduceMotion ? nil : .spring(response: 0.55, dampingFraction: 0.66), value: phase)
+                .accessibilityHidden(true)
 
                 VStack(spacing: 10) {
                     Text((phase == .ready ? "onboarding.ready.title" : "onboarding.building.title").localized)

@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "business-cover-finance.jpg",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

@@ -475,7 +475,7 @@ struct BusinessOffersPanel: View {
             if growth.tier < .pro {
                 lockedCard
             } else if growth.offers.isEmpty {
-                MascotEmptyState(title: "business.offers.empty_title".localized, subtitle: "business.offers.empty_subtitle".localized, pose: .celebrate, actionTitle: "business.offers.add".localized, action: { creating = true })
+                MascotEmptyState(title: "business.offers.empty_title".localized, subtitle: "business.offers.empty_subtitle".localized, actionTitle: "business.offers.add".localized, spot: .noOffers, action: { creating = true })
             }
             ForEach(growth.offers) { offer in
                 VStack(alignment: .leading, spacing: 10) {
@@ -579,7 +579,7 @@ struct BusinessReviewsPanel: View {
             }
             Text("business.reviews.owner_hint".localized).font(.system(size: 13)).foregroundStyle(JourneyVisual.secondaryText)
             if growth.reviews.isEmpty {
-                MascotEmptyState(title: "business.reviews.owner_empty_title".localized, subtitle: "business.reviews.owner_empty_subtitle".localized, pose: .guide)
+                MascotEmptyState(title: "business.reviews.owner_empty_title".localized, subtitle: "business.reviews.owner_empty_subtitle".localized, spot: .noReviews)
             }
             ForEach(growth.reviews) { review in
                 VStack(alignment: .leading, spacing: 8) {
@@ -641,7 +641,7 @@ struct BusinessClubPanel: View {
             }
             BusinessSectionHeader(title: "business.page.members".localized, trailing: "\(approved.count)")
             if approved.isEmpty {
-                MascotEmptyState(title: "business.club.empty_title".localized, subtitle: "business.club.empty_subtitle".localized, pose: .people)
+                MascotEmptyState(title: "business.club.empty_title".localized, subtitle: "business.club.empty_subtitle".localized, spot: .club)
             }
             ForEach(approved) { member in
                 BusinessDirectoryCard(business: member.business) {}

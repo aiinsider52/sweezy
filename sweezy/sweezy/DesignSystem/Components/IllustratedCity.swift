@@ -1,5 +1,13 @@
 import SwiftUI
 
+/// Hero artwork per tab and country: `city-scene-<scene>-<ch|de|at>`.
+enum CityArtwork {
+    static func name(_ scene: String, country: String = APIClient.countryCode) -> String {
+        let code = country.lowercased()
+        return "city-scene-\(scene)-\(["ch", "de", "at"].contains(code) ? code : "ch")"
+    }
+}
+
 /// Plain paper under forms and reading surfaces. City artwork is reserved for the main tabs.
 struct CityPageBackground: View {
     var scene = "directory"
@@ -29,7 +37,7 @@ struct CityScene: View {
 
     var body: some View {
         GeometryReader { geometry in
-            Image("city-scene-\(scene)")
+            Image(CityArtwork.name(scene))
                 .resizable().scaledToFill()
                 .frame(width: geometry.size.width, height: height)
                 .clipped()

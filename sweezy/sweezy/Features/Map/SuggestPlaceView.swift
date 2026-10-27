@@ -222,7 +222,8 @@ struct SuggestPlaceView: View {
             subtitle: "place.suggest.guest.subtitle".localized,
             pose: .plan,
             actionTitle: "place.suggest.guest.action".localized,
-            actionIdentifier: "place.suggest.sign_in"
+            actionIdentifier: "place.suggest.sign_in",
+            spot: .locked
         ) {
             showAuth = true
         }
@@ -234,7 +235,7 @@ struct SuggestPlaceView: View {
             MascotEmptyState(
                 title: "place.suggest.success.title".localized,
                 subtitle: "place.suggest.success.subtitle".localized(with: suggestion.name),
-                pose: .celebrate
+                spot: .sent
             )
             Button { dismiss() } label: {
                 Text("common.done".localized)

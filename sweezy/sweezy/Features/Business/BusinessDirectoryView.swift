@@ -184,8 +184,8 @@ struct BusinessDirectoryContent: View {
             MascotEmptyState(
                 title: model.loadFailed ? "business.directory.error_title".localized : "business.directory.empty_title".localized,
                 subtitle: model.loadFailed ? "business.directory.error_subtitle".localized : "business.directory.empty_subtitle".localized,
-                pose: .people,
                 actionTitle: model.loadFailed ? "common.retry".localized : "business.invite.cta".localized,
+                spot: model.loadFailed ? .offline : .noResults,
                 action: model.loadFailed ? { Task { await model.load() } } : openOwnerHub
             )
         } else {

@@ -65,8 +65,8 @@ struct BusinessPageView: View {
                 MascotEmptyState(
                     title: notFound ? "business.page.not_found".localized : "business.directory.error_title".localized,
                     subtitle: notFound ? "business.page.not_found_subtitle".localized : "business.directory.error_subtitle".localized,
-                    pose: .help,
                     actionTitle: "common.close".localized,
+                    spot: notFound ? .noResults : .offline,
                     action: { dismiss() }
                 )
                 .padding(24)
@@ -148,14 +148,10 @@ struct BusinessPageView: View {
     private func cover(_ profile: PublicBusinessProfile) -> some View {
         let raw = profile.coverURL ?? profile.photoURLs?.first
         ZStack(alignment: .bottom) {
-            if let url = raw.flatMap(APIClient.resolveMediaURL) {
-                JourneyRemoteImage(url: url, fallbackAsset: "city-scene-market")
-                    .frame(height: 250)
-                    .frame(maxWidth: .infinity)
-                    .clipped()
-            } else {
-                CityScene(scene: profile.businessKind == .club ? "people" : "market", height: 250)
-            }
+            JourneyRemoteImage(url: raw.flatMap(APIClient.resolveMediaURL), fallbackAsset: profile.businessCategory.coverAsset)
+                .frame(height: 250)
+                .frame(maxWidth: .infinity)
+                .clipped()
             LinearGradient(colors: [JourneyVisual.pageBackground.opacity(0), JourneyVisual.pageBackground], startPoint: .top, endPoint: .bottom)
                 .frame(height: 110)
         }
@@ -402,7 +398,7 @@ struct BusinessPageView: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 10) {
                 ForEach(profile.photoURLs ?? [], id: \.self) { raw in
-                    JourneyRemoteImage(url: APIClient.resolveMediaURL(raw), fallbackAsset: "city-scene-market")
+                    JourneyRemoteImage(url: APIClient.resolveMediaURL(raw), fallbackAsset: profile.businessCategory.coverAsset)
                         .frame(width: 220, height: 150)
                         .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
                 }

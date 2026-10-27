@@ -915,8 +915,7 @@ struct FriendNetworkView: View {
             .background(Theme.Colors.card).clipShape(Capsule())
             .overlay(Capsule().stroke(JourneyVisual.softBorder, lineWidth: 1))
 
-            // Artwork and mascot as one scene instead of two stacked blocks.
-            // Sweezy at the lakeside bench waving two neighbours over: what this tab is for.
+            // One scene of neighbours meeting at a park café: what this tab is for.
             StoryScene(name: "find-people", height: 210, cornerRadius: 22)
               .padding(.bottom, 6)
             Text("Знайди своїх\nу Швейцарії".localized)
@@ -1196,7 +1195,8 @@ struct FriendNetworkView: View {
             title: "Поки нікого не знайшли".localized,
             subtitle: "Спробуй змінити місто або інтереси".localized,
             actionTitle: "Змінити фільтри".localized,
-            actionIdentifier: "friends.search.changeFilters"
+            actionIdentifier: "friends.search.changeFilters",
+            spot: .noResults
           ) {
             filters = true
           }

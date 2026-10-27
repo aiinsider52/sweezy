@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "spot-no-bookings.png",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

@@ -86,15 +86,15 @@ struct JourneyPhotoBackground: View {
     var blurRadius: CGFloat = 0
     var darkness: Double = 0.36
 
-    private var cityArtwork: String {
-        if imageName.contains("market") { return "city-scene-market" }
-        if imageName.contains("community") { return "city-scene-people" }
-        if imageName.contains("tool") || imageName.contains("museum") { return "city-scene-directory" }
-        return "city-scene-home"
+    private var cityScene: String {
+        if imageName.contains("market") { return "market" }
+        if imageName.contains("community") { return "people" }
+        if imageName.contains("tool") || imageName.contains("museum") { return "directory" }
+        return "home"
     }
 
     var body: some View {
-        CityPageBackground(scene: cityArtwork.replacingOccurrences(of: "city-scene-", with: ""))
+        CityPageBackground(scene: cityScene)
     }
 }
 

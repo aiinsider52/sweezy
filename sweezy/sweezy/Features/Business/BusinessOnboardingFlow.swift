@@ -364,7 +364,7 @@ struct BusinessOnboardingFlow: View {
         PhotosPicker(selection: selection, matching: .images) {
             ZStack {
                 if let resolved = url.flatMap(APIClient.resolveMediaURL) {
-                    JourneyRemoteImage(url: resolved, fallbackAsset: "city-scene-market")
+                    JourneyRemoteImage(url: resolved, fallbackAsset: (BusinessCategory(rawValue: payload.category) ?? .other).coverAsset)
                 } else {
                     VStack(spacing: 6) {
                         Image(systemName: slot == .logo ? "app.badge" : "photo.on.rectangle.angled")

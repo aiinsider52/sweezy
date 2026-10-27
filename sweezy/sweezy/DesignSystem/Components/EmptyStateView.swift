@@ -21,12 +21,22 @@ struct EmptyStateView: View {
             subtitle: subtitle,
             pose: pose,
             actionTitle: actionTitle,
+            spot: spot,
             action: action
         )
         .frame(maxWidth: 520)
         .padding(Theme.Spacing.lg)
         .frame(maxWidth: .infinity)
         .accessibilityElement(children: .contain)
+    }
+
+    /// Object art for common cases; the mascot remains for everything else.
+    private var spot: EmptyStateSpot? {
+        switch systemImage {
+        case "calendar", "clock": return .noBookings
+        case "doc.text.magnifyingglass", "magnifyingglass": return .noResults
+        default: return nil
+        }
     }
 
     /// The mascot mirrors what the screen is about, so empty states stop looking interchangeable.

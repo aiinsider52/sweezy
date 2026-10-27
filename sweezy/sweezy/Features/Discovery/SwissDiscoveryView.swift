@@ -169,7 +169,7 @@ struct SwissDiscoveryView: View {
             }
 
             // The promenade with the signpost: "go and explore".
-            FocusedSceneImage(name: "city-scene-map", focusY: 0.35)
+            FocusedSceneImage(name: CityArtwork.name("map"), focusY: 0.35)
                 .frame(height: 190)
                 .frame(maxWidth: .infinity)
                 .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))

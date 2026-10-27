@@ -141,8 +141,8 @@ struct JourneyGuideArticleView: View {
         case .documents, .legal: return "story-documents"
         case .work, .finance, .banking: return "story-jobs"
         case .education, .integration: return "story-language"
-        case .transport, .lifestyle: return "city-scene-map"
-        default: return "city-scene-directory"
+        case .transport, .lifestyle: return CityArtwork.name("map")
+        default: return CityArtwork.name("directory")
         }
     }
 

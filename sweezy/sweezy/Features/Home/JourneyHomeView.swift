@@ -164,8 +164,8 @@ struct JourneyHomeView: View {
 
         return ZStack(alignment: .topLeading) {
             // Crop is biased left (42% instead of centred) so the heading lands on sky and lake,
-            // not on the Grossmünster towers, while the strolling couple stays in frame on the right.
-            Image("city-scene-home")
+            // not on the landmarks, while the people stay in frame on the right.
+            Image(CityArtwork.name("home"))
                 .resizable()
                 .frame(width: imageWidth, height: imageHeight)
                 .scaleEffect(heroDrift ? 1.06 : 1, anchor: .init(x: 0.62, y: 0.55))
@@ -376,16 +376,6 @@ struct JourneyHomeView: View {
             .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 26, style: .continuous))
             .overlay(RoundedRectangle(cornerRadius: 26, style: .continuous).stroke(JourneyVisual.softBorder, lineWidth: 1))
             .shadow(color: JourneyVisual.black.opacity(0.08), radius: 22, y: 10)
-            .overlay(alignment: .topTrailing) {
-                Image("sweezy-companion-plan")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(height: 164)
-                    .idleFloat(enabled: !reduceMotion)
-                    .offset(x: -4, y: -66)
-                    .allowsHitTesting(false)
-                    .accessibilityHidden(true)
-            }
         }
         .buttonStyle(CardPressStyle())
         .accessibilityIdentifier("home.myPlan")
@@ -432,7 +422,7 @@ struct JourneyHomeView: View {
             ZStack(alignment: .bottomLeading) {
                 Color.clear
                     .overlay {
-                        Image("city-scene-\(item.scene)")
+                        Image(CityArtwork.name(item.scene))
                             .resizable()
                             .scaledToFill()
                     }
@@ -616,7 +606,7 @@ struct JourneyHomeView: View {
                 Color.clear
                     .frame(width: 84, height: 110)
                     .overlay(alignment: .trailing) {
-                        Image("city-scene-directory")
+                        Image(CityArtwork.name("directory"))
                             .resizable()
                             .frame(width: 165, height: 110)
                     }

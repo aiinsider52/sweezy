@@ -681,7 +681,10 @@ def _upsert_jobs(
     db: Session, rows: list[NormalizedJob], now: datetime
 ) -> tuple[int, list[Job]]:
     changed: list[Job] = []
-    for item in rows:
+    # Providers sometimes repeat an item within one page; a second insert of the same
+    # (source, source_job_id) aborts the whole batch on the unique constraint.
+    unique_rows = {(item.source, item.source_job_id): item for item in rows}
+    for item in unique_rows.values():
         canonical = _canonical_url(item.apply_url)
         dedupe_key = job_fingerprint(item.title, item.company, item.location)
         job = db.execute(
@@ -1280,12 +1283,22 @@ async def search_jobs(
 async def jobs_sync_worker() -> None:
     from ..core.database import SessionLocal
 
+    if os.getenv("JOBS_SYNC_ENABLED", "1").lower() in {"0", "false", "no"}:
+        return
     interval = max(300, int(os.getenv("JOBS_SYNC_INTERVAL_SEC", "1800")))
-    await asyncio.sleep(10)
+
+    def _sync_once() -> None:
+        # The upserts are synchronous SQLAlchemy calls. Run the whole sync on a worker
+        # thread with its own loop, otherwise it blocks the server loop for minutes and
+        # Render's health check restarts the instance mid-sync.
+        with SessionLocal() as db:
+            asyncio.run(sync_jobs(db))
+
+    # Let startup finish and the health check pass before the first heavy sync.
+    await asyncio.sleep(120)
     while True:
         try:
-            with SessionLocal() as db:
-                await sync_jobs(db)
+            await asyncio.to_thread(_sync_once)
         except asyncio.CancelledError:
             raise
         except Exception as exc:  # noqa: BLE001 - worker must survive transient provider failures

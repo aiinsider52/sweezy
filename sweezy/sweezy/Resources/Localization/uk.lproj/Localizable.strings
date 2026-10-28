@@ -943,6 +943,7 @@
 "marketplace.detail.contact" = "Контакт";
 "marketplace.detail.views" = "Перегляди";
 "marketplace.detail.published" = "Опубліковано";
+"marketplace.detail.price" = "Ціна";
 "marketplace.detail.author_hint" = "Зв'яжися через кнопку контакту нижче.";
 "marketplace.detail.footer" = "Перед домовленістю ще раз перевір деталі послуги, терміни та ціну.";
 

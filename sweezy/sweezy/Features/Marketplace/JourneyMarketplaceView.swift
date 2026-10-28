@@ -854,27 +854,30 @@ private struct MarketDiscoveryCategoryTile: View {
 
     var body: some View {
         Button(action: action) {
-            VStack(spacing: 9) {
-                JourneyCategoryIcon(symbol: icon, swatch: swatch, size: 38, onDark: true, selected: selected)
+            HStack(spacing: 8) {
+                JourneyCategoryIcon(symbol: icon, swatch: swatch, size: 30)
                 Text(title)
-                    .font(.system(size: 12, weight: .semibold, design: .default))
-                    .lineLimit(2)
-                    .multilineTextAlignment(.center)
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(selected ? Color.black : JourneyVisual.primaryText)
+                    .lineLimit(1)
             }
-            .foregroundStyle(selected ? JourneyVisual.lime : .white.opacity(0.82))
-            .frame(width: 86, height: 92)
-            .background(Color.white.opacity(selected ? 0.08 : 0.045))
-            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+            .padding(.leading, 6)
+            .padding(.trailing, 15)
+            .frame(height: 44)
+            .background(selected ? JourneyVisual.lime : Theme.Colors.card, in: Capsule())
             .overlay(
-                RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .stroke(selected ? JourneyVisual.lime : .white.opacity(0.16), lineWidth: selected ? 1.5 : 1)
+                Capsule().strokeBorder(selected ? JourneyVisual.accentStrong.opacity(0.5) : JourneyVisual.softBorder, lineWidth: 1)
             )
+            .shadow(color: selected ? JourneyVisual.lime.opacity(0.35) : .black.opacity(0.04), radius: selected ? 10 : 6, y: 3)
+            .animation(.easeOut(duration: 0.18), value: selected)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(ScaleButtonStyle(scaleAmount: 0.96, hapticStyle: .light))
         .accessibilityAddTraits(selected ? .isSelected : [])
     }
 }
 
+/// Featured service: the photo stays clean on top, and the copy sits on a paper panel below,
+/// so bright artwork (yellow ads, white cars) never fights the title.
 private struct JourneyServiceDiscoveryHeroCard: View {
     let listing: ServiceListing
     let isSaved: Bool
@@ -882,94 +885,101 @@ private struct JourneyServiceDiscoveryHeroCard: View {
     let saveAction: () -> Void
 
     var body: some View {
-        ZStack(alignment: .bottomLeading) {
-            Button(action: openAction) {
-                ZStack(alignment: .bottomLeading) {
-                    JourneyRemoteImage(url: listing.primaryImageURL, fallbackAsset: listing.marketplaceFallbackAsset)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 312)
-                        .clipped()
-
-                    LinearGradient(
-                        colors: [.clear, .black.opacity(0.16), .black.opacity(0.94)],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-
-                    VStack(alignment: .leading, spacing: 10) {
-                        Spacer()
-
-                        Text(listing.title)
-                            .font(.system(size: 24, weight: .bold, design: .default))
-                            .foregroundStyle(.white)
-                            .lineLimit(2)
-                            .multilineTextAlignment(.leading)
-
-                        HStack(spacing: 8) {
-                            if listing.isVerified {
-                                Label("map.verified".localized, systemImage: "checkmark.seal.fill")
-                                    .foregroundStyle(JourneyVisual.accentText)
-                            }
-
-                            Label(listing.canton == "all" ? "CH" : listing.canton, systemImage: "mappin")
-                                .foregroundStyle(.white.opacity(0.82))
-
-                            Spacer(minLength: 4)
-
-                            Text(listing.priceDisplay ?? "journey.marketplace.negotiable_price".localized)
-                                .fontWeight(.bold)
-                                .foregroundStyle(.white)
+        Button(action: openAction) {
+            VStack(alignment: .leading, spacing: 0) {
+                JourneyRemoteImage(url: listing.primaryImageURL, fallbackAsset: listing.marketplaceFallbackAsset)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 210)
+                    .clipped()
+                    .overlay(alignment: .bottomLeading) {
+                        HStack(spacing: 6) {
+                            Image(systemName: listing.categoryIcon)
+                            Text(listing.categoryDisplayName)
                         }
-                        .font(.system(size: 12, weight: .semibold, design: .default))
-
-                        HStack(spacing: 8) {
-                            Text(listing.authorName)
-                                .foregroundStyle(.white.opacity(0.74))
-                            Text("·")
-                                .foregroundStyle(.white.opacity(0.42))
-                            Text(listing.freshnessText)
-                                .foregroundStyle(.white.opacity(0.58))
-                                .lineLimit(1)
-                        }
-                        .font(.system(size: 11, weight: .medium, design: .default))
-
-                        HStack {
-                            Text("journey.marketplace.view_service".localized)
-                            Spacer()
-                            Image(systemName: "arrow.right")
-                        }
-                        .font(.system(size: 15, weight: .bold, design: .default))
-                        .foregroundStyle(.black)
-                        .padding(.horizontal, 18)
-                        .frame(height: 52)
-                        .background(JourneyVisual.lime)
-                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundStyle(JourneyVisual.primaryText)
+                        .padding(.horizontal, 11)
+                        .frame(height: 30)
+                        .background(Theme.Colors.card.opacity(0.94), in: Capsule())
+                        .padding(12)
                     }
-                    .padding(16)
-                }
-            }
-            .buttonStyle(.plain)
-            .accessibilityElement(children: .combine)
-            .accessibilityHint("marketplace.open".localized)
 
+                VStack(alignment: .leading, spacing: 10) {
+                    Text(listing.title)
+                        .font(.system(size: 20, weight: .bold))
+                        .tracking(-0.2)
+                        .foregroundStyle(JourneyVisual.primaryText)
+                        .lineLimit(2)
+                        .multilineTextAlignment(.leading)
+                        .fixedSize(horizontal: false, vertical: true)
+
+                    HStack(spacing: 6) {
+                        if listing.isVerified {
+                            Image(systemName: "checkmark.seal.fill")
+                                .foregroundStyle(JourneyVisual.accentStrong)
+                        }
+                        Text(listing.authorName)
+                            .foregroundStyle(JourneyVisual.primaryText)
+                        Text("·")
+                        Image(systemName: "mappin")
+                        Text(listing.canton == "all" ? "CH" : listing.canton)
+                        Text("·")
+                        Text(listing.freshnessText)
+                            .lineLimit(1)
+                    }
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundStyle(JourneyVisual.secondaryText)
+                    .lineLimit(1)
+
+                    HStack(spacing: 10) {
+                        Text(listing.priceDisplay ?? "journey.marketplace.negotiable_price".localized)
+                            .font(.system(size: 15, weight: .heavy))
+                            .foregroundStyle(JourneyVisual.primaryText)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.8)
+                        Spacer(minLength: 8)
+                        HStack(spacing: 8) {
+                            Text("journey.marketplace.view_service".localized)
+                                .font(.system(size: 14, weight: .bold))
+                            Image(systemName: "arrow.right")
+                                .font(.system(size: 12, weight: .bold))
+                                .foregroundStyle(JourneyVisual.lime)
+                                .frame(width: 26, height: 26)
+                                .background(Color.black, in: Circle())
+                        }
+                        .foregroundStyle(.black)
+                        .padding(.leading, 15)
+                        .padding(.trailing, 5)
+                        .frame(height: 36)
+                        .background(JourneyVisual.lime, in: Capsule())
+                    }
+                    .padding(.top, 2)
+                }
+                .padding(.horizontal, 16)
+                .padding(.top, 14)
+                .padding(.bottom, 16)
+            }
+            .background(Theme.Colors.card)
+        }
+        .buttonStyle(ScaleButtonStyle(scaleAmount: 0.985, hapticStyle: .light))
+        .accessibilityElement(children: .combine)
+        .accessibilityHint("marketplace.open".localized)
+        .overlay(alignment: .topTrailing) {
             Button(action: saveAction) {
                 Image(systemName: isSaved ? "heart.fill" : "heart")
-                    .font(.system(size: 17, weight: .bold))
-                    .foregroundStyle(isSaved ? .black : .white)
-                    .frame(width: 46, height: 46)
-                    .background(isSaved ? JourneyVisual.lime : Color.black.opacity(0.56))
-                    .clipShape(Circle())
-                    .overlay(Circle().stroke(.white.opacity(0.24), lineWidth: 1))
+                    .font(.system(size: 15, weight: .bold))
+                    .foregroundStyle(isSaved ? .black : JourneyVisual.primaryText)
+                    .frame(width: 38, height: 38)
+                    .background(isSaved ? JourneyVisual.lime : Theme.Colors.card.opacity(0.94), in: Circle())
+                    .overlay(Circle().strokeBorder(JourneyVisual.softBorder, lineWidth: 1))
             }
             .buttonStyle(.plain)
-            .padding(14)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+            .padding(12)
             .accessibilityLabel(isSaved ? "journey.marketplace.remove_saved".localized : "journey.marketplace.save".localized)
         }
-        .frame(height: 312)
-        .clipShape(RoundedRectangle(cornerRadius: 27, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 27, style: .continuous).stroke(.white.opacity(0.25), lineWidth: 1))
-        .shadow(color: .black.opacity(0.32), radius: 20, y: 10)
+        .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 26, style: .continuous).strokeBorder(JourneyVisual.softBorder, lineWidth: 1))
+        .shadow(color: .black.opacity(0.08), radius: 18, y: 8)
     }
 }
 
@@ -993,10 +1003,10 @@ private struct JourneyServiceDiscoveryCard: View {
                 Button(action: saveAction) {
                     Image(systemName: isSaved ? "heart.fill" : "heart")
                         .font(.system(size: 14, weight: .bold))
-                        .foregroundStyle(isSaved ? .black : .white)
-                        .frame(width: 38, height: 38)
-                        .background(isSaved ? JourneyVisual.lime : Color.black.opacity(0.54))
-                        .clipShape(Circle())
+                        .foregroundStyle(isSaved ? .black : JourneyVisual.primaryText)
+                        .frame(width: 34, height: 34)
+                        .background(isSaved ? JourneyVisual.lime : Theme.Colors.card.opacity(0.94), in: Circle())
+                        .overlay(Circle().strokeBorder(JourneyVisual.softBorder, lineWidth: 1))
                 }
                 .buttonStyle(.plain)
                 .padding(8)

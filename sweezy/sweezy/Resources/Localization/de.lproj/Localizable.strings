@@ -730,6 +730,7 @@
 "marketplace.detail.contact" = "Kontakt";
 "marketplace.detail.views" = "Aufrufe";
 "marketplace.detail.published" = "Veröffentlicht";
+"marketplace.detail.price" = "Preis";
 "marketplace.detail.author_hint" = "Nehmen Sie über die Kontakt-Schaltfläche unten Verbindung auf.";
 "marketplace.detail.footer" = "Bitte prüfen Sie Leistungsdetails, Zeitrahmen und Preis vor der Vereinbarung noch einmal.";
 
@@ -4299,3 +4300,6 @@
 "auth.login.no_account" = "Noch kein Konto?";
 "auth.login.create" = "Erstellen";
 "auth.registration.eyebrow" = "Neues Konto";
+"Як зустрітися" = "Treffen";
+"Чат події" = "Event-Chat";
+"%@ учасників" = "%@ Teilnehmende";

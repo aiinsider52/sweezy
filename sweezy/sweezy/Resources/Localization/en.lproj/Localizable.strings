@@ -921,6 +921,7 @@
 "marketplace.detail.contact" = "Contact";
 "marketplace.detail.views" = "Views";
 "marketplace.detail.published" = "Published";
+"marketplace.detail.price" = "Price";
 "marketplace.detail.author_hint" = "Reach out using the contact button below.";
 "marketplace.detail.footer" = "Always double-check the service details and agree on timing and price before proceeding.";
 
@@ -4370,3 +4371,6 @@
 "auth.login.no_account" = "No account yet?";
 "auth.login.create" = "Create one";
 "auth.registration.eyebrow" = "New account";
+"Як зустрітися" = "How to meet";
+"Чат події" = "Event chat";
+"%@ учасників" = "%@ attendees";

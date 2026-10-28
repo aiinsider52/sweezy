@@ -253,6 +253,7 @@ import UIKit
       isLimited: false, visibleLimit: nil, advancedFiltersAvailable: true,
       requestsRemaining: 5)
     swipeProfiles = profiles
+    if events.isEmpty { events = SocialFriendPreviewFixtures.events }
     swipeDeckMeta = SocialSwipeDeck(
       items: profiles, likesRemaining: 15, weeklyLimit: 15, isPremium: false,
       resetAt: Calendar.current.date(byAdding: .day, value: 7, to: Date()))
@@ -290,13 +291,9 @@ private struct FriendSwipeDeck: View {
   }
 
   var body: some View {
-    VStack(spacing: 11) {
+    VStack(spacing: 6) {
       cardStack
       actionControls
-      Text("Like приватний до взаємного вибору".localized)
-        .font(.caption2.weight(.semibold))
-        .foregroundColor(JourneyVisual.secondaryText)
-        .accessibilityHidden(true)
     }
   }
 
@@ -307,7 +304,6 @@ private struct FriendSwipeDeck: View {
       }
     }
     .frame(height: cardHeight + 20)
-    .clipped()
     .sensoryFeedback(.impact(weight: .light), trigger: armed) { _, armed in armed }
   }
 
@@ -351,55 +347,37 @@ private struct FriendSwipeDeck: View {
   }
 
   private var actionControls: some View {
-    GeometryReader { proxy in
-      let scale = min(1, max(0.82, (proxy.size.width - 32) / 250))
-      HStack(alignment: .top, spacing: 15 * scale) {
-        swipeActionButton(
-          label: "friends.swipe.pass".localized, icon: "xmark", size: 68 * scale, primary: false,
-          enabled: topProfile != nil && !busy, identifier: "friends.swipe.pass"
-        ) {
-          if let topProfile { commit(topProfile, decision: "pass") }
-        }
-        VStack(spacing: 10 * scale) {
-          actionButton(
-            icon: "info", size: 44 * scale, enabled: topProfile != nil && !busy,
-            identifier: "friends.swipe.details"
-          ) {
-            if let topProfile { onDetails(topProfile) }
-          }
-          if canUndo {
-            actionButton(
-              icon: "arrow.uturn.backward", size: 36 * scale, enabled: !busy,
-              identifier: "friends.swipe.undo", action: onUndo)
-              .transition(.scale.combined(with: .opacity))
-          }
-        }
-        .padding(.top, 22 * scale)
-        swipeActionButton(
-          label: "friends.swipe.like".localized, icon: "heart.fill", size: 76 * scale, primary: true,
-          enabled: topProfile != nil && !busy, identifier: "friends.swipe.like"
-        ) {
-          if let topProfile { commit(topProfile, decision: "like") }
-        }
-      }
-      .frame(maxWidth: .infinity)
-    }
-    .frame(height: 104)
-  }
-
-  private func swipeActionButton(
-    label: String, icon: String, size: CGFloat, primary: Bool, enabled: Bool,
-    identifier: String,
-    action: @escaping () -> Void
-  ) -> some View {
-    VStack(spacing: 8) {
-      Text(label.uppercased())
-        .font(.caption.bold()).tracking(1.4)
-        .foregroundColor(primary ? JourneyVisual.accentText : JourneyVisual.secondaryText)
+    HStack(spacing: 18) {
       actionButton(
-        icon: icon, size: size, primary: primary, enabled: enabled, identifier: identifier,
-        action: action)
+        icon: "xmark", size: 60, enabled: topProfile != nil && !busy,
+        identifier: "friends.swipe.pass"
+      ) {
+        if let topProfile { commit(topProfile, decision: "pass") }
+      }
+      .accessibilityLabel("friends.swipe.pass".localized)
+      if canUndo {
+        actionButton(
+          icon: "arrow.uturn.backward", size: 44, enabled: !busy,
+          identifier: "friends.swipe.undo", action: onUndo)
+          .transition(.scale.combined(with: .opacity))
+      }
+      actionButton(
+        icon: "info", size: 44, enabled: topProfile != nil && !busy,
+        identifier: "friends.swipe.details"
+      ) {
+        if let topProfile { onDetails(topProfile) }
+      }
+      actionButton(
+        icon: "heart.fill", size: 68, primary: true, enabled: topProfile != nil && !busy,
+        identifier: "friends.swipe.like"
+      ) {
+        if let topProfile { commit(topProfile, decision: "like") }
+      }
+      .accessibilityLabel("friends.swipe.like".localized)
     }
+    .frame(maxWidth: .infinity)
+    .frame(height: 72)
+    .animation(.spring(response: 0.3, dampingFraction: 0.8), value: canUndo)
   }
 
   private var swipeGesture: some Gesture {
@@ -457,12 +435,12 @@ private struct FriendSwipeDeck: View {
         .font(.system(size: size * 0.31, weight: .bold))
         .foregroundColor(primary ? .black : JourneyVisual.primaryText.opacity(enabled ? 0.9 : 0.28))
         .frame(width: size, height: size)
-        .background(primary ? JourneyVisual.lime : JourneyVisual.elevatedSurface)
+        .background(primary ? JourneyVisual.lime : Theme.Colors.card)
         .clipShape(Circle())
-        .overlay(Circle().stroke(primary ? JourneyVisual.lime : JourneyVisual.softBorder))
-        .shadow(color: primary ? JourneyVisual.lime.opacity(0.24) : .clear, radius: 16)
+        .overlay(Circle().stroke(primary ? JourneyVisual.accentStrong.opacity(0.35) : JourneyVisual.softBorder))
+        .shadow(color: primary ? JourneyVisual.lime.opacity(0.45) : .black.opacity(0.08), radius: primary ? 16 : 8, y: 5)
     }
-    .buttonStyle(.plain)
+    .buttonStyle(ScaleButtonStyle(scaleAmount: 0.9, hapticStyle: .soft))
     .disabled(!enabled)
     .opacity(enabled ? 1 : 0.45)
     .accessibilityIdentifier(identifier ?? "")
@@ -503,29 +481,28 @@ private struct FriendSwipeCard: View {
         }
         HStack(alignment: .firstTextBaseline, spacing: 8) {
           Text(profile.displayName)
-            .font(.system(size: 26, weight: .bold, design: .default))
+            .font(.system(size: 30, weight: .bold, design: .default))
+            .tracking(-0.4)
             .foregroundColor(.white).lineLimit(1).minimumScaleFactor(0.72)
+          if let ageBand = profile.ageBand, !ageBand.isEmpty {
+            Text(ageBand.replacingOccurrences(of: "-", with: "–"))
+              .font(.system(size: 20, weight: .medium)).foregroundColor(.white.opacity(0.82))
+          }
           if profile.isVerified {
-            Image(systemName: "checkmark.seal.fill").foregroundColor(lime)
+            Image(systemName: "checkmark.seal.fill").font(.system(size: 18)).foregroundColor(lime)
           }
         }
-        if let ageBand = profile.ageBand, !ageBand.isEmpty {
-          Text(ageBand.replacingOccurrences(of: "-", with: "–"))
-            .font(.system(size: 17, weight: .bold)).foregroundColor(.white)
-            .padding(.top, 2)
-        }
         Text(profile.bio)
-          .font(.subheadline.weight(.medium)).foregroundColor(.white.opacity(0.76))
+          .font(.system(size: 15, weight: .medium)).foregroundColor(.white.opacity(0.82))
           .lineLimit(2).fixedSize(horizontal: false, vertical: true)
-          .padding(.top, 5)
-        HStack(spacing: 7) {
+          .padding(.top, 6)
+        HStack(spacing: 6) {
           ForEach(Array(profile.sharedInterests.prefix(3))) { interest in
             Label(interest.title, systemImage: interest.icon)
-              .font(.system(size: 10, weight: .bold)).foregroundColor(.white.opacity(0.92))
+              .font(.system(size: 12, weight: .bold)).foregroundColor(.black)
               .lineLimit(1).minimumScaleFactor(0.72)
-              .padding(.horizontal, 9).padding(.vertical, 8)
-              .background(Color.black.opacity(0.48)).clipShape(Capsule())
-              .overlay(Capsule().stroke(Color.white.opacity(0.24)))
+              .padding(.horizontal, 10).frame(height: 30)
+              .background(lime.opacity(0.92), in: Capsule())
           }
         }
         .padding(.top, 12)
@@ -535,7 +512,7 @@ private struct FriendSwipeCard: View {
       VStack {
         HStack(alignment: .top) {
           Spacer()
-          verticalMatchScore.padding(.top, 16).padding(.trailing, 16)
+          verticalMatchScore.padding(.top, 18).padding(.trailing, 18)
         }
         Spacer()
       }
@@ -604,26 +581,26 @@ private struct FriendSwipeCard: View {
       Text("\(profile.city) · \(profile.canton)")
       if let distance = profile.distanceKM { Text("· %@ км".localized(with: "\(distance)")) }
     }
-    .font(.caption.bold()).foregroundColor(.white)
-    .padding(.horizontal, 11).padding(.vertical, 8)
-    .background(.black.opacity(0.42)).clipShape(Capsule())
-    .overlay(Capsule().stroke(.white.opacity(0.16)))
+    .font(.system(size: 12, weight: .bold)).foregroundColor(JourneyVisual.primaryText)
+    .padding(.horizontal, 11).frame(height: 30)
+    .background(Theme.Colors.card.opacity(0.92), in: Capsule())
   }
 
   private var verticalMatchScore: some View {
-    VStack(spacing: 0) {
+    HStack(spacing: 4) {
+      Image(systemName: "sparkle")
+        .font(.system(size: 10, weight: .black))
       Text("\(profile.matchScore)%")
-        .font(.system(size: 22, weight: .black, design: .default))
-        .foregroundColor(.black)
+        .font(.system(size: 14, weight: .black))
       Text("friends.match.label".localized)
-        .font(.system(size: 9, weight: .black))
-        .tracking(0.8)
-        .foregroundColor(.black.opacity(0.7))
+        .font(.system(size: 11, weight: .bold))
+        .opacity(0.7)
     }
-    .frame(width: 66, height: 66)
-    .background(lime, in: Circle())
-    .overlay(Circle().stroke(.white.opacity(0.6), lineWidth: 2))
-    .shadow(color: .black.opacity(0.3), radius: 10, y: 4)
+    .foregroundColor(.black)
+    .padding(.horizontal, 11)
+    .frame(height: 30)
+    .background(lime, in: Capsule())
+    .shadow(color: .black.opacity(0.2), radius: 8, y: 3)
     .accessibilityHidden(true)
   }
 
@@ -841,7 +818,7 @@ struct FriendNetworkView: View {
               case 3: profile
               default: discover(screenHeight: geometry.size.height)
               }
-            }.padding(.top, 18)
+            }.padding(.top, 12)
           }
           .frame(width: geometry.size.width)
           .padding(.bottom, showsDismissButton ? 44 : 124)
@@ -1009,17 +986,12 @@ struct FriendNetworkView: View {
         }
         .accessibilityLabel("Назад".localized)
       }
-      VStack(alignment: .leading, spacing: 3) {
-        Text("journey.tab.people".localized)
-          .font(.system(size: 30, weight: .bold))
-          .foregroundColor(JourneyVisual.primaryText)
-          .accessibilityIdentifier("friends.people.title")
-        Text("friends.header.subtitle".localized)
-          .font(.system(size: 13, weight: .medium))
-          .foregroundColor(JourneyVisual.secondaryText)
-          .lineLimit(2)
-          .fixedSize(horizontal: false, vertical: true)
-      }
+      Text("journey.tab.people".localized)
+        .font(.system(size: 30, weight: .bold))
+        .tracking(-0.4)
+        .foregroundColor(JourneyVisual.primaryText)
+        .accessibilityIdentifier("friends.people.title")
+        .accessibilityHint("friends.header.subtitle".localized)
       Spacer(minLength: 8)
       if !vm.incoming.isEmpty {
         Button { tab = 2 } label: {
@@ -1030,9 +1002,9 @@ struct FriendNetworkView: View {
       }
       Button { filters = true } label: {
         Image(systemName: "slider.horizontal.3")
-          .font(.headline)
+          .font(.system(size: 15, weight: .bold))
           .foregroundColor(JourneyVisual.primaryText)
-          .frame(width: 46, height: 46)
+          .frame(width: 42, height: 42)
           .background(Theme.Colors.card)
           .clipShape(Circle())
           .overlay(Circle().stroke(JourneyVisual.softBorder, lineWidth: 1))
@@ -1041,8 +1013,8 @@ struct FriendNetworkView: View {
       .accessibilityIdentifier("friends.people.filters")
     }
     .padding(.horizontal, 18)
-    .padding(.top, 12)
-    .padding(.bottom, 12)
+    .padding(.top, 6)
+    .padding(.bottom, 10)
   }
   private var isUITestPreview: Bool {
     #if DEBUG
@@ -1119,17 +1091,18 @@ struct FriendNetworkView: View {
     .background(JourneyVisual.elevatedSurface)
     .clipShape(Capsule())
   }
+  private var likesBadgeText: String {
+    if vm.swipeDeckMeta?.isPremium == true { return "Plus" }
+    return vm.swipeDeckMeta?.likesRemaining.map { "\($0)" } ?? "Like"
+  }
   private var peopleLikesText: String {
     if vm.swipeDeckMeta?.isPremium == true { return "Like без ліміту".localized }
     if let remaining = vm.swipeDeckMeta?.likesRemaining { return "%@ Like доступно".localized(with: "\(remaining)") }
     return "Приватні Like".localized
   }
   private func discover(screenHeight: CGFloat) -> some View {
-    VStack(alignment: .leading, spacing: 15) {
+    VStack(alignment: .leading, spacing: 12) {
       discoverModePicker
-      if vm.isShowingDemoProfiles {
-        demoNotice
-      }
       if !showPeopleCatalog {
       if vm.loading && vm.swipeProfiles.isEmpty {
         SkeletonList(rows: 2).padding(.vertical, 12)
@@ -1148,7 +1121,9 @@ struct FriendNetworkView: View {
       } else {
         FriendSwipeDeck(
           profiles: vm.swipeProfiles,
-          cardHeight: min(460, max(350, screenHeight * 0.46)),
+          // Header, switcher, toolbar, buttons and the floating tab bar take ~290pt;
+          // the card gets the rest so the like/pass buttons never hide under the tab bar.
+          cardHeight: min(540, max(320, screenHeight - (showsDismissButton ? 220 : 300))),
           busy: vm.swipeBusy,
           canUndo: vm.lastPassedProfile != nil,
           onDecision: handleSwipe,
@@ -1190,46 +1165,68 @@ struct FriendNetworkView: View {
   }
   /// Cards for one-by-one introductions, search for browsing everyone at once.
   private var discoverModePicker: some View {
-    HStack(spacing: 10) {
-      discoverModeButton(
-        title: "friends.mode.cards".localized, subtitle: "friends.mode.cards.subtitle".localized,
-        icon: "rectangle.stack.fill", selected: !showPeopleCatalog, identifier: "friends.mode.cards"
-      ) { showPeopleCatalog = false }
-      discoverModeButton(
-        title: "friends.mode.search".localized, subtitle: "friends.mode.search.subtitle".localized,
-        icon: "magnifyingglass", selected: showPeopleCatalog, identifier: "friends.catalog.toggle"
-      ) { showPeopleCatalog = true }
+    HStack(spacing: 8) {
+      HStack(spacing: 2) {
+        discoverModeButton(
+          title: "friends.mode.cards".localized, icon: "rectangle.stack.fill",
+          selected: !showPeopleCatalog, identifier: "friends.mode.cards"
+        ) { showPeopleCatalog = false }
+        discoverModeButton(
+          title: "friends.mode.search".localized, icon: "magnifyingglass",
+          selected: showPeopleCatalog, identifier: "friends.catalog.toggle"
+        ) { showPeopleCatalog = true }
+      }
+      .padding(3)
+      .background(JourneyVisual.softSurface, in: Capsule())
+      .fixedSize()
+      Spacer(minLength: 4)
+      if vm.isShowingDemoProfiles {
+        Text("DEMO")
+          .font(.system(size: 10, weight: .heavy)).tracking(0.8)
+          .foregroundColor(JourneyVisual.secondaryText)
+          .padding(.horizontal, 8).frame(height: 24)
+          .overlay(Capsule().stroke(JourneyVisual.softBorder))
+          .accessibilityLabel("Демо-каталог · тестові профілі".localized)
+          .accessibilityIdentifier("friends.demo.notice")
+      }
+      HStack(spacing: 5) {
+        Image(systemName: vm.swipeDeckMeta?.isPremium == true ? "infinity" : "heart.fill")
+          .font(.system(size: 10, weight: .bold))
+          .foregroundColor(JourneyVisual.accentStrong)
+        Text(likesBadgeText)
+          .font(.system(size: 13, weight: .bold))
+          .foregroundColor(JourneyVisual.primaryText)
+      }
+      .padding(.horizontal, 10).frame(height: 28)
+      .background(Theme.Colors.card, in: Capsule())
+      .overlay(Capsule().stroke(JourneyVisual.softBorder))
+      .accessibilityElement(children: .ignore)
+      .accessibilityLabel(peopleLikesText)
     }
   }
   private func discoverModeButton(
-    title: String, subtitle: String, icon: String, selected: Bool, identifier: String,
+    title: String, icon: String, selected: Bool, identifier: String,
     action: @escaping () -> Void
   ) -> some View {
     Button {
       withAnimation(reduceMotion ? nil : .spring(response: 0.32, dampingFraction: 0.84)) { action() }
     } label: {
-      HStack(spacing: 10) {
-        Image(systemName: icon)
-          .font(.system(size: 15, weight: .bold))
-          .foregroundColor(selected ? .black : JourneyVisual.accentStrong)
-          .frame(width: 36, height: 36)
-          .background(selected ? Color.white.opacity(0.55) : JourneyVisual.softSurface, in: Circle())
-        VStack(alignment: .leading, spacing: 1) {
-          Text(title).font(.system(size: 14, weight: .bold))
-          Text(subtitle).font(.system(size: 11, weight: .medium)).opacity(0.7)
-            .lineLimit(1).minimumScaleFactor(0.8)
-        }
-        .foregroundColor(selected ? .black : JourneyVisual.primaryText)
-        Spacer(minLength: 0)
+      HStack(spacing: 6) {
+        Image(systemName: icon).font(.system(size: 11, weight: .bold))
+        Text(title).font(.system(size: 13, weight: .bold))
       }
-      .padding(10)
-      .frame(maxWidth: .infinity)
-      .background(selected ? limeAccent : Theme.Colors.card, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
-      .overlay(
-        RoundedRectangle(cornerRadius: 20, style: .continuous)
-          .stroke(selected ? Color.clear : JourneyVisual.softBorder, lineWidth: 1))
+      .foregroundColor(selected ? JourneyVisual.primaryText : JourneyVisual.secondaryText)
+      .padding(.horizontal, 13)
+      .frame(height: 32)
+      .background {
+        if selected {
+          Capsule().fill(Theme.Colors.card)
+            .shadow(color: .black.opacity(0.08), radius: 4, y: 2)
+        }
+      }
+      .contentShape(Capsule())
     }
-    .buttonStyle(ScaleButtonStyle(scaleAmount: 0.97, hapticStyle: .light))
+    .buttonStyle(.plain)
     .accessibilityAddTraits(selected ? .isSelected : [])
     .accessibilityIdentifier(identifier)
   }
@@ -1289,11 +1286,6 @@ struct FriendNetworkView: View {
         activeMatch = SocialMatchPresentation(profile: profile, conversationID: result?.conversationID)
       }
     }
-  }
-  private var demoNotice: some View {
-    Label("Демо-каталог · тестові профілі".localized, systemImage: "info.circle")
-      .font(.caption).foregroundColor(JourneyVisual.secondaryText)
-      .accessibilityIdentifier("friends.demo.notice")
   }
   private var search: some View {
     VStack(alignment: .leading, spacing: 12) {
@@ -1402,62 +1394,112 @@ struct FriendNetworkView: View {
       if vm.events.isEmpty {
         empty("Подій поки немає".localized, "Спробуй інший кантон або повернися пізніше.".localized, story: "events")
       } else {
-        ForEach(vm.events) { e in
-          VStack(alignment: .leading, spacing: 12) {
-            HStack {
-              VStack(alignment: .leading, spacing: 5) {
-                Text(e.title).font(.headline).foregroundColor(JourneyVisual.primaryText)
-                Text("\(e.city) · \(e.startsAt.formatted(Date.FormatStyle(date:.abbreviated,time:.shortened, locale: AppLanguage.current.locale)))").font(
-                  .caption
-                ).foregroundColor(JourneyVisual.secondaryText)
-              }
-              Spacer()
-              Text("\(e.attendeeCount)").font(.headline.bold()).foregroundColor(JourneyVisual.accentText)
-            }
-            HStack {
-              Button {
-                Task { await vm.attend(e) }
-              } label: {
-                Label(
-                  e.myStatus == "going" ? "Я йду".localized : "Піти".localized,
-                  systemImage: e.myStatus == "going" ? "checkmark.circle.fill" : "plus.circle.fill"
-                ).font(.subheadline.bold()).foregroundColor(.black).padding(.horizontal, 16).frame(
-                  height: 42
-                ).background(limeAccent).clipShape(Capsule())
-              }
-              if e.myStatus == "going" {
-                Button {
-                  Task {
-                    do {
-                      vm.profiles = try await FriendsAPI.profiles(eventID: e.id).items
-                      tab = 0
-                    } catch { vm.error = error.localizedDescription }
-                  }
-                } label: {
-                  Text("Хто буде".localized).font(.subheadline.bold()).foregroundColor(JourneyVisual.primaryText)
-                }
-                if e.groupChatAvailable {
-                  Button {
-                    eventChat = e
-                  } label: {
-                    Image(systemName: "bubble.left.and.bubble.right.fill").foregroundColor(
-                      JourneyVisual.accentStrong)
-                  }
-                }
-              }
-              Spacer()
-              Button {
-                event = e
-              } label: {
-                Image(systemName: "arrow.up.right").foregroundColor(JourneyVisual.primaryText)
-              }
-            }
-          }.padding(17).background(JourneyVisual.elevatedSurface).clipShape(
-            RoundedRectangle(cornerRadius: 22)
-          ).overlay(RoundedRectangle(cornerRadius: 22).stroke(JourneyVisual.softBorder))
-        }
+        ForEach(vm.events) { e in eventCard(e) }
       }
     }.padding(.horizontal, 18)
+  }
+  /// Poster-style row: a calendar tile you can scan down the list, then what, where and who.
+  private func eventCard(_ e: SocialEvent) -> some View {
+    let going = e.myStatus == "going"
+    let locale = AppLanguage.current.locale
+    return VStack(alignment: .leading, spacing: 14) {
+      Button { event = e } label: {
+        HStack(alignment: .top, spacing: 14) {
+          VStack(spacing: 0) {
+            Text(e.startsAt.formatted(.dateTime.month(.abbreviated).locale(locale)).uppercased())
+              .font(.system(size: 11, weight: .heavy)).tracking(0.6)
+            Text(e.startsAt.formatted(.dateTime.day().locale(locale)))
+              .font(.system(size: 26, weight: .heavy))
+            Text(e.startsAt.formatted(.dateTime.weekday(.abbreviated).locale(locale)))
+              .font(.system(size: 11, weight: .semibold))
+              .opacity(0.65)
+          }
+          .foregroundColor(e.isRecommended ? .black : JourneyVisual.primaryText)
+          .frame(width: 62, height: 76)
+          .background(
+            e.isRecommended ? JourneyVisual.lime : JourneyVisual.softSurface,
+            in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+
+          VStack(alignment: .leading, spacing: 6) {
+            Text(e.title)
+              .font(.system(size: 17, weight: .bold))
+              .foregroundColor(JourneyVisual.primaryText)
+              .lineLimit(2)
+              .multilineTextAlignment(.leading)
+              .fixedSize(horizontal: false, vertical: true)
+            HStack(spacing: 5) {
+              Image(systemName: "clock")
+              Text(e.startsAt.formatted(.dateTime.hour().minute().locale(locale)))
+              Text("·")
+              Image(systemName: "mappin")
+              Text(e.city).lineLimit(1)
+            }
+            .font(.system(size: 13, weight: .medium))
+            .foregroundColor(JourneyVisual.secondaryText)
+            if let reason = e.recommendationReason, !reason.isEmpty {
+              Label(reason, systemImage: "sparkles")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundColor(JourneyVisual.accentText)
+                .lineLimit(2)
+            }
+          }
+          Spacer(minLength: 0)
+        }
+        .contentShape(Rectangle())
+      }
+      .buttonStyle(.plain)
+      .accessibilityElement(children: .combine)
+
+      HStack(spacing: 10) {
+        Button {
+          Task { await vm.attend(e) }
+        } label: {
+          Label(going ? "Я йду".localized : "Піти".localized, systemImage: going ? "checkmark" : "plus")
+            .font(.system(size: 14, weight: .bold))
+            .foregroundColor(going ? JourneyVisual.primaryText : .black)
+            .padding(.horizontal, 16).frame(height: 38)
+            .background(going ? JourneyVisual.lime.opacity(0.22) : JourneyVisual.lime, in: Capsule())
+        }
+        .buttonStyle(ScaleButtonStyle(scaleAmount: 0.95, hapticStyle: .light))
+        if going {
+          Button {
+            Task {
+              do {
+                vm.profiles = try await FriendsAPI.profiles(eventID: e.id).items
+                tab = 0
+              } catch { vm.error = error.localizedDescription }
+            }
+          } label: {
+            Text("Хто буде".localized)
+              .font(.system(size: 14, weight: .bold))
+              .foregroundColor(JourneyVisual.primaryText)
+              .padding(.horizontal, 14).frame(height: 38)
+              .background(JourneyVisual.softSurface, in: Capsule())
+          }
+          .buttonStyle(.plain)
+          if e.groupChatAvailable {
+            Button { eventChat = e } label: {
+              Image(systemName: "bubble.left.and.bubble.right.fill")
+                .font(.system(size: 13, weight: .bold))
+                .foregroundColor(JourneyVisual.primaryText)
+                .frame(width: 38, height: 38)
+                .background(JourneyVisual.softSurface, in: Circle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Чат події".localized)
+          }
+        }
+        Spacer(minLength: 0)
+        Label("\(e.attendeeCount)", systemImage: "person.2.fill")
+          .font(.system(size: 13, weight: .bold))
+          .foregroundColor(JourneyVisual.secondaryText)
+          .accessibilityLabel("%@ учасників".localized(with: "\(e.attendeeCount)"))
+      }
+    }
+    .padding(14)
+    .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+    .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous).stroke(JourneyVisual.softBorder))
+    .shadow(color: .black.opacity(0.04), radius: 10, y: 4)
   }
   private var connections: some View {
     VStack(alignment: .leading, spacing: 18) {
@@ -1830,127 +1872,351 @@ private struct FriendCard: View {
   }
 }
 
+/// Full profile: portrait on top, a paper sheet with who they are and what you share,
+/// and the one action that matters pinned to the bottom.
 private struct FriendProfileDetail: View {
   @Environment(\.dismiss) var dismiss
   let profile: SocialProfile
   @ObservedObject var vm: FriendNetworkViewModel
   @Binding var conversation: ChatConversation?
   @State var message = ""
+  @State private var scrollOffset: CGFloat = 0
   private var isDemo: Bool { profile.id.hasPrefix("preview-") }
-  private var profilePortrait: some View {
-    GeometryReader { geometry in
-      Group {
-        if isDemo {
-          Image(profile.id.replacingOccurrences(of: "preview-", with: "friend-preview-"))
-            .resizable().scaledToFill()
-        } else if let raw = profile.avatarURL, let url = APIClient.resolveMediaURL(raw) {
-          CachedAsyncImage(url: url) {
-            Text(profile.initials).font(.largeTitle.bold()).foregroundStyle(JourneyVisual.accentText)
-          }
-        } else {
-          Text(profile.initials).font(.largeTitle.bold()).foregroundStyle(JourneyVisual.accentText)
+  private var sharedSet: Set<SocialInterest> { Set(profile.sharedInterests) }
+  private var orderedInterests: [SocialInterest] {
+    profile.interests.sorted { sharedSet.contains($0) && !sharedSet.contains($1) }
+  }
+
+  var body: some View {
+    ZStack(alignment: .top) {
+      JourneyVisual.pageBackground.ignoresSafeArea()
+      ScrollView(showsIndicators: false) {
+        VStack(spacing: 0) {
+          hero
+          sheet.padding(.top, -28)
+        }
+        .padding(.bottom, 20)
+      }
+      .ignoresSafeArea(edges: .top)
+      .scrollDismissesKeyboard(.interactively)
+      .onScrollGeometryChange(for: CGFloat.self) { geometry in
+        geometry.contentOffset.y + geometry.contentInsets.top
+      } action: { _, offset in
+        scrollOffset = offset
+      }
+      topBar
+    }
+    .safeAreaInset(edge: .bottom, spacing: 0) { actionBar }
+  }
+
+  private var hero: some View {
+    Color.clear
+      .frame(height: 460)
+      .overlay { portrait }
+      .clipped()
+      .overlay(alignment: .top) {
+        LinearGradient(colors: [.black.opacity(0.25), .clear], startPoint: .top, endPoint: .bottom)
+          .frame(height: 120)
+      }
+      .accessibilityHidden(true)
+  }
+
+  @ViewBuilder private var portrait: some View {
+    if isDemo {
+      Image(profile.id.replacingOccurrences(of: "preview-", with: "friend-preview-"))
+        .resizable().scaledToFill()
+    } else if let raw = profile.avatarURL, let url = APIClient.resolveMediaURL(raw) {
+      CachedAsyncImage(url: url) { initialsArt }
+    } else {
+      initialsArt
+    }
+  }
+
+  private var initialsArt: some View {
+    ZStack {
+      LinearGradient(
+        colors: [JourneyVisual.lime.opacity(0.55), JourneyVisual.softSurface],
+        startPoint: .topLeading, endPoint: .bottomTrailing)
+      Text(profile.initials)
+        .font(.system(size: 96, weight: .black))
+        .foregroundColor(JourneyVisual.primaryText.opacity(0.8))
+    }
+  }
+
+  private var sheet: some View {
+    VStack(alignment: .leading, spacing: 22) {
+      identity
+      matchCard
+      if !profile.bio.isEmpty {
+        section("Про мене".localized) {
+          Text(profile.bio)
+            .font(.system(size: 16))
+            .foregroundColor(JourneyVisual.primaryText.opacity(0.86))
+            .lineSpacing(3)
+            .fixedSize(horizontal: false, vertical: true)
         }
       }
-      .frame(width: geometry.size.width, height: 220)
-      .background(Theme.Colors.card)
-      .clipped()
-    }
-    .frame(height: 220)
-    .clipShape(RoundedRectangle(cornerRadius: 24))
-    .accessibilityHidden(true)
-  }
-  var body: some View {
-    ZStack {
-      JourneyAmbientBackground()
-      ScrollView {
-        VStack(alignment: .leading, spacing: 20) {
-          HStack {
-            Button {
-              dismiss()
-            } label: {
-              Image(systemName: "xmark").foregroundColor(JourneyVisual.primaryText)
-                .frame(width: 48, height: 48)
-                .background(JourneyVisual.elevatedSurface).clipShape(Circle())
-            }
-            Spacer()
-            if !isDemo { Menu {
-              Button("Поскаржитися".localized, role: .destructive) {
-                Task {
-                  do {
-                    try await FriendsAPI.report(profile.id)
-                  } catch {
-                    vm.error = error.localizedDescription
-                  }
-                }
-              }
-              Button("Заблокувати".localized, role: .destructive) {
-                Task {
-                  do {
-                    try await FriendsAPI.block(profile.id)
-                    dismiss()
-                  } catch {
-                    vm.error = error.localizedDescription
-                  }
-                }
-              }
-            } label: {
-              Image(systemName: "ellipsis").foregroundColor(JourneyVisual.primaryText)
-            } }
-          }
-          profilePortrait
-          Text("%@%% збіг".localized(with: "\(profile.matchScore)")).font(.caption.bold()).foregroundColor(
-            JourneyVisual.accentText)
-          Text(profile.displayName).font(.largeTitle.bold())
-            .foregroundColor(JourneyVisual.primaryText)
-          Text("\(profile.city) · \(profile.canton)").foregroundColor(JourneyVisual.secondaryText)
-          Text(profile.bio).foregroundColor(JourneyVisual.primaryText.opacity(0.78))
-          Text("СПІЛЬНІ ІНТЕРЕСИ".localized).font(.caption.bold()).tracking(1.5).foregroundColor(
-            JourneyVisual.accentText)
+      if !orderedInterests.isEmpty {
+        section("Інтереси".localized) {
           FlowLayout(spacing: 8) {
-            ForEach(profile.sharedInterests) { i in
-              Label(i.title, systemImage: i.icon).font(.caption.bold())
-                .foregroundColor(JourneyVisual.primaryText)
-                .padding(10).background(JourneyVisual.lime.opacity(0.12)).clipShape(Capsule())
-                .overlay(Capsule().stroke(JourneyVisual.lime.opacity(0.2)))
+            ForEach(orderedInterests) { interest in
+              chip(interest.title, icon: interest.icon, highlighted: sharedSet.contains(interest))
             }
           }
-          if isDemo {
-            Label("Демо-профіль · дії вимкнені".localized, systemImage: "sparkles")
-              .font(.subheadline.bold()).foregroundColor(Theme.Colors.textPrimary)
-              .frame(maxWidth: .infinity, minHeight: 52)
-              .background(JourneyVisual.lime.opacity(0.1))
-              .clipShape(RoundedRectangle(cornerRadius: 17))
-          } else if profile.connectionState == "accepted", let id = profile.conversationID {
-            Button {
-              Task { conversation = try? await ChatAPI.conversation(id: id) }
-            } label: {
-              Text("Відкрити чат".localized).font(.headline).foregroundColor(.black).frame(
-                maxWidth: .infinity, minHeight: 56
-              ).background(JourneyVisual.lime).clipShape(RoundedRectangle(cornerRadius: 18))
+        }
+      }
+      if !profile.meetupFormats.isEmpty || !profile.availability.isEmpty {
+        section("Як зустрітися".localized) {
+          FlowLayout(spacing: 8) {
+            ForEach(profile.meetupFormats) { format in
+              chip(format.title, icon: formatIcon(format), highlighted: false)
             }
-          } else if profile.connectionState == "none" {
-            TextField("Коротко привітайся…".localized, text: $message, axis: .vertical).padding().background(
-              JourneyVisual.elevatedSurface
-            ).clipShape(RoundedRectangle(cornerRadius: 16))
-              .foregroundColor(JourneyVisual.primaryText)
-            Button {
-              Task { if await vm.connect(profile, message: message) { dismiss() } }
-            } label: {
-              Text("Запропонувати дружбу".localized).font(.headline).foregroundColor(.black).frame(
-                maxWidth: .infinity, minHeight: 56
-              ).background(JourneyVisual.lime).clipShape(RoundedRectangle(cornerRadius: 18))
+            ForEach(profile.availability) { slot in
+              chip(slot.title, icon: slot.icon, highlighted: false)
             }
-          } else {
-            Text(
-              profile.connectionState == "incoming"
-                ? "Заявка очікує твоєї відповіді".localized : "Заявку надіслано".localized
-            ).foregroundColor(JourneyVisual.secondaryText)
           }
-          Text("Зустрічайся у публічному місці. Не надсилай гроші або документи незнайомим людям.".localized)
-            .font(.caption).foregroundColor(JourneyVisual.secondaryText)
-        }.padding(20)
+        }
+      }
+      if !profile.languages.isEmpty {
+        section("Мови".localized) {
+          FlowLayout(spacing: 8) {
+            ForEach(profile.languages, id: \.self) { code in
+              chip(languageName(code), icon: "globe", highlighted: false)
+            }
+          }
+        }
+      }
+      Label("Зустрічайся у публічному місці. Не надсилай гроші або документи незнайомим людям.".localized, systemImage: "checkmark.shield.fill")
+        .font(.system(size: 12, weight: .medium))
+        .foregroundColor(JourneyVisual.secondaryText)
+        .fixedSize(horizontal: false, vertical: true)
+    }
+    .padding(.horizontal, 20)
+    .padding(.top, 24)
+    .frame(maxWidth: .infinity, alignment: .leading)
+    .background(
+      UnevenRoundedRectangle(topLeadingRadius: 28, topTrailingRadius: 28, style: .continuous)
+        .fill(JourneyVisual.pageBackground)
+        .shadow(color: .black.opacity(0.12), radius: 16, y: -6)
+    )
+  }
+
+  private var identity: some View {
+    VStack(alignment: .leading, spacing: 8) {
+      HStack(alignment: .firstTextBaseline, spacing: 8) {
+        Text(profile.displayName)
+          .font(.system(size: 30, weight: .bold))
+          .tracking(-0.4)
+          .foregroundColor(JourneyVisual.primaryText)
+          .lineLimit(1).minimumScaleFactor(0.7)
+        if let age = profile.ageBand, !age.isEmpty {
+          Text(age.replacingOccurrences(of: "-", with: "–"))
+            .font(.system(size: 20, weight: .medium))
+            .foregroundColor(JourneyVisual.secondaryText)
+        }
+        if profile.isVerified {
+          Image(systemName: "checkmark.seal.fill")
+            .font(.system(size: 18))
+            .foregroundColor(JourneyVisual.accentStrong)
+        }
+      }
+      .accessibilityElement(children: .combine)
+      .accessibilityAddTraits(.isHeader)
+      HStack(spacing: 6) {
+        Image(systemName: "mappin")
+        Text("\(profile.city) · \(profile.canton)")
+        if let distance = profile.distanceKM {
+          Text("·")
+          Text("%@ км".localized(with: "\(distance)"))
+        }
+        if profile.residencyStage == "newcomer" {
+          Text("НОВИЙ У ШВЕЙЦАРІЇ".localized)
+            .font(.system(size: 10, weight: .heavy)).tracking(0.6)
+            .foregroundColor(.black)
+            .padding(.horizontal, 8).frame(height: 22)
+            .background(JourneyVisual.lime, in: Capsule())
+            .padding(.leading, 4)
+        }
+      }
+      .font(.system(size: 14, weight: .medium))
+      .foregroundColor(JourneyVisual.secondaryText)
+    }
+  }
+
+  private var matchCard: some View {
+    HStack(alignment: .center, spacing: 14) {
+      ZStack {
+        Circle().stroke(JourneyVisual.lime.opacity(0.3), lineWidth: 6)
+        Circle()
+          .trim(from: 0, to: CGFloat(min(100, max(0, profile.matchScore))) / 100)
+          .stroke(JourneyVisual.accentStrong, style: StrokeStyle(lineWidth: 6, lineCap: .round))
+          .rotationEffect(.degrees(-90))
+        Text("\(profile.matchScore)%")
+          .font(.system(size: 15, weight: .heavy))
+          .foregroundColor(JourneyVisual.primaryText)
+      }
+      .frame(width: 58, height: 58)
+      VStack(alignment: .leading, spacing: 4) {
+        Text("%@%% збіг".localized(with: "\(profile.matchScore)"))
+          .font(.system(size: 16, weight: .bold))
+          .foregroundColor(JourneyVisual.primaryText)
+        Text(matchSummary)
+          .font(.system(size: 13, weight: .medium))
+          .foregroundColor(JourneyVisual.secondaryText)
+          .lineLimit(3)
+          .fixedSize(horizontal: false, vertical: true)
+      }
+      Spacer(minLength: 0)
+    }
+    .padding(14)
+    .background(JourneyVisual.lime.opacity(0.14), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+    .accessibilityElement(children: .combine)
+  }
+
+  private var matchSummary: String {
+    if !profile.matchReasons.isEmpty { return profile.matchReasons.prefix(2).joined(separator: " · ") }
+    let shared = profile.sharedInterests.prefix(3).map(\.title)
+    return shared.isEmpty ? profile.city : shared.joined(separator: " · ")
+  }
+
+  private func section<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
+    VStack(alignment: .leading, spacing: 10) {
+      Text(title.uppercased())
+        .font(.system(size: 11, weight: .heavy)).tracking(1)
+        .foregroundColor(JourneyVisual.secondaryText)
+      content()
+    }
+  }
+
+  private func chip(_ title: String, icon: String, highlighted: Bool) -> some View {
+    Label(title, systemImage: icon)
+      .font(.system(size: 13, weight: .semibold))
+      .foregroundColor(highlighted ? .black : JourneyVisual.primaryText)
+      .padding(.horizontal, 12).frame(height: 34)
+      .background(highlighted ? JourneyVisual.lime : Theme.Colors.card, in: Capsule())
+      .overlay(Capsule().stroke(highlighted ? Color.clear : JourneyVisual.softBorder))
+  }
+
+  private func formatIcon(_ format: MeetupFormat) -> String {
+    switch format {
+    case .coffee: return "cup.and.saucer.fill"
+    case .walk: return "figure.walk"
+    case .activity: return "figure.run"
+    case .event: return "ticket.fill"
+    case .online: return "video.fill"
+    case .family: return "figure.2.and.child.holdinghands"
+    }
+  }
+
+  private func languageName(_ code: String) -> String {
+    AppLanguage.current.locale.localizedString(forLanguageCode: code)?.capitalized(with: AppLanguage.current.locale) ?? code.uppercased()
+  }
+
+  private var topBar: some View {
+    let collapsed = scrollOffset > 330
+    return HStack(spacing: 10) {
+      Button { dismiss() } label: { glassIcon("xmark") }
+        .buttonStyle(ScaleButtonStyle(scaleAmount: 0.94, hapticStyle: .light))
+        .accessibilityLabel("Закрити".localized)
+      Text(profile.displayName)
+        .font(.system(size: 16, weight: .bold))
+        .foregroundColor(JourneyVisual.primaryText)
+        .lineLimit(1)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .opacity(collapsed ? 1 : 0)
+        .accessibilityHidden(true)
+      if !isDemo {
+        Menu {
+          Button("Поскаржитися".localized, role: .destructive) {
+            Task {
+              do { try await FriendsAPI.report(profile.id) } catch { vm.error = error.localizedDescription }
+            }
+          }
+          Button("Заблокувати".localized, role: .destructive) {
+            Task {
+              do {
+                try await FriendsAPI.block(profile.id)
+                dismiss()
+              } catch { vm.error = error.localizedDescription }
+            }
+          }
+        } label: { glassIcon("ellipsis") }
       }
     }
+    .padding(.horizontal, 16)
+    .padding(.top, 6)
+    .padding(.bottom, 8)
+    .background {
+      Rectangle()
+        .fill(JourneyVisual.pageBackground)
+        .overlay(alignment: .bottom) { Rectangle().fill(JourneyVisual.softBorder).frame(height: 0.5) }
+        .ignoresSafeArea(edges: .top)
+        .opacity(collapsed ? 1 : 0)
+    }
+    .animation(.easeOut(duration: 0.2), value: collapsed)
+  }
+
+  private func glassIcon(_ name: String) -> some View {
+    Image(systemName: name)
+      .font(.system(size: 15, weight: .bold))
+      .foregroundColor(JourneyVisual.primaryText)
+      .frame(width: 42, height: 42)
+      .background(Theme.Colors.card.opacity(0.94), in: Circle())
+      .overlay(Circle().stroke(JourneyVisual.softBorder))
+      .shadow(color: .black.opacity(0.14), radius: 8, y: 3)
+  }
+
+  @ViewBuilder private var actionBar: some View {
+    VStack(spacing: 10) {
+      if isDemo {
+        Label("Демо-профіль · дії вимкнені".localized, systemImage: "sparkles")
+          .font(.system(size: 15, weight: .semibold))
+          .foregroundColor(JourneyVisual.secondaryText)
+          .frame(maxWidth: .infinity).frame(height: 52)
+          .background(JourneyVisual.softSurface, in: Capsule())
+      } else if profile.connectionState == "accepted", let id = profile.conversationID {
+        primaryButton("Відкрити чат".localized, icon: "bubble.left.and.bubble.right.fill") {
+          Task { conversation = try? await ChatAPI.conversation(id: id) }
+        }
+      } else if profile.connectionState == "none" {
+        TextField("Коротко привітайся…".localized, text: $message, axis: .vertical)
+          .font(.system(size: 15))
+          .lineLimit(1...3)
+          .foregroundColor(JourneyVisual.primaryText)
+          .padding(.horizontal, 16).padding(.vertical, 12)
+          .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+          .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(JourneyVisual.softBorder))
+        primaryButton("Запропонувати дружбу".localized, icon: "hand.wave.fill") {
+          Task { if await vm.connect(profile, message: message) { dismiss() } }
+        }
+      } else {
+        Label(
+          profile.connectionState == "incoming"
+            ? "Заявка очікує твоєї відповіді".localized : "Заявку надіслано".localized,
+          systemImage: profile.connectionState == "incoming" ? "bell.badge.fill" : "paperplane.fill"
+        )
+        .font(.system(size: 15, weight: .semibold))
+        .foregroundColor(JourneyVisual.secondaryText)
+        .frame(maxWidth: .infinity).frame(height: 52)
+        .background(JourneyVisual.softSurface, in: Capsule())
+      }
+    }
+    .padding(.horizontal, 16)
+    .padding(.top, 10)
+    .padding(.bottom, 6)
+    .background(.ultraThinMaterial)
+  }
+
+  private func primaryButton(_ title: String, icon: String, action: @escaping () -> Void) -> some View {
+    Button(action: action) {
+      Label(title, systemImage: icon)
+        .font(.system(size: 16, weight: .bold))
+        .foregroundColor(.black)
+        .frame(maxWidth: .infinity).frame(height: 52)
+        .background(JourneyVisual.lime, in: Capsule())
+        .shadow(color: JourneyVisual.lime.opacity(0.4), radius: 14, y: 6)
+    }
+    .buttonStyle(ScaleButtonStyle(scaleAmount: 0.98, hapticStyle: .medium))
   }
 }
 

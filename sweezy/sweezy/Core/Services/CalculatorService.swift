@@ -35,7 +35,7 @@ protocol CalculatorServiceProtocol: ObservableObject {
 class CalculatorService: CalculatorServiceProtocol {
     private let localeIdentifier: String
     
-    init(localeIdentifier: String = (UserDefaults.standard.string(forKey: "selected_locale") ?? Locale.current.identifier)) {
+    init(localeIdentifier: String = AppLanguage.current.rawValue) {
         self.localeIdentifier = localeIdentifier
     }
     
@@ -157,7 +157,7 @@ class CalculatorService: CalculatorServiceProtocol {
                 type: .income,
                 operator: .lessThan,
                 value: getIncomeThreshold(for: canton),
-                description: "Income below threshold"
+                description: "calculator.reason.income_below_threshold".localized
             )
         ]
         // Add income per person threshold
@@ -166,7 +166,7 @@ class CalculatorService: CalculatorServiceProtocol {
                 type: .incomePerPerson,
                 operator: .lessThan,
                 value: getIncomeThreshold(for: canton) / 2.5,
-                description: "Income per person below threshold"
+                description: "calculator.reason.income_per_person_below_threshold".localized
             )
         )
         
@@ -180,8 +180,8 @@ class CalculatorService: CalculatorServiceProtocol {
         )
         
         return BenefitRule(
-            name: "Health Insurance Subsidy",
-            description: "Monthly subsidy for health insurance premiums",
+            name: "calculator.subsidy.health_insurance.name".localized,
+            description: "calculator.subsidy.health_insurance.description".localized,
             category: .healthInsurance,
             canton: canton,
             permitTypes: [.s, .b, .c, .f, .n],
@@ -311,6 +311,7 @@ extension CalculatorService {
     /// Format currency amount for display
     static func formatCurrency(_ amount: Double, currency: String = "CHF") -> String {
         let formatter = NumberFormatter()
+        formatter.locale = AppLanguage.current.locale
         formatter.numberStyle = .currency
         formatter.currencyCode = currency
         formatter.maximumFractionDigits = 0
@@ -331,11 +332,11 @@ extension CalculatorService {
     /// Validate income input
     static func validateIncome(_ income: Double) -> ValidationResult {
         if income < 0 {
-            return .invalid("Income cannot be negative")
+            return .invalid("calculator.validation.income_negative".localized)
         }
         
         if income > 1000000 {
-            return .invalid("Income seems unusually high")
+            return .invalid("calculator.validation.income_high".localized)
         }
         
         return .valid
@@ -348,7 +349,7 @@ extension CalculatorService {
         }
         
         if size > 20 {
-            return .invalid("Family size seems unusually large")
+            return .invalid("calculator.validation.family_large".localized)
         }
         
         return .valid

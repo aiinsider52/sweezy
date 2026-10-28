@@ -44,7 +44,7 @@ struct DocumentReadinessView: View {
                         editingDocument = nil
                     }
                 }
-                .navigationTitle(document.title)
+                .navigationTitle(document.displayTitle)
                 .toolbar {
                     ToolbarItem(placement: .confirmationAction) {
                         Button("companion.documents.save".localized) {
@@ -111,7 +111,7 @@ struct DocumentReadinessView: View {
                     let markingReady = !document.isReady
                     appContainer.lifeAdmin.toggleDocument(document.id)
                     if markingReady, let updated = appContainer.lifeAdmin.documents.first(where: { $0.id == document.id }), updated.status != .expired {
-                        completedDocumentTitle = document.title
+                        completedDocumentTitle = document.displayTitle
                         companionReaction += 1
                     } else {
                         completedDocumentTitle = nil
@@ -126,15 +126,15 @@ struct DocumentReadinessView: View {
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("\(document.title). \(document.isReady ? "companion.documents.unmark".localized : "companion.documents.mark".localized)")
+                .accessibilityLabel("\(document.displayTitle). \(document.isReady ? "companion.documents.unmark".localized : "companion.documents.mark".localized)")
                 .accessibilityValue(statusText(document.status))
                 .accessibilityIdentifier("documents.toggle.\(document.id)")
 
                 VStack(alignment: .leading, spacing: 5) {
-                    Text(document.title)
+                    Text(document.displayTitle)
                         .font(.headline)
                         .foregroundStyle(Theme.Colors.textPrimary)
-                    Text(document.requiredFor)
+                    Text(document.displayRequiredFor)
                         .font(.footnote)
                         .foregroundStyle(Theme.Colors.textSecondary)
                     Text(statusText(document.status))
@@ -184,7 +184,7 @@ struct DocumentReadinessView: View {
     }
 
     private func expiryText(_ document: ReadinessDocument) -> String {
-        document.expiryDate?.formatted(.dateTime.day().month(.abbreviated).year()) ?? "companion.documents.add_expiry".localized
+        document.expiryDate?.formatted(.dateTime.day().month(.abbreviated).year().locale(AppLanguage.current.locale)) ?? "companion.documents.add_expiry".localized
     }
 
     private func statusText(_ status: ReadinessDocumentStatus) -> String {

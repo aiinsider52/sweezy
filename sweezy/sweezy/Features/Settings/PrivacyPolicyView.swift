@@ -74,6 +74,7 @@ struct PrivacyPolicyView: View {
     
     private func formattedDate(_ date: Date) -> String {
         let formatter = DateFormatter()
+        formatter.locale = AppLanguage.current.locale
         formatter.dateStyle = .medium
         return formatter.string(from: date)
     }

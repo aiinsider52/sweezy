@@ -1295,7 +1295,7 @@ private struct LanguageSelectionSheetV2: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(String(localized: "common.done")) {
+                    Button("common.done".localized) {
                         dismiss()
                     }
                 }

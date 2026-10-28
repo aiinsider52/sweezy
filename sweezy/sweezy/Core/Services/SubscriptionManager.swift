@@ -60,7 +60,7 @@ final class SubscriptionManager: ObservableObject {
         guard isPremium else { return "Базовий доступ".localized }
         let period = entitlementPlan == "yearly" ? "Річний план".localized : entitlementPlan == "monthly" ? "Місячний план".localized : "Активний план".localized
         guard let entitlementExpiresAt else { return period }
-        return "%@ · до %@".localized(with: "\(period)", "\(entitlementExpiresAt.formatted(date: .abbreviated, time: .omitted))")
+        return "%@ · до %@".localized(with: "\(period)", "\(entitlementExpiresAt.formatted(Date.FormatStyle(date: .abbreviated, time: .omitted, locale: AppLanguage.current.locale)))")
     }
 
     func load() async {

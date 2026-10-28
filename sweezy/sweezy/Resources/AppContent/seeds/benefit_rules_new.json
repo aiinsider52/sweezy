@@ -5,7 +5,13 @@
     "description": "Canton Vaud provides subsidies for health insurance premiums (Réduction de primes) based on income and family size. Official source: https://www.vd.ch/assurance-maladie",
     "category": "health_insurance",
     "canton": "VD",
-    "permitTypes": ["S", "B", "C", "F", "N"],
+    "permitTypes": [
+      "S",
+      "B",
+      "C",
+      "F",
+      "N"
+    ],
     "conditions": [
       {
         "id": "11111111-2222-3333-4444-000000000511",
@@ -21,7 +27,9 @@
       "percentage": null,
       "perPersonAmount": null,
       "childBonus": null,
-      "parameters": {"max_income": 60000}
+      "parameters": {
+        "max_income": 60000
+      }
     },
     "maxAmount": 3600,
     "minAmount": 0,
@@ -30,7 +38,8 @@
     "validUntil": null,
     "isActive": true,
     "officialSource": "https://www.vd.ch/assurance-maladie",
-    "lastUpdated": "2025-01-15T10:00:00Z"
+    "lastUpdated": "2025-01-15T10:00:00Z",
+    "language": "en"
   },
   {
     "id": "eeeeeeee-ffff-1111-2222-000000000502",
@@ -38,7 +47,13 @@
     "description": "Canton Ticino offers premium reductions (Riduzione dei premi) for low-income families. Official source: https://www4.ti.ch/dss/dasi/upcd/temi/riduzione-dei-premi/",
     "category": "health_insurance",
     "canton": "TI",
-    "permitTypes": ["S", "B", "C", "F", "N"],
+    "permitTypes": [
+      "S",
+      "B",
+      "C",
+      "F",
+      "N"
+    ],
     "conditions": [
       {
         "id": "11111111-2222-3333-4444-000000000521",
@@ -54,7 +69,9 @@
       "percentage": null,
       "perPersonAmount": null,
       "childBonus": null,
-      "parameters": {"max_income": 55000}
+      "parameters": {
+        "max_income": 55000
+      }
     },
     "maxAmount": 3200,
     "minAmount": 0,
@@ -63,7 +80,7 @@
     "validUntil": null,
     "isActive": true,
     "officialSource": "https://www4.ti.ch/dss/dasi/upcd/temi/riduzione-dei-premi/",
-    "lastUpdated": "2025-01-15T10:00:00Z"
+    "lastUpdated": "2025-01-15T10:00:00Z",
+    "language": "en"
   }
 ]
-

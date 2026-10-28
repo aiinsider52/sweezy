@@ -141,11 +141,7 @@ extension APIClient {
     private static func validatePlaceSuggestionResponse(data: Data, response: URLResponse) throws {
         guard let http = response as? HTTPURLResponse else { throw URLError(.badServerResponse) }
         guard (200..<300).contains(http.statusCode) else {
-            throw NSError(
-                domain: "PlaceSuggestionsAPI",
-                code: http.statusCode,
-                userInfo: [NSLocalizedDescriptionKey: HTTPURLResponse.localizedString(forStatusCode: http.statusCode)]
-            )
+            throw APIErrorText.error(domain: "PlaceSuggestionsAPI", status: http.statusCode, data: data)
         }
     }
 }

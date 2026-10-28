@@ -166,7 +166,7 @@ class NotificationService: NotificationServiceProtocol {
             guard triggerDate > Date() else { continue }
             
             let content = UNMutableNotificationContent()
-            content.title = appointment.reminderSettings.notificationTitle ?? "Appointment Reminder"
+            content.title = appointment.reminderSettings.notificationTitle ?? "notifications.appointment_reminder".localized
             content.body = appointment.reminderSettings.notificationBody ?? "You have an appointment: \(appointment.title)"
             content.sound = .default
             content.badge = 1
@@ -303,7 +303,7 @@ extension NotificationService {
         // Content update category
         let openAction = UNNotificationAction(
             identifier: "OPEN_CONTENT",
-            title: "View Updates",
+            title: "notifications.action.view_updates".localized,
             options: [.foreground]
         )
         
@@ -317,7 +317,7 @@ extension NotificationService {
         // Trial reminder category
         let upgradeAction = UNNotificationAction(
             identifier: "OPEN_PAYWALL",
-            title: "Open Sweezy",
+            title: "notifications.action.open".localized,
             options: [.foreground]
         )
         let trialCategory = UNNotificationCategory(
@@ -330,7 +330,7 @@ extension NotificationService {
         // Re-engage category
         let reengageOpen = UNNotificationAction(
             identifier: "OPEN_HOME",
-            title: "Open Sweezy",
+            title: "notifications.action.open".localized,
             options: [.foreground]
         )
         let reengageCategory = UNNotificationCategory(

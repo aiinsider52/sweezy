@@ -3,16 +3,9 @@ import Foundation
 enum FriendsAPI {
   private static func responseError(_ data: Data, response: URLResponse?, fallback: String) -> NSError {
     let status = (response as? HTTPURLResponse)?.statusCode ?? 0
-    if let payload = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-      let detail = payload["detail"]
-    {
-      if let message = detail as? String {
-        return NSError(domain: "FriendsAPI", code: status, userInfo: [NSLocalizedDescriptionKey: message])
-      }
-      if let object = detail as? [String: Any], let message = object["message"] as? String {
-        return NSError(domain: "FriendsAPI", code: status, userInfo: [NSLocalizedDescriptionKey: message])
-      }
-    }
+    let error = APIErrorText.error(domain: "FriendsAPI", status: status, data: data)
+    guard error.userInfo["api.code"] == nil else { return error }
+    // Friend-specific wording for common failures; other statuses use the shared messages.
     let message: String
     switch status {
     case 401:
@@ -24,7 +17,7 @@ enum FriendsAPI {
     case 500...599:
       message = "Сервер не зміг виконати дію. Дані не втрачено — повтори через хвилину.".localized
     default:
-      message = fallback
+      return error
     }
     return NSError(domain: "FriendsAPI", code: status, userInfo: [NSLocalizedDescriptionKey: message])
   }

@@ -15,7 +15,6 @@ final class CountryContextTests: XCTestCase {
         XCTAssertEqual(ResidenceCountry.germany.homeHeroName(languageIdentifier: "uk"), "Німеччині")
         XCTAssertEqual(ResidenceCountry.germany.homeHeroName(languageIdentifier: "de-DE"), "in Deutschland")
         XCTAssertEqual(ResidenceCountry.austria.homeHeroName(languageIdentifier: "en_GB"), "in Austria")
-        XCTAssertEqual(ResidenceCountry.germany.ukrainianGenitiveName, "Німеччини")
         XCTAssertEqual(ResidenceCountry.austria.currencyCode, "EUR")
     }
 

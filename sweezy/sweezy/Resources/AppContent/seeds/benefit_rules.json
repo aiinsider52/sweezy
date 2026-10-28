@@ -5,12 +5,36 @@
     "description": "Monthly subsidy for health insurance premiums in canton Zürich (demo values)",
     "category": "health_insurance",
     "canton": "ZH",
-    "permitTypes": ["S", "B", "F", "N"],
-    "conditions": [
-      {"id":"c-1","type":"income","operator":"less_than","value":45000,"description":"Income below threshold"},
-      {"id":"c-2","type":"family_size","operator":"greater_than_or_equal","value":1,"description":"At least 1 person"}
+    "permitTypes": [
+      "S",
+      "B",
+      "F",
+      "N"
     ],
-    "calculationFormula": {"type":"income_based_sliding","baseAmount":400,"parameters":{"max_income":45000,"min_subsidy":50}},
+    "conditions": [
+      {
+        "id": "c-1",
+        "type": "income",
+        "operator": "less_than",
+        "value": 45000,
+        "description": "Income below threshold"
+      },
+      {
+        "id": "c-2",
+        "type": "family_size",
+        "operator": "greater_than_or_equal",
+        "value": 1,
+        "description": "At least 1 person"
+      }
+    ],
+    "calculationFormula": {
+      "type": "income_based_sliding",
+      "baseAmount": 400,
+      "parameters": {
+        "max_income": 45000,
+        "min_subsidy": 50
+      }
+    },
     "maxAmount": 400,
     "minAmount": 50,
     "currency": "CHF",
@@ -19,7 +43,8 @@
     "isActive": true,
     "officialSource": "https://www.zh.ch/de/gesundheit/gesundheitsversorgung/praemienverbilligung.html",
     "lastUpdated": "2023-10-14T10:00:00Z",
-    "disclaimer": "These are demo reference values for MVP. Always verify eligibility and amounts on your official cantonal website."
+    "disclaimer": "These are demo reference values for MVP. Always verify eligibility and amounts on your official cantonal website.",
+    "language": "en"
   },
   {
     "id": "b2222222-2222-2222-2222-222222222222",
@@ -27,11 +52,29 @@
     "description": "Monthly subsidy for health insurance premiums in canton Geneva (demo values)",
     "category": "health_insurance",
     "canton": "GE",
-    "permitTypes": ["S", "B", "F", "N"],
-    "conditions": [
-      {"id":"c-3","type":"income","operator":"less_than","value":42000,"description":"Income below threshold"}
+    "permitTypes": [
+      "S",
+      "B",
+      "F",
+      "N"
     ],
-    "calculationFormula": {"type":"income_based_sliding","baseAmount":380,"parameters":{"max_income":42000,"min_subsidy":50}},
+    "conditions": [
+      {
+        "id": "c-3",
+        "type": "income",
+        "operator": "less_than",
+        "value": 42000,
+        "description": "Income below threshold"
+      }
+    ],
+    "calculationFormula": {
+      "type": "income_based_sliding",
+      "baseAmount": 380,
+      "parameters": {
+        "max_income": 42000,
+        "min_subsidy": 50
+      }
+    },
     "maxAmount": 380,
     "minAmount": 50,
     "currency": "CHF",
@@ -40,6 +83,7 @@
     "isActive": true,
     "officialSource": "https://www.ge.ch/reduire-prime-assurance-maladie",
     "lastUpdated": "2023-10-14T10:00:00Z",
-    "disclaimer": "Довідкові значення для демо. Перевіряйте на офіційних сайтах кантону."
+    "disclaimer": "Довідкові значення для демо. Перевіряйте на офіційних сайтах кантону.",
+    "language": "en"
   }
 ]

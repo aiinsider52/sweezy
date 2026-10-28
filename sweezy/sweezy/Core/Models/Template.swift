@@ -339,16 +339,16 @@ enum PlaceholderType: String, CaseIterable, Codable, Hashable {
     
     var localizedName: String {
         switch self {
-        case .text: return "Text"
-        case .multilineText: return "Long Text"
-        case .number: return "Number"
-        case .date: return "Date"
-        case .email: return "Email"
-        case .phone: return "Phone"
-        case .dropdown: return "Selection"
-        case .checkbox: return "Yes/No"
-        case .address: return "Address"
-        case .currency: return "Currency"
+        case .text: return "templates.field.text".localized
+        case .multilineText: return "templates.field.long_text".localized
+        case .number: return "templates.field.number".localized
+        case .date: return "templates.field.date".localized
+        case .email: return "templates.field.email".localized
+        case .phone: return "templates.field.phone".localized
+        case .dropdown: return "templates.field.selection".localized
+        case .checkbox: return "templates.field.yes_no".localized
+        case .address: return "templates.field.address".localized
+        case .currency: return "templates.field.currency".localized
         }
     }
     
@@ -382,18 +382,18 @@ struct PlaceholderValidation: Codable, Hashable {
     
     func validate(_ value: String) -> ValidationResult {
         if let minLength = minLength, value.count < minLength {
-            return .invalid(customMessage ?? "Value is too short")
+            return .invalid(customMessage ?? "templates.validation.too_short".localized)
         }
         
         if let maxLength = maxLength, value.count > maxLength {
-            return .invalid(customMessage ?? "Value is too long")
+            return .invalid(customMessage ?? "templates.validation.too_long".localized)
         }
         
         if let pattern = pattern {
             let regex = try? NSRegularExpression(pattern: pattern)
             let range = NSRange(location: 0, length: value.utf16.count)
             if regex?.firstMatch(in: value, options: [], range: range) == nil {
-                return .invalid(customMessage ?? "Invalid format")
+                return .invalid(customMessage ?? "templates.validation.invalid_format".localized)
             }
         }
         
@@ -447,7 +447,7 @@ enum DocumentFormat: String, CaseIterable, Codable {
     
     var localizedName: String {
         switch self {
-        case .text: return "Text"
+        case .text: return "templates.field.text".localized
         case .pdf: return "PDF"
         case .html: return "HTML"
         }

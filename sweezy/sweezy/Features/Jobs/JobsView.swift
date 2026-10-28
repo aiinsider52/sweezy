@@ -810,7 +810,7 @@ struct JobsView: View {
         switch careerNextAction {
         case .createCV: return "Створи швейцарське CV".localized
         case .completeCV:
-            return "Додай \(careerProfile.nextMissingSection ?? "дані CV")"
+            return "jobs.next.add_section".localized(with: careerProfile.nextMissingSection ?? "дані CV".localized)
         case .findMatches: return "Запусти пошук за своїм CV".localized
         case .reviewMatches: return "Обери першу відповідну вакансію".localized
         case .reviewApplications:
@@ -1700,6 +1700,7 @@ struct JobsView: View {
         let iso = ISO8601DateFormatter()
         if let d = iso.date(from: s) { return d }
         let df = DateFormatter()
+        df.locale = AppLanguage.current.locale
         df.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
         return df.date(from: s)
     }
@@ -2617,7 +2618,7 @@ private struct JobCard: View {
         .onTapGesture(perform: onTap)
         .accessibilityElement(children: .contain)
         .accessibilityAddTraits(.isButton)
-        .accessibilityAction(named: "Відкрити вакансію", onTap)
+        .accessibilityAction(named: "Відкрити вакансію".localized, onTap)
     }
 }
 
@@ -3015,10 +3016,10 @@ private struct JobDetailSheet: View {
                 Label(workplaceLabel(workplace), systemImage: "house.and.flag")
             }
             if let languages = job.languages, !languages.isEmpty {
-                Label("Мови: \(languages.joined(separator: ", "))", systemImage: "character.bubble")
+                Label("jobs.languages_list".localized(with: languages.joined(separator: ", ")), systemImage: "character.bubble")
             }
             if let permits = job.permit_requirements, !permits.isEmpty {
-                Label("Дозвіл: \(permits.joined(separator: ", "))", systemImage: "person.text.rectangle")
+                Label("jobs.permits_list".localized(with: permits.joined(separator: ", ")), systemImage: "person.text.rectangle")
             }
             if job.no_experience_required == true {
                 Label("Підходить без досвіду".localized, systemImage: "sparkles")
@@ -3035,16 +3036,20 @@ private struct JobDetailSheet: View {
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 
+    private func amount<Value: BinaryInteger>(_ value: Value) -> String {
+        Int(value).formatted(.number.locale(AppLanguage.current.locale))
+    }
+
     private var salaryText: String? {
         if let salary = job.salary, !salary.isEmpty { return salary }
         guard job.salary_min != nil || job.salary_max != nil else { return nil }
         let currency = job.salary_currency ?? (APIClient.countryCode == "CH" ? "CHF" : "EUR")
         let period = ["year": "/рік".localized, "month": "/місяць".localized, "hour": "/год".localized].first { job.salary_period?.lowercased().contains($0.key) == true }?.value ?? ""
         if let minimum = job.salary_min, let maximum = job.salary_max {
-            return "\(currency) \(minimum.formatted())–\(maximum.formatted())\(period) brutto"
+            return "jobs.salary.range".localized(with: currency, amount(minimum), amount(maximum), period)
         }
-        if let minimum = job.salary_min { return "від %@ %@%@ brutto".localized(with: "\(currency)", "\(minimum.formatted())", "\(period)") }
-        if let maximum = job.salary_max { return "до %@ %@%@ brutto".localized(with: "\(currency)", "\(maximum.formatted())", "\(period)") }
+        if let minimum = job.salary_min { return "від %@ %@%@ brutto".localized(with: currency, amount(minimum), period) }
+        if let maximum = job.salary_max { return "до %@ %@%@ brutto".localized(with: currency, amount(maximum), period) }
         return nil
     }
 

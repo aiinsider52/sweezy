@@ -89,7 +89,7 @@ private struct MomentCard: View {
                 .foregroundColor(Theme.Colors.textSecondary)
                 .lineLimit(3)
             HStack {
-                Text(NSLocalizedString(moment.ctaKind.localizedCtaKey, comment: ""))
+                Text(moment.ctaKind.localizedCtaKey.localized)
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundColor(JourneyVisual.accentText)
                 Image(systemName: "arrow.right")
@@ -109,6 +109,6 @@ private struct MomentCard: View {
     private var deadlineLabel: String {
         let days = moment.daysUntilDeadline
         if days <= 0 { return "—" }
-        return String(format: NSLocalizedString("moments.deadline.in_days", comment: ""), days)
+        return String(format: "moments.deadline.in_days".localized, days)
     }
 }

@@ -26,6 +26,10 @@ final class FirstWeekChecklistService: ObservableObject {
             self.isDone = isDone
             self.notificationIds = notificationIds
         }
+
+        /// Generated tasks were stored already translated; show them in the current app language.
+        var displayTitle: String { title.localizationKey.localized }
+        var displayDetails: String? { details.map { $0.localizationKey.localized } }
     }
     
     @Published private(set) var tasks: [TaskItem] = []
@@ -128,7 +132,7 @@ final class FirstWeekChecklistService: ObservableObject {
             let id1 = "fw_\\(tasks[idx].id.uuidString)_d1"
             let id2 = "fw_\\(tasks[idx].id.uuidString)_h2"
             let title = "Наближається дедлайн".localized
-            let body = tasks[idx].title
+            let body = tasks[idx].displayTitle
             let scheduledDayBefore = await notificationService.scheduleReminder(id: id1, title: title, body: body, at: dayBefore)
             let scheduledTwoHoursBefore = await notificationService.scheduleReminder(id: id2, title: title, body: body, at: twoHoursBefore)
             scheduledAny = scheduledAny || scheduledDayBefore || scheduledTwoHoursBefore

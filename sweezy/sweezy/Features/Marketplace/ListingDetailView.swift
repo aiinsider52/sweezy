@@ -614,14 +614,14 @@ struct ListingDetailView: View {
                 await appContainer.chatStore.start()
                 selectedConversation = try await appContainer.chatStore.openConversation(for: listingId)
             } catch {
-                let raw = error.localizedDescription
+                let raw = ((error as NSError).userInfo["api.detail"] as? String) ?? ""
                 if raw.localizedCaseInsensitiveContains("Listing not found")
                     || raw.localizedCaseInsensitiveContains("no seller") {
                     safetyMessage = "chat.listing.no_seller".localized
                 } else if raw.localizedCaseInsensitiveContains("Verify your email") {
                     safetyMessage = "chat.listing.verify_email".localized
                 } else {
-                    safetyMessage = raw
+                    safetyMessage = error.localizedDescription
                 }
             }
         }

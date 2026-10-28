@@ -756,7 +756,7 @@ struct LevelDetailSheet: View {
     }
     
     private func checklistInfo(for slug: String) -> (title: String, completed: Int, total: Int) {
-        let checklists = appContainer.contentService.checklists
+        let checklists = appContainer.contentService.getChecklistsForLocale(appContainer.currentLocale.identifier)
 
         // 1) Exact or partial title slug match
         if let cl = checklists.first(where: { slugify($0.title) == slug || slugify($0.title).contains(slug) }) {
@@ -768,7 +768,7 @@ struct LevelDetailSheet: View {
         // 2) Match by ChecklistCategory rawValue (e.g. "housing", "insurance", "work")
         //    Prefer the user's locale (Ukrainian) first, then any available checklist
         if let category = ChecklistCategory(rawValue: slug) {
-            let currentLang = Locale.current.language.languageCode?.identifier ?? "uk"
+            let currentLang = AppLanguage.current.rawValue
             let langTag = "lang:\(currentLang)"
             // Try to find a checklist tagged for current language first
             let candidates = checklists.filter { $0.category == category }

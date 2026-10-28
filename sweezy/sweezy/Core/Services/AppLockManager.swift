@@ -29,14 +29,14 @@ final class AppLockManager: ObservableObject {
             return displayName(for: cached)
         }
         // Fallback: return generic name immediately; actual type will be resolved lazily
-        return "Biometrics"
+        return "lock.biometrics".localized
     }
     
     private func displayName(for type: LABiometryType) -> String {
         switch type {
         case .faceID: return "Face ID"
         case .touchID: return "Touch ID"
-        default: return "Biometrics"
+        default: return "lock.biometrics".localized
         }
     }
     
@@ -64,7 +64,7 @@ final class AppLockManager: ObservableObject {
         didInitializeLockState = true
         if biometricsEnabled && isBiometryAvailable {
             isLocked = true
-            Task { _ = await authenticate(reason: "Unlock Sweezy") }
+            Task { _ = await authenticate(reason: "lock.unlock_reason".localized) }
         }
     }
     
@@ -81,7 +81,7 @@ final class AppLockManager: ObservableObject {
             return
         }
         guard isLocked else { return }
-        Task { _ = await authenticate(reason: "Unlock Sweezy") }
+        Task { _ = await authenticate(reason: "lock.unlock_reason".localized) }
     }
     
     func setBiometricsEnabled(_ enabled: Bool) async -> Bool {
@@ -113,7 +113,7 @@ final class AppLockManager: ObservableObject {
     
     func authenticate(reason: String) async -> Bool {
         let context = LAContext()
-        context.localizedFallbackTitle = String(localized: "Use Passcode")
+        context.localizedFallbackTitle = "Use Passcode".localized
         
         do {
             guard try canEvaluateBiometrics(context) else {

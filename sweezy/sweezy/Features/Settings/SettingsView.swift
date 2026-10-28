@@ -1263,6 +1263,7 @@ private extension SettingsView {
 private extension SettingsView {
     var defaultBackupFilename: String {
         let fmt = DateFormatter()
+        fmt.locale = AppLanguage.current.locale
         fmt.dateFormat = "yyyy-MM-dd_HH-mm"
         return "SweezyBackup_\(fmt.string(from: Date())).json"
     }
@@ -1875,7 +1876,7 @@ struct ProfileEditView: View {
                             Circle().fill(.white).frame(width: 6, height: 6)
                         }
                         Text("settings.profile.arrival".localized).font(.system(size: 11, weight: .medium)).foregroundColor(winterSecondaryText)
-                        Text(arrivalDate.formatted(.dateTime.day().month(.abbreviated)))
+                        Text(arrivalDate.formatted(.dateTime.day().month(.abbreviated).locale(AppLanguage.current.locale)))
                             .font(.system(size: 13, weight: .semibold))
                             .foregroundColor(winterPrimaryText)
                     }.frame(maxWidth: .infinity)
@@ -1895,7 +1896,7 @@ struct ProfileEditView: View {
                             Circle().fill(.white).frame(width: 6, height: 6)
                         }
                         Text("settings.profile.expiry".localized).font(.system(size: 11, weight: .medium)).foregroundColor(winterSecondaryText)
-                        Text(permitExpiry.formatted(.dateTime.day().month(.abbreviated).year()))
+                        Text(permitExpiry.formatted(.dateTime.day().month(.abbreviated).year().locale(AppLanguage.current.locale)))
                             .font(.system(size: 13, weight: .semibold))
                             .foregroundColor(winterPrimaryText)
                     }.frame(maxWidth: .infinity)
@@ -2098,7 +2099,7 @@ struct ProfileEditView: View {
                     VStack(spacing: 8) {
                         ZStack { Circle().fill(Color.green).frame(width: 16, height: 16); Circle().fill(.white).frame(width: 6, height: 6) }
                         Text("settings.profile.arrival".localized).font(.system(size: 11, weight: .medium)).foregroundColor(JourneyVisual.secondaryText)
-                        Text(arrivalDate.formatted(.dateTime.day().month(.abbreviated))).font(.system(size: 13, weight: .semibold))
+                        Text(arrivalDate.formatted(.dateTime.day().month(.abbreviated).locale(AppLanguage.current.locale))).font(.system(size: 13, weight: .semibold))
                             .foregroundColor(JourneyVisual.primaryText)
                     }.frame(maxWidth: .infinity)
                     VStack { Rectangle().fill(LinearGradient(colors: [.green, permitStatusColor], startPoint: .leading, endPoint: .trailing)).frame(height: 3).cornerRadius(2) }
@@ -2106,7 +2107,7 @@ struct ProfileEditView: View {
                     VStack(spacing: 8) {
                         ZStack { Circle().fill(permitStatusColor).frame(width: 16, height: 16); Circle().fill(.white).frame(width: 6, height: 6) }
                         Text("settings.profile.expiry".localized).font(.system(size: 11, weight: .medium)).foregroundColor(JourneyVisual.secondaryText)
-                        Text(permitExpiry.formatted(.dateTime.day().month(.abbreviated).year())).font(.system(size: 13, weight: .semibold))
+                        Text(permitExpiry.formatted(.dateTime.day().month(.abbreviated).year().locale(AppLanguage.current.locale))).font(.system(size: 13, weight: .semibold))
                             .foregroundColor(JourneyVisual.primaryText)
                     }.frame(maxWidth: .infinity)
                 }
@@ -2292,7 +2293,7 @@ struct ProfileEditView: View {
         if countryChanged { appContainer.firstWeekService.generateTasks(for: profile) }
         LiveActivitiesManager.shared.updatePermitDeadline(profile.permitExpiryDate)
         if let next = appContainer.firstWeekService.nextDueTask {
-            LiveActivitiesManager.shared.updateNextTask(.init(title: next.title, dueDate: next.dueDate))
+            LiveActivitiesManager.shared.updateNextTask(.init(title: next.displayTitle, dueDate: next.dueDate))
         }
         dismiss()
     }

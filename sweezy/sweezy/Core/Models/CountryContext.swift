@@ -37,10 +37,7 @@ enum ResidenceCountry: String, CaseIterable, Codable, Hashable, Identifiable {
     var currencyCode: String { self == .switzerland ? "CHF" : "EUR" }
 
     func localizedName(languageIdentifier: String) -> String {
-        let language = languageIdentifier
-            .split(whereSeparator: { $0 == "_" || $0 == "-" })
-            .first
-            .map(String.init) ?? "uk"
+        let language = AppLanguage(identifier: languageIdentifier).rawValue
 
         switch (language, self) {
         case ("de", .switzerland): return "Schweiz"
@@ -56,10 +53,7 @@ enum ResidenceCountry: String, CaseIterable, Codable, Hashable, Identifiable {
     /// Country fragment for Home hero. Ukrainian copy supplies "у" on previous line;
     /// English and German fragments include their own preposition.
     func homeHeroName(languageIdentifier: String) -> String {
-        let language = languageIdentifier
-            .split(whereSeparator: { $0 == "_" || $0 == "-" })
-            .first
-            .map(String.init) ?? "uk"
+        let language = AppLanguage(identifier: languageIdentifier).rawValue
 
         switch (language, self) {
         case ("de", .switzerland): return "in der Schweiz"
@@ -79,14 +73,6 @@ enum ResidenceCountry: String, CaseIterable, Codable, Hashable, Identifiable {
 
     /// "Для ринку Швейцарії" / "Für den Schweizer Arbeitsmarkt".
     var jobMarketPhrase: String { "country.job_market.\(rawValue.lowercased())".localized }
-
-    var ukrainianGenitiveName: String {
-        switch self {
-        case .switzerland: return "Швейцарії"
-        case .germany: return "Німеччини"
-        case .austria: return "Австрії"
-        }
-    }
 
     var timeZoneIdentifier: String {
         switch self {

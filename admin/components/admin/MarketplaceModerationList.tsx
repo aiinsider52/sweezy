@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
+import { ApproveListingDialog, ApprovePayload, RejectListingDialog } from "./MarketplaceModerationDialogs"
 
 type Listing = {
   id: string
@@ -48,6 +49,9 @@ export default function MarketplaceModerationList() {
   const [loading, setLoading] = useState(true)
   const [busyId, setBusyId] = useState<string | null>(null)
   const [search, setSearch] = useState("")
+  const [approving, setApproving] = useState<Listing | null>(null)
+  const [rejecting, setRejecting] = useState<Listing | null>(null)
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
 
   async function load() {
     setLoading(true)
@@ -99,51 +103,22 @@ export default function MarketplaceModerationList() {
     })
   }, [items, search, status, typeFilter])
 
-  async function approve(id: string) {
-    const isVerified = window.confirm("Mark this listing as verified?")
-    const isFeatured = window.confirm("Feature this as a partner listing?")
-    const partnerLabel = isFeatured ? window.prompt("Partner label (optional):") : null
-    const isExpert = window.confirm("Promote to verified expert profile (visible in /experts)?")
-    let expertSpecialty: string | null = null
-    let expertLanguages: string[] | null = null
-    let responseTime: number | null = null
-    let expertBio: string | null = null
-    if (isExpert) {
-      expertSpecialty = window.prompt("Expert specialty (tax / legal / insurance / relocation / career / family):", "tax")
-      const langsRaw = window.prompt("Expert languages (comma, e.g. de,en,uk):", "de,en")
-      expertLanguages = (langsRaw || "").split(",").map(s => s.trim().toLowerCase()).filter(Boolean)
-      const rt = window.prompt("Typical response time in hours (optional):", "24")
-      const parsed = rt ? Number(rt) : NaN
-      responseTime = Number.isFinite(parsed) && parsed > 0 ? parsed : null
-      expertBio = window.prompt("Expert short bio (optional):") || null
-    }
-    const moderationNotes = window.prompt("Moderation notes (optional):")
+  async function approve(id: string, payload: ApprovePayload) {
     setBusyId(id)
     try {
       await fetch(`/api/admin/marketplace/${id}/approve`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          is_verified: isVerified,
-          is_featured: isFeatured,
-          partner_label: partnerLabel || null,
-          moderation_notes: moderationNotes || null,
-          is_expert: isExpert,
-          expert_specialty: expertSpecialty,
-          expert_languages: expertLanguages,
-          response_time_hours: responseTime,
-          expert_bio: expertBio,
-        }),
+        body: JSON.stringify(payload),
       })
+      setApproving(null)
       await load()
     } finally {
       setBusyId(null)
     }
   }
 
-  async function reject(id: string) {
-    const reason = window.prompt("Reason for rejection:")
-    if (!reason) return
+  async function reject(id: string, reason: string) {
     setBusyId(id)
     try {
       await fetch(`/api/admin/marketplace/${id}/reject`, {
@@ -151,19 +126,18 @@ export default function MarketplaceModerationList() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ reason }),
       })
+      setRejecting(null)
       await load()
     } finally {
       setBusyId(null)
     }
   }
 
-  async function remove(id: string, title: string) {
-    const confirmed = window.confirm(`Delete listing "${title}"? This cannot be undone.`)
-    if (!confirmed) return
-
+  async function remove(id: string) {
     setBusyId(id)
     try {
       await fetch(`/api/admin/marketplace/${id}`, { method: "DELETE" })
+      setConfirmDeleteId(null)
       await load()
     } finally {
       setBusyId(null)
@@ -172,6 +146,18 @@ export default function MarketplaceModerationList() {
 
   return (
     <div className="space-y-5">
+      <ApproveListingDialog
+        title={approving?.title ?? null}
+        busy={approving !== null && busyId === approving.id}
+        onCancel={() => setApproving(null)}
+        onApprove={payload => approving && approve(approving.id, payload)}
+      />
+      <RejectListingDialog
+        title={rejecting?.title ?? null}
+        busy={rejecting !== null && busyId === rejecting.id}
+        onCancel={() => setRejecting(null)}
+        onReject={reason => rejecting && reject(rejecting.id, reason)}
+      />
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div className="flex flex-wrap items-center gap-2">
           {(["all", "pending", "approved", "rejected"] as StatusFilter[]).map(value => (
@@ -311,25 +297,40 @@ export default function MarketplaceModerationList() {
                   <div className="flex flex-wrap gap-2">
                     <button
                       disabled={busyId === item.id || item.status === "approved"}
-                      onClick={() => approve(item.id)}
+                      onClick={() => setApproving(item)}
                       className="rounded-lg bg-emerald-500/20 px-3 py-2 text-sm text-emerald-200 disabled:opacity-50"
                     >
                       {busyId === item.id ? "..." : "Approve"}
                     </button>
                     <button
                       disabled={busyId === item.id || item.status === "rejected"}
-                      onClick={() => reject(item.id)}
+                      onClick={() => setRejecting(item)}
                       className="rounded-lg bg-red-500/20 px-3 py-2 text-sm text-red-200 disabled:opacity-50"
                     >
                       Reject
                     </button>
-                    <button
-                      disabled={busyId === item.id}
-                      onClick={() => remove(item.id, item.title)}
-                      className="rounded-lg bg-white/10 px-3 py-2 text-sm text-white/85 disabled:opacity-50"
-                    >
-                      Delete
-                    </button>
+                    {confirmDeleteId === item.id ? (
+                      <>
+                        <button
+                          disabled={busyId === item.id}
+                          onClick={() => remove(item.id)}
+                          className="rounded-lg bg-red-500/80 px-3 py-2 text-sm font-semibold text-white disabled:opacity-50"
+                        >
+                          {busyId === item.id ? "..." : "Delete for good"}
+                        </button>
+                        <button onClick={() => setConfirmDeleteId(null)} className="rounded-lg bg-white/10 px-3 py-2 text-sm">
+                          Keep
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        disabled={busyId === item.id}
+                        onClick={() => setConfirmDeleteId(item.id)}
+                        className="rounded-lg bg-white/10 px-3 py-2 text-sm text-white/85 disabled:opacity-50"
+                      >
+                        Delete
+                      </button>
+                    )}
                   </div>
                 </div>
 

@@ -15,7 +15,13 @@ export async function POST(req: NextRequest) {
     body: JSON.stringify({ email, password })
   })
   const text = await res.text()
-  if (!res.ok) return new NextResponse(text || 'Login failed', { status: res.status })
+  if (!res.ok) {
+    // Render answers 502/503 with an HTML page while the free API instance wakes up.
+    if (res.status >= 500 || text.trimStart().startsWith('<')) {
+      return new NextResponse('API is waking up — try again in a minute', { status: 503 })
+    }
+    return new NextResponse(text || 'Login failed', { status: res.status })
+  }
   let payload: { access_token?: string } = {}
   try { payload = JSON.parse(text) } catch {}
   if (!payload.access_token || !(await verifyAdminToken(payload.access_token))) {

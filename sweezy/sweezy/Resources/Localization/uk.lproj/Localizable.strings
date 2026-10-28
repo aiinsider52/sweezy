@@ -746,6 +746,8 @@
 "place.category.community_cafe" = "Громадське кафе";
 "place.category.supermarket" = "Супермаркет";
 "place.category.youth_center" = "Молодіжний центр";
+"place.category.restaurant" = "Українська кухня";
+"place.category.grocery_store" = "Українські продукти";
 
 // MARK: - User Goals
 "user.goal.housing" = "Знайти житло";
@@ -3247,3 +3249,8 @@
 "auth.login.no_account" = "Немає акаунта?";
 "auth.login.create" = "Створити";
 "auth.registration.eyebrow" = "Новий акаунт";
+"map.filter.ukrainian" = "Українцям";
+"map.filter.ukrainian.title" = "Для українців";
+"place.detail.hours" = "Години роботи";
+"place.detail.source" = "Джерело інформації";
+"journey.map.open_place" = "Відкрити місце";

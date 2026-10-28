@@ -478,6 +478,8 @@
 "place.category.community_cafe" = "Gemeinschaftscafé";
 "place.category.supermarket" = "Supermarkt";
 "place.category.youth_center" = "Jugendzentrum";
+"place.category.restaurant" = "Ukrainische Küche";
+"place.category.grocery_store" = "Ukrainische Produkte";
 
 // MARK: - User Goals
 "user.goal.housing" = "Wohnung finden";
@@ -4303,3 +4305,8 @@
 "Як зустрітися" = "Treffen";
 "Чат події" = "Event-Chat";
 "%@ учасників" = "%@ Teilnehmende";
+"map.filter.ukrainian" = "Für Ukrainer:innen";
+"map.filter.ukrainian.title" = "Für Ukrainerinnen und Ukrainer";
+"place.detail.hours" = "Öffnungszeiten";
+"place.detail.source" = "Quelle der Angaben";
+"journey.map.open_place" = "Ort öffnen";

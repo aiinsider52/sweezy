@@ -1,0 +1,1504 @@
+[
+ {
+  "id": "5d36f391-e2f8-5109-893b-0abb5481c473",
+  "name": "Посольство України у Швейцарії",
+  "type": "government",
+  "category": "embassy",
+  "audience": "ukrainian",
+  "description": "Консульські послуги для громадян України: паспорти, довідки, нотаріальні дії. Прийом за попереднім записом.",
+  "descriptions": {
+   "uk": "Консульські послуги для громадян України: паспорти, довідки, нотаріальні дії. Прийом за попереднім записом.",
+   "en": "Consular services for Ukrainian citizens: passports, certificates, notarial acts. By appointment.",
+   "de": "Konsularische Dienste für ukrainische Staatsangehörige: Pässe, Bescheinigungen, Beglaubigungen. Nach Terminvereinbarung."
+  },
+  "address": {
+   "street": "Feldeggweg",
+   "houseNumber": "5",
+   "postalCode": "3005",
+   "city": "Bern",
+   "canton": "BE"
+  },
+  "coordinate": {
+   "latitude": 46.943944,
+   "longitude": 7.447174
+  },
+  "countryCode": "CH",
+  "subdivisionCode": "BE",
+  "openingHours": [],
+  "languages": [
+   "uk",
+   "en",
+   "de"
+  ],
+  "services": [
+   "Паспорти",
+   "Консульські довідки",
+   "Нотаріальні дії"
+  ],
+  "isAccessible": false,
+  "reviewCount": 0,
+  "source": "https://www.eda.admin.ch/countries/ukraine/fr/home/vivre-a/representations-en-ch.html",
+  "verifiedAt": "2026-10-28T00:00:00Z",
+  "canton": "BE",
+  "phoneNumber": "+41 31 352 23 16",
+  "email": "emb_ch@mfa.gov.ua",
+  "website": "https://switzerland.mfa.gov.ua"
+ },
+ {
+  "id": "803fcefe-14f6-5423-b0da-6cffa24e01ae",
+  "name": "Реєстрація статусу S (MZH Sand-Schönbühl)",
+  "type": "government",
+  "category": "migration_office",
+  "audience": "ukrainian",
+  "description": "Єдине місце особистої реєстрації для статусу захисту S. Якщо є житло і документи — спершу запишіться онлайн у RegisterMe.",
+  "descriptions": {
+   "uk": "Єдине місце особистої реєстрації для статусу захисту S. Якщо є житло і документи — спершу запишіться онлайн у RegisterMe.",
+   "en": "The only in-person registration point for protection status S. With housing and ID, book a slot in RegisterMe first.",
+   "de": "Einziger Ort für die persönliche Registrierung zum Schutzstatus S. Mit Unterkunft und Ausweis zuerst Termin in RegisterMe buchen."
+  },
+  "address": {
+   "street": "Moosstrasse",
+   "houseNumber": "28",
+   "postalCode": "3322",
+   "city": "Urtenen-Schönbühl",
+   "canton": "BE"
+  },
+  "coordinate": {
+   "latitude": 47.014684,
+   "longitude": 7.499215
+  },
+  "countryCode": "CH",
+  "subdivisionCode": "BE",
+  "openingHours": [],
+  "languages": [
+   "de",
+   "fr",
+   "en"
+  ],
+  "services": [
+   "Статус S",
+   "Онлайн-запис RegisterMe"
+  ],
+  "isAccessible": false,
+  "reviewCount": 0,
+  "source": "https://www.sem.admin.ch/sem/de/home/asyl/ukraine.html",
+  "verifiedAt": "2026-10-28T00:00:00Z",
+  "canton": "BE",
+  "website": "https://www.sem.admin.ch/sem/de/home/asyl/ukraine.html"
+ },
+ {
+  "id": "ce9a8954-f5f0-566a-b94c-9f6dd83cd3b4",
+  "name": "Українська греко-католицька громада Цюриха",
+  "type": "community",
+  "category": "religious_center",
+  "audience": "ukrainian",
+  "description": "Літургія українською щонеділі о 14:00 у крипті церкви Liebfrauen. Після служби — катехеза для дітей.",
+  "descriptions": {
+   "uk": "Літургія українською щонеділі о 14:00 у крипті церкви Liebfrauen. Після служби — катехеза для дітей.",
+   "en": "Liturgy in Ukrainian every Sunday at 14:00 in the crypt of Liebfrauen church, followed by children's catechesis.",
+   "de": "Ukrainische Liturgie jeden Sonntag um 14 Uhr in der Krypta der Liebfrauenkirche, danach Kinderkatechese."
+  },
+  "address": {
+   "street": "Weinbergstrasse",
+   "houseNumber": "32",
+   "postalCode": "8006",
+   "city": "Zürich",
+   "canton": "ZH"
+  },
+  "coordinate": {
+   "latitude": 47.379597,
+   "longitude": 8.545071
+  },
+  "countryCode": "CH",
+  "subdivisionCode": "ZH",
+  "openingHours": [
+   {
+    "weekday": 1,
+    "openTime": {
+     "hour": 14,
+     "minute": 0
+    },
+    "closeTime": {
+     "hour": 16,
+     "minute": 30
+    },
+    "isClosed": false
+   }
+  ],
+  "languages": [
+   "uk"
+  ],
+  "services": [
+   "Богослужіння українською",
+   "Катехеза для дітей"
+  ],
+  "isAccessible": false,
+  "reviewCount": 0,
+  "source": "https://www.forum-magazin.ch/ukrainische-mission/",
+  "verifiedAt": "2026-10-28T00:00:00Z",
+  "canton": "ZH",
+  "website": "https://www.ugcc.ch"
+ },
+ {
+  "id": "52648dc0-127a-52eb-8d92-46a917ed1f8b",
+  "name": "Українська греко-католицька громада Базеля",
+  "type": "community",
+  "category": "religious_center",
+  "audience": "ukrainian",
+  "description": "Літургія українською в церкві St. Marien, зазвичай у 2-гу та 4-ту неділю місяця о 15:00.",
+  "descriptions": {
+   "uk": "Літургія українською в церкві St. Marien, зазвичай у 2-гу та 4-ту неділю місяця о 15:00.",
+   "en": "Ukrainian liturgy at St. Marien church, usually on the 2nd and 4th Sunday of the month at 15:00.",
+   "de": "Ukrainische Liturgie in der Kirche St. Marien, meist am 2. und 4. Sonntag im Monat um 15 Uhr."
+  },
+  "address": {
+   "street": "Holbeinstrasse",
+   "houseNumber": "30",
+   "postalCode": "4051",
+   "city": "Basel",
+   "canton": "BS"
+  },
+  "coordinate": {
+   "latitude": 47.553492,
+   "longitude": 7.584354
+  },
+  "countryCode": "CH",
+  "subdivisionCode": "BS",
+  "openingHours": [],
+  "languages": [
+   "uk"
+  ],
+  "services": [
+   "Богослужіння українською"
+  ],
+  "isAccessible": false,
+  "reviewCount": 0,
+  "source": "https://www.inforel.ch/wissen/portraets-der-religionscommunity/ukrainische-seelsorge",
+  "verifiedAt": "2026-10-28T00:00:00Z",
+  "canton": "BS",
+  "email": "basel.ugkk@gmail.com",
+  "website": "https://www.ugcc.ch"
+ },
+ {
+  "id": "1e4d9257-1962-5a5a-a2eb-eeb22b7a8cd8",
+  "name": "Українська греко-католицька громада Берна",
+  "type": "community",
+  "category": "religious_center",
+  "audience": "ukrainian",
+  "description": "Богослужіння українською в крипті базиліки Dreifaltigkeit, неділя о 12:00, після служби — спільний обід. У цьому ж будинку працює українська школа «Рідне слово».",
+  "descriptions": {
+   "uk": "Богослужіння українською в крипті базиліки Dreifaltigkeit, неділя о 12:00, після служби — спільний обід. У цьому ж будинку працює українська школа «Рідне слово».",
+   "en": "Ukrainian services in the crypt of the Dreifaltigkeit basilica, Sundays at 12:00. Check ugcc.ch for the schedule.",
+   "de": "Ukrainische Gottesdienste in der Krypta der Basilika Dreifaltigkeit, sonntags 12 Uhr. Plan auf ugcc.ch prüfen."
+  },
+  "address": {
+   "street": "Taubenstrasse",
+   "houseNumber": "4",
+   "postalCode": "3011",
+   "city": "Bern",
+   "canton": "BE"
+  },
+  "coordinate": {
+   "latitude": 46.945147,
+   "longitude": 7.439321
+  },
+  "countryCode": "CH",
+  "subdivisionCode": "BE",
+  "openingHours": [
+   {
+    "weekday": 1,
+    "openTime": {
+     "hour": 12,
+     "minute": 0
+    },
+    "closeTime": {
+     "hour": 13,
+     "minute": 30
+    },
+    "isClosed": false
+   }
+  ],
+  "languages": [
+   "uk"
+  ],
+  "services": [
+   "Богослужіння українською"
+  ],
+  "isAccessible": false,
+  "reviewCount": 0,
+  "source": "https://www.pfarrblattbern.ch/artikel/wir-brauchen-auch-seelischen-beistand",
+  "verifiedAt": "2026-10-28T00:00:00Z",
+  "canton": "BE",
+  "website": "https://www.ugcc.ch"
+ },
+ {
+  "id": "848d56a0-2f5c-54f9-a7fe-4ac14357a54c",
+  "name": "Українська православна парафія св. Андрія Первозванного",
+  "type": "community",
+  "category": "religious_center",
+  "audience": "ukrainian",
+  "description": "Українська православна громада біля Цюриха. Розклад служб — на сайті парафії.",
+  "descriptions": {
+   "uk": "Українська православна громада біля Цюриха. Розклад служб — на сайті парафії.",
+   "en": "Ukrainian Orthodox parish near Zurich. Service schedule on the parish website.",
+   "de": "Ukrainisch-orthodoxe Gemeinde bei Zürich. Gottesdienstplan auf der Website der Gemeinde."
+  },
+  "address": {
+   "street": "Zentralstrasse",
+   "houseNumber": "10",
+   "postalCode": "8304",
+   "city": "Wallisellen",
+   "canton": "ZH"
+  },
+  "coordinate": {
+   "latitude": 47.415798,
+   "longitude": 8.592803
+  },
+  "countryCode": "CH",
+  "subdivisionCode": "ZH",
+  "openingHours": [],
+  "languages": [
+   "uk"
+  ],
+  "services": [
+   "Богослужіння українською"
+  ],
+  "isAccessible": false,
+  "reviewCount": 0,
+  "source": "https://orthodoxie.ch/de/deutsch/verzeichnis/zuerich-ukrainisch-orthodoxe-kirchengemeinde-des-heiligen-apostels-andreas/",
+  "verifiedAt": "2026-10-28T00:00:00Z",
+  "canton": "ZH",
+  "website": "https://www.ukrhram.com/"
+ },
+ {
+  "id": "f812ffdb-1f8a-5fa6-a5b2-46b24f1c4ec8",
+  "name": "Ukraine Hub Ticino",
+  "type": "community",
+  "category": "community_center",
+  "audience": "ukrainian",
+  "description": "Інформаційний і громадський центр для українців у Тічино: інтеграція, волонтерство, події громади.",
+  "descriptions": {
+   "uk": "Інформаційний і громадський центр для українців у Тічино: інтеграція, волонтерство, події громади.",
+   "en": "Information and community centre for Ukrainians in Ticino: integration, volunteering, community events.",
+   "de": "Informations- und Begegnungszentrum für Ukrainer:innen im Tessin: Integration, Freiwilligenarbeit, Anlässe."
+  },
+  "address": {
+   "street": "Via Vincenzo Vela",
+   "houseNumber": "4",
+   "postalCode": "6830",
+   "city": "Chiasso",
+   "canton": "TI"
+  },
+  "coordinate": {
+   "latitude": 45.835933,
+   "longitude": 9.027951
+  },
+  "countryCode": "CH",
+  "subdivisionCode": "TI",
+  "openingHours": [],
+  "languages": [
+   "uk",
+   "it"
+  ],
+  "services": [
+   "Інформаційна підтримка",
+   "Події громади"
+  ],
+  "isAccessible": false,
+  "reviewCount": 0,
+  "source": "https://mezha.net/eng/bukvy/f2e9dd66_ukraine_hub_ticino/",
+  "verifiedAt": "2026-10-28T00:00:00Z",
+  "canton": "TI"
+ },
+ {
+  "id": "9715e154-80d5-5202-8b1e-07aadfbadab0",
+  "name": "Ukrainehilfe Zentralschweiz",
+  "type": "community",
+  "category": "community_center",
+  "audience": "ukrainian",
+  "description": "Волонтерська організація в Люцерні: гуманітарна допомога, освітні й культурні проєкти.",
+  "descriptions": {
+   "uk": "Волонтерська організація в Люцерні: гуманітарна допомога, освітні й культурні проєкти.",
+   "en": "Volunteer organisation in Lucerne: humanitarian aid, education and culture projects.",
+   "de": "Freiwilligenorganisation in Luzern: humanitäre Hilfe, Bildungs- und Kulturprojekte."
+  },
+  "address": {
+   "street": "St.-Karli-Strasse",
+   "houseNumber": "71a",
+   "postalCode": "6004",
+   "city": "Luzern",
+   "canton": "LU"
+  },
+  "coordinate": {
+   "latitude": 47.057877,
+   "longitude": 8.288407
+  },
+  "countryCode": "CH",
+  "subdivisionCode": "LU",
+  "openingHours": [],
+  "languages": [
+   "uk",
+   "de"
+  ],
+  "services": [
+   "Гуманітарна допомога",
+   "Культурні проєкти"
+  ],
+  "isAccessible": false,
+  "reviewCount": 0,
+  "source": "https://ukrainehilfe-zentralschweiz.ch/unsere-projekte/",
+  "verifiedAt": "2026-10-28T00:00:00Z",
+  "canton": "LU",
+  "email": "info@ukrainehilfe-zentralschweiz.ch",
+  "website": "https://ukrainehilfe-zentralschweiz.ch"
+ },
+ {
+  "id": "6c2514a1-e38f-54c6-8912-3c40b6b28650",
+  "name": "Hope for Ukraine · Heilsarmee Zürich-Zentral",
+  "type": "social",
+  "category": "food_assistance",
+  "audience": "ukrainian",
+  "description": "Обід за 3 CHF і роздача продуктів (Пн, Ср, Пт 12:00–13:00). У п'ятницю 14:30–16:30 — кава й розмовна німецька.",
+  "descriptions": {
+   "uk": "Обід за 3 CHF і роздача продуктів (Пн, Ср, Пт 12:00–13:00). У п'ятницю 14:30–16:30 — кава й розмовна німецька.",
+   "en": "Lunch for CHF 3 and food distribution (Mon, Wed, Fri 12:00–13:00). Fridays 14:30–16:30: coffee and German conversation.",
+   "de": "Mittagessen für 3 CHF und Lebensmittelabgabe (Mo, Mi, Fr 12–13 Uhr). Freitags 14.30–16.30: Kaffee & Deutsch-Konversation."
+  },
+  "address": {
+   "street": "Ankerstrasse",
+   "houseNumber": "31",
+   "postalCode": "8004",
+   "city": "Zürich",
+   "canton": "ZH"
+  },
+  "coordinate": {
+   "latitude": 47.373627,
+   "longitude": 8.524444
+  },
+  "countryCode": "CH",
+  "subdivisionCode": "ZH",
+  "openingHours": [
+   {
+    "weekday": 2,
+    "openTime": {
+     "hour": 12,
+     "minute": 0
+    },
+    "closeTime": {
+     "hour": 13,
+     "minute": 0
+    },
+    "isClosed": false
+   },
+   {
+    "weekday": 4,
+    "openTime": {
+     "hour": 12,
+     "minute": 0
+    },
+    "closeTime": {
+     "hour": 13,
+     "minute": 0
+    },
+    "isClosed": false
+   },
+   {
+    "weekday": 6,
+    "openTime": {
+     "hour": 12,
+     "minute": 0
+    },
+    "closeTime": {
+     "hour": 13,
+     "minute": 0
+    },
+    "isClosed": false
+   }
+  ],
+  "languages": [
+   "de",
+   "en"
+  ],
+  "services": [
+   "Обід за 3 CHF",
+   "Продукти",
+   "Розмовна німецька"
+  ],
+  "isAccessible": false,
+  "reviewCount": 0,
+  "source": "https://hope-for-ukraine.heilsarmee.ch/de/region-zuerich/",
+  "verifiedAt": "2026-10-28T00:00:00Z",
+  "canton": "ZH",
+  "phoneNumber": "+41 44 242 53 89",
+  "website": "https://hope-for-ukraine.heilsarmee.ch/de/region-zuerich/"
+ },
+ {
+  "id": "c053565d-8d95-5be5-8560-cf1d53eb3c96",
+  "name": "Hope for Ukraine · Heilsarmee Zürich Nord",
+  "type": "social",
+  "category": "food_assistance",
+  "audience": "ukrainian",
+  "description": "Обід за 3 CHF (Пн, Вт, Чт, Пт 11:45–13:00). Щосереди 13:30–16:30 — Kids & Fun для дітей до 6 класу.",
+  "descriptions": {
+   "uk": "Обід за 3 CHF (Пн, Вт, Чт, Пт 11:45–13:00). Щосереди 13:30–16:30 — Kids & Fun для дітей до 6 класу.",
+   "en": "Lunch for CHF 3 (Mon, Tue, Thu, Fri 11:45–13:00). Wednesdays 13:30–16:30: Kids & Fun for children up to grade 6.",
+   "de": "Mittagessen für 3 CHF (Mo, Di, Do, Fr 11.45–13 Uhr). Mittwochs 13.30–16.30: Kids & Fun bis 6. Klasse."
+  },
+  "address": {
+   "street": "Saatlenstrasse",
+   "houseNumber": "256",
+   "postalCode": "8050",
+   "city": "Zürich",
+   "canton": "ZH"
+  },
+  "coordinate": {
+   "latitude": 47.411097,
+   "longitude": 8.5635
+  },
+  "countryCode": "CH",
+  "subdivisionCode": "ZH",
+  "openingHours": [
+   {
+    "weekday": 2,
+    "openTime": {
+     "hour": 11,
+     "minute": 45
+    },
+    "closeTime": {
+     "hour": 13,
+     "minute": 0
+    },
+    "isClosed": false
+   },
+   {
+    "weekday": 3,
+    "openTime": {
+     "hour": 11,
+     "minute": 45
+    },
+    "closeTime": {
+     "hour": 13,
+     "minute": 0
+    },
+    "isClosed": false
+   },
+   {
+    "weekday": 5,
+    "openTime": {
+     "hour": 11,
+     "minute": 45
+    },
+    "closeTime": {
+     "hour": 13,
+     "minute": 0
+    },
+    "isClosed": false
+   },
+   {
+    "weekday": 6,
+    "openTime": {
+     "hour": 11,
+     "minute": 45
+    },
+    "closeTime": {
+     "hour": 13,
+     "minute": 0
+    },
+    "isClosed": false
+   }
+  ],
+  "languages": [
+   "de",
+   "en"
+  ],
+  "services": [
+   "Обід за 3 CHF",
+   "Дитячий клуб"
+  ],
+  "isAccessible": false,
+  "reviewCount": 0,
+  "source": "https://hope-for-ukraine.heilsarmee.ch/de/region-zuerich/",
+  "verifiedAt": "2026-10-28T00:00:00Z",
+  "canton": "ZH",
+  "phoneNumber": "+41 44 325 10 90",
+  "website": "https://hope-for-ukraine.heilsarmee.ch/de/region-zuerich/"
+ },
+ {
+  "id": "ad2f87ed-c452-5c6f-97a0-a854d09fa318",
+  "name": "Hope Brocki · одяг для біженців",
+  "type": "social",
+  "category": "secondhand_shop",
+  "audience": "ukrainian",
+  "description": "Одяг для біженців за символічною ціною від Армії Спасіння.",
+  "descriptions": {
+   "uk": "Одяг для біженців за символічною ціною від Армії Спасіння.",
+   "en": "Clothing for refugees at a symbolic price, run by the Salvation Army.",
+   "de": "Kleider für Geflüchtete zu symbolischen Preisen, betrieben von der Heilsarmee."
+  },
+  "address": {
+   "street": "Ankerstrasse",
+   "houseNumber": "23",
+   "postalCode": "8004",
+   "city": "Zürich",
+   "canton": "ZH"
+  },
+  "coordinate": {
+   "latitude": 47.37335,
+   "longitude": 8.52424
+  },
+  "countryCode": "CH",
+  "subdivisionCode": "ZH",
+  "openingHours": [],
+  "languages": [
+   "de"
+  ],
+  "services": [
+   "Одяг"
+  ],
+  "isAccessible": false,
+  "reviewCount": 0,
+  "source": "https://hope-for-ukraine.heilsarmee.ch/de/region-zuerich/",
+  "verifiedAt": "2026-10-28T00:00:00Z",
+  "canton": "ZH",
+  "website": "https://hope-for-ukraine.heilsarmee.ch/de/region-zuerich/"
+ },
+ {
+  "id": "6ae7d3da-064c-50b3-bd2c-ca4d1571b66f",
+  "name": "Українська греко-католицька громада Женеви",
+  "type": "community",
+  "category": "religious_center",
+  "audience": "ukrainian",
+  "description": "Літургія українською щонеділі о 14:30 у церкві Saint-Paul (Колоньї, біля Женеви).",
+  "descriptions": {
+   "uk": "Літургія українською щонеділі о 14:30 у церкві Saint-Paul (Колоньї, біля Женеви).",
+   "en": "Ukrainian liturgy every Sunday at 14:30 at Saint-Paul church in Cologny near Geneva.",
+   "de": "Ukrainische Liturgie jeden Sonntag um 14.30 Uhr in der Kirche Saint-Paul in Cologny bei Genf."
+  },
+  "address": {
+   "street": "Avenue de Saint-Paul",
+   "houseNumber": "6",
+   "postalCode": "1223",
+   "city": "Cologny",
+   "canton": "GE"
+  },
+  "coordinate": {
+   "latitude": 46.202463,
+   "longitude": 6.1756
+  },
+  "countryCode": "CH",
+  "subdivisionCode": "GE",
+  "openingHours": [
+   {
+    "weekday": 1,
+    "openTime": {
+     "hour": 14,
+     "minute": 30
+    },
+    "closeTime": {
+     "hour": 16,
+     "minute": 0
+    },
+    "isClosed": false
+   }
+  ],
+  "languages": [
+   "uk",
+   "fr"
+  ],
+  "services": [
+   "Богослужіння українською"
+  ],
+  "isAccessible": false,
+  "reviewCount": 0,
+  "source": "https://ugcc.fr/fr/location/geneve/",
+  "verifiedAt": "2026-10-28T00:00:00Z",
+  "canton": "GE",
+  "website": "https://ugcc.fr/fr/location/geneve/"
+ },
+ {
+  "id": "1e0a591b-3806-51c3-8650-822c1d6b6010",
+  "name": "Українська греко-католицька громада Лозанни",
+  "type": "community",
+  "category": "religious_center",
+  "audience": "ukrainian",
+  "description": "Літургія українською в церкві Sacré-Cœur (Уші), 1-ша та 3-тя неділя місяця о 14:00.",
+  "descriptions": {
+   "uk": "Літургія українською в церкві Sacré-Cœur (Уші), 1-ша та 3-тя неділя місяця о 14:00.",
+   "en": "Ukrainian liturgy at Sacré-Cœur church in Ouchy, 1st and 3rd Sunday of the month at 14:00.",
+   "de": "Ukrainische Liturgie in der Kirche Sacré-Cœur in Ouchy, 1. und 3. Sonntag im Monat um 14 Uhr."
+  },
+  "address": {
+   "street": "Chemin de Beau-Rivage",
+   "houseNumber": "3",
+   "postalCode": "1006",
+   "city": "Lausanne",
+   "canton": "VD"
+  },
+  "coordinate": {
+   "latitude": 46.510432,
+   "longitude": 6.630745
+  },
+  "countryCode": "CH",
+  "subdivisionCode": "VD",
+  "openingHours": [],
+  "languages": [
+   "uk",
+   "fr"
+  ],
+  "services": [
+   "Богослужіння українською"
+  ],
+  "isAccessible": false,
+  "reviewCount": 0,
+  "source": "https://ugcc.fr/fr/location/lausanne/",
+  "verifiedAt": "2026-10-28T00:00:00Z",
+  "canton": "VD",
+  "website": "https://ugcc.fr/fr/location/lausanne/"
+ },
+ {
+  "id": "f92f1462-8001-55f8-9de5-74ee2a241460",
+  "name": "Ансамбль українського танцю «СвіТанок»",
+  "type": "community",
+  "category": "cultural_center",
+  "audience": "ukrainian",
+  "description": "Заняття українським народним танцем щосуботи 9:00–10:00 для дітей, батьків і вчителів. Організатор — Ukrainian Women in Switzerland, що також веде українську школу в Женеві.",
+  "descriptions": {
+   "uk": "Заняття українським народним танцем щосуботи 9:00–10:00 для дітей, батьків і вчителів. Організатор — Ukrainian Women in Switzerland, що також веде українську школу в Женеві.",
+   "en": "Ukrainian folk dance classes every Saturday 9:00–10:00 for children, parents and teachers, run by Ukrainian Women in Switzerland, which also runs the Ukrainian school in Geneva.",
+   "de": "Ukrainischer Volkstanz jeden Samstag 9–10 Uhr für Kinder, Eltern und Lehrpersonen, organisiert von Ukrainian Women in Switzerland, die auch die ukrainische Schule in Genf führen."
+  },
+  "address": {
+   "street": "Rue Saint-Jean",
+   "houseNumber": "60",
+   "postalCode": "1203",
+   "city": "Genève",
+   "canton": "GE"
+  },
+  "coordinate": {
+   "latitude": 46.204906,
+   "longitude": 6.13283
+  },
+  "countryCode": "CH",
+  "subdivisionCode": "GE",
+  "openingHours": [
+   {
+    "weekday": 7,
+    "openTime": {
+     "hour": 9,
+     "minute": 0
+    },
+    "closeTime": {
+     "hour": 10,
+     "minute": 0
+    },
+    "isClosed": false
+   }
+  ],
+  "languages": [
+   "uk",
+   "fr"
+  ],
+  "services": [
+   "Народний танець",
+   "Українська школа"
+  ],
+  "isAccessible": false,
+  "reviewCount": 0,
+  "source": "https://femmes-ukrainiennes.ch/fra/",
+  "verifiedAt": "2026-10-28T00:00:00Z",
+  "canton": "GE",
+  "email": "dances@femmes-ukrainiennes.ch",
+  "website": "https://femmes-ukrainiennes.ch/fra/"
+ },
+ {
+  "id": "042156a0-cbd8-5e23-8681-5d9082605c27",
+  "name": "Ukraine-Café · Kirchgemeinde Paulus",
+  "type": "community",
+  "category": "community_cafe",
+  "audience": "ukrainian",
+  "description": "Щовівторка 14:00–16:00: кава, чай, спілкування українською, російською, англійською та німецькою. У понеділок о 19:30 тут співає українсько-швейцарський хор «Співдружба».",
+  "descriptions": {
+   "uk": "Щовівторка 14:00–16:00: кава, чай, спілкування українською, російською, англійською та німецькою. У понеділок о 19:30 тут співає українсько-швейцарський хор «Співдружба».",
+   "en": "Every Tuesday 14:00–16:00: coffee, tea and conversation in Ukrainian, Russian, English and German. Mondays at 19:30 the Ukrainian-Swiss choir Spivdruzhba rehearses here.",
+   "de": "Jeden Dienstag 14–16 Uhr: Kaffee, Tee und Austausch auf Ukrainisch, Russisch, Englisch und Deutsch. Montags 19.30 Uhr probt hier der ukrainisch-schweizerische Chor Spivdruzhba."
+  },
+  "address": {
+   "street": "Freiestrasse",
+   "houseNumber": "20",
+   "postalCode": "3012",
+   "city": "Bern",
+   "canton": "BE"
+  },
+  "coordinate": {
+   "latitude": 46.953449,
+   "longitude": 7.429121
+  },
+  "countryCode": "CH",
+  "subdivisionCode": "BE",
+  "openingHours": [
+   {
+    "weekday": 3,
+    "openTime": {
+     "hour": 14,
+     "minute": 0
+    },
+    "closeTime": {
+     "hour": 16,
+     "minute": 0
+    },
+    "isClosed": false
+   }
+  ],
+  "languages": [
+   "uk",
+   "de",
+   "en"
+  ],
+  "services": [
+   "Кава та спілкування",
+   "Хор «Співдружба»",
+   "Розмовна німецька (Пн 16:00)"
+  ],
+  "isAccessible": false,
+  "reviewCount": 0,
+  "source": "https://www.paulus.refbern.ch/de/angebote/angebote-fuer-gefluechtete-375.html",
+  "verifiedAt": "2026-10-28T00:00:00Z",
+  "canton": "BE",
+  "phoneNumber": "+41 31 309 00 05",
+  "website": "https://www.paulus.refbern.ch/de/angebote/angebote-fuer-gefluechtete-375.html"
+ },
+ {
+  "id": "de76c3d6-5627-5a66-ac34-5aa4fc098429",
+  "name": "Українська школа Берн",
+  "type": "education",
+  "category": "school",
+  "audience": "ukrainian",
+  "description": "Школа й садочок українською, вечірня ігрова кімната, творчі майстерні. Організатор — Verein Ukraine Schweiz Bern.",
+  "descriptions": {
+   "uk": "Школа й садочок українською, вечірня ігрова кімната, творчі майстерні. Організатор — Verein Ukraine Schweiz Bern.",
+   "en": "Ukrainian-language school and kindergarten, evening playroom and creative workshops, run by Verein Ukraine Schweiz Bern.",
+   "de": "Ukrainische Schule und Kindergarten, Abend-Spielzimmer und Kreativworkshops, getragen vom Verein Ukraine Schweiz Bern."
+  },
+  "address": {
+   "street": "Marktgasse",
+   "houseNumber": "32",
+   "postalCode": "3011",
+   "city": "Bern",
+   "canton": "BE"
+  },
+  "coordinate": {
+   "latitude": 46.948044,
+   "longitude": 7.445534
+  },
+  "countryCode": "CH",
+  "subdivisionCode": "BE",
+  "openingHours": [],
+  "languages": [
+   "uk"
+  ],
+  "services": [
+   "Школа",
+   "Садочок",
+   "Творчі майстерні"
+  ],
+  "isAccessible": false,
+  "reviewCount": 0,
+  "source": "https://www.ukraine-hilfe-bern.ch/angebote",
+  "verifiedAt": "2026-10-28T00:00:00Z",
+  "canton": "BE"
+ },
+ {
+  "id": "b1d5555a-9ca8-58fb-8ccd-a55f2c225ac7",
+  "name": "Психологічна допомога українцям · Pfarrei St. Michael",
+  "type": "healthcare",
+  "category": "mental_health",
+  "audience": "ukrainian",
+  "description": "Безкоштовні групи та індивідуальні сесії з психологом для українців, щотижня. Запис через форму Ukraine-Hilfe Bern.",
+  "descriptions": {
+   "uk": "Безкоштовні групи та індивідуальні сесії з психологом для українців, щотижня. Запис через форму Ukraine-Hilfe Bern.",
+   "en": "Free weekly group and individual sessions with a psychologist for Ukrainians. Sign up via the Ukraine-Hilfe Bern form.",
+   "de": "Kostenlose wöchentliche Gruppen- und Einzelsitzungen mit Psycholog:innen für Ukrainer:innen. Anmeldung über Ukraine-Hilfe Bern."
+  },
+  "address": {
+   "street": "Gossetstrasse",
+   "houseNumber": "8",
+   "postalCode": "3084",
+   "city": "Wabern",
+   "canton": "BE"
+  },
+  "coordinate": {
+   "latitude": 46.930017,
+   "longitude": 7.45054
+  },
+  "countryCode": "CH",
+  "subdivisionCode": "BE",
+  "openingHours": [],
+  "languages": [
+   "uk",
+   "de"
+  ],
+  "services": [
+   "Безкоштовна психологічна підтримка"
+  ],
+  "isAccessible": false,
+  "reviewCount": 0,
+  "source": "https://www.ukraine-hilfe-bern.ch/angebote",
+  "verifiedAt": "2026-10-28T00:00:00Z",
+  "canton": "BE",
+  "website": "https://www.ukraine-hilfe-bern.ch/angebote"
+ },
+ {
+  "id": "3061b7f5-a5d1-52d4-b46f-4acaf9bb5bee",
+  "name": "Безкоштовна німецька для статусу S · VHS Bern",
+  "type": "education",
+  "category": "language_school",
+  "audience": "ukrainian",
+  "description": "Безкоштовні курси німецької для українців зі статусом S. Тест на рівень — Пн–Пт 10:00–17:00.",
+  "descriptions": {
+   "uk": "Безкоштовні курси німецької для українців зі статусом S. Тест на рівень — Пн–Пт 10:00–17:00.",
+   "en": "Free German courses for Ukrainians with S status. Placement test Mon–Fri 10:00–17:00.",
+   "de": "Kostenlose Deutschkurse für Ukrainer:innen mit Status S. Einstufungstest Mo–Fr 10–17 Uhr."
+  },
+  "address": {
+   "street": "Grabenpromenade",
+   "houseNumber": "3",
+   "postalCode": "3011",
+   "city": "Bern",
+   "canton": "BE"
+  },
+  "coordinate": {
+   "latitude": 46.948939,
+   "longitude": 7.448144
+  },
+  "countryCode": "CH",
+  "subdivisionCode": "BE",
+  "openingHours": [
+   {
+    "weekday": 2,
+    "openTime": {
+     "hour": 10,
+     "minute": 0
+    },
+    "closeTime": {
+     "hour": 17,
+     "minute": 0
+    },
+    "isClosed": false
+   },
+   {
+    "weekday": 3,
+    "openTime": {
+     "hour": 10,
+     "minute": 0
+    },
+    "closeTime": {
+     "hour": 17,
+     "minute": 0
+    },
+    "isClosed": false
+   },
+   {
+    "weekday": 4,
+    "openTime": {
+     "hour": 10,
+     "minute": 0
+    },
+    "closeTime": {
+     "hour": 17,
+     "minute": 0
+    },
+    "isClosed": false
+   },
+   {
+    "weekday": 5,
+    "openTime": {
+     "hour": 10,
+     "minute": 0
+    },
+    "closeTime": {
+     "hour": 17,
+     "minute": 0
+    },
+    "isClosed": false
+   },
+   {
+    "weekday": 6,
+    "openTime": {
+     "hour": 10,
+     "minute": 0
+    },
+    "closeTime": {
+     "hour": 17,
+     "minute": 0
+    },
+    "isClosed": false
+   }
+  ],
+  "languages": [
+   "de"
+  ],
+  "services": [
+   "Німецька мова",
+   "Статус S"
+  ],
+  "isAccessible": false,
+  "reviewCount": 0,
+  "source": "https://www.ukraine-hilfe-bern.ch/angebote",
+  "verifiedAt": "2026-10-28T00:00:00Z",
+  "canton": "BE"
+ },
+ {
+  "id": "b6722db4-7449-5ced-80c0-473b631ea877",
+  "name": "Berner Rechtsberatungsstelle für Menschen in Not",
+  "type": "legal",
+  "category": "legal_aid",
+  "audience": "ukrainian",
+  "description": "Безкоштовна юридична консультація: статус S, житло, робота, соцдопомога.",
+  "descriptions": {
+   "uk": "Безкоштовна юридична консультація: статус S, житло, робота, соцдопомога.",
+   "en": "Free legal advice: S status, housing, work, social assistance.",
+   "de": "Kostenlose Rechtsberatung: Status S, Wohnen, Arbeit, Sozialhilfe."
+  },
+  "address": {
+   "street": "Eigerplatz",
+   "houseNumber": "5",
+   "postalCode": "3007",
+   "city": "Bern",
+   "canton": "BE"
+  },
+  "coordinate": {
+   "latitude": 46.940908,
+   "longitude": 7.431654
+  },
+  "countryCode": "CH",
+  "subdivisionCode": "BE",
+  "openingHours": [],
+  "languages": [
+   "de"
+  ],
+  "services": [
+   "Безкоштовна юридична консультація"
+  ],
+  "isAccessible": false,
+  "reviewCount": 0,
+  "source": "https://www.ukraine-hilfe-bern.ch/angebote",
+  "verifiedAt": "2026-10-28T00:00:00Z",
+  "canton": "BE"
+ },
+ {
+  "id": "cc67a598-f5a7-54f2-ae43-ebe60691cead",
+  "name": "Caritas-Markt Bern",
+  "type": "social",
+  "category": "food_assistance",
+  "audience": "ukrainian",
+  "description": "Дешеві продукти для людей з низьким доходом (потрібна картка KulturLegi або довідка про соцдопомогу).",
+  "descriptions": {
+   "uk": "Дешеві продукти для людей з низьким доходом (потрібна картка KulturLegi або довідка про соцдопомогу).",
+   "en": "Low-cost groceries for people on low incomes (KulturLegi or proof of social assistance needed).",
+   "de": "Günstige Lebensmittel für Menschen mit wenig Geld (KulturLegi oder Sozialhilfe-Nachweis)."
+  },
+  "address": {
+   "street": "Brunnmattstrasse",
+   "houseNumber": "44",
+   "postalCode": "3007",
+   "city": "Bern",
+   "canton": "BE"
+  },
+  "coordinate": {
+   "latitude": 46.943121,
+   "longitude": 7.426452
+  },
+  "countryCode": "CH",
+  "subdivisionCode": "BE",
+  "openingHours": [
+   {
+    "weekday": 3,
+    "openTime": {
+     "hour": 10,
+     "minute": 0
+    },
+    "closeTime": {
+     "hour": 18,
+     "minute": 30
+    },
+    "isClosed": false
+   },
+   {
+    "weekday": 4,
+    "openTime": {
+     "hour": 10,
+     "minute": 0
+    },
+    "closeTime": {
+     "hour": 18,
+     "minute": 30
+    },
+    "isClosed": false
+   },
+   {
+    "weekday": 5,
+    "openTime": {
+     "hour": 10,
+     "minute": 0
+    },
+    "closeTime": {
+     "hour": 18,
+     "minute": 30
+    },
+    "isClosed": false
+   },
+   {
+    "weekday": 6,
+    "openTime": {
+     "hour": 10,
+     "minute": 0
+    },
+    "closeTime": {
+     "hour": 18,
+     "minute": 30
+    },
+    "isClosed": false
+   },
+   {
+    "weekday": 2,
+    "openTime": {
+     "hour": 14,
+     "minute": 0
+    },
+    "closeTime": {
+     "hour": 18,
+     "minute": 30
+    },
+    "isClosed": false
+   },
+   {
+    "weekday": 7,
+    "openTime": {
+     "hour": 10,
+     "minute": 0
+    },
+    "closeTime": {
+     "hour": 14,
+     "minute": 0
+    },
+    "isClosed": false
+   }
+  ],
+  "languages": [
+   "de"
+  ],
+  "services": [
+   "Дешеві продукти"
+  ],
+  "isAccessible": false,
+  "reviewCount": 0,
+  "source": "https://www.ukraine-hilfe-bern.ch/angebote",
+  "verifiedAt": "2026-10-28T00:00:00Z",
+  "canton": "BE"
+ },
+ {
+  "id": "3ca547a2-1e7a-5088-a992-f1bc0573e8a1",
+  "name": "Treffpunkt Ostermundigen",
+  "type": "community",
+  "category": "community_cafe",
+  "audience": "ukrainian",
+  "description": "Кафе для зустрічей щовівторка 9:30–11:00, безкоштовна кава. Організовують громада і церкви Остермундігена.",
+  "descriptions": {
+   "uk": "Кафе для зустрічей щовівторка 9:30–11:00, безкоштовна кава. Організовують громада і церкви Остермундігена.",
+   "en": "Meeting café every Tuesday 9:30–11:00 with free coffee, run by the municipality and local churches.",
+   "de": "Begegnungscafé jeden Dienstag 9.30–11 Uhr mit Gratis-Kaffee, von Gemeinde und Kirchen Ostermundigen."
+  },
+  "address": {
+   "street": "Obere Zollgasse",
+   "houseNumber": "31",
+   "postalCode": "3072",
+   "city": "Ostermundigen",
+   "canton": "BE"
+  },
+  "coordinate": {
+   "latitude": 46.954828,
+   "longitude": 7.486728
+  },
+  "countryCode": "CH",
+  "subdivisionCode": "BE",
+  "openingHours": [
+   {
+    "weekday": 3,
+    "openTime": {
+     "hour": 9,
+     "minute": 30
+    },
+    "closeTime": {
+     "hour": 11,
+     "minute": 0
+    },
+    "isClosed": false
+   }
+  ],
+  "languages": [
+   "de"
+  ],
+  "services": [
+   "Кава та спілкування"
+  ],
+  "isAccessible": false,
+  "reviewCount": 0,
+  "source": "https://www.ukraine-hilfe-bern.ch/angebote",
+  "verifiedAt": "2026-10-28T00:00:00Z",
+  "canton": "BE"
+ },
+ {
+  "id": "9c49ab36-affe-5177-815c-8a063e307993",
+  "name": "Kozak Buvette",
+  "type": "community",
+  "category": "restaurant",
+  "audience": "ukrainian",
+  "description": "Українська кухня в Markthalle Basel: борщ, вареники, все готують на місці.",
+  "descriptions": {
+   "uk": "Українська кухня в Markthalle Basel: борщ, вареники, все готують на місці.",
+   "en": "Ukrainian kitchen in Basel's Markthalle: borscht, varenyky, made from scratch.",
+   "de": "Ukrainische Küche in der Markthalle Basel: Borschtsch, Wareniki, frisch zubereitet."
+  },
+  "address": {
+   "street": "Viaduktstrasse",
+   "houseNumber": "10",
+   "postalCode": "4051",
+   "city": "Basel",
+   "canton": "BS"
+  },
+  "coordinate": {
+   "latitude": 47.548911,
+   "longitude": 7.587218
+  },
+  "countryCode": "CH",
+  "subdivisionCode": "BS",
+  "openingHours": [
+   {
+    "weekday": 2,
+    "openTime": {
+     "hour": 11,
+     "minute": 30
+    },
+    "closeTime": {
+     "hour": 14,
+     "minute": 0
+    },
+    "isClosed": false
+   },
+   {
+    "weekday": 3,
+    "openTime": {
+     "hour": 11,
+     "minute": 30
+    },
+    "closeTime": {
+     "hour": 14,
+     "minute": 0
+    },
+    "isClosed": false
+   },
+   {
+    "weekday": 4,
+    "openTime": {
+     "hour": 11,
+     "minute": 30
+    },
+    "closeTime": {
+     "hour": 14,
+     "minute": 0
+    },
+    "isClosed": false
+   },
+   {
+    "weekday": 5,
+    "openTime": {
+     "hour": 11,
+     "minute": 30
+    },
+    "closeTime": {
+     "hour": 14,
+     "minute": 0
+    },
+    "isClosed": false
+   },
+   {
+    "weekday": 6,
+    "openTime": {
+     "hour": 11,
+     "minute": 30
+    },
+    "closeTime": {
+     "hour": 14,
+     "minute": 0
+    },
+    "isClosed": false
+   },
+   {
+    "weekday": 7,
+    "openTime": {
+     "hour": 11,
+     "minute": 30
+    },
+    "closeTime": {
+     "hour": 14,
+     "minute": 0
+    },
+    "isClosed": false
+   }
+  ],
+  "languages": [
+   "uk",
+   "de",
+   "en"
+  ],
+  "services": [
+   "Українська кухня"
+  ],
+  "isAccessible": false,
+  "reviewCount": 0,
+  "source": "https://www.kozakbuvette.ch/",
+  "verifiedAt": "2026-10-28T00:00:00Z",
+  "canton": "BS",
+  "phoneNumber": "+41 78 313 50 42",
+  "website": "https://www.kozakbuvette.ch/"
+ },
+ {
+  "id": "41c2d1e3-b440-5005-822c-dc45010357ab",
+  "name": "Restaurant Alexander",
+  "type": "community",
+  "category": "restaurant",
+  "audience": "ukrainian",
+  "description": "Ресторан біля Messeplatz з українськими стравами в меню: борщ, вареники.",
+  "descriptions": {
+   "uk": "Ресторан біля Messeplatz з українськими стравами в меню: борщ, вареники.",
+   "en": "Restaurant by Messeplatz with Ukrainian dishes on the menu: borscht, varenyky.",
+   "de": "Restaurant beim Messeplatz mit ukrainischen Spezialitäten: Borschtsch, Wareniki."
+  },
+  "address": {
+   "street": "Riehenring",
+   "houseNumber": "85",
+   "postalCode": "4058",
+   "city": "Basel",
+   "canton": "BS"
+  },
+  "coordinate": {
+   "latitude": 47.564671,
+   "longitude": 7.598231
+  },
+  "countryCode": "CH",
+  "subdivisionCode": "BS",
+  "openingHours": [],
+  "languages": [
+   "uk",
+   "de"
+  ],
+  "services": [
+   "Українська кухня"
+  ],
+  "isAccessible": false,
+  "reviewCount": 0,
+  "source": "https://www.polizeinews.ch/restaurant-alexander-bietet-eine-fusion-ukrainischer-spezialitaeten-in-basel/",
+  "verifiedAt": "2026-10-28T00:00:00Z",
+  "canton": "BS",
+  "website": "https://www.restaurant-alexander-bs.ch/"
+ },
+ {
+  "id": "37e4a970-afcc-5a55-aff7-0ced75ed53a6",
+  "name": "Abend.Kyiv",
+  "type": "community",
+  "category": "restaurant",
+  "audience": "ukrainian",
+  "description": "Українська кухня на Limmatquai: борщ, вареники, деруни. Відкрито ввечері, зазвичай з четверга по суботу.",
+  "descriptions": {
+   "uk": "Українська кухня на Limmatquai: борщ, вареники, деруни. Відкрито ввечері, зазвичай з четверга по суботу.",
+   "en": "Ukrainian kitchen on Limmatquai: borscht, varenyky, deruny. Evenings, usually Thursday to Saturday.",
+   "de": "Ukrainische Küche am Limmatquai: Borschtsch, Wareniki, Deruny. Abends, meist Donnerstag bis Samstag."
+  },
+  "address": {
+   "street": "Limmatquai",
+   "houseNumber": "88",
+   "postalCode": "8001",
+   "city": "Zürich",
+   "canton": "ZH"
+  },
+  "coordinate": {
+   "latitude": 47.373815,
+   "longitude": 8.543112
+  },
+  "countryCode": "CH",
+  "subdivisionCode": "ZH",
+  "openingHours": [],
+  "languages": [
+   "uk",
+   "de"
+  ],
+  "services": [
+   "Українська кухня"
+  ],
+  "isAccessible": false,
+  "reviewCount": 0,
+  "source": "https://warenyky.ch/de/blog/2023/09/28/ukrainisches-essen-in-zurich-bestellen/",
+  "verifiedAt": "2026-10-28T00:00:00Z",
+  "canton": "ZH"
+ },
+ {
+  "id": "45d5c029-cc26-5cb7-af58-34c4a48b1130",
+  "name": "Lakomka Stansstad",
+  "type": "community",
+  "category": "grocery_store",
+  "audience": "ukrainian",
+  "description": "Східноєвропейські продукти, зокрема українські.",
+  "descriptions": {
+   "uk": "Східноєвропейські продукти, зокрема українські.",
+   "en": "Eastern European groceries, including Ukrainian products.",
+   "de": "Osteuropäische Lebensmittel, auch ukrainische Produkte."
+  },
+  "address": {
+   "street": "Zielmatte",
+   "houseNumber": "2",
+   "postalCode": "6362",
+   "city": "Stansstad",
+   "canton": "NW"
+  },
+  "coordinate": {
+   "latitude": 46.977482,
+   "longitude": 8.341256
+  },
+  "countryCode": "CH",
+  "subdivisionCode": "NW",
+  "openingHours": [],
+  "languages": [
+   "uk",
+   "de"
+  ],
+  "services": [
+   "Українські продукти"
+  ],
+  "isAccessible": false,
+  "reviewCount": 0,
+  "source": "https://www.sidebase.ch/ukgeschaefte/",
+  "verifiedAt": "2026-10-28T00:00:00Z",
+  "canton": "NW",
+  "website": "https://www.facebook.com/LakomkaStansstad/"
+ },
+ {
+  "id": "26afc1a8-78a6-5f63-8a5b-e3a42c62acd8",
+  "name": "Slavic Shop",
+  "type": "community",
+  "category": "grocery_store",
+  "audience": "ukrainian",
+  "description": "Слов'янські продукти, зокрема українські.",
+  "descriptions": {
+   "uk": "Слов'янські продукти, зокрема українські.",
+   "en": "Slavic groceries, including Ukrainian products.",
+   "de": "Slawische Lebensmittel, auch ukrainische Produkte."
+  },
+  "address": {
+   "street": "Kanzleistrasse",
+   "houseNumber": "23",
+   "postalCode": "8405",
+   "city": "Winterthur",
+   "canton": "ZH"
+  },
+  "coordinate": {
+   "latitude": 47.485264,
+   "longitude": 8.762526
+  },
+  "countryCode": "CH",
+  "subdivisionCode": "ZH",
+  "openingHours": [],
+  "languages": [
+   "uk",
+   "de"
+  ],
+  "services": [
+   "Українські продукти"
+  ],
+  "isAccessible": false,
+  "reviewCount": 0,
+  "source": "https://www.sidebase.ch/ukgeschaefte/",
+  "verifiedAt": "2026-10-28T00:00:00Z",
+  "canton": "ZH",
+  "website": "https://www.slavic-shop.ch/"
+ },
+ {
+  "id": "95907400-379a-53b8-945a-23c0c06dad5f",
+  "name": "Gastro Tour",
+  "type": "community",
+  "category": "grocery_store",
+  "audience": "ukrainian",
+  "description": "Продукти з України, Польщі, Балтії та інших країн Східної Європи.",
+  "descriptions": {
+   "uk": "Продукти з України, Польщі, Балтії та інших країн Східної Європи.",
+   "en": "Groceries from Ukraine, Poland, the Baltics and other Eastern European countries.",
+   "de": "Lebensmittel aus der Ukraine, Polen, dem Baltikum und weiteren osteuropäischen Ländern."
+  },
+  "address": {
+   "street": "Moosstrasse",
+   "houseNumber": "2",
+   "postalCode": "6003",
+   "city": "Luzern",
+   "canton": "LU"
+  },
+  "coordinate": {
+   "latitude": 47.045645,
+   "longitude": 8.304384
+  },
+  "countryCode": "CH",
+  "subdivisionCode": "LU",
+  "openingHours": [],
+  "languages": [
+   "uk",
+   "de"
+  ],
+  "services": [
+   "Українські продукти"
+  ],
+  "isAccessible": false,
+  "reviewCount": 0,
+  "source": "https://www.sidebase.ch/ukgeschaefte/",
+  "verifiedAt": "2026-10-28T00:00:00Z",
+  "canton": "LU",
+  "website": "https://gastro-tour.ch/shop/"
+ },
+ {
+  "id": "c18f3a9e-daa2-5cff-a23c-259ddd3d3c5b",
+  "name": "La Berezka",
+  "type": "community",
+  "category": "grocery_store",
+  "audience": "ukrainian",
+  "description": "Східноєвропейські продукти в Женеві, зокрема українські.",
+  "descriptions": {
+   "uk": "Східноєвропейські продукти в Женеві, зокрема українські.",
+   "en": "Eastern European groceries in Geneva, including Ukrainian products.",
+   "de": "Osteuropäische Lebensmittel in Genf, auch ukrainische Produkte."
+  },
+  "address": {
+   "street": "Rue de la Terrassière",
+   "houseNumber": "48",
+   "postalCode": "1207",
+   "city": "Genève",
+   "canton": "GE"
+  },
+  "coordinate": {
+   "latitude": 46.200216,
+   "longitude": 6.160067
+  },
+  "countryCode": "CH",
+  "subdivisionCode": "GE",
+  "openingHours": [],
+  "languages": [
+   "uk",
+   "fr"
+  ],
+  "services": [
+   "Українські продукти"
+  ],
+  "isAccessible": false,
+  "reviewCount": 0,
+  "source": "https://www.sidebase.ch/ukgeschaefte/",
+  "verifiedAt": "2026-10-28T00:00:00Z",
+  "canton": "GE",
+  "website": "https://www.facebook.com/Laberezka/"
+ }
+]

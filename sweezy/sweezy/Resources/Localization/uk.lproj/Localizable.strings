@@ -3240,3 +3240,9 @@
 "onboarding.people.description" = "Гортай картки людей зі спільними інтересами. Like приватний — чат відкриється лише після взаємного вибору.";
 "onboarding.people.events.title" = "Зустрічі та друзі";
 "onboarding.people.events.description" = "Приєднуйся до подій поруч, дивись, хто піде, і тримай своє коло друзів в одному місці.";
+
+/* Auth redesign */
+"auth.login.eyebrow" = "З поверненням";
+"auth.login.no_account" = "Немає акаунта?";
+"auth.login.create" = "Створити";
+"auth.registration.eyebrow" = "Новий акаунт";

@@ -42,7 +42,9 @@ protocol ContentServiceProtocol: ObservableObject {
 /// Content service implementation with local JSON and remote updates
 @MainActor
 class ContentService: ContentServiceProtocol {
-    @Published var guides: [Guide] = []
+    @Published var guides: [Guide] = [] {
+        didSet { GuideCovers.index(guides) }
+    }
     @Published var checklists: [Checklist] = []
     @Published var places: [Place] = []
     @Published var templates: [DocumentTemplate] = []

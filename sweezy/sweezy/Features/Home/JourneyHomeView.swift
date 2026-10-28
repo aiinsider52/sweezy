@@ -198,12 +198,12 @@ struct JourneyHomeView: View {
             VStack(alignment: .leading, spacing: 0) {
                 profileHeader
                     .journeyEntrance(delay: 0.02, distance: 8)
-                heroTitle(width: width)
-                    .padding(.top, 18)
-                    .journeyEntrance(delay: 0.06)
-                progressLabel
-                    .padding(.top, 14)
-                    .journeyEntrance(delay: 0.10, distance: 8)
+                SceneTitlePlate(maxWidth: 300) {
+                    heroTitle(width: width)
+                    progressLabel
+                }
+                .padding(.top, 18)
+                .journeyEntrance(delay: 0.06)
             }
             .padding(.horizontal, 20)
             .padding(.top, topInset + 8)
@@ -291,10 +291,10 @@ struct JourneyHomeView: View {
                     )
             }
         }
-        .font(.system(size: min(34, Theme.Layout.heroTitleSize(for: width) + 4), weight: .bold, design: .default))
+        .font(.system(size: min(30, Theme.Layout.heroTitleSize(for: width)), weight: .bold, design: .default))
+        .tracking(-0.3)
         .foregroundColor(JourneyVisual.primaryText)
         .lineSpacing(1)
-        .shadow(color: JourneyVisual.pageBackground.opacity(0.9), radius: 14)
     }
 
     private var progressLabel: some View {
@@ -323,10 +323,6 @@ struct JourneyHomeView: View {
             .frame(width: 96)
             .accessibilityHidden(true)
         }
-        .padding(.horizontal, 12)
-        .frame(height: 32)
-        .background(.ultraThinMaterial, in: Capsule())
-        .background(Theme.Colors.card.opacity(0.5), in: Capsule())
         .animation(.spring(response: 0.45, dampingFraction: 0.8), value: completedTasks)
         .accessibilityElement(children: .combine)
         .accessibilityValue("\(Int(fraction * 100))%")

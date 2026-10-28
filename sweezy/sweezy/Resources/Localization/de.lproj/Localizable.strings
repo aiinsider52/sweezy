@@ -4293,3 +4293,9 @@
 "onboarding.people.description" = "Blättere durch Karten von Menschen mit gemeinsamen Interessen. Likes sind privat – der Chat öffnet sich erst bei gegenseitigem Interesse.";
 "onboarding.people.events.title" = "Treffen und Freunde";
 "onboarding.people.events.description" = "Mach bei Treffen in deiner Nähe mit, sieh, wer kommt, und behalte deinen Freundeskreis an einem Ort.";
+
+/* Auth redesign */
+"auth.login.eyebrow" = "Willkommen zurück";
+"auth.login.no_account" = "Noch kein Konto?";
+"auth.login.create" = "Erstellen";
+"auth.registration.eyebrow" = "Neues Konto";

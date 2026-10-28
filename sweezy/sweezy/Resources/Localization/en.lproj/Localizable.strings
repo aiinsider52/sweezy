@@ -4364,3 +4364,9 @@
 "onboarding.people.description" = "Swipe through people who share your interests. Likes are private — chat opens only when it's mutual.";
 "onboarding.people.events.title" = "Meetups and friends";
 "onboarding.people.events.description" = "Join meetups nearby, see who's going and keep your circle of friends in one place.";
+
+/* Auth redesign */
+"auth.login.eyebrow" = "Welcome back";
+"auth.login.no_account" = "No account yet?";
+"auth.login.create" = "Create one";
+"auth.registration.eyebrow" = "New account";

@@ -15,45 +15,25 @@ struct LoginView: View {
     @State private var showReset: Bool = false
     @State private var showRegistration: Bool = false
     @State private var showEmailVerification: Bool = false
-    @State private var showPassword: Bool = false
-    @State private var animateIcon: Bool = false
+    @FocusState private var focusedField: Field?
+
+    private enum Field: Hashable {
+        case email, password
+    }
 
     var body: some View {
         NavigationStack {
-            ZStack {
-                JourneyPhotoBackground(imageName: JourneyBackdrop.alpine.rawValue, blurRadius: 6, darkness: 0.64)
-                
-                ScrollView(showsIndicators: false) {
-                    VStack(spacing: 28) {
-                        // Top icon
-                        loginHeader
-                            .padding(.top, 8)
-                        
-                        // Login form
-                        loginFormCard
-                        
-                        // Footer
-                        footerSection
-                        
-                        Spacer(minLength: 40)
-                    }
-                    .padding(.horizontal, 20)
-                }
-            }
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.title3)
-                            .foregroundStyle(JourneyVisual.secondaryText)
-                    }
-                }
+            AuthScaffold(
+                scene: "login",
+                eyebrow: "auth.login.eyebrow".localized,
+                title: "auth.login.title".localized,
+                subtitle: "auth.login.subtitle".localized,
+                closeIdentifier: "auth.login.close",
+                onClose: { dismiss() }
+            ) {
+                form
             }
         }
-        .journeyScreen(.alpine, darkness: 0.64)
         .sheet(isPresented: $showReset) {
             PasswordResetSheet(initialEmail: normalizedEmail)
         }
@@ -71,208 +51,85 @@ struct LoginView: View {
                 .environmentObject(lockManager)
                 .environmentObject(sessionManager)
         }
-        .onAppear {
-            withAnimation(.easeOut(duration: 0.8).delay(0.2)) {
-                animateIcon = true
-            }
-        }
     }
 
     private var normalizedEmail: String {
         email.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
     }
-    
-    // MARK: - Header
-    private var loginHeader: some View {
-        VStack(alignment: .leading, spacing: 18) {
-            // Sweezy holding the front door open: "come back in".
-            StoryScene(name: "login", height: 196)
-                .scaleEffect(animateIcon ? 1 : 0.96)
-                .opacity(animateIcon ? 1 : 0)
 
-            VStack(alignment: .leading, spacing: 6) {
-                Text("auth.login.title")
-                    .font(.system(size: 30, weight: .bold))
-                    .foregroundColor(JourneyVisual.primaryText)
-
-                Text("auth.login.subtitle")
-                    .font(.system(size: 15, weight: .medium))
-                    .foregroundColor(JourneyVisual.secondaryText)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .opacity(animateIcon ? 1 : 0)
-            .offset(y: animateIcon ? 0 : 12)
-        }
+    private var canSubmit: Bool {
+        !normalizedEmail.isEmpty && !password.isEmpty
     }
 
-    // MARK: - Form Card
-    private var loginFormCard: some View {
-        VStack(spacing: 20) {
-            // Email field
-            modernTextField(
-                placeholder: "auth.login.email",
-                text: $email,
+    // MARK: - Form
+
+    private var form: some View {
+        VStack(spacing: 14) {
+            AuthField(
+                label: "auth.login.email".localized,
+                placeholder: "name@email.com",
                 icon: "envelope.fill",
-                keyboardType: .emailAddress
-            )
-            
-            // Password field
-            modernSecureField(
-                placeholder: "auth.login.password",
+                text: $email,
+                focus: $focusedField,
+                field: .email,
+                contentType: .emailAddress,
+                keyboardType: .emailAddress,
+                identifier: "auth.login.email"
+            ) { focusedField = .password }
+
+            AuthField(
+                label: "auth.login.password".localized,
+                placeholder: "••••••••",
+                icon: "lock.fill",
                 text: $password,
-                icon: "lock.fill"
-            )
-            
-            // Forgot password link
+                focus: $focusedField,
+                field: .password,
+                isSecure: true,
+                contentType: .password,
+                submitLabel: .go,
+                identifier: "auth.login.password"
+            ) {
+                focusedField = nil
+                if canSubmit { Task { await login() } }
+            }
+
             HStack {
                 Spacer()
-                Button {
-                    showReset = true
-                } label: {
-                    Text("auth.login.forgot_password")
-                        .font(.subheadline.weight(.medium))
+                Button { showReset = true } label: {
+                    Text("auth.login.forgot_password".localized)
+                        .font(.system(size: 14, weight: .semibold))
                         .foregroundColor(JourneyVisual.accentText)
+                        .frame(minHeight: 32)
                 }
+                .buttonStyle(.plain)
             }
-            
-            // Error message
-            if let error = errorMessage {
-                HStack(spacing: 8) {
-                    Image(systemName: "exclamationmark.triangle.fill")
-                        .foregroundColor(.orange)
-                    Text(error)
-                        .font(.caption)
-                        .foregroundColor(.orange)
-                }
-                .padding(.vertical, 8)
-                .padding(.horizontal, 12)
-                .background(
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(.orange.opacity(0.15))
-                )
-                .transition(.opacity.combined(with: .scale))
+            .padding(.top, -4)
+
+            if let errorMessage {
+                AuthNotice(text: errorMessage)
             }
-            
-            // Login button
-            Button {
+
+            AuthPrimaryButton(
+                title: "auth.login.button".localized,
+                isLoading: isLoading,
+                isEnabled: canSubmit,
+                identifier: "auth.login.submit"
+            ) {
+                focusedField = nil
                 Task { await login() }
-            } label: {
-                HStack(spacing: 12) {
-                    if isLoading {
-                        ProgressView()
-                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                    } else {
-                        Image(systemName: "arrow.right.circle.fill")
-                            .font(.title3)
-                        Text("auth.login.button")
-                            .fontWeight(.semibold)
-                    }
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 16)
-                .background(
-                    Group {
-                        if email.isEmpty || password.isEmpty {
-                            LinearGradient(
-                                colors: [.gray.opacity(0.4), .gray.opacity(0.3)],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
-                        } else {
-                            LinearGradient(
-                                colors: [Theme.Colors.primary, Theme.Colors.primaryDark],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
-                        }
-                    }
-                )
-                .foregroundColor(JourneyVisual.primaryText)
-                .cornerRadius(16)
-                .shadow(color: email.isEmpty || password.isEmpty ? .clear : Theme.Colors.primary.opacity(0.4), radius: 12, y: 6)
             }
-            .disabled(email.isEmpty || password.isEmpty || isLoading)
-            .animation(.easeInOut(duration: 0.2), value: email.isEmpty || password.isEmpty)
 
             SocialAuthPanel(
                 errorMessage: $errorMessage,
-                onAuthenticated: {
-                    dismiss()
-                }
+                onAuthenticated: { dismiss() }
             )
-        }
-        .padding(24)
-        .background(
-            RoundedRectangle(cornerRadius: 24)
-                .fill(
-                    LinearGradient(
-                        colors: [
-                            Theme.Colors.card,
-                            Theme.Colors.card
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 24)
-                        .stroke(
-                            LinearGradient(
-                                colors: [Theme.Colors.primary.opacity(0.28), .white.opacity(0.08), Theme.Colors.primaryDark.opacity(0.18)],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            ),
-                            lineWidth: 1
-                        )
-                )
-        )
-    }
-    
-    // MARK: - Footer
-    private var footerSection: some View {
-        VStack(spacing: 16) {
-            // Divider
-            HStack {
-                Rectangle()
-                    .fill(JourneyVisual.softBorder)
-                    .frame(height: 1)
-                Text("common.or")
-                    .font(.caption)
-                    .foregroundColor(JourneyVisual.secondaryText)
-                Rectangle()
-                    .fill(JourneyVisual.softBorder)
-                    .frame(height: 1)
-            }
-            
-            // Guest mode (App Store 5.1.1 compliance):
-            // Allow users to use the app for non-account features without creating an account.
-            Button {
-                sessionManager.continueAsGuest()
-                dismiss()
-            } label: {
-                HStack(spacing: 10) {
-                    Image(systemName: "person.fill.questionmark")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(JourneyVisual.secondaryText)
-                    Text("auth.login.continue_as_guest")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundColor(JourneyVisual.primaryText)
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 14)
-                .background(
-                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .fill(Theme.Colors.card)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                .stroke(JourneyVisual.softBorder, lineWidth: 1)
-                        )
-                )
-            }
-            .buttonStyle(.plain)
+            .padding(.top, 4)
 
-            Button {
+            AuthSwitchRow(
+                prompt: "auth.login.no_account".localized,
+                action: "auth.login.create".localized,
+                identifier: "auth.login.openRegistration"
+            ) {
                 if let onRequestRegistration {
                     dismiss()
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
@@ -281,110 +138,27 @@ struct LoginView: View {
                 } else {
                     showRegistration = true
                 }
+            }
+
+            // Guest mode (App Store 5.1.1): the app stays usable without an account.
+            Button {
+                sessionManager.continueAsGuest()
+                dismiss()
             } label: {
-                Text("auth.login.create_account")
-                    .font(.subheadline.weight(.medium))
-                    .foregroundColor(JourneyVisual.accentText)
+                HStack(spacing: 6) {
+                    Text("auth.login.continue_as_guest".localized)
+                    Image(systemName: "arrow.right").font(.system(size: 12, weight: .bold))
+                }
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(JourneyVisual.secondaryText)
+                .frame(minHeight: 44)
             }
             .buttonStyle(.plain)
+            .accessibilityIdentifier("auth.login.guest")
 
-            // Security note
-            HStack(spacing: 8) {
-                Image(systemName: "lock.shield.fill")
-                    .foregroundColor(JourneyVisual.accentStrong.opacity(0.7))
-                Text("auth.secure_connection")
-                    .font(.caption)
-                    .foregroundColor(JourneyVisual.secondaryText)
-            }
+            AuthSecurityNote(text: "auth.secure_connection".localized)
         }
-    }
-    
-    // MARK: - Modern Text Field
-    private func modernTextField(
-        placeholder: String,
-        text: Binding<String>,
-        icon: String,
-        keyboardType: UIKeyboardType = .default
-    ) -> some View {
-        HStack(spacing: 14) {
-            Image(systemName: icon)
-                .font(.system(size: 18))
-                .foregroundColor(JourneyVisual.accentStrong.opacity(0.8))
-                .frame(width: 24)
-            
-            TextField("", text: text, prompt: Text(LocalizedStringKey(placeholder)).foregroundColor(JourneyVisual.secondaryText))
-                .font(.body)
-                .foregroundColor(JourneyVisual.primaryText)
-                .keyboardType(keyboardType)
-                .autocapitalization(.none)
-                .autocorrectionDisabled()
-        }
-        .padding(.horizontal, 18)
-        .padding(.vertical, 16)
-        .background(
-            RoundedRectangle(cornerRadius: 14)
-                .fill(Theme.Colors.card)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 14)
-                        .stroke(
-                            !text.wrappedValue.isEmpty
-                                ? LinearGradient(colors: [Theme.Colors.primary.opacity(0.42), Theme.Colors.primaryDark.opacity(0.22)], startPoint: .topLeading, endPoint: .bottomTrailing)
-                                : LinearGradient(colors: [.white.opacity(0.10), .white.opacity(0.06)], startPoint: .topLeading, endPoint: .bottomTrailing),
-                            lineWidth: 1
-                        )
-                )
-        )
-        .animation(.easeInOut(duration: 0.2), value: text.wrappedValue.isEmpty)
-    }
-    
-    // MARK: - Modern Secure Field
-    private func modernSecureField(
-        placeholder: String,
-        text: Binding<String>,
-        icon: String
-    ) -> some View {
-        HStack(spacing: 14) {
-            Image(systemName: icon)
-                .font(.system(size: 18))
-                .foregroundColor(JourneyVisual.accentStrong.opacity(0.8))
-                .frame(width: 24)
-            
-            Group {
-                if showPassword {
-                    TextField("", text: text, prompt: Text(LocalizedStringKey(placeholder)).foregroundColor(JourneyVisual.secondaryText))
-                } else {
-                    SecureField("", text: text, prompt: Text(LocalizedStringKey(placeholder)).foregroundColor(JourneyVisual.secondaryText))
-                }
-            }
-            .font(.body)
-            .foregroundColor(JourneyVisual.primaryText)
-            .autocapitalization(.none)
-            .autocorrectionDisabled()
-            
-            Button {
-                showPassword.toggle()
-            } label: {
-                Image(systemName: showPassword ? "eye.slash.fill" : "eye.fill")
-                    .font(.system(size: 16))
-                    .foregroundColor(JourneyVisual.secondaryText)
-            }
-        }
-        .padding(.horizontal, 18)
-        .padding(.vertical, 16)
-        .background(
-            RoundedRectangle(cornerRadius: 14)
-                .fill(Theme.Colors.card)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 14)
-                        .stroke(
-                            !text.wrappedValue.isEmpty
-                                ? LinearGradient(colors: [Theme.Colors.primary.opacity(0.42), Theme.Colors.primaryDark.opacity(0.22)], startPoint: .topLeading, endPoint: .bottomTrailing)
-                                : LinearGradient(colors: [.white.opacity(0.10), .white.opacity(0.06)], startPoint: .topLeading, endPoint: .bottomTrailing),
-                            lineWidth: 1
-                        )
-                )
-        )
-        .animation(.easeInOut(duration: 0.2), value: text.wrappedValue.isEmpty)
+        .animation(.easeOut(duration: 0.2), value: errorMessage)
     }
 
     private func login() async {

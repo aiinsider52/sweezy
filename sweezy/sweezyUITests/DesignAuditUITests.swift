@@ -39,6 +39,58 @@ final class DesignAuditUITests: XCTestCase {
     }
 
     @MainActor
+    func testCaptureSceneHeroes() throws {
+        let app = launch(["-onboarding_completed", "YES", "-initial_auth_choice_completed", "YES",
+                          "--skip-feature-onboarding", "-pending_initial_auth_entry", "NO"])
+        XCTAssertTrue(app.buttons["tab.marketplace"].waitForExistence(timeout: 20))
+        Thread.sleep(forTimeInterval: 3)
+        keep(app, "hero-1-home")
+        app.buttons["tab.marketplace"].tap()
+        Thread.sleep(forTimeInterval: 2)
+        keep(app, "hero-2-market")
+        let modes = app.otherElements["marketplace.screen"].buttons.allElementsBoundByIndex
+            .filter { $0.frame.minY > 250 && $0.frame.minY < 340 }
+        for (index, mode) in modes.prefix(3).enumerated().dropFirst() {
+            mode.tap()
+            Thread.sleep(forTimeInterval: 1.5)
+            keep(app, "hero-\(index + 2)-mode")
+        }
+    }
+
+    @MainActor
+    func testCaptureAuth() throws {
+        let app = XCUIApplication()
+        app.launchArguments = ["--reset-ui-test-state", "-onboarding_completed", "NO",
+                               "-initial_auth_choice_completed", "NO", "-pending_initial_auth_entry", "NO",
+                               "-biometricsEnabled", "NO", "--skip-feature-onboarding", "-AppleLanguages", "(uk)"]
+        app.launchEnvironment["UITESTS"] = "1"
+        app.launch()
+        let skip = app.buttons["onboarding.skipButton"]
+        XCTAssertTrue(skip.waitForExistence(timeout: 15))
+        skip.tap()
+        XCTAssertTrue(app.buttons["auth.entry.createAccount"].waitForExistence(timeout: 10))
+        app.buttons["auth.entry.createAccount"].tap()
+        XCTAssertTrue(app.textFields["auth.registration.name"].waitForExistence(timeout: 10))
+        Thread.sleep(forTimeInterval: 1)
+        keep(app, "auth-1-register")
+        app.textFields["auth.registration.name"].tap()
+        app.textFields["auth.registration.name"].typeText("Olena")
+        app.secureTextFields["auth.registration.password"].tap()
+        app.secureTextFields["auth.registration.password"].typeText("Sweezy2026")
+        keep(app, "auth-2-register-typing")
+        app.swipeUp()
+        app.swipeUp()
+        keep(app, "auth-3-register-bottom")
+        app.buttons["auth.registration.openLogin"].tap()
+        XCTAssertTrue(app.textFields["auth.login.email"].waitForExistence(timeout: 10))
+        Thread.sleep(forTimeInterval: 1)
+        keep(app, "auth-4-login")
+        app.textFields["auth.login.email"].tap()
+        app.textFields["auth.login.email"].typeText("olena@example.com")
+        keep(app, "auth-5-login-typing")
+    }
+
+    @MainActor
     func testCaptureGuideArticle() throws {
         let app = launch(["--ui-test-article-layout"])
         Thread.sleep(forTimeInterval: 3)

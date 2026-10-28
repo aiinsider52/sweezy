@@ -1,25 +1,74 @@
 import SwiftUI
 
 extension GuideCategory {
-    /// Illustration that matches the topic: the desk for documents, moving boxes for housing…
-    var coverAsset: String {
+    /// Illustrations that fit the topic. Guides of one category rotate through them,
+    /// so a list of six banking guides doesn't show the same picture six times.
+    /// First entries differ between categories, so neighbouring topics start apart.
+    var coverPool: [String] {
         switch self {
-        case .documents, .legal: return "story-documents"
-        case .housing: return "story-housing"
-        case .work, .finance, .banking: return "story-jobs"
-        case .education, .integration: return "story-language"
-        case .insurance, .healthcare: return "swiss-moment-luzern"
-        case .emergency: return "cityhub-zurich-grossmuenster"
-        case .transport: return "cityhub-zurich-viadukt"
-        case .lifestyle: return "swiss-moment-grindelwald"
+        case .documents:
+            return ["story-documents", "journey-tool-documents", "journey-place-government", "business-cover-translation", "journey-tool-deadlines", "story-plan-complete"]
+        case .legal:
+            return ["business-cover-legal", "journey-market-consultant", "journey-place-government", "business-cover-translation", "story-documents"]
+        case .housing:
+            return ["story-housing", "journey-place-housing", "business-cover-moving", "marketplace-service-moving", "business-cover-community", "business-cover-cleaning", "business-cover-repair"]
+        case .insurance:
+            return ["journey-market-consultant", "business-cover-finance", "marketplace-service-business", "journey-place-healthcare", "business-cover-legal"]
+        case .healthcare:
+            return ["journey-place-healthcare", "marketplace-service-family", "business-cover-health", "story-chat", "journey-tool-ask"]
+        case .work:
+            return ["story-jobs", "journey-place-employment", "journey-tool-cv", "journey-tool-jobs", "business-cover-it", "marketplace-service-business", "business-cover-other"]
+        case .finance:
+            return ["business-cover-finance", "marketplace-service-business", "journey-market-consultant", "journey-tool-ask", "business-cover-retail", "journey-tool-deadlines"]
+        case .banking:
+            return ["journey-tool-ask", "business-cover-finance", "marketplace-service-business", "journey-market-consultant", "business-cover-it", "story-jobs"]
+        case .education:
+            return ["journey-place-education", "business-cover-education", "story-language", "journey-tool-deadlines", "journey-place-community"]
+        case .integration:
+            return ["story-language", "story-events", "story-find-people", "journey-place-community", "business-cover-community", "story-chat", "business-cover-events"]
+        case .emergency:
+            return ["business-cover-health", "journey-place-government", "story-chat", "journey-tool-ask", "journey-place-healthcare"]
+        case .transport:
+            return ["journey-tool-my-plan", "business-cover-auto", "journey-place-housing", "story-login", "marketplace-service-moving", "marketplace-service-family"]
+        case .lifestyle:
+            return ["story-events", "business-cover-food", "business-cover-events", "story-chat", "journey-place-community", "story-registration", "business-cover-beauty"]
         }
     }
 }
 
 extension Guide {
+    /// Picture from the category pool, assigned in turn by `GuideCovers` so that
+    /// neighbours in a category never repeat. Hash fallback for guides not indexed yet.
+    var coverAsset: String {
+        if let assigned = GuideCovers.assigned[id] { return assigned }
+        let pool = category.coverPool
+        var seed = 5381
+        for scalar in id.uuidString.unicodeScalars { seed = (seed &* 33 &+ Int(scalar.value)) & 0x7fffffff }
+        return pool[seed % pool.count]
+    }
+
     var coverURL: URL? {
         guard let heroImage, heroImage.hasPrefix("http") else { return nil }
         return URL(string: heroImage)
+    }
+}
+
+/// Rotates each category's cover pool over its guides (per language, in list order: by priority),
+/// so the same guide keeps its picture in the list, the featured card and the article.
+enum GuideCovers {
+    /// Written only from ContentService on the main actor.
+    nonisolated(unsafe) private(set) static var assigned: [UUID: String] = [:]
+
+    static func index(_ guides: [Guide]) {
+        var result: [UUID: String] = [:]
+        let groups = Dictionary(grouping: guides) { "\($0.category.rawValue)|\($0.language ?? "")" }
+        for group in groups.values {
+            for (offset, guide) in group.sorted(by: { $0.priority > $1.priority }).enumerated() {
+                let pool = guide.category.coverPool
+                result[guide.id] = pool[offset % pool.count]
+            }
+        }
+        assigned = result
     }
 }
 
@@ -81,7 +130,7 @@ struct JourneyGuideFeatureCard: View {
                 Color.clear
                     .frame(height: 236)
                     .overlay {
-                        JourneyRemoteImage(url: guide.coverURL, fallbackAsset: guide.category.coverAsset)
+                        JourneyRemoteImage(url: guide.coverURL, fallbackAsset: guide.coverAsset)
                     }
                     .clipped()
 

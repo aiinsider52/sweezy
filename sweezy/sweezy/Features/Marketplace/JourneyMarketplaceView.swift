@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct JourneyMarketplaceView: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var appContainer: AppContainer
     @EnvironmentObject private var lockManager: AppLockManager
@@ -197,16 +198,13 @@ struct JourneyMarketplaceView: View {
             ZStack(alignment: .topLeading) {
                 CityScene(scene: selectedMode == .businesses ? "business" : "market", height: 300)
 
+                // Light veil for the status bar only; the title has its own plate.
                 LinearGradient(
-                    stops: [
-                        .init(color: JourneyVisual.pageBackground.opacity(colorScheme == .dark ? 0.9 : 0.7), location: 0),
-                        .init(color: JourneyVisual.pageBackground.opacity(colorScheme == .dark ? 0.62 : 0.3), location: 0.55),
-                        .init(color: JourneyVisual.pageBackground.opacity(0), location: 1)
-                    ],
+                    colors: [JourneyVisual.pageBackground.opacity(colorScheme == .dark ? 0.6 : 0.4), JourneyVisual.pageBackground.opacity(0)],
                     startPoint: .top,
                     endPoint: .bottom
                 )
-                .frame(height: colorScheme == .dark ? 230 : 190)
+                .frame(height: 110)
                 .allowsHitTesting(false)
 
                 VStack(spacing: 0) {
@@ -220,18 +218,23 @@ struct JourneyMarketplaceView: View {
                 }
                 .allowsHitTesting(false)
 
-                Text(heroTitle)
-                    .font(.system(size: 28, weight: .bold, design: .default))
-                    .foregroundColor(JourneyVisual.primaryText)
-                    .lineSpacing(1)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .shadow(color: JourneyVisual.pageBackground.opacity(0.9), radius: 12)
-                    .frame(maxWidth: 250, alignment: .leading)
-                    .padding(.top, 62)
-                    .padding(.horizontal, 18)
-                    .allowsHitTesting(false)
             }
             .frame(height: 300)
+            // Lower left keeps the faces in the artwork clear and leaves the top row to the buttons.
+            .overlay(alignment: .bottomLeading) {
+                SceneTitlePlate(maxWidth: 250) {
+                    SceneTitleText(text: heroTitle, size: 25)
+                }
+                .id(selectedMode)
+                .transition(.asymmetric(
+                    insertion: .opacity.combined(with: .offset(y: 8)),
+                    removal: .opacity
+                ))
+                .padding(.leading, 18)
+                .padding(.bottom, 38)
+                .allowsHitTesting(false)
+            }
+            .animation(reduceMotion ? nil : .spring(response: 0.4, dampingFraction: 0.85), value: selectedMode)
 
             MarketModeSelector(selection: $selectedMode)
                 .padding(.horizontal, 18)

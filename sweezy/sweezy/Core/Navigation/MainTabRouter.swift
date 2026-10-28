@@ -8,7 +8,7 @@ final class MainTabRouter: ObservableObject {
     @Published private(set) var requestedDirectoryRouteID = UUID()
     @Published private(set) var activeDeepLink: DeepLink?
 
-    static let settingsTab = 5
+    nonisolated static let settingsTab = 5
 
     func select(tab: Int) {
         selectedTab = min(max(tab, 0), Self.settingsTab)

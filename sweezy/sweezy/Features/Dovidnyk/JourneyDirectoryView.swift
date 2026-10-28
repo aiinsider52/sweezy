@@ -217,7 +217,7 @@ struct JourneyDirectoryView: View {
                     LazyVStack(spacing: 10) {
                         ForEach(rest.prefix(visibleGuideCount)) { guide in
                             Button { selectedGuide = guide } label: {
-                                JourneyGuideCompactRow(guide: guide, imageName: guide.category.coverAsset)
+                                JourneyGuideCompactRow(guide: guide, imageName: guide.coverAsset)
                             }
                             .buttonStyle(ScaleButtonStyle(scaleAmount: 0.985, hapticStyle: .light))
                         }

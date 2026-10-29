@@ -2,7 +2,7 @@
 import Foundation
 
 enum GeneratedOpenAPIContract {
-    static let sha256 = "5e3421844219816e5e0707a97978cca7ac4fb6ceed6e467801b4a67efd473805"
+    static let sha256 = "0ca40983ea0dc4c4608c3e636f054142ffc107802d2da2bc9b579a0178e963cb"
 
     struct Operation: Sendable {
         let method: String
@@ -312,6 +312,13 @@ enum GeneratedOpenAPIContract {
         "delete_news_api_v1_news__news_id__delete": Operation(method: "DELETE", path: "/api/v1/news/{news_id}", requiresAuthentication: true),
         "get_news_api_v1_news__news_id__get": Operation(method: "GET", path: "/api/v1/news/{news_id}", requiresAuthentication: true),
         "update_news_api_v1_news__news_id__put": Operation(method: "PUT", path: "/api/v1/news/{news_id}", requiresAuthentication: true),
+        "unwatch_listing_api_v1_notifications_listing_watches__listing_id__delete": Operation(method: "DELETE", path: "/api/v1/notifications/listing-watches/{listing_id}", requiresAuthentication: true),
+        "watch_listing_api_v1_notifications_listing_watches__listing_id__put": Operation(method: "PUT", path: "/api/v1/notifications/listing-watches/{listing_id}", requiresAuthentication: true),
+        "list_follows_api_v1_notifications_marketplace_follows_get": Operation(method: "GET", path: "/api/v1/notifications/marketplace-follows", requiresAuthentication: true),
+        "create_follow_api_v1_notifications_marketplace_follows_post": Operation(method: "POST", path: "/api/v1/notifications/marketplace-follows", requiresAuthentication: true),
+        "delete_follow_api_v1_notifications_marketplace_follows__follow_id__delete": Operation(method: "DELETE", path: "/api/v1/notifications/marketplace-follows/{follow_id}", requiresAuthentication: true),
+        "get_preferences_api_v1_notifications_preferences_get": Operation(method: "GET", path: "/api/v1/notifications/preferences", requiresAuthentication: true),
+        "update_preferences_api_v1_notifications_preferences_put": Operation(method: "PUT", path: "/api/v1/notifications/preferences", requiresAuthentication: true),
         "community_places_api_v1_places_community_get": Operation(method: "GET", path: "/api/v1/places/community", requiresAuthentication: false),
         "create_suggestion_api_v1_places_suggestions_post": Operation(method: "POST", path: "/api/v1/places/suggestions", requiresAuthentication: true),
         "my_suggestions_api_v1_places_suggestions_me_get": Operation(method: "GET", path: "/api/v1/places/suggestions/me", requiresAuthentication: true),

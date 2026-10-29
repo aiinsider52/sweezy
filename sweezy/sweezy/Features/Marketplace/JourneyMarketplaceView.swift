@@ -373,6 +373,14 @@ struct JourneyMarketplaceView: View {
 
                 serviceDiscoveryCategoryRail
 
+                MarketFollowToggle(
+                    category: servicesVM.selectedCategory?.rawValue,
+                    categoryTitle: servicesVM.selectedCategory.flatMap { selected in
+                        discoveryServiceFilters.first { $0.category == selected }?.title
+                    },
+                    requireSignIn: { showAuth = true }
+                )
+
                 sectionHeader(
                     "journey.marketplace.popular_nearby".localized,
                     count: servicesVM.filteredListings.count,
@@ -457,6 +465,14 @@ struct JourneyMarketplaceView: View {
                     isSaved: appContainer.savedItems.isListingSaved(featuredItem.id),
                     open: { selectedListing = featuredItem },
                     save: { appContainer.savedItems.toggleListing(featuredItem.id) }
+                )
+
+                MarketFollowToggle(
+                    category: itemsVM.selectedItemCategory?.rawValue,
+                    categoryTitle: itemsVM.selectedItemCategory.flatMap { selected in
+                        itemFilters.first { $0.0 == selected }?.1
+                    },
+                    requireSignIn: { showAuth = true }
                 )
 
                 sectionHeader("journey.marketplace.more_nearby".localized, count: itemsVM.filteredListings.count, trailing: itemsVM.isShowingStaleData ? "journey.marketplace.offline_data".localized : nil)

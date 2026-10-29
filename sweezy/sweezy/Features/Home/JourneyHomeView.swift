@@ -20,6 +20,7 @@ struct JourneyHomeView: View {
     @State private var showSubscription = false
     @State private var showCareerHub = false
     @State private var showSettings = false
+    @State private var showDeadlines = false
     /// Vertical scroll position: negative while pulling down, positive once scrolled up.
     @State private var scrollOffset: CGFloat = 0
     @State private var heroDrift = false
@@ -71,6 +72,9 @@ struct JourneyHomeView: View {
                                 nextStepCard
                                     .padding(.top, 20)
                                     .journeyEntrance(delay: 0.22)
+                                deadlinesCard
+                                    .padding(.top, 12)
+                                    .journeyEntrance(delay: 0.24)
                             }
                             .padding(.horizontal, 20)
                             .padding(.top, -heroOverlap)
@@ -111,6 +115,10 @@ struct JourneyHomeView: View {
             }
             .navigationDestination(isPresented: $showMyPlan) {
                 MyPlanView()
+                    .environmentObject(appContainer)
+            }
+            .navigationDestination(isPresented: $showDeadlines) {
+                DeadlinesView()
                     .environmentObject(appContainer)
             }
             .navigationDestination(isPresented: $showCareerHub) {
@@ -611,6 +619,41 @@ struct JourneyHomeView: View {
             }
             .padding(16)
         }
+    }
+
+    /// The nearest document expiry or personal date, or an invitation to add the permit date.
+    private var deadlinesCard: some View {
+        let next = appContainer.lifeAdmin.expiryItems.first { $0.daysLeft >= 0 }
+        return Button { showDeadlines = true } label: {
+            HStack(spacing: 14) {
+                JourneyCategoryIcon(
+                    symbol: next?.kind.icon ?? "calendar.badge.clock",
+                    swatch: next?.kind.swatch ?? JourneyCategoryPalette.lime,
+                    size: 44
+                )
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("deadline.title".localized)
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundColor(JourneyVisual.secondaryText)
+                    Text(next.map { "\($0.title) · \($0.countdown)" } ?? "deadline.home.empty".localized)
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(JourneyVisual.primaryText)
+                        .lineLimit(2)
+                        .multilineTextAlignment(.leading)
+                }
+                Spacer(minLength: 6)
+                Image(systemName: next == nil ? "plus" : "chevron.right")
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundColor(next == nil ? .black : JourneyVisual.secondaryText)
+                    .frame(width: 30, height: 30)
+                    .background(next == nil ? JourneyVisual.lime : Color.clear, in: Circle())
+            }
+            .padding(14)
+            .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(JourneyVisual.softBorder))
+        }
+        .buttonStyle(CardPressStyle())
+        .accessibilityIdentifier("home.deadlines")
     }
 
     private var firstName: String {

@@ -45,7 +45,7 @@ from ..schemas.social import (
     SocialSwipeResponse,
 )
 from ..services.moderation import ensure_case, ensure_profile_review_case
-from ..services.push_notifications import enqueue_account_notification
+from ..services.engagement_push import enqueue_engagement
 
 router = APIRouter()
 
@@ -394,13 +394,12 @@ def swipe(target_id: str, payload: SocialSwipeCreate, db: DBSession, user: Curre
             is_match = True
     if is_match and connection:
         pair_key = ":".join(sorted((user.id, target_id)))
-        enqueue_account_notification(
+        enqueue_engagement(
             db,
+            user_id=target_id,
+            kind="friend_match",
             event_key=f"friend_match:{pair_key}",
-            recipient_id=target_id,
-            event_type="friend_match",
-            title="Новий взаємний збіг",
-            body=f"Ви з {own.display_name} обрали одне одного. Чат уже відкритий.",
+            params={"name": own.display_name, "score": _response(own, target).match_score},
             data={"conversation_id": connection.conversation_id, "profile_id": user.id},
         )
     try:

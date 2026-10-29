@@ -27,6 +27,8 @@ struct MainTabView: View {
     @State private var showPrivacy = false
     @State private var showLanguage = false
     @State private var showWhatsNew = false
+    @State private var showDeadlines = false
+    @State private var deepLinkedListingID: DeepLinkedListing?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     @ViewBuilder
@@ -127,10 +129,35 @@ struct MainTabView: View {
         .sheet(isPresented: $showPrivacy) { PrivacyPolicyView() }
         .sheet(isPresented: $showLanguage) { LanguageSelectionSheet().environmentObject(appContainer) }
         .sheet(isPresented: $showWhatsNew) { WhatsNewView() }
+        .sheet(isPresented: $showDeadlines) {
+            NavigationStack { DeadlinesView(showsCloseButton: true).environmentObject(appContainer) }
+        }
+        .sheet(item: $deepLinkedListingID) { link in
+            ListingDetailView(listingId: link.id, initialListing: nil)
+                .environmentObject(appContainer)
+                .environmentObject(lockManager)
+                .environmentObject(sessionManager)
+        }
     }
 
     @MainActor
     private func resolve(_ link: DeepLink) async {
+        // These open local screens and must not wait for the content catalogue to download.
+        switch link {
+        case .deadlines:
+            showDeadlines = true
+            router.consumeDeepLink()
+            return
+        case .listing(let id):
+            deepLinkedListingID = DeepLinkedListing(id: id)
+            router.consumeDeepLink()
+            return
+        case .people:
+            router.consumeDeepLink()
+            return
+        default:
+            break
+        }
         if appContainer.contentService.guides.isEmpty || appContainer.contentService.checklists.isEmpty {
             await appContainer.contentService.refreshContent()
         }
@@ -159,6 +186,7 @@ struct MainTabView: View {
         case .privacy: showPrivacy = true
         case .language: showLanguage = true
         case .whatsNew: showWhatsNew = true
+        case .deadlines, .listing, .people: break
         case .onboarding:
             appContainer.restartOnboarding()
         case .passwordReset, .chat:
@@ -171,6 +199,8 @@ struct MainTabView: View {
         uuid.uuidString.caseInsensitiveCompare(raw) == .orderedSame
     }
 }
+
+private struct DeepLinkedListing: Identifiable { let id: String }
 
 enum DovidnykRouteSection: String {
     case guides
@@ -2628,6 +2658,8 @@ struct NotificationSettingsView: View {
     @State private var pendingCount = 0
     @State private var isWorking = false
     @State private var showSettingsPrompt = false
+    @State private var engagement = EngagementPreferences.default
+    @State private var deadlineReminders = DeadlineReminderPreference.isEnabled
 
     var body: some View {
         ScrollView(showsIndicators: false) {
@@ -2649,6 +2681,9 @@ struct NotificationSettingsView: View {
                 }
 
                 notificationMasterCard
+                if notificationsEnabled {
+                    notificationTopicsCard
+                }
                 notificationStatusCard
 
                 Text("settings.notifications.privacy".localized)
@@ -2731,6 +2766,105 @@ struct NotificationSettingsView: View {
             }
             .padding(18)
         }
+    }
+
+    /// One switch per kind of push, so people mute what bores them instead of everything.
+    private var notificationTopicsCard: some View {
+        JourneyGlassPanel(cornerRadius: 24) {
+            VStack(spacing: 0) {
+                topicRow(
+                    icon: "calendar.badge.clock",
+                    title: "settings.notifications.topic.deadlines".localized,
+                    subtitle: "settings.notifications.topic.deadlines_hint".localized,
+                    isOn: Binding(get: { deadlineReminders }, set: { value in
+                        deadlineReminders = value
+                        DeadlineReminderPreference.isEnabled = value
+                        appContainer.lifeAdmin.scheduleReminderSync()
+                    }),
+                    id: "deadlines"
+                )
+                if NotificationsAPI.isSignedIn {
+                    Divider().overlay(Color.white.opacity(0.12))
+                    topicRow(
+                        icon: "heart.circle.fill",
+                        title: "settings.notifications.topic.social".localized,
+                        subtitle: "settings.notifications.topic.social_hint".localized,
+                        isOn: engagementBinding(\.socialEnabled) { try await NotificationsAPI.updatePreferences(social: $0) },
+                        id: "social"
+                    )
+                    Divider().overlay(Color.white.opacity(0.12))
+                    topicRow(
+                        icon: "party.popper.fill",
+                        title: "settings.notifications.topic.events".localized,
+                        subtitle: "settings.notifications.topic.events_hint".localized,
+                        isOn: engagementBinding(\.eventsEnabled) { try await NotificationsAPI.updatePreferences(events: $0) },
+                        id: "events"
+                    )
+                    Divider().overlay(Color.white.opacity(0.12))
+                    topicRow(
+                        icon: "bag.fill",
+                        title: "settings.notifications.topic.marketplace".localized,
+                        subtitle: "settings.notifications.topic.marketplace_hint".localized,
+                        isOn: engagementBinding(\.marketplaceEnabled) { try await NotificationsAPI.updatePreferences(marketplace: $0) },
+                        id: "marketplace"
+                    )
+                }
+                Divider().overlay(Color.white.opacity(0.12))
+                Label("settings.notifications.quiet_hours".localized, systemImage: "moon.zzz.fill")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(JourneyVisual.secondaryText)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(17)
+            }
+        }
+        .task {
+            guard NotificationsAPI.isSignedIn, let loaded = try? await NotificationsAPI.preferences() else { return }
+            engagement = loaded
+        }
+    }
+
+    private func topicRow(icon: String, title: String, subtitle: String, isOn: Binding<Bool>, id: String) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: icon)
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundColor(Theme.Colors.textPrimary)
+                .frame(width: 36, height: 36)
+                .background(Color.white.opacity(0.08), in: Circle())
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundColor(JourneyVisual.primaryText)
+                Text(subtitle)
+                    .font(.system(size: 12))
+                    .foregroundColor(JourneyVisual.secondaryText)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Spacer(minLength: 8)
+            Toggle("", isOn: isOn)
+                .labelsHidden()
+                .tint(JourneyVisual.accentText)
+                .accessibilityLabel(title)
+                .accessibilityIdentifier("settings.notifications.topic.\(id)")
+        }
+        .padding(.horizontal, 17)
+        .padding(.vertical, 13)
+    }
+
+    /// Flips the switch at once and rolls it back if the server refuses.
+    private func engagementBinding(
+        _ keyPath: WritableKeyPath<EngagementPreferences, Bool>,
+        save: @escaping (Bool) async throws -> EngagementPreferences
+    ) -> Binding<Bool> {
+        Binding(
+            get: { engagement[keyPath: keyPath] },
+            set: { value in
+                let previous = engagement
+                engagement[keyPath: keyPath] = value
+                Task { @MainActor in
+                    do { engagement = try await save(value) } catch { engagement = previous }
+                }
+            }
+        )
     }
 
     private var notificationStatusCard: some View {

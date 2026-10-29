@@ -1642,68 +1642,63 @@ struct FriendNetworkView: View {
     .padding(14).background((rejected ? Color.orange : limeAccent).opacity(0.09))
     .clipShape(RoundedRectangle(cornerRadius: 16))
   }
+  /// First visit to the "Я" tab: the people scene, what the passport is in three steps, one button.
   private var profileLaunchCard: some View {
-    VStack(alignment: .leading, spacing: 20) {
-      HStack(alignment: .top) {
-        VStack(alignment: .leading, spacing: 7) {
-          Text("ТВІЙ КРУГ У ШВЕЙЦАРІЇ".localized).font(.caption2.bold()).tracking(1.9).foregroundColor(
-            JourneyVisual.accentText)
-          Text("Створи свій\nsocial passport".localized).font(
-            .system(size: 29, weight: .black, design: .default)
-          )
-          .lineSpacing(1).foregroundColor(JourneyVisual.primaryText)
-          Text("Знайомства за інтересами, подіями та кантоном.".localized).font(.subheadline)
-            .foregroundColor(JourneyVisual.secondaryText).fixedSize(horizontal: false, vertical: true)
+    VStack(alignment: .leading, spacing: 0) {
+      StoryScene(name: "find-people", height: 190, cornerRadius: 0)
+        .overlay(alignment: .topLeading) {
+          HStack(spacing: 6) {
+            Circle().fill(limeAccent).frame(width: 7, height: 7)
+            Text("friends.launch.eyebrow".localized)
+              .font(.system(size: 11, weight: .heavy)).tracking(1)
+              .foregroundColor(JourneyVisual.primaryText)
+          }
+          .padding(.horizontal, 10).frame(height: 28)
+          .background(Theme.Colors.card.opacity(0.94), in: Capsule())
+          .padding(14)
         }
-        Spacer(minLength: 10)
-        ZStack {
-          Circle().stroke(limeAccent.opacity(0.18), lineWidth: 1).frame(width: 94, height: 94)
-          Circle().stroke(limeAccent.opacity(0.45), lineWidth: 1).frame(width: 66, height: 66)
-          Circle().fill(limeAccent.opacity(0.12)).frame(width: 52, height: 52)
-          Text("CH").font(.headline.bold()).foregroundColor(JourneyVisual.accentText)
-          Circle().fill(limeAccent).frame(width: 10, height: 10).offset(x: 33, y: -27)
+      VStack(alignment: .leading, spacing: 18) {
+        VStack(alignment: .leading, spacing: 8) {
+          SceneTitleText(text: "Створи свій\nsocial passport".localized, size: 30)
+          Text("Знайомства за інтересами, подіями та кантоном.".localized)
+            .font(.system(size: 15, weight: .medium))
+            .foregroundColor(JourneyVisual.secondaryText)
+            .fixedSize(horizontal: false, vertical: true)
         }
+        VStack(alignment: .leading, spacing: 12) {
+          launchStep(1, "Інтереси".localized, "Обери теми, які тебе захоплюють".localized)
+          launchStep(2, "Формат зустрічей".localized, "Прогулянки, спорт, кава або події".localized)
+          launchStep(3, "Приватність".localized, "Контакти приховані, контроль завжди твій".localized)
+        }
+        AuthPrimaryButton(title: "Створити social passport".localized, identifier: "friends.passport.create") {
+          editor = true
+        }
+        Label("Професійний профіль залишається окремим".localized, systemImage: "checkmark.shield.fill")
+          .font(.system(size: 12, weight: .medium))
+          .foregroundColor(JourneyVisual.secondaryText)
+          .frame(maxWidth: .infinity)
       }
-      VStack(spacing: 0) {
-        profileStep("sparkles", "Інтереси".localized, "Обери теми, які тебе захоплюють".localized)
-        Divider().overlay(JourneyVisual.softBorder).padding(.leading, 46)
-        profileStep("person.2.fill", "Формат зустрічей".localized, "Прогулянки, спорт, кава або події".localized)
-        Divider().overlay(JourneyVisual.softBorder).padding(.leading, 46)
-        profileStep("lock.shield.fill", "Приватність".localized, "Контакти приховані, контроль завжди твій".localized)
-      }.padding(.horizontal, 14).background(Theme.Colors.card).clipShape(
-        RoundedRectangle(cornerRadius: 20))
-      Button {
-        editor = true
-      } label: {
-        HStack {
-          Text("Створити social passport".localized).font(.headline)
-          Spacer()
-          Image(systemName: "arrow.right").font(.headline.bold())
-        }.foregroundColor(.black).padding(.horizontal, 20).frame(maxWidth: .infinity, minHeight: 58)
-          .background(limeAccent).clipShape(RoundedRectangle(cornerRadius: 19))
-      }
-      Label("Професійний профіль залишається окремим".localized, systemImage: "checkmark.shield.fill")
-        .font(.caption).foregroundColor(JourneyVisual.secondaryText).frame(maxWidth: .infinity)
-    }.padding(20).background(
-      LinearGradient(
-        colors: [forest, Theme.Colors.card],
-        startPoint: .topLeading, endPoint: .bottomTrailing)
-    ).clipShape(RoundedRectangle(cornerRadius: 30)).overlay(
-      RoundedRectangle(cornerRadius: 30).stroke(limeAccent.opacity(0.3))
-    )
-    .shadow(color: limeAccent.opacity(0.09), radius: 28, y: 12)
+      .padding(20)
+    }
+    .background(Theme.Colors.card)
+    .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+    .overlay(RoundedRectangle(cornerRadius: 28, style: .continuous).stroke(JourneyVisual.softBorder))
+    .shadow(color: .black.opacity(0.06), radius: 18, y: 8)
   }
-  private func profileStep(_ icon: String, _ title: String, _ subtitle: String) -> some View {
-    HStack(spacing: 13) {
-      Image(systemName: icon).font(.subheadline.bold()).foregroundColor(JourneyVisual.accentStrong).frame(
-        width: 34, height: 34
-      ).background(limeAccent.opacity(0.1)).clipShape(RoundedRectangle(cornerRadius: 11))
+  private func launchStep(_ number: Int, _ title: String, _ subtitle: String) -> some View {
+    HStack(spacing: 12) {
+      Text("\(number)")
+        .font(.system(size: 15, weight: .heavy, design: .rounded))
+        .foregroundColor(.black)
+        .frame(width: 34, height: 34)
+        .background(limeAccent, in: Circle())
       VStack(alignment: .leading, spacing: 2) {
-        Text(title).font(.subheadline.bold()).foregroundColor(JourneyVisual.primaryText)
-        Text(subtitle).font(.caption).foregroundColor(JourneyVisual.secondaryText).lineLimit(2)
+        Text(title).font(.system(size: 15, weight: .bold)).foregroundColor(JourneyVisual.primaryText)
+        Text(subtitle).font(.system(size: 13)).foregroundColor(JourneyVisual.secondaryText)
+          .fixedSize(horizontal: false, vertical: true)
       }
       Spacer(minLength: 0)
-    }.padding(.vertical, 11)
+    }
   }
   private func title(_ text: String, sub: String, count: Int) -> some View {
     HStack {
@@ -1969,7 +1964,7 @@ private struct FriendProfileDetail: View {
         section("Як зустрітися".localized) {
           FlowLayout(spacing: 8) {
             ForEach(profile.meetupFormats) { format in
-              chip(format.title, icon: formatIcon(format), highlighted: false)
+              chip(format.title, icon: format.symbol, highlighted: false)
             }
             ForEach(profile.availability) { slot in
               chip(slot.title, icon: slot.icon, highlighted: false)
@@ -2095,17 +2090,6 @@ private struct FriendProfileDetail: View {
       .padding(.horizontal, 12).frame(height: 34)
       .background(highlighted ? JourneyVisual.lime : Theme.Colors.card, in: Capsule())
       .overlay(Capsule().stroke(highlighted ? Color.clear : JourneyVisual.softBorder))
-  }
-
-  private func formatIcon(_ format: MeetupFormat) -> String {
-    switch format {
-    case .coffee: return "cup.and.saucer.fill"
-    case .walk: return "figure.walk"
-    case .activity: return "figure.run"
-    case .event: return "ticket.fill"
-    case .online: return "video.fill"
-    case .family: return "figure.2.and.child.holdinghands"
-    }
   }
 
   private func languageName(_ code: String) -> String {
@@ -2454,67 +2438,110 @@ private struct FriendProfileEditor: View {
     _d = State(initialValue: profile.map(SocialProfileDraft.init) ?? SocialProfileDraft())
   }
 
+  private enum Field: Hashable { case name, city, bio }
+  @FocusState private var focus: Field?
+  @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+  private var country: ResidenceCountry { ResidenceCountry(rawValue: d.countryCode) ?? .switzerland }
+  private var regions: [AdministrativeArea] { CountryCatalog.subdivisions(for: country) }
+  private var regionTitle: String { country == .switzerland ? "Кантон".localized : "Регіон".localized }
+  private var regionName: String {
+    regions.first { $0.code == d.subdivisionCode || $0.code == d.canton }?.name ?? d.canton
+  }
+
   var body: some View {
-    NavigationStack {
-      ZStack {
-        JourneyAmbientBackground()
-        VStack(spacing: 0) {
-          progress
-          ScrollView(showsIndicators: false) {
-            VStack(alignment: .leading, spacing: 20) {
-              heading
-              content
-            }
-            .padding(.horizontal, 20).padding(.vertical, 22).padding(.bottom, 110)
+    ZStack {
+      JourneyVisual.pageBackground.ignoresSafeArea()
+      VStack(spacing: 0) {
+        topBar
+        ScrollView(showsIndicators: false) {
+          VStack(alignment: .leading, spacing: 22) {
+            heading
+            content
+              .id(step)
+              // Quick fade-and-nudge: steps never sit on top of each other mid-transition.
+              .transition(.asymmetric(
+                insertion: .opacity.combined(with: .offset(x: 24)).animation(.easeOut(duration: 0.22).delay(0.08)),
+                removal: .opacity.animation(.easeIn(duration: 0.08))))
           }
+          .padding(.horizontal, 20).padding(.top, 18).padding(.bottom, 120)
         }
-      }.safeAreaInset(edge: .bottom) { controls }
-        .toolbar {
-          ToolbarItem(placement: .cancellationAction) {
-            Button("Закрити".localized) { dismiss() }.foregroundColor(JourneyVisual.primaryText)
-          }
-        }
-        .navigationBarTitleDisplayMode(.inline)
-        .alert(
-          "friends.passport.title".localized,
-          isPresented: Binding(get: { error != nil }, set: { if !$0 { error = nil } })
-        ) {
-          Button("OK", role: .cancel) {}
-        } message: {
-          Text(error ?? "")
-        }
-        .onChange(of: photoItem) { _, item in Task { await loadPhoto(item) } }
-        .onChange(of: locationService.currentLocation) { _, location in
-          d.latitude = location?.coordinate.latitude
-          d.longitude = location?.coordinate.longitude
-          locationService.stopLocationUpdates()
-        }
+        .scrollDismissesKeyboard(.interactively)
+      }
+    }
+    .safeAreaInset(edge: .bottom, spacing: 0) { controls }
+    .alert(
+      "friends.passport.title".localized,
+      isPresented: Binding(get: { error != nil }, set: { if !$0 { error = nil } })
+    ) {
+      Button("OK", role: .cancel) {}
+    } message: {
+      Text(error ?? "")
+    }
+    .onChange(of: photoItem) { _, item in Task { await loadPhoto(item) } }
+    .onChange(of: locationService.currentLocation) { _, location in
+      d.latitude = location?.coordinate.latitude
+      d.longitude = location?.coordinate.longitude
+      locationService.stopLocationUpdates()
     }
   }
 
-  private var progress: some View {
-    VStack(spacing: 8) {
+  // MARK: Header
+
+  private var topBar: some View {
+    VStack(alignment: .leading, spacing: 12) {
       HStack {
-        Text("friends.passport.badge_ch".localized).font(.caption2.bold()).tracking(1.8)
-        Spacer()
-        Text("\(step.rawValue + 1)/8").font(.caption.bold())
-      }
-      .foregroundColor(JourneyVisual.accentText)
-      GeometryReader { g in
-        ZStack(alignment: .leading) {
-          Capsule().fill(JourneyVisual.softBorder)
-          Capsule().fill(lime).frame(width: g.size.width * CGFloat(step.rawValue + 1) / 8)
+        Button { dismiss() } label: {
+          Image(systemName: "xmark")
+            .font(.system(size: 14, weight: .bold))
+            .foregroundColor(JourneyVisual.primaryText)
+            .frame(width: 40, height: 40)
+            .background(Theme.Colors.card, in: Circle())
+            .overlay(Circle().stroke(JourneyVisual.softBorder))
         }
-      }.frame(height: 4)
-    }.padding(.horizontal, 20).padding(.vertical, 12)
-      .background(JourneyVisual.elevatedSurface.opacity(0.92))
+        .buttonStyle(ScaleButtonStyle(scaleAmount: 0.94, hapticStyle: .light))
+        .accessibilityLabel("Закрити".localized)
+        Spacer()
+        HStack(spacing: 6) {
+          Circle().fill(lime).frame(width: 7, height: 7)
+          Text("friends.passport.badge".localized)
+            .font(.system(size: 11, weight: .heavy)).tracking(1.1)
+            .foregroundColor(JourneyVisual.accentText)
+        }
+        Spacer()
+        Text("\(step.rawValue + 1)/\(Step.allCases.count)")
+          .font(.system(size: 13, weight: .bold, design: .rounded))
+          .foregroundColor(JourneyVisual.secondaryText)
+          .frame(width: 40)
+      }
+      // One segment per step: you can see how far it is, not just a thin percentage bar.
+      HStack(spacing: 4) {
+        ForEach(Step.allCases, id: \.rawValue) { item in
+          Capsule()
+            .fill(item.rawValue <= step.rawValue ? lime : JourneyVisual.softBorder)
+            .frame(height: 5)
+        }
+      }
+      .animation(.easeOut(duration: 0.25), value: step)
+      .accessibilityElement(children: .ignore)
+      .accessibilityLabel("\(step.rawValue + 1)/\(Step.allCases.count)")
+    }
+    .padding(.horizontal, 20)
+    .padding(.top, 14)
+    .padding(.bottom, 4)
   }
 
   private var heading: some View {
-    VStack(alignment: .leading, spacing: 7) {
-      Text(stepTitle).font(.system(size: 26, weight: .bold, design: .default)).foregroundColor(
-        JourneyVisual.primaryText)
-      Text(stepSubtitle).font(.subheadline).foregroundColor(JourneyVisual.secondaryText)
+    VStack(alignment: .leading, spacing: 6) {
+      Text(stepTitle)
+        .font(.system(size: 30, weight: .bold))
+        .tracking(-0.4)
+        .foregroundColor(JourneyVisual.primaryText)
+        .accessibilityAddTraits(.isHeader)
+      Text(stepSubtitle)
+        .font(.system(size: 15, weight: .medium))
+        .foregroundColor(JourneyVisual.secondaryText)
+        .fixedSize(horizontal: false, vertical: true)
     }
   }
 
@@ -2522,206 +2549,476 @@ private struct FriendProfileEditor: View {
     switch step {
     case .identity: identity
     case .interests:
-      choiceGrid(
-        SocialInterest.allCases, selected: d.interests, title: { $0.title }, icon: { $0.icon }
-      ) { toggle($0, in: &d.interests) }
+      choiceGrid(SocialInterest.allCases, selected: d.interests, title: { $0.title }, icon: { $0.icon }) {
+        toggle($0, in: &d.interests)
+      }
     case .languages: languages
     case .meetups:
-      choiceGrid(
-        MeetupFormat.allCases, selected: d.meetupFormats, title: { $0.title },
-        icon: { _ in "person.2.fill" }
-      ) { toggle($0, in: &d.meetupFormats) }
-    case .availability: availability
+      choiceGrid(MeetupFormat.allCases, selected: d.meetupFormats, title: { $0.title }, icon: { $0.symbol }) {
+        toggle($0, in: &d.meetupFormats)
+      }
+    case .availability:
+      choiceGrid(SocialAvailability.allCases, selected: d.availability, title: { $0.title }, icon: { $0.icon }) {
+        toggle($0, in: &d.availability)
+      }
     case .photo: photoStep
     case .safety: safety
     case .preview: preview
     }
   }
 
+  // MARK: Step 1
+
   private var identity: some View {
-    VStack(spacing: 13) {
-      field("person.fill", "Ім’я".localized, text: $d.displayName)
-      field("building.2.fill", "Місто".localized, text: $d.city)
-      Menu {
-        ForEach(SwissCanton.all, id: \.code) { c in
-          Button("\(c.name) · \(c.code)") { d.canton = c.code }
+    VStack(spacing: 12) {
+      AuthField(
+        label: "Ім’я".localized, placeholder: "Як тебе називати".localized, icon: "person.fill",
+        text: $d.displayName, focus: $focus, field: .name, contentType: .givenName,
+        capitalization: .words, onSubmit: { focus = .city })
+      AuthField(
+        label: "Місто".localized, placeholder: "Zürich, Berlin, Wien…", icon: "building.2.fill",
+        text: $d.city, focus: $focus, field: .city, contentType: .addressCity,
+        capitalization: .words, onSubmit: { focus = .bio })
+
+      HStack(spacing: 12) {
+        Menu {
+          ForEach(regions) { area in
+            Button("\(area.name) · \(shortCode(area.code))") {
+              d.subdivisionCode = area.code
+              // Swiss codes are bare (ZH); German and Austrian ones keep the country prefix (DE-BE),
+              // so "BE" never reads as the canton of Bern.
+              d.canton = area.code
+            }
+          }
+        } label: {
+          pickerTile(icon: "mappin.and.ellipse", title: regionTitle, value: regionName)
         }
-      } label: {
-        row("mappin.and.ellipse", "Кантон".localized, value: d.canton)
-      }
-      Menu {
-        Button("Не вказувати".localized) { d.ageBand = nil }
-        ForEach(SocialAgeBand.allCases) { band in
-          Button(band.rawValue) { d.ageBand = band.rawValue }
+        Menu {
+          Button("Не вказувати".localized) { d.ageBand = nil }
+          ForEach(SocialAgeBand.allCases) { band in
+            Button(band.rawValue.replacingOccurrences(of: "-", with: "–")) { d.ageBand = band.rawValue }
+          }
+        } label: {
+          pickerTile(
+            icon: "birthday.cake.fill", title: "Вікова група".localized,
+            value: d.ageBand?.replacingOccurrences(of: "-", with: "–") ?? "Не вказано".localized)
         }
-      } label: {
-        row("person.2.fill", "Вікова група".localized, value: d.ageBand ?? "Не вказано".localized)
       }
-      Stepper(
-        value: Binding(get: { d.arrivalYear ?? 2026 }, set: { d.arrivalYear = $0 }),
-        in: 1950...Calendar.current.component(.year, from: Date())
-      ) {
-        HStack {
-          Image(systemName: "flag.fill").foregroundColor(JourneyVisual.accentStrong)
-          Text("У Швейцарії з".localized)
-          Spacer()
-          Text(String(d.arrivalYear ?? 2026)).foregroundColor(JourneyVisual.accentText)
-        }
-      }.tint(lime).padding().background(JourneyVisual.elevatedSurface).clipShape(
-        RoundedRectangle(cornerRadius: 18))
-      Text(
-        "Радіус пошуку можна увімкнути після дозволу геолокації. Точні координати іншим не показуються.".localized
-      )
-      .font(.caption).foregroundColor(JourneyVisual.secondaryText)
-      Button {
-        locationService.requestLocationPermission()
-        locationService.startLocationUpdates()
-      } label: {
-        Label(
-          locationService.currentLocation == nil ? "Додати приблизну локацію".localized : "Локацію додано".localized,
-          systemImage: locationService.currentLocation == nil
-            ? "location.fill" : "checkmark.circle.fill"
-        ).font(.subheadline.bold()).foregroundColor(
-          locationService.currentLocation == nil ? .black : lime
-        )
-        .frame(maxWidth: .infinity, minHeight: 50)
-        .background(locationService.currentLocation == nil ? lime : lime.opacity(0.1))
-        .clipShape(RoundedRectangle(cornerRadius: 16))
-      }
-      TextField("Розкажи про себе — мінімум 30 символів".localized, text: $d.bio, axis: .vertical).lineLimit(
-        4...7
-      )
-      .padding().background(JourneyVisual.elevatedSurface)
-      .clipShape(RoundedRectangle(cornerRadius: 18))
-      .foregroundColor(JourneyVisual.primaryText)
+
+      arrivalYearRow
+
+      bioField
+
+      locationRow
     }
   }
+
+  private func shortCode(_ code: String) -> String {
+    code.split(separator: "-").last.map(String.init) ?? code
+  }
+
+  private func pickerTile(icon: String, title: String, value: String) -> some View {
+    VStack(alignment: .leading, spacing: 10) {
+      HStack {
+        iconChip(icon)
+        Spacer()
+        Image(systemName: "chevron.up.chevron.down")
+          .font(.system(size: 11, weight: .bold))
+          .foregroundColor(JourneyVisual.secondaryText)
+      }
+      VStack(alignment: .leading, spacing: 2) {
+        Text(title)
+          .font(.system(size: 11, weight: .semibold))
+          .foregroundColor(JourneyVisual.secondaryText)
+        Text(value)
+          .font(.system(size: 16, weight: .bold))
+          .foregroundColor(JourneyVisual.primaryText)
+          .lineLimit(1).minimumScaleFactor(0.75)
+      }
+    }
+    .padding(12)
+    .frame(maxWidth: .infinity, alignment: .leading)
+    .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+    .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(JourneyVisual.softBorder))
+  }
+
+  private var arrivalYear: Int { d.arrivalYear ?? Calendar.current.component(.year, from: Date()) }
+
+  private var arrivalYearRow: some View {
+    let current = Calendar.current.component(.year, from: Date())
+    return HStack(spacing: 12) {
+      iconChip("airplane.arrival")
+      VStack(alignment: .leading, spacing: 2) {
+        Text("Рік переїзду".localized)
+          .font(.system(size: 11, weight: .semibold))
+          .foregroundColor(JourneyVisual.secondaryText)
+        Text(String(arrivalYear))
+          .font(.system(size: 18, weight: .bold, design: .rounded))
+          .foregroundColor(JourneyVisual.primaryText)
+          .contentTransition(.numericText())
+      }
+      Spacer()
+      roundStep("minus", enabled: arrivalYear > 1950) { d.arrivalYear = arrivalYear - 1 }
+      roundStep("plus", enabled: arrivalYear < current) { d.arrivalYear = arrivalYear + 1 }
+    }
+    .padding(12)
+    .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+    .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(JourneyVisual.softBorder))
+    .animation(.snappy, value: arrivalYear)
+    .accessibilityElement(children: .combine)
+    .accessibilityAdjustableAction { direction in
+      switch direction {
+      case .increment: if arrivalYear < current { d.arrivalYear = arrivalYear + 1 }
+      case .decrement: if arrivalYear > 1950 { d.arrivalYear = arrivalYear - 1 }
+      @unknown default: break
+      }
+    }
+  }
+
+  private func roundStep(_ icon: String, enabled: Bool, action: @escaping () -> Void) -> some View {
+    Button(action: action) {
+      Image(systemName: icon)
+        .font(.system(size: 14, weight: .bold))
+        .foregroundColor(enabled ? JourneyVisual.primaryText : JourneyVisual.secondaryText.opacity(0.4))
+        .frame(width: 38, height: 38)
+        .background(JourneyVisual.softSurface, in: Circle())
+    }
+    .buttonStyle(ScaleButtonStyle(scaleAmount: 0.9, hapticStyle: .light))
+    .disabled(!enabled)
+  }
+
+  private static let bioMinimum = 30
+
+  private var bioField: some View {
+    let count = d.bio.trimmingCharacters(in: .whitespacesAndNewlines).count
+    let done = count >= Self.bioMinimum
+    let focused = focus == .bio
+    return VStack(alignment: .leading, spacing: 8) {
+      HStack {
+        Text("Про себе".localized)
+          .font(.system(size: 11, weight: .semibold))
+          .foregroundColor(focused ? JourneyVisual.accentText : JourneyVisual.secondaryText)
+        Spacer()
+        HStack(spacing: 4) {
+          if done { Image(systemName: "checkmark.circle.fill") }
+          Text("\(min(count, Self.bioMinimum))/\(Self.bioMinimum)")
+        }
+        .font(.system(size: 11, weight: .bold, design: .rounded))
+        .foregroundColor(done ? JourneyVisual.accentStrong : JourneyVisual.secondaryText)
+      }
+      TextField(
+        "",
+        text: $d.bio,
+        prompt: Text("Що любиш, чим займаєшся, кого шукаєш…".localized)
+          .foregroundColor(JourneyVisual.secondaryText.opacity(0.7)),
+        axis: .vertical
+      )
+      .lineLimit(3...6)
+      .font(.system(size: 16))
+      .foregroundColor(JourneyVisual.primaryText)
+      .focused($focus, equals: .bio)
+      // Fill line: shows how close the text is to the minimum without nagging.
+      GeometryReader { g in
+        ZStack(alignment: .leading) {
+          Capsule().fill(JourneyVisual.softBorder)
+          Capsule().fill(done ? JourneyVisual.accentStrong : lime)
+            .frame(width: g.size.width * min(1, CGFloat(count) / CGFloat(Self.bioMinimum)))
+        }
+      }
+      .frame(height: 3)
+      .animation(.easeOut(duration: 0.2), value: count)
+    }
+    .padding(14)
+    .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+    .overlay(
+      RoundedRectangle(cornerRadius: 20, style: .continuous)
+        .strokeBorder(focused ? JourneyVisual.accentStrong : JourneyVisual.softBorder, lineWidth: focused ? 1.5 : 1))
+    .contentShape(Rectangle())
+    .onTapGesture { focus = .bio }
+  }
+
+  private var locationRow: some View {
+    let added = locationService.currentLocation != nil
+    return Button {
+      locationService.requestLocationPermission()
+      locationService.startLocationUpdates()
+    } label: {
+      HStack(spacing: 12) {
+        iconChip(added ? "checkmark" : "location.fill", active: added)
+        VStack(alignment: .leading, spacing: 2) {
+          Text(added ? "Локацію додано".localized : "Додати приблизну локацію".localized)
+            .font(.system(size: 15, weight: .bold))
+            .foregroundColor(JourneyVisual.primaryText)
+          Text("Радіус пошуку можна увімкнути після дозволу геолокації. Точні координати іншим не показуються.".localized)
+            .font(.system(size: 12))
+            .foregroundColor(JourneyVisual.secondaryText)
+            .fixedSize(horizontal: false, vertical: true)
+            .multilineTextAlignment(.leading)
+        }
+        Spacer(minLength: 0)
+      }
+      .padding(12)
+      .background(
+        RoundedRectangle(cornerRadius: 20, style: .continuous)
+          .strokeBorder(JourneyVisual.softBorder, style: StrokeStyle(lineWidth: 1, dash: added ? [] : [5, 4])))
+    }
+    .buttonStyle(ScaleButtonStyle(scaleAmount: 0.98, hapticStyle: .light))
+    .disabled(added)
+  }
+
+  private func iconChip(_ icon: String, active: Bool = false) -> some View {
+    Image(systemName: icon)
+      .font(.system(size: 14, weight: .semibold))
+      .foregroundColor(active ? .black : JourneyVisual.accentText)
+      .frame(width: 36, height: 36)
+      .background(active ? lime : JourneyVisual.softSurface, in: Circle())
+  }
+
+  // MARK: Steps 2–5
 
   private var languages: some View {
-    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-      ForEach(["UK", "DE", "FR", "IT", "EN", "RU"], id: \.self) { language in
-        let active = d.languages.contains(language)
-        Button {
-          toggle(language, in: &d.languages)
-        } label: {
-          VStack(alignment: .leading, spacing: 10) {
-            Image(systemName: "character.bubble.fill").font(.title2)
-            Text(language).font(.subheadline.bold())
-          }.foregroundColor(active ? .black : JourneyVisual.primaryText)
-            .frame(maxWidth: .infinity, minHeight: 90, alignment: .leading).padding(14)
-            .background(active ? lime : JourneyVisual.elevatedSurface)
-            .clipShape(RoundedRectangle(cornerRadius: 20))
-        }
-      }
+    let codes = ["UK", "DE", "EN", "FR", "IT", "RU"]
+    return choiceGrid(
+      codes.map(LanguageChoice.init), selected: d.languages.map(LanguageChoice.init),
+      title: { choice in
+        AppLanguage.current.locale.localizedString(forLanguageCode: choice.id.lowercased())?
+          .capitalized(with: AppLanguage.current.locale) ?? choice.id
+      },
+      icon: { _ in "character.bubble.fill" },
+      monogram: { $0.id }
+    ) { choice in
+      toggle(choice.id, in: &d.languages)
     }
   }
 
-  private var availability: some View {
-    choiceGrid(
-      SocialAvailability.allCases, selected: d.availability, title: { $0.title }, icon: { $0.icon }
-    ) { toggle($0, in: &d.availability) }
+  private struct LanguageChoice: Identifiable, Equatable {
+    let id: String
+    init(_ id: String) { self.id = id }
   }
 
-  private var photoStep: some View {
-    VStack(spacing: 20) {
-      ZStack {
-        Circle().fill(lime.opacity(0.12)).frame(width: 180, height: 180)
-        if let photo {
-          Image(uiImage: photo).resizable().scaledToFill().frame(width: 170, height: 170).clipShape(
-            Circle())
-        } else {
-          Image(systemName: "person.crop.circle.badge.plus").font(.system(size: 76))
-            .foregroundColor(JourneyVisual.accentStrong)
+  private func choiceGrid<T: Identifiable & Equatable>(
+    _ items: [T], selected: [T], title: @escaping (T) -> String,
+    icon: @escaping (T) -> String, monogram: ((T) -> String)? = nil, action: @escaping (T) -> Void
+  ) -> some View {
+    VStack(alignment: .leading, spacing: 12) {
+      LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
+        ForEach(items) { item in
+          let active = selected.contains(item)
+          Button {
+            withAnimation(reduceMotion ? nil : .spring(response: 0.28, dampingFraction: 0.8)) { action(item) }
+          } label: {
+            VStack(alignment: .leading, spacing: 8) {
+              HStack {
+                Group {
+                  if let monogram {
+                    Text(monogram(item)).font(.system(size: 13, weight: .heavy, design: .rounded))
+                  } else {
+                    Image(systemName: icon(item)).font(.system(size: 16, weight: .semibold))
+                  }
+                }
+                .foregroundColor(active ? lime : JourneyVisual.accentText)
+                .frame(width: 38, height: 38)
+                .background(active ? Color.black : JourneyVisual.softSurface, in: Circle())
+                Spacer()
+                Image(systemName: active ? "checkmark.circle.fill" : "circle")
+                  .font(.system(size: 20, weight: .semibold))
+                  .foregroundColor(active ? .black : JourneyVisual.softBorder)
+              }
+              Text(title(item))
+                .font(.system(size: 15, weight: .bold))
+                .foregroundColor(active ? .black : JourneyVisual.primaryText)
+                .lineLimit(2).minimumScaleFactor(0.85).multilineTextAlignment(.leading)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .padding(12)
+            .background(active ? lime : Theme.Colors.card, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .overlay(
+              RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .stroke(active ? JourneyVisual.accentStrong.opacity(0.4) : JourneyVisual.softBorder))
+            .shadow(color: active ? lime.opacity(0.35) : .clear, radius: 10, y: 4)
+          }
+          .buttonStyle(ScaleButtonStyle(scaleAmount: 0.96, hapticStyle: .light))
+          .accessibilityAddTraits(active ? .isSelected : [])
         }
-      }.overlay(Circle().stroke(lime.opacity(0.35), lineWidth: 2))
-      PhotosPicker(selection: $photoItem, matching: .images) {
-        Label(photo == nil ? "Додати фото".localized : "Замінити фото".localized, systemImage: "photo.fill").font(
-          .headline
-        )
-        .foregroundColor(.black).padding(.horizontal, 22).frame(height: 52).background(lime)
-        .clipShape(Capsule())
       }
-      Text("Фото перевіряється разом з описом. Контакти та документи на фото заборонені.".localized)
-        .font(.caption).multilineTextAlignment(.center).foregroundColor(JourneyVisual.secondaryText)
-    }.frame(maxWidth: .infinity).padding(24).background(JourneyVisual.elevatedSurface).clipShape(
-      RoundedRectangle(cornerRadius: 28))
+      Text("Обрано: %@".localized(with: "\(selected.count)"))
+        .font(.system(size: 12, weight: .semibold))
+        .foregroundColor(JourneyVisual.secondaryText)
+    }
+  }
+
+  // MARK: Steps 6–8
+
+  private var photoStep: some View {
+    VStack(spacing: 18) {
+      PhotosPicker(selection: $photoItem, matching: .images) {
+        ZStack {
+          RoundedRectangle(cornerRadius: 28, style: .continuous)
+            .fill(Theme.Colors.card)
+          if let photo {
+            Image(uiImage: photo).resizable().scaledToFill()
+              .frame(maxWidth: .infinity).frame(height: 320)
+              .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+          } else {
+            VStack(spacing: 12) {
+              Image(systemName: "camera.fill")
+                .font(.system(size: 26, weight: .semibold))
+                .foregroundColor(.black)
+                .frame(width: 70, height: 70)
+                .background(lime, in: Circle())
+              Text("Додати фото".localized)
+                .font(.system(size: 17, weight: .bold))
+                .foregroundColor(JourneyVisual.primaryText)
+              Text("Портрет при денному світлі працює найкраще".localized)
+                .font(.system(size: 13))
+                .foregroundColor(JourneyVisual.secondaryText)
+            }
+          }
+        }
+        .frame(height: 320)
+        .overlay(
+          RoundedRectangle(cornerRadius: 28, style: .continuous)
+            .strokeBorder(photo == nil ? JourneyVisual.softBorder : .clear, style: StrokeStyle(lineWidth: 1.5, dash: [6, 5])))
+        .overlay(alignment: .bottomTrailing) {
+          if photo != nil {
+            Label("Замінити фото".localized, systemImage: "arrow.triangle.2.circlepath")
+              .font(.system(size: 13, weight: .bold))
+              .foregroundColor(JourneyVisual.primaryText)
+              .padding(.horizontal, 12).frame(height: 34)
+              .background(Theme.Colors.card.opacity(0.94), in: Capsule())
+              .padding(12)
+          }
+        }
+      }
+      .buttonStyle(ScaleButtonStyle(scaleAmount: 0.98, hapticStyle: .light))
+      Label("Фото перевіряється разом з описом. Контакти та документи на фото заборонені.".localized, systemImage: "checkmark.shield.fill")
+        .font(.system(size: 12, weight: .medium))
+        .foregroundColor(JourneyVisual.secondaryText)
+    }
   }
 
   private var safety: some View {
-    VStack(spacing: 12) {
-      safetyToggle(
-        "Показувати профіль".localized, "Профіль бере участь у пошуку".localized, icon: "eye.fill", value: $d.isVisible)
-      safetyToggle(
-        "Відкритий до знайомств".localized, "Інші можуть надіслати запит".localized, icon: "person.badge.plus",
-        value: $d.openToFriends)
+    VStack(spacing: 10) {
+      safetyToggle("Показувати профіль".localized, "Профіль бере участь у пошуку".localized, icon: "eye.fill", value: $d.isVisible)
+      safetyToggle("Відкритий до знайомств".localized, "Інші можуть надіслати запит".localized, icon: "person.badge.plus", value: $d.openToFriends)
       safetyToggle(
         "Правила спільноти".localized, "Без продажів, переслідувань та небезпечних зустрічей".localized,
         icon: "checkmark.shield.fill", value: $d.guidelinesAccepted)
-      Label(
-        "Контакти не публікуються. Точна геолокація не показується іншим.".localized, systemImage: "lock.fill"
-      )
-      .font(.caption).foregroundColor(JourneyVisual.secondaryText).padding(.top, 6)
+      Label("Контакти не публікуються. Точна геолокація не показується іншим.".localized, systemImage: "lock.fill")
+        .font(.system(size: 12, weight: .medium))
+        .foregroundColor(JourneyVisual.secondaryText)
+        .padding(.top, 6)
     }
   }
 
+  private func safetyToggle(_ title: String, _ subtitle: String, icon: String, value: Binding<Bool>) -> some View {
+    HStack(spacing: 12) {
+      iconChip(icon, active: value.wrappedValue)
+      VStack(alignment: .leading, spacing: 2) {
+        Text(title).font(.system(size: 15, weight: .bold)).foregroundColor(JourneyVisual.primaryText)
+        Text(subtitle).font(.system(size: 12)).foregroundColor(JourneyVisual.secondaryText)
+          .fixedSize(horizontal: false, vertical: true)
+      }
+      Spacer(minLength: 8)
+      Toggle("", isOn: value).labelsHidden().tint(JourneyVisual.accentStrong)
+    }
+    .padding(12)
+    .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+    .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(JourneyVisual.softBorder))
+    .animation(.easeOut(duration: 0.18), value: value.wrappedValue)
+  }
+
+  /// The same card other people will swipe, so the preview is honest.
   private var preview: some View {
-    VStack(alignment: .leading, spacing: 18) {
-      HStack(spacing: 14) {
+    VStack(alignment: .leading, spacing: 14) {
+      ZStack(alignment: .bottomLeading) {
         Group {
           if let photo {
             Image(uiImage: photo).resizable().scaledToFill()
           } else {
-            Text(initials).font(.title.bold()).foregroundColor(.black)
+            ZStack {
+              LinearGradient(colors: [lime.opacity(0.85), JourneyVisual.accentStrong.opacity(0.7)], startPoint: .topLeading, endPoint: .bottomTrailing)
+              Text(initials.isEmpty ? "?" : initials)
+                .font(.system(size: 96, weight: .black))
+                .foregroundColor(.black.opacity(0.75))
+                .offset(y: -40)
+            }
           }
         }
-        .frame(width: 76, height: 76).background(lime).clipShape(Circle())
-        VStack(alignment: .leading, spacing: 4) {
-          Text(d.displayName).font(.title2.bold())
-          Text("\(d.city) · \(d.canton)").foregroundColor(JourneyVisual.secondaryText)
-          Label("Email підтверджено".localized, systemImage: "checkmark.seal.fill").font(.caption)
-            .foregroundColor(JourneyVisual.accentText)
+        .frame(maxWidth: .infinity).frame(height: 420)
+        .clipped()
+        LinearGradient(colors: [.clear, .black.opacity(0.85)], startPoint: .center, endPoint: .bottom)
+        VStack(alignment: .leading, spacing: 8) {
+          HStack(alignment: .firstTextBaseline, spacing: 8) {
+            Text(d.displayName.isEmpty ? "—" : d.displayName)
+              .font(.system(size: 30, weight: .bold)).tracking(-0.4)
+            if let age = d.ageBand {
+              Text(age.replacingOccurrences(of: "-", with: "–"))
+                .font(.system(size: 20, weight: .medium)).opacity(0.82)
+            }
+          }
+          Label("\(d.city) · \(regionName)", systemImage: "mappin")
+            .font(.system(size: 13, weight: .semibold)).opacity(0.85)
+          Text(d.bio)
+            .font(.system(size: 14, weight: .medium)).opacity(0.85)
+            .lineLimit(2)
+          HStack(spacing: 6) {
+            ForEach(Array(d.interests.prefix(3))) { i in
+              Label(i.title, systemImage: i.icon)
+                .font(.system(size: 12, weight: .bold)).foregroundColor(.black)
+                .lineLimit(1).minimumScaleFactor(0.75)
+                .padding(.horizontal, 10).frame(height: 30)
+                .background(lime, in: Capsule())
+            }
+          }
         }
+        .foregroundColor(.white)
+        .padding(18)
       }
-      Text(d.bio).foregroundColor(JourneyVisual.primaryText.opacity(0.78))
-      FlowLayout(spacing: 8) {
-        ForEach(d.interests) { i in
-          Label(i.title, systemImage: i.icon).font(.caption.bold()).padding(10).background(
-            lime.opacity(0.12)
-          ).clipShape(Capsule())
-        }
-      }
+      .clipShape(RoundedRectangle(cornerRadius: 30, style: .continuous))
+      .shadow(color: .black.opacity(0.18), radius: 18, y: 10)
+
       Label("Профіль буде надіслано на перевірку адміністратору".localized, systemImage: "shield.lefthalf.filled")
-        .font(.caption).foregroundColor(JourneyVisual.secondaryText)
-    }.foregroundColor(JourneyVisual.primaryText).padding(20)
-      .background(JourneyVisual.elevatedSurface)
-      .clipShape(RoundedRectangle(cornerRadius: 28)).overlay(
-      RoundedRectangle(cornerRadius: 28).stroke(lime.opacity(0.3)))
+        .font(.system(size: 12, weight: .medium))
+        .foregroundColor(JourneyVisual.secondaryText)
+    }
   }
 
+  // MARK: Controls
+
   private var controls: some View {
-    HStack(spacing: 12) {
+    HStack(spacing: 10) {
       if step != .identity {
         Button {
-          step = Step(rawValue: step.rawValue - 1)!
+          focus = nil
+          withAnimation(reduceMotion ? nil : .spring(response: 0.35, dampingFraction: 0.86)) {
+            step = Step(rawValue: step.rawValue - 1)!
+          }
         } label: {
-          Image(systemName: "arrow.left").frame(width: 52, height: 56).background(
-            JourneyVisual.elevatedSurface
-          ).clipShape(RoundedRectangle(cornerRadius: 18))
+          Image(systemName: "arrow.left")
+            .font(.system(size: 16, weight: .bold))
+            .foregroundColor(JourneyVisual.primaryText)
+            .frame(width: 56, height: 56)
+            .background(Theme.Colors.card, in: Circle())
+            .overlay(Circle().stroke(JourneyVisual.softBorder))
         }
+        .buttonStyle(ScaleButtonStyle(scaleAmount: 0.94, hapticStyle: .light))
+        .accessibilityLabel("common.back".localized)
       }
-      Button {
+      AuthPrimaryButton(
+        title: step == .preview ? "Опублікувати профіль".localized : "Продовжити".localized,
+        isLoading: saving || uploading,
+        isEnabled: canContinue,
+        identifier: "friends.passport.next"
+      ) {
+        focus = nil
         advance()
-      } label: {
-        HStack {
-          if saving || uploading { ProgressView().tint(.black) }
-          Text(step == .preview ? "Опублікувати профіль".localized : "Продовжити".localized).font(.headline)
-          Spacer()
-          Image(systemName: step == .preview ? "checkmark" : "arrow.right")
-        }
-        .foregroundColor(.black).padding(.horizontal, 20).frame(maxWidth: .infinity, minHeight: 56)
-        .background(canContinue ? lime : .gray).clipShape(RoundedRectangle(cornerRadius: 18))
-      }.disabled(!canContinue || saving || uploading)
-    }.padding(16).background(.ultraThinMaterial)
+      }
+    }
+    .padding(.horizontal, 16)
+    .padding(.top, 10)
+    .padding(.bottom, 6)
+    .background(.ultraThinMaterial)
   }
 
   private var canContinue: Bool {
@@ -2792,59 +3089,17 @@ private struct FriendProfileEditor: View {
   private func toggle<T: Equatable>(_ item: T, in items: inout [T]) {
     if let i = items.firstIndex(of: item) { items.remove(at: i) } else { items.append(item) }
   }
-  private func field(_ icon: String, _ placeholder: String, text: Binding<String>) -> some View {
-    HStack {
-      Image(systemName: icon).foregroundColor(JourneyVisual.accentStrong)
-      TextField(placeholder, text: text).foregroundColor(JourneyVisual.primaryText)
-    }.padding().background(JourneyVisual.elevatedSurface)
-      .clipShape(RoundedRectangle(cornerRadius: 18))
-  }
-  private func row(_ icon: String, _ title: String, value: String) -> some View {
-    HStack {
-      Image(systemName: icon).foregroundColor(JourneyVisual.accentStrong)
-      Text(title).foregroundColor(JourneyVisual.primaryText)
-      Spacer()
-      Text(value).foregroundColor(JourneyVisual.accentText)
-      Image(systemName: "chevron.down").foregroundColor(JourneyVisual.secondaryText)
-    }.padding().background(JourneyVisual.elevatedSurface)
-      .clipShape(RoundedRectangle(cornerRadius: 18))
-  }
-  private func safetyToggle(_ title: String, _ subtitle: String, icon: String, value: Binding<Bool>)
-    -> some View
-  {
-    HStack(spacing: 13) {
-      Image(systemName: icon).foregroundColor(JourneyVisual.accentStrong).frame(width: 38, height: 38).background(
-        lime.opacity(0.1)
-      ).clipShape(RoundedRectangle(cornerRadius: 12))
-      VStack(alignment: .leading) {
-        Text(title).font(.headline).foregroundColor(JourneyVisual.primaryText)
-        Text(subtitle).font(.caption).foregroundColor(JourneyVisual.secondaryText)
-      }
-      Spacer()
-      Toggle("", isOn: value).labelsHidden().tint(lime)
-    }.padding(15).background(JourneyVisual.elevatedSurface)
-      .clipShape(RoundedRectangle(cornerRadius: 20))
-  }
-  private func choiceGrid<T: Identifiable & Equatable>(
-    _ items: [T], selected: [T], title: @escaping (T) -> String,
-    icon: @escaping (T) -> String, action: @escaping (T) -> Void
-  ) -> some View {
-    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-      ForEach(items) { item in
-        let active = selected.contains(item)
-        Button {
-          action(item)
-        } label: {
-          VStack(alignment: .leading, spacing: 10) {
-            Image(systemName: icon(item)).font(.title2)
-            Text(title(item)).font(.subheadline.bold()).lineLimit(2)
-          }.foregroundColor(active ? .black : JourneyVisual.primaryText)
-            .frame(maxWidth: .infinity, minHeight: 90, alignment: .leading).padding(14)
-            .background(active ? lime : JourneyVisual.elevatedSurface)
-            .clipShape(RoundedRectangle(cornerRadius: 20))
-            .overlay(RoundedRectangle(cornerRadius: 20).stroke(active ? lime : JourneyVisual.softBorder))
-        }
-      }
+}
+
+private extension MeetupFormat {
+  var symbol: String {
+    switch self {
+    case .coffee: return "cup.and.saucer.fill"
+    case .walk: return "figure.walk"
+    case .activity: return "figure.run"
+    case .event: return "ticket.fill"
+    case .online: return "video.fill"
+    case .family: return "figure.2.and.child.holdinghands"
     }
   }
 }

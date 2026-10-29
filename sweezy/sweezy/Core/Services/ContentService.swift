@@ -42,7 +42,9 @@ protocol ContentServiceProtocol: ObservableObject {
 /// Content service implementation with local JSON and remote updates
 @MainActor
 class ContentService: ContentServiceProtocol {
-    @Published var guides: [Guide] = []
+    @Published var guides: [Guide] = [] {
+        didSet { GuideCovers.index(guides) }
+    }
     @Published var checklists: [Checklist] = []
     @Published var places: [Place] = []
     @Published var templates: [DocumentTemplate] = []
@@ -231,6 +233,12 @@ class ContentService: ContentServiceProtocol {
     // MARK: - Private Loading Methods
     
     private func loadGuides() async {
+        // Show the cached or bundled catalog right away; a cold backend can take a minute to answer.
+        if guides.isEmpty, let local = try? loadCountryCacheOrBundle("guides.json", type: [Guide].self) {
+            guides = local
+            if countryCode == "CH" { await loadAdditionalGuides() }
+            guides = guides.filter(safetyPolicy.allows)
+        }
         do {
             // 1) Пробуем забрать всі гайды з бекенду (публічний ендпоінт /api/v1/guides).
             //    Якщо є access_token у Keychain — він буде доданий автоматично як Bearer.
@@ -282,6 +290,10 @@ class ContentService: ContentServiceProtocol {
     }
     
     private func loadChecklists() async {
+        if checklists.isEmpty, let local = try? loadCountryCacheOrBundle("checklists.json", type: [Checklist].self) {
+            checklists = local
+            if countryCode == "CH" { await loadAdditionalChecklists() }
+        }
         do {
             do {
                 let remote = try await APIClient.fetchChecklists(language: preferredLanguage)
@@ -336,6 +348,9 @@ class ContentService: ContentServiceProtocol {
         do {
             places = try loadCountryCacheOrBundle("places.json", type: [Place].self) ?? []
             if countryCode == "CH" { await loadAdditionalPlaces() }
+            loadUkrainianPlaces()
+            // Older installs keep a cached copy of places.json with shops and stations in it.
+            places.removeAll { Self.offTopicPlaceCategories.contains($0.category) }
         } catch {
             AppLogger.content("Error loading places: \(error)", isError: true)
             places = []
@@ -535,6 +550,22 @@ class ContentService: ContentServiceProtocol {
             }
         }
     }
+    /// Everyday commerce and transit the user already finds in Apple Maps; the map is for help, papers and community.
+    private static let offTopicPlaceCategories: Set<PlaceCategory> = [
+        .supermarket, .trainStation, .busStop, .airport, .bank, .insuranceCompany
+    ]
+
+    /// Embassy and consulates, parishes, schools, hubs and Ukrainian kitchens for the selected country;
+    /// built by scripts/build_places_ukrainian.py. Replaces any same-id entry (the OSM embassy pin)
+    /// so the checked address and description win.
+    private func loadUkrainianPlaces() {
+        let filename = "places_ukrainian_\(countryCode.lowercased()).json"
+        guard let ukrainian = try? loadFromBundle(filename, type: [Place].self), !ukrainian.isEmpty else { return }
+        let ids = Set(ukrainian.map(\.id))
+        places.removeAll { ids.contains($0.id) }
+        places.append(contentsOf: ukrainian)
+    }
+
     private func loadAdditionalPlaces() async {
         // places_unverified.json is intentionally NOT loaded: entries without a source whose phones
         // were placeholders or whose websites did not exist. Re-add an entry only after checking it.

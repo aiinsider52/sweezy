@@ -253,6 +253,7 @@ import UIKit
       isLimited: false, visibleLimit: nil, advancedFiltersAvailable: true,
       requestsRemaining: 5)
     swipeProfiles = profiles
+    if events.isEmpty { events = SocialFriendPreviewFixtures.events }
     swipeDeckMeta = SocialSwipeDeck(
       items: profiles, likesRemaining: 15, weeklyLimit: 15, isPremium: false,
       resetAt: Calendar.current.date(byAdding: .day, value: 7, to: Date()))
@@ -290,13 +291,9 @@ private struct FriendSwipeDeck: View {
   }
 
   var body: some View {
-    VStack(spacing: 11) {
+    VStack(spacing: 6) {
       cardStack
       actionControls
-      Text("Like приватний до взаємного вибору".localized)
-        .font(.caption2.weight(.semibold))
-        .foregroundColor(JourneyVisual.secondaryText)
-        .accessibilityHidden(true)
     }
   }
 
@@ -307,7 +304,6 @@ private struct FriendSwipeDeck: View {
       }
     }
     .frame(height: cardHeight + 20)
-    .clipped()
     .sensoryFeedback(.impact(weight: .light), trigger: armed) { _, armed in armed }
   }
 
@@ -351,55 +347,37 @@ private struct FriendSwipeDeck: View {
   }
 
   private var actionControls: some View {
-    GeometryReader { proxy in
-      let scale = min(1, max(0.82, (proxy.size.width - 32) / 250))
-      HStack(alignment: .top, spacing: 15 * scale) {
-        swipeActionButton(
-          label: "PASS", icon: "xmark", size: 68 * scale, primary: false,
-          enabled: topProfile != nil && !busy, identifier: "friends.swipe.pass"
-        ) {
-          if let topProfile { commit(topProfile, decision: "pass") }
-        }
-        VStack(spacing: 10 * scale) {
-          actionButton(
-            icon: "info", size: 44 * scale, enabled: topProfile != nil && !busy,
-            identifier: "friends.swipe.details"
-          ) {
-            if let topProfile { onDetails(topProfile) }
-          }
-          if canUndo {
-            actionButton(
-              icon: "arrow.uturn.backward", size: 36 * scale, enabled: !busy,
-              identifier: "friends.swipe.undo", action: onUndo)
-              .transition(.scale.combined(with: .opacity))
-          }
-        }
-        .padding(.top, 22 * scale)
-        swipeActionButton(
-          label: "LIKE", icon: "heart.fill", size: 76 * scale, primary: true,
-          enabled: topProfile != nil && !busy, identifier: "friends.swipe.like"
-        ) {
-          if let topProfile { commit(topProfile, decision: "like") }
-        }
-      }
-      .frame(maxWidth: .infinity)
-    }
-    .frame(height: 104)
-  }
-
-  private func swipeActionButton(
-    label: String, icon: String, size: CGFloat, primary: Bool, enabled: Bool,
-    identifier: String,
-    action: @escaping () -> Void
-  ) -> some View {
-    VStack(spacing: 8) {
-      Text(label)
-        .font(.caption.bold()).tracking(2)
-        .foregroundColor(primary ? JourneyVisual.accentText : JourneyVisual.secondaryText)
+    HStack(spacing: 18) {
       actionButton(
-        icon: icon, size: size, primary: primary, enabled: enabled, identifier: identifier,
-        action: action)
+        icon: "xmark", size: 60, enabled: topProfile != nil && !busy,
+        identifier: "friends.swipe.pass"
+      ) {
+        if let topProfile { commit(topProfile, decision: "pass") }
+      }
+      .accessibilityLabel("friends.swipe.pass".localized)
+      if canUndo {
+        actionButton(
+          icon: "arrow.uturn.backward", size: 44, enabled: !busy,
+          identifier: "friends.swipe.undo", action: onUndo)
+          .transition(.scale.combined(with: .opacity))
+      }
+      actionButton(
+        icon: "info", size: 44, enabled: topProfile != nil && !busy,
+        identifier: "friends.swipe.details"
+      ) {
+        if let topProfile { onDetails(topProfile) }
+      }
+      actionButton(
+        icon: "heart.fill", size: 68, primary: true, enabled: topProfile != nil && !busy,
+        identifier: "friends.swipe.like"
+      ) {
+        if let topProfile { commit(topProfile, decision: "like") }
+      }
+      .accessibilityLabel("friends.swipe.like".localized)
     }
+    .frame(maxWidth: .infinity)
+    .frame(height: 72)
+    .animation(.spring(response: 0.3, dampingFraction: 0.8), value: canUndo)
   }
 
   private var swipeGesture: some Gesture {
@@ -457,12 +435,12 @@ private struct FriendSwipeDeck: View {
         .font(.system(size: size * 0.31, weight: .bold))
         .foregroundColor(primary ? .black : JourneyVisual.primaryText.opacity(enabled ? 0.9 : 0.28))
         .frame(width: size, height: size)
-        .background(primary ? JourneyVisual.lime : JourneyVisual.elevatedSurface)
+        .background(primary ? JourneyVisual.lime : Theme.Colors.card)
         .clipShape(Circle())
-        .overlay(Circle().stroke(primary ? JourneyVisual.lime : JourneyVisual.softBorder))
-        .shadow(color: primary ? JourneyVisual.lime.opacity(0.24) : .clear, radius: 16)
+        .overlay(Circle().stroke(primary ? JourneyVisual.accentStrong.opacity(0.35) : JourneyVisual.softBorder))
+        .shadow(color: primary ? JourneyVisual.lime.opacity(0.45) : .black.opacity(0.08), radius: primary ? 16 : 8, y: 5)
     }
-    .buttonStyle(.plain)
+    .buttonStyle(ScaleButtonStyle(scaleAmount: 0.9, hapticStyle: .soft))
     .disabled(!enabled)
     .opacity(enabled ? 1 : 0.45)
     .accessibilityIdentifier(identifier ?? "")
@@ -503,29 +481,28 @@ private struct FriendSwipeCard: View {
         }
         HStack(alignment: .firstTextBaseline, spacing: 8) {
           Text(profile.displayName)
-            .font(.system(size: 26, weight: .bold, design: .default))
+            .font(.system(size: 30, weight: .bold, design: .default))
+            .tracking(-0.4)
             .foregroundColor(.white).lineLimit(1).minimumScaleFactor(0.72)
+          if let ageBand = profile.ageBand, !ageBand.isEmpty {
+            Text(ageBand.replacingOccurrences(of: "-", with: "–"))
+              .font(.system(size: 20, weight: .medium)).foregroundColor(.white.opacity(0.82))
+          }
           if profile.isVerified {
-            Image(systemName: "checkmark.seal.fill").foregroundColor(lime)
+            Image(systemName: "checkmark.seal.fill").font(.system(size: 18)).foregroundColor(lime)
           }
         }
-        if let ageBand = profile.ageBand, !ageBand.isEmpty {
-          Text(ageBand.replacingOccurrences(of: "-", with: "–"))
-            .font(.system(size: 17, weight: .bold)).foregroundColor(.white)
-            .padding(.top, 2)
-        }
         Text(profile.bio)
-          .font(.subheadline.weight(.medium)).foregroundColor(.white.opacity(0.76))
+          .font(.system(size: 15, weight: .medium)).foregroundColor(.white.opacity(0.82))
           .lineLimit(2).fixedSize(horizontal: false, vertical: true)
-          .padding(.top, 5)
-        HStack(spacing: 7) {
+          .padding(.top, 6)
+        HStack(spacing: 6) {
           ForEach(Array(profile.sharedInterests.prefix(3))) { interest in
             Label(interest.title, systemImage: interest.icon)
-              .font(.system(size: 10, weight: .bold)).foregroundColor(.white.opacity(0.92))
+              .font(.system(size: 12, weight: .bold)).foregroundColor(.black)
               .lineLimit(1).minimumScaleFactor(0.72)
-              .padding(.horizontal, 9).padding(.vertical, 8)
-              .background(Color.black.opacity(0.48)).clipShape(Capsule())
-              .overlay(Capsule().stroke(Color.white.opacity(0.24)))
+              .padding(.horizontal, 10).frame(height: 30)
+              .background(lime.opacity(0.92), in: Capsule())
           }
         }
         .padding(.top, 12)
@@ -535,7 +512,7 @@ private struct FriendSwipeCard: View {
       VStack {
         HStack(alignment: .top) {
           Spacer()
-          verticalMatchScore.padding(.top, 72).padding(.trailing, 16)
+          verticalMatchScore.padding(.top, 18).padding(.trailing, 18)
         }
         Spacer()
       }
@@ -604,25 +581,27 @@ private struct FriendSwipeCard: View {
       Text("\(profile.city) · \(profile.canton)")
       if let distance = profile.distanceKM { Text("· %@ км".localized(with: "\(distance)")) }
     }
-    .font(.caption.bold()).foregroundColor(.white)
-    .padding(.horizontal, 11).padding(.vertical, 8)
-    .background(.black.opacity(0.42)).clipShape(Capsule())
-    .overlay(Capsule().stroke(.white.opacity(0.16)))
+    .font(.system(size: 12, weight: .bold)).foregroundColor(JourneyVisual.primaryText)
+    .padding(.horizontal, 11).frame(height: 30)
+    .background(Theme.Colors.card.opacity(0.92), in: Capsule())
   }
 
   private var verticalMatchScore: some View {
-    VStack(spacing: -3) {
-      Text("\(profile.matchScore)")
-        .font(.system(size: 50, weight: .bold, design: .default))
-        .minimumScaleFactor(0.7)
-      Text("M\nA\nT\nC\nH")
-        .font(.system(size: 13, weight: .black, design: .default))
-        .tracking(1.2)
-        .multilineTextAlignment(.center)
-        .lineSpacing(1)
+    HStack(spacing: 4) {
+      Image(systemName: "sparkle")
+        .font(.system(size: 10, weight: .black))
+      Text("\(profile.matchScore)%")
+        .font(.system(size: 14, weight: .black))
+      Text("friends.match.label".localized)
+        .font(.system(size: 11, weight: .bold))
+        .opacity(0.7)
     }
-    .foregroundColor(lime)
-    .shadow(color: .black.opacity(0.45), radius: 8)
+    .foregroundColor(.black)
+    .padding(.horizontal, 11)
+    .frame(height: 30)
+    .background(lime, in: Capsule())
+    .shadow(color: .black.opacity(0.2), radius: 8, y: 3)
+    .accessibilityHidden(true)
   }
 
   private var swipeStamp: some View {
@@ -839,7 +818,7 @@ struct FriendNetworkView: View {
               case 3: profile
               default: discover(screenHeight: geometry.size.height)
               }
-            }.padding(.top, 18)
+            }.padding(.top, 12)
           }
           .frame(width: geometry.size.width)
           .padding(.bottom, showsDismissButton ? 44 : 124)
@@ -1007,13 +986,12 @@ struct FriendNetworkView: View {
         }
         .accessibilityLabel("Назад".localized)
       }
-      Text("SWEEZY CIRCLE")
-        .font(.system(size: 15, weight: .black))
-        .tracking(3.2)
+      Text("journey.tab.people".localized)
+        .font(.system(size: 30, weight: .bold))
+        .tracking(-0.4)
         .foregroundColor(JourneyVisual.primaryText)
-        .lineLimit(1)
-        .minimumScaleFactor(0.8)
         .accessibilityIdentifier("friends.people.title")
+        .accessibilityHint("friends.header.subtitle".localized)
       Spacer(minLength: 8)
       if !vm.incoming.isEmpty {
         Button { tab = 2 } label: {
@@ -1024,18 +1002,18 @@ struct FriendNetworkView: View {
       }
       Button { filters = true } label: {
         Image(systemName: "slider.horizontal.3")
-          .font(.headline)
+          .font(.system(size: 15, weight: .bold))
           .foregroundColor(JourneyVisual.primaryText)
-          .frame(width: 48, height: 48)
-          .background(JourneyVisual.softSurface)
+          .frame(width: 42, height: 42)
+          .background(Theme.Colors.card)
           .clipShape(Circle())
-          .overlay(Circle().stroke(limeAccent.opacity(0.58), lineWidth: 1))
+          .overlay(Circle().stroke(JourneyVisual.softBorder, lineWidth: 1))
       }
       .accessibilityLabel("Фільтри знайомств".localized)
       .accessibilityIdentifier("friends.people.filters")
     }
     .padding(.horizontal, 18)
-    .padding(.top, 10)
+    .padding(.top, 6)
     .padding(.bottom, 10)
   }
   private var isUITestPreview: Bool {
@@ -1080,35 +1058,14 @@ struct FriendNetworkView: View {
     #endif
   }
   private var tabs: some View {
-    HStack(spacing: 0) {
-      ForEach(
-        Array(
-          [
-            ("Люди".localized, "sparkles"), ("Події".localized, "calendar"), ("Друзі".localized, "person.2.fill"),
-            ("Я".localized, "person.crop.circle"),
-          ].enumerated()), id: \.offset
-      ) { i, x in
-        Button {
-          withAnimation(reduceMotion ? nil : Theme.Animation.selection) { tab = i }
-        } label: {
-          VStack(spacing: 10) {
-            Text(x.0)
-              .font(.system(size: 14, weight: tab == i ? .bold : .semibold))
-            Capsule()
-              .fill(tab == i ? limeAccent : Color.clear)
-              .frame(width: 44, height: 3)
-          }
-          .foregroundColor(tab == i ? JourneyVisual.primaryText : JourneyVisual.secondaryText)
-          .frame(maxWidth: .infinity)
-          .frame(height: 54)
-        }
-        .buttonStyle(ScaleButtonStyle(scaleAmount: 0.97, hapticStyle: .light))
-      }
-    }
+    JourneyWorkspaceSwitcher(
+      items: [0, 1, 2, 3],
+      selection: $tab,
+      title: { ["Люди".localized, "Події".localized, "Друзі".localized, "Я".localized][$0] },
+      icon: { ["sparkles", "calendar", "person.2.fill", "person.crop.circle"][$0] }
+    )
     .padding(.horizontal, 18)
-    .overlay(alignment: .bottom) {
-      Rectangle().fill(JourneyVisual.softBorder).frame(height: 1)
-    }
+    .padding(.bottom, 4)
   }
   private var peopleMetrics: some View {
     HStack(spacing: 10) {
@@ -1134,16 +1091,18 @@ struct FriendNetworkView: View {
     .background(JourneyVisual.elevatedSurface)
     .clipShape(Capsule())
   }
+  private var likesBadgeText: String {
+    if vm.swipeDeckMeta?.isPremium == true { return "Plus" }
+    return vm.swipeDeckMeta?.likesRemaining.map { "\($0)" } ?? "Like"
+  }
   private var peopleLikesText: String {
     if vm.swipeDeckMeta?.isPremium == true { return "Like без ліміту".localized }
     if let remaining = vm.swipeDeckMeta?.likesRemaining { return "%@ Like доступно".localized(with: "\(remaining)") }
     return "Приватні Like".localized
   }
   private func discover(screenHeight: CGFloat) -> some View {
-    VStack(alignment: .leading, spacing: 15) {
-      if vm.isShowingDemoProfiles {
-        demoNotice
-      }
+    VStack(alignment: .leading, spacing: 12) {
+      discoverModePicker
       if !showPeopleCatalog {
       if vm.loading && vm.swipeProfiles.isEmpty {
         SkeletonList(rows: 2).padding(.vertical, 12)
@@ -1162,7 +1121,9 @@ struct FriendNetworkView: View {
       } else {
         FriendSwipeDeck(
           profiles: vm.swipeProfiles,
-          cardHeight: min(460, max(350, screenHeight * 0.46)),
+          // Header, switcher, toolbar, buttons and the floating tab bar take ~290pt;
+          // the card gets the rest so the like/pass buttons never hide under the tab bar.
+          cardHeight: min(540, max(320, screenHeight - (showsDismissButton ? 220 : 300))),
           busy: vm.swipeBusy,
           canUndo: vm.lastPassedProfile != nil,
           onDecision: handleSwipe,
@@ -1170,20 +1131,6 @@ struct FriendNetworkView: View {
           onDetails: openProfile)
       }
       }
-      Button {
-        showPeopleCatalog.toggle()
-      } label: {
-        HStack {
-          Label(showPeopleCatalog ? "Картки знайомств".localized : "Пошук і каталог".localized, systemImage: "rectangle.grid.1x2")
-          Spacer()
-          Image(systemName: showPeopleCatalog ? "chevron.up" : "chevron.down")
-        }
-        .font(.subheadline.bold()).foregroundColor(JourneyVisual.primaryText)
-        .padding(.horizontal, 16).frame(height: 52)
-        .background(JourneyVisual.elevatedSurface).clipShape(RoundedRectangle(cornerRadius: 17))
-        .overlay(RoundedRectangle(cornerRadius: 17).stroke(JourneyVisual.softBorder))
-      }
-      .accessibilityIdentifier("friends.catalog.toggle")
       if showPeopleCatalog {
         search
         if vm.loading && vm.profiles.isEmpty {
@@ -1215,6 +1162,73 @@ struct FriendNetworkView: View {
       }
       }
     }.padding(.horizontal, 18)
+  }
+  /// Cards for one-by-one introductions, search for browsing everyone at once.
+  private var discoverModePicker: some View {
+    HStack(spacing: 8) {
+      HStack(spacing: 2) {
+        discoverModeButton(
+          title: "friends.mode.cards".localized, icon: "rectangle.stack.fill",
+          selected: !showPeopleCatalog, identifier: "friends.mode.cards"
+        ) { showPeopleCatalog = false }
+        discoverModeButton(
+          title: "friends.mode.search".localized, icon: "magnifyingglass",
+          selected: showPeopleCatalog, identifier: "friends.catalog.toggle"
+        ) { showPeopleCatalog = true }
+      }
+      .padding(3)
+      .background(JourneyVisual.softSurface, in: Capsule())
+      .fixedSize()
+      Spacer(minLength: 4)
+      if vm.isShowingDemoProfiles {
+        Text("DEMO")
+          .font(.system(size: 10, weight: .heavy)).tracking(0.8)
+          .foregroundColor(JourneyVisual.secondaryText)
+          .padding(.horizontal, 8).frame(height: 24)
+          .overlay(Capsule().stroke(JourneyVisual.softBorder))
+          .accessibilityLabel("Демо-каталог · тестові профілі".localized)
+          .accessibilityIdentifier("friends.demo.notice")
+      }
+      HStack(spacing: 5) {
+        Image(systemName: vm.swipeDeckMeta?.isPremium == true ? "infinity" : "heart.fill")
+          .font(.system(size: 10, weight: .bold))
+          .foregroundColor(JourneyVisual.accentStrong)
+        Text(likesBadgeText)
+          .font(.system(size: 13, weight: .bold))
+          .foregroundColor(JourneyVisual.primaryText)
+      }
+      .padding(.horizontal, 10).frame(height: 28)
+      .background(Theme.Colors.card, in: Capsule())
+      .overlay(Capsule().stroke(JourneyVisual.softBorder))
+      .accessibilityElement(children: .ignore)
+      .accessibilityLabel(peopleLikesText)
+    }
+  }
+  private func discoverModeButton(
+    title: String, icon: String, selected: Bool, identifier: String,
+    action: @escaping () -> Void
+  ) -> some View {
+    Button {
+      withAnimation(reduceMotion ? nil : .spring(response: 0.32, dampingFraction: 0.84)) { action() }
+    } label: {
+      HStack(spacing: 6) {
+        Image(systemName: icon).font(.system(size: 11, weight: .bold))
+        Text(title).font(.system(size: 13, weight: .bold))
+      }
+      .foregroundColor(selected ? JourneyVisual.primaryText : JourneyVisual.secondaryText)
+      .padding(.horizontal, 13)
+      .frame(height: 32)
+      .background {
+        if selected {
+          Capsule().fill(Theme.Colors.card)
+            .shadow(color: .black.opacity(0.08), radius: 4, y: 2)
+        }
+      }
+      .contentShape(Capsule())
+    }
+    .buttonStyle(.plain)
+    .accessibilityAddTraits(selected ? .isSelected : [])
+    .accessibilityIdentifier(identifier)
   }
   private var swipeHeader: some View {
     HStack(alignment: .top, spacing: 14) {
@@ -1273,71 +1287,39 @@ struct FriendNetworkView: View {
       }
     }
   }
-  private var demoNotice: some View {
-    Label("Демо-каталог · тестові профілі".localized, systemImage: "info.circle")
-      .font(.caption).foregroundColor(JourneyVisual.secondaryText)
-      .accessibilityIdentifier("friends.demo.notice")
-  }
-  private var orbit: some View {
-    ZStack {
-      RoundedRectangle(cornerRadius: 28).fill(
-        LinearGradient(
-          colors: [forest, Theme.Colors.card],
-          startPoint: .topLeading, endPoint: .bottomTrailing))
-      HStack {
-        VStack(alignment: .leading, spacing: 6) {
-          Text("SWISS CIRCLE").font(.caption2.bold()).tracking(1.7).foregroundColor(JourneyVisual.accentText)
-          Text("%@ збігів поруч".localized(with: "\(vm.profiles.count)")).font(.title3.bold()).foregroundColor(JourneyVisual.primaryText)
-          Text("Люди, з якими вже є про що поговорити".localized).font(.caption).foregroundColor(JourneyVisual.primaryText)
-        }
-        Spacer()
-        ZStack {
-          Circle().stroke(limeAccent.opacity(0.22), lineWidth: 1).frame(width: 92, height: 92)
-          Circle().stroke(mintGlow.opacity(0.28), lineWidth: 1).frame(width: 58, height: 58)
-          Circle().fill(limeAccent).frame(width: 15, height: 15).offset(x: 34, y: -24)
-          Circle().fill(mintGlow).frame(width: 11, height: 11).offset(x: -22, y: 18)
-          Text("CH").font(.caption.bold()).foregroundColor(JourneyVisual.secondaryText)
-        }
-      }.padding(20)
-    }.frame(height: 145).overlay(
-      RoundedRectangle(cornerRadius: 28).stroke(limeAccent.opacity(0.28)))
-  }
   private var search: some View {
-    VStack(spacing: 10) {
-      HStack(alignment: .bottom) {
-        VStack(alignment: .leading, spacing: 6) {
-          Text("Люди поруч".localized).font(.title2.bold())
-          Text("Шукаємо спільне".localized).font(.subheadline)
-        }.foregroundColor(JourneyVisual.primaryText).padding(.bottom, 18)
-        Spacer(minLength: 8)
-        if vm.loading || !vm.profiles.isEmpty {
-          SocialCompanion(pose: .guide, size: 78, portrait: true, trigger: vm.loading ? 1 : 0)
+    VStack(alignment: .leading, spacing: 12) {
+      HStack(spacing: 10) {
+        HStack(spacing: 10) {
+          Image(systemName: "magnifyingglass").foregroundColor(JourneyVisual.secondaryText)
+          TextField("Ім’я, місто або інтерес".localized, text: $vm.query)
+            .foregroundColor(JourneyVisual.primaryText)
+            .submitLabel(.search)
+            .onSubmit { Task { await vm.reload() } }
+            .accessibilityIdentifier("friends.search.query")
+          if !vm.query.isEmpty {
+            Button {
+              vm.query = ""
+              Task { await vm.reload() }
+            } label: {
+              Image(systemName: "xmark.circle.fill").foregroundColor(JourneyVisual.secondaryText)
+            }
+            .accessibilityLabel("common.clear".localized)
+          }
         }
-      }.padding(.horizontal, 18).padding(.top, 10)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 20))
-      HStack {
-        Image(systemName: "magnifyingglass").foregroundColor(JourneyVisual.secondaryText)
-        TextField("Ім’я, місто або інтерес".localized, text: $vm.query).foregroundColor(JourneyVisual.primaryText).submitLabel(
-          .search
-        ).onSubmit { Task { await vm.reload() } }
-          .accessibilityIdentifier("friends.search.query")
-      }.padding(.horizontal, 16).frame(height: 56).background(JourneyVisual.elevatedSurface).clipShape(
-        RoundedRectangle(cornerRadius: 18)
-      ).overlay(RoundedRectangle(cornerRadius: 18).stroke(JourneyVisual.softBorder))
-      HStack {
-        Button {
-          filters = true
-        } label: {
-          Label("Фільтри".localized, systemImage: "slider.horizontal.3").font(.subheadline.bold())
+        .padding(.horizontal, 16)
+        .frame(height: 52)
+        .background(Theme.Colors.card, in: Capsule())
+        .overlay(Capsule().stroke(JourneyVisual.softBorder))
+        Button { filters = true } label: {
+          Image(systemName: "slider.horizontal.3")
+            .font(.headline)
+            .foregroundColor(.black)
+            .frame(width: 52, height: 52)
+            .background(limeAccent, in: Circle())
         }
-        Spacer()
-        if let remaining = vm.searchMeta?.requestsRemaining {
-          Text("%@ запитів цього тижня".localized(with: "\(remaining)")).font(.caption).foregroundColor(JourneyVisual.secondaryText)
-        } else if vm.searchMeta?.advancedFiltersAvailable == true {
-          Label("PLUS", systemImage: "star.fill").font(.caption.bold()).foregroundColor(JourneyVisual.primaryText)
-        }
-      }.foregroundColor(JourneyVisual.primaryText)
+        .accessibilityLabel("Фільтри".localized)
+      }
       ScrollView(.horizontal, showsIndicators: false) {
         HStack {
           chip("Усі".localized, active: vm.interest == nil) { vm.interest = nil }
@@ -1347,7 +1329,17 @@ struct FriendNetworkView: View {
             }
           }
         }
-      }.onChange(of: vm.interest) { _, _ in Task { await vm.reload() } }
+      }
+      .scrollClipDisabled()
+      .onChange(of: vm.interest) { _, _ in Task { await vm.reload() } }
+      HStack(spacing: 10) {
+        buddyTile(title: "friends.buddy.travel".localized, subtitle: "friends.buddy.travel.subtitle".localized, icon: "airplane", interest: .travel)
+        buddyTile(title: "friends.buddy.activity".localized, subtitle: "friends.buddy.activity.subtitle".localized, icon: "figure.run", interest: .sports)
+      }
+      if let remaining = vm.searchMeta?.requestsRemaining {
+        Label("%@ запитів цього тижня".localized(with: "\(remaining)"), systemImage: "paperplane")
+          .font(.caption).foregroundColor(JourneyVisual.secondaryText)
+      }
       if vm.searchMeta?.isLimited == true {
         Button {
           paywall = true
@@ -1357,29 +1349,44 @@ struct FriendNetworkView: View {
             Spacer()
             Image(systemName: "arrow.right")
           }
-          .font(.subheadline.bold()).foregroundColor(.black).padding(.horizontal, 16).frame(
-            height: 48
-          )
-          .background(limeAccent).clipShape(RoundedRectangle(cornerRadius: 16))
+          .font(.subheadline.bold()).foregroundColor(.black).padding(.horizontal, 16)
+          .frame(height: 48)
+          .background(limeAccent).clipShape(Capsule())
         }
       }
-      HStack(spacing: 10) {
-        Button {
-          guard subscription.isPremium else { paywall = true; return }
-          vm.interest = .travel; vm.nearby = true
-          Task { await vm.reload() }
-        } label: {
-          Label("Travel buddy", systemImage: "airplane").frame(maxWidth: .infinity, minHeight: 44)
-        }
-        Button {
-          guard subscription.isPremium else { paywall = true; return }
-          vm.interest = .sports; vm.nearby = true
-          Task { await vm.reload() }
-        } label: {
-          Label("Activity buddy", systemImage: "figure.run").frame(maxWidth: .infinity, minHeight: 44)
-        }
-      }.font(.caption.bold()).foregroundColor(JourneyVisual.primaryText).background(limeAccent.opacity(0.07)).clipShape(RoundedRectangle(cornerRadius: 15))
     }
+  }
+  private func buddyTile(title: String, subtitle: String, icon: String, interest: SocialInterest) -> some View {
+    Button {
+      guard subscription.isPremium else { paywall = true; return }
+      vm.interest = interest; vm.nearby = true
+      Task { await vm.reload() }
+    } label: {
+      HStack(spacing: 10) {
+        Image(systemName: icon)
+          .font(.system(size: 14, weight: .bold))
+          .foregroundColor(JourneyVisual.accentStrong)
+          .frame(width: 34, height: 34)
+          .background(JourneyVisual.softSurface, in: Circle())
+        VStack(alignment: .leading, spacing: 1) {
+          HStack(spacing: 4) {
+            Text(title).font(.system(size: 13, weight: .bold))
+            if !subscription.isPremium {
+              Image(systemName: "star.fill").font(.system(size: 9)).foregroundColor(JourneyVisual.accentStrong)
+            }
+          }
+          Text(subtitle).font(.system(size: 10, weight: .medium)).foregroundColor(JourneyVisual.secondaryText)
+            .lineLimit(1).minimumScaleFactor(0.8)
+        }
+        .foregroundColor(JourneyVisual.primaryText)
+        Spacer(minLength: 0)
+      }
+      .padding(10)
+      .frame(maxWidth: .infinity)
+      .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+      .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(JourneyVisual.softBorder))
+    }
+    .buttonStyle(ScaleButtonStyle(scaleAmount: 0.97, hapticStyle: .light))
   }
   private var events: some View {
     VStack(alignment: .leading, spacing: 16) {
@@ -1387,62 +1394,112 @@ struct FriendNetworkView: View {
       if vm.events.isEmpty {
         empty("Подій поки немає".localized, "Спробуй інший кантон або повернися пізніше.".localized, story: "events")
       } else {
-        ForEach(vm.events) { e in
-          VStack(alignment: .leading, spacing: 12) {
-            HStack {
-              VStack(alignment: .leading, spacing: 5) {
-                Text(e.title).font(.headline).foregroundColor(JourneyVisual.primaryText)
-                Text("\(e.city) · \(e.startsAt.formatted(Date.FormatStyle(date:.abbreviated,time:.shortened, locale: AppLanguage.current.locale)))").font(
-                  .caption
-                ).foregroundColor(JourneyVisual.secondaryText)
-              }
-              Spacer()
-              Text("\(e.attendeeCount)").font(.headline.bold()).foregroundColor(JourneyVisual.accentText)
-            }
-            HStack {
-              Button {
-                Task { await vm.attend(e) }
-              } label: {
-                Label(
-                  e.myStatus == "going" ? "Я йду".localized : "Піти".localized,
-                  systemImage: e.myStatus == "going" ? "checkmark.circle.fill" : "plus.circle.fill"
-                ).font(.subheadline.bold()).foregroundColor(.black).padding(.horizontal, 16).frame(
-                  height: 42
-                ).background(limeAccent).clipShape(Capsule())
-              }
-              if e.myStatus == "going" {
-                Button {
-                  Task {
-                    do {
-                      vm.profiles = try await FriendsAPI.profiles(eventID: e.id).items
-                      tab = 0
-                    } catch { vm.error = error.localizedDescription }
-                  }
-                } label: {
-                  Text("Хто буде".localized).font(.subheadline.bold()).foregroundColor(JourneyVisual.primaryText)
-                }
-                if e.groupChatAvailable {
-                  Button {
-                    eventChat = e
-                  } label: {
-                    Image(systemName: "bubble.left.and.bubble.right.fill").foregroundColor(
-                      JourneyVisual.accentStrong)
-                  }
-                }
-              }
-              Spacer()
-              Button {
-                event = e
-              } label: {
-                Image(systemName: "arrow.up.right").foregroundColor(JourneyVisual.primaryText)
-              }
-            }
-          }.padding(17).background(JourneyVisual.elevatedSurface).clipShape(
-            RoundedRectangle(cornerRadius: 22)
-          ).overlay(RoundedRectangle(cornerRadius: 22).stroke(JourneyVisual.softBorder))
-        }
+        ForEach(vm.events) { e in eventCard(e) }
       }
     }.padding(.horizontal, 18)
+  }
+  /// Poster-style row: a calendar tile you can scan down the list, then what, where and who.
+  private func eventCard(_ e: SocialEvent) -> some View {
+    let going = e.myStatus == "going"
+    let locale = AppLanguage.current.locale
+    return VStack(alignment: .leading, spacing: 14) {
+      Button { event = e } label: {
+        HStack(alignment: .top, spacing: 14) {
+          VStack(spacing: 0) {
+            Text(e.startsAt.formatted(.dateTime.month(.abbreviated).locale(locale)).uppercased())
+              .font(.system(size: 11, weight: .heavy)).tracking(0.6)
+            Text(e.startsAt.formatted(.dateTime.day().locale(locale)))
+              .font(.system(size: 26, weight: .heavy))
+            Text(e.startsAt.formatted(.dateTime.weekday(.abbreviated).locale(locale)))
+              .font(.system(size: 11, weight: .semibold))
+              .opacity(0.65)
+          }
+          .foregroundColor(e.isRecommended ? .black : JourneyVisual.primaryText)
+          .frame(width: 62, height: 76)
+          .background(
+            e.isRecommended ? JourneyVisual.lime : JourneyVisual.softSurface,
+            in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+
+          VStack(alignment: .leading, spacing: 6) {
+            Text(e.title)
+              .font(.system(size: 17, weight: .bold))
+              .foregroundColor(JourneyVisual.primaryText)
+              .lineLimit(2)
+              .multilineTextAlignment(.leading)
+              .fixedSize(horizontal: false, vertical: true)
+            HStack(spacing: 5) {
+              Image(systemName: "clock")
+              Text(e.startsAt.formatted(.dateTime.hour().minute().locale(locale)))
+              Text("·")
+              Image(systemName: "mappin")
+              Text(e.city).lineLimit(1)
+            }
+            .font(.system(size: 13, weight: .medium))
+            .foregroundColor(JourneyVisual.secondaryText)
+            if let reason = e.recommendationReason, !reason.isEmpty {
+              Label(reason, systemImage: "sparkles")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundColor(JourneyVisual.accentText)
+                .lineLimit(2)
+            }
+          }
+          Spacer(minLength: 0)
+        }
+        .contentShape(Rectangle())
+      }
+      .buttonStyle(.plain)
+      .accessibilityElement(children: .combine)
+
+      HStack(spacing: 10) {
+        Button {
+          Task { await vm.attend(e) }
+        } label: {
+          Label(going ? "Я йду".localized : "Піти".localized, systemImage: going ? "checkmark" : "plus")
+            .font(.system(size: 14, weight: .bold))
+            .foregroundColor(going ? JourneyVisual.primaryText : .black)
+            .padding(.horizontal, 16).frame(height: 38)
+            .background(going ? JourneyVisual.lime.opacity(0.22) : JourneyVisual.lime, in: Capsule())
+        }
+        .buttonStyle(ScaleButtonStyle(scaleAmount: 0.95, hapticStyle: .light))
+        if going {
+          Button {
+            Task {
+              do {
+                vm.profiles = try await FriendsAPI.profiles(eventID: e.id).items
+                tab = 0
+              } catch { vm.error = error.localizedDescription }
+            }
+          } label: {
+            Text("Хто буде".localized)
+              .font(.system(size: 14, weight: .bold))
+              .foregroundColor(JourneyVisual.primaryText)
+              .padding(.horizontal, 14).frame(height: 38)
+              .background(JourneyVisual.softSurface, in: Capsule())
+          }
+          .buttonStyle(.plain)
+          if e.groupChatAvailable {
+            Button { eventChat = e } label: {
+              Image(systemName: "bubble.left.and.bubble.right.fill")
+                .font(.system(size: 13, weight: .bold))
+                .foregroundColor(JourneyVisual.primaryText)
+                .frame(width: 38, height: 38)
+                .background(JourneyVisual.softSurface, in: Circle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Чат події".localized)
+          }
+        }
+        Spacer(minLength: 0)
+        Label("\(e.attendeeCount)", systemImage: "person.2.fill")
+          .font(.system(size: 13, weight: .bold))
+          .foregroundColor(JourneyVisual.secondaryText)
+          .accessibilityLabel("%@ учасників".localized(with: "\(e.attendeeCount)"))
+      }
+    }
+    .padding(14)
+    .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+    .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous).stroke(JourneyVisual.softBorder))
+    .shadow(color: .black.opacity(0.04), radius: 10, y: 4)
   }
   private var connections: some View {
     VStack(alignment: .leading, spacing: 18) {
@@ -1585,68 +1642,63 @@ struct FriendNetworkView: View {
     .padding(14).background((rejected ? Color.orange : limeAccent).opacity(0.09))
     .clipShape(RoundedRectangle(cornerRadius: 16))
   }
+  /// First visit to the "Я" tab: the people scene, what the passport is in three steps, one button.
   private var profileLaunchCard: some View {
-    VStack(alignment: .leading, spacing: 20) {
-      HStack(alignment: .top) {
-        VStack(alignment: .leading, spacing: 7) {
-          Text("ТВІЙ КРУГ У ШВЕЙЦАРІЇ".localized).font(.caption2.bold()).tracking(1.9).foregroundColor(
-            JourneyVisual.accentText)
-          Text("Створи свій\nsocial passport".localized).font(
-            .system(size: 29, weight: .black, design: .default)
-          )
-          .lineSpacing(1).foregroundColor(JourneyVisual.primaryText)
-          Text("Знайомства за інтересами, подіями та кантоном.".localized).font(.subheadline)
-            .foregroundColor(JourneyVisual.secondaryText).fixedSize(horizontal: false, vertical: true)
+    VStack(alignment: .leading, spacing: 0) {
+      StoryScene(name: "find-people", height: 190, cornerRadius: 0)
+        .overlay(alignment: .topLeading) {
+          HStack(spacing: 6) {
+            Circle().fill(limeAccent).frame(width: 7, height: 7)
+            Text("friends.launch.eyebrow".localized)
+              .font(.system(size: 11, weight: .heavy)).tracking(1)
+              .foregroundColor(JourneyVisual.primaryText)
+          }
+          .padding(.horizontal, 10).frame(height: 28)
+          .background(Theme.Colors.card.opacity(0.94), in: Capsule())
+          .padding(14)
         }
-        Spacer(minLength: 10)
-        ZStack {
-          Circle().stroke(limeAccent.opacity(0.18), lineWidth: 1).frame(width: 94, height: 94)
-          Circle().stroke(limeAccent.opacity(0.45), lineWidth: 1).frame(width: 66, height: 66)
-          Circle().fill(limeAccent.opacity(0.12)).frame(width: 52, height: 52)
-          Text("CH").font(.headline.bold()).foregroundColor(JourneyVisual.accentText)
-          Circle().fill(limeAccent).frame(width: 10, height: 10).offset(x: 33, y: -27)
+      VStack(alignment: .leading, spacing: 18) {
+        VStack(alignment: .leading, spacing: 8) {
+          SceneTitleText(text: "Створи свій\nsocial passport".localized, size: 30)
+          Text("Знайомства за інтересами, подіями та кантоном.".localized)
+            .font(.system(size: 15, weight: .medium))
+            .foregroundColor(JourneyVisual.secondaryText)
+            .fixedSize(horizontal: false, vertical: true)
         }
+        VStack(alignment: .leading, spacing: 12) {
+          launchStep(1, "Інтереси".localized, "Обери теми, які тебе захоплюють".localized)
+          launchStep(2, "Формат зустрічей".localized, "Прогулянки, спорт, кава або події".localized)
+          launchStep(3, "Приватність".localized, "Контакти приховані, контроль завжди твій".localized)
+        }
+        AuthPrimaryButton(title: "Створити social passport".localized, identifier: "friends.passport.create") {
+          editor = true
+        }
+        Label("Професійний профіль залишається окремим".localized, systemImage: "checkmark.shield.fill")
+          .font(.system(size: 12, weight: .medium))
+          .foregroundColor(JourneyVisual.secondaryText)
+          .frame(maxWidth: .infinity)
       }
-      VStack(spacing: 0) {
-        profileStep("sparkles", "Інтереси".localized, "Обери теми, які тебе захоплюють".localized)
-        Divider().overlay(JourneyVisual.softBorder).padding(.leading, 46)
-        profileStep("person.2.fill", "Формат зустрічей".localized, "Прогулянки, спорт, кава або події".localized)
-        Divider().overlay(JourneyVisual.softBorder).padding(.leading, 46)
-        profileStep("lock.shield.fill", "Приватність".localized, "Контакти приховані, контроль завжди твій".localized)
-      }.padding(.horizontal, 14).background(Theme.Colors.card).clipShape(
-        RoundedRectangle(cornerRadius: 20))
-      Button {
-        editor = true
-      } label: {
-        HStack {
-          Text("Створити social passport".localized).font(.headline)
-          Spacer()
-          Image(systemName: "arrow.right").font(.headline.bold())
-        }.foregroundColor(.black).padding(.horizontal, 20).frame(maxWidth: .infinity, minHeight: 58)
-          .background(limeAccent).clipShape(RoundedRectangle(cornerRadius: 19))
-      }
-      Label("Професійний профіль залишається окремим".localized, systemImage: "checkmark.shield.fill")
-        .font(.caption).foregroundColor(JourneyVisual.secondaryText).frame(maxWidth: .infinity)
-    }.padding(20).background(
-      LinearGradient(
-        colors: [forest, Theme.Colors.card],
-        startPoint: .topLeading, endPoint: .bottomTrailing)
-    ).clipShape(RoundedRectangle(cornerRadius: 30)).overlay(
-      RoundedRectangle(cornerRadius: 30).stroke(limeAccent.opacity(0.3))
-    )
-    .shadow(color: limeAccent.opacity(0.09), radius: 28, y: 12)
+      .padding(20)
+    }
+    .background(Theme.Colors.card)
+    .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+    .overlay(RoundedRectangle(cornerRadius: 28, style: .continuous).stroke(JourneyVisual.softBorder))
+    .shadow(color: .black.opacity(0.06), radius: 18, y: 8)
   }
-  private func profileStep(_ icon: String, _ title: String, _ subtitle: String) -> some View {
-    HStack(spacing: 13) {
-      Image(systemName: icon).font(.subheadline.bold()).foregroundColor(JourneyVisual.accentStrong).frame(
-        width: 34, height: 34
-      ).background(limeAccent.opacity(0.1)).clipShape(RoundedRectangle(cornerRadius: 11))
+  private func launchStep(_ number: Int, _ title: String, _ subtitle: String) -> some View {
+    HStack(spacing: 12) {
+      Text("\(number)")
+        .font(.system(size: 15, weight: .heavy, design: .rounded))
+        .foregroundColor(.black)
+        .frame(width: 34, height: 34)
+        .background(limeAccent, in: Circle())
       VStack(alignment: .leading, spacing: 2) {
-        Text(title).font(.subheadline.bold()).foregroundColor(JourneyVisual.primaryText)
-        Text(subtitle).font(.caption).foregroundColor(JourneyVisual.secondaryText).lineLimit(2)
+        Text(title).font(.system(size: 15, weight: .bold)).foregroundColor(JourneyVisual.primaryText)
+        Text(subtitle).font(.system(size: 13)).foregroundColor(JourneyVisual.secondaryText)
+          .fixedSize(horizontal: false, vertical: true)
       }
       Spacer(minLength: 0)
-    }.padding(.vertical, 11)
+    }
   }
   private func title(_ text: String, sub: String, count: Int) -> some View {
     HStack {
@@ -1719,7 +1771,8 @@ private struct FriendCard: View {
 
   private var previewImageName: String? {
     guard profile.id.hasPrefix("preview-") else { return nil }
-    return profile.id.replacingOccurrences(of: "preview-", with: "friend-preview-")
+    let name = profile.id.replacingOccurrences(of: "preview-", with: "friend-preview-")
+    return UIImage(named: name) == nil ? nil : name
   }
 
   var body: some View {
@@ -1755,11 +1808,12 @@ private struct FriendCard: View {
         .lineLimit(1)
 
         HStack(spacing: 6) {
-          ForEach(Array(profile.sharedInterests.prefix(3))) { interest in
+          ForEach(Array(profile.sharedInterests.prefix(2))) { interest in
             Label(interest.title, systemImage: interest.icon)
               .font(.system(size: 10, weight: .bold))
               .foregroundColor(JourneyVisual.primaryText)
               .lineLimit(1)
+              .fixedSize()
               .padding(.horizontal, 8)
               .frame(height: 24)
               .background(JourneyVisual.softSurface)
@@ -1813,127 +1867,340 @@ private struct FriendCard: View {
   }
 }
 
+/// Full profile: portrait on top, a paper sheet with who they are and what you share,
+/// and the one action that matters pinned to the bottom.
 private struct FriendProfileDetail: View {
   @Environment(\.dismiss) var dismiss
   let profile: SocialProfile
   @ObservedObject var vm: FriendNetworkViewModel
   @Binding var conversation: ChatConversation?
   @State var message = ""
+  @State private var scrollOffset: CGFloat = 0
   private var isDemo: Bool { profile.id.hasPrefix("preview-") }
-  private var profilePortrait: some View {
-    GeometryReader { geometry in
-      Group {
-        if isDemo {
-          Image(profile.id.replacingOccurrences(of: "preview-", with: "friend-preview-"))
-            .resizable().scaledToFill()
-        } else if let raw = profile.avatarURL, let url = APIClient.resolveMediaURL(raw) {
-          CachedAsyncImage(url: url) {
-            Text(profile.initials).font(.largeTitle.bold()).foregroundStyle(JourneyVisual.accentText)
-          }
-        } else {
-          Text(profile.initials).font(.largeTitle.bold()).foregroundStyle(JourneyVisual.accentText)
+  private var sharedSet: Set<SocialInterest> { Set(profile.sharedInterests) }
+  private var orderedInterests: [SocialInterest] {
+    profile.interests.sorted { sharedSet.contains($0) && !sharedSet.contains($1) }
+  }
+
+  var body: some View {
+    ZStack(alignment: .top) {
+      JourneyVisual.pageBackground.ignoresSafeArea()
+      ScrollView(showsIndicators: false) {
+        VStack(spacing: 0) {
+          hero
+          sheet.padding(.top, -28)
+        }
+        .padding(.bottom, 20)
+      }
+      .ignoresSafeArea(edges: .top)
+      .scrollDismissesKeyboard(.interactively)
+      .onScrollGeometryChange(for: CGFloat.self) { geometry in
+        geometry.contentOffset.y + geometry.contentInsets.top
+      } action: { _, offset in
+        scrollOffset = offset
+      }
+      topBar
+    }
+    .safeAreaInset(edge: .bottom, spacing: 0) { actionBar }
+  }
+
+  private var hero: some View {
+    Color.clear
+      .frame(height: 460)
+      .overlay { portrait }
+      .clipped()
+      .overlay(alignment: .top) {
+        LinearGradient(colors: [.black.opacity(0.25), .clear], startPoint: .top, endPoint: .bottom)
+          .frame(height: 120)
+      }
+      .accessibilityHidden(true)
+  }
+
+  @ViewBuilder private var portrait: some View {
+    if isDemo {
+      Image(profile.id.replacingOccurrences(of: "preview-", with: "friend-preview-"))
+        .resizable().scaledToFill()
+    } else if let raw = profile.avatarURL, let url = APIClient.resolveMediaURL(raw) {
+      CachedAsyncImage(url: url) { initialsArt }
+    } else {
+      initialsArt
+    }
+  }
+
+  private var initialsArt: some View {
+    ZStack {
+      LinearGradient(
+        colors: [JourneyVisual.lime.opacity(0.55), JourneyVisual.softSurface],
+        startPoint: .topLeading, endPoint: .bottomTrailing)
+      Text(profile.initials)
+        .font(.system(size: 96, weight: .black))
+        .foregroundColor(JourneyVisual.primaryText.opacity(0.8))
+    }
+  }
+
+  private var sheet: some View {
+    VStack(alignment: .leading, spacing: 22) {
+      identity
+      matchCard
+      if !profile.bio.isEmpty {
+        section("Про мене".localized) {
+          Text(profile.bio)
+            .font(.system(size: 16))
+            .foregroundColor(JourneyVisual.primaryText.opacity(0.86))
+            .lineSpacing(3)
+            .fixedSize(horizontal: false, vertical: true)
         }
       }
-      .frame(width: geometry.size.width, height: 220)
-      .background(Theme.Colors.card)
-      .clipped()
-    }
-    .frame(height: 220)
-    .clipShape(RoundedRectangle(cornerRadius: 24))
-    .accessibilityHidden(true)
-  }
-  var body: some View {
-    ZStack {
-      JourneyAmbientBackground()
-      ScrollView {
-        VStack(alignment: .leading, spacing: 20) {
-          HStack {
-            Button {
-              dismiss()
-            } label: {
-              Image(systemName: "xmark").foregroundColor(JourneyVisual.primaryText)
-                .frame(width: 48, height: 48)
-                .background(JourneyVisual.elevatedSurface).clipShape(Circle())
-            }
-            Spacer()
-            if !isDemo { Menu {
-              Button("Поскаржитися".localized, role: .destructive) {
-                Task {
-                  do {
-                    try await FriendsAPI.report(profile.id)
-                  } catch {
-                    vm.error = error.localizedDescription
-                  }
-                }
-              }
-              Button("Заблокувати".localized, role: .destructive) {
-                Task {
-                  do {
-                    try await FriendsAPI.block(profile.id)
-                    dismiss()
-                  } catch {
-                    vm.error = error.localizedDescription
-                  }
-                }
-              }
-            } label: {
-              Image(systemName: "ellipsis").foregroundColor(JourneyVisual.primaryText)
-            } }
-          }
-          profilePortrait
-          Text("%@%% збіг".localized(with: "\(profile.matchScore)")).font(.caption.bold()).foregroundColor(
-            JourneyVisual.accentText)
-          Text(profile.displayName).font(.largeTitle.bold())
-            .foregroundColor(JourneyVisual.primaryText)
-          Text("\(profile.city) · \(profile.canton)").foregroundColor(JourneyVisual.secondaryText)
-          Text(profile.bio).foregroundColor(JourneyVisual.primaryText.opacity(0.78))
-          Text("СПІЛЬНІ ІНТЕРЕСИ".localized).font(.caption.bold()).tracking(1.5).foregroundColor(
-            JourneyVisual.accentText)
+      if !orderedInterests.isEmpty {
+        section("Інтереси".localized) {
           FlowLayout(spacing: 8) {
-            ForEach(profile.sharedInterests) { i in
-              Label(i.title, systemImage: i.icon).font(.caption.bold())
-                .foregroundColor(JourneyVisual.primaryText)
-                .padding(10).background(JourneyVisual.lime.opacity(0.12)).clipShape(Capsule())
-                .overlay(Capsule().stroke(JourneyVisual.lime.opacity(0.2)))
+            ForEach(orderedInterests) { interest in
+              chip(interest.title, icon: interest.icon, highlighted: sharedSet.contains(interest))
             }
           }
-          if isDemo {
-            Label("Демо-профіль · дії вимкнені".localized, systemImage: "sparkles")
-              .font(.subheadline.bold()).foregroundColor(Theme.Colors.textPrimary)
-              .frame(maxWidth: .infinity, minHeight: 52)
-              .background(JourneyVisual.lime.opacity(0.1))
-              .clipShape(RoundedRectangle(cornerRadius: 17))
-          } else if profile.connectionState == "accepted", let id = profile.conversationID {
-            Button {
-              Task { conversation = try? await ChatAPI.conversation(id: id) }
-            } label: {
-              Text("Відкрити чат".localized).font(.headline).foregroundColor(.black).frame(
-                maxWidth: .infinity, minHeight: 56
-              ).background(JourneyVisual.lime).clipShape(RoundedRectangle(cornerRadius: 18))
+        }
+      }
+      if !profile.meetupFormats.isEmpty || !profile.availability.isEmpty {
+        section("Як зустрітися".localized) {
+          FlowLayout(spacing: 8) {
+            ForEach(profile.meetupFormats) { format in
+              chip(format.title, icon: format.symbol, highlighted: false)
             }
-          } else if profile.connectionState == "none" {
-            TextField("Коротко привітайся…".localized, text: $message, axis: .vertical).padding().background(
-              JourneyVisual.elevatedSurface
-            ).clipShape(RoundedRectangle(cornerRadius: 16))
-              .foregroundColor(JourneyVisual.primaryText)
-            Button {
-              Task { if await vm.connect(profile, message: message) { dismiss() } }
-            } label: {
-              Text("Запропонувати дружбу".localized).font(.headline).foregroundColor(.black).frame(
-                maxWidth: .infinity, minHeight: 56
-              ).background(JourneyVisual.lime).clipShape(RoundedRectangle(cornerRadius: 18))
+            ForEach(profile.availability) { slot in
+              chip(slot.title, icon: slot.icon, highlighted: false)
             }
-          } else {
-            Text(
-              profile.connectionState == "incoming"
-                ? "Заявка очікує твоєї відповіді".localized : "Заявку надіслано".localized
-            ).foregroundColor(JourneyVisual.secondaryText)
           }
-          Text("Зустрічайся у публічному місці. Не надсилай гроші або документи незнайомим людям.".localized)
-            .font(.caption).foregroundColor(JourneyVisual.secondaryText)
-        }.padding(20)
+        }
+      }
+      if !profile.languages.isEmpty {
+        section("Мови".localized) {
+          FlowLayout(spacing: 8) {
+            ForEach(profile.languages, id: \.self) { code in
+              chip(languageName(code), icon: "globe", highlighted: false)
+            }
+          }
+        }
+      }
+      Label("Зустрічайся у публічному місці. Не надсилай гроші або документи незнайомим людям.".localized, systemImage: "checkmark.shield.fill")
+        .font(.system(size: 12, weight: .medium))
+        .foregroundColor(JourneyVisual.secondaryText)
+        .fixedSize(horizontal: false, vertical: true)
+    }
+    .padding(.horizontal, 20)
+    .padding(.top, 24)
+    .frame(maxWidth: .infinity, alignment: .leading)
+    .background(
+      UnevenRoundedRectangle(topLeadingRadius: 28, topTrailingRadius: 28, style: .continuous)
+        .fill(JourneyVisual.pageBackground)
+        .shadow(color: .black.opacity(0.12), radius: 16, y: -6)
+    )
+  }
+
+  private var identity: some View {
+    VStack(alignment: .leading, spacing: 8) {
+      HStack(alignment: .firstTextBaseline, spacing: 8) {
+        Text(profile.displayName)
+          .font(.system(size: 30, weight: .bold))
+          .tracking(-0.4)
+          .foregroundColor(JourneyVisual.primaryText)
+          .lineLimit(1).minimumScaleFactor(0.7)
+        if let age = profile.ageBand, !age.isEmpty {
+          Text(age.replacingOccurrences(of: "-", with: "–"))
+            .font(.system(size: 20, weight: .medium))
+            .foregroundColor(JourneyVisual.secondaryText)
+        }
+        if profile.isVerified {
+          Image(systemName: "checkmark.seal.fill")
+            .font(.system(size: 18))
+            .foregroundColor(JourneyVisual.accentStrong)
+        }
+      }
+      .accessibilityElement(children: .combine)
+      .accessibilityAddTraits(.isHeader)
+      HStack(spacing: 6) {
+        Image(systemName: "mappin")
+        Text("\(profile.city) · \(profile.canton)")
+        if let distance = profile.distanceKM {
+          Text("·")
+          Text("%@ км".localized(with: "\(distance)"))
+        }
+        if profile.residencyStage == "newcomer" {
+          Text("НОВИЙ У ШВЕЙЦАРІЇ".localized)
+            .font(.system(size: 10, weight: .heavy)).tracking(0.6)
+            .foregroundColor(.black)
+            .padding(.horizontal, 8).frame(height: 22)
+            .background(JourneyVisual.lime, in: Capsule())
+            .padding(.leading, 4)
+        }
+      }
+      .font(.system(size: 14, weight: .medium))
+      .foregroundColor(JourneyVisual.secondaryText)
+    }
+  }
+
+  private var matchCard: some View {
+    HStack(alignment: .center, spacing: 14) {
+      ZStack {
+        Circle().stroke(JourneyVisual.lime.opacity(0.3), lineWidth: 6)
+        Circle()
+          .trim(from: 0, to: CGFloat(min(100, max(0, profile.matchScore))) / 100)
+          .stroke(JourneyVisual.accentStrong, style: StrokeStyle(lineWidth: 6, lineCap: .round))
+          .rotationEffect(.degrees(-90))
+        Text("\(profile.matchScore)%")
+          .font(.system(size: 15, weight: .heavy))
+          .foregroundColor(JourneyVisual.primaryText)
+      }
+      .frame(width: 58, height: 58)
+      VStack(alignment: .leading, spacing: 4) {
+        Text("%@%% збіг".localized(with: "\(profile.matchScore)"))
+          .font(.system(size: 16, weight: .bold))
+          .foregroundColor(JourneyVisual.primaryText)
+        Text(matchSummary)
+          .font(.system(size: 13, weight: .medium))
+          .foregroundColor(JourneyVisual.secondaryText)
+          .lineLimit(3)
+          .fixedSize(horizontal: false, vertical: true)
+      }
+      Spacer(minLength: 0)
+    }
+    .padding(14)
+    .background(JourneyVisual.lime.opacity(0.14), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+    .accessibilityElement(children: .combine)
+  }
+
+  private var matchSummary: String {
+    if !profile.matchReasons.isEmpty { return profile.matchReasons.prefix(2).joined(separator: " · ") }
+    let shared = profile.sharedInterests.prefix(3).map(\.title)
+    return shared.isEmpty ? profile.city : shared.joined(separator: " · ")
+  }
+
+  private func section<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
+    VStack(alignment: .leading, spacing: 10) {
+      Text(title.uppercased())
+        .font(.system(size: 11, weight: .heavy)).tracking(1)
+        .foregroundColor(JourneyVisual.secondaryText)
+      content()
+    }
+  }
+
+  private func chip(_ title: String, icon: String, highlighted: Bool) -> some View {
+    Label(title, systemImage: icon)
+      .font(.system(size: 13, weight: .semibold))
+      .foregroundColor(highlighted ? .black : JourneyVisual.primaryText)
+      .padding(.horizontal, 12).frame(height: 34)
+      .background(highlighted ? JourneyVisual.lime : Theme.Colors.card, in: Capsule())
+      .overlay(Capsule().stroke(highlighted ? Color.clear : JourneyVisual.softBorder))
+  }
+
+  private func languageName(_ code: String) -> String {
+    AppLanguage.current.locale.localizedString(forLanguageCode: code)?.capitalized(with: AppLanguage.current.locale) ?? code.uppercased()
+  }
+
+  private var topBar: some View {
+    let collapsed = scrollOffset > 330
+    return HStack(spacing: 10) {
+      Button { dismiss() } label: { glassIcon("xmark") }
+        .buttonStyle(ScaleButtonStyle(scaleAmount: 0.94, hapticStyle: .light))
+        .accessibilityLabel("Закрити".localized)
+      Text(profile.displayName)
+        .font(.system(size: 16, weight: .bold))
+        .foregroundColor(JourneyVisual.primaryText)
+        .lineLimit(1)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .opacity(collapsed ? 1 : 0)
+        .accessibilityHidden(true)
+      if !isDemo {
+        Menu {
+          Button("Поскаржитися".localized, role: .destructive) {
+            Task {
+              do { try await FriendsAPI.report(profile.id) } catch { vm.error = error.localizedDescription }
+            }
+          }
+          Button("Заблокувати".localized, role: .destructive) {
+            Task {
+              do {
+                try await FriendsAPI.block(profile.id)
+                dismiss()
+              } catch { vm.error = error.localizedDescription }
+            }
+          }
+        } label: { glassIcon("ellipsis") }
       }
     }
+    .padding(.horizontal, 16)
+    .padding(.top, 6)
+    .padding(.bottom, 8)
+    .background {
+      Rectangle()
+        .fill(JourneyVisual.pageBackground)
+        .overlay(alignment: .bottom) { Rectangle().fill(JourneyVisual.softBorder).frame(height: 0.5) }
+        .ignoresSafeArea(edges: .top)
+        .opacity(collapsed ? 1 : 0)
+    }
+    .animation(.easeOut(duration: 0.2), value: collapsed)
+  }
+
+  private func glassIcon(_ name: String) -> some View {
+    Image(systemName: name)
+      .font(.system(size: 15, weight: .bold))
+      .foregroundColor(JourneyVisual.primaryText)
+      .frame(width: 42, height: 42)
+      .background(Theme.Colors.card.opacity(0.94), in: Circle())
+      .overlay(Circle().stroke(JourneyVisual.softBorder))
+      .shadow(color: .black.opacity(0.14), radius: 8, y: 3)
+  }
+
+  @ViewBuilder private var actionBar: some View {
+    VStack(spacing: 10) {
+      if isDemo {
+        Label("Демо-профіль · дії вимкнені".localized, systemImage: "sparkles")
+          .font(.system(size: 15, weight: .semibold))
+          .foregroundColor(JourneyVisual.secondaryText)
+          .frame(maxWidth: .infinity).frame(height: 52)
+          .background(JourneyVisual.softSurface, in: Capsule())
+      } else if profile.connectionState == "accepted", let id = profile.conversationID {
+        primaryButton("Відкрити чат".localized, icon: "bubble.left.and.bubble.right.fill") {
+          Task { conversation = try? await ChatAPI.conversation(id: id) }
+        }
+      } else if profile.connectionState == "none" {
+        TextField("Коротко привітайся…".localized, text: $message, axis: .vertical)
+          .font(.system(size: 15))
+          .lineLimit(1...3)
+          .foregroundColor(JourneyVisual.primaryText)
+          .padding(.horizontal, 16).padding(.vertical, 12)
+          .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+          .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(JourneyVisual.softBorder))
+        primaryButton("Запропонувати дружбу".localized, icon: "hand.wave.fill") {
+          Task { if await vm.connect(profile, message: message) { dismiss() } }
+        }
+      } else {
+        Label(
+          profile.connectionState == "incoming"
+            ? "Заявка очікує твоєї відповіді".localized : "Заявку надіслано".localized,
+          systemImage: profile.connectionState == "incoming" ? "bell.badge.fill" : "paperplane.fill"
+        )
+        .font(.system(size: 15, weight: .semibold))
+        .foregroundColor(JourneyVisual.secondaryText)
+        .frame(maxWidth: .infinity).frame(height: 52)
+        .background(JourneyVisual.softSurface, in: Capsule())
+      }
+    }
+    .padding(.horizontal, 16)
+    .padding(.top, 10)
+    .padding(.bottom, 6)
+    .background(.ultraThinMaterial)
+  }
+
+  private func primaryButton(_ title: String, icon: String, action: @escaping () -> Void) -> some View {
+    Button(action: action) {
+      Label(title, systemImage: icon)
+        .font(.system(size: 16, weight: .bold))
+        .foregroundColor(.black)
+        .frame(maxWidth: .infinity).frame(height: 52)
+        .background(JourneyVisual.lime, in: Capsule())
+        .shadow(color: JourneyVisual.lime.opacity(0.4), radius: 14, y: 6)
+    }
+    .buttonStyle(ScaleButtonStyle(scaleAmount: 0.98, hapticStyle: .medium))
   }
 }
 
@@ -2171,67 +2438,110 @@ private struct FriendProfileEditor: View {
     _d = State(initialValue: profile.map(SocialProfileDraft.init) ?? SocialProfileDraft())
   }
 
+  private enum Field: Hashable { case name, city, bio }
+  @FocusState private var focus: Field?
+  @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+  private var country: ResidenceCountry { ResidenceCountry(rawValue: d.countryCode) ?? .switzerland }
+  private var regions: [AdministrativeArea] { CountryCatalog.subdivisions(for: country) }
+  private var regionTitle: String { country == .switzerland ? "Кантон".localized : "Регіон".localized }
+  private var regionName: String {
+    regions.first { $0.code == d.subdivisionCode || $0.code == d.canton }?.name ?? d.canton
+  }
+
   var body: some View {
-    NavigationStack {
-      ZStack {
-        JourneyAmbientBackground()
-        VStack(spacing: 0) {
-          progress
-          ScrollView(showsIndicators: false) {
-            VStack(alignment: .leading, spacing: 20) {
-              heading
-              content
-            }
-            .padding(.horizontal, 20).padding(.vertical, 22).padding(.bottom, 110)
+    ZStack {
+      JourneyVisual.pageBackground.ignoresSafeArea()
+      VStack(spacing: 0) {
+        topBar
+        ScrollView(showsIndicators: false) {
+          VStack(alignment: .leading, spacing: 22) {
+            heading
+            content
+              .id(step)
+              // Quick fade-and-nudge: steps never sit on top of each other mid-transition.
+              .transition(.asymmetric(
+                insertion: .opacity.combined(with: .offset(x: 24)).animation(.easeOut(duration: 0.22).delay(0.08)),
+                removal: .opacity.animation(.easeIn(duration: 0.08))))
           }
+          .padding(.horizontal, 20).padding(.top, 18).padding(.bottom, 120)
         }
-      }.safeAreaInset(edge: .bottom) { controls }
-        .toolbar {
-          ToolbarItem(placement: .cancellationAction) {
-            Button("Закрити".localized) { dismiss() }.foregroundColor(JourneyVisual.primaryText)
-          }
-        }
-        .navigationBarTitleDisplayMode(.inline)
-        .alert(
-          "friends.passport.title".localized,
-          isPresented: Binding(get: { error != nil }, set: { if !$0 { error = nil } })
-        ) {
-          Button("OK", role: .cancel) {}
-        } message: {
-          Text(error ?? "")
-        }
-        .onChange(of: photoItem) { _, item in Task { await loadPhoto(item) } }
-        .onChange(of: locationService.currentLocation) { _, location in
-          d.latitude = location?.coordinate.latitude
-          d.longitude = location?.coordinate.longitude
-          locationService.stopLocationUpdates()
-        }
+        .scrollDismissesKeyboard(.interactively)
+      }
+    }
+    .safeAreaInset(edge: .bottom, spacing: 0) { controls }
+    .alert(
+      "friends.passport.title".localized,
+      isPresented: Binding(get: { error != nil }, set: { if !$0 { error = nil } })
+    ) {
+      Button("OK", role: .cancel) {}
+    } message: {
+      Text(error ?? "")
+    }
+    .onChange(of: photoItem) { _, item in Task { await loadPhoto(item) } }
+    .onChange(of: locationService.currentLocation) { _, location in
+      d.latitude = location?.coordinate.latitude
+      d.longitude = location?.coordinate.longitude
+      locationService.stopLocationUpdates()
     }
   }
 
-  private var progress: some View {
-    VStack(spacing: 8) {
+  // MARK: Header
+
+  private var topBar: some View {
+    VStack(alignment: .leading, spacing: 12) {
       HStack {
-        Text("friends.passport.badge_ch".localized).font(.caption2.bold()).tracking(1.8)
-        Spacer()
-        Text("\(step.rawValue + 1)/8").font(.caption.bold())
-      }
-      .foregroundColor(JourneyVisual.accentText)
-      GeometryReader { g in
-        ZStack(alignment: .leading) {
-          Capsule().fill(JourneyVisual.softBorder)
-          Capsule().fill(lime).frame(width: g.size.width * CGFloat(step.rawValue + 1) / 8)
+        Button { dismiss() } label: {
+          Image(systemName: "xmark")
+            .font(.system(size: 14, weight: .bold))
+            .foregroundColor(JourneyVisual.primaryText)
+            .frame(width: 40, height: 40)
+            .background(Theme.Colors.card, in: Circle())
+            .overlay(Circle().stroke(JourneyVisual.softBorder))
         }
-      }.frame(height: 4)
-    }.padding(.horizontal, 20).padding(.vertical, 12)
-      .background(JourneyVisual.elevatedSurface.opacity(0.92))
+        .buttonStyle(ScaleButtonStyle(scaleAmount: 0.94, hapticStyle: .light))
+        .accessibilityLabel("Закрити".localized)
+        Spacer()
+        HStack(spacing: 6) {
+          Circle().fill(lime).frame(width: 7, height: 7)
+          Text("friends.passport.badge".localized)
+            .font(.system(size: 11, weight: .heavy)).tracking(1.1)
+            .foregroundColor(JourneyVisual.accentText)
+        }
+        Spacer()
+        Text("\(step.rawValue + 1)/\(Step.allCases.count)")
+          .font(.system(size: 13, weight: .bold, design: .rounded))
+          .foregroundColor(JourneyVisual.secondaryText)
+          .frame(width: 40)
+      }
+      // One segment per step: you can see how far it is, not just a thin percentage bar.
+      HStack(spacing: 4) {
+        ForEach(Step.allCases, id: \.rawValue) { item in
+          Capsule()
+            .fill(item.rawValue <= step.rawValue ? lime : JourneyVisual.softBorder)
+            .frame(height: 5)
+        }
+      }
+      .animation(.easeOut(duration: 0.25), value: step)
+      .accessibilityElement(children: .ignore)
+      .accessibilityLabel("\(step.rawValue + 1)/\(Step.allCases.count)")
+    }
+    .padding(.horizontal, 20)
+    .padding(.top, 14)
+    .padding(.bottom, 4)
   }
 
   private var heading: some View {
-    VStack(alignment: .leading, spacing: 7) {
-      Text(stepTitle).font(.system(size: 26, weight: .bold, design: .default)).foregroundColor(
-        JourneyVisual.primaryText)
-      Text(stepSubtitle).font(.subheadline).foregroundColor(JourneyVisual.secondaryText)
+    VStack(alignment: .leading, spacing: 6) {
+      Text(stepTitle)
+        .font(.system(size: 30, weight: .bold))
+        .tracking(-0.4)
+        .foregroundColor(JourneyVisual.primaryText)
+        .accessibilityAddTraits(.isHeader)
+      Text(stepSubtitle)
+        .font(.system(size: 15, weight: .medium))
+        .foregroundColor(JourneyVisual.secondaryText)
+        .fixedSize(horizontal: false, vertical: true)
     }
   }
 
@@ -2239,206 +2549,476 @@ private struct FriendProfileEditor: View {
     switch step {
     case .identity: identity
     case .interests:
-      choiceGrid(
-        SocialInterest.allCases, selected: d.interests, title: { $0.title }, icon: { $0.icon }
-      ) { toggle($0, in: &d.interests) }
+      choiceGrid(SocialInterest.allCases, selected: d.interests, title: { $0.title }, icon: { $0.icon }) {
+        toggle($0, in: &d.interests)
+      }
     case .languages: languages
     case .meetups:
-      choiceGrid(
-        MeetupFormat.allCases, selected: d.meetupFormats, title: { $0.title },
-        icon: { _ in "person.2.fill" }
-      ) { toggle($0, in: &d.meetupFormats) }
-    case .availability: availability
+      choiceGrid(MeetupFormat.allCases, selected: d.meetupFormats, title: { $0.title }, icon: { $0.symbol }) {
+        toggle($0, in: &d.meetupFormats)
+      }
+    case .availability:
+      choiceGrid(SocialAvailability.allCases, selected: d.availability, title: { $0.title }, icon: { $0.icon }) {
+        toggle($0, in: &d.availability)
+      }
     case .photo: photoStep
     case .safety: safety
     case .preview: preview
     }
   }
 
+  // MARK: Step 1
+
   private var identity: some View {
-    VStack(spacing: 13) {
-      field("person.fill", "Ім’я".localized, text: $d.displayName)
-      field("building.2.fill", "Місто".localized, text: $d.city)
-      Menu {
-        ForEach(SwissCanton.all, id: \.code) { c in
-          Button("\(c.name) · \(c.code)") { d.canton = c.code }
+    VStack(spacing: 12) {
+      AuthField(
+        label: "Ім’я".localized, placeholder: "Як тебе називати".localized, icon: "person.fill",
+        text: $d.displayName, focus: $focus, field: .name, contentType: .givenName,
+        capitalization: .words, onSubmit: { focus = .city })
+      AuthField(
+        label: "Місто".localized, placeholder: "Zürich, Berlin, Wien…", icon: "building.2.fill",
+        text: $d.city, focus: $focus, field: .city, contentType: .addressCity,
+        capitalization: .words, onSubmit: { focus = .bio })
+
+      HStack(spacing: 12) {
+        Menu {
+          ForEach(regions) { area in
+            Button("\(area.name) · \(shortCode(area.code))") {
+              d.subdivisionCode = area.code
+              // Swiss codes are bare (ZH); German and Austrian ones keep the country prefix (DE-BE),
+              // so "BE" never reads as the canton of Bern.
+              d.canton = area.code
+            }
+          }
+        } label: {
+          pickerTile(icon: "mappin.and.ellipse", title: regionTitle, value: regionName)
         }
-      } label: {
-        row("mappin.and.ellipse", "Кантон".localized, value: d.canton)
-      }
-      Menu {
-        Button("Не вказувати".localized) { d.ageBand = nil }
-        ForEach(SocialAgeBand.allCases) { band in
-          Button(band.rawValue) { d.ageBand = band.rawValue }
+        Menu {
+          Button("Не вказувати".localized) { d.ageBand = nil }
+          ForEach(SocialAgeBand.allCases) { band in
+            Button(band.rawValue.replacingOccurrences(of: "-", with: "–")) { d.ageBand = band.rawValue }
+          }
+        } label: {
+          pickerTile(
+            icon: "birthday.cake.fill", title: "Вікова група".localized,
+            value: d.ageBand?.replacingOccurrences(of: "-", with: "–") ?? "Не вказано".localized)
         }
-      } label: {
-        row("person.2.fill", "Вікова група".localized, value: d.ageBand ?? "Не вказано".localized)
       }
-      Stepper(
-        value: Binding(get: { d.arrivalYear ?? 2026 }, set: { d.arrivalYear = $0 }),
-        in: 1950...Calendar.current.component(.year, from: Date())
-      ) {
-        HStack {
-          Image(systemName: "flag.fill").foregroundColor(JourneyVisual.accentStrong)
-          Text("У Швейцарії з".localized)
-          Spacer()
-          Text(String(d.arrivalYear ?? 2026)).foregroundColor(JourneyVisual.accentText)
-        }
-      }.tint(lime).padding().background(JourneyVisual.elevatedSurface).clipShape(
-        RoundedRectangle(cornerRadius: 18))
-      Text(
-        "Радіус пошуку можна увімкнути після дозволу геолокації. Точні координати іншим не показуються.".localized
-      )
-      .font(.caption).foregroundColor(JourneyVisual.secondaryText)
-      Button {
-        locationService.requestLocationPermission()
-        locationService.startLocationUpdates()
-      } label: {
-        Label(
-          locationService.currentLocation == nil ? "Додати приблизну локацію".localized : "Локацію додано".localized,
-          systemImage: locationService.currentLocation == nil
-            ? "location.fill" : "checkmark.circle.fill"
-        ).font(.subheadline.bold()).foregroundColor(
-          locationService.currentLocation == nil ? .black : lime
-        )
-        .frame(maxWidth: .infinity, minHeight: 50)
-        .background(locationService.currentLocation == nil ? lime : lime.opacity(0.1))
-        .clipShape(RoundedRectangle(cornerRadius: 16))
-      }
-      TextField("Розкажи про себе — мінімум 30 символів".localized, text: $d.bio, axis: .vertical).lineLimit(
-        4...7
-      )
-      .padding().background(JourneyVisual.elevatedSurface)
-      .clipShape(RoundedRectangle(cornerRadius: 18))
-      .foregroundColor(JourneyVisual.primaryText)
+
+      arrivalYearRow
+
+      bioField
+
+      locationRow
     }
   }
+
+  private func shortCode(_ code: String) -> String {
+    code.split(separator: "-").last.map(String.init) ?? code
+  }
+
+  private func pickerTile(icon: String, title: String, value: String) -> some View {
+    VStack(alignment: .leading, spacing: 10) {
+      HStack {
+        iconChip(icon)
+        Spacer()
+        Image(systemName: "chevron.up.chevron.down")
+          .font(.system(size: 11, weight: .bold))
+          .foregroundColor(JourneyVisual.secondaryText)
+      }
+      VStack(alignment: .leading, spacing: 2) {
+        Text(title)
+          .font(.system(size: 11, weight: .semibold))
+          .foregroundColor(JourneyVisual.secondaryText)
+        Text(value)
+          .font(.system(size: 16, weight: .bold))
+          .foregroundColor(JourneyVisual.primaryText)
+          .lineLimit(1).minimumScaleFactor(0.75)
+      }
+    }
+    .padding(12)
+    .frame(maxWidth: .infinity, alignment: .leading)
+    .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+    .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(JourneyVisual.softBorder))
+  }
+
+  private var arrivalYear: Int { d.arrivalYear ?? Calendar.current.component(.year, from: Date()) }
+
+  private var arrivalYearRow: some View {
+    let current = Calendar.current.component(.year, from: Date())
+    return HStack(spacing: 12) {
+      iconChip("airplane.arrival")
+      VStack(alignment: .leading, spacing: 2) {
+        Text("Рік переїзду".localized)
+          .font(.system(size: 11, weight: .semibold))
+          .foregroundColor(JourneyVisual.secondaryText)
+        Text(String(arrivalYear))
+          .font(.system(size: 18, weight: .bold, design: .rounded))
+          .foregroundColor(JourneyVisual.primaryText)
+          .contentTransition(.numericText())
+      }
+      Spacer()
+      roundStep("minus", enabled: arrivalYear > 1950) { d.arrivalYear = arrivalYear - 1 }
+      roundStep("plus", enabled: arrivalYear < current) { d.arrivalYear = arrivalYear + 1 }
+    }
+    .padding(12)
+    .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+    .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(JourneyVisual.softBorder))
+    .animation(.snappy, value: arrivalYear)
+    .accessibilityElement(children: .combine)
+    .accessibilityAdjustableAction { direction in
+      switch direction {
+      case .increment: if arrivalYear < current { d.arrivalYear = arrivalYear + 1 }
+      case .decrement: if arrivalYear > 1950 { d.arrivalYear = arrivalYear - 1 }
+      @unknown default: break
+      }
+    }
+  }
+
+  private func roundStep(_ icon: String, enabled: Bool, action: @escaping () -> Void) -> some View {
+    Button(action: action) {
+      Image(systemName: icon)
+        .font(.system(size: 14, weight: .bold))
+        .foregroundColor(enabled ? JourneyVisual.primaryText : JourneyVisual.secondaryText.opacity(0.4))
+        .frame(width: 38, height: 38)
+        .background(JourneyVisual.softSurface, in: Circle())
+    }
+    .buttonStyle(ScaleButtonStyle(scaleAmount: 0.9, hapticStyle: .light))
+    .disabled(!enabled)
+  }
+
+  private static let bioMinimum = 30
+
+  private var bioField: some View {
+    let count = d.bio.trimmingCharacters(in: .whitespacesAndNewlines).count
+    let done = count >= Self.bioMinimum
+    let focused = focus == .bio
+    return VStack(alignment: .leading, spacing: 8) {
+      HStack {
+        Text("Про себе".localized)
+          .font(.system(size: 11, weight: .semibold))
+          .foregroundColor(focused ? JourneyVisual.accentText : JourneyVisual.secondaryText)
+        Spacer()
+        HStack(spacing: 4) {
+          if done { Image(systemName: "checkmark.circle.fill") }
+          Text("\(min(count, Self.bioMinimum))/\(Self.bioMinimum)")
+        }
+        .font(.system(size: 11, weight: .bold, design: .rounded))
+        .foregroundColor(done ? JourneyVisual.accentStrong : JourneyVisual.secondaryText)
+      }
+      TextField(
+        "",
+        text: $d.bio,
+        prompt: Text("Що любиш, чим займаєшся, кого шукаєш…".localized)
+          .foregroundColor(JourneyVisual.secondaryText.opacity(0.7)),
+        axis: .vertical
+      )
+      .lineLimit(3...6)
+      .font(.system(size: 16))
+      .foregroundColor(JourneyVisual.primaryText)
+      .focused($focus, equals: .bio)
+      // Fill line: shows how close the text is to the minimum without nagging.
+      GeometryReader { g in
+        ZStack(alignment: .leading) {
+          Capsule().fill(JourneyVisual.softBorder)
+          Capsule().fill(done ? JourneyVisual.accentStrong : lime)
+            .frame(width: g.size.width * min(1, CGFloat(count) / CGFloat(Self.bioMinimum)))
+        }
+      }
+      .frame(height: 3)
+      .animation(.easeOut(duration: 0.2), value: count)
+    }
+    .padding(14)
+    .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+    .overlay(
+      RoundedRectangle(cornerRadius: 20, style: .continuous)
+        .strokeBorder(focused ? JourneyVisual.accentStrong : JourneyVisual.softBorder, lineWidth: focused ? 1.5 : 1))
+    .contentShape(Rectangle())
+    .onTapGesture { focus = .bio }
+  }
+
+  private var locationRow: some View {
+    let added = locationService.currentLocation != nil
+    return Button {
+      locationService.requestLocationPermission()
+      locationService.startLocationUpdates()
+    } label: {
+      HStack(spacing: 12) {
+        iconChip(added ? "checkmark" : "location.fill", active: added)
+        VStack(alignment: .leading, spacing: 2) {
+          Text(added ? "Локацію додано".localized : "Додати приблизну локацію".localized)
+            .font(.system(size: 15, weight: .bold))
+            .foregroundColor(JourneyVisual.primaryText)
+          Text("Радіус пошуку можна увімкнути після дозволу геолокації. Точні координати іншим не показуються.".localized)
+            .font(.system(size: 12))
+            .foregroundColor(JourneyVisual.secondaryText)
+            .fixedSize(horizontal: false, vertical: true)
+            .multilineTextAlignment(.leading)
+        }
+        Spacer(minLength: 0)
+      }
+      .padding(12)
+      .background(
+        RoundedRectangle(cornerRadius: 20, style: .continuous)
+          .strokeBorder(JourneyVisual.softBorder, style: StrokeStyle(lineWidth: 1, dash: added ? [] : [5, 4])))
+    }
+    .buttonStyle(ScaleButtonStyle(scaleAmount: 0.98, hapticStyle: .light))
+    .disabled(added)
+  }
+
+  private func iconChip(_ icon: String, active: Bool = false) -> some View {
+    Image(systemName: icon)
+      .font(.system(size: 14, weight: .semibold))
+      .foregroundColor(active ? .black : JourneyVisual.accentText)
+      .frame(width: 36, height: 36)
+      .background(active ? lime : JourneyVisual.softSurface, in: Circle())
+  }
+
+  // MARK: Steps 2–5
 
   private var languages: some View {
-    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-      ForEach(["UK", "DE", "FR", "IT", "EN", "RU"], id: \.self) { language in
-        let active = d.languages.contains(language)
-        Button {
-          toggle(language, in: &d.languages)
-        } label: {
-          VStack(alignment: .leading, spacing: 10) {
-            Image(systemName: "character.bubble.fill").font(.title2)
-            Text(language).font(.subheadline.bold())
-          }.foregroundColor(active ? .black : JourneyVisual.primaryText)
-            .frame(maxWidth: .infinity, minHeight: 90, alignment: .leading).padding(14)
-            .background(active ? lime : JourneyVisual.elevatedSurface)
-            .clipShape(RoundedRectangle(cornerRadius: 20))
-        }
-      }
+    let codes = ["UK", "DE", "EN", "FR", "IT", "RU"]
+    return choiceGrid(
+      codes.map(LanguageChoice.init), selected: d.languages.map(LanguageChoice.init),
+      title: { choice in
+        AppLanguage.current.locale.localizedString(forLanguageCode: choice.id.lowercased())?
+          .capitalized(with: AppLanguage.current.locale) ?? choice.id
+      },
+      icon: { _ in "character.bubble.fill" },
+      monogram: { $0.id }
+    ) { choice in
+      toggle(choice.id, in: &d.languages)
     }
   }
 
-  private var availability: some View {
-    choiceGrid(
-      SocialAvailability.allCases, selected: d.availability, title: { $0.title }, icon: { $0.icon }
-    ) { toggle($0, in: &d.availability) }
+  private struct LanguageChoice: Identifiable, Equatable {
+    let id: String
+    init(_ id: String) { self.id = id }
   }
 
-  private var photoStep: some View {
-    VStack(spacing: 20) {
-      ZStack {
-        Circle().fill(lime.opacity(0.12)).frame(width: 180, height: 180)
-        if let photo {
-          Image(uiImage: photo).resizable().scaledToFill().frame(width: 170, height: 170).clipShape(
-            Circle())
-        } else {
-          Image(systemName: "person.crop.circle.badge.plus").font(.system(size: 76))
-            .foregroundColor(JourneyVisual.accentStrong)
+  private func choiceGrid<T: Identifiable & Equatable>(
+    _ items: [T], selected: [T], title: @escaping (T) -> String,
+    icon: @escaping (T) -> String, monogram: ((T) -> String)? = nil, action: @escaping (T) -> Void
+  ) -> some View {
+    VStack(alignment: .leading, spacing: 12) {
+      LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
+        ForEach(items) { item in
+          let active = selected.contains(item)
+          Button {
+            withAnimation(reduceMotion ? nil : .spring(response: 0.28, dampingFraction: 0.8)) { action(item) }
+          } label: {
+            VStack(alignment: .leading, spacing: 8) {
+              HStack {
+                Group {
+                  if let monogram {
+                    Text(monogram(item)).font(.system(size: 13, weight: .heavy, design: .rounded))
+                  } else {
+                    Image(systemName: icon(item)).font(.system(size: 16, weight: .semibold))
+                  }
+                }
+                .foregroundColor(active ? lime : JourneyVisual.accentText)
+                .frame(width: 38, height: 38)
+                .background(active ? Color.black : JourneyVisual.softSurface, in: Circle())
+                Spacer()
+                Image(systemName: active ? "checkmark.circle.fill" : "circle")
+                  .font(.system(size: 20, weight: .semibold))
+                  .foregroundColor(active ? .black : JourneyVisual.softBorder)
+              }
+              Text(title(item))
+                .font(.system(size: 15, weight: .bold))
+                .foregroundColor(active ? .black : JourneyVisual.primaryText)
+                .lineLimit(2).minimumScaleFactor(0.85).multilineTextAlignment(.leading)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .padding(12)
+            .background(active ? lime : Theme.Colors.card, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .overlay(
+              RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .stroke(active ? JourneyVisual.accentStrong.opacity(0.4) : JourneyVisual.softBorder))
+            .shadow(color: active ? lime.opacity(0.35) : .clear, radius: 10, y: 4)
+          }
+          .buttonStyle(ScaleButtonStyle(scaleAmount: 0.96, hapticStyle: .light))
+          .accessibilityAddTraits(active ? .isSelected : [])
         }
-      }.overlay(Circle().stroke(lime.opacity(0.35), lineWidth: 2))
-      PhotosPicker(selection: $photoItem, matching: .images) {
-        Label(photo == nil ? "Додати фото".localized : "Замінити фото".localized, systemImage: "photo.fill").font(
-          .headline
-        )
-        .foregroundColor(.black).padding(.horizontal, 22).frame(height: 52).background(lime)
-        .clipShape(Capsule())
       }
-      Text("Фото перевіряється разом з описом. Контакти та документи на фото заборонені.".localized)
-        .font(.caption).multilineTextAlignment(.center).foregroundColor(JourneyVisual.secondaryText)
-    }.frame(maxWidth: .infinity).padding(24).background(JourneyVisual.elevatedSurface).clipShape(
-      RoundedRectangle(cornerRadius: 28))
+      Text("Обрано: %@".localized(with: "\(selected.count)"))
+        .font(.system(size: 12, weight: .semibold))
+        .foregroundColor(JourneyVisual.secondaryText)
+    }
+  }
+
+  // MARK: Steps 6–8
+
+  private var photoStep: some View {
+    VStack(spacing: 18) {
+      PhotosPicker(selection: $photoItem, matching: .images) {
+        ZStack {
+          RoundedRectangle(cornerRadius: 28, style: .continuous)
+            .fill(Theme.Colors.card)
+          if let photo {
+            Image(uiImage: photo).resizable().scaledToFill()
+              .frame(maxWidth: .infinity).frame(height: 320)
+              .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+          } else {
+            VStack(spacing: 12) {
+              Image(systemName: "camera.fill")
+                .font(.system(size: 26, weight: .semibold))
+                .foregroundColor(.black)
+                .frame(width: 70, height: 70)
+                .background(lime, in: Circle())
+              Text("Додати фото".localized)
+                .font(.system(size: 17, weight: .bold))
+                .foregroundColor(JourneyVisual.primaryText)
+              Text("Портрет при денному світлі працює найкраще".localized)
+                .font(.system(size: 13))
+                .foregroundColor(JourneyVisual.secondaryText)
+            }
+          }
+        }
+        .frame(height: 320)
+        .overlay(
+          RoundedRectangle(cornerRadius: 28, style: .continuous)
+            .strokeBorder(photo == nil ? JourneyVisual.softBorder : .clear, style: StrokeStyle(lineWidth: 1.5, dash: [6, 5])))
+        .overlay(alignment: .bottomTrailing) {
+          if photo != nil {
+            Label("Замінити фото".localized, systemImage: "arrow.triangle.2.circlepath")
+              .font(.system(size: 13, weight: .bold))
+              .foregroundColor(JourneyVisual.primaryText)
+              .padding(.horizontal, 12).frame(height: 34)
+              .background(Theme.Colors.card.opacity(0.94), in: Capsule())
+              .padding(12)
+          }
+        }
+      }
+      .buttonStyle(ScaleButtonStyle(scaleAmount: 0.98, hapticStyle: .light))
+      Label("Фото перевіряється разом з описом. Контакти та документи на фото заборонені.".localized, systemImage: "checkmark.shield.fill")
+        .font(.system(size: 12, weight: .medium))
+        .foregroundColor(JourneyVisual.secondaryText)
+    }
   }
 
   private var safety: some View {
-    VStack(spacing: 12) {
-      safetyToggle(
-        "Показувати профіль".localized, "Профіль бере участь у пошуку".localized, icon: "eye.fill", value: $d.isVisible)
-      safetyToggle(
-        "Відкритий до знайомств".localized, "Інші можуть надіслати запит".localized, icon: "person.badge.plus",
-        value: $d.openToFriends)
+    VStack(spacing: 10) {
+      safetyToggle("Показувати профіль".localized, "Профіль бере участь у пошуку".localized, icon: "eye.fill", value: $d.isVisible)
+      safetyToggle("Відкритий до знайомств".localized, "Інші можуть надіслати запит".localized, icon: "person.badge.plus", value: $d.openToFriends)
       safetyToggle(
         "Правила спільноти".localized, "Без продажів, переслідувань та небезпечних зустрічей".localized,
         icon: "checkmark.shield.fill", value: $d.guidelinesAccepted)
-      Label(
-        "Контакти не публікуються. Точна геолокація не показується іншим.".localized, systemImage: "lock.fill"
-      )
-      .font(.caption).foregroundColor(JourneyVisual.secondaryText).padding(.top, 6)
+      Label("Контакти не публікуються. Точна геолокація не показується іншим.".localized, systemImage: "lock.fill")
+        .font(.system(size: 12, weight: .medium))
+        .foregroundColor(JourneyVisual.secondaryText)
+        .padding(.top, 6)
     }
   }
 
+  private func safetyToggle(_ title: String, _ subtitle: String, icon: String, value: Binding<Bool>) -> some View {
+    HStack(spacing: 12) {
+      iconChip(icon, active: value.wrappedValue)
+      VStack(alignment: .leading, spacing: 2) {
+        Text(title).font(.system(size: 15, weight: .bold)).foregroundColor(JourneyVisual.primaryText)
+        Text(subtitle).font(.system(size: 12)).foregroundColor(JourneyVisual.secondaryText)
+          .fixedSize(horizontal: false, vertical: true)
+      }
+      Spacer(minLength: 8)
+      Toggle("", isOn: value).labelsHidden().tint(JourneyVisual.accentStrong)
+    }
+    .padding(12)
+    .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+    .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(JourneyVisual.softBorder))
+    .animation(.easeOut(duration: 0.18), value: value.wrappedValue)
+  }
+
+  /// The same card other people will swipe, so the preview is honest.
   private var preview: some View {
-    VStack(alignment: .leading, spacing: 18) {
-      HStack(spacing: 14) {
+    VStack(alignment: .leading, spacing: 14) {
+      ZStack(alignment: .bottomLeading) {
         Group {
           if let photo {
             Image(uiImage: photo).resizable().scaledToFill()
           } else {
-            Text(initials).font(.title.bold()).foregroundColor(.black)
+            ZStack {
+              LinearGradient(colors: [lime.opacity(0.85), JourneyVisual.accentStrong.opacity(0.7)], startPoint: .topLeading, endPoint: .bottomTrailing)
+              Text(initials.isEmpty ? "?" : initials)
+                .font(.system(size: 96, weight: .black))
+                .foregroundColor(.black.opacity(0.75))
+                .offset(y: -40)
+            }
           }
         }
-        .frame(width: 76, height: 76).background(lime).clipShape(Circle())
-        VStack(alignment: .leading, spacing: 4) {
-          Text(d.displayName).font(.title2.bold())
-          Text("\(d.city) · \(d.canton)").foregroundColor(JourneyVisual.secondaryText)
-          Label("Email підтверджено".localized, systemImage: "checkmark.seal.fill").font(.caption)
-            .foregroundColor(JourneyVisual.accentText)
+        .frame(maxWidth: .infinity).frame(height: 420)
+        .clipped()
+        LinearGradient(colors: [.clear, .black.opacity(0.85)], startPoint: .center, endPoint: .bottom)
+        VStack(alignment: .leading, spacing: 8) {
+          HStack(alignment: .firstTextBaseline, spacing: 8) {
+            Text(d.displayName.isEmpty ? "—" : d.displayName)
+              .font(.system(size: 30, weight: .bold)).tracking(-0.4)
+            if let age = d.ageBand {
+              Text(age.replacingOccurrences(of: "-", with: "–"))
+                .font(.system(size: 20, weight: .medium)).opacity(0.82)
+            }
+          }
+          Label("\(d.city) · \(regionName)", systemImage: "mappin")
+            .font(.system(size: 13, weight: .semibold)).opacity(0.85)
+          Text(d.bio)
+            .font(.system(size: 14, weight: .medium)).opacity(0.85)
+            .lineLimit(2)
+          HStack(spacing: 6) {
+            ForEach(Array(d.interests.prefix(3))) { i in
+              Label(i.title, systemImage: i.icon)
+                .font(.system(size: 12, weight: .bold)).foregroundColor(.black)
+                .lineLimit(1).minimumScaleFactor(0.75)
+                .padding(.horizontal, 10).frame(height: 30)
+                .background(lime, in: Capsule())
+            }
+          }
         }
+        .foregroundColor(.white)
+        .padding(18)
       }
-      Text(d.bio).foregroundColor(JourneyVisual.primaryText.opacity(0.78))
-      FlowLayout(spacing: 8) {
-        ForEach(d.interests) { i in
-          Label(i.title, systemImage: i.icon).font(.caption.bold()).padding(10).background(
-            lime.opacity(0.12)
-          ).clipShape(Capsule())
-        }
-      }
+      .clipShape(RoundedRectangle(cornerRadius: 30, style: .continuous))
+      .shadow(color: .black.opacity(0.18), radius: 18, y: 10)
+
       Label("Профіль буде надіслано на перевірку адміністратору".localized, systemImage: "shield.lefthalf.filled")
-        .font(.caption).foregroundColor(JourneyVisual.secondaryText)
-    }.foregroundColor(JourneyVisual.primaryText).padding(20)
-      .background(JourneyVisual.elevatedSurface)
-      .clipShape(RoundedRectangle(cornerRadius: 28)).overlay(
-      RoundedRectangle(cornerRadius: 28).stroke(lime.opacity(0.3)))
+        .font(.system(size: 12, weight: .medium))
+        .foregroundColor(JourneyVisual.secondaryText)
+    }
   }
 
+  // MARK: Controls
+
   private var controls: some View {
-    HStack(spacing: 12) {
+    HStack(spacing: 10) {
       if step != .identity {
         Button {
-          step = Step(rawValue: step.rawValue - 1)!
+          focus = nil
+          withAnimation(reduceMotion ? nil : .spring(response: 0.35, dampingFraction: 0.86)) {
+            step = Step(rawValue: step.rawValue - 1)!
+          }
         } label: {
-          Image(systemName: "arrow.left").frame(width: 52, height: 56).background(
-            JourneyVisual.elevatedSurface
-          ).clipShape(RoundedRectangle(cornerRadius: 18))
+          Image(systemName: "arrow.left")
+            .font(.system(size: 16, weight: .bold))
+            .foregroundColor(JourneyVisual.primaryText)
+            .frame(width: 56, height: 56)
+            .background(Theme.Colors.card, in: Circle())
+            .overlay(Circle().stroke(JourneyVisual.softBorder))
         }
+        .buttonStyle(ScaleButtonStyle(scaleAmount: 0.94, hapticStyle: .light))
+        .accessibilityLabel("common.back".localized)
       }
-      Button {
+      AuthPrimaryButton(
+        title: step == .preview ? "Опублікувати профіль".localized : "Продовжити".localized,
+        isLoading: saving || uploading,
+        isEnabled: canContinue,
+        identifier: "friends.passport.next"
+      ) {
+        focus = nil
         advance()
-      } label: {
-        HStack {
-          if saving || uploading { ProgressView().tint(.black) }
-          Text(step == .preview ? "Опублікувати профіль".localized : "Продовжити".localized).font(.headline)
-          Spacer()
-          Image(systemName: step == .preview ? "checkmark" : "arrow.right")
-        }
-        .foregroundColor(.black).padding(.horizontal, 20).frame(maxWidth: .infinity, minHeight: 56)
-        .background(canContinue ? lime : .gray).clipShape(RoundedRectangle(cornerRadius: 18))
-      }.disabled(!canContinue || saving || uploading)
-    }.padding(16).background(.ultraThinMaterial)
+      }
+    }
+    .padding(.horizontal, 16)
+    .padding(.top, 10)
+    .padding(.bottom, 6)
+    .background(.ultraThinMaterial)
   }
 
   private var canContinue: Bool {
@@ -2509,59 +3089,17 @@ private struct FriendProfileEditor: View {
   private func toggle<T: Equatable>(_ item: T, in items: inout [T]) {
     if let i = items.firstIndex(of: item) { items.remove(at: i) } else { items.append(item) }
   }
-  private func field(_ icon: String, _ placeholder: String, text: Binding<String>) -> some View {
-    HStack {
-      Image(systemName: icon).foregroundColor(JourneyVisual.accentStrong)
-      TextField(placeholder, text: text).foregroundColor(JourneyVisual.primaryText)
-    }.padding().background(JourneyVisual.elevatedSurface)
-      .clipShape(RoundedRectangle(cornerRadius: 18))
-  }
-  private func row(_ icon: String, _ title: String, value: String) -> some View {
-    HStack {
-      Image(systemName: icon).foregroundColor(JourneyVisual.accentStrong)
-      Text(title).foregroundColor(JourneyVisual.primaryText)
-      Spacer()
-      Text(value).foregroundColor(JourneyVisual.accentText)
-      Image(systemName: "chevron.down").foregroundColor(JourneyVisual.secondaryText)
-    }.padding().background(JourneyVisual.elevatedSurface)
-      .clipShape(RoundedRectangle(cornerRadius: 18))
-  }
-  private func safetyToggle(_ title: String, _ subtitle: String, icon: String, value: Binding<Bool>)
-    -> some View
-  {
-    HStack(spacing: 13) {
-      Image(systemName: icon).foregroundColor(JourneyVisual.accentStrong).frame(width: 38, height: 38).background(
-        lime.opacity(0.1)
-      ).clipShape(RoundedRectangle(cornerRadius: 12))
-      VStack(alignment: .leading) {
-        Text(title).font(.headline).foregroundColor(JourneyVisual.primaryText)
-        Text(subtitle).font(.caption).foregroundColor(JourneyVisual.secondaryText)
-      }
-      Spacer()
-      Toggle("", isOn: value).labelsHidden().tint(lime)
-    }.padding(15).background(JourneyVisual.elevatedSurface)
-      .clipShape(RoundedRectangle(cornerRadius: 20))
-  }
-  private func choiceGrid<T: Identifiable & Equatable>(
-    _ items: [T], selected: [T], title: @escaping (T) -> String,
-    icon: @escaping (T) -> String, action: @escaping (T) -> Void
-  ) -> some View {
-    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-      ForEach(items) { item in
-        let active = selected.contains(item)
-        Button {
-          action(item)
-        } label: {
-          VStack(alignment: .leading, spacing: 10) {
-            Image(systemName: icon(item)).font(.title2)
-            Text(title(item)).font(.subheadline.bold()).lineLimit(2)
-          }.foregroundColor(active ? .black : JourneyVisual.primaryText)
-            .frame(maxWidth: .infinity, minHeight: 90, alignment: .leading).padding(14)
-            .background(active ? lime : JourneyVisual.elevatedSurface)
-            .clipShape(RoundedRectangle(cornerRadius: 20))
-            .overlay(RoundedRectangle(cornerRadius: 20).stroke(active ? lime : JourneyVisual.softBorder))
-        }
-      }
+}
+
+private extension MeetupFormat {
+  var symbol: String {
+    switch self {
+    case .coffee: return "cup.and.saucer.fill"
+    case .walk: return "figure.walk"
+    case .activity: return "figure.run"
+    case .event: return "ticket.fill"
+    case .online: return "video.fill"
+    case .family: return "figure.2.and.child.holdinghands"
     }
   }
 }

@@ -11253,6 +11253,75 @@
         "title": "ListingType",
         "type": "string"
       },
+      "MarketplaceFollowCreate": {
+        "properties": {
+          "category": {
+            "anyOf": [
+              {
+                "maxLength": 30,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category"
+          },
+          "country_code": {
+            "maxLength": 2,
+            "minLength": 2,
+            "title": "Country Code",
+            "type": "string"
+          },
+          "subdivision_code": {
+            "maxLength": 10,
+            "minLength": 1,
+            "title": "Subdivision Code",
+            "type": "string"
+          }
+        },
+        "required": [
+          "country_code",
+          "subdivision_code"
+        ],
+        "title": "MarketplaceFollowCreate",
+        "type": "object"
+      },
+      "MarketplaceFollowResponse": {
+        "properties": {
+          "category": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category"
+          },
+          "country_code": {
+            "title": "Country Code",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "subdivision_code": {
+            "title": "Subdivision Code",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "country_code",
+          "subdivision_code",
+          "category"
+        ],
+        "title": "MarketplaceFollowResponse",
+        "type": "object"
+      },
       "MarketplaceProClient": {
         "properties": {
           "conversation_id": {
@@ -11855,6 +11924,106 @@
           }
         },
         "title": "NewsUpdate",
+        "type": "object"
+      },
+      "NotificationPreferencesResponse": {
+        "properties": {
+          "events_enabled": {
+            "title": "Events Enabled",
+            "type": "boolean"
+          },
+          "locale": {
+            "title": "Locale",
+            "type": "string"
+          },
+          "marketplace_enabled": {
+            "title": "Marketplace Enabled",
+            "type": "boolean"
+          },
+          "social_enabled": {
+            "title": "Social Enabled",
+            "type": "boolean"
+          },
+          "timezone": {
+            "title": "Timezone",
+            "type": "string"
+          }
+        },
+        "required": [
+          "locale",
+          "timezone",
+          "social_enabled",
+          "events_enabled",
+          "marketplace_enabled"
+        ],
+        "title": "NotificationPreferencesResponse",
+        "type": "object"
+      },
+      "NotificationPreferencesUpdate": {
+        "properties": {
+          "events_enabled": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Events Enabled"
+          },
+          "locale": {
+            "anyOf": [
+              {
+                "enum": [
+                  "uk",
+                  "de",
+                  "en"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Locale"
+          },
+          "marketplace_enabled": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Marketplace Enabled"
+          },
+          "social_enabled": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Social Enabled"
+          },
+          "timezone": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Timezone"
+          }
+        },
+        "title": "NotificationPreferencesUpdate",
         "type": "object"
       },
       "PasswordResetConfirm": {
@@ -32458,6 +32627,268 @@
         "summary": "Update News",
         "tags": [
           "news"
+        ]
+      }
+    },
+    "/api/v1/notifications/listing-watches/{listing_id}": {
+      "delete": {
+        "operationId": "unwatch_listing_api_v1_notifications_listing_watches__listing_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "listing_id",
+            "required": true,
+            "schema": {
+              "title": "Listing Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Unwatch Listing",
+        "tags": [
+          "notifications"
+        ]
+      },
+      "put": {
+        "operationId": "watch_listing_api_v1_notifications_listing_watches__listing_id__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "listing_id",
+            "required": true,
+            "schema": {
+              "title": "Listing Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Watch Listing",
+        "tags": [
+          "notifications"
+        ]
+      }
+    },
+    "/api/v1/notifications/marketplace-follows": {
+      "get": {
+        "operationId": "list_follows_api_v1_notifications_marketplace_follows_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/MarketplaceFollowResponse"
+                  },
+                  "title": "Response List Follows Api V1 Notifications Marketplace Follows Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Follows",
+        "tags": [
+          "notifications"
+        ]
+      },
+      "post": {
+        "operationId": "create_follow_api_v1_notifications_marketplace_follows_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MarketplaceFollowCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MarketplaceFollowResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Follow",
+        "tags": [
+          "notifications"
+        ]
+      }
+    },
+    "/api/v1/notifications/marketplace-follows/{follow_id}": {
+      "delete": {
+        "operationId": "delete_follow_api_v1_notifications_marketplace_follows__follow_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "follow_id",
+            "required": true,
+            "schema": {
+              "title": "Follow Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Delete Follow",
+        "tags": [
+          "notifications"
+        ]
+      }
+    },
+    "/api/v1/notifications/preferences": {
+      "get": {
+        "operationId": "get_preferences_api_v1_notifications_preferences_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationPreferencesResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Preferences",
+        "tags": [
+          "notifications"
+        ]
+      },
+      "put": {
+        "operationId": "update_preferences_api_v1_notifications_preferences_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotificationPreferencesUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationPreferencesResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Update Preferences",
+        "tags": [
+          "notifications"
         ]
       }
     },

@@ -37,6 +37,7 @@ from .chat import (
 )
 from .discovery_review import DiscoveryReview, DiscoveryReviewReport
 from .place_suggestion import PlaceSuggestion
+from .notification import MarketplaceFollow, MarketplaceWatch, NotificationPreference
 from .incident import Incident
 from .moderation import ModerationAction, ModerationCase, ModerationNotification, UserSanction
 from .business import (
@@ -108,6 +109,9 @@ __all__ = [
     "DiscoveryReview",
     "DiscoveryReviewReport",
     "PlaceSuggestion",
+    "NotificationPreference",
+    "MarketplaceWatch",
+    "MarketplaceFollow",
     "Incident",
     "ModerationAction",
     "ModerationCase",

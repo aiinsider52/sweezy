@@ -470,14 +470,7 @@ private struct JourneyGuideHeroImage: View {
             .scaledToFill()
     }
 
-    private var fallbackName: String {
-        switch guide.category {
-        case .housing, .documents: return "cityhub-zurich-oldtown"
-        case .work: return "cityhub-zurich-viadukt"
-        case .healthcare, .insurance: return "swiss-moment-luzern"
-        default: return "swiss-moment-grindelwald"
-        }
-    }
+    private var fallbackName: String { guide.coverAsset }
 }
 
 private struct JourneyArticleMarkdown: View {

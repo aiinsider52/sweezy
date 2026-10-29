@@ -199,6 +199,24 @@ struct SocialProfile: Codable, Identifiable, Equatable {
 
 #if DEBUG
 enum SocialFriendPreviewFixtures {
+  /// Demo meetups for the Events tab, dated relative to today so the poster tiles stay current.
+  static var events: [SocialEvent] {
+    let iso = ISO8601DateFormatter()
+    func at(days: Int, hour: Int) -> String {
+      let day = Calendar.current.date(byAdding: .day, value: days, to: Date()) ?? Date()
+      return iso.string(from: Calendar.current.date(bySettingHour: hour, minute: 0, second: 0, of: day) ?? day)
+    }
+    let json = """
+    [
+      {"event_id":"preview-event-1","title":"Ранкова кава біля озера","category":"community","canton":"ZH","city":"Zürich","starts_at":"\(at(days: 2, hour: 9))","attendee_count":12,"is_recommended":true,"recommendation_reason":"Поруч і про твої інтереси"},
+      {"event_id":"preview-event-2","title":"Похід на Uetliberg для новачків","category":"sports","canton":"ZH","city":"Zürich","starts_at":"\(at(days: 5, hour: 10))","attendee_count":8,"my_status":"going","group_chat_available":true},
+      {"event_id":"preview-event-3","title":"Мовний обмін: німецька ↔ українська","category":"education","canton":"BE","city":"Bern","starts_at":"\(at(days: 9, hour: 18))","attendee_count":21}
+    ]
+    """
+    let decoder = JSONDecoder()
+    decoder.dateDecodingStrategy = .iso8601
+    return (try? decoder.decode([SocialEvent].self, from: Data(json.utf8))) ?? []
+  }
   static let profiles: [SocialProfile] = [
     profile("anna", "Anna Keller", "ZH", "Zürich", "Люблю ранкові прогулянки біля озера, каву та камерні концерти.".localized, [.hiking, .music, .food], ["DE", "UK", "EN"], [.coffee, .walk], 96, 4, true, 2021),
     profile("dmytro", "Dmytro Melnyk", "ZH", "Winterthur", "Працюю в IT, граю у теніс і шукаю компанію для хайкінгу на вихідних.".localized, [.technology, .sports, .hiking], ["UK", "DE", "EN"], [.activity, .event], 91, 18, true, 2023),

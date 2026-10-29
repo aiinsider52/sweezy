@@ -227,7 +227,8 @@ struct JourneyBottomBar: View {
         ("list.bullet.rectangle", "journey.tab.directory".localized),
         ("mappin", "journey.tab.map".localized),
         ("cart", "journey.tab.marketplace".localized),
-        ("person.2", "journey.tab.people".localized)
+        ("person.2", "journey.tab.people".localized),
+        ("gearshape", "journey.tab.settings".localized)
     ]
 
     var body: some View {
@@ -244,7 +245,7 @@ struct JourneyBottomBar: View {
                             if selection == index {
                                 Circle()
                                     .fill(JourneyVisual.lime)
-                                    .frame(width: 34, height: 34)
+                                    .frame(width: 32, height: 32)
                                     .matchedGeometryEffect(id: "journey-tab-selection", in: selectionNamespace)
                             }
                             Image(systemName: iconName(for: index, baseName: item.0))
@@ -270,7 +271,7 @@ struct JourneyBottomBar: View {
                 .accessibilityIdentifier("tab.\(tabIdentifier(for: index))")
             }
         }
-        .padding(.horizontal, 8)
+        .padding(.horizontal, 4)
         .padding(.top, 7)
         .padding(.bottom, 8)
         .sensoryFeedback(.selection, trigger: selection)
@@ -286,7 +287,7 @@ struct JourneyBottomBar: View {
     }
 
     private func tabIdentifier(for index: Int) -> String {
-        ["home", "directory", "map", "marketplace", "people"][index]
+        ["home", "directory", "map", "marketplace", "people", "settings"][index]
     }
 }
 

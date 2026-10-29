@@ -1,0 +1,1163 @@
+[
+ {
+  "id": "6eca3662-83cc-543e-a6a0-8678e46f86eb",
+  "name": "Посольство України в Німеччині",
+  "type": "government",
+  "category": "embassy",
+  "audience": "ukrainian",
+  "description": "Консульські послуги для громадян України: паспорти, довідки, нотаріальні дії. Консульський відділ: +49 30 28 88 71 70.",
+  "descriptions": {
+   "uk": "Консульські послуги для громадян України: паспорти, довідки, нотаріальні дії. Консульський відділ: +49 30 28 88 71 70.",
+   "en": "Consular services for Ukrainian citizens: passports, certificates, notarial acts. Consular section: +49 30 28 88 71 70.",
+   "de": "Konsularische Dienste für ukrainische Staatsangehörige: Pässe, Bescheinigungen, Beglaubigungen. Konsularabteilung: +49 30 28 88 71 70."
+  },
+  "address": {
+   "street": "Albrechtstraße",
+   "houseNumber": "26",
+   "postalCode": "10117",
+   "city": "Berlin",
+   "canton": "ZH"
+  },
+  "coordinate": {
+   "latitude": 52.523919,
+   "longitude": 13.383605
+  },
+  "countryCode": "DE",
+  "subdivisionCode": "DE-BE",
+  "openingHours": [],
+  "languages": [
+   "uk",
+   "de"
+  ],
+  "services": [
+   "Паспорти",
+   "Консульські довідки",
+   "Нотаріальні дії"
+  ],
+  "isAccessible": false,
+  "reviewCount": 0,
+  "source": "https://www.auswaertiges-amt.de/de/service/laender/ukraine-node/vertretungenukraine-201950",
+  "verifiedAt": "2026-10-28T00:00:00Z",
+  "phoneNumber": "+49 30 288 871 28",
+  "website": "https://germany.mfa.gov.ua"
+ },
+ {
+  "id": "44373057-bd56-5b23-8169-f89be5df8a3e",
+  "name": "Генеральне консульство України в Дюссельдорфі",
+  "type": "government",
+  "category": "embassy",
+  "audience": "ukrainian",
+  "description": "Паспорти, консульський облік, довідки та нотаріальні дії. Прийом за попереднім записом.",
+  "descriptions": {
+   "uk": "Паспорти, консульський облік, довідки та нотаріальні дії. Прийом за попереднім записом.",
+   "en": "Passports, consular registration, certificates and notarial acts. By appointment.",
+   "de": "Pässe, konsularische Registrierung, Bescheinigungen und Beglaubigungen. Nach Terminvereinbarung."
+  },
+  "address": {
+   "street": "Luisenstraße",
+   "houseNumber": "9",
+   "postalCode": "40215",
+   "city": "Düsseldorf",
+   "canton": "ZH"
+  },
+  "coordinate": {
+   "latitude": 51.217288,
+   "longitude": 6.777742
+  },
+  "countryCode": "DE",
+  "subdivisionCode": "DE-NW",
+  "openingHours": [],
+  "languages": [
+   "uk",
+   "de"
+  ],
+  "services": [
+   "Паспорти",
+   "Консульський облік"
+  ],
+  "isAccessible": false,
+  "reviewCount": 0,
+  "source": "https://www.auswaertiges-amt.de/de/service/laender/ukraine-node/vertretungenukraine-201950",
+  "verifiedAt": "2026-10-28T00:00:00Z",
+  "phoneNumber": "+49 211 93 65 42 11"
+ },
+ {
+  "id": "7f21e564-add7-5efa-b28c-f4423fcad0d2",
+  "name": "Генеральне консульство України в Франкфурті-на-Майні",
+  "type": "government",
+  "category": "embassy",
+  "audience": "ukrainian",
+  "description": "Паспорти, консульський облік, довідки та нотаріальні дії. Прийом за попереднім записом.",
+  "descriptions": {
+   "uk": "Паспорти, консульський облік, довідки та нотаріальні дії. Прийом за попереднім записом.",
+   "en": "Passports, consular registration, certificates and notarial acts. By appointment.",
+   "de": "Pässe, konsularische Registrierung, Bescheinigungen und Beglaubigungen. Nach Terminvereinbarung."
+  },
+  "address": {
+   "street": "Vilbeler Straße",
+   "houseNumber": "29",
+   "postalCode": "60313",
+   "city": "Frankfurt am Main",
+   "canton": "ZH"
+  },
+  "coordinate": {
+   "latitude": 50.116893,
+   "longitude": 8.686437
+  },
+  "countryCode": "DE",
+  "subdivisionCode": "DE-HE",
+  "openingHours": [],
+  "languages": [
+   "uk",
+   "de"
+  ],
+  "services": [
+   "Паспорти",
+   "Консульський облік"
+  ],
+  "isAccessible": false,
+  "reviewCount": 0,
+  "source": "https://www.auswaertiges-amt.de/de/service/laender/ukraine-node/vertretungenukraine-201950",
+  "verifiedAt": "2026-10-28T00:00:00Z",
+  "phoneNumber": "+49 69 297 209 20"
+ },
+ {
+  "id": "a8bf470e-68c6-50c3-8af9-8f0fdf2e5b21",
+  "name": "Генеральне консульство України в Гамбурзі",
+  "type": "government",
+  "category": "embassy",
+  "audience": "ukrainian",
+  "description": "Паспорти, консульський облік, довідки та нотаріальні дії. Прийом за попереднім записом.",
+  "descriptions": {
+   "uk": "Паспорти, консульський облік, довідки та нотаріальні дії. Прийом за попереднім записом.",
+   "en": "Passports, consular registration, certificates and notarial acts. By appointment.",
+   "de": "Pässe, konsularische Registrierung, Bescheinigungen und Beglaubigungen. Nach Terminvereinbarung."
+  },
+  "address": {
+   "street": "Mundsburger Damm",
+   "houseNumber": "1",
+   "postalCode": "22087",
+   "city": "Hamburg",
+   "canton": "ZH"
+  },
+  "coordinate": {
+   "latitude": 53.564399,
+   "longitude": 10.017468
+  },
+  "countryCode": "DE",
+  "subdivisionCode": "DE-HH",
+  "openingHours": [],
+  "languages": [
+   "uk",
+   "de"
+  ],
+  "services": [
+   "Паспорти",
+   "Консульський облік"
+  ],
+  "isAccessible": false,
+  "reviewCount": 0,
+  "source": "https://www.auswaertiges-amt.de/de/service/laender/ukraine-node/vertretungenukraine-201950",
+  "verifiedAt": "2026-10-28T00:00:00Z",
+  "phoneNumber": "+49 40 229 498 10"
+ },
+ {
+  "id": "191ed097-5c6b-5565-998b-2105b1102218",
+  "name": "Генеральне консульство України в Мюнхені",
+  "type": "government",
+  "category": "embassy",
+  "audience": "ukrainian",
+  "description": "Паспорти, консульський облік, довідки та нотаріальні дії. Прийом за попереднім записом.",
+  "descriptions": {
+   "uk": "Паспорти, консульський облік, довідки та нотаріальні дії. Прийом за попереднім записом.",
+   "en": "Passports, consular registration, certificates and notarial acts. By appointment.",
+   "de": "Pässe, konsularische Registrierung, Bescheinigungen und Beglaubigungen. Nach Terminvereinbarung."
+  },
+  "address": {
+   "street": "Riedenburger Straße",
+   "houseNumber": "2",
+   "postalCode": "81633",
+   "city": "München",
+   "canton": "ZH"
+  },
+  "coordinate": {
+   "latitude": 48.136072,
+   "longitude": 11.624729
+  },
+  "countryCode": "DE",
+  "subdivisionCode": "DE-BY",
+  "openingHours": [],
+  "languages": [
+   "uk",
+   "de"
+  ],
+  "services": [
+   "Паспорти",
+   "Консульський облік"
+  ],
+  "isAccessible": false,
+  "reviewCount": 0,
+  "source": "https://www.auswaertiges-amt.de/de/service/laender/ukraine-node/vertretungenukraine-201950",
+  "verifiedAt": "2026-10-28T00:00:00Z",
+  "phoneNumber": "+49 89 55 27 37 18"
+ },
+ {
+  "id": "a4b1d3e5-5f9c-5631-87d0-d53dc0673231",
+  "name": "Українська греко-католицька парафія св. Миколая (Берлін)",
+  "type": "community",
+  "category": "religious_center",
+  "audience": "ukrainian",
+  "description": "Літургія українською щонеділі о 9:00 і 11:00 у церкві St. Johannes Evangelist.",
+  "descriptions": {
+   "uk": "Літургія українською щонеділі о 9:00 і 11:00 у церкві St. Johannes Evangelist.",
+   "en": "Ukrainian liturgy every Sunday at 9:00 and 11:00 at St. Johannes Evangelist church (St. Nicholas parish).",
+   "de": "Ukrainische Liturgie jeden Sonntag um 9 und 11 Uhr in der Kirche St. Johannes Evangelist (Pfarrei St. Nikolaus)."
+  },
+  "address": {
+   "street": "Waldstraße",
+   "houseNumber": "11",
+   "postalCode": "12487",
+   "city": "Berlin",
+   "canton": "ZH"
+  },
+  "coordinate": {
+   "latitude": 52.445998,
+   "longitude": 13.509706
+  },
+  "countryCode": "DE",
+  "subdivisionCode": "DE-BE",
+  "openingHours": [
+   {
+    "weekday": 1,
+    "openTime": {
+     "hour": 9,
+     "minute": 0
+    },
+    "closeTime": {
+     "hour": 12,
+     "minute": 30
+    },
+    "isClosed": false
+   }
+  ],
+  "languages": [
+   "uk"
+  ],
+  "services": [
+   "Богослужіння українською"
+  ],
+  "isAccessible": false,
+  "reviewCount": 0,
+  "source": "https://ukrainet.eu/wp-content/uploads/2025/02/Ukrainische-Orte-in-Berlin_Die-Karte_2025.pdf",
+  "verifiedAt": "2026-10-28T00:00:00Z",
+  "email": "ugcc.berlin@gmail.com"
+ },
+ {
+  "id": "29d02e9f-ed61-559d-a8c6-001832d22684",
+  "name": "Парафія св. Андрія Первозванного ПЦУ (Берлін)",
+  "type": "community",
+  "category": "religious_center",
+  "audience": "ukrainian",
+  "description": "Православна церква України в Берліні. Служба щонеділі в Nathanael-Kirche: листопад–березень о 10:00, квітень–жовтень о 12:00.",
+  "descriptions": {
+   "uk": "Православна церква України в Берліні. Служба щонеділі в Nathanael-Kirche: листопад–березень о 10:00, квітень–жовтень о 12:00.",
+   "en": "Orthodox Church of Ukraine in Berlin. Sunday service at Nathanael-Kirche: 10:00 from November to March, 12:00 from April to October.",
+   "de": "Orthodoxe Kirche der Ukraine in Berlin. Sonntagsgottesdienst in der Nathanael-Kirche: November–März 10 Uhr, April–Oktober 12 Uhr."
+  },
+  "address": {
+   "street": "Grazer Platz",
+   "houseNumber": "4",
+   "postalCode": "12157",
+   "city": "Berlin",
+   "canton": "ZH"
+  },
+  "coordinate": {
+   "latitude": 52.466528,
+   "longitude": 13.34453
+  },
+  "countryCode": "DE",
+  "subdivisionCode": "DE-BE",
+  "openingHours": [],
+  "languages": [
+   "uk"
+  ],
+  "services": [
+   "Богослужіння українською"
+  ],
+  "isAccessible": false,
+  "reviewCount": 0,
+  "source": "https://ukrainet.eu/wp-content/uploads/2025/02/Ukrainische-Orte-in-Berlin_Die-Karte_2025.pdf",
+  "verifiedAt": "2026-10-28T00:00:00Z"
+ },
+ {
+  "id": "657f128f-103a-5854-9260-3394aaebbace",
+  "name": "Українська школа в Берліні",
+  "type": "education",
+  "category": "school",
+  "audience": "ukrainian",
+  "description": "Школа з 2017 року: діти вчаться читати, писати й навчатися українською.",
+  "descriptions": {
+   "uk": "Школа з 2017 року: діти вчаться читати, писати й навчатися українською.",
+   "en": "Since 2017: children learn to read, write and study in Ukrainian.",
+   "de": "Seit 2017: Kinder lernen auf Ukrainisch zu lesen, schreiben und lernen."
+  },
+  "address": {
+   "street": "Am Treptower Park",
+   "houseNumber": "28-30",
+   "postalCode": "12435",
+   "city": "Berlin",
+   "canton": "ZH"
+  },
+  "coordinate": {
+   "latitude": 52.487389,
+   "longitude": 13.462596
+  },
+  "countryCode": "DE",
+  "subdivisionCode": "DE-BE",
+  "openingHours": [],
+  "languages": [
+   "uk"
+  ],
+  "services": [
+   "Українська школа"
+  ],
+  "isAccessible": false,
+  "reviewCount": 0,
+  "source": "https://ukrainet.eu/wp-content/uploads/2025/02/Ukrainische-Orte-in-Berlin_Die-Karte_2025.pdf",
+  "verifiedAt": "2026-10-28T00:00:00Z",
+  "email": "ua.school.berlin@gmail.com"
+ },
+ {
+  "id": "e7f6efd8-1235-5370-97f3-4671183ee1e4",
+  "name": "Альянс українських організацій · Interkulturelles Haus",
+  "type": "community",
+  "category": "community_center",
+  "audience": "ukrainian",
+  "description": "Об'єднання 22 українських організацій: зустрічі, воркшопи, психосоціальна підтримка, консультації для біженців.",
+  "descriptions": {
+   "uk": "Об'єднання 22 українських організацій: зустрічі, воркшопи, психосоціальна підтримка, консультації для біженців.",
+   "en": "Alliance of 22 Ukrainian organisations: meetups, workshops, psychosocial support and advice for refugees.",
+   "de": "Zusammenschluss von 22 ukrainischen Organisationen: Treffen, Workshops, psychosoziale Unterstützung, Beratung."
+  },
+  "address": {
+   "street": "Schönfließer Straße",
+   "houseNumber": "7",
+   "postalCode": "10439",
+   "city": "Berlin",
+   "canton": "ZH"
+  },
+  "coordinate": {
+   "latitude": 52.553126,
+   "longitude": 13.409718
+  },
+  "countryCode": "DE",
+  "subdivisionCode": "DE-BE",
+  "openingHours": [],
+  "languages": [
+   "uk",
+   "de"
+  ],
+  "services": [
+   "Зустрічі",
+   "Консультації",
+   "Психологічна підтримка"
+  ],
+  "isAccessible": false,
+  "reviewCount": 0,
+  "source": "https://ukrainet.eu/wp-content/uploads/2025/02/Ukrainische-Orte-in-Berlin_Die-Karte_2025.pdf",
+  "verifiedAt": "2026-10-28T00:00:00Z",
+  "website": "https://ukr-alliance.de"
+ },
+ {
+  "id": "a3135da6-53e3-515b-8b8e-a204fed99cf1",
+  "name": "Vitsche · дитячий центр «Бедрик»",
+  "type": "community",
+  "category": "community_center",
+  "audience": "ukrainian",
+  "description": "Простір української молодіжної організації Vitsche та дитячий центр «Бедрик» для дітей-біженців і їхніх мам.",
+  "descriptions": {
+   "uk": "Простір української молодіжної організації Vitsche та дитячий центр «Бедрик» для дітей-біженців і їхніх мам.",
+   "en": "Home of the Ukrainian youth group Vitsche and the Bedryk children's centre for refugee kids and their mothers.",
+   "de": "Räume der ukrainischen Jugendorganisation Vitsche und des Kinderzentrums Bedryk für geflüchtete Kinder und Mütter."
+  },
+  "address": {
+   "street": "Skalitzer Straße",
+   "houseNumber": "80",
+   "postalCode": "10997",
+   "city": "Berlin",
+   "canton": "ZH"
+  },
+  "coordinate": {
+   "latitude": 52.500735,
+   "longitude": 13.439388
+  },
+  "countryCode": "DE",
+  "subdivisionCode": "DE-BE",
+  "openingHours": [],
+  "languages": [
+   "uk",
+   "de"
+  ],
+  "services": [
+   "Дитячий центр",
+   "Події громади"
+  ],
+  "isAccessible": false,
+  "reviewCount": 0,
+  "source": "https://ukrainet.eu/wp-content/uploads/2025/02/Ukrainische-Orte-in-Berlin_Die-Karte_2025.pdf",
+  "verifiedAt": "2026-10-28T00:00:00Z"
+ },
+ {
+  "id": "9daa4e11-56b4-5c24-be74-87e740cc4253",
+  "name": "UA Nest Berlin",
+  "type": "community",
+  "category": "community_center",
+  "audience": "ukrainian",
+  "description": "Хаб і коворкінг для українських правозахисників і громадських активістів.",
+  "descriptions": {
+   "uk": "Хаб і коворкінг для українських правозахисників і громадських активістів.",
+   "en": "Hub and co-working space for Ukrainian human rights defenders and civic activists.",
+   "de": "Hub und Co-Working für ukrainische Menschenrechtler:innen und Aktivist:innen."
+  },
+  "address": {
+   "street": "Levetzowstraße",
+   "houseNumber": "13",
+   "postalCode": "10555",
+   "city": "Berlin",
+   "canton": "ZH"
+  },
+  "coordinate": {
+   "latitude": 52.520025,
+   "longitude": 13.33662
+  },
+  "countryCode": "DE",
+  "subdivisionCode": "DE-BE",
+  "openingHours": [],
+  "languages": [
+   "uk",
+   "en"
+  ],
+  "services": [
+   "Коворкінг",
+   "Події"
+  ],
+  "isAccessible": false,
+  "reviewCount": 0,
+  "source": "https://ukrainet.eu/wp-content/uploads/2025/02/Ukrainische-Orte-in-Berlin_Die-Karte_2025.pdf",
+  "verifiedAt": "2026-10-28T00:00:00Z",
+  "website": "https://uanest.berlin/"
+ },
+ {
+  "id": "c616a840-0389-5791-aea0-5d699dd33ed1",
+  "name": "Spiel-Sprach-Café",
+  "type": "community",
+  "category": "community_cafe",
+  "audience": "ukrainian",
+  "description": "Кафе для зустрічей і розмовної мови для українських сімей.",
+  "descriptions": {
+   "uk": "Кафе для зустрічей і розмовної мови для українських сімей.",
+   "en": "Meeting and language café for Ukrainian families.",
+   "de": "Begegnungs- und Sprachcafé für ukrainische Familien."
+  },
+  "address": {
+   "street": "Treskowallee",
+   "houseNumber": "78",
+   "postalCode": "10318",
+   "city": "Berlin",
+   "canton": "ZH"
+  },
+  "coordinate": {
+   "latitude": 52.485273,
+   "longitude": 13.526054
+  },
+  "countryCode": "DE",
+  "subdivisionCode": "DE-BE",
+  "openingHours": [],
+  "languages": [
+   "uk",
+   "de"
+  ],
+  "services": [
+   "Кава та спілкування",
+   "Розмовна німецька"
+  ],
+  "isAccessible": false,
+  "reviewCount": 0,
+  "source": "https://ukrainet.eu/wp-content/uploads/2025/02/Ukrainische-Orte-in-Berlin_Die-Karte_2025.pdf",
+  "verifiedAt": "2026-10-28T00:00:00Z"
+ },
+ {
+  "id": "ac132dd1-58b9-5042-98be-2a24cc9fc116",
+  "name": "Український інститут у Німеччині",
+  "type": "community",
+  "category": "cultural_center",
+  "audience": "ukrainian",
+  "description": "Перше закордонне представництво Українського інституту: виставки, лекції, кіно й музика.",
+  "descriptions": {
+   "uk": "Перше закордонне представництво Українського інституту: виставки, лекції, кіно й музика.",
+   "en": "The Ukrainian Institute's first office abroad: exhibitions, talks, film and music.",
+   "de": "Erste Auslandsvertretung des Ukrainischen Instituts: Ausstellungen, Vorträge, Film und Musik."
+  },
+  "address": {
+   "street": "Friedrichstraße",
+   "houseNumber": "95",
+   "postalCode": "10117",
+   "city": "Berlin",
+   "canton": "ZH"
+  },
+  "coordinate": {
+   "latitude": 52.519374,
+   "longitude": 13.38981
+  },
+  "countryCode": "DE",
+  "subdivisionCode": "DE-BE",
+  "openingHours": [],
+  "languages": [
+   "uk",
+   "de",
+   "en"
+  ],
+  "services": [
+   "Культурні події"
+  ],
+  "isAccessible": false,
+  "reviewCount": 0,
+  "source": "https://ukrainet.eu/wp-content/uploads/2025/02/Ukrainische-Orte-in-Berlin_Die-Karte_2025.pdf",
+  "verifiedAt": "2026-10-28T00:00:00Z"
+ },
+ {
+  "id": "1237e2fe-0a5e-5da3-8f57-867d38902c9a",
+  "name": "Український кіноклуб Берліна · Kino Brotfabrik",
+  "type": "community",
+  "category": "cultural_center",
+  "audience": "ukrainian",
+  "description": "Регулярні покази українського кіно в кінотеатрі Brotfabrik.",
+  "descriptions": {
+   "uk": "Регулярні покази українського кіно в кінотеатрі Brotfabrik.",
+   "en": "Regular screenings of Ukrainian films at the Brotfabrik cinema.",
+   "de": "Regelmäßige Vorführungen ukrainischer Filme im Kino Brotfabrik."
+  },
+  "address": {
+   "street": "Caligariplatz",
+   "houseNumber": "1",
+   "postalCode": "13086",
+   "city": "Berlin",
+   "canton": "ZH"
+  },
+  "coordinate": {
+   "latitude": 52.552592,
+   "longitude": 13.430592
+  },
+  "countryCode": "DE",
+  "subdivisionCode": "DE-BE",
+  "openingHours": [],
+  "languages": [
+   "uk"
+  ],
+  "services": [
+   "Українське кіно"
+  ],
+  "isAccessible": false,
+  "reviewCount": 0,
+  "source": "https://ukrainet.eu/wp-content/uploads/2025/02/Ukrainische-Orte-in-Berlin_Die-Karte_2025.pdf",
+  "verifiedAt": "2026-10-28T00:00:00Z"
+ },
+ {
+  "id": "7923d1a8-2834-50ed-9bda-3ccffa35876e",
+  "name": "Kul'tura Club · Amerika-Gedenkbibliothek",
+  "type": "community",
+  "category": "library",
+  "audience": "ukrainian",
+  "description": "Український клуб культури в центральній бібліотеці Берліна.",
+  "descriptions": {
+   "uk": "Український клуб культури в центральній бібліотеці Берліна.",
+   "en": "Ukrainian culture club at Berlin's central library.",
+   "de": "Ukrainischer Kulturclub in der Amerika-Gedenkbibliothek."
+  },
+  "address": {
+   "street": "Blücherplatz",
+   "houseNumber": "1",
+   "postalCode": "10961",
+   "city": "Berlin",
+   "canton": "ZH"
+  },
+  "coordinate": {
+   "latitude": 52.496567,
+   "longitude": 13.392494
+  },
+  "countryCode": "DE",
+  "subdivisionCode": "DE-BE",
+  "openingHours": [],
+  "languages": [
+   "uk",
+   "de"
+  ],
+  "services": [
+   "Книжковий клуб",
+   "Культурні події"
+  ],
+  "isAccessible": false,
+  "reviewCount": 0,
+  "source": "https://ukrainet.eu/wp-content/uploads/2025/02/Ukrainische-Orte-in-Berlin_Die-Karte_2025.pdf",
+  "verifiedAt": "2026-10-28T00:00:00Z"
+ },
+ {
+  "id": "27e2f657-dd78-5ce3-bf85-a1207461be91",
+  "name": "Українські книжки · Stadtteilbibliothek Karow",
+  "type": "education",
+  "category": "library",
+  "audience": "ukrainian",
+  "description": "Бібліотека, де можна безкоштовно позичити книжки українською.",
+  "descriptions": {
+   "uk": "Бібліотека, де можна безкоштовно позичити книжки українською.",
+   "en": "Library lending books in Ukrainian for free.",
+   "de": "Bibliothek mit ukrainischen Büchern zum Ausleihen."
+  },
+  "address": {
+   "street": "Achillesstraße",
+   "houseNumber": "77",
+   "postalCode": "13125",
+   "city": "Berlin",
+   "canton": "ZH"
+  },
+  "coordinate": {
+   "latitude": 52.616548,
+   "longitude": 13.491704
+  },
+  "countryCode": "DE",
+  "subdivisionCode": "DE-BE",
+  "openingHours": [],
+  "languages": [
+   "uk",
+   "de"
+  ],
+  "services": [
+   "Книжки українською"
+  ],
+  "isAccessible": false,
+  "reviewCount": 0,
+  "source": "https://ukrainet.eu/wp-content/uploads/2025/02/Ukrainische-Orte-in-Berlin_Die-Karte_2025.pdf",
+  "verifiedAt": "2026-10-28T00:00:00Z"
+ },
+ {
+  "id": "c4c4c9fa-30a7-53d2-882e-0be8621682c8",
+  "name": "Die mit den Kirschen",
+  "type": "community",
+  "category": "restaurant",
+  "audience": "ukrainian",
+  "description": "Сучасна українська кухня в Шарлоттенбурзі, гості хвалять борщ.",
+  "descriptions": {
+   "uk": "Сучасна українська кухня в Шарлоттенбурзі, гості хвалять борщ.",
+   "en": "Modern Ukrainian kitchen in Charlottenburg, praised for its borscht.",
+   "de": "Moderne ukrainische Küche in Charlottenburg, bekannt für Borschtsch."
+  },
+  "address": {
+   "street": "Wielandstraße",
+   "houseNumber": "38",
+   "postalCode": "10629",
+   "city": "Berlin",
+   "canton": "ZH"
+  },
+  "coordinate": {
+   "latitude": 52.504095,
+   "longitude": 13.315678
+  },
+  "countryCode": "DE",
+  "subdivisionCode": "DE-BE",
+  "openingHours": [],
+  "languages": [
+   "uk",
+   "de"
+  ],
+  "services": [
+   "Українська кухня"
+  ],
+  "isAccessible": false,
+  "reviewCount": 0,
+  "source": "https://ukrainet.eu/wp-content/uploads/2025/02/Ukrainische-Orte-in-Berlin_Die-Karte_2025.pdf",
+  "verifiedAt": "2026-10-28T00:00:00Z"
+ },
+ {
+  "id": "48a09c1a-51aa-5ca3-8a96-2284b546bdc1",
+  "name": "Slava Berlin!",
+  "type": "community",
+  "category": "restaurant",
+  "audience": "ukrainian",
+  "description": "Український соулфуд і наливки в Кройцберзі.",
+  "descriptions": {
+   "uk": "Український соулфуд і наливки в Кройцберзі.",
+   "en": "Ukrainian soul food and nalyvky in Kreuzberg.",
+   "de": "Ukrainisches Soulfood und Nalivki in Kreuzberg."
+  },
+  "address": {
+   "street": "Wrangelstraße",
+   "houseNumber": "43",
+   "postalCode": "10997",
+   "city": "Berlin",
+   "canton": "ZH"
+  },
+  "coordinate": {
+   "latitude": 52.499496,
+   "longitude": 13.439477
+  },
+  "countryCode": "DE",
+  "subdivisionCode": "DE-BE",
+  "openingHours": [],
+  "languages": [
+   "uk",
+   "de"
+  ],
+  "services": [
+   "Українська кухня"
+  ],
+  "isAccessible": false,
+  "reviewCount": 0,
+  "source": "https://ukrainet.eu/wp-content/uploads/2025/02/Ukrainische-Orte-in-Berlin_Die-Karte_2025.pdf",
+  "verifiedAt": "2026-10-28T00:00:00Z"
+ },
+ {
+  "id": "173e15d6-b8d7-52b2-ab23-9ccd98438692",
+  "name": "Drei Elefanten · Fresh Ukrainian Soulfood",
+  "type": "community",
+  "category": "restaurant",
+  "audience": "ukrainian",
+  "description": "Український соулфуд у Нойкельні, є веганський борщ.",
+  "descriptions": {
+   "uk": "Український соулфуд у Нойкельні, є веганський борщ.",
+   "en": "Ukrainian soul food in Neukölln, including vegan borscht.",
+   "de": "Ukrainisches Soulfood in Neukölln, auch veganer Borschtsch."
+  },
+  "address": {
+   "street": "Donaustraße",
+   "houseNumber": "104",
+   "postalCode": "12043",
+   "city": "Berlin",
+   "canton": "ZH"
+  },
+  "coordinate": {
+   "latitude": 52.481949,
+   "longitude": 13.436654
+  },
+  "countryCode": "DE",
+  "subdivisionCode": "DE-BE",
+  "openingHours": [],
+  "languages": [
+   "uk",
+   "de"
+  ],
+  "services": [
+   "Українська кухня"
+  ],
+  "isAccessible": false,
+  "reviewCount": 0,
+  "source": "https://ukrainet.eu/wp-content/uploads/2025/02/Ukrainische-Orte-in-Berlin_Die-Karte_2025.pdf",
+  "verifiedAt": "2026-10-28T00:00:00Z"
+ },
+ {
+  "id": "6549739e-12c2-547c-84fb-1a1fa75e9b5e",
+  "name": "Odessa Mama",
+  "type": "community",
+  "category": "restaurant",
+  "audience": "ukrainian",
+  "description": "Ресторан одеської кухні.",
+  "descriptions": {
+   "uk": "Ресторан одеської кухні.",
+   "en": "Restaurant with Odesa cuisine.",
+   "de": "Restaurant mit Odessaer Küche."
+  },
+  "address": {
+   "street": "Innsbrucker Platz",
+   "houseNumber": "3",
+   "postalCode": "10827",
+   "city": "Berlin",
+   "canton": "ZH"
+  },
+  "coordinate": {
+   "latitude": 52.47857,
+   "longitude": 13.345011
+  },
+  "countryCode": "DE",
+  "subdivisionCode": "DE-BE",
+  "openingHours": [],
+  "languages": [
+   "uk",
+   "de"
+  ],
+  "services": [
+   "Українська кухня"
+  ],
+  "isAccessible": false,
+  "reviewCount": 0,
+  "source": "https://ukrainet.eu/wp-content/uploads/2025/02/Ukrainische-Orte-in-Berlin_Die-Karte_2025.pdf",
+  "verifiedAt": "2026-10-28T00:00:00Z"
+ },
+ {
+  "id": "196cc396-ef61-53ed-a1b2-ee87fd0f190f",
+  "name": "Küche UA · Markthalle Neun",
+  "type": "community",
+  "category": "restaurant",
+  "audience": "ukrainian",
+  "description": "Українська кухня щочетверга 17:00–22:00 у Markthalle Neun.",
+  "descriptions": {
+   "uk": "Українська кухня щочетверга 17:00–22:00 у Markthalle Neun.",
+   "en": "Ukrainian food every Thursday 17:00–22:00 at Markthalle Neun.",
+   "de": "Ukrainische Küche jeden Donnerstag 17–22 Uhr in der Markthalle Neun."
+  },
+  "address": {
+   "street": "Eisenbahnstraße",
+   "houseNumber": "42/43",
+   "postalCode": "10997",
+   "city": "Berlin",
+   "canton": "ZH"
+  },
+  "coordinate": {
+   "latitude": 52.502166,
+   "longitude": 13.431489
+  },
+  "countryCode": "DE",
+  "subdivisionCode": "DE-BE",
+  "openingHours": [
+   {
+    "weekday": 5,
+    "openTime": {
+     "hour": 17,
+     "minute": 0
+    },
+    "closeTime": {
+     "hour": 22,
+     "minute": 0
+    },
+    "isClosed": false
+   }
+  ],
+  "languages": [
+   "uk",
+   "de"
+  ],
+  "services": [
+   "Українська кухня"
+  ],
+  "isAccessible": false,
+  "reviewCount": 0,
+  "source": "https://ukrainet.eu/wp-content/uploads/2025/02/Ukrainische-Orte-in-Berlin_Die-Karte_2025.pdf",
+  "verifiedAt": "2026-10-28T00:00:00Z"
+ },
+ {
+  "id": "d32194ac-21a4-51be-ace4-5487abe0243a",
+  "name": "Paska.L",
+  "type": "community",
+  "category": "restaurant",
+  "audience": "ukrainian",
+  "description": "Український ресторан у Пренцлауер-Берзі.",
+  "descriptions": {
+   "uk": "Український ресторан у Пренцлауер-Берзі.",
+   "en": "Ukrainian restaurant in Prenzlauer Berg.",
+   "de": "Ukrainisches Restaurant im Prenzlauer Berg."
+  },
+  "address": {
+   "street": "Kollwitzstraße",
+   "houseNumber": "66",
+   "postalCode": "10435",
+   "city": "Berlin",
+   "canton": "ZH"
+  },
+  "coordinate": {
+   "latitude": 52.53615,
+   "longitude": 13.418158
+  },
+  "countryCode": "DE",
+  "subdivisionCode": "DE-BE",
+  "openingHours": [],
+  "languages": [
+   "uk",
+   "de"
+  ],
+  "services": [
+   "Українська кухня"
+  ],
+  "isAccessible": false,
+  "reviewCount": 0,
+  "source": "https://ukrainet.eu/wp-content/uploads/2025/02/Ukrainische-Orte-in-Berlin_Die-Karte_2025.pdf",
+  "verifiedAt": "2026-10-28T00:00:00Z"
+ },
+ {
+  "id": "6d3a6ecf-e95c-5e57-b961-15bbb46b93e4",
+  "name": "Кафедральний собор УГКЦ Покрови і св. Андрія (Мюнхен)",
+  "type": "community",
+  "category": "religious_center",
+  "audience": "ukrainian",
+  "description": "Кафедральний собор Апостольського екзархату УГКЦ у Німеччині та Скандинавії. Літургія щонеділі.",
+  "descriptions": {
+   "uk": "Кафедральний собор Апостольського екзархату УГКЦ у Німеччині та Скандинавії. Літургія щонеділі.",
+   "en": "Cathedral of the Ukrainian Greek-Catholic exarchate for Germany and Scandinavia. Sunday liturgy.",
+   "de": "Kathedrale des ukrainischen griechisch-katholischen Exarchats für Deutschland und Skandinavien. Sonntagsliturgie."
+  },
+  "address": {
+   "street": "Schönstraße",
+   "houseNumber": "55",
+   "postalCode": "81543",
+   "city": "München",
+   "canton": "ZH"
+  },
+  "coordinate": {
+   "latitude": 48.106632,
+   "longitude": 11.564419
+  },
+  "countryCode": "DE",
+  "subdivisionCode": "DE-BY",
+  "openingHours": [],
+  "languages": [
+   "uk"
+  ],
+  "services": [
+   "Богослужіння українською"
+  ],
+  "isAccessible": false,
+  "reviewCount": 0,
+  "source": "https://www.ukr-kirche.de/seite/561733/kontakt.html",
+  "verifiedAt": "2026-10-28T00:00:00Z",
+  "phoneNumber": "+49 89 651 29 09 0",
+  "email": "ugkkm@t-online.de",
+  "website": "https://www.ukr-kirche.de"
+ },
+ {
+  "id": "3e46793e-83d2-568e-8955-e1998cec16b2",
+  "name": "Український вільний університет",
+  "type": "education",
+  "category": "university",
+  "audience": "ukrainian",
+  "description": "Український університет у Мюнхені з 1921 року: навчання, лекції, події громади. Секретаріат Пн–Пт 9:00–13:00.",
+  "descriptions": {
+   "uk": "Український університет у Мюнхені з 1921 року: навчання, лекції, події громади. Секретаріат Пн–Пт 9:00–13:00.",
+   "en": "Ukrainian university in Munich since 1921: studies, lectures, community events. Office Mon–Fri 9:00–13:00.",
+   "de": "Ukrainische Universität in München seit 1921: Studium, Vorträge, Community-Veranstaltungen. Sekretariat Mo–Fr 9–13 Uhr."
+  },
+  "address": {
+   "street": "Barellistraße",
+   "houseNumber": "9a",
+   "postalCode": "80638",
+   "city": "München",
+   "canton": "ZH"
+  },
+  "coordinate": {
+   "latitude": 48.163604,
+   "longitude": 11.509581
+  },
+  "countryCode": "DE",
+  "subdivisionCode": "DE-BY",
+  "openingHours": [
+   {
+    "weekday": 2,
+    "openTime": {
+     "hour": 9,
+     "minute": 0
+    },
+    "closeTime": {
+     "hour": 13,
+     "minute": 0
+    },
+    "isClosed": false
+   },
+   {
+    "weekday": 3,
+    "openTime": {
+     "hour": 9,
+     "minute": 0
+    },
+    "closeTime": {
+     "hour": 13,
+     "minute": 0
+    },
+    "isClosed": false
+   },
+   {
+    "weekday": 4,
+    "openTime": {
+     "hour": 9,
+     "minute": 0
+    },
+    "closeTime": {
+     "hour": 13,
+     "minute": 0
+    },
+    "isClosed": false
+   },
+   {
+    "weekday": 5,
+    "openTime": {
+     "hour": 9,
+     "minute": 0
+    },
+    "closeTime": {
+     "hour": 13,
+     "minute": 0
+    },
+    "isClosed": false
+   },
+   {
+    "weekday": 6,
+    "openTime": {
+     "hour": 9,
+     "minute": 0
+    },
+    "closeTime": {
+     "hour": 13,
+     "minute": 0
+    },
+    "isClosed": false
+   }
+  ],
+  "languages": [
+   "uk",
+   "de"
+  ],
+  "services": [
+   "Навчання",
+   "Лекції",
+   "Події"
+  ],
+  "isAccessible": false,
+  "reviewCount": 0,
+  "source": "https://www.ufu-muenchen.de/kontakt/",
+  "verifiedAt": "2026-10-28T00:00:00Z",
+  "website": "https://www.ufu-muenchen.de"
+ },
+ {
+  "id": "bcc9c391-4d4a-547d-8db8-9e95b8bf774a",
+  "name": "Ruta",
+  "type": "community",
+  "category": "restaurant",
+  "audience": "ukrainian",
+  "description": "Українське бістро у Вестенді: традиційні страви з сучасними акцентами.",
+  "descriptions": {
+   "uk": "Українське бістро у Вестенді: традиційні страви з сучасними акцентами.",
+   "en": "Ukrainian bistro in Westend: traditional dishes with a modern touch.",
+   "de": "Ukrainisches Bistro im Westend: traditionelle Gerichte, modern interpretiert."
+  },
+  "address": {
+   "street": "Tulbeckstraße",
+   "houseNumber": "9",
+   "postalCode": "80339",
+   "city": "München",
+   "canton": "ZH"
+  },
+  "coordinate": {
+   "latitude": 48.136722,
+   "longitude": 11.542854
+  },
+  "countryCode": "DE",
+  "subdivisionCode": "DE-BY",
+  "openingHours": [],
+  "languages": [
+   "uk",
+   "de"
+  ],
+  "services": [
+   "Українська кухня"
+  ],
+  "isAccessible": false,
+  "reviewCount": 0,
+  "source": "https://www.cremeguides.com/muenchen/restaurant-ruta/",
+  "verifiedAt": "2026-10-28T00:00:00Z"
+ },
+ {
+  "id": "4e2fe15b-5fd1-5791-ad26-3ce7d3e65d1b",
+  "name": "Mavka",
+  "type": "community",
+  "category": "restaurant",
+  "audience": "ukrainian",
+  "description": "Сучасний український ресторан, вареники в меню. Ср–Пт 18:00–22:00, Сб 13:00–22:00, Нд 11:00–21:00.",
+  "descriptions": {
+   "uk": "Сучасний український ресторан, вареники в меню. Ср–Пт 18:00–22:00, Сб 13:00–22:00, Нд 11:00–21:00.",
+   "en": "Modern Ukrainian restaurant with varenyky. Wed–Fri 18:00–22:00, Sat 13:00–22:00, Sun 11:00–21:00.",
+   "de": "Modernes ukrainisches Restaurant mit Wareniki. Mi–Fr 18–22, Sa 13–22, So 11–21 Uhr."
+  },
+  "address": {
+   "street": "Wasgaustraße",
+   "houseNumber": "19A",
+   "postalCode": "65929",
+   "city": "Frankfurt am Main",
+   "canton": "ZH"
+  },
+  "coordinate": {
+   "latitude": 50.109994,
+   "longitude": 8.536478
+  },
+  "countryCode": "DE",
+  "subdivisionCode": "DE-HE",
+  "openingHours": [
+   {
+    "weekday": 4,
+    "openTime": {
+     "hour": 18,
+     "minute": 0
+    },
+    "closeTime": {
+     "hour": 22,
+     "minute": 0
+    },
+    "isClosed": false
+   },
+   {
+    "weekday": 5,
+    "openTime": {
+     "hour": 18,
+     "minute": 0
+    },
+    "closeTime": {
+     "hour": 22,
+     "minute": 0
+    },
+    "isClosed": false
+   },
+   {
+    "weekday": 6,
+    "openTime": {
+     "hour": 18,
+     "minute": 0
+    },
+    "closeTime": {
+     "hour": 22,
+     "minute": 0
+    },
+    "isClosed": false
+   },
+   {
+    "weekday": 7,
+    "openTime": {
+     "hour": 13,
+     "minute": 0
+    },
+    "closeTime": {
+     "hour": 22,
+     "minute": 0
+    },
+    "isClosed": false
+   },
+   {
+    "weekday": 1,
+    "openTime": {
+     "hour": 11,
+     "minute": 0
+    },
+    "closeTime": {
+     "hour": 21,
+     "minute": 0
+    },
+    "isClosed": false
+   }
+  ],
+  "languages": [
+   "uk",
+   "de"
+  ],
+  "services": [
+   "Українська кухня"
+  ],
+  "isAccessible": false,
+  "reviewCount": 0,
+  "source": "https://www.mavka-ua.com/",
+  "verifiedAt": "2026-10-28T00:00:00Z",
+  "website": "https://www.mavka-ua.com/"
+ }
+]

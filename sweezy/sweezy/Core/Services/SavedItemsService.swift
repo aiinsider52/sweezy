@@ -27,6 +27,9 @@ final class SavedItemsService: ObservableObject {
     func toggleListing(_ id: String) {
         Self.toggle(id, in: &listingIDs)
         defaults.set(Array(listingIDs), forKey: key("listings"))
+        // Saved listings are watched on the server, so a price drop can reach the user as a push.
+        let watching = listingIDs.contains(id)
+        Task { await NotificationsAPI.watchListing(id, watching: watching) }
     }
 
     func togglePlace(_ id: UUID) {

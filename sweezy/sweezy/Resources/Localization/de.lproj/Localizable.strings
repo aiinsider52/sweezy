@@ -4292,6 +4292,17 @@
 "marketplace.photo_cover" = "TITELBILD";
 "marketplace.create.sell" = "Verkaufen";
 "marketplace.create.suggested" = "Passt zu «%@» – auswählen?";
+"marketplace.step.about_item" = "Was verkaufst du";
+"marketplace.field.item_title_placeholder" = "z. B. IKEA-Sofa, 2 Jahre alt";
+"marketplace.field.item_description" = "Artikelbeschreibung";
+"marketplace.field.description_placeholder" = "Was du machst, Erfahrung, Sprachen, Ablauf";
+"marketplace.field.item_description_placeholder" = "Zustand, Größe, Verkaufsgrund, Abholung oder Versand";
+"marketplace.create.price_needed" = "Preis angeben";
+"marketplace.create.ready" = "Bereit zur Veröffentlichung";
+"marketplace.create.steps_left" = "Noch %d Schritte";
+"marketplace.create.where_contact" = "Ort & Kontakt";
+"marketplace.create.add_photo" = "Hinzufügen";
+"marketplace.create.pick_category" = "Kategorie wählen";
 "onboarding.people.title" = "Finde deine Leute in der Nähe";
 "onboarding.people.description" = "Blättere durch Karten von Menschen mit gemeinsamen Interessen. Likes sind privat – der Chat öffnet sich erst bei gegenseitigem Interesse.";
 "onboarding.people.events.title" = "Treffen und Freunde";

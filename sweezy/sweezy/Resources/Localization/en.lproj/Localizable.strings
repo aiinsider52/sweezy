@@ -4363,6 +4363,17 @@
 "marketplace.photo_cover" = "COVER";
 "marketplace.create.sell" = "Sell";
 "marketplace.create.suggested" = "Looks like “%@” — pick it?";
+"marketplace.step.about_item" = "What are you selling";
+"marketplace.field.item_title_placeholder" = "e.g. IKEA sofa, 2 years old";
+"marketplace.field.item_description" = "Item description";
+"marketplace.field.description_placeholder" = "What you do, experience, languages, how you work";
+"marketplace.field.item_description_placeholder" = "Condition, size, why you sell it, pickup or delivery";
+"marketplace.create.price_needed" = "Set a price";
+"marketplace.create.ready" = "Ready to publish";
+"marketplace.create.steps_left" = "Steps left: %d";
+"marketplace.create.where_contact" = "Location & contact";
+"marketplace.create.add_photo" = "Add";
+"marketplace.create.pick_category" = "Pick a category";
 "onboarding.people.title" = "Find your people nearby";
 "onboarding.people.description" = "Swipe through people who share your interests. Likes are private — chat opens only when it's mutual.";
 "onboarding.people.events.title" = "Meetups and friends";

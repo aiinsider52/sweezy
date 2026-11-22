@@ -3239,6 +3239,17 @@
 "marketplace.photo_cover" = "ОБКЛАДИНКА";
 "marketplace.create.sell" = "Продати";
 "marketplace.create.suggested" = "Схоже на «%@» — обрати?";
+"marketplace.step.about_item" = "Що продаєш";
+"marketplace.field.item_title_placeholder" = "Наприклад: Диван IKEA, 2 роки";
+"marketplace.field.item_description" = "Опис товару";
+"marketplace.field.description_placeholder" = "Що саме робиш, досвід, мови, як працюєш";
+"marketplace.field.item_description_placeholder" = "Стан, розмір, чому продаєш, самовивіз чи доставка";
+"marketplace.create.price_needed" = "Вкажи ціну";
+"marketplace.create.ready" = "Готово до публікації";
+"marketplace.create.steps_left" = "Залишилось кроків: %d";
+"marketplace.create.where_contact" = "Де і як зв'язатися";
+"marketplace.create.add_photo" = "Додати";
+"marketplace.create.pick_category" = "Обери категорію";
 "onboarding.people.title" = "Знайди своїх поруч";
 "onboarding.people.description" = "Гортай картки людей зі спільними інтересами. Like приватний — чат відкриється лише після взаємного вибору.";
 "onboarding.people.events.title" = "Зустрічі та друзі";

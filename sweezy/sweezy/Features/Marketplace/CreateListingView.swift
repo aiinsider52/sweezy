@@ -10,8 +10,9 @@ struct CreateListingView: View {
 
     @State private var title = ""
     @State private var description = ""
-    @State private var category: ServiceCategory = .other
-    @State private var itemCategory: ItemCategory = .other
+    /// No default: a preselected "Other" sent most listings into a category nobody browses.
+    @State private var category: ServiceCategory?
+    @State private var itemCategory: ItemCategory?
     @State private var canton = APIClient.subdivisionCode
     @State private var priceInfo = ""
     @State private var priceText = ""
@@ -41,14 +42,9 @@ struct CreateListingView: View {
         case title, description, price, contact, author
     }
 
-    private var isValid: Bool {
-        let base = !title.trimmingCharacters(in: .whitespaces).isEmpty &&
-        description.trimmingCharacters(in: .whitespaces).count >= 20 &&
-        !contactValue.trimmingCharacters(in: .whitespaces).isEmpty &&
-        !authorName.trimmingCharacters(in: .whitespaces).isEmpty
-        guard listingType == .item else { return base }
-        return base && (isFreeItem || parsedPrice != nil)
-    }
+    private var isItem: Bool { listingType == .item }
+
+    private var isValid: Bool { requiredSteps.allSatisfy { $0 } }
 
     private var parsedPrice: Int? {
         guard let value = Int(priceText.trimmingCharacters(in: .whitespaces)), value >= 0 else { return nil }
@@ -58,43 +54,50 @@ struct CreateListingView: View {
     private var currencyCode: String { APIClient.countryCode == "CH" ? "CHF" : "EUR" }
     private var country: ResidenceCountry { ResidenceCountry(rawValue: APIClient.countryCode) ?? .switzerland }
 
-    private var hasAbout: Bool {
-        !title.trimmingCharacters(in: .whitespaces).isEmpty && description.trimmingCharacters(in: .whitespaces).count >= 20
-    }
-    private var hasPrice: Bool { listingType == .service || isFreeItem || parsedPrice != nil }
+    private var hasTitle: Bool { !title.trimmingCharacters(in: .whitespaces).isEmpty }
+    private var hasDescription: Bool { description.trimmingCharacters(in: .whitespaces).count >= 20 }
+    private var hasAbout: Bool { hasTitle && hasDescription }
+    private var hasPrice: Bool { !isItem || isFreeItem || parsedPrice != nil }
     private var hasContact: Bool {
         !contactValue.trimmingCharacters(in: .whitespaces).isEmpty && !authorName.trimmingCharacters(in: .whitespaces).isEmpty
     }
-    private var hasCategory: Bool { listingType == .item ? itemCategory != .other : category != .other }
+    private var hasCategory: Bool { isItem ? itemCategory != nil : category != nil }
 
-    /// Required steps only; photos and category stay optional.
-    private var progress: (done: Int, total: Int) {
-        let steps = [hasAbout, hasPrice, hasContact]
-        return (steps.filter { $0 }.count, steps.count)
+    /// Steps that gate publishing; a service price stays optional, so it is not one of them.
+    private var requiredSteps: [Bool] {
+        isItem ? [hasAbout, hasCategory, hasPrice, hasContact] : [hasAbout, hasCategory, hasContact]
     }
+
+    private var stepsLeft: Int { requiredSteps.filter { !$0 }.count }
 
     private var missingHint: String {
         var missing: [String] = []
-        if title.trimmingCharacters(in: .whitespaces).isEmpty { missing.append("marketplace.field.title".localized) }
-        if description.trimmingCharacters(in: .whitespaces).count < 20 { missing.append("marketplace.field.description".localized) }
+        if !hasTitle { missing.append("marketplace.field.title".localized) }
+        if !hasDescription { missing.append(descriptionLabel) }
+        if !hasCategory { missing.append("marketplace.field.category".localized) }
         if !hasPrice { missing.append("marketplace.field.price".localized) }
         if contactValue.trimmingCharacters(in: .whitespaces).isEmpty { missing.append("marketplace.field.contact".localized) }
         if authorName.trimmingCharacters(in: .whitespaces).isEmpty { missing.append("marketplace.field.author".localized) }
         return "marketplace.create.missing".localized(with: missing.joined(separator: ", ").lowercased())
     }
 
+    private var descriptionLabel: String {
+        (isItem ? "marketplace.field.item_description" : "marketplace.field.description").localized
+    }
+
     private var previewPrice: String {
-        if listingType == .item {
+        if isItem {
             if isFreeItem { return "marketplace.free".localized }
             if let parsedPrice { return "\(currencyCode) \(parsedPrice)" }
-            return "\(currencyCode) —"
+            return "marketplace.create.price_needed".localized
         }
         let trimmed = priceInfo.trimmingCharacters(in: .whitespaces)
         return trimmed.isEmpty ? "marketplace.create.price_on_request".localized : trimmed
     }
 
-    private var previewCategory: (title: String, icon: String) {
-        listingType == .item ? (itemCategory.displayName, itemCategory.icon) : (category.displayName, category.icon)
+    private var previewCategory: (title: String, icon: String, swatch: JourneyCategorySwatch)? {
+        if isItem { return itemCategory.map { ($0.displayName, $0.icon, $0.swatch) } }
+        return category.map { ($0.displayName, $0.icon, $0.swatch) }
     }
 
     var body: some View {
@@ -103,33 +106,28 @@ struct CreateListingView: View {
                 JourneyVisual.pageBackground.ignoresSafeArea()
 
                 ScrollView(showsIndicators: false) {
-                    VStack(spacing: 14) {
+                    VStack(alignment: .leading, spacing: 20) {
                         header
                         previewCard
-                        stepCard(1, title: "marketplace.field.photos".localized, icon: "photo.on.rectangle.angled", done: !selectedImages.isEmpty, optional: true) {
+                        section("marketplace.field.photos".localized, done: !selectedImages.isEmpty, optional: true, boxed: false) {
                             photosContent
                         }
-                        stepCard(2, title: "marketplace.step.about".localized, icon: "text.alignleft", done: hasAbout) {
-                            titleField
-                            descriptionField
+                        section((isItem ? "marketplace.step.about_item" : "marketplace.step.about").localized, done: hasAbout) {
+                            aboutContent
                         }
-                        stepCard(3, title: "marketplace.field.category".localized, icon: "tag.fill", done: hasCategory) {
-                            categoryGrid
+                        section("marketplace.field.category".localized, done: hasCategory, boxed: false) {
+                            categoryChips
                         }
-                        stepCard(4, title: "marketplace.field.price".localized, icon: "banknote.fill", done: hasPrice && (listingType == .item || !priceInfo.isEmpty), optional: listingType == .service) {
-                            if listingType == .item { itemPriceContent } else { servicePriceField }
+                        section("marketplace.field.price".localized, done: isItem ? hasPrice : !priceInfo.isEmpty, optional: !isItem) {
+                            if isItem { itemPriceContent } else { servicePriceField }
                         }
-                        stepCard(5, title: country.subdivisionTitle, icon: "mappin.and.ellipse", done: true) {
-                            cantonButton
-                        }
-                        stepCard(6, title: "marketplace.field.contact".localized, icon: "bubble.left.fill", done: hasContact) {
+                        section("marketplace.create.where_contact".localized, done: hasContact) {
                             contactContent
-                            authorField
                         }
                     }
                     .padding(.horizontal, 16)
                     .padding(.top, 8)
-                    .padding(.bottom, 132)
+                    .padding(.bottom, 128)
                 }
                 .scrollDismissesKeyboard(.interactively)
 
@@ -158,93 +156,70 @@ struct CreateListingView: View {
     // MARK: - Header & preview
 
     private var header: some View {
-        HStack(spacing: 12) {
-            Button { dismiss() } label: {
-                Image(systemName: "xmark")
-                    .font(.system(size: 15, weight: .bold))
-                    .foregroundColor(JourneyVisual.primaryText)
-                    .frame(width: 44, height: 44)
-                    .background(Theme.Colors.card, in: Circle())
-                    .overlay(Circle().stroke(JourneyVisual.softBorder))
-            }
-            .accessibilityLabel("common.cancel".localized)
-
-            VStack(alignment: .leading, spacing: 1) {
-                Text(listingType == .item ? "marketplace.create_item_title".localized : "marketplace.create_title".localized)
-                    .font(.system(size: 22, weight: .bold))
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 12) {
+                circleButton("xmark", label: "common.cancel".localized) { dismiss() }
+                Spacer(minLength: 8)
+                Text((isItem ? "marketplace.create_item_title" : "marketplace.create_title").localized)
+                    .font(.system(size: 17, weight: .bold))
                     .foregroundColor(JourneyVisual.primaryText)
                     .lineLimit(1)
-                    .minimumScaleFactor(0.8)
-                Text("marketplace.create.progress".localized(with: progress.done, progress.total))
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(JourneyVisual.secondaryText)
+                Spacer(minLength: 8)
+                circleButton("list.bullet", label: "marketplace.my_listings".localized) { showMyListings = true }
             }
 
-            Spacer(minLength: 8)
-
-            Button { showMyListings = true } label: {
-                Image(systemName: "list.bullet.rectangle")
-                    .font(.system(size: 15, weight: .bold))
-                    .foregroundColor(JourneyVisual.primaryText)
-                    .frame(width: 44, height: 44)
-                    .background(Theme.Colors.card, in: Circle())
-                    .overlay(Circle().stroke(JourneyVisual.softBorder))
+            HStack(spacing: 4) {
+                ForEach(Array(requiredSteps.enumerated()), id: \.offset) { _, done in
+                    Capsule()
+                        .fill(done ? JourneyVisual.lime : JourneyVisual.primaryText.opacity(0.1))
+                        .frame(height: 4)
+                }
             }
-            .accessibilityLabel("marketplace.my_listings".localized)
+            .animation(.easeOut(duration: 0.25), value: requiredSteps)
+
+            Text(isValid ? "marketplace.create.ready".localized : "marketplace.create.steps_left".localized(with: stepsLeft))
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundColor(isValid ? JourneyVisual.accentText : JourneyVisual.secondaryText)
+                .contentTransition(.numericText())
+                .animation(.easeOut(duration: 0.2), value: stepsLeft)
         }
-        .padding(.top, 8)
+        .padding(.top, 6)
+    }
+
+    private func circleButton(_ icon: String, label: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: icon)
+                .font(.system(size: 14, weight: .bold))
+                .foregroundColor(JourneyVisual.primaryText)
+                .frame(width: 38, height: 38)
+                .background(Theme.Colors.card, in: Circle())
+                .overlay(Circle().stroke(JourneyVisual.softBorder))
+        }
+        .accessibilityLabel(label)
     }
 
     /// How the listing will look in the feed, updated while the form is filled.
     private var previewCard: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text("marketplace.create.preview".localized.uppercased())
-                    .font(.system(size: 10, weight: .black))
-                    .tracking(1.2)
-                    .foregroundColor(JourneyVisual.accentText)
-                Spacer()
-                GeometryReader { proxy in
-                    ZStack(alignment: .leading) {
-                        Capsule().fill(JourneyVisual.softSurface)
-                        Capsule().fill(JourneyVisual.lime)
-                            .frame(width: proxy.size.width * CGFloat(progress.done) / CGFloat(max(progress.total, 1)))
-                    }
-                }
-                .frame(width: 84, height: 6)
-                .animation(.easeOut(duration: 0.25), value: progress.done)
-            }
-
-            HStack(spacing: 14) {
-                ZStack {
-                    if let first = selectedImages.first {
-                        Image(uiImage: first.image).resizable().scaledToFill()
-                    } else {
-                        JourneyVisual.softSurface
-                        Image(systemName: previewCategory.icon)
-                            .font(.system(size: 26, weight: .semibold))
-                            .foregroundColor(JourneyVisual.accentStrong)
-                    }
-                }
-                .frame(width: 92, height: 92)
-                .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-
-                VStack(alignment: .leading, spacing: 6) {
-                    Label(previewCategory.title, systemImage: previewCategory.icon)
-                        .font(.system(size: 10, weight: .bold))
-                        .foregroundColor(JourneyVisual.accentText)
+        VStack(alignment: .leading, spacing: 8) {
+            sectionLabel("marketplace.create.preview".localized)
+            HStack(spacing: 12) {
+                previewThumb
+                VStack(alignment: .leading, spacing: 5) {
+                    Text(previewCategory?.title ?? "marketplace.create.pick_category".localized)
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundColor(previewCategory?.swatch.ink ?? JourneyVisual.secondaryText)
                         .lineLimit(1)
                     Text(title.isEmpty ? "marketplace.create.preview_title".localized : title)
-                        .font(.system(size: 17, weight: .bold))
+                        .font(.system(size: 15, weight: .bold))
                         .foregroundColor(title.isEmpty ? JourneyVisual.secondaryText : JourneyVisual.primaryText)
                         .lineLimit(2)
                     HStack(spacing: 8) {
                         Text(previewPrice)
-                            .font(.system(size: 13, weight: .black))
-                            .foregroundColor(.black)
-                            .padding(.horizontal, 9)
-                            .frame(height: 24)
-                            .background(JourneyVisual.lime, in: Capsule())
+                            .font(.system(size: 12, weight: .heavy))
+                            .foregroundColor(hasPrice ? .black : JourneyVisual.secondaryText)
+                            .padding(.horizontal, 8)
+                            .frame(height: 22)
+                            .background(hasPrice ? JourneyVisual.lime : JourneyVisual.softSurface, in: Capsule())
                         Label(canton == "all" ? country.flag : canton, systemImage: "mappin")
                             .font(.system(size: 11, weight: .semibold))
                             .foregroundColor(JourneyVisual.secondaryText)
@@ -252,117 +227,133 @@ struct CreateListingView: View {
                 }
                 Spacer(minLength: 0)
             }
+            .padding(10)
+            .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(JourneyVisual.softBorder))
+            .shadow(color: .black.opacity(colorScheme == .dark ? 0 : 0.05), radius: 12, y: 4)
         }
-        .padding(14)
-        .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous).stroke(JourneyVisual.lime.opacity(0.55), lineWidth: 1.5))
         .animation(.easeOut(duration: 0.2), value: title)
         .animation(.easeOut(duration: 0.2), value: selectedImages.count)
     }
 
-    // MARK: - Steps
+    @ViewBuilder
+    private var previewThumb: some View {
+        let shape = RoundedRectangle(cornerRadius: 14, style: .continuous)
+        ZStack {
+            if let first = selectedImages.first {
+                Image(uiImage: first.image).resizable().scaledToFill()
+            } else if let cat = previewCategory {
+                cat.swatch.fill
+                Image(systemName: cat.icon)
+                    .font(.system(size: 24, weight: .semibold))
+                    .foregroundColor(cat.swatch.ink)
+            } else {
+                JourneyVisual.softSurface
+                Image(systemName: "photo")
+                    .font(.system(size: 20, weight: .semibold))
+                    .foregroundColor(JourneyVisual.secondaryText.opacity(0.6))
+            }
+        }
+        .frame(width: 72, height: 72)
+        .clipShape(shape)
+    }
 
-    private func stepCard<Content: View>(
-        _ number: Int, title: String, icon: String, done: Bool, optional: Bool = false,
+    // MARK: - Sections
+
+    private func sectionLabel(_ text: String) -> some View {
+        Text(text.uppercased())
+            .font(.system(size: 11, weight: .bold))
+            .tracking(0.8)
+            .foregroundColor(JourneyVisual.secondaryText)
+    }
+
+    private func section<Content: View>(
+        _ title: String, done: Bool, optional: Bool = false, boxed: Bool = true,
         @ViewBuilder content: () -> Content
     ) -> some View {
-        VStack(alignment: .leading, spacing: 14) {
-            HStack(spacing: 10) {
-                ZStack {
-                    Circle().fill(done ? JourneyVisual.lime : JourneyVisual.softSurface)
-                    if done {
-                        Image(systemName: "checkmark").font(.system(size: 12, weight: .black)).foregroundColor(.black)
-                    } else {
-                        Text("\(number)").font(.system(size: 13, weight: .black)).foregroundColor(JourneyVisual.primaryText)
-                    }
-                }
-                .frame(width: 28, height: 28)
-                .animation(.spring(response: 0.3, dampingFraction: 0.7), value: done)
-
-                Text(title)
-                    .font(.system(size: 16, weight: .bold))
-                    .foregroundColor(JourneyVisual.primaryText)
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 6) {
+                sectionLabel(title)
                 if optional {
-                    Text("marketplace.optional".localized)
-                        .font(.system(size: 11, weight: .semibold))
-                        .foregroundColor(JourneyVisual.secondaryText)
-                        .padding(.horizontal, 8)
-                        .frame(height: 20)
-                        .background(JourneyVisual.softSurface, in: Capsule())
+                    Text("· " + "marketplace.optional".localized)
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundColor(JourneyVisual.secondaryText.opacity(0.8))
                 }
                 Spacer(minLength: 0)
-                Image(systemName: icon)
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundColor(JourneyVisual.secondaryText)
+                if done {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 15))
+                        .foregroundStyle(.black, JourneyVisual.lime)
+                        .transition(.scale.combined(with: .opacity))
+                }
             }
-            content()
+            .animation(.spring(response: 0.3, dampingFraction: 0.7), value: done)
+            .padding(.horizontal, 4)
+
+            if boxed {
+                VStack(alignment: .leading, spacing: 0) { content() }
+                    .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(JourneyVisual.softBorder))
+            } else {
+                content()
+            }
         }
-        .padding(16)
-        .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(JourneyVisual.softBorder, lineWidth: 1))
+    }
+
+    private var rowDivider: some View {
+        Rectangle().fill(JourneyVisual.softBorder).frame(height: 1).padding(.leading, 14)
     }
 
     // MARK: - Photos
 
+    private var addPhotoTile: some View {
+        VStack(spacing: 4) {
+            Image(systemName: "camera.fill").font(.system(size: 18, weight: .semibold))
+            Text(selectedImages.isEmpty ? "marketplace.create.add_photo".localized : "\(selectedImages.count)/\(maxImages)")
+                .font(.system(size: 11, weight: .bold))
+        }
+        .foregroundColor(JourneyVisual.accentText)
+        .frame(width: 76, height: 76)
+        .background(JourneyVisual.lime.opacity(0.22), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .stroke(JourneyVisual.accentStrong.opacity(0.4), style: StrokeStyle(lineWidth: 1.2, dash: [5, 4]))
+        )
+    }
+
     private var photosContent: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            if selectedImages.isEmpty {
-                PhotosPicker(selection: $selectedPhotoItems, maxSelectionCount: maxImages, matching: .images) {
-                    VStack(spacing: 10) {
-                        Image(systemName: "camera.fill")
-                            .font(.system(size: 22, weight: .bold))
-                            .foregroundColor(.black)
-                            .frame(width: 54, height: 54)
-                            .background(JourneyVisual.lime, in: Circle())
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                if selectedImages.count < maxImages {
+                    PhotosPicker(
+                        selection: $selectedPhotoItems,
+                        maxSelectionCount: maxImages - selectedImages.count,
+                        matching: .images
+                    ) {
+                        addPhotoTile
+                    }
+                    .buttonStyle(.plain)
+                }
+                if selectedImages.isEmpty {
+                    VStack(alignment: .leading, spacing: 3) {
                         Text("marketplace.photos_placeholder".localized(with: maxImages))
-                            .font(.system(size: 15, weight: .bold))
+                            .font(.system(size: 14, weight: .semibold))
                             .foregroundColor(JourneyVisual.primaryText)
                         Text("marketplace.photos_hint".localized)
-                            .font(.caption)
+                            .font(.system(size: 12))
                             .foregroundColor(JourneyVisual.secondaryText)
-                            .multilineTextAlignment(.center)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 26)
-                    .padding(.horizontal, 12)
-                    .background(JourneyVisual.softSurface, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 18, style: .continuous)
-                            .stroke(JourneyVisual.accentStrong.opacity(0.35), style: StrokeStyle(lineWidth: 1.5, dash: [7, 5]))
-                    )
+                    .frame(width: 250, alignment: .leading)
+                    .padding(.leading, 4)
                 }
-                .buttonStyle(.plain)
-            } else {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 10) {
-                        ForEach(Array(selectedImages.enumerated()), id: \.element.id) { index, image in
-                            photoThumbnail(image, isCover: index == 0)
-                        }
-                        if selectedImages.count < maxImages {
-                            PhotosPicker(
-                                selection: $selectedPhotoItems,
-                                maxSelectionCount: maxImages - selectedImages.count,
-                                matching: .images
-                            ) {
-                                VStack(spacing: 6) {
-                                    Image(systemName: "plus").font(.system(size: 20, weight: .bold))
-                                    Text("\(selectedImages.count)/\(maxImages)").font(.caption.weight(.bold))
-                                }
-                                .foregroundColor(JourneyVisual.accentText)
-                                .frame(width: 104, height: 104)
-                                .background(JourneyVisual.softSurface, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                        .stroke(JourneyVisual.accentStrong.opacity(0.35), style: StrokeStyle(lineWidth: 1.5, dash: [7, 5]))
-                                )
-                            }
-                            .buttonStyle(.plain)
-                        }
-                    }
+                ForEach(Array(selectedImages.enumerated()), id: \.element.id) { index, image in
+                    photoThumbnail(image, isCover: index == 0)
                 }
-                .scrollClipDisabled()
             }
+            .padding(.horizontal, 1)
         }
+        .scrollClipDisabled()
     }
 
     private func photoThumbnail(_ image: SelectedListingImage, isCover: Bool) -> some View {
@@ -370,17 +361,17 @@ struct CreateListingView: View {
             Image(uiImage: image.image)
                 .resizable()
                 .scaledToFill()
-                .frame(width: 104, height: 104)
+                .frame(width: 76, height: 76)
                 .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                 .overlay(alignment: .bottomLeading) {
                     if isCover {
                         Text("marketplace.photo_cover".localized)
-                            .font(.system(size: 9, weight: .black))
+                            .font(.system(size: 8, weight: .black))
                             .foregroundColor(.black)
-                            .padding(.horizontal, 7)
-                            .frame(height: 18)
+                            .padding(.horizontal, 6)
+                            .frame(height: 16)
                             .background(JourneyVisual.lime, in: Capsule())
-                            .padding(6)
+                            .padding(5)
                     }
                 }
 
@@ -388,10 +379,10 @@ struct CreateListingView: View {
                 removeSelectedImage(image)
             } label: {
                 Image(systemName: "xmark.circle.fill")
-                    .font(.system(size: 22))
+                    .font(.system(size: 20))
                     .symbolRenderingMode(.hierarchical)
                     .foregroundStyle(.white, Color.black.opacity(0.55))
-                    .padding(5)
+                    .padding(3)
             }
             .accessibilityLabel("marketplace.photo_remove".localized)
         }
@@ -399,217 +390,245 @@ struct CreateListingView: View {
 
     // MARK: - About
 
-    private var titleField: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            fieldCaption("marketplace.field.title".localized, counter: "\(title.count)/100", warn: title.count > 90)
-            TextField("marketplace.field.title_placeholder".localized, text: $title)
-                .focused($focusedField, equals: .title)
-                .font(.body.weight(.medium))
-                .padding(.horizontal, 14)
-                .frame(height: 50)
-                .background(fieldBackground)
-                .overlay(fieldBorder(.title))
-                .onChange(of: title) { _, newValue in
-                    if newValue.count > 100 { title = String(newValue.prefix(100)) }
-                    updateCategorySuggestion(for: newValue)
+    private var aboutContent: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack(spacing: 8) {
+                TextField((isItem ? "marketplace.field.item_title_placeholder" : "marketplace.field.title_placeholder").localized, text: $title)
+                    .focused($focusedField, equals: .title)
+                    .font(.system(size: 16, weight: .semibold))
+                    .onChange(of: title) { _, newValue in
+                        if newValue.count > 100 { title = String(newValue.prefix(100)) }
+                        updateCategorySuggestion(for: newValue)
+                    }
+                if title.count > 80 {
+                    Text("\(title.count)/100")
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundColor(title.count > 95 ? Theme.Colors.error : JourneyVisual.secondaryText)
                 }
-            if let suggested = suggestedCategory, categorySuggestionVisible, suggested != category {
-                suggestedCategoryBadge(suggested)
-                    .transition(.scale(scale: 0.85).combined(with: .opacity))
             }
-        }
-        .animation(.spring(response: 0.4, dampingFraction: 0.7), value: categorySuggestionVisible)
-    }
+            .padding(.horizontal, 14)
+            .frame(height: 50)
 
-    private var descriptionField: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            fieldCaption("marketplace.field.description".localized, counter: "\(description.count)/1000", warn: description.count > 950)
-            TextEditor(text: $description)
-                .focused($focusedField, equals: .description)
-                .font(.body)
-                .frame(minHeight: 110, maxHeight: 180)
-                .scrollContentBackground(.hidden)
-                .padding(10)
-                .background(fieldBackground)
-                .overlay(fieldBorder(.description))
-                .onChange(of: description) { _, newValue in
-                    if newValue.count > 1000 { description = String(newValue.prefix(1000)) }
+            rowDivider
+
+            ZStack(alignment: .topLeading) {
+                if description.isEmpty {
+                    Text((isItem ? "marketplace.field.item_description_placeholder" : "marketplace.field.description_placeholder").localized)
+                        .font(.system(size: 15))
+                        .foregroundColor(JourneyVisual.secondaryText.opacity(0.7))
+                        .padding(.horizontal, 14)
+                        .padding(.top, 12)
+                        .allowsHitTesting(false)
                 }
-            if description.count < 20 && !description.isEmpty {
-                Label("marketplace.field.description_min".localized, systemImage: "exclamationmark.circle")
-                    .font(.caption2)
-                    .foregroundColor(Theme.Colors.warning)
+                TextEditor(text: $description)
+                    .focused($focusedField, equals: .description)
+                    .font(.system(size: 15))
+                    .frame(minHeight: 96, maxHeight: 170)
+                    .scrollContentBackground(.hidden)
+                    .padding(.horizontal, 9)
+                    .padding(.vertical, 4)
+                    .onChange(of: description) { _, newValue in
+                        if newValue.count > 1000 { description = String(newValue.prefix(1000)) }
+                    }
+            }
+
+            if !description.isEmpty {
+                HStack {
+                    if !hasDescription {
+                        Label("marketplace.field.description_min".localized, systemImage: "exclamationmark.circle")
+                            .foregroundColor(Theme.Colors.warning)
+                    }
+                    Spacer()
+                    Text("\(description.count)/1000")
+                        .foregroundColor(description.count > 950 ? Theme.Colors.error : JourneyVisual.secondaryText)
+                }
+                .font(.system(size: 11, weight: .medium))
+                .padding(.horizontal, 14)
+                .padding(.bottom, 10)
             }
         }
     }
 
     // MARK: - Category
 
-    private var categoryGrid: some View {
-        LazyVGrid(columns: [GridItem(.adaptive(minimum: 140), spacing: 8)], spacing: 8) {
-            if listingType == .item {
-                ForEach(ItemCategory.allCases) { cat in
-                    categoryChip(title: cat.displayName, icon: cat.icon, selected: itemCategory == cat, suggested: false) {
-                        itemCategory = cat
-                        if cat == .free { isFreeItem = true }
+    private var categoryChips: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            if let suggested = suggestedCategory, categorySuggestionVisible, suggested != category {
+                suggestedCategoryBadge(suggested)
+                    .transition(.scale(scale: 0.85, anchor: .leading).combined(with: .opacity))
+            }
+            FlowLayout(spacing: 8) {
+                if isItem {
+                    ForEach(ItemCategory.allCases) { cat in
+                        categoryChip(title: cat.displayName, icon: cat.icon, swatch: cat.swatch, selected: itemCategory == cat, suggested: false) {
+                            itemCategory = cat
+                            if cat == .free { isFreeItem = true }
+                        }
                     }
-                }
-            } else {
-                ForEach(ServiceCategory.allCases) { cat in
-                    categoryChip(
-                        title: cat.displayName, icon: cat.icon, selected: category == cat,
-                        suggested: suggestedCategory == cat && categorySuggestionVisible && category != cat
-                    ) {
-                        category = cat
-                        if suggestedCategory == cat { categorySuggestionVisible = false }
+                } else {
+                    ForEach(ServiceCategory.allCases) { cat in
+                        categoryChip(
+                            title: cat.displayName, icon: cat.icon, swatch: cat.swatch, selected: category == cat,
+                            suggested: suggestedCategory == cat && categorySuggestionVisible && category != cat
+                        ) {
+                            category = cat
+                            if suggestedCategory == cat { categorySuggestionVisible = false }
+                        }
                     }
                 }
             }
         }
+        .animation(.spring(response: 0.4, dampingFraction: 0.75), value: categorySuggestionVisible)
     }
 
-    private func categoryChip(title: String, icon: String, selected: Bool, suggested: Bool, action: @escaping () -> Void) -> some View {
+    private func categoryChip(
+        title: String, icon: String, swatch: JourneyCategorySwatch, selected: Bool, suggested: Bool,
+        action: @escaping () -> Void
+    ) -> some View {
         Button {
             withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) { action() }
         } label: {
-            HStack(spacing: 7) {
-                Image(systemName: icon).font(.system(size: 12, weight: .bold))
+            HStack(spacing: 6) {
+                Image(systemName: icon)
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(selected ? .black : swatch.ink)
+                    .frame(width: 16)
                 Text(title)
                     .font(.system(size: 13, weight: .semibold))
+                    .foregroundColor(selected ? .black : JourneyVisual.primaryText)
                     .lineLimit(1)
-                    .minimumScaleFactor(0.8)
-                Spacer(minLength: 0)
-                if suggested {
-                    Image(systemName: "sparkle").font(.system(size: 9, weight: .bold))
-                }
             }
-            .foregroundColor(selected ? .black : JourneyVisual.primaryText)
-            .padding(.horizontal, 12)
-            .frame(height: 44)
-            .frame(maxWidth: .infinity)
-            .background(selected ? JourneyVisual.lime : JourneyVisual.softSurface, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .padding(.leading, 11)
+            .padding(.trailing, 13)
+            .frame(height: 36)
+            .background(selected ? JourneyVisual.lime : Theme.Colors.card, in: Capsule())
             .overlay(
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .stroke(suggested ? JourneyVisual.accentStrong.opacity(0.6) : Color.clear, style: StrokeStyle(lineWidth: 1.5, dash: [4, 3]))
+                Capsule().stroke(
+                    suggested ? JourneyVisual.accentStrong.opacity(0.7) : (selected ? Color.clear : JourneyVisual.softBorder),
+                    style: StrokeStyle(lineWidth: suggested ? 1.5 : 1, dash: suggested ? [4, 3] : [])
+                )
             )
         }
-        .buttonStyle(ScaleButtonStyle(scaleAmount: 0.97, hapticStyle: .light))
+        .buttonStyle(ScaleButtonStyle(scaleAmount: 0.96, hapticStyle: .light))
         .accessibilityAddTraits(selected ? .isSelected : [])
     }
 
     // MARK: - Price
 
     private var itemPriceContent: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(spacing: 8) {
+        VStack(alignment: .leading, spacing: 0) {
+            segmentTrack {
                 segment("marketplace.create.sell".localized, icon: "banknote", selected: !isFreeItem) { isFreeItem = false }
                 segment("marketplace.field.give_away".localized, icon: "gift.fill", selected: isFreeItem) { isFreeItem = true }
             }
+            .padding(10)
 
             if !isFreeItem {
+                rowDivider
                 HStack(spacing: 10) {
                     Text(currencyCode)
-                        .font(.system(size: 15, weight: .black))
+                        .font(.system(size: 14, weight: .black))
                         .foregroundColor(JourneyVisual.accentText)
                     TextField("marketplace.field.item_price_placeholder".localized, text: $priceText)
                         .focused($focusedField, equals: .price)
-                        .font(.system(size: 22, weight: .bold))
+                        .font(.system(size: 20, weight: .bold))
                         .keyboardType(.numberPad)
                         .onChange(of: priceText) { _, newValue in
                             let digits = newValue.filter(\.isNumber)
                             if digits != newValue { priceText = digits }
                             if digits.count > 7 { priceText = String(digits.prefix(7)) }
                         }
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.2)) { negotiable.toggle() }
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: negotiable ? "checkmark" : "arrow.left.arrow.right")
+                                .font(.system(size: 10, weight: .bold))
+                            Text("marketplace.price.negotiable".localized)
+                                .font(.system(size: 13, weight: .semibold))
+                        }
+                        .foregroundColor(negotiable ? .black : JourneyVisual.primaryText)
+                        .padding(.horizontal, 11)
+                        .frame(height: 30)
+                        .background(negotiable ? JourneyVisual.lime : JourneyVisual.softSurface, in: Capsule())
+                        .overlay(Capsule().stroke(negotiable ? Color.clear : JourneyVisual.softBorder))
+                    }
+                    .buttonStyle(ScaleButtonStyle(scaleAmount: 0.95, hapticStyle: .light))
+                    .accessibilityLabel("marketplace.field.negotiable".localized)
+                    .accessibilityAddTraits(negotiable ? .isSelected : [])
                 }
                 .padding(.horizontal, 14)
-                .frame(height: 56)
-                .background(fieldBackground)
-                .overlay(fieldBorder(.price))
-
-                Toggle(isOn: $negotiable) {
-                    Text("marketplace.field.negotiable".localized)
-                        .font(.subheadline.weight(.medium))
-                        .foregroundColor(JourneyVisual.primaryText)
-                }
-                .tint(JourneyVisual.accentStrong)
+                .frame(height: 54)
             }
 
-            fieldCaption("marketplace.field.condition".localized)
-            HStack(spacing: 8) {
-                ForEach(ItemCondition.allCases) { cond in
-                    segment(cond.displayName, icon: nil, selected: condition == cond) { condition = cond }
+            rowDivider
+            HStack(spacing: 10) {
+                Text("marketplace.field.condition".localized)
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundColor(JourneyVisual.secondaryText)
+                segmentTrack {
+                    ForEach(ItemCondition.allCases) { cond in
+                        segment(cond.displayName, icon: nil, selected: condition == cond) { condition = cond }
+                    }
                 }
             }
+            .padding(.leading, 14)
+            .padding(.trailing, 10)
+            .padding(.vertical, 10)
         }
     }
 
     private var servicePriceField: some View {
         HStack(spacing: 10) {
-            Text(currencyCode)
-                .font(.system(size: 15, weight: .black))
-                .foregroundColor(JourneyVisual.accentText)
+            Image(systemName: "banknote")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(JourneyVisual.accentStrong)
+                .frame(width: 20)
             TextField("marketplace.field.price_placeholder".localized, text: $priceInfo)
                 .focused($focusedField, equals: .price)
-                .font(.body.weight(.medium))
+                .font(.system(size: 16, weight: .medium))
         }
         .padding(.horizontal, 14)
         .frame(height: 50)
-        .background(fieldBackground)
-        .overlay(fieldBorder(.price))
     }
 
-    // MARK: - Location
-
-    private var cantonButton: some View {
-        Button {
-            showCantonPicker = true
-        } label: {
-            HStack(spacing: 12) {
-                Text(canton == "all" ? country.flag : canton)
-                    .font(.system(size: 13, weight: .black))
-                    .foregroundColor(.black)
-                    .frame(width: 40, height: 40)
-                    .background(JourneyVisual.lime, in: Circle())
-                Text(CountryCatalog.subdivisionName(country: country, code: canton))
-                    .font(.body.weight(.semibold))
-                    .foregroundColor(JourneyVisual.primaryText)
-                Spacer()
-                Text("common.change".localized)
-                    .font(.system(size: 13, weight: .bold))
-                    .foregroundColor(JourneyVisual.accentText)
-            }
-            .padding(.horizontal, 12)
-            .frame(height: 58)
-            .background(fieldBackground)
-        }
-        .buttonStyle(.plain)
-    }
-
-    // MARK: - Contact
+    // MARK: - Location & contact
 
     private var contactContent: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack(spacing: 8) {
+        VStack(alignment: .leading, spacing: 0) {
+            Button {
+                showCantonPicker = true
+            } label: {
+                HStack(spacing: 10) {
+                    Image(systemName: "mappin.and.ellipse")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(JourneyVisual.accentStrong)
+                        .frame(width: 20)
+                    Text(CountryCatalog.subdivisionName(country: country, code: canton))
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(JourneyVisual.primaryText)
+                    Spacer()
+                    Text(country.subdivisionTitle)
+                        .font(.system(size: 13))
+                        .foregroundColor(JourneyVisual.secondaryText)
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(JourneyVisual.secondaryText)
+                }
+                .padding(.horizontal, 14)
+                .frame(height: 50)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+
+            rowDivider
+
+            segmentTrack {
                 ForEach(ContactType.allCases) { type in
-                    Button {
-                        withAnimation(.easeInOut(duration: 0.2)) { contactType = type }
-                    } label: {
-                        VStack(spacing: 5) {
-                            Image(systemName: type.icon).font(.system(size: 15, weight: .semibold))
-                            Text(type.displayName)
-                                .font(.system(size: 11, weight: .semibold))
-                                .lineLimit(1)
-                                .minimumScaleFactor(0.75)
-                        }
-                        .foregroundColor(contactType == type ? .black : JourneyVisual.primaryText)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 58)
-                        .background(contactType == type ? JourneyVisual.lime : JourneyVisual.softSurface, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-                    }
-                    .buttonStyle(ScaleButtonStyle(scaleAmount: 0.96, hapticStyle: .light))
-                    .accessibilityAddTraits(contactType == type ? .isSelected : [])
+                    segment(type.displayName, icon: type.icon, selected: contactType == type) { contactType = type }
                 }
             }
+            .padding(10)
 
             HStack(spacing: 10) {
                 Image(systemName: contactType.icon)
@@ -618,36 +637,29 @@ struct CreateListingView: View {
                     .frame(width: 20)
                 TextField(contactType.placeholder, text: $contactValue)
                     .focused($focusedField, equals: .contact)
-                    .font(.body.weight(.medium))
+                    .font(.system(size: 16, weight: .medium))
                     .keyboardType(contactType == .email ? .emailAddress : contactType == .telegram ? .default : .phonePad)
                     .textContentType(contactType == .email ? .emailAddress : contactType == .phone ? .telephoneNumber : nil)
                     .textInputAutocapitalization(.never)
             }
             .padding(.horizontal, 14)
             .frame(height: 50)
-            .background(fieldBackground)
-            .overlay(fieldBorder(.contact))
-        }
-    }
 
-    private var authorField: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            fieldCaption("marketplace.field.author".localized)
+            rowDivider
+
             HStack(spacing: 10) {
                 Text(authorName.isEmpty ? "?" : String(authorName.prefix(1)).uppercased())
-                    .font(.system(size: 14, weight: .black))
+                    .font(.system(size: 11, weight: .black))
                     .foregroundColor(.black)
-                    .frame(width: 32, height: 32)
+                    .frame(width: 22, height: 22)
                     .background(JourneyVisual.lime, in: Circle())
                 TextField("marketplace.field.author_placeholder".localized, text: $authorName)
                     .focused($focusedField, equals: .author)
-                    .font(.body.weight(.medium))
+                    .font(.system(size: 16, weight: .medium))
                     .textContentType(.name)
             }
-            .padding(.horizontal, 10)
+            .padding(.horizontal, 13)
             .frame(height: 50)
-            .background(fieldBackground)
-            .overlay(fieldBorder(.author))
         }
     }
 
@@ -676,10 +688,10 @@ struct CreateListingView: View {
                         Image(systemName: "arrow.right")
                     }
                 }
-                .font(.headline)
+                .font(.system(size: 16, weight: .bold))
                 .foregroundColor(isValid ? .black : JourneyVisual.secondaryText)
                 .frame(maxWidth: .infinity)
-                .frame(height: 56)
+                .frame(height: 52)
                 .background(isValid ? JourneyVisual.lime : JourneyVisual.softSurface, in: Capsule())
                 .shadow(color: isValid ? JourneyVisual.lime.opacity(0.35) : .clear, radius: 14, y: 6)
             }
@@ -688,14 +700,18 @@ struct CreateListingView: View {
             .accessibilityIdentifier("marketplace.create.submit")
         }
         .padding(.horizontal, 16)
-        .padding(.top, 12)
-        .padding(.bottom, 10)
-        .background(
-            JourneyVisual.pageBackground
-                .opacity(0.96)
-                .ignoresSafeArea(edges: .bottom)
-                .shadow(color: .black.opacity(0.06), radius: 10, y: -4)
-        )
+        .padding(.top, 10)
+        .padding(.bottom, 8)
+        .background(alignment: .top) {
+            VStack(spacing: 0) {
+                LinearGradient(colors: [JourneyVisual.pageBackground.opacity(0), JourneyVisual.pageBackground], startPoint: .top, endPoint: .bottom)
+                    .frame(height: 24)
+                    .offset(y: -24)
+                    .padding(.bottom, -24)
+                JourneyVisual.pageBackground
+            }
+            .ignoresSafeArea(edges: .bottom)
+        }
         .animation(.easeOut(duration: 0.2), value: isValid)
     }
 
@@ -740,43 +756,27 @@ struct CreateListingView: View {
 
     // MARK: - Shared Components
 
-    private var fieldBackground: some View {
-        RoundedRectangle(cornerRadius: 14, style: .continuous)
-            .fill(colorScheme == .dark ? Color.white.opacity(0.06) : Color.black.opacity(0.035))
-    }
-
-    private func fieldBorder(_ field: FormField) -> some View {
-        RoundedRectangle(cornerRadius: 14, style: .continuous)
-            .stroke(focusedField == field ? JourneyVisual.accentStrong : Color.clear, lineWidth: 1.5)
-            .animation(.easeOut(duration: 0.15), value: focusedField)
-    }
-
-    private func fieldCaption(_ text: String, counter: String? = nil, warn: Bool = false) -> some View {
-        HStack {
-            Text(text)
-                .font(.system(size: 12, weight: .bold))
-                .foregroundColor(JourneyVisual.secondaryText)
-            Spacer()
-            if let counter {
-                Text(counter)
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundColor(warn ? Theme.Colors.error : JourneyVisual.secondaryText)
-            }
-        }
+    /// Pill segments on a soft track, iOS segmented-control style.
+    private func segmentTrack<Content: View>(@ViewBuilder content: () -> Content) -> some View {
+        HStack(spacing: 2) { content() }
+            .padding(3)
+            .background(JourneyVisual.softSurface, in: Capsule())
     }
 
     private func segment(_ title: String, icon: String?, selected: Bool, action: @escaping () -> Void) -> some View {
         Button {
             withAnimation(.easeInOut(duration: 0.2)) { action() }
         } label: {
-            HStack(spacing: 6) {
-                if let icon { Image(systemName: icon).font(.system(size: 12, weight: .bold)) }
-                Text(title).font(.system(size: 13, weight: .semibold)).lineLimit(1).minimumScaleFactor(0.8)
+            HStack(spacing: 5) {
+                if let icon { Image(systemName: icon).font(.system(size: 11, weight: .bold)) }
+                Text(title).font(.system(size: 12, weight: .semibold)).lineLimit(1).minimumScaleFactor(0.75)
             }
             .foregroundColor(selected ? .black : JourneyVisual.primaryText)
+            .padding(.horizontal, 6)
             .frame(maxWidth: .infinity)
-            .frame(height: 42)
-            .background(selected ? JourneyVisual.lime : JourneyVisual.softSurface, in: Capsule())
+            .frame(height: 32)
+            .background(selected ? JourneyVisual.lime : Color.clear, in: Capsule())
+            .contentShape(Capsule())
         }
         .buttonStyle(ScaleButtonStyle(scaleAmount: 0.97, hapticStyle: .light))
         .accessibilityAddTraits(selected ? .isSelected : [])
@@ -852,7 +852,7 @@ struct CreateListingView: View {
             listingType: listingType,
             title: title.trimmingCharacters(in: .whitespaces),
             description: description.trimmingCharacters(in: .whitespaces),
-            category: listingType == .item ? itemCategory.rawValue : category.rawValue,
+            category: (isItem ? itemCategory?.rawValue : category?.rawValue) ?? ServiceCategory.other.rawValue,
             canton: canton,
             priceInfo: listingType == .service && !priceInfo.isEmpty ? priceInfo : nil,
             priceChf: listingType == .item && !isFreeItem ? parsedPrice : nil,

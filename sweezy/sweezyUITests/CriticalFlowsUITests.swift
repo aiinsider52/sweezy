@@ -304,14 +304,9 @@ final class CriticalFlowsUITests: XCTestCase {
         XCTAssertLessThanOrEqual(title.frame.maxX, app.frame.maxX)
         XCTAssertTrue(app.buttons["friends.people.filters"].exists)
         XCTAssertTrue(app.staticTexts["Anna Keller"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.buttons["friends.catalog.toggle"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.buttons["friends.swipe.pass"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.buttons["friends.swipe.pass"].exists)
-        XCTAssertTrue(app.buttons["friends.swipe.like"].exists)
-        XCTAssertTrue(app.buttons["friends.swipe.pass"].isHittable)
-        XCTAssertTrue(app.buttons["friends.swipe.like"].isHittable)
-        XCTAssertLessThanOrEqual(app.buttons["friends.swipe.pass"].frame.maxY, app.frame.maxY)
-        XCTAssertLessThanOrEqual(app.buttons["friends.swipe.like"].frame.maxY, app.frame.maxY)
+        // Swipe cards are switched off: People opens straight on the catalog.
+        XCTAssertTrue(app.textFields["friends.search.query"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.buttons["friends.swipe.like"].exists)
         keepScreenshot(app, name: "friends-responsive")
 
         let details = app.buttons["friends.swipe.details"]

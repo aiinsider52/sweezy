@@ -3251,7 +3251,7 @@
 "marketplace.create.add_photo" = "Додати";
 "marketplace.create.pick_category" = "Обери категорію";
 "onboarding.people.title" = "Знайди своїх поруч";
-"onboarding.people.description" = "Гортай картки людей зі спільними інтересами. Like приватний — чат відкриється лише після взаємного вибору.";
+"onboarding.people.description" = "Шукай людей зі спільними інтересами, мовою й кантоном. Контакти приховані — знайомство починається із заявки в друзі.";
 "onboarding.people.events.title" = "Зустрічі та друзі";
 "onboarding.people.events.description" = "Приєднуйся до подій поруч, дивись, хто піде, і тримай своє коло друзів в одному місці.";
 

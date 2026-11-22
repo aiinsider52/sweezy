@@ -78,9 +78,6 @@ final class CompanionUITests: XCTestCase {
         reveal(demo, in: app)
         keep(app, "social-welcome-v2")
         demo.tap()
-        let catalogToggle = app.buttons["friends.catalog.toggle"]
-        reveal(catalogToggle, in: app)
-        catalogToggle.tap()
         let search = app.textFields["friends.search.query"]
         reveal(search, in: app)
         keep(app, "social-search-v2")

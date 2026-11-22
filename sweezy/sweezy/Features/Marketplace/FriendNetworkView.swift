@@ -3,6 +3,10 @@ import SwiftUI
 import UIKit
 
 @MainActor final class FriendNetworkViewModel: ObservableObject {
+  /// Swipe cards with likes and matches are switched off for now; the people catalog,
+  /// events and friend requests stay. Flip back to bring the cards mode back.
+  static let swipeCardsEnabled = false
+
   @Published var profiles: [SocialProfile] = []
   @Published var connections: [FriendConnection] = []
   @Published var events: [SocialEvent] = []
@@ -70,7 +74,10 @@ import UIKit
     async let c = friendResult { try await FriendsAPI.connections() }
     async let e = friendResult { try await FriendsAPI.events(canton: self.canton) }
     async let m = friendResult { try await self.own() }
-    async let s = friendResult { try await FriendsAPI.swipeDeck(canton: self.canton, interest: self.interest) }
+    async let s = friendResult { () -> SocialSwipeDeck? in
+      guard Self.swipeCardsEnabled else { return nil }
+      return try await FriendsAPI.swipeDeck(canton: self.canton, interest: self.interest)
+    }
     let values = await (p, c, e, m, s)
     var failures: [Int: String] = [:]
     switch values.0 { case .success(let page): profiles = page.items; searchMeta = page; case .failure(let issue): failures[0] = loadIssue("Не вдалося завантажити людей.".localized, issue) }
@@ -78,7 +85,8 @@ import UIKit
     switch values.2 { case .success(let value): events = value; case .failure(let issue): failures[1] = loadIssue("Не вдалося завантажити події.".localized, issue) }
     switch values.3 { case .success(let value): myProfile = value; case .failure(let issue): failures[3] = loadIssue("Не вдалося завантажити твій Social Passport.".localized, issue) }
     switch values.4 {
-    case .success(let value): swipeProfiles = value.items; swipeDeckMeta = value
+    case .success(let value):
+      if let value { swipeProfiles = value.items; swipeDeckMeta = value }
     case .failure(let issue):
       if myProfile?.moderationStatus == "approved" {
         failures[0] = loadIssue("Не вдалося завантажити картки знайомств.".localized, issue)
@@ -100,15 +108,16 @@ import UIKit
         maxDistanceKM: self.maxDistanceKM, nearby: self.nearby)
     }
     async let eventPage = friendResult { try await FriendsAPI.events(canton: self.canton) }
-    async let deck = friendResult {
-      try await FriendsAPI.swipeDeck(
+    async let deck = friendResult { () -> SocialSwipeDeck? in
+      guard Self.swipeCardsEnabled else { return nil }
+      return try await FriendsAPI.swipeDeck(
         canton: self.canton, interest: self.interest, language: self.language, nearby: self.nearby)
     }
     let values = await (page, eventPage, deck)
     var failures = loadErrors
     switch values.0 { case .success(let value): profiles = value.items; searchMeta = value; failures[0] = nil; case .failure(let issue): failures[0] = loadIssue("Не вдалося оновити людей.".localized, issue) }
     switch values.1 { case .success(let value): events = value; failures[1] = nil; case .failure(let issue): failures[1] = loadIssue("Не вдалося оновити події.".localized, issue) }
-    switch values.2 { case .success(let value): swipeProfiles = value.items; swipeDeckMeta = value; case .failure(let issue): failures[0] = loadIssue("Не вдалося оновити картки знайомств.".localized, issue) }
+    switch values.2 { case .success(let value): if let value { swipeProfiles = value.items; swipeDeckMeta = value }; case .failure(let issue): failures[0] = loadIssue("Не вдалося оновити картки знайомств.".localized, issue) }
     loadErrors = failures
     #if DEBUG
     if !failures.isEmpty || profiles.isEmpty { applyDemoProfiles() }
@@ -1100,10 +1109,11 @@ struct FriendNetworkView: View {
     if let remaining = vm.swipeDeckMeta?.likesRemaining { return "%@ Like доступно".localized(with: "\(remaining)") }
     return "Приватні Like".localized
   }
+  private var showsCatalog: Bool { !FriendNetworkViewModel.swipeCardsEnabled || showPeopleCatalog }
   private func discover(screenHeight: CGFloat) -> some View {
     VStack(alignment: .leading, spacing: 12) {
-      discoverModePicker
-      if !showPeopleCatalog {
+      if FriendNetworkViewModel.swipeCardsEnabled { discoverModePicker }
+      if !showsCatalog {
       if vm.loading && vm.swipeProfiles.isEmpty {
         SkeletonList(rows: 2).padding(.vertical, 12)
       } else if let own = vm.myProfile, own.moderationStatus != "approved", !vm.isShowingDemoProfiles {
@@ -1131,7 +1141,7 @@ struct FriendNetworkView: View {
           onDetails: openProfile)
       }
       }
-      if showPeopleCatalog {
+      if showsCatalog {
         search
         if vm.loading && vm.profiles.isEmpty {
           SkeletonList(rows: 4)

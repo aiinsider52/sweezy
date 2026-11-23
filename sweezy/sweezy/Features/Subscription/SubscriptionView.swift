@@ -52,6 +52,7 @@ struct SubscriptionView: View {
         .sensoryFeedback(.selection, trigger: selectedProductID)
         .task {
             APIClient.logPaywall(eventType: "view", context: source.rawValue)
+            TelemetryService.current?.track(.paywallViewed, source: "paywall", meta: ["context": source.rawValue])
             await manager.load()
         }
         .alert("Sweezy Plus", isPresented: $purchaseSucceeded) {

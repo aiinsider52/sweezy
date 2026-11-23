@@ -263,12 +263,19 @@ struct LetterExplainerView: View {
                 let explanation = try await APIClient.explainLetter(text: reading.text)
                 let letter = SavedLetter(id: UUID(), createdAt: Date(), explanation: explanation, payment: reading.payment, deadlineAdded: false)
                 store.add(letter)
+                appContainer.telemetry.track(.letterExplained, source: "letters", meta: [
+                    "category": explanation.category,
+                    "has_deadline": String(explanation.deadline != nil),
+                    "has_payment": String(reading.payment != nil || explanation.amount != nil),
+                    "pages": String(pages.count),
+                ])
                 UINotificationFeedbackGenerator().notificationOccurred(.success)
                 phase = .idle
                 openedLetter = letter
             } catch {
                 phase = .idle
                 if (error as NSError).code == 402 {
+                    appContainer.telemetry.track(.letterLimitReached, source: "letters")
                     showPaywall = true
                 } else {
                     errorMessage = error.localizedDescription
@@ -633,6 +640,7 @@ struct LetterResultView: View {
     private func addDeadline(_ letter: SavedLetter, date: Date) {
         let label = letter.explanation.deadlineLabel ?? letter.explanation.title
         appContainer.lifeAdmin.saveDeadline(kind: .other, title: "\(label) · \(letter.explanation.sender)", date: date)
+        appContainer.telemetry.track(.letterDeadlineAdded, source: "letters", meta: ["category": letter.explanation.category])
         var updated = letter
         updated.deadlineAdded = true
         store.update(updated)

@@ -7,6 +7,7 @@ import Skeleton from '@/components/Skeleton'
 import UISelect from '@/components/ui/select'
 import { RankingChart, TrendChart, type ChartPoint } from './AnalyticsCharts'
 import RegistrationsAnalytics from './RegistrationsAnalytics'
+import GrowthAnalytics from './GrowthAnalytics'
 
 type Metric = { key: string; label: string; value: number; delta?: number; format?: string }
 type FunnelStep = { label: string; value: number }
@@ -182,6 +183,8 @@ export default function AnalyticsDashboard({ compact = false }: { compact?: bool
           {data.top.length > 0 && <Card title="Top content" className="xl:col-span-2"><RankingChart data={data.top.slice(0, 8)} /></Card>}
         </div>
       )}
+
+      {!compact && <GrowthAnalytics range={range} />}
 
       <RegistrationsAnalytics compact={compact} />
 

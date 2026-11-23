@@ -60,19 +60,6 @@ struct JourneyMarketplaceView: View {
                 }
                 .tint(JourneyVisual.accentText)
 
-                Button(action: handleCreateTap) {
-                    Image(systemName: "plus")
-                        .font(.system(size: 24, weight: .bold))
-                        .foregroundColor(.black)
-                        .frame(width: 58, height: 58)
-                        .background(JourneyVisual.lime)
-                        .clipShape(Circle())
-                        .shadow(color: JourneyVisual.lime.opacity(0.38), radius: 18, y: 8)
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel(createAccessibilityLabel)
-                .padding(.trailing, 22)
-                .padding(.bottom, 116)
             }
             .navigationBarHidden(true)
             .fullScreenCover(item: $selectedListing) { listing in
@@ -196,7 +183,7 @@ struct JourneyMarketplaceView: View {
     private var marketHero: some View {
         VStack(alignment: .leading, spacing: 0) {
             ZStack(alignment: .topLeading) {
-                CityScene(scene: selectedMode == .businesses ? "business" : "market", height: 300)
+                CityScene(scene: selectedMode == .businesses ? "business" : "market", height: 230)
 
                 // Light veil for the status bar only; the title has its own plate.
                 LinearGradient(
@@ -219,11 +206,11 @@ struct JourneyMarketplaceView: View {
                 .allowsHitTesting(false)
 
             }
-            .frame(height: 300)
+            .frame(height: 230)
             // Lower left keeps the faces in the artwork clear and leaves the top row to the buttons.
             .overlay(alignment: .bottomLeading) {
                 SceneTitlePlate(maxWidth: 250) {
-                    SceneTitleText(text: heroTitle, size: 25)
+                    SceneTitleText(text: heroTitle, size: 22)
                 }
                 .id(selectedMode)
                 .transition(.asymmetric(
@@ -286,6 +273,19 @@ struct JourneyMarketplaceView: View {
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel("chat.accessibility.inbox".localized(with: appContainer.chatStore.unreadCount))
+
+                // Creating a listing lives with the other header actions instead of floating over the cards.
+                Button(action: handleCreateTap) {
+                    Image(systemName: "plus")
+                        .font(.system(size: 19, weight: .bold))
+                        .foregroundColor(.black)
+                        .frame(width: 48, height: 48)
+                        .background(JourneyVisual.lime, in: Circle())
+                        .shadow(color: JourneyVisual.lime.opacity(0.35), radius: 10, y: 3)
+                }
+                .buttonStyle(ScaleButtonStyle(scaleAmount: 0.94, hapticStyle: .medium))
+                .accessibilityLabel(createAccessibilityLabel)
+                .accessibilityIdentifier("marketplace.create")
             }
             .padding(.top, 58)
             .padding(.trailing, 18)
@@ -373,18 +373,18 @@ struct JourneyMarketplaceView: View {
 
                 serviceDiscoveryCategoryRail
 
-                MarketFollowToggle(
-                    category: servicesVM.selectedCategory?.rawValue,
-                    categoryTitle: servicesVM.selectedCategory.flatMap { selected in
-                        discoveryServiceFilters.first { $0.category == selected }?.title
-                    },
-                    requireSignIn: { showAuth = true }
-                )
-
                 sectionHeader(
                     "journey.marketplace.popular_nearby".localized,
                     count: servicesVM.filteredListings.count,
-                    trailing: servicesVM.isShowingStaleData ? "journey.marketplace.offline_data".localized : nil
+                    trailing: servicesVM.isShowingStaleData ? "journey.marketplace.offline_data".localized : nil,
+                    follow: MarketFollowToggle(
+                        category: servicesVM.selectedCategory?.rawValue,
+                        categoryTitle: servicesVM.selectedCategory.flatMap { selected in
+                            discoveryServiceFilters.first { $0.category == selected }?.title
+                        },
+                        requireSignIn: { showAuth = true },
+                        compact: true
+                    )
                 )
 
                 LazyVGrid(
@@ -406,7 +406,7 @@ struct JourneyMarketplaceView: View {
 
     private var serviceDiscoveryCategoryRail: some View {
         ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 10) {
+            HStack(spacing: 8) {
                 ForEach(discoveryServiceFilters) { filter in
                     MarketDiscoveryCategoryTile(
                         title: filter.title,
@@ -467,15 +467,19 @@ struct JourneyMarketplaceView: View {
                     save: { appContainer.savedItems.toggleListing(featuredItem.id) }
                 )
 
-                MarketFollowToggle(
-                    category: itemsVM.selectedItemCategory?.rawValue,
-                    categoryTitle: itemsVM.selectedItemCategory.flatMap { selected in
-                        itemFilters.first { $0.0 == selected }?.1
-                    },
-                    requireSignIn: { showAuth = true }
+                sectionHeader(
+                    "journey.marketplace.more_nearby".localized,
+                    count: itemsVM.filteredListings.count,
+                    trailing: itemsVM.isShowingStaleData ? "journey.marketplace.offline_data".localized : nil,
+                    follow: MarketFollowToggle(
+                        category: itemsVM.selectedItemCategory?.rawValue,
+                        categoryTitle: itemsVM.selectedItemCategory.flatMap { selected in
+                            itemFilters.first { $0.0 == selected }?.1
+                        },
+                        requireSignIn: { showAuth = true },
+                        compact: true
+                    )
                 )
-
-                sectionHeader("journey.marketplace.more_nearby".localized, count: itemsVM.filteredListings.count, trailing: itemsVM.isShowingStaleData ? "journey.marketplace.offline_data".localized : nil)
 
                 LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible())], spacing: 10) {
                     ForEach(remainingItems.prefix(8)) { listing in
@@ -542,11 +546,13 @@ struct JourneyMarketplaceView: View {
         }
     }
 
-    private func sectionHeader(_ title: String, count: Int? = nil, trailing: String?) -> some View {
+    private func sectionHeader(_ title: String, count: Int? = nil, trailing: String?, follow: MarketFollowToggle? = nil) -> some View {
         HStack(spacing: 8) {
             Text(title)
                 .font(.system(size: 18, weight: .bold, design: .default))
                 .foregroundColor(JourneyVisual.primaryText)
+                .lineLimit(1)
+                .minimumScaleFactor(0.85)
             if let count, count > 0 {
                 Text("\(count)")
                     .font(.system(size: 12, weight: .black).monospacedDigit())
@@ -564,6 +570,7 @@ struct JourneyMarketplaceView: View {
                     .font(.system(size: 11, weight: .semibold))
                     .foregroundColor(JourneyVisual.accentText)
             }
+            if let follow { follow }
         }
         .padding(.top, 2)
     }
@@ -870,21 +877,21 @@ private struct MarketDiscoveryCategoryTile: View {
 
     var body: some View {
         Button(action: action) {
-            HStack(spacing: 8) {
-                JourneyCategoryIcon(symbol: icon, swatch: swatch, size: 30)
+            HStack(spacing: 7) {
+                Image(systemName: icon)
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundStyle(selected ? Color.black : swatch.ink)
                 Text(title)
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundStyle(selected ? Color.black : JourneyVisual.primaryText)
                     .lineLimit(1)
             }
-            .padding(.leading, 6)
-            .padding(.trailing, 15)
-            .frame(height: 44)
+            .padding(.horizontal, 14)
+            .frame(height: 38)
             .background(selected ? JourneyVisual.lime : Theme.Colors.card, in: Capsule())
             .overlay(
-                Capsule().strokeBorder(selected ? JourneyVisual.accentStrong.opacity(0.5) : JourneyVisual.softBorder, lineWidth: 1)
+                Capsule().strokeBorder(selected ? Color.clear : JourneyVisual.softBorder, lineWidth: 1)
             )
-            .shadow(color: selected ? JourneyVisual.lime.opacity(0.35) : .black.opacity(0.04), radius: selected ? 10 : 6, y: 3)
             .animation(.easeOut(duration: 0.18), value: selected)
         }
         .buttonStyle(ScaleButtonStyle(scaleAmount: 0.96, hapticStyle: .light))
@@ -905,7 +912,7 @@ private struct JourneyServiceDiscoveryHeroCard: View {
             VStack(alignment: .leading, spacing: 0) {
                 JourneyRemoteImage(url: listing.primaryImageURL, fallbackAsset: listing.marketplaceFallbackAsset)
                     .frame(maxWidth: .infinity)
-                    .frame(height: 210)
+                    .frame(height: 160)
                     .clipped()
                     .overlay(alignment: .bottomLeading) {
                         HStack(spacing: 6) {
@@ -920,9 +927,9 @@ private struct JourneyServiceDiscoveryHeroCard: View {
                         .padding(12)
                     }
 
-                VStack(alignment: .leading, spacing: 10) {
+                VStack(alignment: .leading, spacing: 8) {
                     Text(listing.title)
-                        .font(.system(size: 20, weight: .bold))
+                        .font(.system(size: 18, weight: .bold))
                         .tracking(-0.2)
                         .foregroundStyle(JourneyVisual.primaryText)
                         .lineLimit(2)
@@ -947,33 +954,15 @@ private struct JourneyServiceDiscoveryHeroCard: View {
                     .foregroundStyle(JourneyVisual.secondaryText)
                     .lineLimit(1)
 
-                    HStack(spacing: 10) {
-                        Text(listing.priceDisplay ?? "journey.marketplace.negotiable_price".localized)
-                            .font(.system(size: 15, weight: .heavy))
-                            .foregroundStyle(JourneyVisual.primaryText)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.8)
-                        Spacer(minLength: 8)
-                        HStack(spacing: 8) {
-                            Text("journey.marketplace.view_service".localized)
-                                .font(.system(size: 14, weight: .bold))
-                            Image(systemName: "arrow.right")
-                                .font(.system(size: 12, weight: .bold))
-                                .foregroundStyle(JourneyVisual.lime)
-                                .frame(width: 26, height: 26)
-                                .background(Color.black, in: Circle())
-                        }
-                        .foregroundStyle(.black)
-                        .padding(.leading, 15)
-                        .padding(.trailing, 5)
-                        .frame(height: 36)
-                        .background(JourneyVisual.lime, in: Capsule())
-                    }
-                    .padding(.top, 2)
+                    Text(listing.priceDisplay ?? "journey.marketplace.negotiable_price".localized)
+                        .font(.system(size: 15, weight: .heavy))
+                        .foregroundStyle(JourneyVisual.primaryText)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
                 }
                 .padding(.horizontal, 16)
-                .padding(.top, 14)
-                .padding(.bottom, 16)
+                .padding(.top, 12)
+                .padding(.bottom, 14)
             }
             .background(Theme.Colors.card)
         }
@@ -1011,7 +1000,7 @@ private struct JourneyServiceDiscoveryCard: View {
                 Button(action: openAction) {
                     JourneyRemoteImage(url: listing.primaryImageURL, fallbackAsset: listing.marketplaceFallbackAsset)
                         .frame(maxWidth: .infinity)
-                        .frame(height: 142)
+                        .frame(height: 120)
                         .clipped()
                 }
                 .buttonStyle(.plain)

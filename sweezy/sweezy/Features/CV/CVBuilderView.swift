@@ -131,10 +131,8 @@ struct CVBuilderView: View {
                     .ignoresSafeArea()
 
                 VStack(spacing: 0) {
-                    ZStack(alignment: .top) {
-                        cvHero
-                        cvTopBar
-                    }
+                    cvTopBar
+                    cvHero
 
                     TabView(selection: $currentStep) {
                         personalStepView.tag(CVStep.personal)
@@ -298,7 +296,8 @@ struct CVBuilderView: View {
             .accessibilityLabel("Поради для швейцарського CV".localized)
         }
         .padding(.horizontal, 16)
-        .padding(.top, 58)
+        // Below the status-bar scrim (about 62 pt), so the round buttons are not clipped.
+        .padding(.top, 66)
         .padding(.bottom, 8)
     }
 
@@ -311,42 +310,13 @@ struct CVBuilderView: View {
         }
     }
 
+    /// Just the step bar under the top bar: the form gets the room, not a picture and a second title.
     private var cvHero: some View {
-        ZStack(alignment: .bottomLeading) {
-            JourneyVisual.pageBackground
-
-            VStack(alignment: .leading, spacing: 10) {
-                if !isInputFocused {
-                    // Sweezy reviewing a CV at the desk; hidden while typing to give the form room.
-                    FocusedSceneImage(name: "story-jobs", focusY: 0.2)
-                        .frame(height: 112)
-                        .frame(maxWidth: .infinity)
-                        .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 22, style: .continuous)
-                                .stroke(JourneyVisual.softBorder, lineWidth: 1)
-                        )
-                        .accessibilityHidden(true)
-                        .transition(.opacity)
-
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("CV, який\nпомітять".localized)
-                            .font(.system(size: 29, weight: .bold, design: .default))
-                            .foregroundColor(JourneyVisual.primaryText)
-                            .lineSpacing(1)
-                        Text("Заповни основні дані — ми допоможемо решту.".localized)
-                            .font(.system(size: 13, weight: .medium))
-                            .foregroundColor(JourneyVisual.secondaryText)
-                    }
-                }
-                progressBar
-            }
+        progressBar
             .padding(.horizontal, 18)
+            .padding(.top, 4)
             .padding(.bottom, 12)
-        }
-        .frame(height: isInputFocused ? 148 : 300)
-        .clipped()
-        .animation(.easeInOut(duration: 0.2), value: isInputFocused)
+            .background(JourneyVisual.pageBackground)
     }
 
     // MARK: - Progress Bar

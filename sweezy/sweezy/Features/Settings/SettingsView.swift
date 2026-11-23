@@ -53,12 +53,12 @@ struct SettingsView: View {
                     .ignoresSafeArea()
 
                 ScrollView(showsIndicators: false) {
-                    VStack(spacing: 14) {
+                    VStack(spacing: 12) {
                         editorialSettingsHero
                         settingsProfileHero
                         editorialPlanCard
-                        editorialActivityStrip
                         editorialSettingsSections
+                            .padding(.top, 10)
                     }
                     .padding(.bottom, 126)
                 }
@@ -239,92 +239,56 @@ struct SettingsView: View {
 
 private extension SettingsView {
     var editorialSettingsHero: some View {
-        ZStack(alignment: .bottomLeading) {
-            VStack(alignment: .leading, spacing: 7) {
-                Text("settings.editorial.header".localized)
-                    .font(.system(size: 11, weight: .bold, design: .default))
-                    .tracking(2)
-                    .foregroundColor(JourneyVisual.secondaryText)
-
-                Text("settings.editorial.greeting_format".localized(with: editorialGreetingName))
-                    .font(.system(size: 32, weight: .bold, design: .default))
-                    .foregroundColor(JourneyVisual.primaryText)
-
-                HStack(spacing: 5) {
-                    Text("settings.editorial.profile_ready_label".localized)
-                        .foregroundColor(JourneyVisual.secondaryText)
-                    Text("\(profileCompletion)%")
-                        .fontWeight(.bold)
-                        .foregroundColor(Theme.Colors.textPrimary)
-                }
-                .font(.system(size: 14, weight: .medium, design: .default))
-            }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 16)
+        Text("settings.title".localized)
+            .font(.system(size: 28, weight: .heavy, design: .default))
+            .foregroundColor(JourneyVisual.primaryText)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(JourneyVisual.pageBackground)
-        }
-        .padding(.top, 56)
-        .accessibilityElement(children: .combine)
+            .padding(.horizontal, 20)
+            .padding(.top, 70)
+            .padding(.bottom, 4)
+            .accessibilityAddTraits(.isHeader)
     }
 
-    /// Profile scene, avatar and completion in one card: "this is you, and here's what's left".
+    /// Avatar, name and place in one row; while the profile is unfinished, a thin bar and one line say what's left.
     var settingsProfileHero: some View {
         Button {
             openProfile()
         } label: {
-            VStack(alignment: .leading, spacing: 0) {
-                StoryScene(name: "profile", height: 150, cornerRadius: 22)
-                    .padding(6)
-                    // Only the avatar sits on the picture's edge; the text stays on paper below.
-                    .overlay(alignment: .bottomLeading) {
-                        ZStack {
-                            Circle()
-                                .fill(JourneyVisual.lime)
-                            Text(profileInitials)
-                                .font(.system(size: 24, weight: .bold, design: .default))
-                                .foregroundColor(.black)
-                        }
-                        .frame(width: 72, height: 72)
-                        .overlay(Circle().stroke(Theme.Colors.card, lineWidth: 4))
-                        .shadow(color: JourneyVisual.black.opacity(0.12), radius: 8, y: 3)
-                        .offset(x: 18, y: 36)
-                    }
+            VStack(alignment: .leading, spacing: 14) {
+                HStack(spacing: 14) {
+                    Text(profileInitials)
+                        .font(.system(size: 20, weight: .bold, design: .default))
+                        .foregroundColor(.black)
+                        .frame(width: 56, height: 56)
+                        .background(JourneyVisual.lime, in: Circle())
 
-                HStack(alignment: .center, spacing: 12) {
                     VStack(alignment: .leading, spacing: 3) {
                         Text(profileName)
-                            .font(.system(size: 19, weight: .bold, design: .default))
+                            .font(.system(size: 18, weight: .bold, design: .default))
                             .foregroundColor(JourneyVisual.primaryText)
                             .lineLimit(1)
                         Label(editorialProfileLocation, systemImage: "mappin.and.ellipse")
-                            .font(.system(size: 12, weight: .medium))
+                            .font(.system(size: 13, weight: .medium))
                             .foregroundColor(JourneyVisual.secondaryText)
+                            .lineLimit(1)
                     }
 
                     Spacer(minLength: 8)
 
-                    Image(systemName: "pencil")
-                        .font(.system(size: 14, weight: .bold))
-                        .foregroundColor(JourneyVisual.primaryText)
-                        .frame(width: 40, height: 40)
-                        .background(JourneyVisual.softSurface, in: Circle())
-                        .overlay(Circle().stroke(JourneyVisual.softBorder, lineWidth: 1))
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundColor(JourneyVisual.secondaryText.opacity(0.6))
                 }
-                .padding(.leading, 18 + 72 + 12)
-                .padding(.trailing, 16)
-                .padding(.top, 8)
-                .frame(minHeight: 48)
 
                 if profileCompletion < 100 {
-                    VStack(alignment: .leading, spacing: 10) {
+                    VStack(alignment: .leading, spacing: 7) {
                         HStack {
                             Text("settings.editorial.complete_profile_title".localized)
-                                .font(.system(size: 15, weight: .bold))
+                                .font(.system(size: 13, weight: .semibold))
                                 .foregroundColor(JourneyVisual.primaryText)
                             Spacer()
                             Text("\(profileCompletion)%")
-                                .font(.system(size: 14, weight: .black).monospacedDigit())
+                                .font(.system(size: 13, weight: .bold).monospacedDigit())
                                 .foregroundColor(JourneyVisual.accentText)
                         }
                         GeometryReader { proxy in
@@ -335,132 +299,16 @@ private extension SettingsView {
                                     .frame(width: proxy.size.width * CGFloat(profileCompletion) / 100)
                             }
                         }
-                        .frame(height: 8)
-                        Text("settings.editorial.complete_profile_subtitle".localized)
-                            .font(.system(size: 12, weight: .medium))
-                            .foregroundColor(JourneyVisual.secondaryText)
-                            .fixedSize(horizontal: false, vertical: true)
-
-                        HStack {
-                            Text("settings.editorial.continue_filling".localized)
-                            Spacer()
-                            Image(systemName: "arrow.right")
-                                .frame(width: 30, height: 30)
-                                .background(Color.black.opacity(0.08), in: Circle())
-                        }
-                        .font(.system(size: 14, weight: .bold, design: .default))
-                        .foregroundColor(.black)
-                        .padding(.leading, 16)
-                        .padding(.trailing, 8)
-                        .frame(height: 48)
-                        .background(JourneyVisual.lime, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-                        .padding(.top, 4)
+                        .frame(height: 6)
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.top, 14)
                 }
-            }
-            .padding(.bottom, 16)
-            .editorialSettingsPanel(cornerRadius: 28)
-        }
-        .buttonStyle(CardPressStyle())
-        .padding(.horizontal, 16)
-        .accessibilityHint("settings.editorial.edit_profile_hint".localized)
-    }
-
-    var editorialProfileCard: some View {
-        Button {
-            openProfile()
-        } label: {
-            HStack(spacing: 14) {
-                ZStack {
-                    Circle()
-                        .fill(Theme.Colors.adaptiveSurface)
-                    Circle()
-                        .stroke(JourneyVisual.lime.opacity(0.7), lineWidth: 1)
-                    Text(profileInitials)
-                        .font(.system(size: 20, weight: .bold, design: .default))
-                        .foregroundColor(Theme.Colors.textPrimary)
-                }
-                .frame(width: 58, height: 58)
-
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(profileName)
-                        .font(.system(size: 17, weight: .semibold, design: .default))
-                        .foregroundColor(Theme.Colors.textPrimary)
-                        .lineLimit(1)
-                    Label(editorialProfileLocation, systemImage: "mappin")
-                        .font(.system(size: 12, weight: .medium))
-                        .foregroundColor(Theme.Colors.textSecondary)
-                }
-
-                Spacer(minLength: 10)
-
-                Image(systemName: "pencil")
-                    .font(.system(size: 15, weight: .bold))
-                    .foregroundColor(Theme.Colors.textPrimary)
-                    .frame(width: 42, height: 42)
-                    .background(Theme.Colors.adaptiveSurface)
-                    .clipShape(Circle())
-                    .overlay(Circle().stroke(JourneyVisual.lime.opacity(0.48), lineWidth: 1))
-            }
-            .padding(15)
-            .editorialSettingsPanel(cornerRadius: 22)
-        }
-        .buttonStyle(CardPressStyle())
-        .padding(.horizontal, 16)
-        .accessibilityHint("settings.editorial.edit_profile_hint".localized)
-    }
-
-    var editorialCompletionCard: some View {
-        Button {
-            openProfile()
-        } label: {
-            VStack(alignment: .leading, spacing: 14) {
-                HStack(alignment: .top, spacing: 14) {
-                    VStack(alignment: .leading, spacing: 5) {
-                        Text("settings.editorial.complete_profile_title".localized)
-                            .font(.system(size: 18, weight: .bold, design: .default))
-                            .foregroundColor(Theme.Colors.textPrimary)
-                        Text("settings.editorial.complete_profile_subtitle".localized)
-                            .font(.system(size: 13, weight: .medium))
-                            .foregroundColor(Theme.Colors.textSecondary)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-
-                    Spacer()
-
-                    ZStack {
-                        Circle()
-                            .stroke(Theme.Colors.adaptiveBorder, lineWidth: 5)
-                        Circle()
-                            .trim(from: 0, to: CGFloat(profileCompletion) / 100)
-                            .stroke(JourneyVisual.lime, style: StrokeStyle(lineWidth: 5, lineCap: .round))
-                            .rotationEffect(.degrees(-90))
-                        Text("\(profileCompletion)%")
-                            .font(.system(size: 14, weight: .bold, design: .default))
-                            .foregroundColor(Theme.Colors.textPrimary)
-                    }
-                    .frame(width: 58, height: 58)
-                }
-
-                HStack {
-                    Text("settings.editorial.continue_filling".localized)
-                    Spacer()
-                    Image(systemName: "arrow.right")
-                }
-                .font(.system(size: 14, weight: .bold, design: .default))
-                .foregroundColor(.black)
-                .padding(.horizontal, 16)
-                .frame(height: 48)
-                .background(JourneyVisual.lime)
-                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
             }
             .padding(16)
-            .editorialSettingsPanel(cornerRadius: 22)
+            .editorialSettingsPanel(cornerRadius: 24)
         }
         .buttonStyle(CardPressStyle())
         .padding(.horizontal, 16)
+        .accessibilityHint("settings.editorial.edit_profile_hint".localized)
     }
 
     var editorialPlanCard: some View {
@@ -471,16 +319,12 @@ private extension SettingsView {
                 JourneyCategoryIcon(
                     symbol: subscriptionManager.isPremium ? "sparkles" : "star.fill",
                     swatch: JourneyCategoryPalette.lime,
-                    size: 50
+                    size: 40
                 )
 
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("ТВІЙ ПЛАН".localized)
-                        .font(.system(size: 10, weight: .bold, design: .default))
-                        .tracking(1.7)
-                        .foregroundColor(JourneyVisual.secondaryText)
+                VStack(alignment: .leading, spacing: 2) {
                     Text(subscriptionManager.planDisplayName)
-                        .font(.system(size: 18, weight: .bold, design: .default))
+                        .font(.system(size: 16, weight: .bold, design: .default))
                         .foregroundColor(Theme.Colors.textPrimary)
                     Text(subscriptionManager.planDetails)
                         .font(.system(size: 12, weight: .medium))
@@ -510,7 +354,7 @@ private extension SettingsView {
                     .background(JourneyVisual.black, in: Capsule())
                 }
             }
-            .padding(15)
+            .padding(14)
             .editorialSettingsPanel(cornerRadius: 22)
         }
         .buttonStyle(CardPressStyle())
@@ -518,31 +362,10 @@ private extension SettingsView {
         .accessibilityIdentifier("settings.currentPlan")
     }
 
-    var editorialActivityStrip: some View {
-        HStack(spacing: 0) {
-            editorialActivityItem(icon: "book.closed", value: "\(appContainer.userStats.guidesReadCount)", label: "settings.editorial.stat.guides".localized)
-            editorialActivityDivider
-            editorialActivityItem(icon: "checklist", value: "\(appContainer.userStats.activeChecklistsCount)", label: "settings.editorial.stat.checklists".localized)
-            editorialActivityDivider
-            editorialActivityItem(icon: "target", value: "\(appContainer.userProfile?.goals.count ?? 0)", label: "settings.editorial.stat.goals".localized)
-        }
-        .padding(.vertical, 14)
-        .editorialSettingsPanel(cornerRadius: 22)
-        .padding(.horizontal, 16)
-    }
-
     var editorialSettingsSections: some View {
         VStack(alignment: .leading, spacing: 18) {
             editorialSectionTitle("settings.account".localized)
             VStack(spacing: 0) {
-                editorialSettingsRow(
-                    icon: "star.circle.fill",
-                    title: "Sweezy Plus",
-                    value: subscriptionManager.isPremium ? "Активна".localized : "Відкрити".localized
-                ) {
-                    showingSubscription = true
-                }
-                editorialSettingsDivider
                 editorialSettingsRow(icon: "globe", title: "settings.language".localized, value: currentLanguageName) {
                     showingLanguageSelection = true
                 }
@@ -664,28 +487,10 @@ private extension SettingsView {
         }
     }
 
-    var editorialGreetingName: String {
-        profileName.split(separator: " ").first.map(String.init) ?? profileName
-    }
-
     var editorialProfileLocation: String {
         guard let profile = appContainer.userProfile else { return "Zürich, ZH" }
         let city = profile.address?.city.trimmingCharacters(in: .whitespacesAndNewlines)
         return "\((city?.isEmpty == false ? city : profile.canton.localizedName) ?? profile.canton.localizedName), \(profile.canton.rawValue)"
-    }
-
-    func editorialActivityItem(icon: String, value: String, label: String) -> some View {
-        VStack(spacing: 6) {
-            JourneyCategoryIcon(symbol: icon, swatch: settingsSwatch(for: icon), size: 34)
-            Text(value)
-                .font(.system(size: 18, weight: .black, design: .default).monospacedDigit())
-                .foregroundColor(JourneyVisual.primaryText)
-            Text(label)
-                .font(.system(size: 11, weight: .medium))
-                .foregroundColor(JourneyVisual.secondaryText)
-        }
-        .frame(maxWidth: .infinity)
-        .accessibilityElement(children: .combine)
     }
 
     /// Each settings topic keeps one sticker colour, matching category colours elsewhere.
@@ -699,12 +504,6 @@ private extension SettingsView {
         case "chart.bar.xaxis", "star": return JourneyCategoryPalette.sand
         default: return JourneyCategoryPalette.graphite
         }
-    }
-
-    var editorialActivityDivider: some View {
-        Rectangle()
-            .fill(Theme.Colors.adaptiveBorder)
-            .frame(width: 1, height: 34)
     }
 
     func editorialSectionTitle(_ title: String) -> some View {

@@ -551,79 +551,56 @@ struct SweezyPlusHomeCard: View {
     let country: ResidenceCountry
     let action: () -> Void
 
+    /// A slim lime strip: what Plus is, the price, one arrow. The full pitch lives on the paywall.
     var body: some View {
-        let shape = RoundedRectangle(cornerRadius: 26, style: .continuous)
+        let shape = RoundedRectangle(cornerRadius: 22, style: .continuous)
         Button(action: action) {
-            HStack(alignment: .bottom, spacing: 0) {
-                VStack(alignment: .leading, spacing: 10) {
-                    Label("PLUS", systemImage: "sparkles")
-                        .font(.system(size: 10, weight: .black))
-                        .foregroundColor(JourneyVisual.lime)
-                        .padding(.horizontal, 10)
-                        .frame(height: 26)
-                        .background(JourneyVisual.black, in: Capsule())
+            HStack(spacing: 12) {
+                SweezyCompanion(pose: .celebrate, size: 58)
+                    .idleFloat(enabled: !reduceMotion)
+                    .frame(width: 52, height: 58)
 
-                    Text("Більше можливостей з Plus".localized)
-                        .font(.system(size: 22, weight: .bold))
-                        .foregroundColor(.black)
-                        .fixedSize(horizontal: false, vertical: true)
-
-                    VStack(alignment: .leading, spacing: 5) {
-                        Label("Персональний план".localized, systemImage: "checkmark.circle.fill")
-                        Label("AI без лімітів".localized, systemImage: "checkmark.circle.fill")
-                    }
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(.black.opacity(0.72))
-
+                VStack(alignment: .leading, spacing: 3) {
                     HStack(spacing: 6) {
-                        Text("Відкрити Plus".localized)
+                        Text("PLUS")
+                            .font(.system(size: 9, weight: .black))
+                            .foregroundColor(JourneyVisual.lime)
+                            .padding(.horizontal, 7)
+                            .frame(height: 18)
+                            .background(JourneyVisual.black, in: Capsule())
+                        Text("від %@ / місяць".localized(with: "\(manager.displayPrice(for: SubscriptionManager.ProductID.monthly, fallback: fallbackPrice))"))
+                            .font(.system(size: 11, weight: .semibold))
+                            .foregroundColor(.black.opacity(0.62))
                             .lineLimit(1)
-                            .fixedSize()
-                        Image(systemName: "arrow.right")
+                            .minimumScaleFactor(0.8)
                     }
+                    Text("Більше можливостей з Plus".localized)
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(.black)
+                        .lineLimit(2)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                Spacer(minLength: 4)
+
+                Image(systemName: "arrow.right")
                     .font(.system(size: 14, weight: .bold))
                     .foregroundColor(JourneyVisual.lime)
-                    .padding(.horizontal, 16)
-                    .frame(height: 42)
-                    .background(JourneyVisual.black, in: Capsule())
-                    .padding(.top, 4)
-
-                    Text("від %@ / місяць".localized(with: "\(manager.displayPrice(for: SubscriptionManager.ProductID.monthly, fallback: fallbackPrice))"))
-                        .font(.system(size: 11, weight: .semibold))
-                        .foregroundColor(.black.opacity(0.62))
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.8)
-                }
-                .padding(20)
-                .layoutPriority(1)
-
-                Spacer(minLength: 0)
-
-                SweezyCompanion(pose: .celebrate, size: 140)
-                    .idleFloat(enabled: !reduceMotion)
-                    .offset(x: 16, y: 14)
+                    .frame(width: 38, height: 38)
+                    .background(JourneyVisual.black, in: Circle())
             }
+            .padding(.vertical, 12)
+            .padding(.horizontal, 14)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background {
-                ZStack {
-                    LinearGradient(
-                        colors: [JourneyVisual.lime, JourneyVisual.lime.opacity(0.62)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                    Circle()
-                        .stroke(Color.white.opacity(0.5), lineWidth: 1.2)
-                        .frame(width: 260, height: 260)
-                        .offset(x: 120, y: 30)
-                    Circle()
-                        .stroke(Color.white.opacity(0.35), lineWidth: 1)
-                        .frame(width: 170, height: 170)
-                        .offset(x: 120, y: 30)
-                }
-            }
-            .clipShape(shape)
+            .background(
+                LinearGradient(
+                    colors: [JourneyVisual.lime, JourneyVisual.lime.opacity(0.7)],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                ),
+                in: shape
+            )
             .contentShape(shape)
-            .shadow(color: JourneyVisual.lime.opacity(0.25), radius: 18, y: 8)
         }
         .buttonStyle(CardPressStyle())
         .accessibilityIdentifier("home.plusCard")

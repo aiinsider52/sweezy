@@ -111,7 +111,7 @@ final class CompanionUITests: XCTestCase {
     @MainActor
     func testCitySettingsAndRegistration() throws {
         let app = launch()
-        app.buttons["home.openSettingsButton"].tap()
+        app.buttons["tab.settings"].tap()
         XCTAssertTrue(app.descendants(matching: .any)["settings.screen"].waitForExistence(timeout: 10))
         keep(app, "city-settings")
         let notifications = app.buttons["settings.notifications.open"]

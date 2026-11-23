@@ -3048,6 +3048,8 @@ struct ThemeSettingsView: View {
 // MARK: - Tab switching notification
 extension Notification.Name {
     static let switchTab = Notification.Name("SwitchTab")
+    /// The active tab was tapped again; its root screen pops back to the start (object: tab index).
+    static let journeyTabReselected = Notification.Name("JourneyTabReselected")
     static let setJourneyBottomBarHidden = Notification.Name("SetJourneyBottomBarHidden")
 }
 

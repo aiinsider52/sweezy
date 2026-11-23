@@ -3460,3 +3460,7 @@
 "jobs.detail.read_more" = "Читати далі";
 "jobs.detail.read_less" = "Згорнути";
 "jobs.detail.open_short" = "Відкрити";
+"journey.home.whole_plan" = "Весь план";
+"market.follow.short_off" = "Стежити";
+"market.follow.short_on" = "Стежу";
+"journey.guide.scope.all_cantons_short" = "усі кантони";

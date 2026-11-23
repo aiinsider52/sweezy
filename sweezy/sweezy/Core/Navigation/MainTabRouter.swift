@@ -13,7 +13,12 @@ final class MainTabRouter: ObservableObject {
     nonisolated static let settingsTab = 5
 
     func select(tab: Int) {
-        move(to: min(max(tab, 0), Self.settingsTab))
+        let target = min(max(tab, 0), Self.settingsTab)
+        // Tapping the tab you are already on takes it back to its first screen, as in system apps.
+        if target == selectedTab {
+            NotificationCenter.default.post(name: .journeyTabReselected, object: target)
+        }
+        move(to: target)
     }
 
     private func move(to tab: Int) {

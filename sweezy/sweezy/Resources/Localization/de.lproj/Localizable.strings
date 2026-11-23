@@ -4516,3 +4516,7 @@
 "jobs.detail.read_more" = "Weiterlesen";
 "jobs.detail.read_less" = "Weniger";
 "jobs.detail.open_short" = "Öffnen";
+"journey.home.whole_plan" = "Ganzer Plan";
+"market.follow.short_off" = "Folgen";
+"market.follow.short_on" = "Folge ich";
+"journey.guide.scope.all_cantons_short" = "alle Kantone";

@@ -4587,3 +4587,7 @@
 "jobs.detail.read_more" = "Read more";
 "jobs.detail.read_less" = "Show less";
 "jobs.detail.open_short" = "Open";
+"journey.home.whole_plan" = "Full plan";
+"market.follow.short_off" = "Follow";
+"market.follow.short_on" = "Following";
+"journey.guide.scope.all_cantons_short" = "all cantons";

@@ -40,6 +40,8 @@ struct MarketFollowToggle: View {
     let category: String?
     let categoryTitle: String?
     let requireSignIn: () -> Void
+    /// A small bell capsule for section headers instead of the full-width row.
+    var compact = false
 
     @EnvironmentObject private var appContainer: AppContainer
     @StateObject private var store = MarketFollowStore.shared
@@ -51,6 +53,38 @@ struct MarketFollowToggle: View {
     private var isOn: Bool { store.follow(country: country.rawValue, subdivision: subdivision, category: category) != nil }
 
     var body: some View {
+        if compact { compactBody } else { fullBody }
+    }
+
+    private var compactBody: some View {
+        Button(action: toggle) {
+            HStack(spacing: 6) {
+                if isWorking {
+                    ProgressView().controlSize(.mini)
+                } else {
+                    Image(systemName: isOn ? "bell.fill" : "bell")
+                        .symbolEffect(.bounce, value: isOn)
+                }
+                Text((isOn ? "market.follow.short_on" : "market.follow.short_off").localized)
+                    .lineLimit(1)
+            }
+            .font(.system(size: 12, weight: .bold))
+            .foregroundColor(isOn ? .black : JourneyVisual.primaryText)
+            .padding(.horizontal, 12)
+            .frame(height: 32)
+            .background(isOn ? JourneyVisual.lime : Theme.Colors.card, in: Capsule())
+            .overlay(Capsule().stroke(isOn ? Color.clear : JourneyVisual.softBorder, lineWidth: 1))
+        }
+        .buttonStyle(ScaleButtonStyle(scaleAmount: 0.96, hapticStyle: .light))
+        .disabled(isWorking)
+        .task { await store.loadIfNeeded() }
+        .accessibilityLabel((isOn ? "market.follow.on" : "market.follow.off").localized)
+        .accessibilityValue([categoryTitle, regionName].compactMap { $0 }.joined(separator: ", "))
+        .accessibilityAddTraits(isOn ? .isSelected : [])
+        .accessibilityIdentifier("market.follow")
+    }
+
+    private var fullBody: some View {
         Button(action: toggle) {
             HStack(spacing: 10) {
                 Image(systemName: isOn ? "bell.fill" : "bell")

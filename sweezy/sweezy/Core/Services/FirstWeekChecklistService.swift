@@ -110,6 +110,7 @@ final class FirstWeekChecklistService: ObservableObject {
         tasks[idx].isDone = willBeDone
         if willBeDone {
             EventBus.shared.emit(GamEvent(type: .checklistStepCompleted, metadata: ["entityId": id.uuidString]))
+            Celebration.fire()
         }
         // If finished all tasks → checklist.completed
         let doneCount = tasks.filter { $0.isDone }.count

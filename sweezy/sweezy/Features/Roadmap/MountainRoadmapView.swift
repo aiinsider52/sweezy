@@ -678,6 +678,7 @@ struct LevelDetailSheet: View {
         UserDefaults.standard.set(true, forKey: AccountScopedStorage.roadmapTaskCompletedKey(for: task.id))
         completedTaskIds.insert(task.id)
         saveCompletedTasks()
+        Celebration.fire()
         EventBus.shared.emit(GamEvent(type: .roadmapStageCompleted, metadata: ["entityId": task.id]))
         appContainer.telemetry.retention(
             .roadmapTaskCompleted,

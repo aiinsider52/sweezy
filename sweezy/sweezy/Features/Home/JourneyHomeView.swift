@@ -12,6 +12,7 @@ private struct HomeExploreItem: Identifiable {
 struct JourneyHomeView: View {
     @EnvironmentObject private var appContainer: AppContainer
     @EnvironmentObject private var lockManager: AppLockManager
+    @EnvironmentObject private var sessionManager: SessionManager
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.colorScheme) private var colorScheme
     @StateObject private var subscriptionManager = SubscriptionManager.shared
@@ -21,6 +22,7 @@ struct JourneyHomeView: View {
     @State private var showCareerHub = false
     @State private var showSettings = false
     @State private var showDeadlines = false
+    @State private var showPeople = false
     /// Vertical scroll position: negative while pulling down, positive once scrolled up.
     @State private var scrollOffset: CGFloat = 0
     @State private var heroDrift = false
@@ -128,6 +130,13 @@ struct JourneyHomeView: View {
             .fullScreenCover(isPresented: $showSubscription) {
                 SubscriptionView(source: .home)
             }
+            .fullScreenCover(isPresented: $showPeople) {
+                FriendNetworkView(showsDismissButton: true)
+                    .featureOnboarding(.people)
+                    .environmentObject(appContainer)
+                    .environmentObject(lockManager)
+                    .environmentObject(sessionManager)
+            }
             .sheet(isPresented: $showSettings) {
                 SettingsView()
                     .environmentObject(appContainer)
@@ -202,6 +211,11 @@ struct JourneyHomeView: View {
                 .frame(height: 150)
             }
             .allowsHitTesting(false)
+
+            // Clouds drift across the sky above the wash, slower than the page when scrolled.
+            DriftingClouds(scrollOffset: lift)
+                .frame(width: width, height: total * 0.62)
+                .offset(y: -pull * 0.6)
 
             VStack(alignment: .leading, spacing: 0) {
                 profileHeader
@@ -307,33 +321,22 @@ struct JourneyHomeView: View {
 
     private var progressLabel: some View {
         let total = max(7, appContainer.firstWeekService.tasks.count)
-        let fraction = total == 0 ? 0 : min(1, Double(completedTasks) / Double(total))
-        return HStack(spacing: 10) {
-            HStack(spacing: 5) {
-                Text("\(completedTasks)/\(total)")
-                    .font(.system(size: 13, weight: .bold, design: .default).monospacedDigit())
-                    .foregroundColor(JourneyVisual.primaryText)
-                    .contentTransition(.numericText(value: Double(completedTasks)))
+        let done = min(completedTasks, total)
+        return HStack(spacing: 12) {
+            JourneyProgressRing(done: done, total: total, size: 50, lineWidth: 6)
+            VStack(alignment: .leading, spacing: 2) {
                 Text("journey.home.steps_completed".localized)
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(JourneyVisual.secondaryText)
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundColor(JourneyVisual.primaryText)
+                Text("\(Int(Double(done) / Double(total) * 100))%")
+                    .font(.system(size: 12, weight: .semibold).monospacedDigit())
+                    .foregroundColor(JourneyVisual.accentText)
+                    .contentTransition(.numericText(value: Double(done)))
             }
-            .fixedSize()
-
-            // Segmented like the onboarding progress: each finished step fills one piece.
-            HStack(spacing: 3) {
-                ForEach(0..<total, id: \.self) { index in
-                    Capsule()
-                        .fill(index < completedTasks ? JourneyVisual.accentStrong : JourneyVisual.primaryText.opacity(0.14))
-                        .frame(height: 5)
-                }
-            }
-            .frame(width: 96)
-            .accessibilityHidden(true)
         }
+        .padding(.top, 4)
         .animation(.spring(response: 0.45, dampingFraction: 0.8), value: completedTasks)
         .accessibilityElement(children: .combine)
-        .accessibilityValue("\(Int(fraction * 100))%")
     }
 
     // MARK: - Plan
@@ -421,7 +424,12 @@ struct JourneyHomeView: View {
     private func exploreCard(_ item: HomeExploreItem) -> some View {
         let shape = RoundedRectangle(cornerRadius: 24, style: .continuous)
         return Button {
-            NotificationCenter.default.post(name: .switchTab, object: SwitchTabPayload(tab: item.tab))
+            // People has no tab of its own any more; it opens over the home page.
+            if item.id == "people" {
+                showPeople = true
+            } else {
+                NotificationCenter.default.post(name: .switchTab, object: SwitchTabPayload(tab: item.tab))
+            }
         } label: {
             ZStack(alignment: .bottomLeading) {
                 Color.clear

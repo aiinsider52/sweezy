@@ -6,7 +6,7 @@ final class FeatureOnboardingUITests: XCTestCase {
     func testCaptureDirectoryOnboarding() throws { try capture(tab: "tab.directory", name: "onb-directory") }
 
     @MainActor
-    func testCapturePeopleOnboarding() throws { try capture(tab: "tab.people", name: "onb-people") }
+    func testCaptureMapOnboarding() throws { try capture(tab: "tab.map", name: "onb-map") }
 
     @MainActor
     private func capture(tab: String, name: String) throws {

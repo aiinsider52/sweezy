@@ -29,6 +29,7 @@ struct MainTabView: View {
     @State private var showWhatsNew = false
     @State private var showDeadlines = false
     @State private var deepLinkedListingID: DeepLinkedListing?
+    @State private var celebrationCount = 0
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     @ViewBuilder
@@ -66,17 +67,17 @@ struct MainTabView: View {
         ZStack {
             tabContent
                 .id(router.selectedTab)
-                // Tabs cross-fade and settle instead of snapping between screens.
-                .transition(
-                    reduceMotion
-                        ? .opacity
-                        : .asymmetric(
-                            insertion: .opacity.combined(with: .scale(scale: 0.985)),
-                            removal: .opacity
-                        )
-                )
+                // Tabs glide a little in the direction of travel along the dock and fade, instead of snapping.
+                .transition(reduceMotion ? .opacity : .tabSlide(forward: router.movesForward))
         }
-        .animation(reduceMotion ? nil : .easeOut(duration: 0.24), value: router.selectedTab)
+        .animation(reduceMotion ? nil : .spring(response: 0.42, dampingFraction: 0.88), value: router.selectedTab)
+        .overlay {
+            ConfettiBurst(trigger: celebrationCount)
+                .ignoresSafeArea()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .celebrate)) { _ in
+            celebrationCount += 1
+        }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .safeAreaInset(edge: .bottom, spacing: 0) {
             if !router.isBottomBarHidden {
@@ -85,7 +86,20 @@ struct MainTabView: View {
                     set: { router.select(tab: $0) }
                 ))
                     .transition(.move(edge: .bottom).combined(with: .opacity))
-                    .background(JourneyVisual.chrome.ignoresSafeArea(edges: .bottom))
+                    // A soft paper fade under the floating dock keeps it legible over scrolled content.
+                    .background(alignment: .bottom) {
+                        LinearGradient(
+                            stops: [
+                                .init(color: JourneyVisual.pageBackground.opacity(0), location: 0),
+                                .init(color: JourneyVisual.pageBackground.opacity(0.9), location: 0.45),
+                                .init(color: JourneyVisual.pageBackground, location: 1)
+                            ],
+                            startPoint: .top, endPoint: .bottom
+                        )
+                        .padding(.top, -28)
+                        .ignoresSafeArea(edges: .bottom)
+                        .allowsHitTesting(false)
+                    }
             }
         }
         .onAppear {

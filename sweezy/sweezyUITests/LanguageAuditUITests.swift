@@ -23,7 +23,7 @@ final class LanguageAuditUITests: XCTestCase {
         keep(app, "\(language)-home-1")
         app.swipeUp(); keep(app, "\(language)-home-2")
         app.swipeUp(); keep(app, "\(language)-home-3")
-        for tab in ["tab.directory", "tab.map", "tab.marketplace", "tab.people"] {
+        for tab in ["tab.directory", "tab.map", "tab.marketplace"] {
             app.buttons[tab].tap()
             Thread.sleep(forTimeInterval: 1.5)
             keep(app, "\(language)-\(tab)")

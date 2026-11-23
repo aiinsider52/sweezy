@@ -187,6 +187,7 @@ struct JourneyMapView: View {
                         } label: {
                             JourneyMapPin(
                                 icon: icon(for: place),
+                                swatch: swatch(for: place.type),
                                 isSelected: selectedPlace?.id == place.id,
                                 ukrainian: place.isForUkrainians
                             )
@@ -205,6 +206,7 @@ struct JourneyMapView: View {
                         } label: {
                             JourneyMapPin(
                                 icon: "sparkles",
+                                swatch: JourneyCategoryPalette.lime,
                                 isSelected: selectedDiscoveryPlace?.id == place.id
                             )
                         }
@@ -219,8 +221,11 @@ struct JourneyMapView: View {
         // keep only what someone new in the country may need in a hurry.
         .mapStyle(.standard(
             elevation: .realistic,
+            emphasis: .muted,
             pointsOfInterest: .including([.hospital, .pharmacy, .police, .publicTransport])
         ))
+        // Apple's compass sat on top of the battery icon; ours lives in the zoom stepper.
+        .mapControls { MapCompass().mapControlVisibility(.hidden) }
         .onMapCameraChange(frequency: .continuous) { context in
             cameraCenter = context.camera.centerCoordinate
             cameraDistance = context.camera.distance
@@ -228,6 +233,24 @@ struct JourneyMapView: View {
             cameraPitch = context.camera.pitch
         }
         .ignoresSafeArea()
+        // Warm paper wash over the muted map so it reads like the app's illustrations, and a soft
+        // paper fade top and bottom where the controls float.
+        .overlay {
+            ZStack {
+                Color(red: 1.0, green: 0.95, blue: 0.84)
+                    .opacity(0.32)
+                    .blendMode(.multiply)
+                VStack(spacing: 0) {
+                    LinearGradient(colors: [JourneyVisual.pageBackground.opacity(0.85), JourneyVisual.pageBackground.opacity(0)], startPoint: .top, endPoint: .bottom)
+                        .frame(height: 200)
+                    Spacer()
+                    LinearGradient(colors: [JourneyVisual.pageBackground.opacity(0), JourneyVisual.pageBackground.opacity(0.7)], startPoint: .top, endPoint: .bottom)
+                        .frame(height: 160)
+                }
+            }
+            .ignoresSafeArea()
+            .allowsHitTesting(false)
+        }
     }
 
     /// Compact paper stepper; pinch still drives the map, this is the tidy fallback.
@@ -242,6 +265,20 @@ struct JourneyMapView: View {
             zoomButton(icon: "minus", label: "journey.map.zoom_out".localized) {
                 adjustZoom(factor: 1.55)
             }
+            Rectangle()
+                .fill(JourneyVisual.softBorder)
+                .frame(width: 26, height: 1)
+            Button {
+                resetNorth()
+            } label: {
+                Image(systemName: "location.north.line.fill")
+                    .font(.system(size: 15, weight: .bold))
+                    .foregroundColor(JourneyVisual.coral)
+                    .rotationEffect(.degrees(-cameraHeading))
+                    .frame(width: 44, height: 40)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("journey.map.north".localized)
         }
         .padding(.vertical, 4)
         .background(JourneyVisual.chrome)
@@ -1251,6 +1288,24 @@ struct JourneyMapView: View {
         }
     }
 
+    private func resetNorth() {
+        withAnimation(.easeInOut(duration: 0.6)) {
+            cameraPosition = .camera(MapCamera(centerCoordinate: cameraCenter, distance: cameraDistance, heading: 0, pitch: cameraPitch))
+        }
+    }
+
+    /// Same paper/ink pairs as the category stickers elsewhere, so a place type keeps its colour app-wide.
+    private func swatch(for type: PlaceType) -> JourneyCategorySwatch {
+        switch type {
+        case .government, .legal, .banking: return JourneyCategoryPalette.sky
+        case .healthcare, .emergency: return JourneyCategoryPalette.coral
+        case .education: return JourneyCategoryPalette.lilac
+        case .social, .community: return JourneyCategoryPalette.teal
+        case .employment, .shopping: return JourneyCategoryPalette.sand
+        case .housing, .transport: return JourneyCategoryPalette.lime
+        }
+    }
+
     private func icon(for place: Place) -> String {
         switch place.category {
         case .embassy: return "building.columns.fill"
@@ -1415,34 +1470,79 @@ struct JourneyMapView: View {
 
 private struct JourneyMapPin: View {
     let icon: String
+    var swatch: JourneyCategorySwatch = JourneyCategoryPalette.lime
     let isSelected: Bool
     var ukrainian = false
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var landed = false
+    @State private var pulse = false
 
+    private var size: CGFloat { isSelected ? 50 : 38 }
+
+    /// A paper sticker on a short stem, like the category stickers across the app. The selected one
+    /// grows, turns lime and sends out a soft pulse; Ukrainian places wear a blue-and-yellow ring.
     var body: some View {
-        ZStack {
-            Circle()
-                .fill(isSelected ? JourneyVisual.lime : (ukrainian ? Self.ukraineBlue : JourneyVisual.chrome))
-                .frame(width: isSelected ? 42 : 34, height: isSelected ? 42 : 34)
-                .overlay(
-                    Circle().stroke(
-                        isSelected ? Color.black.opacity(0.12) : (ukrainian ? Self.ukraineYellow : JourneyVisual.softBorder),
-                        lineWidth: ukrainian && !isSelected ? 2 : 1
+        VStack(spacing: -3) {
+            ZStack {
+                if isSelected && !reduceMotion {
+                    Circle()
+                        .stroke(JourneyVisual.lime, lineWidth: 3)
+                        .frame(width: size, height: size)
+                        .scaleEffect(pulse ? 1.7 : 1)
+                        .opacity(pulse ? 0 : 0.8)
+                }
+                RoundedRectangle(cornerRadius: size * 0.34, style: .continuous)
+                    .fill(isSelected ? JourneyVisual.lime : swatch.fill)
+                    .frame(width: size, height: size)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: size * 0.34, style: .continuous)
+                            .stroke(.white, lineWidth: 3)
                     )
-                )
-                .shadow(color: .black.opacity(isSelected ? 0.28 : 0.18), radius: isSelected ? 10 : 6, y: 3)
-            Image(systemName: icon)
-                .font(.system(size: isSelected ? 15 : 12, weight: .bold))
-                .foregroundColor(isSelected ? .black : (ukrainian ? Self.ukraineYellow : JourneyVisual.accentStrong))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: size * 0.34 + 3, style: .continuous)
+                            .stroke(
+                                ukrainian
+                                    ? AnyShapeStyle(LinearGradient(colors: [Self.ukraineBlue, Self.ukraineYellow], startPoint: .top, endPoint: .bottom))
+                                    : AnyShapeStyle(Color.black.opacity(0.08)),
+                                lineWidth: ukrainian ? 2.5 : 1
+                            )
+                            .padding(-3)
+                    )
+                    .shadow(color: .black.opacity(isSelected ? 0.3 : 0.2), radius: isSelected ? 12 : 6, y: isSelected ? 6 : 3)
+                Image(systemName: icon)
+                    .font(.system(size: size * 0.4, weight: .bold))
+                    .foregroundColor(isSelected ? .black : swatch.ink)
+            }
+            // Stem pointing at the exact spot.
+            Triangle()
+                .fill(.white)
+                .frame(width: 12, height: 8)
+                .shadow(color: .black.opacity(0.15), radius: 2, y: 2)
         }
-        .scaleEffect(landed || reduceMotion ? 1 : 0.4)
+        .offset(y: -(size / 2 + 4))
+        .scaleEffect(landed || reduceMotion ? 1 : 0.3, anchor: .bottom)
         .opacity(landed || reduceMotion ? 1 : 0)
-        .animation(.spring(response: 0.42, dampingFraction: 0.68), value: landed)
-        .animation(.spring(response: 0.34, dampingFraction: 0.7), value: isSelected)
+        .animation(.spring(response: 0.42, dampingFraction: 0.62), value: landed)
+        .animation(.spring(response: 0.34, dampingFraction: 0.62), value: isSelected)
         .onAppear { landed = true }
         .onDisappear { landed = false }
+        .onChange(of: isSelected, initial: true) { _, selected in
+            pulse = false
+            guard selected, !reduceMotion else { return }
+            withAnimation(.easeOut(duration: 1.4).repeatForever(autoreverses: false)) { pulse = true }
+        }
+    }
+
+    private struct Triangle: Shape {
+        func path(in rect: CGRect) -> Path {
+            Path { path in
+                path.move(to: CGPoint(x: rect.minX, y: rect.minY))
+                path.addLine(to: CGPoint(x: rect.maxX, y: rect.minY))
+                path.addLine(to: CGPoint(x: rect.midX, y: rect.maxY))
+                path.closeSubpath()
+            }
+        }
     }
 
     static let ukraineBlue = Color(red: 0, green: 0.36, blue: 0.73)

@@ -166,6 +166,7 @@ final class LifeAdminService: ObservableObject {
     func toggleDocument(_ id: String) {
         guard let index = documents.firstIndex(where: { $0.id == id }) else { return }
         documents[index].isReady.toggle()
+        if documents[index].isReady { Celebration.fire() }
         persistDocuments()
     }
 
@@ -176,7 +177,12 @@ final class LifeAdminService: ObservableObject {
     }
 
     func setDeadlineCompleted(_ id: String, completed: Bool) {
-        if completed { completedDeadlineIDs.insert(id) } else { completedDeadlineIDs.remove(id) }
+        if completed {
+            if !completedDeadlineIDs.contains(id) { Celebration.fire() }
+            completedDeadlineIDs.insert(id)
+        } else {
+            completedDeadlineIDs.remove(id)
+        }
         defaults.set(Array(completedDeadlineIDs), forKey: completedKey)
     }
 

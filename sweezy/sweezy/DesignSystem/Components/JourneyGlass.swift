@@ -216,78 +216,92 @@ struct JourneyPrimaryButton: View {
     }
 }
 
+/// Floating dock: the selected tab opens into a lime pill with its name, the rest stay as quiet icons.
+/// People lives in the marketplace and the home page now, so it has no tab of its own.
 struct JourneyBottomBar: View {
-    @Environment(\.colorScheme) private var colorScheme
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Binding var selection: Int
     @Namespace private var selectionNamespace
 
-    private let items: [(String, String)] = [
-        ("house", "journey.tab.home".localized),
-        ("list.bullet.rectangle", "journey.tab.directory".localized),
-        ("mappin", "journey.tab.map".localized),
-        ("cart", "journey.tab.marketplace".localized),
-        ("person.2", "journey.tab.people".localized),
-        ("gearshape", "journey.tab.settings".localized)
+    private struct Item {
+        let tab: Int
+        let icon: String
+        let selectedIcon: String
+        let title: String
+        let identifier: String
+    }
+
+    private let items: [Item] = [
+        Item(tab: 0, icon: "house", selectedIcon: "house.fill", title: "journey.tab.home".localized, identifier: "home"),
+        Item(tab: 1, icon: "book.pages", selectedIcon: "book.pages.fill", title: "journey.tab.directory".localized, identifier: "directory"),
+        Item(tab: 2, icon: "map", selectedIcon: "map.fill", title: "journey.tab.map".localized, identifier: "map"),
+        Item(tab: 3, icon: "bag", selectedIcon: "bag.fill", title: "journey.tab.marketplace".localized, identifier: "marketplace"),
+        Item(tab: MainTabRouter.settingsTab, icon: "gearshape", selectedIcon: "gearshape.fill", title: "journey.tab.settings".localized, identifier: "settings")
     ]
 
     var body: some View {
-        HStack(spacing: 0) {
-            ForEach(Array(items.enumerated()), id: \.offset) { index, item in
-                Button {
-                    // ScaleButtonStyle below already plays the light haptic on press.
-                    withAnimation(reduceMotion ? nil : Theme.Animation.selection) {
-                        selection = index
-                    }
-                } label: {
-                    VStack(spacing: 4) {
-                        ZStack {
-                            if selection == index {
-                                Circle()
-                                    .fill(JourneyVisual.lime)
-                                    .frame(width: 32, height: 32)
-                                    .matchedGeometryEffect(id: "journey-tab-selection", in: selectionNamespace)
-                            }
-                            Image(systemName: iconName(for: index, baseName: item.0))
-                                .font(.system(size: 16, weight: .semibold))
-                                .foregroundColor(selection == index ? .black : JourneyVisual.chromeText)
-                                .contentTransition(.symbolEffect(.replace))
-                                .symbolEffect(.bounce, value: selection == index)
-                        }
-                        Text(item.1)
-                            .font(.system(size: 10, weight: selection == index ? .bold : .semibold))
-                            .foregroundColor(selection == index ? JourneyVisual.accentText : JourneyVisual.chromeText)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.72)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .frame(minHeight: 54)
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(ScaleButtonStyle(scaleAmount: 0.95, hapticStyle: .light))
-                .accessibilityLabel(item.1)
-                .accessibilityValue(selection == index ? "journey.tab.selected".localized : "")
-                .accessibilityAddTraits(selection == index ? [.isSelected] : [])
-                .accessibilityIdentifier("tab.\(tabIdentifier(for: index))")
+        HStack(spacing: 4) {
+            ForEach(items, id: \.tab) { item in
+                tabButton(item)
             }
         }
-        .padding(.horizontal, 4)
-        .padding(.top, 7)
-        .padding(.bottom, 8)
-        .sensoryFeedback(.selection, trigger: selection)
-        .background(JourneyVisual.chrome)
-        .overlay(alignment: .top) {
-            Rectangle().fill(JourneyVisual.softBorder).frame(height: 0.5)
+        .padding(6)
+        .background {
+            Capsule()
+                .fill(JourneyVisual.black)
+                .overlay(
+                    Capsule().stroke(
+                        LinearGradient(colors: [.white.opacity(0.18), .white.opacity(0.04)], startPoint: .top, endPoint: .bottom),
+                        lineWidth: 1
+                    )
+                )
+                .shadow(color: .black.opacity(0.28), radius: 22, y: 12)
+                .shadow(color: JourneyVisual.lime.opacity(0.10), radius: 30, y: 4)
         }
+        .padding(.horizontal, 16)
+        .padding(.top, 6)
+        .padding(.bottom, 4)
+        .animation(reduceMotion ? nil : .spring(response: 0.38, dampingFraction: 0.8), value: selection)
     }
 
-    private func iconName(for index: Int, baseName: String) -> String {
-        guard selection == index else { return baseName }
-        return index == 2 ? "mappin.and.ellipse" : "\(baseName).fill"
-    }
-
-    private func tabIdentifier(for index: Int) -> String {
-        ["home", "directory", "map", "marketplace", "people", "settings"][index]
+    private func tabButton(_ item: Item) -> some View {
+        let selected = selection == item.tab
+        return Button {
+            selection = item.tab
+        } label: {
+            HStack(spacing: 7) {
+                Image(systemName: selected ? item.selectedIcon : item.icon)
+                    .font(.system(size: 17, weight: .semibold))
+                    .contentTransition(.symbolEffect(.replace))
+                    .symbolEffect(.bounce, value: selected)
+                if selected {
+                    Text(item.title)
+                        .font(.system(size: 13, weight: .bold))
+                        .lineLimit(1)
+                        .fixedSize()
+                        .transition(.opacity.combined(with: .scale(scale: 0.6, anchor: .leading)))
+                }
+            }
+            .foregroundColor(selected ? .black : .white.opacity(0.62))
+            .padding(.horizontal, selected ? 16 : 0)
+            .frame(maxWidth: selected ? nil : .infinity)
+            .frame(height: 50)
+            .background {
+                if selected {
+                    Capsule()
+                        .fill(JourneyVisual.lime)
+                        .shadow(color: JourneyVisual.lime.opacity(0.45), radius: 12, y: 2)
+                        .matchedGeometryEffect(id: "journey-tab-selection", in: selectionNamespace)
+                }
+            }
+            .contentShape(Capsule())
+        }
+        .buttonStyle(ScaleButtonStyle(scaleAmount: 0.92, hapticStyle: .light))
+        .layoutPriority(selected ? 1 : 0)
+        .accessibilityLabel(item.title)
+        .accessibilityValue(selected ? "journey.tab.selected".localized : "")
+        .accessibilityAddTraits(selected ? [.isSelected] : [])
+        .accessibilityIdentifier("tab.\(item.identifier)")
     }
 }
 

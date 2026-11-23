@@ -6,6 +6,7 @@ enum SubscriptionSource: String {
     case home
     case cv
     case profile
+    case letters
 }
 
 struct SubscriptionView: View {

@@ -449,6 +449,7 @@ struct JourneyDirectoryView: View {
     private func toolDestination(_ route: JourneyToolRoute) -> some View {
         switch route {
         case .myPlan: MyPlanView()
+        case .letters: LetterExplainerView()
         case .documents: DocumentReadinessView()
         case .ask: AskSweezyView()
         case .deadlines: DeadlineEngineView()
@@ -581,6 +582,7 @@ private enum JourneyToolkitCategory: String, CaseIterable, Identifiable {
 
 private enum JourneyToolRoute: String, Identifiable, CaseIterable {
     case myPlan
+    case letters
     case documents
     case ask
     case deadlines
@@ -600,7 +602,7 @@ private enum JourneyToolRoute: String, Identifiable, CaseIterable {
 
     /// Headline tools shown as illustrated cards on "All".
     static func featured(countryCode: String) -> [JourneyToolRoute] {
-        countryCode == "CH" ? [.careerHub, .discoverSwitzerland] : [.careerHub, .cv]
+        countryCode == "CH" ? [.letters, .careerHub, .discoverSwitzerland] : [.letters, .careerHub, .cv]
     }
 
     /// Everything else, once each. Ask Sweezy and the German word game live elsewhere now.
@@ -608,7 +610,7 @@ private enum JourneyToolRoute: String, Identifiable, CaseIterable {
 
     var swatch: JourneyCategorySwatch {
         switch self {
-        case .myPlan, .roadmap: return JourneyCategoryPalette.lime
+        case .myPlan, .roadmap, .letters: return JourneyCategoryPalette.lime
         case .documents, .cityHub: return JourneyCategoryPalette.sky
         case .deadlines, .moments: return JourneyCategoryPalette.coral
         case .appointments, .experts: return JourneyCategoryPalette.teal
@@ -622,6 +624,7 @@ private enum JourneyToolRoute: String, Identifiable, CaseIterable {
     var heroImage: String {
         switch self {
         case .careerHub, .cv: return "story-jobs"
+        case .letters: return "journey-tool-documents"
         case .discoverSwitzerland: return "swiss-discovery-aletsch"
         default: return imageName
         }
@@ -635,6 +638,7 @@ private enum JourneyToolRoute: String, Identifiable, CaseIterable {
     var title: String {
         switch self {
         case .myPlan: return "journey.tool.my_plan.title".localized
+        case .letters: return "letters.title".localized
         case .documents: return "journey.tool.documents.title".localized
         case .ask: return "journey.tool.ask.title".localized
         case .deadlines: return "journey.tool.deadlines.title".localized
@@ -655,6 +659,7 @@ private enum JourneyToolRoute: String, Identifiable, CaseIterable {
     var subtitle: String {
         switch self {
         case .myPlan: return "journey.tool.my_plan.subtitle".localized
+        case .letters: return "letters.tool_subtitle".localized
         case .documents: return "journey.tool.documents.subtitle".localized
         case .ask: return "journey.tool.ask.subtitle".localized
         case .deadlines: return "journey.tool.deadlines.subtitle".localized
@@ -675,6 +680,7 @@ private enum JourneyToolRoute: String, Identifiable, CaseIterable {
     var icon: String {
         switch self {
         case .myPlan: return "checklist.checked"
+        case .letters: return "envelope.open.badge.clock"
         case .documents: return "doc.text.fill"
         case .ask: return "sparkles"
         case .deadlines: return "calendar.badge.exclamationmark"
@@ -695,6 +701,7 @@ private enum JourneyToolRoute: String, Identifiable, CaseIterable {
     var imageName: String {
         switch self {
         case .myPlan: return "journey-tool-my-plan"
+        case .letters: return "journey-tool-documents"
         case .documents: return "journey-tool-documents"
         case .ask: return "journey-tool-ask"
         case .deadlines: return "journey-tool-deadlines"

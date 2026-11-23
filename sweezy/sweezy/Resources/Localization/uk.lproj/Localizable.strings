@@ -3452,3 +3452,11 @@
 "jobs.employment.contract" = "Тимчасово";
 "jobs.employment.internship" = "Стажування";
 "jobs.employment.apprenticeship" = "Навчання (Lehre)";
+"jobs.map" = "Вакансії на карті";
+"jobs.more" = "Ще";
+"jobs.new" = "Нова";
+"jobs.no_experience_short" = "Без досвіду";
+"jobs.title_short" = "Робота";
+"jobs.detail.read_more" = "Читати далі";
+"jobs.detail.read_less" = "Згорнути";
+"jobs.detail.open_short" = "Відкрити";

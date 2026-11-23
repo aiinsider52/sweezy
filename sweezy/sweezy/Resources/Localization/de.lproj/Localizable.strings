@@ -4508,3 +4508,11 @@
 "jobs.employment.contract" = "Befristet";
 "jobs.employment.internship" = "Praktikum";
 "jobs.employment.apprenticeship" = "Lehre";
+"jobs.map" = "Stellen auf der Karte";
+"jobs.more" = "Mehr";
+"jobs.new" = "Neu";
+"jobs.no_experience_short" = "Ohne Erfahrung";
+"jobs.title_short" = "Jobs";
+"jobs.detail.read_more" = "Weiterlesen";
+"jobs.detail.read_less" = "Weniger";
+"jobs.detail.open_short" = "Öffnen";

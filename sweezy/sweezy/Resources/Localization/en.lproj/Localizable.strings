@@ -4579,3 +4579,11 @@
 "jobs.employment.contract" = "Temporary";
 "jobs.employment.internship" = "Internship";
 "jobs.employment.apprenticeship" = "Apprenticeship";
+"jobs.map" = "Jobs on the map";
+"jobs.more" = "More";
+"jobs.new" = "New";
+"jobs.no_experience_short" = "No experience";
+"jobs.title_short" = "Jobs";
+"jobs.detail.read_more" = "Read more";
+"jobs.detail.read_less" = "Show less";
+"jobs.detail.open_short" = "Open";

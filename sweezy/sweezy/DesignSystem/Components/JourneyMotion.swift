@@ -56,6 +56,8 @@ struct JourneyProgressRing: View {
     let total: Int
     var size: CGFloat = 54
     var lineWidth: CGFloat = 7
+    /// Show "85%" instead of "85/100".
+    var showsPercent = false
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var shown: Double = 0
@@ -79,14 +81,21 @@ struct JourneyProgressRing: View {
                 )
                 .rotationEffect(.degrees(-90))
                 .shadow(color: JourneyVisual.lime.opacity(fraction >= 1 ? 0.7 : 0.25), radius: fraction >= 1 ? 8 : 3)
-            VStack(spacing: -2) {
-                Text("\(done)")
-                    .font(.system(size: size * 0.32, weight: .heavy).monospacedDigit())
+            if showsPercent {
+                Text("\(Int(fraction * 100))%")
+                    .font(.system(size: size * 0.27, weight: .heavy).monospacedDigit())
                     .foregroundColor(JourneyVisual.primaryText)
-                    .contentTransition(.numericText(value: Double(done)))
-                Text("/\(total)")
-                    .font(.system(size: size * 0.18, weight: .bold).monospacedDigit())
-                    .foregroundColor(JourneyVisual.secondaryText)
+                    .contentTransition(.numericText(value: fraction))
+            } else {
+                VStack(spacing: -2) {
+                    Text("\(done)")
+                        .font(.system(size: size * 0.32, weight: .heavy).monospacedDigit())
+                        .foregroundColor(JourneyVisual.primaryText)
+                        .contentTransition(.numericText(value: Double(done)))
+                    Text("/\(total)")
+                        .font(.system(size: size * 0.18, weight: .bold).monospacedDigit())
+                        .foregroundColor(JourneyVisual.secondaryText)
+                }
             }
         }
         .frame(width: size, height: size)

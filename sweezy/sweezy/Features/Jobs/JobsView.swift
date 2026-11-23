@@ -298,6 +298,8 @@ struct JobsView: View {
         .sheet(item: $selectedJob) { job in
             JobDetailSheet(
                 job: job,
+                cv: savedCV,
+                onSaveLetter: { letter in await saveCoverLetter(letter, for: job) },
                 matchScore: matchScores[job.id],
                 matchReasons: matchReasons[job.id] ?? [],
                 isApplied: appliedJobIds.contains(job.id),
@@ -317,7 +319,10 @@ struct JobsView: View {
             DraftSheet(text: draftedText, isDrafting: isDrafting)
         }
         .sheet(isPresented: $showApplicationTracker) {
-            JobApplicationTrackerSheet(applications: applications) { jobID, status in
+            JobApplicationTrackerSheet(
+                applications: applications,
+                applicantName: savedCV?.personal.fullName ?? lockManager.userName
+            ) { jobID, status in
                 await updateApplication(jobID: jobID, status: status)
             }
         }
@@ -382,6 +387,11 @@ struct JobsView: View {
                 didLoadScopedState = true
             }
             if isCareerHubUITest {
+                #if DEBUG
+                items = Self.careerHubJobFixtures
+                if ProcessInfo.processInfo.arguments.contains("--open-job-detail") { selectedJob = items.first }
+                if ProcessInfo.processInfo.arguments.contains("--open-job-report") { showApplicationTracker = true }
+                #endif
                 didSearchOnce = true
                 return
             }
@@ -1397,6 +1407,17 @@ struct JobsView: View {
     }
 
     #if DEBUG
+    #if DEBUG
+    /// Offline vacancies for UI checks of the career copilot without signing in.
+    private static var careerHubJobFixtures: [APIClient.JobItem] {
+        let json = """
+        [{"id":"fixture-ux","source":"jooble","title":"UX/UI Designer (m/w/d) 80–100%","company":"Helvetia Digital AG","location":"Zürich","canton":"ZH","country":"CH","url":"https://example.com/job/ux","employment_type":"full_time","workplace_type":"hybrid","workload_min":80,"workload_max":100,"salary":"CHF 95'000–110'000","snippet":"Gestalte digitale Versicherungsprodukte mit unserem Produktteam.","description":"Wir suchen eine/n UX/UI Designer/in mit Erfahrung in Figma, Design Systems und Nutzerforschung. Deutsch B2, Englisch fliessend. Arbeitsbewilligung erforderlich.","languages":["Deutsch B2","Englisch"],"skills":["Figma","Design Systems","User Research"],"is_verified":true,"freshness":"fresh"},
+         {"id":"fixture-care","source":"jooble","title":"Pflegehelfer/in SRK 60%","company":"Alterszentrum Seefeld","location":"Zürich","canton":"ZH","country":"CH","url":"https://example.com/job/care","employment_type":"part_time","workload_min":60,"workload_max":60,"snippet":"Unterstützung in der Pflege und Betreuung unserer Bewohnenden.","languages":["Deutsch B1"],"no_experience_required":true,"freshness":"fresh"}]
+        """
+        return (try? JSONDecoder().decode([APIClient.JobItem].self, from: Data(json.utf8))) ?? []
+    }
+    #endif
+
     private static var careerHubFixture: CVResume {
         var resume = CVResume.empty
         resume.personal = CVPersonal(
@@ -1435,6 +1456,13 @@ struct JobsView: View {
     
     // MARK: - Actions
     private func performSearch() async {
+        #if DEBUG
+        if isCareerHubUITest {
+            items = Self.careerHubJobFixtures
+            didSearchOnce = true
+            return
+        }
+        #endif
         searchGeneration &+= 1
         let generation = searchGeneration
         isLoading = true
@@ -1662,6 +1690,14 @@ struct JobsView: View {
             haptic(.error)
             await MainActor.run { interactionMessage = error.localizedDescription }
         }
+    }
+
+    /// Keeps the kit's motivation letter with the job in the tracker (as "prepared" unless already further).
+    private func saveCoverLetter(_ letter: String, for job: APIClient.JobItem) async {
+        let status = applications.first(where: { $0.job_id == job.id })?.status ?? "prepared"
+        guard let updated = try? await APIClient.updateJobApplication(jobId: job.id, status: status, coverLetter: letter) else { return }
+        applications.removeAll { $0.job_id == job.id }
+        applications.append(updated)
     }
 
     private func updateApplication(jobID: String, status: String) async {
@@ -2473,6 +2509,17 @@ private struct QuickTagChip: View {
 
 // MARK: - Job Card
 private struct JobCard: View {
+    /// Providers send codes like "full_time" or "Vollzeit"; show them in the app language.
+    static func employmentLabel(_ raw: String) -> String {
+        let value = raw.lowercased()
+        if value.contains("full") || value.contains("vollzeit") { return "jobs.employment.full_time".localized }
+        if value.contains("part") || value.contains("teilzeit") { return "jobs.employment.part_time".localized }
+        if value.contains("contract") || value.contains("temporary") || value.contains("befrist") { return "jobs.employment.contract".localized }
+        if value.contains("intern") || value.contains("prakti") { return "jobs.employment.internship".localized }
+        if value.contains("apprentice") || value.contains("lehr") { return "jobs.employment.apprenticeship".localized }
+        return raw.replacingOccurrences(of: "_", with: " ")
+    }
+
     let job: APIClient.JobItem
     let isSaved: Bool
     let matchScore: Int?
@@ -2554,7 +2601,7 @@ private struct JobCard: View {
                     Text(job.location ?? (ResidenceCountry(rawValue: APIClient.countryCode)?.name ?? "Швейцарія".localized))
                     if let employment = job.employment_type, !employment.isEmpty {
                         Text("·")
-                        Text(employment)
+                        Text(Self.employmentLabel(employment))
                     } else if isRemote {
                         Text("· Remote")
                     }
@@ -2787,6 +2834,8 @@ private struct JobsRecoveryState: View {
 // MARK: - Job Detail Sheet
 private struct JobDetailSheet: View {
     let job: APIClient.JobItem
+    let cv: CVResume?
+    let onSaveLetter: (String) async -> Void
     let matchScore: Int?
     let matchReasons: [String]
     let isApplied: Bool
@@ -2798,6 +2847,8 @@ private struct JobDetailSheet: View {
     
     @Environment(\.dismiss) private var dismiss
     @State private var showReportConfirmation = false
+    @State private var showKit = false
+    @State private var showInterview = false
     @State private var translatedDescription: String?
     @State private var isTranslating = false
     @State private var translationError: String?
@@ -2941,25 +2992,52 @@ private struct JobDetailSheet: View {
                             }
                         }
                         
-                        Button {
-                            Task { await onDraft() }
-                        } label: {
-                            HStack {
-                                Image(systemName: "sparkles")
-                                Text("AI Відповідь".localized)
+                        // Career copilot: the tailored application kit and a mock interview for this job.
+                        Button { showKit = true } label: {
+                            HStack(spacing: 10) {
+                                Image(systemName: "wand.and.stars")
+                                VStack(alignment: .leading, spacing: 1) {
+                                    Text("career.kit.cta".localized).font(.system(size: 16, weight: .bold))
+                                    Text("career.kit.cta_sub".localized).font(.system(size: 12, weight: .medium)).opacity(0.75)
+                                }
+                                Spacer()
+                                Image(systemName: "arrow.right")
                             }
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Theme.Colors.accent)
-                            .foregroundColor(JourneyVisual.primaryText)
-                            .cornerRadius(12)
+                            .foregroundColor(.black)
+                            .padding(.horizontal, 18)
+                            .frame(maxWidth: .infinity, minHeight: 60)
+                            .background(JourneyVisual.lime, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                            .shadow(color: JourneyVisual.lime.opacity(0.35), radius: 12, y: 5)
                         }
+                        .buttonStyle(ScaleButtonStyle(scaleAmount: 0.98, hapticStyle: .medium))
+                        .accessibilityIdentifier("jobs.detail.kit")
+
+                        Button { showInterview = true } label: {
+                            HStack(spacing: 10) {
+                                Image(systemName: "person.wave.2.fill")
+                                Text("career.interview.cta".localized).font(.system(size: 15, weight: .bold))
+                                Spacer()
+                                Image(systemName: "arrow.right")
+                            }
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 18)
+                            .frame(maxWidth: .infinity, minHeight: 52)
+                            .background(JourneyVisual.black, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        }
+                        .buttonStyle(ScaleButtonStyle(scaleAmount: 0.98, hapticStyle: .light))
+                        .accessibilityIdentifier("jobs.detail.interview")
                     }
                 }
                 .padding()
             }
             .navigationTitle("Деталі".localized)
             .navigationBarTitleDisplayMode(.inline)
+            .fullScreenCover(isPresented: $showKit) {
+                ApplicationKitView(job: job, cv: cv, onUseLetter: onSaveLetter)
+            }
+            .fullScreenCover(isPresented: $showInterview) {
+                InterviewCoachView(job: job, cvSummary: cv?.personal.summary ?? "", preferredLanguage: CareerAPI.defaultLetterLanguage(for: job))
+            }
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Menu {
@@ -3108,9 +3186,11 @@ private struct DraftSheet: View {
 
 private struct JobApplicationTrackerSheet: View {
     let applications: [APIClient.JobApplication]
+    let applicantName: String
     let onStatusChange: (String, String) async -> Void
 
     @Environment(\.dismiss) private var dismiss
+    @State private var showReport = false
     private let stages = ["saved", "prepared", "applied", "interview", "offer", "rejected", "withdrawn"]
 
     private func title(_ status: String) -> String {
@@ -3138,6 +3218,30 @@ private struct JobApplicationTrackerSheet: View {
                         .foregroundColor(JourneyVisual.primaryText)
                     Text("Оновлюй статус після кожного кроку. Уся історія синхронізується між пристроями.".localized)
                         .font(.subheadline)
+                    Button { showReport = true } label: {
+                        HStack(spacing: 12) {
+                            Image(systemName: "doc.text.fill")
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundColor(.black)
+                                .frame(width: 40, height: 40)
+                                .background(JourneyVisual.lime, in: Circle())
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("career.report.cta".localized)
+                                    .font(.system(size: 15, weight: .bold))
+                                    .foregroundColor(JourneyVisual.primaryText)
+                                Text("career.report.cta_sub".localized)
+                                    .font(.system(size: 12, weight: .medium))
+                                    .foregroundColor(JourneyVisual.secondaryText)
+                            }
+                            Spacer()
+                            Image(systemName: "chevron.right").foregroundColor(JourneyVisual.secondaryText)
+                        }
+                        .padding(14)
+                        .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                        .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(JourneyVisual.lime.opacity(0.7), lineWidth: 1.5))
+                    }
+                    .buttonStyle(ScaleButtonStyle(scaleAmount: 0.98, hapticStyle: .light))
+                    .accessibilityIdentifier("jobs.tracker.report")
                         .foregroundColor(JourneyVisual.secondaryText)
 
                     if applications.isEmpty {
@@ -3216,6 +3320,14 @@ private struct JobApplicationTrackerSheet: View {
             .navigationTitle("Відгуки".localized)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Готово".localized) { dismiss() } } }
+            .fullScreenCover(isPresented: $showReport) {
+                JobSearchReportView(applications: applications, applicantName: applicantName)
+            }
+            .task {
+                #if DEBUG
+                if ProcessInfo.processInfo.arguments.contains("--open-job-report") { showReport = true }
+                #endif
+            }
         }
     }
 }

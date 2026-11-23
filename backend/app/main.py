@@ -33,6 +33,7 @@ from .routers.news import router as news_router
 from .routers.admin import router as admin_router
 from .routers.admin_analytics import router as admin_analytics_router
 from .routers.ai import router as ai_router
+from .routers.career_ai import router as career_ai_router
 from .routers.jobs import admin_router as jobs_admin_router
 from .routers.jobs import router as jobs_router
 from .routers.live import router as live_router
@@ -449,6 +450,7 @@ app.include_router(incidents_router, prefix=f"{API_PREFIX}/admin", tags=["admin"
 app.include_router(media_router, prefix=f"{API_PREFIX}/media", tags=["media"])
 app.include_router(news_router, prefix=f"{API_PREFIX}/news", tags=["news"])
 app.include_router(ai_router, prefix=f"{API_PREFIX}/ai", tags=["ai"])
+app.include_router(career_ai_router, prefix=f"{API_PREFIX}/ai", tags=["ai", "career"])
 app.include_router(jobs_router, prefix=f"{API_PREFIX}/jobs", tags=["jobs"])
 app.include_router(jobs_admin_router, prefix=f"{API_PREFIX}/admin/jobs", tags=["admin-jobs"])
 app.include_router(live_router, prefix=f"{API_PREFIX}/live", tags=["live"])

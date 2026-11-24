@@ -26,7 +26,7 @@ struct JourneyHomeView: View {
 
     private let actions: [(String, String, DovidnykRouteSection?)] = [
         ("doc.text.fill", "journey.home.action.documents".localized, .checklists),
-        ("briefcase.fill", "Career Hub", .tools),
+        ("briefcase.fill", "journey.home.action.career".localized, .tools),
         ("house.fill", "journey.home.action.housing".localized, .guides),
         ("cross.case.fill", "journey.home.action.health".localized, .guides)
     ]
@@ -633,7 +633,7 @@ struct JourneyHomeView: View {
     }
 
     private var nextStepTitle: String {
-        appContainer.firstWeekService.nextDueTask?.title ?? "journey.home.default_next_step".localized
+        appContainer.firstWeekService.nextDueTask?.displayTitle ?? "journey.home.default_next_step".localized
     }
 
     private var homeDeadlines: [LifeDeadline] {

@@ -391,17 +391,17 @@ struct PlaceBottomSheet: View {
         let calendar = Calendar.current
         let weekday = calendar.component(.weekday, from: Date())
         if let hours = place.openingHours.first(where: { $0.weekday == weekday }) {
-            if hours.isClosed { return NSLocalizedString("Closed today", comment: "") }
+            if hours.isClosed { return "Closed today".localized }
             return "\(hours.weekdayName): \(hours.openTime.formatted) – \(hours.closeTime.formatted)"
         }
-        return NSLocalizedString("Hours unavailable", comment: "")
+        return "Hours unavailable".localized
     }
     
     private var openNowLine: (text: String, color: Color) {
         if place.isOpen() {
-            return (NSLocalizedString("Open now", comment: ""), .green)
+            return ("Open now".localized, .green)
         } else {
-            return (NSLocalizedString("Closed", comment: ""), .red)
+            return ("Closed".localized, .red)
         }
     }
     
@@ -1212,17 +1212,17 @@ struct WinterPlaceBottomSheet: View {
         let calendar = Calendar.current
         let weekday = calendar.component(.weekday, from: Date())
         if let hours = place.openingHours.first(where: { $0.weekday == weekday }) {
-            if hours.isClosed { return NSLocalizedString("Closed today", comment: "") }
+            if hours.isClosed { return "Closed today".localized }
             return "\(hours.weekdayName): \(hours.openTime.formatted) – \(hours.closeTime.formatted)"
         }
-        return NSLocalizedString("Hours unavailable", comment: "")
+        return "Hours unavailable".localized
     }
     
     private var openNowLine: (text: String, color: Color) {
         if place.isOpen() {
-            return (NSLocalizedString("Open now", comment: ""), .green)
+            return ("Open now".localized, .green)
         } else {
-            return (NSLocalizedString("Closed", comment: ""), .red)
+            return ("Closed".localized, .red)
         }
     }
     

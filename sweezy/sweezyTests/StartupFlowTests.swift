@@ -10,12 +10,14 @@ final class StartupFlowTests: XCTestCase {
         XCTAssertNotNil(svc.checklists)
     }
     
-    func testGetChecklistsForLocaleFallback() async {
+    func testChecklistsNeverMixLanguages() async {
         let svc = ContentService(bundle: .main, autoLoad: false)
-        await svc.loadContent()
-        let uk = svc.getChecklistsForLocale("uk")
-        let de = svc.getChecklistsForLocale("de")
-        XCTAssertFalse(uk.isEmpty || de.isEmpty, "Should have base or fallback checklists")
+        for language in ["uk", "de", "en"] {
+            await svc.loadLocalizedContent(for: language)
+            let items = svc.getChecklistsForLocale(language)
+            XCTAssertFalse(items.isEmpty, "No \(language) checklists")
+            XCTAssertTrue(items.allSatisfy { ($0.language ?? "uk") == language }, "Mixed languages for \(language)")
+        }
     }
 }
 

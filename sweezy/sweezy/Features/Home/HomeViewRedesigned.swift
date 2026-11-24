@@ -2107,7 +2107,7 @@ private struct FeaturedNewsInlineCard: View {
     
     private func relativeDate(_ date: Date) -> String {
         let formatter = RelativeDateTimeFormatter()
-        formatter.locale = Locale.current
+        formatter.locale = AppLanguage.current.locale
         formatter.unitsStyle = .short
         return formatter.localizedString(for: date, relativeTo: Date())
     }
@@ -2913,6 +2913,7 @@ private struct QuickTaskPreview: View {
     
     private var timeString: String {
         let formatter = DateFormatter()
+        formatter.locale = AppLanguage.current.locale
         formatter.dateFormat = "HH:mm"
         return formatter.string(from: task.dueDate)
     }
@@ -3108,6 +3109,7 @@ private struct TaskRowItem: View {
     
     private func formatTime(_ date: Date) -> String {
         let formatter = DateFormatter()
+        formatter.locale = AppLanguage.current.locale
         formatter.dateFormat = "HH:mm"
         return formatter.string(from: date)
     }
@@ -3525,7 +3527,7 @@ private struct PremiumNewsCard: View {
     
     private func relativeDate(_ date: Date) -> String {
         let formatter = RelativeDateTimeFormatter()
-        formatter.locale = Locale.current
+        formatter.locale = AppLanguage.current.locale
         formatter.unitsStyle = .short
         return formatter.localizedString(for: date, relativeTo: Date())
     }

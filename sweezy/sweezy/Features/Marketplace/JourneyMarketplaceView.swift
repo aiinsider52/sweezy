@@ -1408,7 +1408,7 @@ private struct JourneyGoodsGridCard: View {
 
     private func shortFreshness(_ date: Date?) -> String {
         guard let date else { return "journey.marketplace.no_date".localized }
-        return date.formatted(.dateTime.day().month(.abbreviated))
+        return date.formatted(.dateTime.day().month(.abbreviated).locale(AppLanguage.current.locale))
     }
 }
 

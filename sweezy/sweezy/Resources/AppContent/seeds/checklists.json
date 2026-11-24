@@ -188,7 +188,8 @@
     "lastUpdated": "2023-10-14T10:00:00Z",
     "source": "https://www.ch.ch/en/foreign-nationals-in-switzerland/",
     "sourceTitle": "ch.ch — Foreign nationals in Switzerland",
-    "verifiedAt": "2026-07-15T00:00:00Z"
+    "verifiedAt": "2026-07-15T00:00:00Z",
+    "language": "en"
   },
   {
     "id": "660e8400-e29b-41d4-a716-446655440002",
@@ -357,7 +358,8 @@
     "lastUpdated": "2023-10-10T11:15:00Z",
     "source": "https://www.ch.ch/en/health/health-insurance/",
     "sourceTitle": "ch.ch — Health insurance",
-    "verifiedAt": "2026-07-15T00:00:00Z"
+    "verifiedAt": "2026-07-15T00:00:00Z",
+    "language": "en"
   },
   {
     "id": "660e8400-e29b-41d4-a716-446655440003",
@@ -548,7 +550,8 @@
     "lastUpdated": "2023-10-05T09:30:00Z",
     "source": "https://www.ch.ch/en/housing/",
     "sourceTitle": "ch.ch — Housing",
-    "verifiedAt": "2026-07-15T00:00:00Z"
+    "verifiedAt": "2026-07-15T00:00:00Z",
+    "language": "en"
   },
   {
     "id": "660e8400-e29b-41d4-a716-446655440004",
@@ -753,7 +756,8 @@
     "lastUpdated": "2023-09-28T15:45:00Z",
     "source": "https://www.ch.ch/en/work/",
     "sourceTitle": "ch.ch — Work",
-    "verifiedAt": "2026-07-15T00:00:00Z"
+    "verifiedAt": "2026-07-15T00:00:00Z",
+    "language": "en"
   },
   {
     "id": "660e8400-e29b-41d4-a716-446655440005",
@@ -840,7 +844,8 @@
     "lastUpdated": "2023-10-14T10:00:00Z",
     "source": "https://www.ch.ch/en/school-and-education/",
     "sourceTitle": "ch.ch — School and education",
-    "verifiedAt": "2026-07-15T00:00:00Z"
+    "verifiedAt": "2026-07-15T00:00:00Z",
+    "language": "en"
   },
   {
     "id": "660e8400-e29b-41d4-a716-446655440006",
@@ -928,7 +933,8 @@
     "lastUpdated": "2023-10-12T10:00:00Z",
     "source": "https://www.ch.ch/en/family-and-partnership/",
     "sourceTitle": "ch.ch — Family and partnership",
-    "verifiedAt": "2026-07-15T00:00:00Z"
+    "verifiedAt": "2026-07-15T00:00:00Z",
+    "language": "en"
   },
   {
     "id": "660e8400-e29b-41d4-a716-446655440007",
@@ -1012,7 +1018,8 @@
     "lastUpdated": "2023-10-14T10:00:00Z",
     "source": "https://www.ch.ch/en/health/",
     "sourceTitle": "ch.ch — Health",
-    "verifiedAt": "2026-07-15T00:00:00Z"
+    "verifiedAt": "2026-07-15T00:00:00Z",
+    "language": "en"
   },
   {
     "id": "660e8400-e29b-41d4-a716-446655440008",
@@ -1077,7 +1084,8 @@
     "lastUpdated": "2023-10-08T10:00:00Z",
     "source": "https://www.ch.ch/en/safety-and-justice/",
     "sourceTitle": "ch.ch — Safety and justice",
-    "verifiedAt": "2026-07-15T00:00:00Z"
+    "verifiedAt": "2026-07-15T00:00:00Z",
+    "language": "en"
   },
   {
     "id": "660e8400-e29b-41d4-a716-446655440009",
@@ -1161,6 +1169,7 @@
     "lastUpdated": "2023-10-01T10:00:00Z",
     "source": "https://www.ch.ch/en/taxes-and-finances/",
     "sourceTitle": "ch.ch — Taxes and finances",
-    "verifiedAt": "2026-07-15T00:00:00Z"
+    "verifiedAt": "2026-07-15T00:00:00Z",
+    "language": "en"
   }
 ]

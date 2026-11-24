@@ -61,7 +61,7 @@ final class SwissMomentsService: ObservableObject {
                 let id = "moment.\(moment.key).\(suffix)"
                 if already.contains(id) { continue }
                 let title = moment.title
-                let body = String(format: NSLocalizedString("moments.deadline.in_days", comment: ""), abs(offsetDays))
+                let body = String(format: "moments.deadline.in_days".localized, abs(offsetDays))
                 let ok = await notifications.scheduleReminder(id: id, title: title, body: body, at: triggerDate)
                 if ok {
                     newlyScheduled.append(id)

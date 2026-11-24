@@ -2134,7 +2134,7 @@ struct GuidesLiteView: View {
             // Wait for content service to load (retry up to 10 times)
             for attempt in 1...10 {
                 try? await Task.sleep(nanoseconds: 300_000_000) // 0.3s
-                let loadedGuides = await MainActor.run { appContainer.contentService.guides }
+                let loadedGuides = await MainActor.run { appContainer.contentService.getGuidesForLocale(appContainer.currentLocale.identifier) }
                 if !loadedGuides.isEmpty {
                     await MainActor.run {
                         guides = loadedGuides
@@ -2146,7 +2146,7 @@ struct GuidesLiteView: View {
             }
             // Fallback: show empty state
             await MainActor.run {
-                guides = appContainer.contentService.guides
+                guides = appContainer.contentService.getGuidesForLocale(appContainer.currentLocale.identifier)
                 isLoading = false
                 AppLogger.content("Loaded \(guides.count) guides (final)")
             }
@@ -2279,7 +2279,7 @@ struct ChecklistsLiteView: View {
             // Wait for content service to load (retry up to 10 times)
             for attempt in 1...10 {
                 try? await Task.sleep(nanoseconds: 300_000_000) // 0.3s
-                let loadedChecklists = await MainActor.run { appContainer.contentService.checklists }
+                let loadedChecklists = await MainActor.run { appContainer.contentService.getChecklistsForLocale(appContainer.currentLocale.identifier) }
                 if !loadedChecklists.isEmpty {
                     await MainActor.run {
                         checklists = loadedChecklists
@@ -2291,7 +2291,7 @@ struct ChecklistsLiteView: View {
             }
             // Fallback: show empty state
             await MainActor.run {
-                checklists = appContainer.contentService.checklists
+                checklists = appContainer.contentService.getChecklistsForLocale(appContainer.currentLocale.identifier)
                 isLoading = false
                 AppLogger.content("Loaded \(checklists.count) checklists (final)")
             }

@@ -586,6 +586,7 @@ struct TemplateFieldView: View {
     
     private static let displayDateFormatter: DateFormatter = {
         let formatter = DateFormatter()
+        formatter.locale = AppLanguage.current.locale
         formatter.dateStyle = .medium
         formatter.timeStyle = .none
         return formatter

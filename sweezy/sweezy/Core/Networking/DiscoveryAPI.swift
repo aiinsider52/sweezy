@@ -109,14 +109,8 @@ extension APIClient {
     private static func validateDiscoveryResponse(data: Data, response: URLResponse) throws {
         guard let http = response as? HTTPURLResponse else { throw URLError(.badServerResponse) }
         guard (200..<300).contains(http.statusCode) else {
-            let detail = (try? JSONDecoder().decode(DiscoveryAPIError.self, from: data).detail)
-            throw NSError(
-                domain: "DiscoveryAPI",
-                code: http.statusCode,
-                userInfo: [NSLocalizedDescriptionKey: detail ?? HTTPURLResponse.localizedString(forStatusCode: http.statusCode)]
-            )
+            throw APIErrorText.error(domain: "DiscoveryAPI", status: http.statusCode, data: data)
         }
     }
 
-    private struct DiscoveryAPIError: Decodable { let detail: String }
 }

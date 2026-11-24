@@ -122,8 +122,8 @@ struct BusinessBookingFlow: View {
                             selectedSlot = nil
                         } label: {
                             VStack(spacing: 5) {
-                                Text(day.formatted(.dateTime.weekday(.abbreviated))).font(.caption2.bold())
-                                Text(day.formatted(.dateTime.day())).font(.title3.weight(.black))
+                                Text(day.formatted(.dateTime.weekday(.abbreviated).locale(AppLanguage.current.locale))).font(.caption2.bold())
+                                Text(day.formatted(.dateTime.day().locale(AppLanguage.current.locale))).font(.title3.weight(.black))
                             }
                             .foregroundStyle(Calendar.current.isDate(day, inSameDayAs: selectedDay) ? .black : JourneyVisual.primaryText)
                             .frame(width: 58, height: 66)
@@ -154,7 +154,7 @@ struct BusinessBookingFlow: View {
                         Button {
                             selectedSlot = slot
                         } label: {
-                            Text(slot.startsAt.formatted(date: .omitted, time: .shortened))
+                            Text(slot.startsAt.formatted(Date.FormatStyle(date: .omitted, time: .shortened, locale: AppLanguage.current.locale)))
                                 .font(.subheadline.bold())
                                 .foregroundStyle(selectedSlot == slot ? .black : JourneyVisual.primaryText)
                                 .frame(maxWidth: .infinity)
@@ -185,7 +185,7 @@ struct BusinessBookingFlow: View {
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
                         Text(service.title).font(.headline).foregroundStyle(JourneyVisual.primaryText)
-                        Text(selectedSlot.startsAt.formatted(date: .abbreviated, time: .shortened)).font(.caption).foregroundStyle(JourneyVisual.secondaryText)
+                        Text(selectedSlot.startsAt.formatted(Date.FormatStyle(date: .abbreviated, time: .shortened, locale: AppLanguage.current.locale))).font(.caption).foregroundStyle(JourneyVisual.secondaryText)
                     }
                     Spacer()
                     Text(service.priceText).font(.caption.bold()).foregroundStyle(Theme.Colors.textPrimary)

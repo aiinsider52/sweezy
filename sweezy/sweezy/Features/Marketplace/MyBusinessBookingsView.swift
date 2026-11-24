@@ -58,9 +58,9 @@ struct MyBusinessBookingsView: View {
         VStack(alignment: .leading, spacing: 13) {
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(booking.businessName ?? "Sweezy business").font(.headline).foregroundStyle(JourneyVisual.primaryText)
+                    Text(booking.businessName ?? "business.booking.fallback_name".localized).font(.headline).foregroundStyle(JourneyVisual.primaryText)
                     if let service = booking.serviceTitle { Text(service).font(.caption).foregroundStyle(JourneyVisual.secondaryText) }
-                    Text(booking.startsAt.formatted(date: .abbreviated, time: .shortened)).font(.subheadline.bold()).foregroundStyle(Theme.Colors.textPrimary)
+                    Text(booking.startsAt.formatted(Date.FormatStyle(date: .abbreviated, time: .shortened, locale: AppLanguage.current.locale))).font(.subheadline.bold()).foregroundStyle(Theme.Colors.textPrimary)
                 }
                 Spacer()
                 statusBadge(booking.status)

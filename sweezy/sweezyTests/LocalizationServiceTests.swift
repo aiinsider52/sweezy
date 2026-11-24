@@ -78,13 +78,13 @@ final class LocalizationServiceTests: XCTestCase {
         // Given starting with Ukrainian
         localizationService.setLocale(Locale(identifier: "uk"))
         
-        // When switching to Russian
-        localizationService.setLocale(Locale(identifier: "ru"))
+        // When switching to German
+        localizationService.setLocale(Locale(identifier: "de_CH"))
         
-        // Then the current locale should be Russian
-        XCTAssertEqual(localizationService.currentLocale.identifier, "ru")
+        // Then the locale is normalized to a supported app language
+        XCTAssertEqual(localizationService.currentLocale.identifier, "de")
         
-        // And localized strings should come from ru.lproj (if available)
+        // And localized strings should come from de.lproj
         let localizedOK = localizationService.localizedString(for: "common.ok")
         // Note: exact value depends on Localizable.strings content
         XCTAssertFalse(localizedOK.isEmpty)

@@ -640,7 +640,7 @@ struct BusinessReviewRow: View {
                     .foregroundStyle(JourneyVisual.primaryText)
                     .fixedSize(horizontal: false, vertical: true)
             }
-            Text(review.createdAt.formatted(date: .abbreviated, time: .omitted))
+            Text(review.createdAt.formatted(Date.FormatStyle(date: .abbreviated, time: .omitted, locale: AppLanguage.current.locale)))
                 .font(.system(size: 11))
                 .foregroundStyle(JourneyVisual.secondaryText)
             if let reply = review.ownerReply, !reply.isEmpty {

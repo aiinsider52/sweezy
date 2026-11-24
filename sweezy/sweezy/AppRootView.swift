@@ -150,7 +150,7 @@ struct BiometricUnlockView: View {
                 }
                 
                 PrimaryButton("Unlock") {
-                    Task { _ = await lockManager.authenticate(reason: "Unlock Sweezy") }
+                    Task { _ = await lockManager.authenticate(reason: "lock.unlock_reason".localized) }
                 }
                 .frame(maxWidth: 200)
                 

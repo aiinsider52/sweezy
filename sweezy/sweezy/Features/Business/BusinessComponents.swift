@@ -52,7 +52,7 @@ struct BusinessRatingLabel: View {
         if let rating, count > 0 {
             HStack(spacing: 3) {
                 Image(systemName: "star.fill").foregroundStyle(JourneyCategoryPalette.sand.ink)
-                Text(rating.formatted(.number.precision(.fractionLength(1))))
+                Text(rating.formatted(.number.precision(.fractionLength(1)).locale(AppLanguage.current.locale)))
                     .fontWeight(.bold)
                     .foregroundStyle(JourneyVisual.primaryText)
                 Text("(\(count))").foregroundStyle(JourneyVisual.secondaryText)
@@ -185,7 +185,7 @@ struct BusinessOfferTicket: View {
                             .overlay(RoundedRectangle(cornerRadius: 5).stroke(style: StrokeStyle(lineWidth: 1, dash: [3])))
                     }
                     if let endsAt = offer.endsAt {
-                        Text("business.offer.until".localized(with: endsAt.formatted(date: .abbreviated, time: .omitted)))
+                        Text("business.offer.until".localized(with: endsAt.formatted(Date.FormatStyle(date: .abbreviated, time: .omitted, locale: AppLanguage.current.locale))))
                             .font(.system(size: 11, weight: .medium))
                             .foregroundStyle(JourneyVisual.secondaryText)
                     }

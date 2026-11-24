@@ -1226,7 +1226,8 @@
     "createdAt": "2023-10-14T10:00:00Z",
     "source": "https://www.sem.admin.ch/sem/en/home/integration-einbuergerung.html",
     "sourceTitle": "SEM — Integration and naturalisation",
-    "verifiedAt": "2026-07-15T00:00:00Z"
+    "verifiedAt": "2026-07-15T00:00:00Z",
+    "language": "en"
   },
   {
     "id": "550e8400-e29b-41d4-a716-446655440002",
@@ -1271,7 +1272,8 @@
     "createdAt": "2023-09-15T09:00:00Z",
     "source": "https://www.ch.ch/en/health/",
     "sourceTitle": "ch.ch — Health",
-    "verifiedAt": "2026-07-15T00:00:00Z"
+    "verifiedAt": "2026-07-15T00:00:00Z",
+    "language": "en"
   },
   {
     "id": "550e8400-e29b-41d4-a716-446655440003",
@@ -1317,7 +1319,8 @@
     "createdAt": "2023-09-20T11:30:00Z",
     "source": "https://www.ch.ch/en/housing/",
     "sourceTitle": "ch.ch — Housing",
-    "verifiedAt": "2026-07-15T00:00:00Z"
+    "verifiedAt": "2026-07-15T00:00:00Z",
+    "language": "en"
   },
   {
     "id": "550e8400-e29b-41d4-a716-446655440004",
@@ -1363,7 +1366,8 @@
     "createdAt": "2023-09-10T08:15:00Z",
     "source": "https://www.ch.ch/en/work/",
     "sourceTitle": "ch.ch — Work",
-    "verifiedAt": "2026-07-15T00:00:00Z"
+    "verifiedAt": "2026-07-15T00:00:00Z",
+    "language": "en"
   },
   {
     "id": "550e8400-e29b-41d4-a716-446655440005",
@@ -1409,7 +1413,8 @@
     "createdAt": "2023-09-05T14:20:00Z",
     "source": "https://www.ch.ch/en/taxes-and-finances/",
     "sourceTitle": "ch.ch — Taxes and finances",
-    "verifiedAt": "2026-07-15T00:00:00Z"
+    "verifiedAt": "2026-07-15T00:00:00Z",
+    "language": "en"
   },
   {
     "id": "5d1c1a1b-8d4e-4c24-9fd2-4d7e8b8c1001",

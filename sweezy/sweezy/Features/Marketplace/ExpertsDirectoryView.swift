@@ -150,7 +150,7 @@ private struct ExpertCard: View {
                 }
                 Spacer()
                 if let hours = expert.responseTimeHours {
-                    Text(String(format: NSLocalizedString("experts.response_time", comment: ""), hours))
+                    Text(String(format: "experts.response_time".localized, hours))
                         .font(.system(size: 11))
                         .foregroundColor(Theme.Colors.textSecondary)
                 }

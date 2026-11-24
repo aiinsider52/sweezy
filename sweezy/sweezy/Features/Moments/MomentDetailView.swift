@@ -63,7 +63,7 @@ struct MomentDetailView: View {
         Button(action: handleCta) {
             HStack {
                 Image(systemName: ctaIcon)
-                Text(NSLocalizedString(moment.ctaKind.localizedCtaKey, comment: ""))
+                Text(moment.ctaKind.localizedCtaKey.localized)
                     .font(.system(size: 16, weight: .semibold))
             }
             .frame(maxWidth: .infinity)
@@ -86,7 +86,7 @@ struct MomentDetailView: View {
     private var deadlineCopy: String {
         let days = moment.daysUntilDeadline
         if days <= 0 { return "—" }
-        return String(format: NSLocalizedString("moments.deadline.in_days", comment: ""), days)
+        return String(format: "moments.deadline.in_days".localized, days)
     }
 
     private func handleCta() {

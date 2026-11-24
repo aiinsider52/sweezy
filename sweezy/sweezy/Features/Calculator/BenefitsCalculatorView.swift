@@ -207,7 +207,7 @@ struct BenefitsCalculatorView: View {
                 income: incomeValue,
                 familySize: familySize,
                 canton: selectedCanton,
-                rules: appContainer.contentService.benefitRules
+                rules: appContainer.contentService.getBenefitRulesForLocale(appContainer.currentLocale.identifier)
             )
             
             isCalculating = false

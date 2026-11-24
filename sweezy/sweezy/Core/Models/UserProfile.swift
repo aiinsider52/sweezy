@@ -292,25 +292,25 @@ enum PermitType: String, CaseIterable, Codable, Hashable {
     
     var localizedName: String {
         switch self {
-        case .s: return "S - Protection Status"
-        case .b: return "B - Residence Permit"
-        case .c: return "C - Settlement Permit"
-        case .f: return "F - Provisional Admission"
-        case .n: return "N - Asylum Seeker"
-        case .l: return "L - Short-term Residence"
-        case .other: return "Other"
+        case .s: return "permit.name.s".localized
+        case .b: return "permit.name.b".localized
+        case .c: return "permit.name.c".localized
+        case .f: return "permit.name.f".localized
+        case .n: return "permit.name.n".localized
+        case .l: return "permit.name.l".localized
+        case .other: return "permit.name.other".localized
         }
     }
     
     var description: String {
         switch self {
-        case .s: return "Temporary protection for Ukrainian refugees"
-        case .b: return "Residence permit for foreign nationals"
-        case .c: return "Settlement permit (permanent residence)"
-        case .f: return "Provisional admission"
-        case .n: return "Asylum seeker permit"
-        case .l: return "Short-term residence permit"
-        case .other: return "Other permit or status"
+        case .s: return "permit.description.s".localized
+        case .b: return "permit.description.b".localized
+        case .c: return "permit.description.c".localized
+        case .f: return "permit.description.f".localized
+        case .n: return "permit.description.n".localized
+        case .l: return "permit.description.l".localized
+        case .other: return "permit.description.other".localized
         }
     }
 }

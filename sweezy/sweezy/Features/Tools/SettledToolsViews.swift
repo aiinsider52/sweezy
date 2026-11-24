@@ -121,7 +121,7 @@ struct KKSwitchingHelperView: View {
                     .foregroundColor(Theme.Colors.textSecondary)
 
                 VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
-                    field(label: "Current insurer", text: $currentInsurer, placeholder: "e.g. Helsana")
+                    field(label: "Current insurer".localized, text: $currentInsurer, placeholder: "tools.kk.insurer_placeholder".localized)
                     field(label: "Monthly premium (CHF)", text: $monthlyPremium, placeholder: "e.g. 420", keyboard: .decimalPad)
                     Picker("Deductible (CHF)", selection: $deductible) {
                         ForEach(["300", "500", "1000", "1500", "2000", "2500"], id: \.self) { Text($0) }
@@ -240,7 +240,7 @@ struct DeadlineTrackerView: View {
         var daysCopy: String {
             let days = Calendar.current.dateComponents([.day], from: Date(), to: date).day ?? 0
             if days < 0 { return "—" }
-            return String(format: NSLocalizedString("moments.deadline.in_days", comment: ""), days)
+            return String(format: "moments.deadline.in_days".localized, days)
         }
     }
 

@@ -64,7 +64,8 @@
     "lastUpdated": "2025-10-14T10:00:00Z",
     "source": "https://www.ch.ch/en/foreign-nationals-in-switzerland/",
     "sourceTitle": "ch.ch — Foreign nationals in Switzerland",
-    "verifiedAt": "2026-07-15T00:00:00Z"
+    "verifiedAt": "2026-07-15T00:00:00Z",
+    "language": "uk"
   },
   {
     "id": "c1-0001-0001-0001-000000000002",
@@ -123,7 +124,8 @@
     "lastUpdated": "2025-10-14T10:00:00Z",
     "source": "https://www.ch.ch/en/foreign-nationals-in-switzerland/",
     "sourceTitle": "ch.ch — Foreign nationals in Switzerland",
-    "verifiedAt": "2026-07-15T00:00:00Z"
+    "verifiedAt": "2026-07-15T00:00:00Z",
+    "language": "uk"
   },
   {
     "id": "c1-0001-0001-0001-000000000003",
@@ -170,7 +172,8 @@
     "lastUpdated": "2025-10-14T10:00:00Z",
     "source": "https://www.ch.ch/en/school-and-education/",
     "sourceTitle": "ch.ch — School and education",
-    "verifiedAt": "2026-07-15T00:00:00Z"
+    "verifiedAt": "2026-07-15T00:00:00Z",
+    "language": "uk"
   },
   {
     "id": "c1-0001-0001-0001-000000000004",
@@ -214,7 +217,8 @@
     "lastUpdated": "2025-10-14T10:00:00Z",
     "source": "https://www.ch.ch/en/taxes-and-finances/",
     "sourceTitle": "ch.ch — Taxes and finances",
-    "verifiedAt": "2026-07-15T00:00:00Z"
+    "verifiedAt": "2026-07-15T00:00:00Z",
+    "language": "uk"
   },
   {
     "id": "7a6b4201-4d9e-4c4f-bf81-0b7300000001",
@@ -366,6 +370,7 @@
     "lastUpdated": "2025-10-14T10:00:00Z",
     "source": "https://www.sem.admin.ch/sem/en/home/integration-einbuergerung.html",
     "sourceTitle": "SEM — Integration and naturalisation",
-    "verifiedAt": "2026-07-15T00:00:00Z"
+    "verifiedAt": "2026-07-15T00:00:00Z",
+    "language": "uk"
   }
 ]

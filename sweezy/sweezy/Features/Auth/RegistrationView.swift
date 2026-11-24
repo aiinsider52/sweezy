@@ -426,7 +426,7 @@ struct RegistrationView: View {
             await MainActor.run {
                 isRegistering = false
                 guard response.status == "verification_required" else {
-                    errorMessage = response.message ?? "auth.registration.error.generic".localized
+                    errorMessage = "auth.registration.error.generic".localized
                     return
                 }
 

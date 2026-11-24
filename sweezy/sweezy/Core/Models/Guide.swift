@@ -234,9 +234,9 @@ enum GuideAudienceStage: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .newlyArrived: return "Newly arrived"
-        case .settlingIn: return "Settling in"
-        case .established: return "Established resident"
+        case .newlyArrived: return "guides.audience.newly_arrived".localized
+        case .settlingIn: return "guides.audience.settling_in".localized
+        case .established: return "guides.audience.established".localized
         }
     }
 }

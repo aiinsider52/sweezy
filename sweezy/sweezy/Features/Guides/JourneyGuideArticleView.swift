@@ -48,7 +48,7 @@ struct JourneyGuideArticleView: View {
         case .integration: mapping = .integration
         default: mapping = nil
         }
-        return appContainer.contentService.checklists.first { $0.category == mapping }
+        return appContainer.contentService.getChecklistsForLocale(appContainer.currentLocale.identifier).first { $0.category == mapping }
     }
 
     var body: some View {
@@ -232,7 +232,7 @@ struct JourneyGuideArticleView: View {
                 HStack(spacing: 16) {
                     Label("guides.reading_time".localized(with: guide.estimatedReadingTime), systemImage: "clock")
                     if case .verified(let verifiedAt) = freshness {
-                        Label(verifiedAt.formatted(date: .abbreviated, time: .omitted), systemImage: "checkmark.seal.fill")
+                        Label(verifiedAt.formatted(Date.FormatStyle(date: .abbreviated, time: .omitted, locale: AppLanguage.current.locale)), systemImage: "checkmark.seal.fill")
                     }
                 }
                 .font(.system(size: 11, weight: .semibold))
@@ -263,7 +263,7 @@ struct JourneyGuideArticleView: View {
                             .foregroundColor(JourneyVisual.primaryText)
                             .lineLimit(2)
                         if case .verified(let date) = freshness {
-                            Text("journey.guide.verified".localized(with: date.formatted(date: .long, time: .omitted)))
+                            Text("journey.guide.verified".localized(with: date.formatted(Date.FormatStyle(date: .long, time: .omitted, locale: AppLanguage.current.locale))))
                                 .font(.system(size: 10, weight: .medium))
                                 .foregroundColor(JourneyVisual.secondaryText)
                         }

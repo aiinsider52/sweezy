@@ -345,9 +345,9 @@ private struct FriendSwipeDeck: View {
       .accessibilityIdentifier("friends.profile.\(profile.id)")
       .accessibilityLabel(accessibilityLabel(profile))
       .accessibilityHint("Свайп праворуч — Like, ліворуч — пропустити".localized)
-      .accessibilityAction(named: "Like") { commit(profile, decision: "like") }
-      .accessibilityAction(named: "Пропустити") { commit(profile, decision: "pass") }
-      .accessibilityAction(named: "Відкрити профіль") { onDetails(profile) }
+      .accessibilityAction(named: "friends.action.like".localized) { commit(profile, decision: "like") }
+      .accessibilityAction(named: "Пропустити".localized) { commit(profile, decision: "pass") }
+      .accessibilityAction(named: "Відкрити профіль".localized) { onDetails(profile) }
   }
 
   private var actionControls: some View {
@@ -703,7 +703,7 @@ private struct FriendMatchCelebration: View {
           Button(action: openChat) {
             HStack {
               Image(systemName: "message.fill")
-              Text("Написати \(profile.displayName.split(separator: " ").first.map(String.init) ?? "")")
+              Text("friends.write_to".localized(with: profile.displayName.split(separator: " ").first.map(String.init) ?? ""))
               Spacer()
               Image(systemName: "arrow.right")
             }
@@ -1392,7 +1392,7 @@ struct FriendNetworkView: View {
             HStack {
               VStack(alignment: .leading, spacing: 5) {
                 Text(e.title).font(.headline).foregroundColor(JourneyVisual.primaryText)
-                Text("\(e.city) · \(e.startsAt.formatted(date:.abbreviated,time:.shortened))").font(
+                Text("\(e.city) · \(e.startsAt.formatted(Date.FormatStyle(date:.abbreviated,time:.shortened, locale: AppLanguage.current.locale)))").font(
                   .caption
                 ).foregroundColor(JourneyVisual.secondaryText)
               }
@@ -1511,7 +1511,7 @@ struct FriendNetworkView: View {
           HStack(spacing: 15) {
             avatar(p).scaleEffect(1.2)
             VStack(alignment: .leading, spacing: 4) {
-              Text("SOCIAL PASSPORT").font(.caption2.bold()).tracking(1.8).foregroundColor(
+              Text("friends.passport.badge".localized).font(.caption2.bold()).tracking(1.8).foregroundColor(
                 JourneyVisual.accentText)
               Text(p.displayName).font(.title2.bold()).foregroundColor(JourneyVisual.primaryText)
               Text("\(p.city) · \(p.canton)").font(.subheadline).foregroundColor(JourneyVisual.primaryText)
@@ -2193,7 +2193,7 @@ private struct FriendProfileEditor: View {
         }
         .navigationBarTitleDisplayMode(.inline)
         .alert(
-          "Social Passport",
+          "friends.passport.title".localized,
           isPresented: Binding(get: { error != nil }, set: { if !$0 { error = nil } })
         ) {
           Button("OK", role: .cancel) {}
@@ -2212,7 +2212,7 @@ private struct FriendProfileEditor: View {
   private var progress: some View {
     VStack(spacing: 8) {
       HStack {
-        Text("SOCIAL PASSPORT · CH").font(.caption2.bold()).tracking(1.8)
+        Text("friends.passport.badge_ch".localized).font(.caption2.bold()).tracking(1.8)
         Spacer()
         Text("\(step.rawValue + 1)/8").font(.caption.bold())
       }

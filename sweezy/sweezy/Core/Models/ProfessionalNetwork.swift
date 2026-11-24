@@ -32,7 +32,7 @@ enum ProfessionalGoal: String, Codable, CaseIterable, Identifiable {
         switch self {
         case .clients: return "Клієнти".localized
         case .partners: return "Партнери".localized
-        case .cofounder: return "Co-founder"
+        case .cofounder: return "network.goal.cofounder".localized
         case .hiring: return "Команда".localized
         case .investing: return "Інвестиції".localized
         case .mentoring: return "Менторство".localized

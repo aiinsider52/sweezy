@@ -135,7 +135,7 @@ struct BenefitRule: Codable, Identifiable, Hashable {
                 ruleId: id,
                 amount: 0,
                 isEligible: false,
-                reason: "Benefit rule is not active"
+                reason: "calculator.reason.inactive".localized
             )
         }
         
@@ -417,25 +417,25 @@ struct CalculationFormula: Codable, Hashable {
     func getCalculationDetails(income: Double, familySize: Int, hasChildren: Bool) -> String {
         switch type {
         case .fixed:
-            return "Fixed amount: CHF \(baseAmount ?? 0)"
+            return "calculator.details.fixed".localized(with: "\(baseAmount ?? 0)")
             
         case .percentage:
             let rate = percentage ?? 0
             let amount = calculate(income: income, familySize: familySize, hasChildren: hasChildren)
-            return "\(rate)% of income (CHF \(income)) = CHF \(amount)"
+            return "calculator.details.percentage".localized(with: "\(rate)", "\(income)", "\(amount)")
             
         case .perPerson:
             let amount = perPersonAmount ?? 0
-            return "CHF \(amount) × \(familySize) persons = CHF \(calculate(income: income, familySize: familySize, hasChildren: hasChildren))"
+            return "calculator.details.per_person".localized(with: "\(amount)", familySize, "\(calculate(income: income, familySize: familySize, hasChildren: hasChildren))")
             
         case .incomeBasedSliding:
-            return "Sliding scale based on income level"
+            return "calculator.details.sliding".localized
             
         case .familySizeBased:
-            return "Base amount + per person amount + child bonus"
+            return "calculator.details.family_size".localized
             
         case .complex:
-            return "Complex calculation based on multiple factors"
+            return "calculator.details.complex".localized
         }
     }
 }
@@ -491,7 +491,7 @@ struct BenefitCalculationResult: Codable, Identifiable, Hashable, Equatable {
         let formatter = NumberFormatter()
         formatter.numberStyle = .currency
         formatter.currencyCode = "CHF"
-        formatter.locale = Locale(identifier: UserDefaults.standard.string(forKey: "selected_locale") ?? Locale.current.identifier)
+        formatter.locale = AppLanguage.current.locale
         return formatter.string(from: NSNumber(value: amount)) ?? "CHF \(amount)"
     }
 }

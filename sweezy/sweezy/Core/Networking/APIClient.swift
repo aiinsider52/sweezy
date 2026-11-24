@@ -263,7 +263,7 @@ enum APIClient {
 
     static func refreshAccessToken() async throws -> TokenPair {
         guard let refreshToken = KeychainStore.get("refresh_token"), !refreshToken.isEmpty else {
-            throw NSError(domain: "API", code: 401, userInfo: [NSLocalizedDescriptionKey: "Session expired. Please sign in again."])
+            throw NSError(domain: "API", code: 401, userInfo: [NSLocalizedDescriptionKey: "api.error.session_expired".localized])
         }
 
         let endpoint = url("auth/refresh")
@@ -278,10 +278,7 @@ enum APIClient {
             throw URLError(.badServerResponse)
         }
         guard httpResp.statusCode == 200 else {
-            if let message = String(data: data, encoding: .utf8), !message.isEmpty {
-                throw NSError(domain: "API", code: httpResp.statusCode, userInfo: [NSLocalizedDescriptionKey: message])
-            }
-            throw NSError(domain: "API", code: httpResp.statusCode, userInfo: [NSLocalizedDescriptionKey: "Session expired. Please sign in again."])
+            throw NSError(domain: "API", code: httpResp.statusCode, userInfo: [NSLocalizedDescriptionKey: "api.error.session_expired".localized])
         }
         let tokens = try JSONDecoder().decode(TokenPair.self, from: data)
         try KeychainStore.save(tokens.access_token, for: "access_token")
@@ -492,7 +489,7 @@ enum APIClient {
             throw NSError(
                 domain: "API",
                 code: 422,
-                userInfo: [NSLocalizedDescriptionKey: "Translation returned an incomplete CV"]
+                userInfo: [NSLocalizedDescriptionKey: "api.error.cv_translation_incomplete".localized]
             )
         }
         var result = resume
@@ -1201,7 +1198,7 @@ extension APIClient {
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         let candidatePayload = candidates.map { ["id": $0.id, "title": $0.title, "region": $0.region, "route": $0.route, "tags": $0.filters.map(\.rawValue)] as [String: Any] }
-        request.httpBody = try JSONSerialization.data(withJSONObject: ["origin": origin, "budget_chf": budget, "transport": transport, "weather": weather, "family": family, "available_hours": availableHours, "language": Locale.current.language.languageCode?.identifier ?? "uk", "candidates": candidatePayload])
+        request.httpBody = try JSONSerialization.data(withJSONObject: ["origin": origin, "budget_chf": budget, "transport": transport, "weather": weather, "family": family, "available_hours": availableHours, "language": AppLanguage.current.rawValue, "candidates": candidatePayload])
         let (data, response) = try await authorizedData(for: request, context: "ai_trip_plan")
         guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else { throw httpError(data: data, response: response) }
         return try JSONDecoder().decode(TripPlanAPIResponse.self, from: data)
@@ -1211,33 +1208,11 @@ extension APIClient {
 // MARK: - Marketplace
 extension APIClient {
     private static func makeAPIError(data: Data, response: HTTPURLResponse?, fallback: String) -> NSError {
-        let status = response?.statusCode ?? 0
-        if let jsonObject = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-           let detail = jsonObject["detail"] {
-            if let detailString = detail as? String {
-                return NSError(domain: "API", code: status, userInfo: [NSLocalizedDescriptionKey: detailString])
-            }
-            if let detailObject = detail as? [String: Any] {
-                let message = (detailObject["message"] as? String) ?? fallback
-                var userInfo: [String: Any] = [NSLocalizedDescriptionKey: message]
-                if let apiCode = detailObject["code"] as? String {
-                    userInfo["api.code"] = apiCode
-                }
-                return NSError(domain: "API", code: status, userInfo: userInfo)
-            }
-        }
-        if let text = String(data: data, encoding: .utf8), !text.isEmpty {
-            return NSError(domain: "API", code: status, userInfo: [NSLocalizedDescriptionKey: text])
-        }
-        return NSError(domain: "API", code: status, userInfo: [NSLocalizedDescriptionKey: fallback])
+        APIErrorText.error(domain: "API", status: response?.statusCode ?? 0, data: data)
     }
 
     private static func httpError(data: Data, response: URLResponse?) -> Error {
-        let status = (response as? HTTPURLResponse)?.statusCode ?? 0
-        if let text = String(data: data, encoding: .utf8), !text.isEmpty {
-            return NSError(domain: "API", code: status, userInfo: [NSLocalizedDescriptionKey: text])
-        }
-        return URLError(.badServerResponse)
+        APIErrorText.error(domain: "API", status: (response as? HTTPURLResponse)?.statusCode ?? 0, data: data)
     }
 
     private static func marketplaceJSONEncoder() -> JSONEncoder {
@@ -1328,11 +1303,7 @@ extension APIClient {
         req.httpBody = try marketplaceJSONEncoder().encode(listing)
         let (data, resp) = try await authorizedData(for: req, context: "marketplace_create")
         guard let http = resp as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
-            if let msg = String(data: data, encoding: .utf8) {
-                throw NSError(domain: "API", code: (resp as? HTTPURLResponse)?.statusCode ?? 0,
-                              userInfo: [NSLocalizedDescriptionKey: msg])
-            }
-            throw URLError(.badServerResponse)
+            throw makeAPIError(data: data, response: resp as? HTTPURLResponse, fallback: "")
         }
         return try JSONDecoder().decode(ServiceListing.self, from: data)
     }
@@ -1372,14 +1343,7 @@ extension APIClient {
         req.httpBody = try JSONEncoder().encode(payload)
         let (data, resp) = try await authorizedData(for: req, context: "marketplace_update")
         guard let http = resp as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
-            if let msg = String(data: data, encoding: .utf8) {
-                throw NSError(
-                    domain: "API",
-                    code: (resp as? HTTPURLResponse)?.statusCode ?? 0,
-                    userInfo: [NSLocalizedDescriptionKey: msg]
-                )
-            }
-            throw URLError(.badServerResponse)
+            throw makeAPIError(data: data, response: resp as? HTTPURLResponse, fallback: "")
         }
         return try JSONDecoder().decode(ServiceListing.self, from: data)
     }
@@ -1446,11 +1410,7 @@ extension APIClient {
         req.httpBody = try marketplaceJSONEncoder().encode(event)
         let (data, resp) = try await authorizedData(for: req, context: "events_create")
         guard let http = resp as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
-            if let msg = String(data: data, encoding: .utf8) {
-                throw NSError(domain: "API", code: (resp as? HTTPURLResponse)?.statusCode ?? 0,
-                              userInfo: [NSLocalizedDescriptionKey: msg])
-            }
-            throw URLError(.badServerResponse)
+            throw makeAPIError(data: data, response: resp as? HTTPURLResponse, fallback: "")
         }
         return try JSONDecoder().decode(EventListing.self, from: data)
     }
@@ -1472,11 +1432,7 @@ extension APIClient {
         req.httpBody = try marketplaceJSONEncoder().encode(payload)
         let (data, resp) = try await authorizedData(for: req, context: "events_update")
         guard let http = resp as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
-            if let msg = String(data: data, encoding: .utf8) {
-                throw NSError(domain: "API", code: (resp as? HTTPURLResponse)?.statusCode ?? 0,
-                              userInfo: [NSLocalizedDescriptionKey: msg])
-            }
-            throw URLError(.badServerResponse)
+            throw makeAPIError(data: data, response: resp as? HTTPURLResponse, fallback: "")
         }
         return try JSONDecoder().decode(EventListing.self, from: data)
     }

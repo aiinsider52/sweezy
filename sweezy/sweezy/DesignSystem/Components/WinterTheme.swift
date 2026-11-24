@@ -1019,6 +1019,7 @@ struct WinterBadgeCard: View {
     
     private var dateFormatter: DateFormatter {
         let formatter = DateFormatter()
+        formatter.locale = AppLanguage.current.locale
         formatter.dateStyle = .short
         return formatter
     }

@@ -2,17 +2,7 @@ import Foundation
 
 enum ChatAPI {
     private static func responseError(_ data: Data, response: URLResponse?, fallback: String) -> NSError {
-        let status = (response as? HTTPURLResponse)?.statusCode ?? 0
-        if let payload = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-           let detail = payload["detail"] {
-            if let message = detail as? String {
-                return NSError(domain: "ChatAPI", code: status, userInfo: [NSLocalizedDescriptionKey: message])
-            }
-            if let object = detail as? [String: Any], let message = object["message"] as? String {
-                return NSError(domain: "ChatAPI", code: status, userInfo: [NSLocalizedDescriptionKey: message])
-            }
-        }
-        return NSError(domain: "ChatAPI", code: status, userInfo: [NSLocalizedDescriptionKey: fallback])
+        APIErrorText.error(domain: "ChatAPI", status: (response as? HTTPURLResponse)?.statusCode ?? 0, data: data)
     }
     private struct ConversationCreatePayload: Encodable { let listingID: String; enum CodingKeys: String, CodingKey { case listingID = "listing_id" } }
     private struct MessageCreatePayload: Encodable { let clientMessageID: String; let body: String; enum CodingKeys: String, CodingKey { case clientMessageID = "client_message_id"; case body } }

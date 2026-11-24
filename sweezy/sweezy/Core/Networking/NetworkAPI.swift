@@ -19,13 +19,7 @@ enum NetworkAPI {
         }
         let (data, response) = try await APIClient.authorizedData(for: request, context: "network_\(method.lowercased())")
         guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
-            let detail = (try? JSONSerialization.jsonObject(with: data) as? [String: Any])?["detail"]
-            let message = (detail as? String) ?? "Не вдалося виконати запит".localized
-            throw NSError(
-                domain: "NetworkAPI",
-                code: (response as? HTTPURLResponse)?.statusCode ?? 0,
-                userInfo: [NSLocalizedDescriptionKey: message]
-            )
+            throw APIErrorText.error(domain: "NetworkAPI", status: (response as? HTTPURLResponse)?.statusCode ?? 0, data: data)
         }
         return try ChatAPI.decoder.decode(T.self, from: data)
     }
@@ -44,12 +38,7 @@ enum NetworkAPI {
         }
         let (data, response) = try await APIClient.authorizedData(for: request, context: "network_\(method.lowercased())")
         guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
-            let detail = (try? JSONSerialization.jsonObject(with: data) as? [String: Any])?["detail"] as? String
-            throw NSError(
-                domain: "NetworkAPI",
-                code: (response as? HTTPURLResponse)?.statusCode ?? 0,
-                userInfo: [NSLocalizedDescriptionKey: detail ?? "Не вдалося виконати запит".localized]
-            )
+            throw APIErrorText.error(domain: "NetworkAPI", status: (response as? HTTPURLResponse)?.statusCode ?? 0, data: data)
         }
     }
 
@@ -75,9 +64,7 @@ enum NetworkAPI {
         request.timeoutInterval = 20
         let (data, response) = try await APIClient.authorizedData(for: request, context: "network_profiles")
         guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
-            let detail = (try? JSONSerialization.jsonObject(with: data) as? [String: Any])?["detail"] as? String
-            throw NSError(domain: "NetworkAPI", code: (response as? HTTPURLResponse)?.statusCode ?? 0,
-                          userInfo: [NSLocalizedDescriptionKey: detail ?? "Каталог тимчасово недоступний".localized])
+            throw APIErrorText.error(domain: "NetworkAPI", status: (response as? HTTPURLResponse)?.statusCode ?? 0, data: data)
         }
         return try ChatAPI.decoder.decode(ProfessionalProfilePage.self, from: data)
     }

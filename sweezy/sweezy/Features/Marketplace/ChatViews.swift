@@ -293,7 +293,7 @@ private struct ChatConversationRow: View {
 
     private var relativeDate: String {
         guard let date = conversation.lastMessageAt else { return "" }
-        return date.formatted(.relative(presentation: .named))
+        return date.formatted(.relative(presentation: .named).locale(AppLanguage.current.locale))
     }
 }
 
@@ -696,7 +696,7 @@ private struct ChatMessageBubble: View {
                         .foregroundColor(isMine ? .black : JourneyVisual.primaryText)
                         .textSelection(.enabled)
                     HStack(spacing: 5) {
-                        Text(message.createdAt.formatted(date: .omitted, time: .shortened))
+                        Text(message.createdAt.formatted(Date.FormatStyle(date: .omitted, time: .shortened, locale: AppLanguage.current.locale)))
                         if isMine {
                             deliveryIndicator
                         }

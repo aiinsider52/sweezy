@@ -275,7 +275,7 @@ struct BusinessPromotionPanel: View {
 
     private var boostSubtitle: String {
         if growth.plan?.isBoosted == true, let until = growth.plan?.boostUntil {
-            return "business.boost.active_until".localized(with: until.formatted(date: .abbreviated, time: .shortened))
+            return "business.boost.active_until".localized(with: until.formatted(Date.FormatStyle(date: .abbreviated, time: .shortened, locale: AppLanguage.current.locale)))
         }
         return "business.boost.inactive".localized
     }
@@ -299,7 +299,7 @@ struct BusinessPromotionPanel: View {
 
     private var planSubtitle: String {
         if let expires = growth.plan?.planExpiresAt, growth.tier != .free {
-            return "business.plan.renews".localized(with: expires.formatted(date: .abbreviated, time: .omitted))
+            return "business.plan.renews".localized(with: expires.formatted(Date.FormatStyle(date: .abbreviated, time: .omitted, locale: AppLanguage.current.locale)))
         }
         return "business.plan.upgrade_hint".localized
     }

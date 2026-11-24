@@ -1396,7 +1396,7 @@ private struct JourneyTaskRow: View {
                     .foregroundColor(task.isDone ? JourneyVisual.lime : .white.opacity(0.72))
 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(task.title)
+                    Text(task.displayTitle)
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundColor(JourneyVisual.primaryText)
                         .strikethrough(task.isDone, color: .white.opacity(0.55))

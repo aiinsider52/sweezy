@@ -4520,3 +4520,14 @@
 "market.follow.short_off" = "Folgen";
 "market.follow.short_on" = "Folge ich";
 "journey.guide.scope.all_cantons_short" = "alle Kantone";
+"ask.title" = "Frag Sweezy";
+"ask.topics" = "Häufige Themen";
+"ask.topic.permit" = "Bewilligung";
+"ask.topic.insurance" = "Versicherung";
+"ask.topic.housing" = "Wohnung";
+"ask.topic.work" = "Arbeit";
+"ask.topic.bank" = "Bank";
+"ask.topic.taxes" = "Steuer";
+"ask.topic.school" = "Schule";
+"ask.topic.language" = "Sprache";
+"ask.source.pending" = "Quelle wird noch geprüft";

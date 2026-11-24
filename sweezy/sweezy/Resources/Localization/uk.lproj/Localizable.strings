@@ -3464,3 +3464,14 @@
 "market.follow.short_off" = "Стежити";
 "market.follow.short_on" = "Стежу";
 "journey.guide.scope.all_cantons_short" = "усі кантони";
+"ask.title" = "Запитай Sweezy";
+"ask.topics" = "Часті теми";
+"ask.topic.permit" = "дозвіл";
+"ask.topic.insurance" = "страхування";
+"ask.topic.housing" = "житло";
+"ask.topic.work" = "робота";
+"ask.topic.bank" = "банк";
+"ask.topic.taxes" = "податки";
+"ask.topic.school" = "школа";
+"ask.topic.language" = "мова";
+"ask.source.pending" = "Джерело ще перевіряємо";

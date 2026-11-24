@@ -30,6 +30,9 @@ struct MainTabView: View {
     @State private var showDeadlines = false
     @State private var deepLinkedListingID: DeepLinkedListing?
     @State private var celebrationCount = 0
+    #if DEBUG
+    @State private var debugRoute: DebugRoute?
+    #endif
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     @ViewBuilder
@@ -128,6 +131,22 @@ struct MainTabView: View {
             router.open(link)
             Task { await resolve(link) }
         }
+        #if DEBUG
+        // Screenshot automation: "-debugRoute ask|documents|digest|paywall|plan|letters|deadlines|whatsnew"
+        // opens that screen straight away.
+        .fullScreenCover(item: $debugRoute) { route in
+            NavigationStack { route.destination }
+                .environmentObject(appContainer)
+                .environmentObject(lockManager)
+                .environmentObject(sessionManager)
+        }
+        .task {
+            if let raw = UserDefaults.standard.string(forKey: "debugRoute"), let route = DebugRoute(rawValue: raw) {
+                try? await Task.sleep(for: .milliseconds(400))
+                debugRoute = route
+            }
+        }
+        #endif
         .sheet(item: $deepLinkedGuide) { GuideDetailView(guide: $0).environmentObject(appContainer) }
         .sheet(item: $deepLinkedChecklist) { ChecklistDetailView(checklist: $0).environmentObject(appContainer) }
         .sheet(item: $deepLinkedTemplate) { TemplateDetailView(template: $0).environmentObject(appContainer) }
@@ -3065,3 +3084,25 @@ extension Notification.Name {
         .environmentObject(ThemeManager())
         .environmentObject(SessionManager(lockManager: lockManager))
 }
+
+#if DEBUG
+/// Screens that screenshot automation can open directly (see the `-debugRoute` launch argument).
+enum DebugRoute: String, Identifiable {
+    case ask, documents, digest, paywall, plan, letters, deadlines, whatsnew
+    var id: String { rawValue }
+
+    @MainActor @ViewBuilder
+    var destination: some View {
+        switch self {
+        case .ask: AskSweezyView()
+        case .documents: DocumentReadinessView()
+        case .digest: WeeklyDigestView()
+        case .paywall: SubscriptionView(source: .profile)
+        case .plan: MyPlanView()
+        case .letters: LetterExplainerView()
+        case .deadlines: DeadlinesView()
+        case .whatsnew: WhatsNewView()
+        }
+    }
+}
+#endif

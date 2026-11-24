@@ -4591,3 +4591,14 @@
 "market.follow.short_off" = "Follow";
 "market.follow.short_on" = "Following";
 "journey.guide.scope.all_cantons_short" = "all cantons";
+"ask.title" = "Ask Sweezy";
+"ask.topics" = "Popular topics";
+"ask.topic.permit" = "permit";
+"ask.topic.insurance" = "insurance";
+"ask.topic.housing" = "housing";
+"ask.topic.work" = "work";
+"ask.topic.bank" = "bank";
+"ask.topic.taxes" = "tax";
+"ask.topic.school" = "school";
+"ask.topic.language" = "language";
+"ask.source.pending" = "Source still being checked";

@@ -231,29 +231,27 @@ final class GamificationService: ObservableObject {
     private func updateStreak(for date: Date) {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: date)
-        
-        if let last = lastStreakDate {
-            let lastDay = calendar.startOfDay(for: last)
-            
-            if calendar.isDate(today, inSameDayAs: lastDay) {
-                // Same day – nothing changes
-            } else if let diff = calendar.dateComponents([.day], from: lastDay, to: today).day,
-                      diff == 1 {
-                // Consecutive day – grow streak
-                streakDays = min(streakDays + 1, 999)
-            } else {
-                // Break in streak – start from 0 again
-                streakDays = 0
-            }
-        } else {
-            // First tracked day: remember it, streak visually starts from 0
-            streakDays = 0
-        }
-        
+        let gap = lastStreakDate.flatMap { calendar.dateComponents([.day], from: calendar.startOfDay(for: $0), to: today).day }
+        streakDays = Self.nextStreak(current: streakDays, gapDays: gap)
         lastStreakDate = today
         persist()
     }
-    
+
+    /// Life admin does not happen every day, so the streak forgives one quiet day:
+    /// - same day: unchanged; next day: +1;
+    /// - one day skipped: kept as it is (an automatic "freeze");
+    /// - longer breaks: starts again at 1, because opening the app today counts.
+    /// The very first open counts as day 1.
+    nonisolated static func nextStreak(current: Int, gapDays: Int?) -> Int {
+        guard let gapDays else { return 1 }
+        switch gapDays {
+        case ..<1: return max(current, 1)
+        case 1: return min(max(current, 1) + 1, 999)
+        case 2: return max(current, 1)
+        default: return 1
+        }
+    }
+
     private func recalcBadges() {
         var newBadges: [String] = []
         // Very lightweight heuristic badges based on XP

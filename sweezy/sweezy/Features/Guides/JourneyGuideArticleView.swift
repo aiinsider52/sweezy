@@ -231,9 +231,13 @@ struct JourneyGuideArticleView: View {
                     if case .verified(let verifiedAt) = freshness {
                         Label(verifiedAt.formatted(Date.FormatStyle(date: .abbreviated, time: .omitted, locale: AppLanguage.current.locale)), systemImage: "checkmark.seal.fill")
                     }
+                    Spacer(minLength: 0)
+                    // Listen to the article instead of reading it: title, summary and body as plain sentences.
+                    ReadAloudButton(text: ([guide.title, guide.summary ?? ""] + AskSweezyService.plainSentences(from: guide.bodyMarkdown)).filter { !$0.isEmpty }.joined(separator: ". "))
                 }
                 .font(.system(size: 11, weight: .semibold))
                 .foregroundColor(JourneyVisual.secondaryText)
+                .frame(maxWidth: contentWidth, alignment: .leading)
             }
             .padding(.horizontal, horizontalInset)
             .padding(.bottom, 18)

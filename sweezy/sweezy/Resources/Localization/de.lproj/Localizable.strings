@@ -4531,3 +4531,5 @@
 "ask.topic.school" = "Schule";
 "ask.topic.language" = "Sprache";
 "ask.source.pending" = "Quelle wird noch geprüft";
+"read_aloud.listen" = "Anhören";
+"read_aloud.stop" = "Stopp";

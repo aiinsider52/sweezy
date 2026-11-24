@@ -32,3 +32,14 @@ final class AskSweezyServiceTests: XCTestCase {
         ])
     }
 }
+
+final class StreakRulesTests: XCTestCase {
+    func testStreakForgivesOneQuietDay() {
+        XCTAssertEqual(GamificationService.nextStreak(current: 0, gapDays: nil), 1, "first open is day 1")
+        XCTAssertEqual(GamificationService.nextStreak(current: 4, gapDays: 0), 4, "same day")
+        XCTAssertEqual(GamificationService.nextStreak(current: 4, gapDays: 1), 5, "next day")
+        XCTAssertEqual(GamificationService.nextStreak(current: 4, gapDays: 2), 4, "one day skipped is frozen")
+        XCTAssertEqual(GamificationService.nextStreak(current: 4, gapDays: 5), 1, "long break restarts")
+        XCTAssertEqual(GamificationService.nextStreak(current: 999, gapDays: 1), 999, "capped")
+    }
+}

@@ -405,7 +405,11 @@ struct LetterResultView: View {
 
     private func summary(_ explanation: LetterExplanation) -> some View {
         card {
-            label("letters.section.about")
+            HStack {
+                label("letters.section.about")
+                Spacer()
+                ReadAloudButton(text: spokenText(explanation))
+            }
             Text(explanation.summary)
                 .font(.system(size: 16, weight: .regular))
                 .foregroundColor(JourneyVisual.primaryText)
@@ -419,6 +423,16 @@ struct LetterResultView: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
+    }
+
+    /// What the letter is, what they want, by when, and the steps — in reading order.
+    private func spokenText(_ explanation: LetterExplanation) -> String {
+        var parts = [explanation.title, explanation.summary, explanation.whatTheyWant]
+        if let label = explanation.deadlineLabel, let date = explanation.deadlineDate {
+            parts.append("\(label): \(date.formatted(date: .long, time: .omitted))")
+        }
+        parts.append(contentsOf: explanation.steps)
+        return parts.filter { !$0.isEmpty }.joined(separator: ". ")
     }
 
     private func deadlineCard(_ letter: SavedLetter, date: Date) -> some View {

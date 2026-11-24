@@ -3475,3 +3475,5 @@
 "ask.topic.school" = "школа";
 "ask.topic.language" = "мова";
 "ask.source.pending" = "Джерело ще перевіряємо";
+"read_aloud.listen" = "Слухати";
+"read_aloud.stop" = "Стоп";

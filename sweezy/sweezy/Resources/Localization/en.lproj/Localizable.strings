@@ -4602,3 +4602,5 @@
 "ask.topic.school" = "school";
 "ask.topic.language" = "language";
 "ask.source.pending" = "Source still being checked";
+"read_aloud.listen" = "Listen";
+"read_aloud.stop" = "Stop";

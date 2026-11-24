@@ -2,7 +2,7 @@
 import Foundation
 
 enum GeneratedOpenAPIContract {
-    static let sha256 = "0ca40983ea0dc4c4608c3e636f054142ffc107802d2da2bc9b579a0178e963cb"
+    static let sha256 = "976a0635f840d8e162d2ed8638190f1f5f879de7968a00c9d6777ae9d23b8af2"
 
     struct Operation: Sendable {
         let method: String
@@ -16,6 +16,7 @@ enum GeneratedOpenAPIContract {
         "app_versions_api_v1_admin_analytics_app_versions_get": Operation(method: "GET", path: "/api/v1/admin/analytics/app-versions", requiresAuthentication: true),
         "errors_api_v1_admin_analytics_errors_get": Operation(method: "GET", path: "/api/v1/admin/analytics/errors", requiresAuthentication: true),
         "funnels_api_v1_admin_analytics_funnels_get": Operation(method: "GET", path: "/api/v1/admin/analytics/funnels", requiresAuthentication: true),
+        "growth_api_v1_admin_analytics_growth_get": Operation(method: "GET", path: "/api/v1/admin/analytics/growth", requiresAuthentication: true),
         "overview_api_v1_admin_analytics_overview_get": Operation(method: "GET", path: "/api/v1/admin/analytics/overview", requiresAuthentication: true),
         "realtime_api_v1_admin_analytics_realtime_get": Operation(method: "GET", path: "/api/v1/admin/analytics/realtime", requiresAuthentication: true),
         "retention_api_v1_admin_analytics_retention_get": Operation(method: "GET", path: "/api/v1/admin/analytics/retention", requiresAuthentication: true),
@@ -98,10 +99,13 @@ enum GeneratedOpenAPIContract {
         "user_stats_api_v1_admin_users_stats_get": Operation(method: "GET", path: "/api/v1/admin/users/stats", requiresAuthentication: true),
         "update_user_role_api_v1_admin_users__user_id__role_put": Operation(method: "PUT", path: "/api/v1/admin/users/{user_id}/role", requiresAuthentication: true),
         "set_user_subscription_api_v1_admin_users__user_id__subscription_post": Operation(method: "POST", path: "/api/v1/admin/users/{user_id}/subscription", requiresAuthentication: true),
+        "application_kit_api_v1_ai_application_kit_post": Operation(method: "POST", path: "/api/v1/ai/application-kit", requiresAuthentication: true),
         "ask_sweezy_api_v1_ai_ask_sweezy_post": Operation(method: "POST", path: "/api/v1/ai/ask-sweezy", requiresAuthentication: true),
         "cv_improve_api_v1_ai_cv_improve_post": Operation(method: "POST", path: "/api/v1/ai/cv-improve", requiresAuthentication: true),
         "cv_translate_api_v1_ai_cv_translate_post": Operation(method: "POST", path: "/api/v1/ai/cv-translate", requiresAuthentication: true),
+        "interview_turn_api_v1_ai_interview_turn_post": Operation(method: "POST", path: "/api/v1/ai/interview-turn", requiresAuthentication: true),
         "job_apply_api_v1_ai_job_apply_post": Operation(method: "POST", path: "/api/v1/ai/job-apply", requiresAuthentication: true),
+        "letter_explain_api_v1_ai_letter_explain_post": Operation(method: "POST", path: "/api/v1/ai/letter-explain", requiresAuthentication: true),
         "trip_plan_api_v1_ai_trip_plan_post": Operation(method: "POST", path: "/api/v1/ai/trip-plan", requiresAuthentication: true),
         "log_paywall_event_api_v1_analytics_paywall_post": Operation(method: "POST", path: "/api/v1/analytics/paywall", requiresAuthentication: false),
         "list_appointments_api_v1_appointments__get": Operation(method: "GET", path: "/api/v1/appointments/", requiresAuthentication: true),

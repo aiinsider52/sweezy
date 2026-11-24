@@ -373,7 +373,7 @@ def test_employer_moderation_and_direct_job_chat() -> None:
     applied = client.put(
         f"/api/v1/jobs/applications/{job_id}",
         headers=candidate,
-        json={"job_id": job_id, "status": "applied"},
+        json={"job_id": job_id, "status": "applied", "notes": "my private note"},
     )
     assert applied.status_code == 200, applied.text
     employer_inbox = client.get("/api/v1/jobs/employer/applications", headers=employer)
@@ -382,13 +382,21 @@ def test_employer_moderation_and_direct_job_chat() -> None:
         item for item in employer_inbox.json() if item["job_id"] == job_id
     )
     assert employer_application["candidate_email"].endswith("@example.com")
+    # The candidate's own tracker notes and reminders stay private.
+    assert "notes" not in employer_application
+    assert "next_action_at" not in employer_application
     interview = client.put(
         f"/api/v1/jobs/employer/applications/{employer_application['id']}",
         headers=employer,
-        json={"status": "interview"},
+        json={"status": "interview", "notes": "Call on Monday"},
     )
     assert interview.status_code == 200, interview.text
     assert interview.json()["status"] == "interview"
+    assert interview.json()["employer_notes"] == "Call on Monday"
+    own = client.get("/api/v1/jobs/applications", headers=candidate)
+    assert own.status_code == 200, own.text
+    mine = next(item for item in own.json() if item["job_id"] == job_id)
+    assert mine["notes"] == "my private note"
 
     conversation = client.post(
         f"/api/v1/chat/conversations/jobs/{job_id}", headers=candidate

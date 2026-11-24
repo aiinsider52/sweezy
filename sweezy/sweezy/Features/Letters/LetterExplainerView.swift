@@ -173,6 +173,8 @@ struct LetterExplainerView: View {
                 Button { showAuth = true } label: { pickLabel(prominent: !canScan) }
                     .accessibilityIdentifier("letters.pick")
             }
+            FreeUsesBadge(feature: "letter_explain", limit: 3) { showPaywall = true }
+                .padding(.top, 2)
         }
     }
 
@@ -263,6 +265,7 @@ struct LetterExplainerView: View {
                 let explanation = try await APIClient.explainLetter(text: reading.text)
                 let letter = SavedLetter(id: UUID(), createdAt: Date(), explanation: explanation, payment: reading.payment, deadlineAdded: false)
                 store.add(letter)
+                Task { await SubscriptionManager.shared.refreshEntitlements() }
                 appContainer.telemetry.track(.letterExplained, source: "letters", meta: [
                     "category": explanation.category,
                     "has_deadline": String(explanation.deadline != nil),
@@ -405,7 +408,11 @@ struct LetterResultView: View {
 
     private func summary(_ explanation: LetterExplanation) -> some View {
         card {
-            label("letters.section.about")
+            HStack {
+                label("letters.section.about")
+                Spacer()
+                ReadAloudButton(text: spokenText(explanation))
+            }
             Text(explanation.summary)
                 .font(.system(size: 16, weight: .regular))
                 .foregroundColor(JourneyVisual.primaryText)
@@ -419,6 +426,16 @@ struct LetterResultView: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
+    }
+
+    /// What the letter is, what they want, by when, and the steps — in reading order.
+    private func spokenText(_ explanation: LetterExplanation) -> String {
+        var parts = [explanation.title, explanation.summary, explanation.whatTheyWant]
+        if let label = explanation.deadlineLabel, let date = explanation.deadlineDate {
+            parts.append("\(label): \(date.formatted(date: .long, time: .omitted))")
+        }
+        parts.append(contentsOf: explanation.steps)
+        return parts.filter { !$0.isEmpty }.joined(separator: ". ")
     }
 
     private func deadlineCard(_ letter: SavedLetter, date: Date) -> some View {

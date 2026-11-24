@@ -19,6 +19,20 @@ extension Notification.Name {
 enum AccountScopedStorage {
     private static let defaults = UserDefaults.standard
 
+    /// A file in Application Support that belongs to the signed-in account (or the guest), so the
+    /// next person who signs in on this phone does not see it. A legacy unscoped file with the same
+    /// name is adopted by whoever is signed in when it is first read.
+    static func fileURL(named name: String) -> URL {
+        let folder = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+        let scoped = folder.appendingPathComponent("acct-\(currentAccountKey())-\(name)")
+        let legacy = folder.appendingPathComponent(name)
+        let manager = FileManager.default
+        if !manager.fileExists(atPath: scoped.path), manager.fileExists(atPath: legacy.path) {
+            try? manager.moveItem(at: legacy, to: scoped)
+        }
+        return scoped
+    }
+
     static func currentAccountKey() -> String {
         let isRegistered = KeychainStore.get("access_token")?.isEmpty == false
         let backendID = (KeychainStore.get("user_id") ?? "")
@@ -194,6 +208,8 @@ final class SessionManager: ObservableObject {
     /// Centralized sign out (keeps the app usable as a guest afterwards).
     /// Call this instead of manually toggling `isRegistered` + clearing Keychain in multiple places.
     func signOut() {
+        // The home-screen widget must not keep showing the previous person's plan.
+        Task { @MainActor in WidgetBridge.clear() }
         let previousScope = AccountScopedStorage.currentAccountKey()
         let accessToken = KeychainStore.get("access_token")
         let pushToken = PushTokenStore.token

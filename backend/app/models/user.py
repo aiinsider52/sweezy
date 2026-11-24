@@ -24,6 +24,8 @@ class User(Base):
     safety_strike_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     email_verified: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     email_verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    # Tokens issued before this moment are no longer accepted (set on password reset and deletion).
+    tokens_valid_after: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     is_superuser: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     role: Mapped[str] = mapped_column(String(20), default="viewer", nullable=False)  # admin|editor|translator|viewer
     subscription_status: Mapped[str] = mapped_column(String(20), default="free", nullable=False)  # free|trial|premium

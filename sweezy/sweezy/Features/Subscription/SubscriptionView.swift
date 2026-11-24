@@ -2,11 +2,21 @@ import StoreKit
 import SwiftUI
 import UIKit
 
+/// Where the paywall was opened from. Each trigger has its own case so the funnel shows which
+/// moment sells, and the paywall headline speaks to what the person was just trying to do.
 enum SubscriptionSource: String {
     case home
     case cv
     case profile
     case letters
+    case careerKit = "career_kit"
+    case interview
+    case jobs
+    case people
+    case events
+    case marketplace
+    case discovery
+    case guides
 }
 
 struct SubscriptionView: View {
@@ -14,7 +24,8 @@ struct SubscriptionView: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @StateObject private var manager = SubscriptionManager.shared
-    @State private var selectedProductID = SubscriptionManager.ProductID.monthly
+    /// Annual is the default: it is the better deal, and it is what most people keep.
+    @State private var selectedProductID = SubscriptionManager.ProductID.yearly
     @State private var purchaseSucceeded = false
 
     let source: SubscriptionSource
@@ -54,6 +65,10 @@ struct SubscriptionView: View {
             APIClient.logPaywall(eventType: "view", context: source.rawValue)
             TelemetryService.current?.track(.paywallViewed, source: "paywall", meta: ["context": source.rawValue])
             await manager.load()
+            // Fall back to monthly only if the yearly product is not on sale in this storefront.
+            if manager.yearlyProduct == nil, manager.monthlyProduct != nil {
+                selectedProductID = SubscriptionManager.ProductID.monthly
+            }
         }
         .alert("Sweezy Plus", isPresented: $purchaseSucceeded) {
             Button("Готово".localized) { dismiss() }
@@ -115,10 +130,10 @@ struct SubscriptionView: View {
         JourneyMascotStage(
             pose: .celebrate,
             stickers: [
-                JourneyStageSticker(icon: "sparkles", title: "AI без лімітів".localized, swatch: JourneyCategoryPalette.lime),
-                JourneyStageSticker(icon: "map.fill", title: "Твій план".localized, swatch: JourneyCategoryPalette.sand),
-                JourneyStageSticker(icon: "doc.text.fill", title: "CV і листи".localized, swatch: JourneyCategoryPalette.sky),
-                JourneyStageSticker(icon: "bell.badge.fill", title: "Дедлайни".localized, swatch: JourneyCategoryPalette.coral)
+                JourneyStageSticker(icon: "envelope.open.fill", title: "paywall.sticker.letters".localized, swatch: JourneyCategoryPalette.lime),
+                JourneyStageSticker(icon: "wand.and.stars", title: "paywall.sticker.career".localized, swatch: JourneyCategoryPalette.sky),
+                JourneyStageSticker(icon: "doc.text.fill", title: "CV і листи".localized, swatch: JourneyCategoryPalette.sand),
+                JourneyStageSticker(icon: "megaphone.fill", title: "paywall.sticker.promo".localized, swatch: JourneyCategoryPalette.coral)
             ]
         )
         .padding(.horizontal, 18)
@@ -128,8 +143,8 @@ struct SubscriptionView: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 8) {
                 Label("PLUS", systemImage: "sparkles")
-                if hasMonthlyFreeTrial {
-                    Text("30 ДНІВ БЕЗКОШТОВНО".localized)
+                if let days = selectedTrialDays {
+                    Text("paywall.trial.badge".localized(with: "\(days)"))
                 }
             }
             .font(.system(size: 10, weight: .black))
@@ -139,34 +154,96 @@ struct SubscriptionView: View {
             .background(JourneyVisual.lime)
             .clipShape(Capsule())
 
-            VStack(alignment: .leading, spacing: -2) {
-                Text("\(selectedCountry.name).")
-                    .foregroundColor(primaryText)
-                Text("Твій маршрут.".localized)
-                    .foregroundColor(readableAccent)
-            }
-            .font(.largeTitle.bold())
-            .fixedSize(horizontal: false, vertical: true)
-
-            Text("Документи, робота, мова й дедлайни — в одному зрозумілому плані.".localized)
-                .font(.system(size: 16, weight: .medium))
-                .foregroundColor(secondaryText)
+            if let pitch = contextualPitch {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(pitch.title)
+                        .font(.largeTitle.bold())
+                        .foregroundColor(primaryText)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Text(pitch.subtitle)
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundColor(secondaryText)
+                        .fixedSize(horizontal: false, vertical: true)
+                    if let usage = usageNote {
+                        Label(usage, systemImage: "hourglass")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundColor(readableAccent)
+                            .padding(.top, 2)
+                    }
+                }
+            } else {
+                VStack(alignment: .leading, spacing: -2) {
+                    Text("\(selectedCountry.name).")
+                        .foregroundColor(primaryText)
+                    Text("Твій маршрут.".localized)
+                        .foregroundColor(readableAccent)
+                }
+                .font(.largeTitle.bold())
                 .fixedSize(horizontal: false, vertical: true)
+
+                // Honest about what stays free: trust is what converts this audience.
+                Text("paywall.default.subtitle".localized)
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundColor(secondaryText)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
         }
         .padding(.horizontal, 22)
     }
 
     // MARK: - Benefits
 
+    /// Only what Plus really unlocks today (App Review 3.1.2: describe what people get).
     private var benefitItems: [PlusBenefit] {
-        [
-            PlusBenefit(icon: "sparkles", title: "AI-помічник без лімітів".localized, text: "Документи, робота, побут — питай скільки треба".localized, swatch: JourneyCategoryPalette.lime),
-            PlusBenefit(icon: "map.fill", title: "Особистий план".localized, text: "Кроки й терміни під твою ситуацію".localized, swatch: JourneyCategoryPalette.sand),
-            PlusBenefit(icon: "doc.text.fill", title: "CV та мотиваційні листи".localized, text: selectedCountry.jobMarketPhrase, swatch: JourneyCategoryPalette.sky),
-            PlusBenefit(icon: "globe.europe.africa.fill", title: "Переклади DE · FR · IT".localized, text: "Листи, договори, оголошення".localized, swatch: JourneyCategoryPalette.coral),
-            PlusBenefit(icon: "bell.badge.fill", title: "Розумні нагадування".localized, text: "Жодного пропущеного дедлайну".localized, swatch: JourneyCategoryPalette.lilac),
-            PlusBenefit(icon: "briefcase.fill", title: "Пошук роботи".localized, text: "Від вакансії до заявки".localized, swatch: JourneyCategoryPalette.teal)
+        let items: [PlusBenefit?] = [
+            PlusBenefit(icon: "envelope.open.fill", title: "paywall.benefit.letters".localized, text: "paywall.benefit.letters.text".localized, swatch: JourneyCategoryPalette.lime),
+            PlusBenefit(icon: "wand.and.stars", title: "paywall.benefit.career".localized, text: selectedCountry.jobMarketPhrase, swatch: JourneyCategoryPalette.sky),
+            PlusBenefit(icon: "doc.text.fill", title: "paywall.benefit.cv".localized, text: "paywall.benefit.cv.text".localized, swatch: JourneyCategoryPalette.sand),
+            selectedCountry == .switzerland
+                ? PlusBenefit(icon: "map.fill", title: "paywall.benefit.discovery".localized, text: "paywall.benefit.discovery.text".localized, swatch: JourneyCategoryPalette.teal)
+                : nil,
+            PlusBenefit(icon: "person.2.fill", title: "paywall.benefit.people".localized, text: "paywall.benefit.people.text".localized, swatch: JourneyCategoryPalette.coral),
+            PlusBenefit(icon: "megaphone.fill", title: "paywall.benefit.market".localized, text: "paywall.benefit.market.text".localized, swatch: JourneyCategoryPalette.lilac)
         ]
+        return items.compactMap { $0 }
+    }
+
+    private struct Pitch {
+        let title: String
+        let subtitle: String
+    }
+
+    /// Speak to what the person was just doing when the paywall opened.
+    private var contextualPitch: Pitch? {
+        switch source {
+        case .letters:
+            return Pitch(title: "paywall.pitch.letters.title".localized, subtitle: "paywall.pitch.letters.subtitle".localized)
+        case .careerKit, .interview, .cv, .jobs:
+            return Pitch(title: "paywall.pitch.career.title".localized, subtitle: "paywall.pitch.career.subtitle".localized)
+        case .people, .events:
+            return Pitch(title: "paywall.pitch.people.title".localized, subtitle: "paywall.pitch.people.subtitle".localized)
+        case .discovery where selectedCountry == .switzerland:
+            return Pitch(title: "paywall.pitch.discovery.title".localized, subtitle: "paywall.pitch.discovery.subtitle".localized)
+        case .marketplace:
+            return Pitch(title: "paywall.pitch.market.title".localized, subtitle: "paywall.pitch.market.subtitle".localized)
+        case .home, .profile, .guides, .discovery:
+            return nil
+        }
+    }
+
+    /// "You've used all 3 free letter explanations", when that is why the paywall opened.
+    private var usageNote: String? {
+        let feature: String
+        let limit: Int
+        switch source {
+        case .letters: feature = "letter_explain"; limit = 3
+        case .careerKit: feature = "career_kit"; limit = 3
+        case .interview: feature = "interview_turns"; limit = 14
+        case .cv: feature = "cv_tools"; limit = 3
+        default: return nil
+        }
+        guard let left = manager.freeUsesRemaining[feature], left == 0 else { return nil }
+        return "paywall.usage.spent".localized(with: "\(limit)")
     }
 
     private var benefits: some View {
@@ -248,20 +325,22 @@ struct SubscriptionView: View {
                 : AnyLayout(HStackLayout(alignment: .top, spacing: 10))
             layout {
                 planCard(
-                    id: SubscriptionManager.ProductID.monthly,
-                    title: "Щомісячно".localized,
-                    price: monthlyPrice,
-                    period: "на місяць".localized,
-                    badge: hasMonthlyFreeTrial ? "30 днів free".localized : nil,
-                    note: hasMonthlyFreeTrial ? "Перший місяць 0 %@".localized(with: "\(selectedCountry.currencyCode)") : "Без зобов’язань".localized
-                )
-                planCard(
                     id: SubscriptionManager.ProductID.yearly,
                     title: "Щорічно".localized,
                     price: yearlyPrice,
                     period: "на рік".localized,
-                    badge: "2 міс. у подарунок".localized,
-                    note: "≈ %@ / міс".localized(with: "\(yearlyPerMonth)")
+                    badge: yearlyBadge,
+                    note: trialDays(for: SubscriptionManager.ProductID.yearly).map { "paywall.trial.days_free".localized(with: "\($0)") }
+                        ?? "≈ %@ / міс".localized(with: "\(yearlyPerMonth)")
+                )
+                planCard(
+                    id: SubscriptionManager.ProductID.monthly,
+                    title: "Щомісячно".localized,
+                    price: monthlyPrice,
+                    period: "на місяць".localized,
+                    badge: nil,
+                    note: trialDays(for: SubscriptionManager.ProductID.monthly).map { "paywall.trial.days_free".localized(with: "\($0)") }
+                        ?? "Без зобов’язань".localized
                 )
             }
         }
@@ -341,7 +420,7 @@ struct SubscriptionView: View {
     private var trialTimeline: some View {
         VStack(alignment: .leading, spacing: 0) {
             trialStep(icon: "lock.open.fill", title: "Сьогодні".localized, text: "Повний доступ до Plus · 0 %@".localized(with: "\(selectedCountry.currencyCode)"), isLast: false)
-            trialStep(icon: "calendar", title: "Через 30 днів".localized, text: "%@ / місяць, якщо не скасуєш".localized(with: "\(monthlyPrice)"), isLast: false)
+            trialStep(icon: "calendar", title: "paywall.trial.after_days".localized(with: "\(selectedTrialDays ?? 0)"), text: "paywall.trial.then".localized(with: "\(selectedPlainPrice)"), isLast: false)
             trialStep(icon: "hand.raised.fill", title: "Будь-коли".localized, text: "Скасування в налаштуваннях Apple ID".localized, isLast: true)
         }
         .padding(.horizontal, 14)
@@ -436,10 +515,10 @@ struct SubscriptionView: View {
                         Spacer()
                     } else {
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(hasSelectedFreeTrial ? "Почати 30 днів безкоштовно".localized : "Продовжити з Plus".localized)
+                            Text(selectedTrialDays.map { "paywall.trial.cta".localized(with: "\($0)") } ?? "Продовжити з Plus".localized)
                                 .font(.headline)
                                 .contentTransition(.opacity)
-                            Text(hasSelectedFreeTrial ? "потім %@ / місяць".localized(with: "\(monthlyPrice)") : selectedPrice)
+                            Text(hasSelectedFreeTrial ? "paywall.trial.then".localized(with: "\(selectedPlainPrice)") : selectedPrice)
                                 .font(.caption.weight(.semibold))
                                 .opacity(0.72)
                                 .contentTransition(.opacity)
@@ -484,6 +563,10 @@ struct SubscriptionView: View {
                     .lineLimit(1).minimumScaleFactor(0.8).frame(minHeight: 44)
             }
             .accessibilityIdentifier("subscription.privacy")
+            Button("paywall.offer_code".localized) { manager.presentOfferCodeRedemption() }
+                .font(.subheadline)
+                .frame(minHeight: 44)
+                .accessibilityIdentifier("subscription.offerCode")
         }
         .foregroundColor(secondaryText)
         .frame(maxWidth: .infinity)
@@ -502,17 +585,25 @@ struct SubscriptionView: View {
         return selectedCountry == .switzerland ? "4.13 CHF" : "4.13 EUR"
     }
 
-    private var hasMonthlyFreeTrial: Bool {
-        let storeTrial = manager.monthlyProduct?.subscription?.introductoryOffer?.paymentMode == .freeTrial
+    /// Days of free trial the person can still get on a product (nil if none or not eligible).
+    private func trialDays(for productID: String) -> Int? {
 #if DEBUG
-        return (storeTrial && manager.isMonthlyTrialEligible) || ProcessInfo.processInfo.arguments.contains("-screenshotTrial")
-#else
-        return storeTrial && manager.isMonthlyTrialEligible
+        if ProcessInfo.processInfo.arguments.contains("-screenshotTrial"), productID == SubscriptionManager.ProductID.yearly { return 14 }
 #endif
+        let eligible = productID == SubscriptionManager.ProductID.yearly ? manager.isYearlyTrialEligible : manager.isMonthlyTrialEligible
+        guard eligible else { return nil }
+        return manager.trialDays(for: productID)
     }
 
-    private var hasSelectedFreeTrial: Bool {
-        selectedProductID == SubscriptionManager.ProductID.monthly && hasMonthlyFreeTrial
+    private var selectedTrialDays: Int? { trialDays(for: selectedProductID) }
+
+    private var hasSelectedFreeTrial: Bool { selectedTrialDays != nil }
+
+    private var yearlyBadge: String {
+        if let percent = manager.yearlySavingsPercent {
+            return "paywall.yearly.save".localized(with: "\(percent)")
+        }
+        return "2 міс. у подарунок".localized
     }
 
     private var monthlyPrice: String {
@@ -524,6 +615,9 @@ struct SubscriptionView: View {
             ? "%@ / місяць".localized(with: "\(monthlyPrice)")
             : "%@ / рік".localized(with: "\(yearlyPrice)")
     }
+
+    /// "49.90 CHF / рік" or "6.90 CHF / місяць" for the selected plan.
+    private var selectedPlainPrice: String { selectedPrice }
 
     private var selectedCountry: ResidenceCountry {
         ResidenceCountry(rawValue: APIClient.countryCode) ?? .switzerland

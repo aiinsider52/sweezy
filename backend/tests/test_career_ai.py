@@ -36,7 +36,7 @@ def _fake_openai(monkeypatch, output: dict, captured: dict):
             captured.update(kwargs)
             return types.SimpleNamespace(output_text=json.dumps(output))
 
-    monkeypatch.setitem(sys.modules, "openai", types.SimpleNamespace(OpenAI=lambda api_key: types.SimpleNamespace(responses=Responses())))
+    monkeypatch.setitem(sys.modules, "openai", types.SimpleNamespace(OpenAI=lambda api_key, **kwargs: types.SimpleNamespace(responses=Responses())))
 
 
 def _usage(user_id: str, feature: str) -> int:

@@ -5675,17 +5675,20 @@
         "properties": {
           "degree": {
             "default": "",
+            "maxLength": 300,
             "title": "Degree",
             "type": "string"
           },
           "details": {
             "default": "",
+            "maxLength": 2000,
             "title": "Details",
             "type": "string"
           },
           "id": {
             "anyOf": [
               {
+                "maxLength": 64,
                 "type": "string"
               },
               {
@@ -5696,11 +5699,13 @@
           },
           "period": {
             "default": "",
+            "maxLength": 100,
             "title": "Period",
             "type": "string"
           },
           "school": {
             "default": "",
+            "maxLength": 300,
             "title": "School",
             "type": "string"
           }
@@ -5712,17 +5717,20 @@
         "properties": {
           "achievements": {
             "default": "",
+            "maxLength": 4000,
             "title": "Achievements",
             "type": "string"
           },
           "company": {
             "default": "",
+            "maxLength": 300,
             "title": "Company",
             "type": "string"
           },
           "id": {
             "anyOf": [
               {
+                "maxLength": 64,
                 "type": "string"
               },
               {
@@ -5733,16 +5741,19 @@
           },
           "location": {
             "default": "",
+            "maxLength": 200,
             "title": "Location",
             "type": "string"
           },
           "period": {
             "default": "",
+            "maxLength": 100,
             "title": "Period",
             "type": "string"
           },
           "role": {
             "default": "",
+            "maxLength": 300,
             "title": "Role",
             "type": "string"
           }
@@ -5756,6 +5767,7 @@
             "items": {
               "$ref": "#/components/schemas/CVEducation"
             },
+            "maxItems": 20,
             "title": "Education",
             "type": "array"
           },
@@ -5763,13 +5775,16 @@
             "items": {
               "$ref": "#/components/schemas/CVExperience"
             },
+            "maxItems": 30,
             "title": "Experience",
             "type": "array"
           },
           "hobbies": {
             "items": {
+              "maxLength": 120,
               "type": "string"
             },
+            "maxItems": 30,
             "title": "Hobbies",
             "type": "array"
           },
@@ -5777,6 +5792,7 @@
             "items": {
               "$ref": "#/components/schemas/CVLanguage"
             },
+            "maxItems": 20,
             "title": "Languages",
             "type": "array"
           },
@@ -5785,8 +5801,10 @@
           },
           "skills": {
             "items": {
+              "maxLength": 120,
               "type": "string"
             },
+            "maxItems": 60,
             "title": "Skills",
             "type": "array"
           },
@@ -5826,6 +5844,7 @@
           "id": {
             "anyOf": [
               {
+                "maxLength": 64,
                 "type": "string"
               },
               {
@@ -5836,11 +5855,13 @@
           },
           "level": {
             "default": "",
+            "maxLength": 60,
             "title": "Level",
             "type": "string"
           },
           "name": {
             "default": "",
+            "maxLength": 100,
             "title": "Name",
             "type": "string"
           }
@@ -5852,31 +5873,37 @@
         "properties": {
           "email": {
             "default": "",
+            "maxLength": 320,
             "title": "Email",
             "type": "string"
           },
           "fullName": {
             "default": "",
+            "maxLength": 200,
             "title": "Fullname",
             "type": "string"
           },
           "location": {
             "default": "",
+            "maxLength": 200,
             "title": "Location",
             "type": "string"
           },
           "phone": {
             "default": "",
+            "maxLength": 60,
             "title": "Phone",
             "type": "string"
           },
           "summary": {
             "default": "",
+            "maxLength": 4000,
             "title": "Summary",
             "type": "string"
           },
           "title": {
             "default": "",
+            "maxLength": 200,
             "title": "Title",
             "type": "string"
           }
@@ -5890,6 +5917,7 @@
             "items": {
               "$ref": "#/components/schemas/CVEducation"
             },
+            "maxItems": 20,
             "title": "Education",
             "type": "array"
           },
@@ -5897,13 +5925,16 @@
             "items": {
               "$ref": "#/components/schemas/CVExperience"
             },
+            "maxItems": 30,
             "title": "Experience",
             "type": "array"
           },
           "hobbies": {
             "items": {
+              "maxLength": 120,
               "type": "string"
             },
+            "maxItems": 30,
             "title": "Hobbies",
             "type": "array"
           },
@@ -5911,6 +5942,7 @@
             "items": {
               "$ref": "#/components/schemas/CVLanguage"
             },
+            "maxItems": 20,
             "title": "Languages",
             "type": "array"
           },
@@ -5919,8 +5951,10 @@
           },
           "skills": {
             "items": {
+              "maxLength": 120,
               "type": "string"
             },
+            "maxItems": 60,
             "title": "Skills",
             "type": "array"
           }
@@ -5937,6 +5971,7 @@
             "items": {
               "$ref": "#/components/schemas/CVEducation"
             },
+            "maxItems": 20,
             "title": "Education",
             "type": "array"
           },
@@ -5944,6 +5979,7 @@
             "items": {
               "$ref": "#/components/schemas/CVExperience"
             },
+            "maxItems": 30,
             "title": "Experience",
             "type": "array"
           },
@@ -5953,8 +5989,10 @@
           },
           "hobbies": {
             "items": {
+              "maxLength": 120,
               "type": "string"
             },
+            "maxItems": 30,
             "title": "Hobbies",
             "type": "array"
           },
@@ -5962,6 +6000,7 @@
             "items": {
               "$ref": "#/components/schemas/CVLanguage"
             },
+            "maxItems": 20,
             "title": "Languages",
             "type": "array"
           },
@@ -5970,8 +6009,10 @@
           },
           "skills": {
             "items": {
+              "maxLength": 120,
               "type": "string"
             },
+            "maxItems": 60,
             "title": "Skills",
             "type": "array"
           }
@@ -7796,6 +7837,7 @@
         "type": "object"
       },
       "EmployerApplicationOut": {
+        "description": "What an employer sees: the application and its status, never the candidate's private\ntracker notes or reminders.",
         "properties": {
           "applied_at": {
             "anyOf": [
@@ -7831,7 +7873,6 @@
           "cover_letter": {
             "anyOf": [
               {
-                "maxLength": 20000,
                 "type": "string"
               },
               {
@@ -7845,13 +7886,22 @@
             "title": "Created At",
             "type": "string"
           },
+          "employer_notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Employer Notes"
+          },
           "id": {
             "title": "Id",
             "type": "string"
           },
           "job_id": {
-            "maxLength": 255,
-            "minLength": 1,
             "title": "Job Id",
             "type": "string"
           },
@@ -7873,30 +7923,6 @@
               }
             ],
             "title": "Location"
-          },
-          "next_action_at": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Next Action At"
-          },
-          "notes": {
-            "anyOf": [
-              {
-                "maxLength": 2000,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Notes"
           },
           "source": {
             "title": "Source",
@@ -7922,9 +7948,9 @@
           }
         },
         "required": [
+          "id",
           "job_id",
           "status",
-          "id",
           "job_title",
           "source",
           "job_url",
@@ -8366,6 +8392,14 @@
               }
             ],
             "title": "Favorites Limit"
+          },
+          "free_uses_remaining": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "default": {},
+            "title": "Free Uses Remaining",
+            "type": "object"
           },
           "guides_full_access": {
             "title": "Guides Full Access",
@@ -10624,6 +10658,7 @@
           "candidateSummary": {
             "anyOf": [
               {
+                "maxLength": 4000,
                 "type": "string"
               },
               {
@@ -10635,6 +10670,7 @@
           "company": {
             "anyOf": [
               {
+                "maxLength": 250,
                 "type": "string"
               },
               {
@@ -10646,6 +10682,7 @@
           "description": {
             "anyOf": [
               {
+                "maxLength": 8000,
                 "type": "string"
               },
               {
@@ -10655,12 +10692,14 @@
             "title": "Description"
           },
           "jobTitle": {
+            "maxLength": 300,
             "title": "Jobtitle",
             "type": "string"
           },
           "language": {
             "anyOf": [
               {
+                "maxLength": 10,
                 "type": "string"
               },
               {
@@ -22822,6 +22861,35 @@
           }
         ],
         "summary": "Get My Account",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/me/export": {
+      "get": {
+        "description": "Everything stored about the signed-in person, as JSON (GDPR / revDSG right of access).",
+        "operationId": "export_my_data_api_v1_auth_me_export_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Export My Data Api V1 Auth Me Export Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Export My Data",
         "tags": [
           "auth"
         ]

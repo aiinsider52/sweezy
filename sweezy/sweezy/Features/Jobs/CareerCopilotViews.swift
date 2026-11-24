@@ -60,7 +60,7 @@ struct ApplicationKitView: View {
                 }
             }
             .overlay(alignment: .bottom) { CopiedToast(text: copied) }
-            .fullScreenCover(isPresented: $showPaywall) { SubscriptionView(source: .cv) }
+            .fullScreenCover(isPresented: $showPaywall) { SubscriptionView(source: .careerKit) }
             .task {
                 #if DEBUG
                 if ProcessInfo.processInfo.arguments.contains("--preview-career-kit") { kit = .debugSample }
@@ -116,6 +116,9 @@ struct ApplicationKitView: View {
             }
             .buttonStyle(ScaleButtonStyle(scaleAmount: 0.98, hapticStyle: .medium))
             .accessibilityIdentifier("career.kit.generate")
+
+            FreeUsesBadge(feature: "career_kit", limit: 3) { showPaywall = true }
+                .frame(maxWidth: .infinity)
         }
     }
 
@@ -277,6 +280,7 @@ struct ApplicationKitView: View {
         do {
             let result = try await CareerAPI.applicationKit(job: job, cv: cv, letterLanguage: letterLanguage)
             withAnimation(.spring(response: 0.5, dampingFraction: 0.85)) { kit = result }
+            Task { await SubscriptionManager.shared.refreshEntitlements() }
             appContainer.telemetry.info("career_kit_generated", source: "jobs", meta: ["fit": String(result.fitScore), "lang": letterLanguage])
             if result.fitScore >= 70 { Celebration.fire() }
         } catch {
@@ -372,7 +376,7 @@ struct InterviewCoachView: View {
                     }
                 }
             }
-            .fullScreenCover(isPresented: $showPaywall) { SubscriptionView(source: .cv) }
+            .fullScreenCover(isPresented: $showPaywall) { SubscriptionView(source: .interview) }
         }
     }
 
@@ -395,6 +399,7 @@ struct InterviewCoachView: View {
                     .font(.system(size: 15, weight: .medium))
                     .foregroundColor(JourneyVisual.secondaryText)
                     .fixedSize(horizontal: false, vertical: true)
+                FreeUsesBadge(feature: "interview_turns", limit: 14) { showPaywall = true }
                 Text("career.interview.language".localized.uppercased())
                     .font(.system(size: 11, weight: .bold)).tracking(0.8)
                     .foregroundColor(JourneyVisual.secondaryText)

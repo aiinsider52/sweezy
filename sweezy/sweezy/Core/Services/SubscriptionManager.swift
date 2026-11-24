@@ -1,5 +1,6 @@
 import Foundation
 import StoreKit
+import UIKit
 
 @MainActor
 final class SubscriptionManager: ObservableObject {
@@ -39,8 +40,13 @@ final class SubscriptionManager: ObservableObject {
     @Published private(set) var entitlementProvider: String?
     @Published private(set) var entitlementExpiresAt: Date?
     @Published var lastError: String?
+    /// Free uses left per metered feature from the server ("letter_explain", "career_kit",
+    /// "interview_turns", "cv_tools"); empty until signed in and loaded.
+    @Published private(set) var freeUsesRemaining: [String: Int] = [:]
+    @Published private(set) var isYearlyTrialEligible = false
 
     private var updatesTask: Task<Void, Never>?
+    private var lastLoadedAt: Date?
 
     private init() {
         updatesTask = observeTransactionUpdates()
@@ -63,10 +69,14 @@ final class SubscriptionManager: ObservableObject {
         return "%@ · до %@".localized(with: "\(period)", "\(entitlementExpiresAt.formatted(Date.FormatStyle(date: .abbreviated, time: .omitted, locale: AppLanguage.current.locale)))")
     }
 
-    func load() async {
+    /// Loads products and entitlements. Many screens call this on appear, so repeat calls within
+    /// five minutes are skipped unless `force` is set (purchase, restore, explicit refresh).
+    func load(force: Bool = false) async {
         guard !isLoading else { return }
+        if !force, !products.isEmpty, let lastLoadedAt, Date().timeIntervalSince(lastLoadedAt) < 300 { return }
         isLoading = true
         defer { isLoading = false }
+        lastLoadedAt = Date()
 
         do {
             products = try await Product.products(for: ProductID.all)
@@ -76,6 +86,12 @@ final class SubscriptionManager: ObservableObject {
                 isMonthlyTrialEligible = await subscription.isEligibleForIntroOffer
             } else {
                 isMonthlyTrialEligible = false
+            }
+            if let subscription = yearlyProduct?.subscription,
+               subscription.introductoryOffer?.paymentMode == .freeTrial {
+                isYearlyTrialEligible = await subscription.isEligibleForIntroOffer
+            } else {
+                isYearlyTrialEligible = false
             }
             lastError = nil
         } catch {
@@ -164,12 +180,53 @@ final class SubscriptionManager: ObservableObject {
             entitlementPlan = server.plan
             entitlementProvider = server.provider
             entitlementExpiresAt = Self.parseDate(server.expire_at)
+            freeUsesRemaining = server.free_uses_remaining ?? ["cv_tools": server.cv_free_uses_remaining]
         } else {
             isPremium = hasActiveSubscription
             entitlementStatus = hasActiveSubscription ? "premium" : "free"
             entitlementPlan = nil
             entitlementProvider = hasActiveSubscription ? "apple" : nil
             entitlementExpiresAt = nil
+        }
+    }
+
+    /// Length of the free trial on a product in days, from its App Store intro offer (nil if none).
+    func trialDays(for productID: String) -> Int? {
+        guard let offer = product(id: productID)?.subscription?.introductoryOffer,
+              offer.paymentMode == .freeTrial else { return nil }
+        let unitDays: Int
+        switch offer.period.unit {
+        case .day: unitDays = 1
+        case .week: unitDays = 7
+        case .month: unitDays = 30
+        case .year: unitDays = 365
+        @unknown default: unitDays = 1
+        }
+        return offer.period.value * unitDays * max(offer.periodCount, 1)
+    }
+
+    /// How much cheaper a year is than twelve months, in whole percent (nil until both prices load).
+    var yearlySavingsPercent: Int? {
+        guard let monthly = monthlyProduct?.price, let yearly = yearlyProduct?.price, monthly > 0 else { return nil }
+        let twelve = monthly * 12
+        let saving = (twelve - yearly) / twelve * 100
+        // NSDecimalNumber.intValue is unreliable for fractional decimals; go through Double.
+        let value = Int(NSDecimalNumber(decimal: saving).doubleValue.rounded(.down))
+        return value > 0 ? value : nil
+    }
+
+    /// The yearly price spread over twelve months, formatted like the product's own price.
+    var yearlyPricePerMonth: String? {
+        guard let yearly = yearlyProduct else { return nil }
+        return (yearly.price / 12).formatted(yearly.priceFormatStyle)
+    }
+
+    /// Apple's sheet for redeeming offer codes (NGO and community promo codes).
+    func presentOfferCodeRedemption() {
+        guard let scene = UIApplication.shared.connectedScenes.first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene else { return }
+        Task {
+            try? await AppStore.presentOfferCodeRedeemSheet(in: scene)
+            await load(force: true)
         }
     }
 

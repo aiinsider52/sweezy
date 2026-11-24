@@ -123,7 +123,7 @@ def test_letter_explain_returns_cleaned_model_answer(monkeypatch):
             return types.SimpleNamespace(output_text=json.dumps(_output().model_dump()))
 
     class FakeOpenAI:
-        def __init__(self, api_key):
+        def __init__(self, api_key, **kwargs):
             self.responses = FakeResponses()
 
     monkeypatch.setitem(sys.modules, "openai", types.SimpleNamespace(OpenAI=FakeOpenAI))

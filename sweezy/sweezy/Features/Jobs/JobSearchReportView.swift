@@ -62,16 +62,33 @@ final class JobSearchLogStore: ObservableObject {
     private static let goalKey = "jobs.report.monthly_goal"
     private struct Stored: Codable { var manual: [JobSearchEntry]; var details: [String: JobSearchEntry] }
 
-    private let fileURL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-        .appendingPathComponent("job-search-log.json")
+    /// The job-search log names employers and outcomes, so it belongs to one account.
+    private var fileURL: URL { AccountScopedStorage.fileURL(named: "job-search-log.json") }
+    private var scopeObserver: NSObjectProtocol?
 
     private init() {
         let goal = UserDefaults.standard.integer(forKey: Self.goalKey)
         monthlyGoal = goal > 0 ? goal : 8
+        reload()
+        scopeObserver = NotificationCenter.default.addObserver(forName: .accountScopeDidChange, object: nil, queue: .main) { [weak self] _ in
+            MainActor.assumeIsolated { self?.reload() }
+        }
+    }
+
+    private func reload() {
         if let data = try? Data(contentsOf: fileURL), let stored = try? JSONDecoder().decode(Stored.self, from: data) {
             manual = stored.manual
             details = stored.details
+        } else {
+            manual = []
+            details = [:]
         }
+    }
+
+    func removeAll() {
+        manual = []
+        details = [:]
+        try? FileManager.default.removeItem(at: fileURL)
     }
 
     func entries(in month: Date, applications: [APIClient.JobApplication]) -> [JobSearchEntry] {

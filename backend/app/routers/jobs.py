@@ -639,7 +639,7 @@ def update_employer_application(
             detail=f"Invalid transition: {application.status} -> {payload.status}",
         )
     application.status = payload.status
-    application.notes = payload.notes
+    application.employer_notes = payload.notes
     event_key = f"job_application:{application.id}:{payload.status}"
     if not db.scalar(
         select(func.count(NotificationOutbox.id)).where(

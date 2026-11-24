@@ -861,7 +861,7 @@ struct FriendNetworkView: View {
     }
     .fullScreenCover(isPresented: $editor) { FriendProfileEditor(profile: vm.myProfile, vm: vm) }
     .sheet(isPresented: $filters) { FriendSearchFilters(vm: vm, showPaywall: $paywall) }
-    .fullScreenCover(isPresented: $paywall) { SubscriptionView(source: .profile) }
+    .fullScreenCover(isPresented: $paywall) { SubscriptionView(source: .people) }
     .sheet(item: $eventChat) { SocialEventChatView(event: $0, friends: vm.friends, vm: vm) }
     .sheet(item: $event) { EventDetailView(eventId: $0.id) }
     .sheet(isPresented: $showVisitors) { FriendVisitorsView(visitors: vm.visitors) }
@@ -1110,9 +1110,28 @@ struct FriendNetworkView: View {
     return "Приватні Like".localized
   }
   private var showsCatalog: Bool { !FriendNetworkViewModel.swipeCardsEnabled || showPeopleCatalog }
+  private var demoBadge: some View {
+    Text("DEMO")
+      .font(.system(size: 10, weight: .heavy)).tracking(0.8)
+      .foregroundColor(JourneyVisual.secondaryText)
+      .padding(.horizontal, 8).frame(height: 24)
+      .overlay(Capsule().stroke(JourneyVisual.softBorder))
+  }
   private func discover(screenHeight: CGFloat) -> some View {
     VStack(alignment: .leading, spacing: 12) {
-      if FriendNetworkViewModel.swipeCardsEnabled { discoverModePicker }
+      if FriendNetworkViewModel.swipeCardsEnabled {
+        discoverModePicker
+      } else if vm.isShowingDemoProfiles {
+        // Without the mode picker the DEMO badge would vanish, and sample profiles would pass for real people.
+        HStack(spacing: 8) {
+          demoBadge
+          Text("Демо-каталог · тестові профілі".localized)
+            .font(.system(size: 13, weight: .semibold))
+            .foregroundColor(JourneyVisual.secondaryText)
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("friends.demo.notice")
+      }
       if !showsCatalog {
       if vm.loading && vm.swipeProfiles.isEmpty {
         SkeletonList(rows: 2).padding(.vertical, 12)
@@ -1191,11 +1210,7 @@ struct FriendNetworkView: View {
       .fixedSize()
       Spacer(minLength: 4)
       if vm.isShowingDemoProfiles {
-        Text("DEMO")
-          .font(.system(size: 10, weight: .heavy)).tracking(0.8)
-          .foregroundColor(JourneyVisual.secondaryText)
-          .padding(.horizontal, 8).frame(height: 24)
-          .overlay(Capsule().stroke(JourneyVisual.softBorder))
+        demoBadge
           .accessibilityLabel("Демо-каталог · тестові профілі".localized)
           .accessibilityIdentifier("friends.demo.notice")
       }

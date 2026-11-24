@@ -11,6 +11,7 @@ from ..core.config import get_settings
 from ..core.database import get_db
 from ..core.rate_limit import limiter
 from ..core.security import (
+    token_is_revoked,
     create_access_token,
     create_oauth_link_token,
     create_refresh_token,
@@ -179,7 +180,12 @@ def _decode_oauth_link_token(link_token: str) -> dict:
 
 
 @router.post("/token", response_model=Token)
-def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)) -> Token:
+@limiter.limit("5/minute")
+def login(
+    request: Request,
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    db: Session = Depends(get_db),
+) -> Token:
     token = AuthService.authenticate_admin(db, form_data.username, form_data.password)
     if not token:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect username or password")
@@ -333,6 +339,8 @@ def refresh_access_token(payload: RefreshTokenRequest, db: Session = Depends(get
     user = UserService.get_by_id(db, user_id)
     if not user or not user.is_active:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid user")
+    if token_is_revoked(token_data, user.tokens_valid_after):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token")
 
     return _issue_token_pair(user)
 
@@ -452,6 +460,8 @@ def reset_password(
 
     user = result.user
     user.hashed_password = get_password_hash(payload.password)
+    # Sign out every existing session: whoever knew the old password loses access now.
+    user.tokens_valid_after = datetime.now(timezone.utc)
     db.add(user)
     db.commit()
     return AuthStatus(status="ok")
@@ -485,3 +495,14 @@ def delete_my_account(
 @router.get("/me", response_model=UserOut)
 def get_my_account(current_user: User = Depends(get_current_user)) -> User:
     return current_user
+
+
+@router.get("/me/export")
+@limiter.limit("3/hour")
+def export_my_data(
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Everything stored about the signed-in person, as JSON (GDPR / revDSG right of access)."""
+    return UserService.export_data(db, user=current_user)

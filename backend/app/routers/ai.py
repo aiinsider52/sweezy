@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 import json
 import re
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
-from typing import List, Optional
+from typing import Annotated, List, Optional
 import os
 
 from ..dependencies import CurrentUser, get_db, require_premium, require_premium_or_free_uses
@@ -15,6 +15,11 @@ from ..core.rate_limit import limiter
 from ..models import Guide, PremiumUsage
 from ..services.official_sources import is_trusted_official_url
 from sqlalchemy.orm import Session
+
+# Bounded OpenAI calls: a slow upstream must not hold worker threads for minutes, and a runaway
+# generation must not bill unbounded tokens. Reasoning tokens count towards the cap, so it is generous.
+OPENAI_TIMEOUT_SECONDS = 60
+OPENAI_MAX_OUTPUT_TOKENS = 12000
 
 router = APIRouter()
 
@@ -235,9 +240,10 @@ def _generate_ask_answer(payload: AskSweezyRequest, documents: list[AskSweezyDoc
     try:
         from openai import OpenAI
 
-        client = OpenAI(api_key=settings.OPENAI_API_KEY)
+        client = OpenAI(api_key=settings.OPENAI_API_KEY, timeout=OPENAI_TIMEOUT_SECONDS, max_retries=1)
         response = client.responses.create(
             model=settings.OPENAI_MODEL,
+            max_output_tokens=OPENAI_MAX_OUTPUT_TOKENS,
             instructions=instructions,
             input=user_input,
             text={
@@ -295,8 +301,9 @@ def trip_plan(request: Request, payload: TripPlanRequest) -> TripPlanResponse:
             f"{item.id}: {item.title}, {item.region}; route={item.route}; tags={','.join(item.tags)}"
             for item in payload.candidates
         )
-        response = OpenAI(api_key=settings.OPENAI_API_KEY).responses.create(
+        response = OpenAI(api_key=settings.OPENAI_API_KEY, timeout=OPENAI_TIMEOUT_SECONDS, max_retries=1).responses.create(
             model=settings.OPENAI_MODEL,
+            max_output_tokens=OPENAI_MAX_OUTPUT_TOKENS,
             instructions=(
                 "Choose exactly one supplied Swiss destination. Respect budget, transport, weather, family and time. "
                 "Never invent a place or transport fact. Answer in requested language using required JSON."
@@ -318,44 +325,44 @@ def trip_plan(request: Request, payload: TripPlanRequest) -> TripPlanResponse:
 
 
 class CVPersonal(BaseModel):
-    fullName: str = ""
-    title: str = ""
-    email: str = ""
-    phone: str = ""
-    location: str = ""
-    summary: str = ""
+    fullName: str = Field(default="", max_length=200)
+    title: str = Field(default="", max_length=200)
+    email: str = Field(default="", max_length=320)
+    phone: str = Field(default="", max_length=60)
+    location: str = Field(default="", max_length=200)
+    summary: str = Field(default="", max_length=4000)
 
 
 class CVEducation(BaseModel):
-    id: Optional[str] = None
-    school: str = ""
-    degree: str = ""
-    period: str = ""
-    details: str = ""
+    id: Optional[str] = Field(default=None, max_length=64)
+    school: str = Field(default="", max_length=300)
+    degree: str = Field(default="", max_length=300)
+    period: str = Field(default="", max_length=100)
+    details: str = Field(default="", max_length=2000)
 
 
 class CVExperience(BaseModel):
-    id: Optional[str] = None
-    role: str = ""
-    company: str = ""
-    period: str = ""
-    location: str = ""
-    achievements: str = ""
+    id: Optional[str] = Field(default=None, max_length=64)
+    role: str = Field(default="", max_length=300)
+    company: str = Field(default="", max_length=300)
+    period: str = Field(default="", max_length=100)
+    location: str = Field(default="", max_length=200)
+    achievements: str = Field(default="", max_length=4000)
 
 
 class CVLanguage(BaseModel):
-    id: Optional[str] = None
-    name: str = ""
-    level: str = ""
+    id: Optional[str] = Field(default=None, max_length=64)
+    name: str = Field(default="", max_length=100)
+    level: str = Field(default="", max_length=60)
 
 
 class CVResumePayload(BaseModel):
     personal: CVPersonal
-    education: List[CVEducation] = Field(default_factory=list)
-    experience: List[CVExperience] = Field(default_factory=list)
-    languages: List[CVLanguage] = Field(default_factory=list)
-    skills: List[str] = Field(default_factory=list)
-    hobbies: List[str] = Field(default_factory=list)
+    education: List[CVEducation] = Field(default_factory=list, max_length=20)
+    experience: List[CVExperience] = Field(default_factory=list, max_length=30)
+    languages: List[CVLanguage] = Field(default_factory=list, max_length=20)
+    skills: List[Annotated[str, Field(max_length=120)]] = Field(default_factory=list, max_length=60)
+    hobbies: List[Annotated[str, Field(max_length=120)]] = Field(default_factory=list, max_length=30)
 
 
 class CVImproveRequest(CVResumePayload):
@@ -410,7 +417,7 @@ def cv_improve(request: Request, payload: CVImproveRequest, _user: CurrentUser) 
     try:
         from openai import OpenAI
 
-        client = OpenAI(api_key=settings.OPENAI_API_KEY)
+        client = OpenAI(api_key=settings.OPENAI_API_KEY, timeout=OPENAI_TIMEOUT_SECONDS, max_retries=1)
         instructions = (
             "Rewrite only the supplied SOURCE for a Swiss employer. Preserve every fact, number, "
             "employer, date, qualification and scope exactly; never infer or invent credentials or metrics. "
@@ -420,6 +427,7 @@ def cv_improve(request: Request, payload: CVImproveRequest, _user: CurrentUser) 
         )
         response = client.responses.create(
             model=settings.OPENAI_MODEL,
+            max_output_tokens=OPENAI_MAX_OUTPUT_TOKENS,
             instructions=instructions,
             input=f"TARGET: {payload.target}\nSOURCE:\n{source}",
         )
@@ -442,7 +450,7 @@ def cv_translate(request: Request, payload: CVResumePayload, _user: CurrentUser)
     try:
         from openai import OpenAI
 
-        client = OpenAI(api_key=settings.OPENAI_API_KEY)
+        client = OpenAI(api_key=settings.OPENAI_API_KEY, timeout=OPENAI_TIMEOUT_SECONDS, max_retries=1)
         instructions = (
             "Translate every user-entered textual CV field into professional German for Switzerland (de-CH). "
             "Translate title, summary, role, company only when it is a translatable name, location, achievements, "
@@ -453,6 +461,7 @@ def cv_translate(request: Request, payload: CVResumePayload, _user: CurrentUser)
         )
         response = client.responses.create(
             model=settings.OPENAI_MODEL,
+            max_output_tokens=OPENAI_MAX_OUTPUT_TOKENS,
             instructions=instructions,
             input=json.dumps(payload.model_dump(), ensure_ascii=False),
             text={
@@ -472,11 +481,11 @@ def cv_translate(request: Request, payload: CVResumePayload, _user: CurrentUser)
 
 # --- Job application helper ---
 class JobApplyRequest(BaseModel):
-    jobTitle: str
-    company: str | None = None
-    description: str | None = None
-    candidateSummary: str | None = None
-    language: str | None = None  # 'en','de','ru','uk'
+    jobTitle: str = Field(max_length=300)
+    company: str | None = Field(default=None, max_length=250)
+    description: str | None = Field(default=None, max_length=8000)
+    candidateSummary: str | None = Field(default=None, max_length=4000)
+    language: str | None = Field(default=None, max_length=10)  # 'en','de','ru','uk'
 
 
 class JobApplyResponse(BaseModel):
@@ -495,13 +504,14 @@ def _job_apply_fallback(req: JobApplyRequest) -> str:
 
 
 @router.post("/job-apply", response_model=JobApplyResponse, dependencies=[require_premium()])
-def job_apply(req: JobApplyRequest) -> JobApplyResponse:
+@limiter.limit("10/minute")
+def job_apply(request: Request, req: JobApplyRequest) -> JobApplyResponse:
     api_key = os.getenv("OPENAI_API_KEY")
     if not api_key:
         return JobApplyResponse(text=_job_apply_fallback(req))
     try:
         from openai import OpenAI
-        client = OpenAI(api_key=api_key)
+        client = OpenAI(api_key=api_key, timeout=OPENAI_TIMEOUT_SECONDS, max_retries=1)
         prompt = (
             "You are an HR assistant in Switzerland. Write a short, professional application message/cover email.\n"
             f"Language: {req.language or 'en'}\n"
@@ -632,7 +642,22 @@ def _clean_letter_output(output: LetterExplainModelOutput, today: date) -> Lette
     )
 
 
+def _has_active_plus(user) -> bool:
+    if user.subscription_status not in {"trial", "premium"}:
+        return False
+    expire_at = user.subscription_expire_at
+    if expire_at is None:
+        return True
+    if expire_at.tzinfo is None:
+        expire_at = expire_at.replace(tzinfo=timezone.utc)
+    return expire_at > datetime.now(timezone.utc)
+
+
 def _refund_free_use(db: Session, user, feature: str) -> None:
+    # Plus members never spent a free use, so there is nothing to give back; refunding them
+    # would bank extra free uses for after their subscription ends.
+    if _has_active_plus(user):
+        return
     usage = db.query(PremiumUsage).filter(PremiumUsage.user_id == user.id, PremiumUsage.feature == feature).one_or_none()
     if usage is not None and usage.free_uses > 0:
         usage.free_uses -= 1
@@ -680,8 +705,9 @@ def letter_explain(
     try:
         from openai import OpenAI
 
-        response = OpenAI(api_key=settings.OPENAI_API_KEY).responses.create(
+        response = OpenAI(api_key=settings.OPENAI_API_KEY, timeout=OPENAI_TIMEOUT_SECONDS, max_retries=1).responses.create(
             model=settings.OPENAI_MODEL,
+            max_output_tokens=OPENAI_MAX_OUTPUT_TOKENS,
             instructions=instructions,
             input=user_input,
             text={

@@ -309,6 +309,13 @@ class UserService:
         db.query(BusinessService).filter(BusinessService.business_user_id == user_id).delete(synchronize_session=False)
         db.query(BusinessProfile).filter(BusinessProfile.user_id == user_id).delete(synchronize_session=False)
 
+        # Everything else that points at this user follows the foreign key's own declared intent:
+        # rows marked ON DELETE CASCADE are personal data and are deleted, rows marked SET NULL
+        # (moderation records, analytics, jobs an employer posted) are unlinked. The user row itself
+        # is kept and anonymised, so the database never fires those rules by itself.
+        UserService._erase_uploaded_media(db, user_id)
+        UserService._apply_user_foreign_key_rules(db, user_id)
+
         # Anonymize + deactivate
         user.is_active = False
         user.email_verified = False
@@ -320,6 +327,7 @@ class UserService:
         user.apple_sub = None
         user.google_sub = None
         user.password_login_enabled = False
+        user.tokens_valid_after = datetime.now(timezone.utc)
 
         # Change email to a unique, non-personal placeholder (revokes tokens that use email as subject)
         user.email = f"deleted+{uuid.uuid4().hex}@example.invalid"
@@ -327,6 +335,112 @@ class UserService:
 
         db.add(user)
         db.commit()
+
+
+def _user_foreign_keys():
+    """(table, column, ondelete) for every column that references users.id, children first."""
+    from ..core.database import Base
+
+    found = []
+    for table in reversed(Base.metadata.sorted_tables):
+        if table.name == User.__tablename__:
+            continue
+        for column in table.columns:
+            for fk in column.foreign_keys:
+                if fk.column.table.name == User.__tablename__:
+                    found.append((table, column, (fk.ondelete or "").upper()))
+    return found
+
+
+def _apply_user_foreign_key_rules(db: Session, user_id: str) -> None:
+    from sqlalchemy import delete, update
+
+    for table, column, rule in _user_foreign_keys():
+        try:
+            with db.begin_nested():
+                if rule == "CASCADE":
+                    db.execute(delete(table).where(column == user_id))
+                elif column.nullable:
+                    db.execute(update(table).where(column == user_id).values({column.name: None}))
+        except Exception as exc:  # pragma: no cover - logged, deletion continues
+            from ..core.logging import get_logger
+
+            get_logger(component="account_deletion").warning(
+                "account_deletion_fk_rule_failed", table=table.name, column=column.name, error=str(exc)
+            )
+
+
+def _erase_uploaded_media(db: Session, user_id: str) -> None:
+    """Delete the account's stored images; the rows go with the other CASCADE data."""
+    from ..models.media_upload import MediaUpload
+    from .media_storage import get_media_storage
+
+    keys = [row[0] for row in db.query(MediaUpload.key).filter(MediaUpload.user_id == user_id).all()]
+    if not keys:
+        return
+    try:
+        storage = get_media_storage(get_settings())
+    except Exception:
+        return
+    for key in keys:
+        try:
+            storage.delete(key)
+        except Exception as exc:  # pragma: no cover - logged, deletion continues
+            from ..core.logging import get_logger
+
+            get_logger(component="account_deletion").warning("media_delete_failed", key=key, error=str(exc))
+
+
+# Columns where the person acted on someone else (moderated, reviewed, resolved a report) or was the
+# subject of other people's reports: exporting those rows would disclose third parties.
+_EXPORT_SKIP_COLUMNS = {
+    "moderated_by", "reviewed_by", "resolved_by", "assigned_to", "created_by", "revoked_by",
+    "moderator_id", "subject_user_id", "profile_user_id", "reviewed_user_id", "blocked_author_id",
+}
+# Secrets and delivery plumbing that are not personal data worth exporting.
+_EXPORT_SKIP_TABLES = {"auth_email_codes", "push_devices", "notification_outbox"}
+_EXPORT_SKIP_FIELDS = {"hashed_password", "code_hash", "token", "device_token"}
+
+
+def _export_value(value):
+    from datetime import date as _date, datetime as _datetime
+    from decimal import Decimal
+
+    if isinstance(value, (_datetime, _date)):
+        return value.isoformat()
+    if isinstance(value, Decimal):
+        return float(value)
+    if isinstance(value, (bytes, bytearray)):
+        return None
+    return value
+
+
+def _export_data(db: Session, *, user: User) -> dict:
+    account = {
+        column.name: _export_value(getattr(user, column.key, None))
+        for column in User.__table__.columns
+        if column.name not in _EXPORT_SKIP_FIELDS
+    }
+    sections: dict[str, list[dict]] = {}
+    for table, column, _rule in _user_foreign_keys():
+        if table.name in _EXPORT_SKIP_TABLES or column.name in _EXPORT_SKIP_COLUMNS:
+            continue
+        rows = db.execute(table.select().where(column == user.id).limit(5000)).mappings().all()
+        if not rows:
+            continue
+        bucket = sections.setdefault(table.name, [])
+        for row in rows:
+            bucket.append({key: _export_value(value) for key, value in row.items() if key not in _EXPORT_SKIP_FIELDS})
+    return {
+        "exported_at": datetime.now(timezone.utc).isoformat(),
+        "account": account,
+        "data": sections,
+    }
+
+
+UserService._apply_user_foreign_key_rules = staticmethod(_apply_user_foreign_key_rules)
+UserService.export_data = staticmethod(_export_data)
+UserService._erase_uploaded_media = staticmethod(_erase_uploaded_media)
 
 
 def seed_admin_user(db: Session) -> None:

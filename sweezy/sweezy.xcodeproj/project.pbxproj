@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		D1A0C001A0C001A0C001A001 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = D1A0C001A0C001A0C001A003 /* GoogleSignIn */; };
+		E5A1B0010000000000000002 /* SweezyWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = E5A1B0010000000000000001 /* SweezyWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -25,12 +26,34 @@
 			remoteGlobalIDString = C1D7277D2E9E56840032E731;
 			remoteInfo = sweezy;
 		};
+		E5A1B0010000000000000003 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C1D727762E9E56840032E731 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E5A1B001000000000000000A;
+			remoteInfo = SweezyWidgetExtension;
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		E5A1B001000000000000000E /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				E5A1B0010000000000000002 /* SweezyWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		C1D7277E2E9E56840032E731 /* sweezy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = sweezy.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C1D7278B2E9E56870032E731 /* sweezyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = sweezyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C1D727952E9E56870032E731 /* sweezyUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = sweezyUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		E5A1B0010000000000000001 /* SweezyWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = SweezyWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -40,6 +63,13 @@
 				Info.plist,
 			);
 			target = C1D7277D2E9E56840032E731 /* sweezy */;
+		};
+		E5A1B0010000000000000006 /* Exceptions for "SweezyWidget" folder in "SweezyWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = E5A1B001000000000000000A /* SweezyWidgetExtension */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -60,6 +90,14 @@
 		C1D727982E9E56870032E731 /* sweezyUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = sweezyUITests;
+			sourceTree = "<group>";
+		};
+		E5A1B0010000000000000005 /* SweezyWidget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				E5A1B0010000000000000006 /* Exceptions for "SweezyWidget" folder in "SweezyWidgetExtension" target */,
+			);
+			path = SweezyWidget;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -87,6 +125,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E5A1B0010000000000000007 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -96,6 +141,7 @@
 				C1D727802E9E56840032E731 /* sweezy */,
 				C1D7278E2E9E56870032E731 /* sweezyTests */,
 				C1D727982E9E56870032E731 /* sweezyUITests */,
+				E5A1B0010000000000000005 /* SweezyWidget */,
 				C1D7277F2E9E56840032E731 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -106,6 +152,7 @@
 				C1D7277E2E9E56840032E731 /* sweezy.app */,
 				C1D7278B2E9E56870032E731 /* sweezyTests.xctest */,
 				C1D727952E9E56870032E731 /* sweezyUITests.xctest */,
+				E5A1B0010000000000000001 /* SweezyWidgetExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -120,10 +167,12 @@
 				C1D7277A2E9E56840032E731 /* Sources */,
 				C1D7277B2E9E56840032E731 /* Frameworks */,
 				C1D7277C2E9E56840032E731 /* Resources */,
+				E5A1B001000000000000000E /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				E5A1B0010000000000000004 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				C1D727802E9E56840032E731 /* sweezy */,
@@ -182,6 +231,28 @@
 			productReference = C1D727952E9E56870032E731 /* sweezyUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		E5A1B001000000000000000A /* SweezyWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E5A1B001000000000000000B /* Build configuration list for PBXNativeTarget "SweezyWidgetExtension" */;
+			buildPhases = (
+				E5A1B0010000000000000009 /* Sources */,
+				E5A1B0010000000000000007 /* Frameworks */,
+				E5A1B0010000000000000008 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				E5A1B0010000000000000005 /* SweezyWidget */,
+			);
+			name = SweezyWidgetExtension;
+			packageProductDependencies = (
+			);
+			productName = SweezyWidgetExtension;
+			productReference = E5A1B0010000000000000001 /* SweezyWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -202,6 +273,9 @@
 					C1D727942E9E56870032E731 = {
 						CreatedOnToolsVersion = 16.4;
 						TestTargetID = C1D7277D2E9E56840032E731;
+					};
+					E5A1B001000000000000000A = {
+						CreatedOnToolsVersion = 26.0;
 					};
 				};
 			};
@@ -228,6 +302,7 @@
 				C1D7277D2E9E56840032E731 /* sweezy */,
 				C1D7278A2E9E56870032E731 /* sweezyTests */,
 				C1D727942E9E56870032E731 /* sweezyUITests */,
+				E5A1B001000000000000000A /* SweezyWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -248,6 +323,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		C1D727932E9E56870032E731 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E5A1B0010000000000000008 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -278,6 +360,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E5A1B0010000000000000009 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -290,6 +379,11 @@
 			isa = PBXTargetDependency;
 			target = C1D7277D2E9E56840032E731 /* sweezy */;
 			targetProxy = C1D727962E9E56870032E731 /* PBXContainerItemProxy */;
+		};
+		E5A1B0010000000000000004 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E5A1B001000000000000000A /* SweezyWidgetExtension */;
+			targetProxy = E5A1B0010000000000000003 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -577,6 +671,62 @@
 			};
 			name = Release;
 		};
+		E5A1B001000000000000000C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CODE_SIGN_ENTITLEMENTS = SweezyWidget/SweezyWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 26;
+				DEVELOPMENT_TEAM = 4538FQ4SA4;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = SweezyWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Sweezy;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 2.4;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sweezy.mobile.widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		E5A1B001000000000000000D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CODE_SIGN_ENTITLEMENTS = SweezyWidget/SweezyWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 26;
+				DEVELOPMENT_TEAM = 4538FQ4SA4;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = SweezyWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Sweezy;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 2.4;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sweezy.mobile.widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -612,6 +762,15 @@
 			buildConfigurations = (
 				C1D727A62E9E56870032E731 /* Debug */,
 				C1D727A72E9E56870032E731 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E5A1B001000000000000000B /* Build configuration list for PBXNativeTarget "SweezyWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E5A1B001000000000000000C /* Debug */,
+				E5A1B001000000000000000D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

@@ -124,6 +124,8 @@ class JobApplication(Base):
     job_url: Mapped[str] = mapped_column(String(1200), nullable=False)
     status: Mapped[str] = mapped_column(String(20), default="saved", nullable=False, index=True)
     notes: Mapped[str | None] = mapped_column(String(2000), nullable=True)
+    # The employer's own note on this application; never mixed with the candidate's private notes.
+    employer_notes: Mapped[str | None] = mapped_column(String(2000), nullable=True)
     cover_letter: Mapped[str | None] = mapped_column(Text, nullable=True)
     applied_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     next_action_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)

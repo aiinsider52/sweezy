@@ -114,7 +114,7 @@ struct SwissDiscoveryView: View {
             )
         }
         .sheet(isPresented: $showPlanner) { SwissTripPlannerView() }
-        .fullScreenCover(isPresented: $showPaywall) { SubscriptionView(source: .profile) }
+        .fullScreenCover(isPresented: $showPaywall) { SubscriptionView(source: .discovery) }
         .onAppear {
             savedPlaceIDs = SwissDiscoveryProgressStore.savedPlaceIDs()
             appContainer.telemetry.retention(
@@ -865,7 +865,7 @@ struct SwissDiscoveryDetailView: View {
                 }
             )
         }
-        .fullScreenCover(isPresented: $showPaywall) { SubscriptionView(source: .profile) }
+        .fullScreenCover(isPresented: $showPaywall) { SubscriptionView(source: .discovery) }
         .alert("Offline route", isPresented: Binding(get: { offlineNotice != nil }, set: { if !$0 { offlineNotice = nil } })) { Button("OK") {} } message: { Text(offlineNotice ?? "") }
         .accessibilityIdentifier("swiss.discovery.detail.\(place.id)")
     }

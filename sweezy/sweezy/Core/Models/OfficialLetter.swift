@@ -143,16 +143,30 @@ final class LetterStore: ObservableObject {
 
     @Published private(set) var letters: [SavedLetter] = []
 
-    private let fileURL: URL = {
-        let folder = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-        return folder.appendingPathComponent("letters.json")
-    }()
+    /// Letters hold IBANs, amounts and reply drafts, so they belong to one account.
+    private var fileURL: URL { AccountScopedStorage.fileURL(named: "letters.json") }
+    private var scopeObserver: NSObjectProtocol?
 
     private init() {
+        reload()
+        scopeObserver = NotificationCenter.default.addObserver(forName: .accountScopeDidChange, object: nil, queue: .main) { [weak self] _ in
+            MainActor.assumeIsolated { self?.reload() }
+        }
+    }
+
+    private func reload() {
         if let data = try? Data(contentsOf: fileURL),
            let stored = try? JSONDecoder().decode([SavedLetter].self, from: data) {
             letters = stored
+        } else {
+            letters = []
         }
+    }
+
+    /// Deletes this account's saved letters from the phone (used when deleting data or the account).
+    func removeAll() {
+        letters = []
+        try? FileManager.default.removeItem(at: fileURL)
     }
 
     func add(_ letter: SavedLetter) {

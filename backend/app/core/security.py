@@ -98,3 +98,20 @@ def create_oauth_link_token(subject: str, *, claims: dict[str, Any], expires_del
         expires_delta=expires_delta,
         extra_claims=claims,
     )
+
+
+def token_is_revoked(payload: dict[str, Any], tokens_valid_after) -> bool:
+    """True when the token was issued before the user's tokens_valid_after cut-off.
+
+    `iat` has whole-second precision, so tokens issued within the same second as the cut-off
+    (for example the fresh session right after a reset) stay valid.
+    """
+    if tokens_valid_after is None:
+        return False
+    issued_at = payload.get("iat")
+    if issued_at is None:
+        return True
+    cutoff = tokens_valid_after
+    if cutoff.tzinfo is None:
+        cutoff = cutoff.replace(tzinfo=UTC)
+    return int(issued_at) < int(cutoff.timestamp())

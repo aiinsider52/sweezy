@@ -13,12 +13,23 @@ struct DocumentReadinessView: View {
         ZStack {
             JourneyVisual.pageBackground.ignoresSafeArea()
             ScrollView(showsIndicators: false) {
-                VStack(alignment: .leading, spacing: 16) {
+                VStack(alignment: .leading, spacing: 18) {
                     header
                     progressCard
-                    ForEach(appContainer.lifeAdmin.documents) { document in
-                        documentRow(document)
+                    // One list with hairlines instead of a stack of cards.
+                    VStack(spacing: 0) {
+                        let documents = appContainer.lifeAdmin.documents
+                        ForEach(Array(documents.enumerated()), id: \.element.id) { index, document in
+                            documentRow(document)
+                            if index < documents.count - 1 {
+                                Divider().padding(.leading, 56)
+                            }
+                        }
                     }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 2)
+                    .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(JourneyVisual.softBorder, lineWidth: 1))
                 }
                 .padding(20)
                 .padding(.bottom, 128)
@@ -58,123 +69,130 @@ struct DocumentReadinessView: View {
     }
 
     private var header: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            // Sweezy sorting folders and ticking a checklist at a library desk.
-            StoryScene(name: "documents", height: 190)
-                .padding(.bottom, 8)
-
+        VStack(alignment: .leading, spacing: 6) {
             Text("companion.documents.title".localized)
-                .font(.largeTitle.bold())
+                .font(.system(size: 28, weight: .heavy))
                 .foregroundStyle(JourneyVisual.primaryText)
                 .accessibilityAddTraits(.isHeader)
-            Text("companion.documents.privacy".localized)
-                .font(.footnote)
+            Label("companion.documents.privacy".localized, systemImage: "lock.fill")
+                .font(.system(size: 13, weight: .medium))
                 .foregroundStyle(JourneyVisual.secondaryText)
                 .fixedSize(horizontal: false, vertical: true)
         }
+        .padding(.top, 8)
     }
 
+    /// Ring, count and one line from Sweezy; the line changes for a moment when something gets ticked.
     private var progressCard: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            SweezyCompanionHeader(
-                title: completedDocumentTitle == nil
-                    ? "companion.documents.intro".localized
-                    : "companion.documents.done".localized,
-                subtitle: completedDocumentTitle ?? "companion.documents.subtitle".localized,
-                pose: .documents,
-                size: 124,
-                reaction: companionReaction,
-                onPhoto: false
-            )
-            HStack {
-                Text("companion.documents.progress".localized)
-                    .font(.subheadline.weight(.semibold))
-                Spacer()
+        HStack(spacing: 14) {
+            JourneyProgressRing(done: readyCount, total: max(appContainer.lifeAdmin.documents.count, 1), size: 56, lineWidth: 6, showsPercent: true)
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 3) {
+                Text(completedDocumentTitle == nil
+                     ? "companion.documents.intro".localized
+                     : "companion.documents.done".localized)
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundStyle(JourneyVisual.primaryText)
+                    .contentTransition(.opacity)
+                Text(completedDocumentTitle ?? "companion.documents.subtitle".localized)
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(JourneyVisual.secondaryText)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .contentTransition(.opacity)
                 Text("\(readyCount)/\(appContainer.lifeAdmin.documents.count)")
-                    .font(.headline.monospacedDigit())
+                    .font(.system(size: 12, weight: .bold).monospacedDigit())
+                    .foregroundStyle(JourneyVisual.accentText)
+                    .accessibilityLabel("\("companion.documents.progress".localized): \(readyCount)/\(appContainer.lifeAdmin.documents.count)")
                     .accessibilityIdentifier("documents.progress")
             }
-            .foregroundStyle(Theme.Colors.textPrimary)
-            ProgressView(value: Double(progress))
-                .tint(JourneyVisual.accentStrong)
-                .accessibilityLabel("companion.documents.progress".localized)
-                .animation(reduceMotion ? nil : .spring(response: 0.5, dampingFraction: 0.8), value: progress)
+            Spacer(minLength: 0)
         }
-        .padding(18)
-        .background(Theme.Colors.surface, in: RoundedRectangle(cornerRadius: 22))
+        .padding(16)
+        .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(JourneyVisual.softBorder, lineWidth: 1))
+        .animation(reduceMotion ? nil : .easeInOut(duration: 0.25), value: completedDocumentTitle)
     }
 
     private func documentRow(_ document: ReadinessDocument) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(alignment: .top, spacing: 10) {
-                Button {
-                    let markingReady = !document.isReady
-                    appContainer.lifeAdmin.toggleDocument(document.id)
-                    if markingReady, let updated = appContainer.lifeAdmin.documents.first(where: { $0.id == document.id }), updated.status != .expired {
-                        completedDocumentTitle = document.displayTitle
-                        companionReaction += 1
-                    } else {
-                        completedDocumentTitle = nil
-                    }
-                } label: {
-                    Image(systemName: document.isReady ? "checkmark.circle.fill" : "circle")
-                        .contentTransition(.symbolEffect(.replace))
-                        .symbolEffect(.bounce, value: document.isReady)
-                        .font(.title2)
-                        .foregroundStyle(document.isReady ? Theme.Colors.primaryDark : Theme.Colors.textSecondary)
-                        .frame(width: 44, height: 44)
-                        .contentShape(Rectangle())
+        HStack(alignment: .top, spacing: 4) {
+            Button {
+                let markingReady = !document.isReady
+                appContainer.lifeAdmin.toggleDocument(document.id)
+                if markingReady, let updated = appContainer.lifeAdmin.documents.first(where: { $0.id == document.id }), updated.status != .expired {
+                    completedDocumentTitle = document.displayTitle
+                    companionReaction += 1
+                } else {
+                    completedDocumentTitle = nil
                 }
-                .buttonStyle(.plain)
-                .accessibilityLabel("\(document.displayTitle). \(document.isReady ? "companion.documents.unmark".localized : "companion.documents.mark".localized)")
-                .accessibilityValue(statusText(document.status))
-                .accessibilityIdentifier("documents.toggle.\(document.id)")
+            } label: {
+                Image(systemName: document.isReady ? "checkmark.circle.fill" : "circle")
+                    .contentTransition(.symbolEffect(.replace))
+                    .symbolEffect(.bounce, value: document.isReady)
+                    .font(.system(size: 24))
+                    .foregroundStyle(document.isReady ? JourneyVisual.accentStrong : JourneyVisual.secondaryText.opacity(0.5))
+                    .frame(width: 44, height: 44)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("\(document.displayTitle). \(document.isReady ? "companion.documents.unmark".localized : "companion.documents.mark".localized)")
+            .accessibilityValue(statusText(document.status))
+            .accessibilityIdentifier("documents.toggle.\(document.id)")
 
-                VStack(alignment: .leading, spacing: 5) {
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(alignment: .firstTextBaseline, spacing: 8) {
                     Text(document.displayTitle)
-                        .font(.headline)
-                        .foregroundStyle(Theme.Colors.textPrimary)
-                    Text(document.displayRequiredFor)
-                        .font(.footnote)
-                        .foregroundStyle(Theme.Colors.textSecondary)
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(JourneyVisual.primaryText)
+                    Spacer(minLength: 4)
                     Text(statusText(document.status))
-                        .font(.caption.weight(.semibold))
+                        .font(.system(size: 11, weight: .bold))
                         .foregroundStyle(statusColor(document.status))
                 }
-                .fixedSize(horizontal: false, vertical: true)
-                .frame(maxWidth: .infinity, alignment: .leading)
+                Text(document.displayRequiredFor)
+                    .font(.system(size: 13))
+                    .foregroundStyle(JourneyVisual.secondaryText)
+                    .fixedSize(horizontal: false, vertical: true)
+                ViewThatFits(in: .horizontal) {
+                    HStack(spacing: 8) { documentActions(document) }
+                    VStack(alignment: .leading, spacing: 6) { documentActions(document) }
+                }
+                .padding(.top, 4)
             }
-            ViewThatFits(in: .horizontal) {
-                HStack(spacing: 16) { documentActions(document) }
-                VStack(alignment: .leading, spacing: 2) { documentActions(document) }
-            }
-            .font(.footnote.weight(.semibold))
-            .foregroundStyle(Theme.Colors.textPrimary)
+            .padding(.top, 10)
         }
-        .padding(14)
-        .background(Theme.Colors.surface, in: RoundedRectangle(cornerRadius: 18))
+        .padding(.bottom, 12)
     }
 
     @ViewBuilder
     private func documentActions(_ document: ReadinessDocument) -> some View {
-        if let url = document.sourceURL {
-            Button { openURL(url) } label: {
-                Label(document.sourceTitle, systemImage: "arrow.up.right.square")
-                    .fixedSize(horizontal: false, vertical: true)
-                    .frame(minHeight: 44)
-            }
-            .buttonStyle(.plain)
-        }
         Button {
             expiryDate = document.expiryDate ?? Calendar.current.date(byAdding: .year, value: 1, to: Date()) ?? Date()
             editingDocument = document
         } label: {
-            Label(expiryText(document), systemImage: "calendar")
-                .fixedSize(horizontal: false, vertical: true)
-                .frame(minHeight: 44)
+            documentChip(expiryText(document), icon: "calendar")
         }
         .buttonStyle(.plain)
         .accessibilityIdentifier("documents.expiry.\(document.id)")
+        if let url = document.sourceURL {
+            Button { openURL(url) } label: {
+                documentChip(document.sourceTitle, icon: "arrow.up.right")
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    /// Small capsule for a row action; the padding keeps the tap area 44 pt tall.
+    private func documentChip(_ title: String, icon: String) -> some View {
+        Label(title, systemImage: icon)
+            .font(.system(size: 12, weight: .semibold))
+            .foregroundStyle(JourneyVisual.primaryText)
+            .lineLimit(1)
+            .padding(.horizontal, 11)
+            .frame(height: 30)
+            .background(JourneyVisual.pageBackground, in: Capsule())
+            .overlay(Capsule().stroke(JourneyVisual.softBorder, lineWidth: 1))
+            .padding(.vertical, 7)
+            .contentShape(Rectangle())
     }
 
     private var readyCount: Int { appContainer.lifeAdmin.documents.filter { $0.isReady && $0.status != .expired }.count }

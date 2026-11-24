@@ -71,7 +71,7 @@ struct CreateEventView: View {
             }
             .sheet(isPresented: $showSuccess) { successSheet }
             .sheet(isPresented: $showMyEvents) { MyEventsView() }
-            .fullScreenCover(isPresented: $showPaywall) { SubscriptionView(source: .profile) }
+            .fullScreenCover(isPresented: $showPaywall) { SubscriptionView(source: .events) }
             .alert("marketplace.error_title".localized, isPresented: .init(
                 get: { errorMessage != nil },
                 set: { if !$0 { errorMessage = nil } }

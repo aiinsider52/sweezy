@@ -11,6 +11,7 @@ from ..core.config import get_settings
 from ..core.database import get_db
 from ..core.rate_limit import limiter
 from ..core.security import (
+    token_is_revoked,
     create_access_token,
     create_oauth_link_token,
     create_refresh_token,
@@ -338,6 +339,8 @@ def refresh_access_token(payload: RefreshTokenRequest, db: Session = Depends(get
     user = UserService.get_by_id(db, user_id)
     if not user or not user.is_active:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid user")
+    if token_is_revoked(token_data, user.tokens_valid_after):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token")
 
     return _issue_token_pair(user)
 
@@ -457,6 +460,8 @@ def reset_password(
 
     user = result.user
     user.hashed_password = get_password_hash(payload.password)
+    # Sign out every existing session: whoever knew the old password loses access now.
+    user.tokens_valid_after = datetime.now(timezone.utc)
     db.add(user)
     db.commit()
     return AuthStatus(status="ok")

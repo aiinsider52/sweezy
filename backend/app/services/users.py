@@ -309,6 +309,12 @@ class UserService:
         db.query(BusinessService).filter(BusinessService.business_user_id == user_id).delete(synchronize_session=False)
         db.query(BusinessProfile).filter(BusinessProfile.user_id == user_id).delete(synchronize_session=False)
 
+        # Everything else that points at this user follows the foreign key's own declared intent:
+        # rows marked ON DELETE CASCADE are personal data and are deleted, rows marked SET NULL
+        # (moderation records, analytics, jobs an employer posted) are unlinked. The user row itself
+        # is kept and anonymised, so the database never fires those rules by itself.
+        UserService._apply_user_foreign_key_rules(db, user_id)
+
         # Anonymize + deactivate
         user.is_active = False
         user.email_verified = False
@@ -320,6 +326,7 @@ class UserService:
         user.apple_sub = None
         user.google_sub = None
         user.password_login_enabled = False
+        user.tokens_valid_after = datetime.now(timezone.utc)
 
         # Change email to a unique, non-personal placeholder (revokes tokens that use email as subject)
         user.email = f"deleted+{uuid.uuid4().hex}@example.invalid"
@@ -327,6 +334,42 @@ class UserService:
 
         db.add(user)
         db.commit()
+
+
+def _user_foreign_keys():
+    """(table, column, ondelete) for every column that references users.id, children first."""
+    from ..core.database import Base
+
+    found = []
+    for table in reversed(Base.metadata.sorted_tables):
+        if table.name == User.__tablename__:
+            continue
+        for column in table.columns:
+            for fk in column.foreign_keys:
+                if fk.column.table.name == User.__tablename__:
+                    found.append((table, column, (fk.ondelete or "").upper()))
+    return found
+
+
+def _apply_user_foreign_key_rules(db: Session, user_id: str) -> None:
+    from sqlalchemy import delete, update
+
+    for table, column, rule in _user_foreign_keys():
+        try:
+            with db.begin_nested():
+                if rule == "CASCADE":
+                    db.execute(delete(table).where(column == user_id))
+                elif column.nullable:
+                    db.execute(update(table).where(column == user_id).values({column.name: None}))
+        except Exception as exc:  # pragma: no cover - logged, deletion continues
+            from ..core.logging import get_logger
+
+            get_logger(component="account_deletion").warning(
+                "account_deletion_fk_rule_failed", table=table.name, column=column.name, error=str(exc)
+            )
+
+
+UserService._apply_user_foreign_key_rules = staticmethod(_apply_user_foreign_key_rules)
 
 
 def seed_admin_user(db: Session) -> None:

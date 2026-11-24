@@ -70,3 +70,53 @@ def test_refund_gives_back_a_spent_free_use():
         _refund_free_use(db, user, "letter_explain")
         usage = db.query(PremiumUsage).filter_by(user_id=user_id, feature="letter_explain").one()
         assert usage.free_uses == 1
+
+
+def test_account_deletion_removes_rows_that_cascade_and_unlinks_the_rest():
+    from backend.app.models.job import JobAlert
+    from backend.app.models.notification import NotificationPreference
+    from backend.app.services.users import _user_foreign_keys
+
+    headers, user_id = _user()
+    with SessionLocal() as db:
+        db.add(JobAlert(user_id=user_id, name="Pflege", keywords="pflege zürich"))
+        db.add(NotificationPreference(user_id=user_id))
+        db.commit()
+
+    response = client.delete("/api/v1/auth/me", headers=headers)
+    assert response.status_code in (200, 204), response.text
+
+    with SessionLocal() as db:
+        for table, column, rule in _user_foreign_keys():
+            remaining = db.execute(table.select().where(column == user_id)).first()
+            assert remaining is None, f"{table.name}.{column.name} still points at the deleted user"
+
+
+def test_password_reset_revokes_existing_sessions():
+    from datetime import timedelta as _td
+
+    from backend.app.core.security import create_refresh_token
+
+    headers, user_id = _user()
+    old_refresh = create_refresh_token(user_id)
+    assert client.get("/api/v1/subscriptions/entitlements", headers=headers).status_code == 200
+
+    with SessionLocal() as db:
+        user = db.get(User, user_id)
+        # Same effect as a completed password reset; one second later than the tokens above.
+        user.tokens_valid_after = datetime.now(timezone.utc) + _td(seconds=2)
+        db.add(user)
+        db.commit()
+
+    assert client.get("/api/v1/subscriptions/entitlements", headers=headers).status_code == 401
+    refreshed = client.post("/api/v1/auth/refresh", json={"refresh_token": old_refresh})
+    assert refreshed.status_code == 401
+
+
+def test_token_issued_in_the_same_second_as_the_cutoff_stays_valid():
+    from backend.app.core.security import token_is_revoked
+
+    cutoff = datetime(2026, 11, 24, 3, 0, 0, 400_000, tzinfo=timezone.utc)
+    assert token_is_revoked({"iat": int(cutoff.timestamp()) - 1}, cutoff)
+    assert not token_is_revoked({"iat": int(cutoff.timestamp())}, cutoff)
+    assert not token_is_revoked({"iat": 1}, None)

@@ -7,7 +7,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
 from .core.database import get_db
-from .core.security import decode_token
+from .core.security import decode_token, token_is_revoked
 from .services.users import UserService
 from .models.subscription import PremiumUsage
 from .models.user import User
@@ -28,6 +28,8 @@ def get_current_admin(
         user = UserService.get_by_id(db, user_id) if user_id else None
         if not user or not user.is_active or not user.is_superuser or not payload.get("is_admin"):
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized")
+        if token_is_revoked(payload, user.tokens_valid_after):
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token revoked")
         return payload
     except HTTPException:
         raise
@@ -77,6 +79,8 @@ def get_current_user(
         user = UserService.get_by_id(db, user_id)
         if not user or not user.is_active:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid user")
+        if token_is_revoked(payload, user.tokens_valid_after):
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token revoked")
         from .services.moderation import refresh_safety_state
         refresh_safety_state(db, user)
         if user.safety_status == "banned":

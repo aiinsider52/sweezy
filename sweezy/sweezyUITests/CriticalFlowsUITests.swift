@@ -310,9 +310,9 @@ final class CriticalFlowsUITests: XCTestCase {
         XCTAssertFalse(app.buttons["friends.swipe.like"].exists)
         keepScreenshot(app, name: "friends-responsive")
 
-        let details = app.buttons["friends.swipe.details"]
-        XCTAssertTrue(details.waitForExistence(timeout: 5))
-        details.tap()
+        let card = app.buttons["friends.profile.preview-anna"]
+        XCTAssertTrue(card.waitForExistence(timeout: 5))
+        card.tap()
         // "Anna Keller" is already on the card behind the sheet, so wait for sheet-only text instead.
         XCTAssertTrue(app.staticTexts["96% збіг"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.staticTexts["Anna Keller"].exists)

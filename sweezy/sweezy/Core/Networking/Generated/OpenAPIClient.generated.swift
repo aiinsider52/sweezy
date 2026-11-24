@@ -2,7 +2,7 @@
 import Foundation
 
 enum GeneratedOpenAPIContract {
-    static let sha256 = "976a0635f840d8e162d2ed8638190f1f5f879de7968a00c9d6777ae9d23b8af2"
+    static let sha256 = "b286cd31bc5b021fd859b700a35745aaba449e53e8127d73e513e7c93903a530"
 
     struct Operation: Sendable {
         let method: String
@@ -116,6 +116,7 @@ enum GeneratedOpenAPIContract {
         "login_user_api_v1_auth_login_post": Operation(method: "POST", path: "/api/v1/auth/login", requiresAuthentication: false),
         "delete_my_account_api_v1_auth_me_delete": Operation(method: "DELETE", path: "/api/v1/auth/me", requiresAuthentication: true),
         "get_my_account_api_v1_auth_me_get": Operation(method: "GET", path: "/api/v1/auth/me", requiresAuthentication: true),
+        "export_my_data_api_v1_auth_me_export_get": Operation(method: "GET", path: "/api/v1/auth/me/export", requiresAuthentication: true),
         "oauth_apple_sign_in_api_v1_auth_oauth_apple_post": Operation(method: "POST", path: "/api/v1/auth/oauth/apple", requiresAuthentication: false),
         "oauth_google_sign_in_api_v1_auth_oauth_google_post": Operation(method: "POST", path: "/api/v1/auth/oauth/google", requiresAuthentication: false),
         "confirm_social_link_api_v1_auth_oauth_link_confirm_post": Operation(method: "POST", path: "/api/v1/auth/oauth/link/confirm", requiresAuthentication: false),

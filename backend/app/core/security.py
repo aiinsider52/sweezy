@@ -113,7 +113,5 @@ def token_is_revoked(payload: dict[str, Any], tokens_valid_after) -> bool:
         return True
     cutoff = tokens_valid_after
     if cutoff.tzinfo is None:
-        from datetime import timezone as _tz
-
-        cutoff = cutoff.replace(tzinfo=_tz.utc)
+        cutoff = cutoff.replace(tzinfo=UTC)
     return int(issued_at) < int(cutoff.timestamp())

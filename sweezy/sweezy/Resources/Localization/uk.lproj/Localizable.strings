@@ -3519,3 +3519,5 @@
 "widget.days_short" = "дн.";
 "widget.today" = "Сьогодні";
 "widget.no_deadlines" = "Строків поки немає";
+"free_uses.left" = "Безкоштовно: лишилось %@ з %@";
+"free_uses.none" = "Безкоштовні спроби вичерпано";

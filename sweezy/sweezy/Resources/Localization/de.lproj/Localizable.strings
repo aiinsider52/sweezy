@@ -4575,3 +4575,5 @@
 "widget.days_short" = "T.";
 "widget.today" = "Heute";
 "widget.no_deadlines" = "Noch keine Fristen";
+"free_uses.left" = "Gratis: noch %@ von %@";
+"free_uses.none" = "Gratis-Nutzungen verbraucht";

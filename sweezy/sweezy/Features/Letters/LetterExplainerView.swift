@@ -173,6 +173,8 @@ struct LetterExplainerView: View {
                 Button { showAuth = true } label: { pickLabel(prominent: !canScan) }
                     .accessibilityIdentifier("letters.pick")
             }
+            FreeUsesBadge(feature: "letter_explain", limit: 3) { showPaywall = true }
+                .padding(.top, 2)
         }
     }
 
@@ -263,6 +265,7 @@ struct LetterExplainerView: View {
                 let explanation = try await APIClient.explainLetter(text: reading.text)
                 let letter = SavedLetter(id: UUID(), createdAt: Date(), explanation: explanation, payment: reading.payment, deadlineAdded: false)
                 store.add(letter)
+                Task { await SubscriptionManager.shared.refreshEntitlements() }
                 appContainer.telemetry.track(.letterExplained, source: "letters", meta: [
                     "category": explanation.category,
                     "has_deadline": String(explanation.deadline != nil),

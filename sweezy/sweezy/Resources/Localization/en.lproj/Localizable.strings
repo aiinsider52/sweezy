@@ -4646,3 +4646,5 @@
 "widget.days_short" = "d";
 "widget.today" = "Today";
 "widget.no_deadlines" = "No deadlines yet";
+"free_uses.left" = "Free: %@ of %@ left";
+"free_uses.none" = "Free uses spent";

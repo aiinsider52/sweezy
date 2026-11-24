@@ -125,7 +125,23 @@ class JobApplicationOut(JobApplicationUpsert):
     updated_at: datetime
 
 
-class EmployerApplicationOut(JobApplicationOut):
+class EmployerApplicationOut(BaseModel):
+    """What an employer sees: the application and its status, never the candidate's private
+    tracker notes or reminders."""
+    model_config = ConfigDict(from_attributes=True)
+    id: str
+    job_id: str
+    status: JobApplicationStatus
+    cover_letter: str | None = None
+    job_title: str
+    company: str | None = None
+    location: str | None = None
+    source: str
+    job_url: str
+    applied_at: datetime | None = None
+    created_at: datetime
+    updated_at: datetime
+    employer_notes: str | None = None
     candidate_id: str
     candidate_email: str
 

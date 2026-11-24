@@ -14,7 +14,7 @@ from sqlalchemy.orm import Session
 from ..core.config import get_settings
 from ..core.rate_limit import limiter
 from ..dependencies import get_db, require_premium_or_free_uses
-from .ai import CVResumePayload, _refund_free_use, _strict_schema
+from .ai import OPENAI_MAX_OUTPUT_TOKENS, OPENAI_TIMEOUT_SECONDS, CVResumePayload, _refund_free_use, _strict_schema
 
 router = APIRouter()
 
@@ -120,8 +120,9 @@ def application_kit(
     try:
         from openai import OpenAI
 
-        response = OpenAI(api_key=settings.OPENAI_API_KEY).responses.create(
+        response = OpenAI(api_key=settings.OPENAI_API_KEY, timeout=OPENAI_TIMEOUT_SECONDS, max_retries=1).responses.create(
             model=settings.OPENAI_MODEL,
+            max_output_tokens=OPENAI_MAX_OUTPUT_TOKENS,
             instructions=instructions,
             input=f"JOB:\n<<<\n{_job_block(payload.job)}\n>>>\n\nCV:\n<<<\n{_cv_block(payload.cv)}\n>>>",
             text={"format": {"type": "json_schema", "name": "application_kit", "strict": True,
@@ -228,8 +229,9 @@ def interview_turn(
     try:
         from openai import OpenAI
 
-        response = OpenAI(api_key=settings.OPENAI_API_KEY).responses.create(
+        response = OpenAI(api_key=settings.OPENAI_API_KEY, timeout=OPENAI_TIMEOUT_SECONDS, max_retries=1).responses.create(
             model=settings.OPENAI_MODEL,
+            max_output_tokens=OPENAI_MAX_OUTPUT_TOKENS,
             instructions=instructions,
             input=(
                 f"JOB:\n<<<\n{_job_block(payload.job)[:3000]}\n>>>\n\nCV SUMMARY:\n<<<\n{payload.cv_summary}\n>>>\n\n"

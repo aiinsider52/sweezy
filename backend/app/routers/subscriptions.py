@@ -48,6 +48,8 @@ class EntitlementsOut(BaseModel):
     guides_full_access: bool
     pdf_download: bool
     cv_free_uses_remaining: int
+    # Free uses left per metered AI feature, so the app can show "2 of 3 left" before the paywall.
+    free_uses_remaining: dict[str, int] = {}
 
 def _compute_is_premium(status: str, expire_at: Optional[datetime]) -> bool:
     if status in {"trial", "premium"}:
@@ -59,6 +61,22 @@ def _compute_is_premium(status: str, expire_at: Optional[datetime]) -> bool:
         except Exception:
             return True
     return False
+
+METERED_FEATURES = {"letter_explain": 3, "career_kit": 3, "interview_turns": 14, "cv_tools": 3}
+
+
+def _free_uses_remaining(db, user_id: str, is_premium: bool) -> dict[str, int]:
+    """Uses left per metered feature; Plus members always see the full allowance."""
+    if is_premium:
+        return dict(METERED_FEATURES)
+    used = {
+        row.feature: row.free_uses
+        for row in db.query(PremiumUsage).filter(
+            PremiumUsage.user_id == user_id, PremiumUsage.feature.in_(list(METERED_FEATURES))
+        )
+    }
+    return {feature: max(0, limit - used.get(feature, 0)) for feature, limit in METERED_FEATURES.items()}
+
 
 @router.get("/entitlements", response_model=EntitlementsOut)
 def entitlements(db: DBSession, user: CurrentUser) -> EntitlementsOut:
@@ -79,6 +97,7 @@ def entitlements(db: DBSession, user: CurrentUser) -> EntitlementsOut:
         .one_or_none()
     )
     cv_free_uses_remaining = 3 if is_premium else max(0, 3 - (usage.free_uses if usage else 0))
+    free_uses_remaining = _free_uses_remaining(db, user.id, is_premium)
     active_subscription = None
     if is_premium:
         candidates = (
@@ -111,6 +130,7 @@ def entitlements(db: DBSession, user: CurrentUser) -> EntitlementsOut:
         guides_full_access=is_premium,
         pdf_download=is_premium,
         cv_free_uses_remaining=cv_free_uses_remaining,
+        free_uses_remaining=free_uses_remaining,
     )
 
 

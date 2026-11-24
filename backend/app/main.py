@@ -342,6 +342,26 @@ class RequestIDMiddleware(BaseHTTPMiddleware):
 
 app.add_middleware(RequestIDMiddleware)
 
+
+AI_BODY_LIMIT_BYTES = 256 * 1024
+
+
+class AIBodyLimitMiddleware(BaseHTTPMiddleware):
+    """AI endpoints take text, never files: refuse oversized bodies before they are parsed or
+    forwarded to OpenAI. Uploads go through /media and keep their own limits."""
+
+    async def dispatch(self, request: Request, call_next):
+        if f"{API_PREFIX}/ai/" in request.url.path:
+            length = request.headers.get("content-length")
+            if length and length.isdigit() and int(length) > AI_BODY_LIMIT_BYTES:
+                from fastapi.responses import JSONResponse
+
+                return JSONResponse(status_code=413, content={"detail": {"code": "payload_too_large"}})
+        return await call_next(request)
+
+
+app.add_middleware(AIBodyLimitMiddleware)
+
 # Rate limiting middleware & handler (slowapi)
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.add_middleware(SlowAPIMiddleware)

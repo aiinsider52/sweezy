@@ -37,8 +37,10 @@ struct JourneyMapView: View {
     @State private var selectedPlace: Place?
     @State private var selectedDiscoveryPlace: SwissDiscoveryPlace?
     @State private var presentedDiscoveryPlace: SwissDiscoveryPlace?
+    @State private var presentedPlace: Place?
     @State private var discoverySavedPlaceIDs = Set<String>()
     @State private var showsDiscoveryOnly = false
+    @State private var ukrainianOnly = false
     @State private var searchText = ""
     @State private var activeRoute: MKRoute?
     @State private var isCalculatingRoute = false
@@ -52,8 +54,8 @@ struct JourneyMapView: View {
         (.government, "map.type.government".localized, "building.columns"),
         (.healthcare, "map.type.healthcare".localized, "cross.case"),
         (.education, "map.type.education".localized, "graduationcap"),
-        (.employment, "map.type.employment".localized, "briefcase"),
-        (.community, "map.type.community".localized, "person.2")
+        (.social, "map.type.social".localized, "hands.sparkles"),
+        (.employment, "map.type.employment".localized, "briefcase")
     ]
 
     var body: some View {
@@ -132,6 +134,18 @@ struct JourneyMapView: View {
         .sheet(isPresented: $showsPlaceList) {
             placeListSheet
         }
+        .sheet(item: $presentedPlace) { place in
+            PlaceDetailView(
+                place: place,
+                fallbackAsset: imageName(for: place),
+                categoryTitle: place.category.localizedName,
+                categoryIcon: icon(for: place),
+                locationLine: locationLine(for: place)
+            )
+            .environmentObject(appContainer)
+            .presentationDetents([.large])
+            .presentationDragIndicator(.visible)
+        }
         .fullScreenCover(item: $presentedDiscoveryPlace) { place in
             NavigationStack {
                 SwissDiscoveryDetailView(
@@ -149,6 +163,7 @@ struct JourneyMapView: View {
         MapDeepLinkRouter.pendingFilter = nil
         selectedType = type
         showsDiscoveryOnly = false
+        ukrainianOnly = false
         selectFirstVisiblePlace()
     }
 
@@ -171,8 +186,9 @@ struct JourneyMapView: View {
                             focus(on: place)
                         } label: {
                             JourneyMapPin(
-                                icon: icon(for: place.type),
-                                isSelected: selectedPlace?.id == place.id
+                                icon: icon(for: place),
+                                isSelected: selectedPlace?.id == place.id,
+                                ukrainian: place.isForUkrainians
                             )
                         }
                         .buttonStyle(.plain)
@@ -181,7 +197,7 @@ struct JourneyMapView: View {
                 }
             }
 
-            if selectedType == nil {
+            if selectedType == nil && !ukrainianOnly {
                 ForEach(displayedDiscoveryPlaces) { place in
                     Annotation(place.title, coordinate: place.coordinate) {
                         Button {
@@ -199,7 +215,12 @@ struct JourneyMapView: View {
                 }
             }
         }
-        .mapStyle(.standard(elevation: .realistic))
+        // Apple's own shop, café and brand pins (Coop, Lidl, Globus…) drown out the help points;
+        // keep only what someone new in the country may need in a hurry.
+        .mapStyle(.standard(
+            elevation: .realistic,
+            pointsOfInterest: .including([.hospital, .pharmacy, .police, .publicTransport])
+        ))
         .onMapCameraChange(frequency: .continuous) { context in
             cameraCenter = context.camera.centerCoordinate
             cameraDistance = context.camera.distance
@@ -284,6 +305,31 @@ struct JourneyMapView: View {
     private var filterBar: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
+                if let all = filters.first {
+                    JourneyFilterChip(
+                        title: all.1,
+                        icon: all.2,
+                        isSelected: !showsDiscoveryOnly && !ukrainianOnly && selectedType == nil
+                    ) {
+                        applyFilter(nil)
+                    }
+                }
+
+                UkrainianFilterChip(isSelected: ukrainianOnly) {
+                    applyUkrainianFilter()
+                }
+                .accessibilityIdentifier("journey.map.ukrainian.filter")
+
+                ForEach(filters.dropFirst(), id: \.1) { type, title, icon in
+                    JourneyFilterChip(
+                        title: title,
+                        icon: icon,
+                        isSelected: !showsDiscoveryOnly && !ukrainianOnly && selectedType == type
+                    ) {
+                        applyFilter(type)
+                    }
+                }
+
                 if APIClient.countryCode == "CH" {
                     JourneyFilterChip(
                         title: "swiss.discovery.map_filter".localized,
@@ -293,16 +339,6 @@ struct JourneyMapView: View {
                         applyDiscoveryFilter()
                     }
                     .accessibilityIdentifier("journey.map.discovery.filter")
-                }
-
-                ForEach(filters, id: \.1) { type, title, icon in
-                    JourneyFilterChip(
-                        title: title,
-                        icon: icon,
-                        isSelected: !showsDiscoveryOnly && selectedType == type
-                    ) {
-                        applyFilter(type)
-                    }
                 }
             }
         }
@@ -417,7 +453,7 @@ struct JourneyMapView: View {
             ScrollViewReader { proxy in
                 ScrollView(.horizontal, showsIndicators: false) {
                     LazyHStack(spacing: 10) {
-                        ForEach(displayedPlaces.prefix(12)) { place in
+                        ForEach(carouselPlaces) { place in
                             placeCard(place)
                                 .frame(width: geometry.size.width)
                                 .id(place.id)
@@ -428,13 +464,26 @@ struct JourneyMapView: View {
                 .scrollTargetBehavior(.viewAligned)
                 .onChange(of: selectedPlace?.id) { _, placeID in
                     guard let placeID else { return }
-                    withAnimation(.spring(response: 0.38, dampingFraction: 0.84)) {
-                        proxy.scrollTo(placeID, anchor: .center)
+                    // The selected card may have just been added to the carousel; scroll once it exists.
+                    DispatchQueue.main.async {
+                        withAnimation(.spring(response: 0.38, dampingFraction: 0.84)) {
+                            proxy.scrollTo(placeID, anchor: .center)
+                        }
                     }
                 }
             }
         }
         .frame(height: Self.mapCardHeight + 16)
+    }
+
+    /// The twelve nearest places, plus the one the user tapped on the map when it is farther away;
+    /// otherwise the carousel cannot scroll to it and keeps showing the first card.
+    private var carouselPlaces: [Place] {
+        var places = Array(displayedPlaces.prefix(12))
+        if let selectedPlace, !places.contains(where: { $0.id == selectedPlace.id }) {
+            places.insert(selectedPlace, at: 0)
+        }
+        return places
     }
 
     private var discoveryCarousel: some View {
@@ -489,7 +538,9 @@ struct JourneyMapView: View {
         let status = [todayHours(for: place), distanceText(to: place)].compactMap { $0 }.joined(separator: " · ")
 
         return HStack(alignment: .top, spacing: 14) {
-            mapCardPhoto(imageName(for: place), badge: typeTitle(for: place.type), badgeIcon: icon(for: place.type))
+            mapCardPhoto(badge: badgeTitle(for: place), badgeIcon: icon(for: place)) {
+                PlacePhotoView(place: place, fallbackAsset: imageName(for: place))
+            }
 
             VStack(alignment: .leading, spacing: 0) {
                 HStack(alignment: .top, spacing: 8) {
@@ -561,7 +612,9 @@ struct JourneyMapView: View {
         .contentShape(Rectangle())
         .onTapGesture {
             focus(on: place)
+            presentedPlace = place
         }
+        .accessibilityAction(named: "journey.map.open_place".localized) { presentedPlace = place }
     }
 
     private func discoveryPlaceCard(_ place: SwissDiscoveryPlace) -> some View {
@@ -627,13 +680,17 @@ struct JourneyMapView: View {
     /// Fixed frame first, image as overlay: `scaledToFill` can no longer push the badge
     /// or the text column out of line, which is what made the old card look shifted.
     private func mapCardPhoto(_ asset: String, badge: String, badgeIcon: String) -> some View {
+        mapCardPhoto(badge: badge, badgeIcon: badgeIcon) {
+            Image(asset)
+                .resizable()
+                .scaledToFill()
+        }
+    }
+
+    private func mapCardPhoto<Photo: View>(badge: String, badgeIcon: String, @ViewBuilder photo: () -> Photo) -> some View {
         Color.clear
             .frame(width: 100, height: Self.mapCardHeight)
-            .overlay {
-                Image(asset)
-                    .resizable()
-                    .scaledToFill()
-            }
+            .overlay { photo() }
             .overlay(alignment: .bottom) {
                 LinearGradient(colors: [.clear, .black.opacity(0.5)], startPoint: .top, endPoint: .bottom)
                     .frame(height: 54)
@@ -849,16 +906,15 @@ struct JourneyMapView: View {
             showsPlaceList = false
         } label: {
             HStack(spacing: 13) {
-                Image(imageName(for: place))
-                    .resizable()
-                    .scaledToFill()
+                Color.clear
                     .frame(width: 86, height: 92)
+                    .overlay { PlacePhotoView(place: place, fallbackAsset: imageName(for: place)) }
                     .clipShape(RoundedRectangle(cornerRadius: 17, style: .continuous))
 
                 VStack(alignment: .leading, spacing: 6) {
                     HStack(spacing: 6) {
-                        Image(systemName: icon(for: place.type))
-                        Text(typeTitle(for: place.type))
+                        Image(systemName: icon(for: place))
+                        Text(badgeTitle(for: place))
                         if place.isCommunitySuggested {
                             communityBadge
                         }
@@ -987,10 +1043,11 @@ struct JourneyMapView: View {
         let matches = appContainer.contentService.places.filter { place in
             let matchesCountry = place.countryCode == APIClient.countryCode
             let matchesType = selectedType == nil || place.type == selectedType
+            let matchesAudience = !ukrainianOnly || place.isForUkrainians
             let matchesSearch = query.isEmpty
                 || place.name.localizedCaseInsensitiveContains(query)
                 || place.formattedAddress.localizedCaseInsensitiveContains(query)
-            return matchesCountry && matchesType && matchesSearch
+            return matchesCountry && matchesType && matchesAudience && matchesSearch
         }
 
         guard let location = appContainer.locationService.currentLocation else {
@@ -1004,12 +1061,15 @@ struct JourneyMapView: View {
     private var mapAnnotationPlaces: [Place] {
         let places = displayedPlaces
         let nearest = places.prefix(24)
-        let businesses = places.dropFirst(24).filter { $0.businessID != nil }.prefix(40)
-        return Array(nearest) + Array(businesses)
+        let rest = places.dropFirst(24)
+        let businesses = rest.filter { $0.businessID != nil }.prefix(40)
+        // Ukrainian parishes and hubs are few and far apart; keep every one on the map.
+        let ukrainian = rest.filter { $0.isForUkrainians && $0.businessID == nil }
+        return Array(nearest) + Array(businesses) + Array(ukrainian)
     }
 
     private var displayedDiscoveryPlaces: [SwissDiscoveryPlace] {
-        guard APIClient.countryCode == "CH", selectedType == nil else { return [] }
+        guard APIClient.countryCode == "CH", selectedType == nil, !ukrainianOnly else { return [] }
         let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
         return SwissDiscoveryCatalog.places.filter { place in
             query.isEmpty
@@ -1023,6 +1083,7 @@ struct JourneyMapView: View {
         if showsDiscoveryOnly || selectedDiscoveryPlace != nil {
             return "swiss.discovery.map_title".localized
         }
+        if ukrainianOnly { return "map.filter.ukrainian.title".localized }
         return selectedType == nil ? "journey.map.near_you".localized : filterTitle
     }
 
@@ -1040,6 +1101,7 @@ struct JourneyMapView: View {
     private func applyFilter(_ type: PlaceType?) {
         withAnimation(.easeInOut(duration: 0.22)) {
             showsDiscoveryOnly = false
+            ukrainianOnly = false
             selectedDiscoveryPlace = nil
             selectedType = type
             activeRoute = nil
@@ -1047,10 +1109,30 @@ struct JourneyMapView: View {
         selectFirstVisiblePlace()
     }
 
+    /// Embassy, consulates, parishes and hubs sit in a handful of cities, so the camera
+    /// pulls back to the whole country instead of staying on the user's street.
+    private func applyUkrainianFilter() {
+        withAnimation(.easeInOut(duration: 0.24)) {
+            showsDiscoveryOnly = false
+            selectedDiscoveryPlace = nil
+            selectedType = nil
+            ukrainianOnly = true
+            activeRoute = nil
+        }
+        selectFirstVisiblePlace()
+        let (center, distance): (CLLocationCoordinate2D, CLLocationDistance) = switch APIClient.countryCode {
+        case "DE": (CLLocationCoordinate2D(latitude: 51.1, longitude: 10.4), 1_350_000)
+        case "AT": (CLLocationCoordinate2D(latitude: 47.6, longitude: 14.1), 620_000)
+        default: (CLLocationCoordinate2D(latitude: 46.95, longitude: 8.15), 380_000)
+        }
+        moveCamera(to: center, distance: distance, heading: 0, pitch: 30, duration: 0.42)
+    }
+
     private func applyDiscoveryFilter() {
         guard APIClient.countryCode == "CH" else { return }
         withAnimation(.easeInOut(duration: 0.24)) {
             showsDiscoveryOnly = true
+            ukrainianOnly = false
             selectedType = nil
             selectedPlace = nil
             activeRoute = nil
@@ -1169,6 +1251,25 @@ struct JourneyMapView: View {
         }
     }
 
+    private func icon(for place: Place) -> String {
+        switch place.category {
+        case .embassy: return "building.columns.fill"
+        case .religiousCenter: return "bell.fill"
+        case .refugeeCenter: return "person.text.rectangle.fill"
+        case .communityCenter: return "person.3.fill"
+        case .culturalCenter: return "music.note"
+        case .communityCafe, .languageCafe: return "cup.and.saucer.fill"
+        case .restaurant: return "fork.knife"
+        case .groceryStore: return "basket.fill"
+        case .foodAssistance, .foodBank: return "takeoutbag.and.cup.and.straw.fill"
+        case .secondhandShop: return "tshirt.fill"
+        case .languageSchool: return "character.bubble.fill"
+        case .mentalHealth, .psychologist: return "heart.text.square.fill"
+        case .legalAid: return "scale.3d"
+        default: return icon(for: place.type)
+        }
+    }
+
     private func icon(for type: PlaceType) -> String {
         switch type {
         case .government: return "building.columns.fill"
@@ -1182,6 +1283,11 @@ struct JourneyMapView: View {
         case .banking: return "creditcard.fill"
         case .shopping: return "cart.fill"
         }
+    }
+
+    /// Ukrainian places name their category ("Українська кухня") — "Спільнота" says nothing about a restaurant.
+    private func badgeTitle(for place: Place) -> String {
+        place.isForUkrainians ? place.category.localizedName : typeTitle(for: place.type)
     }
 
     private func typeTitle(for type: PlaceType) -> String {
@@ -1310,6 +1416,7 @@ struct JourneyMapView: View {
 private struct JourneyMapPin: View {
     let icon: String
     let isSelected: Bool
+    var ukrainian = false
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var landed = false
@@ -1317,18 +1424,18 @@ private struct JourneyMapPin: View {
     var body: some View {
         ZStack {
             Circle()
-                .fill(isSelected ? JourneyVisual.lime : JourneyVisual.chrome)
+                .fill(isSelected ? JourneyVisual.lime : (ukrainian ? Self.ukraineBlue : JourneyVisual.chrome))
                 .frame(width: isSelected ? 42 : 34, height: isSelected ? 42 : 34)
                 .overlay(
                     Circle().stroke(
-                        isSelected ? Color.black.opacity(0.12) : JourneyVisual.softBorder,
-                        lineWidth: 1
+                        isSelected ? Color.black.opacity(0.12) : (ukrainian ? Self.ukraineYellow : JourneyVisual.softBorder),
+                        lineWidth: ukrainian && !isSelected ? 2 : 1
                     )
                 )
                 .shadow(color: .black.opacity(isSelected ? 0.28 : 0.18), radius: isSelected ? 10 : 6, y: 3)
             Image(systemName: icon)
                 .font(.system(size: isSelected ? 15 : 12, weight: .bold))
-                .foregroundColor(isSelected ? .black : JourneyVisual.accentStrong)
+                .foregroundColor(isSelected ? .black : (ukrainian ? Self.ukraineYellow : JourneyVisual.accentStrong))
         }
         .scaleEffect(landed || reduceMotion ? 1 : 0.4)
         .opacity(landed || reduceMotion ? 1 : 0)
@@ -1336,5 +1443,39 @@ private struct JourneyMapPin: View {
         .animation(.spring(response: 0.34, dampingFraction: 0.7), value: isSelected)
         .onAppear { landed = true }
         .onDisappear { landed = false }
+    }
+
+    static let ukraineBlue = Color(red: 0, green: 0.36, blue: 0.73)
+    static let ukraineYellow = Color(red: 1, green: 0.84, blue: 0)
+}
+
+/// Filter chip with a small blue-and-yellow flag, so the Ukrainian layer is easy to spot in the row.
+private struct UkrainianFilterChip: View {
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 7) {
+                VStack(spacing: 0) {
+                    JourneyMapPin.ukraineBlue
+                    JourneyMapPin.ukraineYellow
+                }
+                .frame(width: 16, height: 11)
+                .clipShape(RoundedRectangle(cornerRadius: 2.5, style: .continuous))
+                Text("map.filter.ukrainian".localized)
+                    .lineLimit(1)
+            }
+            .font(.system(size: 13, weight: .semibold))
+            .foregroundColor(isSelected ? .black : JourneyVisual.primaryText)
+            .padding(.horizontal, 15)
+            .frame(minHeight: Theme.Layout.minimumTouchTarget)
+            .background(isSelected ? JourneyVisual.lime : JourneyVisual.softSurface)
+            .background(.ultraThinMaterial.opacity(isSelected ? 0 : 0.72))
+            .clipShape(Capsule())
+            .overlay(Capsule().stroke(isSelected ? Color.clear : JourneyVisual.softBorder, lineWidth: 1))
+        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 }

@@ -34,7 +34,11 @@ struct Place: Codable, Identifiable, Hashable {
     let lastUpdated: Date
     let verifiedAt: Date? // When information was last verified
     let source: String? // URL or authority reference
-    
+    /// Who the place is mainly for; "ukrainian" marks embassy, parishes and community hubs.
+    let audience: String?
+
+    var isForUkrainians: Bool { audience == "ukrainian" }
+
     init(
         id: UUID = UUID(),
         name: String,
@@ -57,7 +61,8 @@ struct Place: Codable, Identifiable, Hashable {
         rating: Double? = nil,
         reviewCount: Int = 0,
         verifiedAt: Date? = nil,
-        source: String? = nil
+        source: String? = nil,
+        audience: String? = nil
     ) {
         self.id = id
         self.name = name
@@ -82,13 +87,14 @@ struct Place: Codable, Identifiable, Hashable {
         self.lastUpdated = Date()
         self.verifiedAt = verifiedAt
         self.source = source
+        self.audience = audience
     }
     
     private enum CodingKeys: String, CodingKey {
         case id, name, type, category, description, descriptions, address, coordinate, canton,
              countryCode, subdivisionCode,
              phoneNumber, email, website, openingHours, languages, services,
-             isAccessible, rating, reviewCount, lastUpdated, verifiedAt, source
+             isAccessible, rating, reviewCount, lastUpdated, verifiedAt, source, audience
     }
     
     init(from decoder: Decoder) throws {
@@ -123,6 +129,7 @@ struct Place: Codable, Identifiable, Hashable {
         self.lastUpdated = (try? c.decode(Date.self, forKey: .lastUpdated)) ?? Date()
         self.verifiedAt = try? c.decode(Date.self, forKey: .verifiedAt)
         self.source = try? c.decode(String.self, forKey: .source)
+        self.audience = try? c.decode(String.self, forKey: .audience)
     }
     
     /// Calculate distance from user location
@@ -362,6 +369,8 @@ enum PlaceCategory: String, CaseIterable, Codable, Hashable {
     // Shopping and retail (extended)
     case supermarket = "supermarket"
     case youthCenter = "youth_center"
+    case restaurant = "restaurant"                  // Ukrainian kitchen, a taste of home
+    case groceryStore = "grocery_store"             // shops that stock Ukrainian products
     
     var localizedName: String {
         switch self {
@@ -406,6 +415,8 @@ enum PlaceCategory: String, CaseIterable, Codable, Hashable {
         case .communityCafe: return "place.category.community_cafe".localized
         case .supermarket: return "place.category.supermarket".localized
         case .youthCenter: return "place.category.youth_center".localized
+        case .restaurant: return "place.category.restaurant".localized
+        case .groceryStore: return "place.category.grocery_store".localized
         }
     }
 }

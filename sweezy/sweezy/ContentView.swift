@@ -102,6 +102,8 @@ struct MainAppContent: View {
                 JourneyDirectoryView(requestedSection: .tools, routeID: UUID())
             } else if isFriendsUITest {
                 FriendNetworkView()
+            } else if let createListingType = createListingUITestType {
+                CreateListingView(listingType: createListingType)
             } else if isNetworkUITest || isNetworkGateUITest {
                 ProfessionalNetworkView()
             } else if isPaywallScreenshot {
@@ -363,6 +365,17 @@ struct MainAppContent: View {
             ProcessInfo.processInfo.arguments.contains("--ui-test-career-tools")
         #else
         false
+        #endif
+    }
+
+    private var createListingUITestType: ListingType? {
+        #if DEBUG
+        guard ProcessInfo.processInfo.environment["UITESTS"] == "1" else { return nil }
+        if ProcessInfo.processInfo.arguments.contains("--ui-test-create-service") { return .service }
+        if ProcessInfo.processInfo.arguments.contains("--ui-test-create-item") { return .item }
+        return nil
+        #else
+        nil
         #endif
     }
 

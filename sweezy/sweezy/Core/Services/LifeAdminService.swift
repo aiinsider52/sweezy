@@ -128,6 +128,12 @@ struct WeeklyDigestSnapshot {
 final class LifeAdminService: ObservableObject {
     @Published private(set) var documents: [ReadinessDocument] = []
     @Published private(set) var completedDeadlineIDs: Set<String> = []
+    /// Dates the user added by hand (tax return, licence exchange…). Edited through `saveDeadline`.
+    @Published var personalDeadlines: [PersonalDeadline] = []
+    /// Who the 30/7/1-day reminders are written for; set from the profile.
+    private(set) var reminderCountry: ResidenceCountry = .switzerland
+    private(set) var reminderPermitCode = "S"
+    private var reminderSync: Task<Void, Never>?
 
     private let defaults: UserDefaults
     private var cancellables = Set<AnyCancellable>()
@@ -144,6 +150,8 @@ final class LifeAdminService: ObservableObject {
     }
 
     func prepareDocuments(for profile: UserProfile?) {
+        reminderCountry = profile?.country ?? .switzerland
+        reminderPermitCode = profile?.permitType.rawValue ?? "S"
         let required = Self.defaultDocuments(for: profile)
         documents = required.map { template in
             guard let saved = storedDocuments[template.id] else { return template }
@@ -293,6 +301,18 @@ final class LifeAdminService: ObservableObject {
             )
         }
 
+        for deadline in personalDeadlines {
+            add(
+                id: "personal.\(deadline.id.uuidString)",
+                title: deadline.title,
+                detail: deadline.kind.hint,
+                date: deadline.date,
+                category: deadline.kind == .tax ? .tax : (deadline.kind == .other ? .personal : .document),
+                sourceTitle: "deadline.my_dates".localized,
+                sourceURL: deadline.kind.source(for: country)?.absoluteString ?? ""
+            )
+        }
+
         for document in documents where document.isReady {
             guard let expiry = document.expiryDate else { continue }
             add(
@@ -320,7 +340,8 @@ final class LifeAdminService: ObservableObject {
         }
         guard notificationService.isAuthorized else { return 0 }
         var count = 0
-        for deadline in deadlines.prefix(20) {
+        // Document expiries and personal dates get their own 30/7/1-day reminders automatically.
+        for deadline in deadlines.filter({ !$0.id.hasPrefix("document.") && !$0.id.hasPrefix("personal.") }).prefix(20) {
             let leadDays = deadline.urgency == .urgent ? 1 : 7
             guard let fireDate = Calendar.current.date(byAdding: .day, value: -leadDays, to: deadline.dueDate) else { continue }
             let didSchedule = await notificationService.scheduleReminder(
@@ -362,6 +383,7 @@ final class LifeAdminService: ObservableObject {
 
     private var documentsKey: String { AccountScopedStorage.namespaced("life.documents.v1") }
     private var completedKey: String { AccountScopedStorage.namespaced("life.deadlines.completed.v1") }
+    private var personalKey: String { AccountScopedStorage.namespaced("life.deadlines.personal.v1") }
 
     private func reload() {
         if let data = defaults.data(forKey: documentsKey),
@@ -372,6 +394,30 @@ final class LifeAdminService: ObservableObject {
         }
         storedDocuments = Dictionary(documents.map { ($0.id, $0) }, uniquingKeysWith: { _, last in last })
         completedDeadlineIDs = Set(defaults.stringArray(forKey: completedKey) ?? [])
+        if let data = defaults.data(forKey: personalKey),
+           let decoded = try? JSONDecoder().decode([PersonalDeadline].self, from: data) {
+            personalDeadlines = decoded
+        } else {
+            personalDeadlines = []
+        }
+        scheduleReminderSync()
+    }
+
+    func persistPersonalDeadlines() {
+        if let data = try? JSONEncoder().encode(personalDeadlines) {
+            defaults.set(data, forKey: personalKey)
+        }
+        scheduleReminderSync()
+    }
+
+    /// Coalesces bursts of edits into one rebuild of the local reminders.
+    func scheduleReminderSync() {
+        reminderSync?.cancel()
+        reminderSync = Task { [weak self] in
+            try? await Task.sleep(for: .milliseconds(400))
+            guard !Task.isCancelled else { return }
+            await self?.syncExpiryReminders()
+        }
     }
 
     private func persistDocuments() {
@@ -379,6 +425,7 @@ final class LifeAdminService: ObservableObject {
         let all = storedDocuments.values.sorted { $0.id < $1.id }
         guard let data = try? JSONEncoder().encode(all) else { return }
         defaults.set(data, forKey: documentsKey)
+        scheduleReminderSync()
     }
 
     /// Swiss IDs predate multi-country support and are already persisted on devices,

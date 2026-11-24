@@ -14,6 +14,7 @@ struct ListingDetailView: View {
     @State private var error: Error?
     @State private var selectedImageIndex = 0
     @State private var descriptionExpanded = false
+    @State private var scrollOffset: CGFloat = 0
     @State private var showAuth = false
     @State private var showReportReasons = false
     @State private var showBlockConfirmation = false
@@ -112,58 +113,55 @@ struct ListingDetailView: View {
     }
 
     private func detailContent(_ listing: ServiceListing) -> some View {
-        GeometryReader { geometry in
-            ScrollView(showsIndicators: false) {
-                LazyVStack(spacing: 0) {
-                    heroSection(listing)
+        ScrollView(showsIndicators: false) {
+            VStack(spacing: 0) {
+                heroSection(listing)
 
-                    contentSheet(listing)
-                        .offset(y: -34)
-                        .padding(.bottom, -34)
-                }
-                .frame(minHeight: geometry.size.height + 80, alignment: .top)
-                .padding(.bottom, 36)
+                contentSheet(listing)
+                    .padding(.top, -26)
             }
-            .scrollBounceBehavior(.basedOnSize, axes: .vertical)
-            .ignoresSafeArea(edges: .top)
-            .accessibilityIdentifier("listing.detail.scroll")
+            .padding(.bottom, 24)
         }
+        .scrollBounceBehavior(.basedOnSize, axes: .vertical)
+        .ignoresSafeArea(edges: .top)
+        .onScrollGeometryChange(for: CGFloat.self) { geometry in
+            geometry.contentOffset.y + geometry.contentInsets.top
+        } action: { _, offset in
+            scrollOffset = offset
+        }
+        .accessibilityIdentifier("listing.detail.scroll")
     }
 
     private func heroSection(_ listing: ServiceListing) -> some View {
-        ZStack(alignment: .bottom) {
-            listingHeroMedia(listing)
-
-            LinearGradient(
-                colors: [.clear, .black.opacity(0.04), .black.opacity(0.56)],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-
-            VStack {
-                Spacer()
-
-                HStack(alignment: .bottom) {
-                    Spacer()
-
-                    if listing.resolvedImageURLs.count > 1 {
-                        Text("\(selectedImageIndex + 1)/\(listing.resolvedImageURLs.count)")
-                            .font(.caption.bold())
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 12)
-                            .frame(height: 34)
-                            .background(Color.black.opacity(0.56))
-                            .background(.ultraThinMaterial.opacity(0.54))
-                            .clipShape(Capsule())
-                    }
-                }
-                .padding(.horizontal, 20)
-                .padding(.bottom, 52)
+        let count = listing.resolvedImageURLs.count
+        return listingHeroMedia(listing)
+            .frame(maxWidth: .infinity)
+            .frame(height: 380)
+            .clipped()
+            .overlay(alignment: .top) {
+                // Keeps the status bar readable over bright photos.
+                LinearGradient(colors: [JourneyVisual.pageBackground.opacity(0.6), .clear], startPoint: .top, endPoint: .bottom)
+                    .frame(height: 100)
+                    .allowsHitTesting(false)
             }
-        }
-        .frame(height: 520)
-        .clipped()
-        .accessibilityElement(children: .contain)
+            .overlay(alignment: .bottom) {
+                if count > 1 {
+                    HStack(spacing: 5) {
+                        ForEach(0..<count, id: \.self) { index in
+                            Capsule()
+                                .fill(index == selectedImageIndex ? Color.white : Color.white.opacity(0.5))
+                                .frame(width: index == selectedImageIndex ? 18 : 6, height: 6)
+                        }
+                    }
+                    .padding(.horizontal, 10)
+                    .frame(height: 22)
+                    .background(.black.opacity(0.28), in: Capsule())
+                    .padding(.bottom, 40)
+                    .animation(.spring(response: 0.3, dampingFraction: 0.8), value: selectedImageIndex)
+                    .accessibilityLabel("\(selectedImageIndex + 1)/\(count)")
+                }
+            }
+            .accessibilityElement(children: .contain)
     }
 
     @ViewBuilder
@@ -200,262 +198,303 @@ struct ListingDetailView: View {
     }
 
     private func contentSheet(_ listing: ServiceListing) -> some View {
-        VStack(alignment: .leading, spacing: 0) {
-            Label(listing.categoryDisplayName, systemImage: listing.categoryIcon)
-                .font(.system(size: 13, weight: .bold, design: .default))
-                .foregroundColor(.black)
-                .padding(.horizontal, 14)
-                .frame(height: 38)
-                .background(JourneyVisual.lime)
-                .clipShape(Capsule())
+        VStack(alignment: .leading, spacing: 18) {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(spacing: 8) {
+                    HStack(spacing: 6) {
+                        Image(systemName: listing.categoryIcon)
+                        Text(listing.categoryDisplayName)
+                    }
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundStyle(listing.categorySwatch.ink)
+                    .padding(.horizontal, 10)
+                    .frame(height: 26)
+                    .background(listing.categorySwatch.fill, in: Capsule())
 
-            Text(listing.title)
-                .font(.system(size: 31, weight: .bold, design: .default))
-                .foregroundColor(JourneyVisual.primaryText)
-                .lineSpacing(1)
-                .fixedSize(horizontal: false, vertical: true)
-                .padding(.top, 16)
+                    HStack(spacing: 5) {
+                        Image(systemName: listing.isStale ? "exclamationmark.circle.fill" : "checkmark.seal.fill")
+                            .foregroundStyle(listing.isStale ? Color.orange : JourneyVisual.accentStrong)
+                        Text(listing.freshnessText)
+                            .foregroundStyle(JourneyVisual.secondaryText)
+                            .lineLimit(1)
+                    }
+                    .font(.system(size: 12, weight: .semibold))
+                }
 
-            HStack(spacing: 9) {
-                Image(systemName: "mappin")
-                    .foregroundColor(Theme.Colors.textPrimary)
-                Text(locationText(for: listing))
-                    .foregroundColor(JourneyVisual.secondaryText)
+                Text(listing.title)
+                    .font(.system(size: 25, weight: .bold))
+                    .tracking(-0.3)
+                    .foregroundColor(JourneyVisual.primaryText)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityAddTraits(.isHeader)
+
+                Text(displayPrice(for: listing))
+                    .font(.system(size: 20, weight: .heavy))
+                    .foregroundColor(.black)
+                    .padding(.horizontal, 9)
+                    .padding(.vertical, 2)
+                    .background(
+                        RoundedRectangle(cornerRadius: 7, style: .continuous)
+                            .fill(JourneyVisual.lime)
+                            .rotationEffect(.degrees(-1.2))
+                    )
+                    .padding(.top, 2)
+                    .accessibilityLabel("\("marketplace.detail.price".localized): \(displayPrice(for: listing))")
             }
-            .font(.system(size: 16, weight: .medium, design: .default))
-            .padding(.top, 14)
 
-            detailDivider
-                .padding(.vertical, 18)
+            factsStrip(listing)
 
-            providerPriceRow(listing)
+            authorCard(listing)
 
-            detailDivider
-                .padding(.vertical, 18)
-
-            metadataRow(listing)
-
-            detailDivider
-                .padding(.vertical, 18)
+            if let value = listing.contactValue?.trimmingCharacters(in: .whitespaces), !value.isEmpty, !isOwnListing(listing) {
+                contactCard(type: listing.contactType, value: value)
+            }
 
             descriptionBlock(listing)
 
-            trustBlock(listing)
-                .padding(.top, 20)
+            trustNote(listing)
 
             safetyActions
-                .padding(.top, 18)
-
-            detailsFootnote
-                .padding(.top, 18)
         }
-        .padding(.horizontal, 24)
-        .padding(.top, 30)
-        .padding(.bottom, 30)
-        .background(.ultraThinMaterial.opacity(0.9))
-        .background(JourneyVisual.pageBackground.opacity(0.94))
-        .clipShape(UnevenRoundedRectangle(
-            topLeadingRadius: 34,
-            bottomLeadingRadius: 0,
-            bottomTrailingRadius: 0,
-            topTrailingRadius: 34,
-            style: .continuous
-        ))
-        .overlay(alignment: .top) {
-            UnevenRoundedRectangle(
-                topLeadingRadius: 34,
-                bottomLeadingRadius: 0,
-                bottomTrailingRadius: 0,
-                topTrailingRadius: 34,
-                style: .continuous
-            )
-            .stroke(JourneyVisual.softBorder, lineWidth: 1)
-        }
-        .shadow(color: .black.opacity(0.42), radius: 28, y: -8)
-    }
-
-    private func providerPriceRow(_ listing: ServiceListing) -> some View {
-        HStack(spacing: 14) {
-            Button { if listing.authorID != nil { showPublicProfile = true } } label: {
-                HStack(spacing: 14) {
-                    ZStack {
-                        Circle().fill(JourneyVisual.softBorder)
-                        Circle().stroke(JourneyVisual.softBorder, lineWidth: 1)
-                        Text(String(listing.authorName.prefix(1)).uppercased())
-                            .font(.system(size: 21, weight: .bold, design: .default))
-                            .foregroundColor(JourneyVisual.primaryText)
-                    }
-                    .frame(width: 56, height: 56)
-                    VStack(alignment: .leading, spacing: 5) {
-                        Text(listing.authorName)
-                            .font(.system(size: 18, weight: .bold, design: .default))
-                            .foregroundColor(JourneyVisual.primaryText).lineLimit(1)
-                        Label(
-                            listing.isVerified ? "profile.verified".localized : "profile.community".localized,
-                            systemImage: listing.isVerified ? "checkmark.seal.fill" : "person.2.fill"
-                        )
-                        .font(.caption.weight(.semibold))
-                        .foregroundColor(listing.isVerified ? Theme.Colors.textPrimary : JourneyVisual.secondaryText)
-                    }
-                }
-            }
-            .buttonStyle(.plain)
-            .disabled(listing.authorID == nil)
-
-            Spacer(minLength: 8)
-
-            Text(displayPrice(for: listing))
-                .font(.system(size: 17, weight: .heavy, design: .default))
-                .foregroundColor(.black)
-                .lineLimit(1)
-                .minimumScaleFactor(0.72)
-                .padding(.horizontal, 17)
-                .frame(minHeight: 52)
-                .background(JourneyVisual.lime)
-                .clipShape(Capsule())
-        }
-        .accessibilityElement(children: .combine)
-    }
-
-    private func metadataRow(_ listing: ServiceListing) -> some View {
-        HStack(spacing: 0) {
-            metadataItem(icon: "eye", text: "%@ переглядів".localized(with: "\(listing.viewCount)"))
-
-            Rectangle()
-                .fill(JourneyVisual.softBorder)
-                .frame(width: 1, height: 28)
-                .padding(.horizontal, 16)
-
-            metadataItem(
-                icon: "calendar",
-                text: listing.createdAt.map {
-                    "Опубліковано %@".localized(with: "\($0.formatted(.dateTime.day().month(.wide).locale(appContainer.currentLocale)))")
-                } ?? "Дата не вказана".localized
-            )
-        }
-        .accessibilityElement(children: .combine)
-    }
-
-    private func metadataItem(icon: String, text: String) -> some View {
-        HStack(spacing: 8) {
-            Image(systemName: icon)
-                .font(.system(size: 16, weight: .medium))
-            Text(text)
-                .font(.caption.weight(.medium))
-                .lineLimit(2)
-        }
-        .foregroundColor(JourneyVisual.secondaryText)
+        .padding(.horizontal, 20)
+        .padding(.top, 22)
         .frame(maxWidth: .infinity, alignment: .leading)
-    }
-
-    private func descriptionBlock(_ listing: ServiceListing) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(spacing: 9) {
-                Image(systemName: "text.alignleft")
-                    .foregroundColor(Theme.Colors.textPrimary)
-                Text("marketplace.description".localized)
-                    .font(.headline)
-                    .foregroundColor(JourneyVisual.primaryText)
-            }
-
-            Text(listing.description)
-                .font(.system(size: 16, weight: .regular, design: .default))
-                .foregroundColor(JourneyVisual.secondaryText)
-                .lineSpacing(4)
-                .lineLimit(descriptionExpanded ? nil : 5)
-                .fixedSize(horizontal: false, vertical: true)
-
-            if listing.description.count > 220 {
-                Button(descriptionExpanded ? "Згорнути".localized : "Читати повністю".localized) {
-                    withAnimation(.easeInOut(duration: 0.24)) {
-                        descriptionExpanded.toggle()
-                    }
-                }
-                .font(.subheadline.bold())
-                .foregroundColor(Theme.Colors.textPrimary)
-                .buttonStyle(.plain)
-            }
-        }
-    }
-
-    private func trustBlock(_ listing: ServiceListing) -> some View {
-        HStack(alignment: .top, spacing: 13) {
-            Image(systemName: listing.isStale ? "exclamationmark.shield.fill" : "checkmark.shield.fill")
-                .font(.system(size: 22, weight: .semibold))
-                .foregroundColor(listing.isStale ? .orange : JourneyVisual.lime)
-
-            VStack(alignment: .leading, spacing: 5) {
-                Text(listing.freshnessText)
-                    .font(.subheadline.bold())
-                    .foregroundColor(JourneyVisual.primaryText)
-                Text(listing.isStale
-                     ? "Дані могли змінитися. Уточніть ціну й умови перед оплатою.".localized
-                     : "Модерація Sweezy пройдена. Не переказуйте гроші наперед незнайомим людям.".localized)
-                    .font(.caption)
-                    .foregroundColor(JourneyVisual.secondaryText)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-        }
-        .padding(16)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Theme.Colors.card)
-        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .stroke(JourneyVisual.softBorder, lineWidth: 1)
+        .background(
+            UnevenRoundedRectangle(topLeadingRadius: 28, topTrailingRadius: 28, style: .continuous)
+                .fill(JourneyVisual.pageBackground)
+                .shadow(color: .black.opacity(0.1), radius: 16, y: -6)
         )
     }
 
+    /// Place, date and reach in one quiet strip instead of three divided rows.
+    private func factsStrip(_ listing: ServiceListing) -> some View {
+        HStack(spacing: 0) {
+            factCell(icon: "mappin", label: "marketplace.detail.location".localized, value: shortLocationText(for: listing))
+            factDivider
+            factCell(
+                icon: "calendar",
+                label: "marketplace.detail.published".localized,
+                value: listing.createdAt.map {
+                    $0.formatted(.dateTime.day().month(.abbreviated).locale(appContainer.currentLocale))
+                } ?? "—"
+            )
+            factDivider
+            factCell(icon: "eye", label: "marketplace.detail.views".localized, value: "\(listing.viewCount)")
+        }
+        .padding(.vertical, 12)
+        .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).strokeBorder(JourneyVisual.softBorder, lineWidth: 1))
+        .accessibilityElement(children: .combine)
+    }
+
+    private func factCell(icon: String, label: String, value: String) -> some View {
+        VStack(alignment: .leading, spacing: 5) {
+            HStack(spacing: 4) {
+                Image(systemName: icon)
+                    .font(.system(size: 10, weight: .bold))
+                Text(label)
+                    .font(.system(size: 11, weight: .semibold))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+            }
+            .foregroundStyle(JourneyVisual.secondaryText)
+            Text(value)
+                .font(.system(size: 15, weight: .bold))
+                .foregroundStyle(JourneyVisual.primaryText)
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 14)
+    }
+
+    private var factDivider: some View {
+        Rectangle()
+            .fill(JourneyVisual.softBorder)
+            .frame(width: 1, height: 34)
+    }
+
+    private func authorCard(_ listing: ServiceListing) -> some View {
+        Button { if listing.authorID != nil { showPublicProfile = true } } label: {
+            HStack(spacing: 12) {
+                Text(String(listing.authorName.prefix(1)).uppercased())
+                    .font(.system(size: 17, weight: .bold))
+                    .foregroundColor(.black)
+                    .frame(width: 44, height: 44)
+                    .background(JourneyVisual.lime, in: Circle())
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(listing.authorName)
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(JourneyVisual.primaryText)
+                        .lineLimit(1)
+                    Label(
+                        listing.isVerified ? "profile.verified".localized : "profile.community".localized,
+                        systemImage: listing.isVerified ? "checkmark.seal.fill" : "person.2.fill"
+                    )
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(JourneyVisual.secondaryText)
+                    .labelStyle(.titleAndIcon)
+                }
+
+                Spacer(minLength: 8)
+
+                if listing.authorID != nil {
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundColor(JourneyVisual.secondaryText)
+                        .frame(width: 30, height: 30)
+                        .background(JourneyVisual.softSurface, in: Circle())
+                }
+            }
+            .padding(12)
+            .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).strokeBorder(JourneyVisual.softBorder, lineWidth: 1))
+        }
+        .buttonStyle(ScaleButtonStyle(scaleAmount: 0.98, hapticStyle: .light))
+        .disabled(listing.authorID == nil)
+        .accessibilityElement(children: .combine)
+    }
+
+    private func contactCard(type: ContactType, value: String) -> some View {
+        Button { openContact(type: type, value: value) } label: {
+            HStack(spacing: 12) {
+                Image(systemName: contactIcon(for: type))
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(JourneyVisual.accentText)
+                    .frame(width: 44, height: 44)
+                    .background(JourneyVisual.softSurface, in: Circle())
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(ctaLabel(for: type))
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(JourneyVisual.secondaryText)
+                    Text(value)
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(JourneyVisual.primaryText)
+                        .lineLimit(1)
+                }
+
+                Spacer(minLength: 8)
+
+                Image(systemName: "arrow.up.right")
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundColor(JourneyVisual.secondaryText)
+                    .frame(width: 30, height: 30)
+                    .background(JourneyVisual.softSurface, in: Circle())
+            }
+            .padding(12)
+            .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).strokeBorder(JourneyVisual.softBorder, lineWidth: 1))
+        }
+        .buttonStyle(ScaleButtonStyle(scaleAmount: 0.98, hapticStyle: .light))
+        .accessibilityIdentifier("listing.detail.contact")
+    }
+
+    private func contactIcon(for type: ContactType) -> String {
+        switch type {
+        case .telegram: return "paperplane.fill"
+        case .whatsapp: return "message.fill"
+        case .email: return "envelope.fill"
+        case .phone: return "phone.fill"
+        }
+    }
+
+    private func descriptionBlock(_ listing: ServiceListing) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("marketplace.description".localized.uppercased())
+                .font(.system(size: 11, weight: .heavy))
+                .tracking(1)
+                .foregroundColor(JourneyVisual.secondaryText)
+
+            Text(listing.description)
+                .font(.system(size: 15, weight: .regular))
+                .foregroundColor(JourneyVisual.primaryText.opacity(0.86))
+                .lineSpacing(4)
+                .lineLimit(descriptionExpanded ? nil : 6)
+                .fixedSize(horizontal: false, vertical: true)
+
+            if listing.description.count > 220 {
+                Button {
+                    withAnimation(.easeInOut(duration: 0.24)) {
+                        descriptionExpanded.toggle()
+                    }
+                } label: {
+                    HStack(spacing: 5) {
+                        Text(descriptionExpanded ? "Згорнути".localized : "Читати повністю".localized)
+                        Image(systemName: descriptionExpanded ? "chevron.up" : "chevron.down")
+                            .font(.system(size: 11, weight: .bold))
+                    }
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundColor(JourneyVisual.primaryText)
+                    .padding(.horizontal, 12)
+                    .frame(height: 32)
+                    .background(JourneyVisual.softSurface, in: Capsule())
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private func trustNote(_ listing: ServiceListing) -> some View {
+        HStack(alignment: .top, spacing: 10) {
+            Image(systemName: listing.isStale ? "exclamationmark.shield.fill" : "checkmark.shield.fill")
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundColor(listing.isStale ? .orange : JourneyVisual.accentStrong)
+            Text(listing.isStale
+                 ? "Дані могли змінитися. Уточніть ціну й умови перед оплатою.".localized
+                 : "Модерація Sweezy пройдена. Не переказуйте гроші наперед незнайомим людям.".localized)
+                .font(.system(size: 13, weight: .medium))
+                .foregroundColor(JourneyVisual.secondaryText)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(14)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background((listing.isStale ? Color.orange : JourneyVisual.lime).opacity(0.12), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+    }
+
     private var safetyActions: some View {
-        HStack(spacing: 10) {
+        HStack(spacing: 18) {
             Button {
                 guard sessionManager.isAuthenticated else { showAuth = true; return }
                 showReportReasons = true
             } label: {
-                Label("Поскаржитися".localized, systemImage: "exclamationmark.bubble")
-                    .frame(maxWidth: .infinity)
+                Label("Поскаржитися".localized, systemImage: "flag")
             }
-            .buttonStyle(.bordered)
 
-            Button(role: .destructive) {
+            Button {
                 guard sessionManager.isAuthenticated else { showAuth = true; return }
                 showBlockConfirmation = true
             } label: {
-                Label("Блокувати".localized, systemImage: "person.crop.circle.badge.xmark")
-                    .frame(maxWidth: .infinity)
+                Label("Блокувати".localized, systemImage: "hand.raised")
             }
-            .buttonStyle(.bordered)
         }
-        .font(.caption.bold())
-        .tint(JourneyVisual.secondaryText)
-    }
-
-    private var detailsFootnote: some View {
-        HStack(spacing: 8) {
-            Image(systemName: "checkmark.shield.fill")
-            Text("marketplace.detail.footer".localized)
-        }
-        .font(.caption)
+        .buttonStyle(.plain)
+        .font(.system(size: 13, weight: .semibold))
         .foregroundColor(JourneyVisual.secondaryText)
-        .fixedSize(horizontal: false, vertical: true)
-    }
-
-    private var detailDivider: some View {
-        Rectangle()
-            .fill(JourneyVisual.softBorder)
-            .frame(height: 1)
+        .frame(maxWidth: .infinity)
+        .frame(minHeight: 44)
     }
 
     private func stickyHeader(_ listing: ServiceListing) -> some View {
-        HStack(spacing: 12) {
+        // Once the photo scrolls away, a paper bar with the title fades in behind the controls.
+        let collapsed = scrollOffset > 220
+        return HStack(spacing: 10) {
             Button { dismiss() } label: {
                 circularControlLabel(icon: "chevron.left")
             }
-            .buttonStyle(.plain)
+            .buttonStyle(ScaleButtonStyle(scaleAmount: 0.94, hapticStyle: .light))
             .accessibilityLabel("common.back".localized)
             .accessibilityIdentifier("listing.detail.back")
 
-            Spacer()
+            Text(listing.title)
+                .font(.system(size: 15, weight: .bold))
+                .foregroundColor(JourneyVisual.primaryText)
+                .lineLimit(1)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .opacity(collapsed ? 1 : 0)
+                .accessibilityHidden(true)
 
             ShareLink(
                 item: "\(listing.title)\n\(listing.description)",
@@ -469,33 +508,45 @@ struct ListingDetailView: View {
 
             Button { toggleSaved(listing) } label: {
                 circularControlLabel(
-                    icon: appContainer.savedItems.isListingSaved(listing.id) ? "heart.fill" : "heart"
+                    icon: appContainer.savedItems.isListingSaved(listing.id) ? "heart.fill" : "heart",
+                    active: appContainer.savedItems.isListingSaved(listing.id)
                 )
             }
-            .buttonStyle(.plain)
+            .buttonStyle(ScaleButtonStyle(scaleAmount: 0.94, hapticStyle: .light))
             .accessibilityLabel(appContainer.savedItems.isListingSaved(listing.id) ? "Збережено".localized : "Зберегти".localized)
             .accessibilityIdentifier("listing.detail.favorite")
         }
-        .padding(.horizontal, 20)
-        .padding(.top, 10)
+        .padding(.horizontal, 16)
+        .padding(.top, 6)
+        .padding(.bottom, 8)
+        .background {
+            Rectangle()
+                .fill(JourneyVisual.pageBackground)
+                .overlay(alignment: .bottom) {
+                    Rectangle().fill(JourneyVisual.softBorder).frame(height: 0.5)
+                }
+                .ignoresSafeArea(edges: .top)
+                .opacity(collapsed ? 1 : 0)
+        }
+        .animation(.easeOut(duration: 0.2), value: collapsed)
     }
 
-    private func circularControlLabel(icon: String) -> some View {
+    private func circularControlLabel(icon: String, active: Bool = false) -> some View {
         Image(systemName: icon)
-            .font(.system(size: 19, weight: .semibold))
-            .foregroundColor(JourneyVisual.primaryText)
-            .frame(width: 52, height: 52)
-            .background(Theme.Colors.card)
-            .background(.ultraThinMaterial.opacity(0.72))
-            .clipShape(Circle())
-            .overlay(Circle().stroke(JourneyVisual.softBorder, lineWidth: 1))
-            .shadow(color: .black.opacity(0.22), radius: 12, y: 5)
+            .font(.system(size: 15, weight: .bold))
+            .foregroundColor(active ? .black : JourneyVisual.primaryText)
+            .frame(width: 42, height: 42)
+            .background(active ? JourneyVisual.lime : Theme.Colors.card.opacity(0.94), in: Circle())
+            .overlay(Circle().strokeBorder(JourneyVisual.softBorder, lineWidth: 1))
+            .shadow(color: .black.opacity(0.14), radius: 8, y: 3)
     }
 
     private func bottomActionBar(listing: ServiceListing) -> some View {
-        let chatAvailable = listing.authorID != nil && !isOwnListing(listing)
-        let bookable = businessService(for: listing) != nil && !isOwnListing(listing)
-        return HStack(spacing: 12) {
+        let own = isOwnListing(listing)
+        let chatAvailable = listing.authorID != nil && !own
+        let bookable = businessService(for: listing) != nil && !own
+        let unavailable = own || listing.authorID == nil
+        return HStack(spacing: 10) {
             Button {
                 if bookable {
                     guard sessionManager.isAuthenticated else {
@@ -520,25 +571,26 @@ struct ListingDetailView: View {
                 startChat()
             } label: {
                 HStack(spacing: 10) {
-                    Image(systemName: isOwnListing(listing) ? "person.crop.circle.badge.checkmark" : (bookable ? "calendar.badge.plus" : "bubble.left.and.bubble.right.fill"))
-                        .font(.system(size: 19, weight: .bold))
+                    Image(systemName: own ? "checkmark.seal.fill" : (bookable ? "calendar.badge.plus" : "bubble.left.and.bubble.right.fill"))
+                        .font(.system(size: 16, weight: .bold))
                     Text(
-                        isOwnListing(listing)
+                        own
                             ? "chat.listing.own".localized
                             : (bookable ? "Записатися".localized : (listing.authorID == nil ? "chat.listing.unavailable".localized : "chat.listing.message".localized))
                     )
-                        .font(.system(size: 16, weight: .heavy, design: .default))
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.78)
+                    .font(.system(size: 16, weight: .bold))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
                 }
-                .foregroundColor(.black)
+                .foregroundColor(unavailable ? JourneyVisual.secondaryText : .black)
                 .frame(maxWidth: .infinity)
-                .frame(height: 58)
-                .background((isOwnListing(listing) || listing.authorID == nil) ? Color.gray : JourneyVisual.lime)
-                .clipShape(Capsule())
+                .frame(height: 52)
+                .background(unavailable ? JourneyVisual.softSurface : JourneyVisual.lime, in: Capsule())
+                .shadow(color: JourneyVisual.lime.opacity(unavailable ? 0 : 0.4), radius: 14, y: 6)
             }
-            .buttonStyle(.plain)
-            .disabled(isOwnListing(listing))
+            .buttonStyle(ScaleButtonStyle(scaleAmount: 0.98, hapticStyle: .medium))
+            .disabled(own)
+            .accessibilityIdentifier("listing.detail.primary")
 
             if bookable {
                 Button {
@@ -550,40 +602,24 @@ struct ListingDetailView: View {
                     startChat()
                 } label: {
                     Image(systemName: "message.fill")
-                        .font(.system(size: 19, weight: .semibold))
+                        .font(.system(size: 17, weight: .semibold))
                         .foregroundColor(JourneyVisual.primaryText)
-                        .frame(width: 58, height: 58)
-                        .background(Theme.Colors.card)
-                        .clipShape(Circle())
-                        .overlay(Circle().stroke(JourneyVisual.softBorder, lineWidth: 1))
+                        .frame(width: 52, height: 52)
+                        .background(Theme.Colors.card, in: Circle())
+                        .overlay(Circle().strokeBorder(JourneyVisual.softBorder, lineWidth: 1))
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel("Написати".localized)
             }
-
-            Button {
-                toggleSaved(listing)
-            } label: {
-                Image(systemName: appContainer.savedItems.isListingSaved(listing.id) ? "bookmark.fill" : "bookmark")
-                    .font(.system(size: 20, weight: .semibold))
-                    .foregroundColor(appContainer.savedItems.isListingSaved(listing.id) ? Theme.Colors.textPrimary : JourneyVisual.secondaryText)
-                    .frame(width: 58, height: 58)
-                    .background(Theme.Colors.card)
-                    .clipShape(Circle())
-                    .overlay(Circle().stroke(JourneyVisual.softBorder, lineWidth: 1))
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel(appContainer.savedItems.isListingSaved(listing.id) ? "Збережено".localized : "Зберегти".localized)
         }
         .padding(.horizontal, 16)
-        .padding(.top, 12)
-        .padding(.bottom, 10)
-        .background(.ultraThinMaterial.opacity(0.96))
-        .background(Theme.Colors.card)
+        .padding(.top, 10)
+        .padding(.bottom, 6)
+        .background(.ultraThinMaterial)
         .overlay(alignment: .top) {
             Rectangle()
-                .fill(JourneyVisual.softBorder)
-                .frame(height: 1)
+                .fill(JourneyVisual.softBorder.opacity(0.6))
+                .frame(height: 0.5)
         }
     }
 
@@ -680,11 +716,10 @@ struct ListingDetailView: View {
         .padding(24)
     }
 
-    private func locationText(for listing: ServiceListing) -> String {
-        let country = ResidenceCountry(rawValue: listing.countryCode) ?? .switzerland
+    private func shortLocationText(for listing: ServiceListing) -> String {
         guard listing.subdivisionCode != "all" else { return "country.whole_country".localized }
-        let name = CountryCatalog.subdivisionName(country: country, code: listing.subdivisionCode)
-        return name == listing.subdivisionCode ? name : "\(name) · \(listing.subdivisionCode)"
+        let country = ResidenceCountry(rawValue: listing.countryCode) ?? .switzerland
+        return CountryCatalog.subdivisionName(country: country, code: listing.subdivisionCode)
     }
 
     private func displayPrice(for listing: ServiceListing) -> String {

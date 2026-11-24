@@ -6,10 +6,9 @@ struct JourneyGuideCompactRow: View {
 
     var body: some View {
         HStack(spacing: 13) {
-            Image(imageName)
-                .resizable()
-                .scaledToFill()
+            Color.clear
                 .frame(width: 76, height: 82)
+                .overlay { JourneyRemoteImage(url: guide.coverURL, fallbackAsset: imageName) }
                 .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
 
             VStack(alignment: .leading, spacing: 7) {

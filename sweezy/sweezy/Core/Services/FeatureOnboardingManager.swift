@@ -25,6 +25,7 @@ enum OnboardingFeature: String, CaseIterable {
     case news = "feature.news"
     case gamification = "feature.gamification"
     case cvBuilder = "feature.cv_builder"
+    case people = "feature.people"
     
     /// UserDefaults key for tracking if this onboarding was shown
     var seenKey: String { AccountScopedStorage.namespaced("onboarding.seen.\(rawValue)") }
@@ -34,7 +35,7 @@ enum OnboardingFeature: String, CaseIterable {
     
     /// Current onboarding version (increment to trigger "What's New")
     var currentVersion: Int {
-        3
+        4
     }
 }
 
@@ -130,6 +131,24 @@ extension FeatureOnboardingContent {
         ]
     )
     
+    static let people = FeatureOnboardingContent(
+        feature: .people,
+        slides: [
+            OnboardingSlide(
+                icon: "person.2.fill",
+                iconColor: Theme.Colors.accentTurquoise,
+                title: "onboarding.people.title".localized,
+                description: "onboarding.people.description".localized
+            ),
+            OnboardingSlide(
+                icon: "calendar.badge.plus",
+                iconColor: Theme.Colors.accentCoral,
+                title: "onboarding.people.events.title".localized,
+                description: "onboarding.people.events.description".localized
+            )
+        ]
+    )
+
     static let calculator = FeatureOnboardingContent(
         feature: .calculator,
         icon: "function",

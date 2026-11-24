@@ -261,11 +261,20 @@ def cleanup_notification_data() -> tuple[int, int]:
 
 
 async def notification_worker() -> None:
+    from .engagement_push import run_engagement_jobs
+
     last_cleanup = 0.0
+    last_engagement = 0.0
     try:
         while True:
             try:
                 await process_notification_outbox()
+                # Digests look at each user's local time, so a 15-minute tick lands inside every window.
+                if time.monotonic() - last_engagement >= 15 * 60:
+                    last_engagement = time.monotonic()
+                    queued = await asyncio.to_thread(run_engagement_jobs)
+                    if any(queued.values()):
+                        log.info("engagement_pushes_queued", **queued)
                 if time.monotonic() - last_cleanup >= 60 * 60:
                     removed_outbox, removed_devices = await asyncio.to_thread(cleanup_notification_data)
                     last_cleanup = time.monotonic()

@@ -55,6 +55,7 @@ from .routers.chat import devices_router
 from .routers.discovery import router as discovery_router
 from .routers.discovery import admin_router as discovery_admin_router
 from .routers.place_suggestions import router as place_suggestions_router
+from .routers.notifications import router as notifications_router
 from .routers.place_suggestions import admin_router as place_suggestions_admin_router
 from .routers.incidents import router as incidents_router
 from .routers.network import router as network_router
@@ -466,6 +467,7 @@ app.include_router(experts_admin_router, prefix=f"{API_PREFIX}/admin", tags=["ad
 app.include_router(chat_router, prefix=f"{API_PREFIX}/chat", tags=["chat"])
 app.include_router(chat_admin_router, prefix=f"{API_PREFIX}/admin", tags=["admin", "chat"])
 app.include_router(devices_router, prefix=f"{API_PREFIX}/devices", tags=["devices"])
+app.include_router(notifications_router, prefix=f"{API_PREFIX}/notifications", tags=["notifications"])
 app.include_router(discovery_router, prefix=f"{API_PREFIX}/discovery", tags=["discovery"])
 app.include_router(discovery_admin_router, prefix=f"{API_PREFIX}/admin", tags=["admin", "discovery"])
 app.include_router(place_suggestions_router, prefix=f"{API_PREFIX}/places", tags=["places"])

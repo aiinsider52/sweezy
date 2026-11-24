@@ -1,0 +1,233 @@
+[
+ {
+  "id": "75299274-ee66-59f7-9b5c-d131fcb1b579",
+  "name": "Посольство України в Австрії",
+  "type": "government",
+  "category": "embassy",
+  "audience": "ukrainian",
+  "description": "Консульські послуги для громадян України в Австрії: паспорти, довідки, нотаріальні дії.",
+  "descriptions": {
+   "uk": "Консульські послуги для громадян України в Австрії: паспорти, довідки, нотаріальні дії.",
+   "en": "Consular services for Ukrainian citizens in Austria: passports, certificates, notarial acts.",
+   "de": "Konsularische Dienste für ukrainische Staatsangehörige in Österreich: Pässe, Bescheinigungen, Beglaubigungen."
+  },
+  "address": {
+   "street": "Naaffgasse",
+   "houseNumber": "23",
+   "postalCode": "1180",
+   "city": "Wien",
+   "canton": "ZH"
+  },
+  "coordinate": {
+   "latitude": 48.234045,
+   "longitude": 16.312129
+  },
+  "countryCode": "AT",
+  "subdivisionCode": "AT-9",
+  "openingHours": [],
+  "languages": [
+   "uk",
+   "de"
+  ],
+  "services": [
+   "Паспорти",
+   "Консульські довідки"
+  ],
+  "isAccessible": false,
+  "reviewCount": 0,
+  "source": "https://austria.mfa.gov.ua/de",
+  "verifiedAt": "2026-10-28T00:00:00Z",
+  "website": "https://austria.mfa.gov.ua"
+ },
+ {
+  "id": "a277c2b8-aab7-55af-b1a1-b24be4ee7f35",
+  "name": "Церква св. Варвари · Barbareum (УГКЦ Відень)",
+  "type": "community",
+  "category": "religious_center",
+  "audience": "ukrainian",
+  "description": "Головна українська греко-католицька церква Австрії й центр громади: богослужіння українською, простір Barbareum для зустрічей і допомоги.",
+  "descriptions": {
+   "uk": "Головна українська греко-католицька церква Австрії й центр громади: богослужіння українською, простір Barbareum для зустрічей і допомоги.",
+   "en": "Main Ukrainian Greek-Catholic church in Austria and a community hub: Ukrainian liturgy and the Barbareum space for meetups and aid.",
+   "de": "Hauptkirche der ukrainischen Griechisch-Katholischen in Österreich und Community-Zentrum: Liturgie auf Ukrainisch, Barbareum für Treffen und Hilfe."
+  },
+  "address": {
+   "street": "Postgasse",
+   "houseNumber": "8",
+   "postalCode": "1010",
+   "city": "Wien",
+   "canton": "ZH"
+  },
+  "coordinate": {
+   "latitude": 48.209643,
+   "longitude": 16.379149
+  },
+  "countryCode": "AT",
+  "subdivisionCode": "AT-9",
+  "openingHours": [],
+  "languages": [
+   "uk",
+   "de"
+  ],
+  "services": [
+   "Богослужіння українською",
+   "Простір громади"
+  ],
+  "isAccessible": false,
+  "reviewCount": 0,
+  "source": "https://www.geschichtewiki.wien.gv.at/Barbarakirche",
+  "verifiedAt": "2026-10-28T00:00:00Z"
+ },
+ {
+  "id": "a53aab84-5bdb-5997-9f6c-7c0304969744",
+  "name": "Українська суботня школа у Відні",
+  "type": "education",
+  "category": "school",
+  "audience": "ukrainian",
+  "description": "Заняття щосуботи та щонеділі в будівлі Akademisches Gymnasium, а також гуртки й курси.",
+  "descriptions": {
+   "uk": "Заняття щосуботи та щонеділі в будівлі Akademisches Gymnasium, а також гуртки й курси.",
+   "en": "Classes every Saturday and Sunday at the Akademisches Gymnasium, plus clubs and courses.",
+   "de": "Unterricht jeden Samstag und Sonntag im Akademischen Gymnasium, dazu Kurse und Workshops."
+  },
+  "address": {
+   "street": "Beethovenplatz",
+   "houseNumber": "1",
+   "postalCode": "1010",
+   "city": "Wien",
+   "canton": "ZH"
+  },
+  "coordinate": {
+   "latitude": 48.201547,
+   "longitude": 16.376613
+  },
+  "countryCode": "AT",
+  "subdivisionCode": "AT-9",
+  "openingHours": [],
+  "languages": [
+   "uk"
+  ],
+  "services": [
+   "Українська школа",
+   "Гуртки"
+  ],
+  "isAccessible": false,
+  "reviewCount": 0,
+  "source": "https://ukr-schule.at/de/schule",
+  "verifiedAt": "2026-10-28T00:00:00Z",
+  "website": "https://ukr-schule.at"
+ },
+ {
+  "id": "433a7b53-87e9-52f2-a0e8-b018fe8e7987",
+  "name": "Elvira's",
+  "type": "community",
+  "category": "restaurant",
+  "audience": "ukrainian",
+  "description": "Традиційна українська кухня: борщ, вареники, голубці. Пн–Пт 11:30–22:30, Сб 17:00–22:30.",
+  "descriptions": {
+   "uk": "Традиційна українська кухня: борщ, вареники, голубці. Пн–Пт 11:30–22:30, Сб 17:00–22:30.",
+   "en": "Traditional Ukrainian kitchen: borscht, varenyky, holubtsi. Mon–Fri 11:30–22:30, Sat 17:00–22:30.",
+   "de": "Traditionelle ukrainische Küche: Borschtsch, Wareniki, Holubzi. Mo–Fr 11.30–22.30, Sa 17–22.30 Uhr."
+  },
+  "address": {
+   "street": "Seidlgasse",
+   "houseNumber": "39",
+   "postalCode": "1030",
+   "city": "Wien",
+   "canton": "ZH"
+  },
+  "coordinate": {
+   "latitude": 48.204982,
+   "longitude": 16.388483
+  },
+  "countryCode": "AT",
+  "subdivisionCode": "AT-9",
+  "openingHours": [
+   {
+    "weekday": 2,
+    "openTime": {
+     "hour": 11,
+     "minute": 30
+    },
+    "closeTime": {
+     "hour": 22,
+     "minute": 30
+    },
+    "isClosed": false
+   },
+   {
+    "weekday": 3,
+    "openTime": {
+     "hour": 11,
+     "minute": 30
+    },
+    "closeTime": {
+     "hour": 22,
+     "minute": 30
+    },
+    "isClosed": false
+   },
+   {
+    "weekday": 4,
+    "openTime": {
+     "hour": 11,
+     "minute": 30
+    },
+    "closeTime": {
+     "hour": 22,
+     "minute": 30
+    },
+    "isClosed": false
+   },
+   {
+    "weekday": 5,
+    "openTime": {
+     "hour": 11,
+     "minute": 30
+    },
+    "closeTime": {
+     "hour": 22,
+     "minute": 30
+    },
+    "isClosed": false
+   },
+   {
+    "weekday": 6,
+    "openTime": {
+     "hour": 11,
+     "minute": 30
+    },
+    "closeTime": {
+     "hour": 22,
+     "minute": 30
+    },
+    "isClosed": false
+   },
+   {
+    "weekday": 7,
+    "openTime": {
+     "hour": 17,
+     "minute": 0
+    },
+    "closeTime": {
+     "hour": 22,
+     "minute": 30
+    },
+    "isClosed": false
+   }
+  ],
+  "languages": [
+   "uk",
+   "de"
+  ],
+  "services": [
+   "Українська кухня"
+  ],
+  "isAccessible": false,
+  "reviewCount": 0,
+  "source": "https://elvirasrestaurant.at/",
+  "verifiedAt": "2026-10-28T00:00:00Z",
+  "phoneNumber": "+43 1 890 80 81",
+  "website": "https://elvirasrestaurant.at/"
+ }
+]

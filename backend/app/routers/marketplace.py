@@ -27,6 +27,7 @@ from ..schemas.marketplace import (
     ServiceListingResponse,
     ServiceListingUpdate,
 )
+from ..services.engagement_push import effective_price_minor, notify_listing_views, notify_price_drop
 from ..services.marketplace_moderation import moderate_listing
 from ..services.users import UserService
 from ..services.moderation import ensure_case
@@ -360,6 +361,7 @@ def get_listing(listing_id: str, db: DBSession) -> ServiceListingResponse:
 
     listing.view_count += 1
     db.add(listing)
+    notify_listing_views(db, listing)
     db.commit()
     db.refresh(listing)
 
@@ -533,6 +535,7 @@ def update_listing(
     data = payload.model_dump(exclude_unset=True)
     if not data:
         return ServiceListingDetail.model_validate(listing)
+    previous_price = effective_price_minor(listing)
 
     if "title" in data:
         listing.title = data["title"]
@@ -563,6 +566,7 @@ def update_listing(
         listing.rejection_reason = None
 
     db.add(listing)
+    notify_price_drop(db, listing, previous_price)
     db.commit()
     db.refresh(listing)
     return ServiceListingDetail.model_validate(listing)

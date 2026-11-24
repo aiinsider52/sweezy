@@ -24,6 +24,9 @@ enum DeepLink: Equatable {
     case news
     case cvBuilder
     case chat(id: String)
+    case listing(id: String)
+    case people
+    case deadlines
     
     // Settings
     case settings
@@ -46,9 +49,15 @@ enum DeepLink: Equatable {
             return 1
         case .map, .place:
             return 2
-        case .settings, .profile, .privacy, .language:
+        case .listing:
+            return 3
+        case .people:
+            return 4
+        case .settings:
+            return MainTabRouter.settingsTab
+        case .profile, .privacy, .language:
             return 0
-        case .onboarding, .passwordReset, .chat:
+        case .onboarding, .passwordReset, .chat, .deadlines:
             return nil
         }
     }
@@ -174,6 +183,15 @@ class DeepLinkService: ObservableObject {
 
         case "chat":
             if path.count == 1, let id = path.first, validID(id) { return .chat(id: id) }
+
+        case "listing", "marketplace":
+            if path.count == 1, let id = path.first, validID(id) { return .listing(id: id) }
+
+        case "people":
+            guard path.isEmpty else { return nil }; return .people
+
+        case "deadlines":
+            guard path.isEmpty else { return nil }; return .deadlines
             
         case "settings":
             if path == ["profile"] {
@@ -241,6 +259,12 @@ class DeepLinkService: ObservableObject {
             return URL(string: "\(baseURL)/cv")
         case .chat(let id):
             return URL(string: "\(baseURL)/chat/\(id)")
+        case .listing(let id):
+            return URL(string: "\(baseURL)/listing/\(id)")
+        case .people:
+            return URL(string: "\(baseURL)/people")
+        case .deadlines:
+            return URL(string: "\(baseURL)/deadlines")
         
         case .settings:
             return URL(string: "\(baseURL)/settings")

@@ -64,8 +64,27 @@ final class SweezyAppDelegate: NSObject, UIApplicationDelegate, UNUserNotificati
         didReceive response: UNNotificationResponse
     ) async {
         let info = response.notification.request.content.userInfo
-        guard info["type"] as? String == "chat_message", let id = info["conversation_id"] as? String else { return }
-        await MainActor.run { DeepLinkService.shared.navigate(to: .chat(id: id)) }
+        guard let link = Self.deepLink(for: info) else { return }
+        await MainActor.run { DeepLinkService.shared.navigate(to: link) }
+    }
+
+    /// Where a tapped notification should land. Each push opens the thing it talks about, not Home.
+    static func deepLink(for info: [AnyHashable: Any]) -> DeepLink? {
+        let type = info["type"] as? String
+        if let id = info["conversation_id"] as? String, !id.isEmpty,
+           type == "chat_message" || type == "friend_match" {
+            return .chat(id: id)
+        }
+        switch type {
+        case "friend_match", "likes_digest", "event_nearby":
+            return .people
+        case "listing_follow", "listing_views", "price_drop":
+            return (info["listing_id"] as? String).map { .listing(id: $0) }
+        case "deadline_reminder":
+            return .deadlines
+        default:
+            return nil
+        }
     }
 
     @MainActor
@@ -87,6 +106,7 @@ final class SweezyAppDelegate: NSObject, UIApplicationDelegate, UNUserNotificati
             #endif
             try? await ChatAPI.registerPush(token: token, environment: environment)
         }
+        await NotificationsAPI.syncDeviceContext()
     }
 
     @MainActor

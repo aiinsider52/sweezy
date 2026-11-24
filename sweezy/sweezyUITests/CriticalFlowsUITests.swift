@@ -22,7 +22,8 @@ final class CriticalFlowsUITests: XCTestCase {
         assertScreen(app, tab: "tab.directory", screen: "directory.screen")
         assertScreen(app, tab: "tab.map", screen: "map.screen")
         assertScreen(app, tab: "tab.marketplace", screen: "marketplace.screen")
-        assertScreen(app, tab: "tab.people", screen: "friends.accessGate.signIn")
+        app.openPeople()
+        XCTAssertTrue(app.buttons["friends.accessGate.signIn"].waitForExistence(timeout: 10))
 
         app.terminate()
         app.launchArguments = []

@@ -224,6 +224,7 @@ final class SessionManager: ObservableObject {
     /// Force an immediate authenticated state update after login/registration.
     /// This avoids waiting for downstream storage propagation before the whole app reacts.
     func activateAuthenticatedSession(userID: String, email: String, name: String?) {
+        TelemetryService.current?.track(.accountSignedIn, source: "auth")
         let previousScope = AccountScopedStorage.currentAccountKey()
         let trimmedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedName = name?.trimmingCharacters(in: .whitespacesAndNewlines)

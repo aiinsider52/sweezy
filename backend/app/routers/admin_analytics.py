@@ -196,3 +196,94 @@ def errors(_: CurrentAdmin, db: DBSession, days: int = 30, limit: int = Query(50
             for row in rows
         ]
     }
+
+
+# --- Growth: acquisition → activation → payment, split by install source -----------------------
+
+ACTIVATION_EVENTS = {
+    "letter_explained",
+    "guide_read",
+    "checklist_step_completed",
+    "retention_roadmap_task_completed",
+    "retention_job_search_performed",
+    "retention_marketplace_contact_tapped",
+    "retention_deadline_reminder_scheduled",
+}
+GROWTH_STEPS = (
+    ("installs", {"install_attributed"}),
+    ("onboarded", {"onboarding_completed"}),
+    ("registered", {"account_registered", "account_signed_in"}),
+    ("activated", ACTIVATION_EVENTS),
+    ("paywall", {"paywall_viewed"}),
+    ("paid", {"plus_purchased"}),
+)
+
+
+def _install(event: AnalyticsEvent) -> str | None:
+    """Telemetry stamps every event with the install id, so guest and signed-in events join up."""
+    return (event.properties or {}).get("install_id")
+
+
+def _source_label(properties: dict[str, str]) -> str:
+    if properties.get("source") != "apple_search_ads":
+        return "organic"
+    campaign = properties.get("campaign_id")
+    return f"apple_search_ads:{campaign}" if campaign else "apple_search_ads"
+
+
+@router.get("/growth")
+def growth(_: CurrentAdmin, db: DBSession, days: int = Query(30, ge=1, le=180)) -> dict[str, Any]:
+    events = sorted(_events(db, days), key=lambda item: item.occurred_at)
+    first_seen: dict[str, datetime] = {}
+    source_of: dict[str, str] = {}
+    keyword_of: dict[str, str] = {}
+    reached: dict[str, set[str]] = defaultdict(set)
+    active_days: dict[str, set[date]] = defaultdict(set)
+
+    for event in events:
+        install = _install(event)
+        if not install:
+            continue
+        occurred = event.occurred_at if event.occurred_at.tzinfo else event.occurred_at.replace(tzinfo=timezone.utc)
+        first_seen.setdefault(install, occurred)
+        active_days[install].add(occurred.date())
+        if event.event_type == "install_attributed":
+            source_of[install] = _source_label(event.properties or {})
+            if keyword := (event.properties or {}).get("keyword_id"):
+                keyword_of[install] = keyword
+        for step, types in GROWTH_STEPS:
+            if event.event_type in types:
+                reached[install].add(step)
+
+    by_source: dict[str, list[str]] = defaultdict(list)
+    for install in first_seen:
+        # Installs that predate attribution (or declined consent before it ran) count as unknown.
+        by_source[source_of.get(install, "unknown")].append(install)
+
+    def retained(installs: list[str], offset: int) -> float | None:
+        eligible = [i for i in installs if first_seen[i].date() + timedelta(days=offset) <= datetime.now(timezone.utc).date()]
+        if not eligible:
+            return None
+        kept = sum((first_seen[i].date() + timedelta(days=offset)) in active_days[i] for i in eligible)
+        return round(kept / len(eligible), 4)
+
+    sources = []
+    for source, installs in sorted(by_source.items(), key=lambda item: -len(item[1])):
+        counts = {step: sum(step in reached[i] for i in installs) for step, _ in GROWTH_STEPS}
+        counts["installs"] = len(installs)
+        sources.append({
+            "source": source,
+            "funnel": [
+                {"step": step, "users": counts[step], "rate": round(counts[step] / len(installs), 4)}
+                for step, _ in GROWTH_STEPS
+            ],
+            "retention": {"d1": retained(installs, 1), "d7": retained(installs, 7), "d30": retained(installs, 30)},
+        })
+
+    keywords = Counter(keyword_of.values())
+    return {
+        "since": _window(days).isoformat(),
+        "installs": len(first_seen),
+        "sources": sources,
+        "top_keywords": [{"keyword_id": key, "installs": count} for key, count in keywords.most_common(20)],
+    }

@@ -110,7 +110,10 @@ final class SubscriptionManager: ObservableObject {
                 await syncWithBackend(verification.jwsRepresentation)
                 await transaction.finish()
                 await refreshEntitlements()
-                if isPremium { isMonthlyTrialEligible = false }
+                if isPremium {
+                    isMonthlyTrialEligible = false
+                    TelemetryService.current?.track(.plusPurchased, source: "storekit", meta: ["product": productID])
+                }
                 return isPremium
             case .pending:
                 lastError = PurchaseError.pending.localizedDescription

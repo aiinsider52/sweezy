@@ -41,7 +41,7 @@ final class CompanionUITests: XCTestCase {
         XCTAssertTrue(app.textFields.firstMatch.waitForExistence(timeout: 10))
         keep(app, "companion-ask")
 
-        app.buttons["tab.people"].tap()
+        app.openPeople()
         let signIn = app.buttons["friends.accessGate.signIn"]
         reveal(signIn, in: app)
         keep(app, "companion-people")
@@ -73,7 +73,7 @@ final class CompanionUITests: XCTestCase {
     @MainActor
     func testPeopleSearchEmptyStateAndFilters() throws {
         let app = launch()
-        app.buttons["tab.people"].tap()
+        app.openPeople()
         let demo = app.buttons["friends.accessGate.demo"]
         reveal(demo, in: app)
         keep(app, "social-welcome-v2")
@@ -94,7 +94,7 @@ final class CompanionUITests: XCTestCase {
     func testIllustratedCityMainTabs() throws {
         let app = launch()
         keep(app, "city-home")
-        for (tab, name) in [("tab.directory", "city-directory"), ("tab.map", "city-map"), ("tab.marketplace", "city-market"), ("tab.people", "city-people")] {
+        for (tab, name) in [("tab.directory", "city-directory"), ("tab.map", "city-map"), ("tab.marketplace", "city-market")] {
             let button = app.buttons[tab]
             XCTAssertTrue(button.waitForExistence(timeout: 5))
             button.tap()
@@ -111,7 +111,7 @@ final class CompanionUITests: XCTestCase {
     @MainActor
     func testCitySettingsAndRegistration() throws {
         let app = launch()
-        app.buttons["home.openSettingsButton"].tap()
+        app.buttons["tab.settings"].tap()
         XCTAssertTrue(app.descendants(matching: .any)["settings.screen"].waitForExistence(timeout: 10))
         keep(app, "city-settings")
         let notifications = app.buttons["settings.notifications.open"]
@@ -121,7 +121,7 @@ final class CompanionUITests: XCTestCase {
         app.terminate()
 
         let guest = launch()
-        guest.buttons["tab.people"].tap()
+        guest.openPeople()
         let signIn = guest.buttons["friends.accessGate.signIn"]
         reveal(signIn, in: guest)
         signIn.tap()

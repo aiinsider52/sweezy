@@ -21,7 +21,19 @@ final class TelemetryService {
         case guideRead = "guide_read"
         case checklistStepCompleted = "checklist_step_completed"
         case checklistCompleted = "checklist_completed"
+        // Growth funnel: where people come from and whether they get value and pay.
+        case installAttributed = "install_attributed"
+        case accountRegistered = "account_registered"
+        case accountSignedIn = "account_signed_in"
+        case paywallViewed = "paywall_viewed"
+        case plusPurchased = "plus_purchased"
+        case letterExplained = "letter_explained"
+        case letterDeadlineAdded = "letter_deadline_added"
+        case letterLimitReached = "letter_limit_reached"
     }
+
+    /// The app's one telemetry pipe, for code that lives outside the view tree (purchases, sign-in).
+    private(set) static weak var current: TelemetryService?
 
     enum RetentionEvent: String {
         case onboardingProfileSaved = "retention_onboarding_profile_saved"
@@ -76,6 +88,7 @@ final class TelemetryService {
             defaults.set(generated, forKey: key)
             installID = generated
         }
+        Self.current = self
     }
     
     func info(_ type: String, source: String, message: String? = nil, meta: [String: String] = [:]) {
@@ -105,6 +118,7 @@ final class TelemetryService {
             sessionStartedAt = Date()
             track(.sessionStarted, source: "lifecycle")
         }
+        AppleAdsAttribution.resolveIfNeeded(telemetry: self)
         heartbeatTimer?.invalidate()
         heartbeatTimer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in
             Task { @MainActor in

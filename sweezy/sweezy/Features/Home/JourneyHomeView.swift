@@ -12,6 +12,7 @@ private struct HomeExploreItem: Identifiable {
 struct JourneyHomeView: View {
     @EnvironmentObject private var appContainer: AppContainer
     @EnvironmentObject private var lockManager: AppLockManager
+    @EnvironmentObject private var sessionManager: SessionManager
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.colorScheme) private var colorScheme
     @StateObject private var subscriptionManager = SubscriptionManager.shared
@@ -19,8 +20,8 @@ struct JourneyHomeView: View {
     @State private var showMyPlan = false
     @State private var showSubscription = false
     @State private var showCareerHub = false
-    @State private var showSettings = false
     @State private var showDeadlines = false
+    @State private var showPeople = false
     /// Vertical scroll position: negative while pulling down, positive once scrolled up.
     @State private var scrollOffset: CGFloat = 0
     @State private var heroDrift = false
@@ -64,28 +65,21 @@ struct JourneyHomeView: View {
                             hero(width: geometry.size.width, topInset: topInset)
 
                             VStack(alignment: .leading, spacing: 0) {
-                                planCard
+                                todayCard
                                     .journeyEntrance(delay: 0.12)
                                 quickActions
-                                    .padding(.top, 20)
+                                    .padding(.top, 22)
                                     .journeyEntrance(delay: 0.18)
-                                nextStepCard
+                                deadlinesCard
                                     .padding(.top, 20)
                                     .journeyEntrance(delay: 0.22)
-                                deadlinesCard
-                                    .padding(.top, 12)
-                                    .journeyEntrance(delay: 0.24)
                             }
                             .padding(.horizontal, 20)
                             .padding(.top, -heroOverlap)
 
                             exploreSection
-                                .padding(.top, 30)
+                                .padding(.top, 32)
                                 .journeyEntrance(delay: 0.26)
-
-                            helpCard
-                                .padding(.horizontal, 20)
-                                .padding(.top, 28)
 
                             if !subscriptionManager.isPremium {
                                 SweezyPlusHomeCard(country: selectedCountry) {
@@ -93,7 +87,7 @@ struct JourneyHomeView: View {
                                     APIClient.logPaywall(eventType: "cta_click", context: SubscriptionSource.home.rawValue)
                                 }
                                 .padding(.horizontal, 20)
-                                .padding(.top, 20)
+                                .padding(.top, 28)
                             }
                         }
                         .padding(.bottom, 126)
@@ -128,9 +122,12 @@ struct JourneyHomeView: View {
             .fullScreenCover(isPresented: $showSubscription) {
                 SubscriptionView(source: .home)
             }
-            .sheet(isPresented: $showSettings) {
-                SettingsView()
+            .fullScreenCover(isPresented: $showPeople) {
+                FriendNetworkView(showsDismissButton: true)
+                    .featureOnboarding(.people)
                     .environmentObject(appContainer)
+                    .environmentObject(lockManager)
+                    .environmentObject(sessionManager)
             }
             .onAppear {
                 appContainer.telemetry.retention(
@@ -153,6 +150,13 @@ struct JourneyHomeView: View {
             }
             .task {
                 await subscriptionManager.load()
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .journeyTabReselected)) { note in
+                guard note.object as? Int == 0 else { return }
+                showMyPlan = false
+                showRoadmap = false
+                showDeadlines = false
+                showCareerHub = false
             }
         }
         .accessibilityIdentifier("home.screen")
@@ -202,6 +206,11 @@ struct JourneyHomeView: View {
                 .frame(height: 150)
             }
             .allowsHitTesting(false)
+
+            // Clouds drift across the sky above the wash, slower than the page when scrolled.
+            DriftingClouds(scrollOffset: lift)
+                .frame(width: width, height: total * 0.62)
+                .offset(y: -pull * 0.6)
 
             VStack(alignment: .leading, spacing: 0) {
                 profileHeader
@@ -267,19 +276,6 @@ struct JourneyHomeView: View {
             .overlay(Capsule().stroke(JourneyVisual.softBorder, lineWidth: 1))
 
             Spacer()
-
-            Button { showSettings = true } label: {
-                Image(systemName: "gearshape.fill")
-                    .font(.system(size: 15, weight: .bold))
-                    .foregroundColor(JourneyVisual.primaryText)
-                    .frame(width: Theme.Layout.minimumTouchTarget, height: Theme.Layout.minimumTouchTarget)
-                    .background(.ultraThinMaterial, in: Circle())
-                    .background(Theme.Colors.card.opacity(0.55), in: Circle())
-                    .overlay(Circle().stroke(JourneyVisual.softBorder, lineWidth: 1))
-            }
-            .buttonStyle(ScaleButtonStyle(scaleAmount: 0.94, hapticStyle: .light))
-            .accessibilityLabel("settings.title".localized)
-            .accessibilityIdentifier("home.openSettingsButton")
         }
     }
 
@@ -307,82 +303,99 @@ struct JourneyHomeView: View {
 
     private var progressLabel: some View {
         let total = max(7, appContainer.firstWeekService.tasks.count)
-        let fraction = total == 0 ? 0 : min(1, Double(completedTasks) / Double(total))
-        return HStack(spacing: 10) {
-            HStack(spacing: 5) {
-                Text("\(completedTasks)/\(total)")
-                    .font(.system(size: 13, weight: .bold, design: .default).monospacedDigit())
-                    .foregroundColor(JourneyVisual.primaryText)
-                    .contentTransition(.numericText(value: Double(completedTasks)))
+        let done = min(completedTasks, total)
+        return HStack(spacing: 12) {
+            JourneyProgressRing(done: done, total: total, size: 50, lineWidth: 6)
+            VStack(alignment: .leading, spacing: 2) {
                 Text("journey.home.steps_completed".localized)
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(JourneyVisual.secondaryText)
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundColor(JourneyVisual.primaryText)
+                Text("\(Int(Double(done) / Double(total) * 100))%")
+                    .font(.system(size: 12, weight: .semibold).monospacedDigit())
+                    .foregroundColor(JourneyVisual.accentText)
+                    .contentTransition(.numericText(value: Double(done)))
             }
-            .fixedSize()
-
-            // Segmented like the onboarding progress: each finished step fills one piece.
-            HStack(spacing: 3) {
-                ForEach(0..<total, id: \.self) { index in
-                    Capsule()
-                        .fill(index < completedTasks ? JourneyVisual.accentStrong : JourneyVisual.primaryText.opacity(0.14))
-                        .frame(height: 5)
-                }
-            }
-            .frame(width: 96)
-            .accessibilityHidden(true)
         }
+        .padding(.top, 4)
         .animation(.spring(response: 0.45, dampingFraction: 0.8), value: completedTasks)
         .accessibilityElement(children: .combine)
-        .accessibilityValue("\(Int(fraction * 100))%")
     }
 
-    // MARK: - Plan
+    // MARK: - Today
 
-    /// The mascot sits on the card's edge with his map, so today's plan reads as the character's job.
-    private var planCard: some View {
-        Button { showMyPlan = true } label: {
-            VStack(alignment: .leading, spacing: 16) {
-                VStack(alignment: .leading, spacing: 5) {
-                    Text("journey.home.plan_today".localized)
-                        .font(.system(size: 21, weight: .bold))
-                        .foregroundColor(JourneyVisual.primaryText)
-                        .fixedSize(horizontal: false, vertical: true)
-                    HStack(spacing: 6) {
-                        Circle()
-                            .fill(urgentDeadlineCount > 0 ? JourneyVisual.coral : JourneyVisual.accentStrong)
-                            .frame(width: 7, height: 7)
-                        Text(planPulseSubtitle)
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(JourneyVisual.secondaryText)
-                            .lineLimit(2)
-                    }
+    /// Today's plan and the next step in one card: what to do now, one button to do it,
+    /// and the whole plan one tap away.
+    private var todayCard: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            VStack(alignment: .leading, spacing: 6) {
+                Text("journey.home.plan_today".localized)
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundColor(JourneyVisual.secondaryText)
+                Text(nextStepTitle)
+                    .font(.system(size: 21, weight: .bold))
+                    .foregroundColor(JourneyVisual.primaryText)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+                HStack(spacing: 6) {
+                    Circle()
+                        .fill(urgentDeadlineCount > 0 ? JourneyVisual.coral : JourneyVisual.accentStrong)
+                        .frame(width: 7, height: 7)
+                    Text(planPulseSubtitle)
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(JourneyVisual.secondaryText)
+                        .lineLimit(1)
                 }
-                .padding(.trailing, 104)
-                .frame(maxWidth: .infinity, alignment: .leading)
-
-                HStack {
-                    Text("companion.open_plan".localized)
-                        .font(.subheadline.weight(.bold))
-                    Spacer()
-                    Image(systemName: "arrow.right")
-                        .font(.system(size: 14, weight: .bold))
-                        .frame(width: 32, height: 32)
-                        .background(Color.black.opacity(0.08), in: Circle())
-                }
-                .foregroundStyle(.black)
-                .padding(.leading, 16)
-                .padding(.trailing, 8)
-                .frame(minHeight: 48)
-                .background(JourneyVisual.lime, in: RoundedRectangle(cornerRadius: 15, style: .continuous))
             }
-            .padding(18)
-            .padding(.top, 4)
-            .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 26, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 26, style: .continuous).stroke(JourneyVisual.softBorder, lineWidth: 1))
-            .shadow(color: JourneyVisual.black.opacity(0.08), radius: 22, y: 10)
+
+            HStack(spacing: 10) {
+                Button(action: continueNextStep) {
+                    HStack(spacing: 8) {
+                        Text("common.continue".localized)
+                        Image(systemName: "arrow.right")
+                    }
+                    .font(.system(size: 15, weight: .bold))
+                    .foregroundColor(.black)
+                    .frame(maxWidth: .infinity, minHeight: 48)
+                    .background(JourneyVisual.lime, in: Capsule())
+                }
+                .buttonStyle(ScaleButtonStyle(scaleAmount: 0.97, hapticStyle: .medium))
+                .accessibilityIdentifier("home.nextStep")
+
+                Button { showMyPlan = true } label: {
+                    Text("journey.home.whole_plan".localized)
+                        .font(.system(size: 15, weight: .bold))
+                        .foregroundColor(JourneyVisual.primaryText)
+                        .lineLimit(1)
+                        .padding(.horizontal, 18)
+                        .frame(minHeight: 48)
+                        .background(JourneyVisual.pageBackground, in: Capsule())
+                        .overlay(Capsule().stroke(JourneyVisual.softBorder, lineWidth: 1))
+                }
+                .buttonStyle(ScaleButtonStyle(scaleAmount: 0.97, hapticStyle: .light))
+                .accessibilityIdentifier("home.myPlan")
+            }
         }
-        .buttonStyle(CardPressStyle())
-        .accessibilityIdentifier("home.myPlan")
+        .padding(18)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 26, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 26, style: .continuous).stroke(JourneyVisual.softBorder, lineWidth: 1))
+        .shadow(color: JourneyVisual.black.opacity(0.07), radius: 20, y: 8)
+    }
+
+    private func continueNextStep() {
+        if appContainer.firstWeekService.nextDueTask == nil {
+            showRoadmap = true
+        } else {
+            NotificationCenter.default.post(
+                name: .switchTab,
+                object: SwitchTabPayload(tab: 1, section: .checklists)
+            )
+        }
+        appContainer.telemetry.retention(
+            .nextActionTapped,
+            source: "journey_home",
+            meta: ["destination": appContainer.firstWeekService.nextDueTask == nil ? "roadmap" : "tasks"]
+        )
     }
 
     // MARK: - Explore
@@ -391,7 +404,7 @@ struct JourneyHomeView: View {
         VStack(alignment: .leading, spacing: 14) {
             VStack(alignment: .leading, spacing: 3) {
                 Text("journey.home.explore.title".localized)
-                    .font(.system(size: 22, weight: .bold))
+                    .font(.system(size: 20, weight: .bold))
                     .foregroundColor(JourneyVisual.primaryText)
                 Text("journey.home.explore.subtitle".localized)
                     .font(.system(size: 13, weight: .medium))
@@ -400,7 +413,8 @@ struct JourneyHomeView: View {
             .padding(.horizontal, 20)
 
             ScrollView(.horizontal, showsIndicators: false) {
-                LazyHStack(spacing: 12) {
+                // A handful of cards: a plain stack keeps every one in the accessibility tree.
+                HStack(spacing: 12) {
                     ForEach(exploreItems) { item in
                         exploreCard(item)
                             .scrollTransition(.interactive, axis: .horizontal) { content, phase in
@@ -421,7 +435,12 @@ struct JourneyHomeView: View {
     private func exploreCard(_ item: HomeExploreItem) -> some View {
         let shape = RoundedRectangle(cornerRadius: 24, style: .continuous)
         return Button {
-            NotificationCenter.default.post(name: .switchTab, object: SwitchTabPayload(tab: item.tab))
+            // People has no tab of its own any more; it opens over the home page.
+            if item.id == "people" {
+                showPeople = true
+            } else {
+                NotificationCenter.default.post(name: .switchTab, object: SwitchTabPayload(tab: item.tab))
+            }
         } label: {
             ZStack(alignment: .bottomLeading) {
                 Color.clear
@@ -450,20 +469,14 @@ struct JourneyHomeView: View {
                         Text(item.subtitleKey.localized)
                             .font(.system(size: 12, weight: .medium))
                             .foregroundColor(.white.opacity(0.88))
-                            .lineLimit(2)
-                            .fixedSize(horizontal: false, vertical: true)
+                            .lineLimit(1)
                     }
                     .shadow(color: .black.opacity(0.35), radius: 6, y: 1)
                     Spacer(minLength: 0)
-                    Image(systemName: "arrow.up.right")
-                        .font(.system(size: 13, weight: .bold))
-                        .foregroundColor(.black)
-                        .frame(width: 36, height: 36)
-                        .background(JourneyVisual.lime, in: Circle())
                 }
                 .padding(14)
             }
-            .frame(width: 272, height: 196)
+            .frame(width: 236, height: 156)
             .clipShape(shape)
             .overlay(shape.stroke(Color.white.opacity(0.35), lineWidth: 1))
             .contentShape(shape)
@@ -471,69 +484,6 @@ struct JourneyHomeView: View {
         }
         .buttonStyle(CardPressStyle())
         .accessibilityIdentifier("home.explore.\(item.id)")
-    }
-
-    // MARK: - Help
-
-    private var helpCard: some View {
-        Button {
-            NotificationCenter.default.post(
-                name: .switchTab,
-                object: SwitchTabPayload(tab: 1, section: .guides)
-            )
-        } label: {
-            HStack(alignment: .bottom, spacing: 0) {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("journey.home.help.title".localized)
-                        .font(.system(size: 19, weight: .bold))
-                        .foregroundColor(JourneyVisual.primaryText)
-                        .fixedSize(horizontal: false, vertical: true)
-                    Text("journey.home.help.subtitle".localized)
-                        .font(.system(size: 13, weight: .medium))
-                        .foregroundColor(JourneyVisual.secondaryText)
-                        .fixedSize(horizontal: false, vertical: true)
-                    HStack(spacing: 6) {
-                        Text("journey.home.help.action".localized)
-                        Image(systemName: "arrow.right")
-                    }
-                    .font(.system(size: 14, weight: .bold))
-                    .foregroundColor(.black)
-                    .padding(.horizontal, 16)
-                    .frame(height: 42)
-                    .background(JourneyVisual.lime, in: Capsule())
-                    .padding(.top, 6)
-                }
-                .padding(.vertical, 20)
-                .padding(.leading, 20)
-
-                Spacer(minLength: 8)
-
-                Image("sweezy-companion-help")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(height: 194)
-                    .padding(.trailing, 10)
-                    .offset(y: 20)
-                    .allowsHitTesting(false)
-                    .accessibilityHidden(true)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(
-                LinearGradient(
-                    colors: [JourneyVisual.lime.opacity(0.34), JourneyVisual.lime.opacity(0.08)],
-                    startPoint: .topTrailing,
-                    endPoint: .bottomLeading
-                )
-            )
-            .background(Theme.Colors.card)
-            .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: 26, style: .continuous)
-                    .stroke(JourneyVisual.lime.opacity(0.4), lineWidth: 1)
-            )
-        }
-        .buttonStyle(CardPressStyle())
-        .accessibilityIdentifier("home.helpCard")
     }
 
     private var quickActions: some View {
@@ -549,75 +499,21 @@ struct JourneyHomeView: View {
                         )
                     }
                 } label: {
-                    VStack(spacing: 9) {
-                        JourneyCategoryIcon(symbol: action.0, swatch: actionSwatches[index], size: 42)
+                    VStack(spacing: 8) {
+                        JourneyCategoryIcon(symbol: action.0, swatch: actionSwatches[index], size: 52)
                         Text(action.1)
-                            .font(.system(size: 11, weight: .semibold))
+                            .font(.system(size: 12, weight: .semibold))
                             .foregroundColor(JourneyVisual.primaryText)
                             .lineLimit(1)
                             .minimumScaleFactor(0.75)
                     }
-                    .padding(.vertical, 12)
                     .frame(maxWidth: .infinity)
-                    .background(Theme.Colors.card)
-                    .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 18, style: .continuous)
-                            .stroke(JourneyVisual.softBorder, lineWidth: 1)
-                    )
+                    .contentShape(Rectangle())
                 }
                 .buttonStyle(CardPressStyle())
                 .accessibilityLabel(action.1)
                 .accessibilityIdentifier("home.quickAction.\(["documents", "jobs", "housing", "health"][index])")
             }
-        }
-    }
-
-    private var nextStepCard: some View {
-        CityPaper(inset: 0) {
-            HStack(spacing: 14) {
-                VStack(alignment: .leading, spacing: 7) {
-                    Text("journey.home.next_step_arrow".localized)
-                        .font(.system(size: 11, weight: .semibold))
-                        .foregroundColor(JourneyVisual.secondaryText)
-
-                    Text(nextStepTitle)
-                        .font(.system(size: 23, weight: .bold, design: .default))
-                        .foregroundColor(JourneyVisual.primaryText)
-                        .lineLimit(2)
-
-                    JourneyPrimaryButton(title: "common.continue".localized, compact: true) {
-                        if appContainer.firstWeekService.nextDueTask == nil {
-                            showRoadmap = true
-                        } else {
-                            NotificationCenter.default.post(
-                                name: .switchTab,
-                                object: SwitchTabPayload(tab: 1, section: .checklists)
-                            )
-                        }
-                        appContainer.telemetry.retention(
-                            .nextActionTapped,
-                            source: "journey_home",
-                            meta: ["destination": appContainer.firstWeekService.nextDueTask == nil ? "roadmap" : "tasks"]
-                        )
-                    }
-                }
-
-                Spacer(minLength: 4)
-
-                // A slice of the civic-square illustration (building and books), matching the art style
-                // instead of the old grey photo.
-                Color.clear
-                    .frame(width: 84, height: 110)
-                    .overlay(alignment: .trailing) {
-                        Image(CityArtwork.name("directory"))
-                            .resizable()
-                            .frame(width: 165, height: 110)
-                    }
-                    .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-                    .accessibilityHidden(true)
-            }
-            .padding(16)
         }
     }
 

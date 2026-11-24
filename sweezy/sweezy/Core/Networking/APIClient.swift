@@ -457,6 +457,36 @@ enum APIClient {
         return decoded.text
     }
 
+    private struct LetterExplainRequest: Encodable {
+        let text: String
+        let language: String
+        let country: String
+        let region: String
+        let today: String
+    }
+
+    /// Explains a letter from its recognised text. 402 means the free letters are used up.
+    static func explainLetter(text: String) async throws -> LetterExplanation {
+        var req = URLRequest(url: url("ai/letter-explain"), timeoutInterval: 60)
+        req.httpMethod = "POST"
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "yyyy-MM-dd"
+        req.httpBody = try JSONEncoder().encode(LetterExplainRequest(
+            text: text,
+            language: AppLanguage.current.rawValue,
+            country: countryCode,
+            region: subdivisionCode,
+            today: formatter.string(from: Date())
+        ))
+        let (data, resp) = try await authorizedData(for: req, context: "letter-explain")
+        guard let http = resp as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+            throw makeAPIError(data: data, response: resp as? HTTPURLResponse, fallback: "Letter explanation unavailable")
+        }
+        return try JSONDecoder().decode(LetterExplanation.self, from: data)
+    }
+
     static func translateCVToGerman(resume: CVResume) async throws -> CVResume {
         let url = url("ai/cv-translate")
         var request = URLRequest(url: url)

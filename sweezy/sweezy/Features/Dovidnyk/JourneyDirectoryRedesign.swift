@@ -1,59 +1,47 @@
 import SwiftUI
 
+/// One guide in the library list: small cover, title, and a single quiet meta line.
 struct JourneyGuideCompactRow: View {
     let guide: Guide
     let imageName: String
 
     var body: some View {
-        HStack(spacing: 13) {
+        HStack(spacing: 14) {
             Color.clear
-                .frame(width: 76, height: 82)
+                .frame(width: 58, height: 58)
                 .overlay { JourneyRemoteImage(url: guide.coverURL, fallbackAsset: imageName) }
-                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
 
-            VStack(alignment: .leading, spacing: 7) {
-                HStack(spacing: 6) {
-                    Label(guide.category.localizedName, systemImage: guide.category.iconName)
-                        .font(.system(size: 9, weight: .bold))
-                        .foregroundColor(JourneyVisual.accentText)
-                        .lineLimit(1)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(guide.title)
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(JourneyVisual.primaryText)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.leading)
+                    .fixedSize(horizontal: false, vertical: true)
 
+                HStack(spacing: 5) {
                     if guide.source != nil {
                         Image(systemName: "checkmark.seal.fill")
-                            .font(.system(size: 9, weight: .bold))
                             .foregroundColor(JourneyVisual.accentStrong)
                     }
+                    Text(metaLine)
+                        .lineLimit(1)
                 }
-
-                Text(guide.title)
-                    .font(.headline)
-                    .foregroundColor(JourneyVisual.primaryText)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .multilineTextAlignment(.leading)
-
-                HStack(spacing: 12) {
-                    Label("journey.directory.reading_time_minutes".localized(with: guide.estimatedReadingTime), systemImage: "clock")
-                    if guide.relatedChecklistId != nil {
-                        Label("journey.directory.checklist_label".localized, systemImage: "checklist")
-                    }
-                }
-                .font(.system(size: 10, weight: .medium))
+                .font(.system(size: 12, weight: .medium))
                 .foregroundColor(JourneyVisual.secondaryText)
             }
 
-            Spacer(minLength: 6)
-
-            Image(systemName: "arrow.up.right")
-                .font(.system(size: 12, weight: .bold))
-                .foregroundColor(.black)
-                .frame(width: 30, height: 30)
-                .background(JourneyVisual.lime)
-                .clipShape(Circle())
+            Spacer(minLength: 4)
         }
-        .padding(10)
-        .background(Theme.Colors.card)
-        .clipShape(RoundedRectangle(cornerRadius: 21, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 21, style: .continuous).stroke(JourneyVisual.softBorder, lineWidth: 1))
+        .padding(.vertical, 10)
+        .contentShape(Rectangle())
+    }
+
+    private var metaLine: String {
+        var parts = [guide.category.localizedName, "journey.directory.reading_time_minutes".localized(with: guide.estimatedReadingTime)]
+        if guide.relatedChecklistId != nil { parts.append("journey.directory.checklist_label".localized) }
+        return parts.joined(separator: " · ")
     }
 }
 
@@ -98,12 +86,8 @@ struct JourneyChecklistWorkspace: View {
     var body: some View {
         let _ = progressVersion
 
-        VStack(alignment: .leading, spacing: 15) {
-            progressHero
-
-            if let nextAction {
-                nextActionCard(checklist: nextAction.0, step: nextAction.1)
-            }
+        VStack(alignment: .leading, spacing: 18) {
+            summaryCard
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
@@ -115,8 +99,9 @@ struct JourneyChecklistWorkspace: View {
             }
             .contentMargins(.horizontal, 0, for: .scrollContent)
 
-            VStack(spacing: 10) {
-                ForEach(filtered) { checklist in
+            // One list with hairlines instead of a stack of bordered cards.
+            VStack(spacing: 0) {
+                ForEach(Array(filtered.enumerated()), id: \.element.id) { index, checklist in
                     Button { open(checklist) } label: {
                         JourneyChecklistRow(
                             checklist: checklist,
@@ -124,89 +109,60 @@ struct JourneyChecklistWorkspace: View {
                         )
                     }
                     .buttonStyle(.plain)
+                    if index < filtered.count - 1 {
+                        Divider().padding(.leading, 56)
+                    }
                 }
             }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 4)
+            .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(JourneyVisual.softBorder, lineWidth: 1))
         }
     }
 
-    private var progressHero: some View {
-        HStack(spacing: 17) {
-            ZStack {
-                Circle()
-                    .stroke(JourneyVisual.softBorder, lineWidth: 8)
-                Circle()
-                    .trim(from: 0, to: progress.fraction)
-                    .stroke(JourneyVisual.accentStrong, style: StrokeStyle(lineWidth: 8, lineCap: .round))
-                    .rotationEffect(.degrees(-90))
-                VStack(spacing: 0) {
-                    Text("\(Int((progress.fraction * 100).rounded()))%")
-                        .font(.system(size: 22, weight: .black, design: .default))
-                    Text("journey.directory.checklists.done".localized)
-                        .font(.system(size: 9, weight: .bold))
-                }
-                .foregroundColor(JourneyVisual.primaryText)
-            }
-            .frame(width: 86, height: 86)
+    /// Overall progress and the next step in one card; tapping it opens that checklist.
+    private var summaryCard: some View {
+        Button {
+            if let nextAction { open(nextAction.0) }
+        } label: {
+            HStack(spacing: 14) {
+                JourneyProgressRing(done: progress.done, total: max(progress.total, 1), size: 52, lineWidth: 6, showsPercent: true)
 
-            VStack(alignment: .leading, spacing: 6) {
-                Text("journey.directory.checklists.your_progress".localized)
-                    .font(.system(size: 22, weight: .bold, design: .default))
-                    .foregroundColor(JourneyVisual.primaryText)
-                Text("journey.directory.checklists.steps_count".localized(with: progress.done, progress.total))
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(JourneyVisual.secondaryText)
-                Text(progress.done == 0 ? "journey.directory.checklists.start_simple".localized : "journey.directory.checklists.keep_going".localized)
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(JourneyVisual.secondaryText)
-            }
-
-            Spacer(minLength: 0)
-        }
-        .padding(18)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Theme.Colors.card)
-        .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 28).stroke(JourneyVisual.softBorder))
-    }
-
-    private func nextActionCard(checklist: Checklist, step: ChecklistStep) -> some View {
-        Button { open(checklist) } label: {
-            HStack(spacing: 13) {
-                JourneyCategoryIcon(
-                    symbol: checklist.category.iconName,
-                    swatch: JourneyCategoryPalette.lime,
-                    size: 46
-                )
-
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("journey.directory.checklists.next_step_label".localized)
-                        .font(.system(size: 9, weight: .bold))
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("journey.directory.checklists.steps_count".localized(with: progress.done, progress.total))
+                        .font(.system(size: 12, weight: .semibold))
                         .foregroundColor(JourneyVisual.secondaryText)
-                    Text(step.title)
-                        .font(.system(size: 14, weight: .bold, design: .default))
+                    Text(nextAction?.1.title ?? "journey.directory.checklists.keep_going".localized)
+                        .font(.system(size: 16, weight: .bold))
                         .foregroundColor(JourneyVisual.primaryText)
+                        .lineLimit(2)
+                        .multilineTextAlignment(.leading)
                         .fixedSize(horizontal: false, vertical: true)
-                    Text(checklist.title)
-                        .font(.system(size: 10, weight: .medium))
-                        .foregroundColor(JourneyVisual.secondaryText)
-                        .lineLimit(1)
+                    if let checklist = nextAction?.0 {
+                        Text(checklist.title)
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(JourneyVisual.secondaryText)
+                            .lineLimit(1)
+                    }
                 }
 
                 Spacer(minLength: 4)
 
-                Image(systemName: "arrow.right")
-                    .font(.system(size: 12, weight: .bold))
-                    .foregroundColor(.black)
-                    .frame(width: 34, height: 34)
-                    .background(JourneyVisual.lime)
-                    .clipShape(Circle())
+                if nextAction != nil {
+                    Image(systemName: "arrow.right")
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundColor(.black)
+                        .frame(width: 36, height: 36)
+                        .background(JourneyVisual.lime, in: Circle())
+                }
             }
-            .padding(12)
-            .background(Theme.Colors.card)
-            .clipShape(RoundedRectangle(cornerRadius: 21, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 21, style: .continuous).stroke(JourneyVisual.softBorder, lineWidth: 1))
+            .padding(14)
+            .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(JourneyVisual.softBorder, lineWidth: 1))
         }
-        .buttonStyle(.plain)
+        .buttonStyle(ScaleButtonStyle(scaleAmount: 0.98, hapticStyle: .light))
+        .disabled(nextAction == nil)
     }
 
     private func checklistFilter(title: String, icon: String, category: ChecklistCategory?) -> some View {
@@ -215,10 +171,10 @@ struct JourneyChecklistWorkspace: View {
             withAnimation(.easeInOut(duration: 0.2)) { selectedCategory = category }
         } label: {
             Label(title, systemImage: icon)
-                .font(.system(size: 11, weight: .bold))
+                .font(.system(size: 13, weight: .semibold))
                 .foregroundColor(selected ? .black : (category?.swatch.ink ?? JourneyVisual.primaryText))
-                .padding(.horizontal, 13)
-                .frame(height: 39)
+                .padding(.horizontal, 14)
+                .frame(height: 38)
                 .background(selected ? JourneyVisual.lime : Theme.Colors.card)
                 .clipShape(Capsule())
                 .overlay(Capsule().stroke(selected ? Color.clear : JourneyVisual.softBorder, lineWidth: 1))
@@ -242,58 +198,41 @@ private struct JourneyChecklistRow: View {
     }
 
     var body: some View {
-        HStack(spacing: 13) {
+        HStack(spacing: 14) {
             JourneyCategoryIcon(
                 symbol: checklist.category.iconName,
                 swatch: checklist.category.swatch,
-                size: 54
+                size: 42
             )
 
-            VStack(alignment: .leading, spacing: 7) {
-                HStack(spacing: 7) {
-                    Text(checklist.title)
-                        .font(.headline)
-                        .foregroundColor(JourneyVisual.primaryText)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .multilineTextAlignment(.leading)
+            VStack(alignment: .leading, spacing: 6) {
+                Text(checklist.title)
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(JourneyVisual.primaryText)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .multilineTextAlignment(.leading)
 
-                    if checklist.isNew {
-                        Text("common.new".localized.uppercased())
-                            .font(.system(size: 8, weight: .black))
-                            .foregroundColor(.black)
-                            .padding(.horizontal, 7)
-                            .frame(height: 21)
-                            .background(JourneyVisual.lime)
-                            .clipShape(Capsule())
+                HStack(spacing: 8) {
+                    Text("\(checklist.estimatedDuration) · " + "journey.directory.checklists.completed_ratio".localized(with: completed, checklist.steps.count))
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(JourneyVisual.secondaryText)
+                        .lineLimit(1)
+                    GeometryReader { geometry in
+                        ZStack(alignment: .leading) {
+                            Capsule().fill(JourneyVisual.softBorder)
+                            Capsule()
+                                .fill(JourneyVisual.accentStrong)
+                                .frame(width: geometry.size.width * fraction)
+                        }
                     }
+                    .frame(width: 44, height: 4)
                 }
-
-                HStack {
-                    Label(checklist.estimatedDuration, systemImage: "clock")
-                    Spacer()
-                    Text("journey.directory.checklists.completed_ratio".localized(with: completed, checklist.steps.count))
-                }
-                .font(.system(size: 10, weight: .medium))
-                .foregroundColor(JourneyVisual.secondaryText)
-
-                GeometryReader { geometry in
-                    ZStack(alignment: .leading) {
-                        Capsule().fill(JourneyVisual.softBorder)
-                        Capsule()
-                            .fill(checklist.category.swiftUIColor)
-                            .frame(width: geometry.size.width * fraction)
-                    }
-                }
-                .frame(height: 4)
             }
 
-            Image(systemName: "chevron.right")
-                .font(.system(size: 12, weight: .bold))
-                .foregroundColor(JourneyVisual.secondaryText)
+            Spacer(minLength: 0)
         }
-        .padding(12)
-        .background(Theme.Colors.card)
-        .clipShape(RoundedRectangle(cornerRadius: 21, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 21, style: .continuous).stroke(JourneyVisual.softBorder, lineWidth: 1))
+        .padding(.vertical, 12)
+        .contentShape(Rectangle())
     }
 }

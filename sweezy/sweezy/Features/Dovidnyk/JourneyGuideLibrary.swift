@@ -205,26 +205,22 @@ struct JourneyGuideTopicTile: View {
 
     var body: some View {
         Button(action: action) {
-            VStack(alignment: .leading, spacing: 10) {
-                JourneyCategoryIcon(symbol: icon, swatch: swatch, size: 36, selected: selected)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(title)
-                        .font(.system(size: 13, weight: .bold))
-                        .foregroundColor(selected ? .black : JourneyVisual.primaryText)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.8)
-                    Text("\(count)")
-                        .font(.system(size: 11, weight: .semibold))
-                        .foregroundColor(selected ? .black.opacity(0.65) : JourneyVisual.secondaryText)
-                }
+            HStack(spacing: 7) {
+                Image(systemName: icon)
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundColor(selected ? .black : swatch.ink)
+                Text(title)
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(selected ? .black : JourneyVisual.primaryText)
+                    .lineLimit(1)
+                Text("\(count)")
+                    .font(.system(size: 12, weight: .semibold).monospacedDigit())
+                    .foregroundColor(selected ? .black.opacity(0.6) : JourneyVisual.secondaryText)
             }
-            .padding(12)
-            .frame(width: 112, alignment: .leading)
-            .background(selected ? JourneyVisual.lime : Theme.Colors.card, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: 20, style: .continuous)
-                    .stroke(selected ? Color.clear : JourneyVisual.softBorder, lineWidth: 1)
-            )
+            .padding(.horizontal, 14)
+            .frame(height: 38)
+            .background(selected ? JourneyVisual.lime : Theme.Colors.card, in: Capsule())
+            .overlay(Capsule().stroke(selected ? Color.clear : JourneyVisual.softBorder, lineWidth: 1))
         }
         .buttonStyle(ScaleButtonStyle(scaleAmount: 0.96, hapticStyle: .light))
         .accessibilityAddTraits(selected ? .isSelected : [])

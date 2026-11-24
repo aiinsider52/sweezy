@@ -62,28 +62,37 @@ struct MyPlanView: View {
         )
     }
 
+    /// Three counts as quiet chips; documents and meetings open their screens.
     private var statusStrip: some View {
-        HStack(spacing: 10) {
-            metric(value: "\(urgentCount)", title: "термінові".localized, icon: "exclamationmark.circle.fill")
-            metric(value: "\(missingDocuments)", title: "документи".localized, icon: "doc.badge.ellipsis")
-            metric(value: "\(upcomingAppointments)", title: "зустрічі".localized, icon: "calendar")
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                metric(value: urgentCount, title: "термінові".localized, icon: "exclamationmark.circle.fill", alert: urgentCount > 0) {}
+                metric(value: missingDocuments, title: "документи".localized, icon: "doc.badge.ellipsis", alert: false) { showDocuments = true }
+                metric(value: upcomingAppointments, title: "зустрічі".localized, icon: "calendar", alert: false) { showAppointments = true }
+            }
         }
+        .scrollClipDisabled()
     }
 
-    private func metric(value: String, title: String, icon: String) -> some View {
-        CityPaper(inset: 0) {
-            VStack(alignment: .leading, spacing: 6) {
-                JourneyCategoryIcon(symbol: icon, swatch: icon.contains("exclamation") ? JourneyCategoryPalette.coral : planToolSwatch(icon == "doc.badge.ellipsis" ? "doc.text.fill" : "calendar.badge.plus"), size: 30)
-                Text(value)
-                    .font(.system(size: 23, weight: .bold, design: .default))
+    private func metric(value: Int, title: String, icon: String, alert: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: 6) {
+                Image(systemName: icon)
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundColor(alert ? JourneyVisual.coral : JourneyVisual.secondaryText)
+                Text("\(value)")
+                    .font(.system(size: 14, weight: .heavy).monospacedDigit())
                     .foregroundColor(JourneyVisual.primaryText)
                 Text(title)
-                    .font(.system(size: 10, weight: .medium))
+                    .font(.system(size: 13, weight: .medium))
                     .foregroundColor(JourneyVisual.secondaryText)
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(13)
+            .padding(.horizontal, 13)
+            .frame(height: 36)
+            .background(Theme.Colors.card, in: Capsule())
+            .overlay(Capsule().stroke(JourneyVisual.softBorder, lineWidth: 1))
         }
+        .buttonStyle(.plain)
     }
 
     private var todaySection: some View {
@@ -106,17 +115,15 @@ struct MyPlanView: View {
                     story: "plan-complete"
                 )
             } else {
-                ForEach(deadlines.prefix(7)) { deadline in
-                    DeadlineRow(deadline: deadline) {
-                        complete(deadline)
-                    }
+                DeadlineList(deadlines: Array(deadlines.prefix(7))) { deadline in
+                    complete(deadline)
                 }
             }
         }
     }
 
     private var toolsGrid: some View {
-        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 11) {
+        LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible())], spacing: 10) {
             planTool(title: "Документи".localized, subtitle: "Готовність і строки".localized, icon: "doc.text.fill") { showDocuments = true }
                 .accessibilityIdentifier("plan.documents")
             planTool(title: "journey.tool.ask.title".localized, subtitle: "Відповіді з джерелами".localized, icon: "sparkles") { showAsk = true }
@@ -138,17 +145,21 @@ struct MyPlanView: View {
     private func planTool(title: String, subtitle: String, icon: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             CityPaper(inset: 0) {
-                VStack(alignment: .leading, spacing: 10) {
-                    JourneyCategoryIcon(symbol: icon, swatch: planToolSwatch(icon), size: 38)
-                    Text(title)
-                        .font(.system(size: 16, weight: .bold, design: .default))
-                        .foregroundColor(JourneyVisual.primaryText)
-                    Text(subtitle)
-                        .font(.system(size: 10, weight: .medium))
-                        .foregroundColor(JourneyVisual.secondaryText)
-                        .lineLimit(2)
+                VStack(alignment: .leading, spacing: 8) {
+                    JourneyCategoryIcon(symbol: icon, swatch: planToolSwatch(icon), size: 34)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(title)
+                            .font(.system(size: 15, weight: .semibold, design: .default))
+                            .foregroundColor(JourneyVisual.primaryText)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.85)
+                        Text(subtitle)
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(JourneyVisual.secondaryText)
+                            .lineLimit(1)
+                    }
                 }
-                .frame(maxWidth: .infinity, minHeight: 100, alignment: .leading)
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(14)
             }
         }
@@ -176,54 +187,78 @@ struct MyPlanView: View {
     }
 }
 
+/// Deadlines as one list with hairlines.
+private struct DeadlineList: View {
+    let deadlines: [LifeDeadline]
+    let complete: (LifeDeadline) -> Void
+
+    var body: some View {
+        VStack(spacing: 0) {
+            ForEach(Array(deadlines.enumerated()), id: \.element.id) { index, deadline in
+                DeadlineRow(deadline: deadline) { complete(deadline) }
+                if index < deadlines.count - 1 {
+                    Divider().padding(.leading, 48)
+                }
+            }
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 2)
+        .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(JourneyVisual.softBorder, lineWidth: 1))
+    }
+}
+
+/// Tick on the left completes it; the row itself opens the official source when there is one.
 private struct DeadlineRow: View {
     let deadline: LifeDeadline
     let complete: () -> Void
     @Environment(\.openURL) private var openURL
 
     var body: some View {
-        CityPaper(inset: 0) {
-            HStack(spacing: 12) {
-                JourneyCategoryIcon(
-                    symbol: deadline.category.icon,
-                    swatch: deadline.urgency == .overdue ? JourneyCategoryPalette.coral : JourneyCategoryPalette.swatch(for: deadline.category.rawValue),
-                    size: 38
-                )
-
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(deadline.title)
-                        .font(.system(size: 14, weight: .bold))
-                        .foregroundColor(JourneyVisual.primaryText)
-                    Text(deadline.detail)
-                        .font(.system(size: 11, weight: .medium))
-                        .foregroundColor(JourneyVisual.secondaryText)
-                        .lineLimit(2)
-                    Button {
-                        if let url = deadline.sourceURL { openURL(url) }
-                    } label: {
-                        Label(deadline.sourceTitle, systemImage: "checkmark.seal.fill")
-                            .font(.system(size: 10, weight: .semibold))
-                            .foregroundColor(deadline.sourceURL == nil ? JourneyVisual.secondaryText : Theme.Colors.primaryDark)
-                    }
-                    .buttonStyle(.plain)
-                    .disabled(deadline.sourceURL == nil)
-                }
-
-                Spacer(minLength: 4)
-
-                VStack(alignment: .trailing, spacing: 10) {
-                    Text(daysText)
-                        .font(.system(size: 11, weight: .bold))
-                        .foregroundColor(deadline.urgency == .overdue ? .red : JourneyVisual.primaryText)
-                    Button(action: complete) {
-                        Image(systemName: "checkmark.circle")
-                            .font(.system(size: 21, weight: .semibold))
-                            .foregroundColor(JourneyVisual.secondaryText)
-                    }
-                }
+        HStack(alignment: .top, spacing: 12) {
+            Button(action: complete) {
+                Circle()
+                    .stroke(deadline.urgency == .overdue ? JourneyVisual.coral : JourneyVisual.softBorder, lineWidth: 2)
+                    .frame(width: 24, height: 24)
+                    .frame(width: 36, height: 36)
+                    .contentShape(Rectangle())
             }
-            .padding(14)
+            .buttonStyle(.plain)
+            .accessibilityLabel("common.done".localized)
+            .padding(.top, -6)
+
+            Button {
+                if let url = deadline.sourceURL { openURL(url) }
+            } label: {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(deadline.title)
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(JourneyVisual.primaryText)
+                        .multilineTextAlignment(.leading)
+                        .fixedSize(horizontal: false, vertical: true)
+                    HStack(spacing: 4) {
+                        Text(daysText)
+                            .fontWeight(.bold)
+                            .foregroundColor(deadline.urgency == .overdue ? JourneyVisual.coral : JourneyVisual.primaryText)
+                        Text("·")
+                        Text(deadline.detail)
+                            .lineLimit(1)
+                        if deadline.sourceURL != nil {
+                            Image(systemName: "checkmark.seal.fill")
+                                .foregroundColor(JourneyVisual.accentStrong)
+                        }
+                    }
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(JourneyVisual.secondaryText)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            // Not .disabled: that would grey out rows that simply have no link.
+            .allowsHitTesting(deadline.sourceURL != nil)
         }
+        .padding(.vertical, 12)
     }
 
     private var daysText: String {
@@ -255,13 +290,11 @@ struct DeadlineEngineView: View {
                     Text("Permit, insurance, tax, registration та твої зустрічі.".localized)
                         .font(.system(size: 14, weight: .medium))
                         .foregroundColor(JourneyVisual.secondaryText)
-                    ForEach(deadlines) { deadline in
-                        DeadlineRow(deadline: deadline) {
-                            if let taskID = LifeAdminService.firstWeekTaskID(from: deadline.id) {
-                                appContainer.firstWeekService.toggle(taskID)
-                            } else {
-                                appContainer.lifeAdmin.setDeadlineCompleted(deadline.id, completed: true)
-                            }
+                    DeadlineList(deadlines: deadlines) { deadline in
+                        if let taskID = LifeAdminService.firstWeekTaskID(from: deadline.id) {
+                            appContainer.firstWeekService.toggle(taskID)
+                        } else {
+                            appContainer.lifeAdmin.setDeadlineCompleted(deadline.id, completed: true)
                         }
                     }
                 }

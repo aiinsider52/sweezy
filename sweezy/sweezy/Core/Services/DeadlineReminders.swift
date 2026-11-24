@@ -146,6 +146,7 @@ extension LifeAdminService {
 
     /// Stores the date where it belongs: on the matching readiness document, or as a personal date.
     func saveDeadline(kind: DeadlineKind, title: String?, date: Date, editing item: ExpiryItem? = nil) {
+        if item == nil { Celebration.fire() }
         if case .personal(let id)? = item?.origin, kind.documentKey != nil {
             removePersonalDeadline(id)
         }

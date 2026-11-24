@@ -20,8 +20,8 @@ final class Phase2SmokeUITests: XCTestCase {
         XCTAssertTrue(app.buttons["auth.entry.continueAsGuest"].waitForExistence(timeout: 10))
         app.buttons["auth.entry.continueAsGuest"].tap()
 
-        XCTAssertTrue(app.buttons["home.openSettingsButton"].waitForExistence(timeout: 15))
-        app.buttons["home.openSettingsButton"].tap()
+        XCTAssertTrue(app.buttons["tab.settings"].waitForExistence(timeout: 15))
+        app.buttons["tab.settings"].tap()
         let onboardingClose = app.buttons["featureOnboarding.close"]
         if onboardingClose.waitForExistence(timeout: 2) {
             onboardingClose.tap()
@@ -43,8 +43,8 @@ final class Phase2SmokeUITests: XCTestCase {
         XCTAssertTrue(app.buttons["auth.entry.continueAsGuest"].waitForExistence(timeout: 10))
         app.buttons["auth.entry.continueAsGuest"].tap()
 
-        XCTAssertTrue(app.buttons["tab.people"].waitForExistence(timeout: 15))
-        app.buttons["tab.people"].tap()
+        XCTAssertTrue(app.buttons["tab.home"].waitForExistence(timeout: 15))
+        app.openPeople()
         XCTAssertTrue(app.buttons["friends.accessGate.signIn"].waitForExistence(timeout: 10))
     }
 }

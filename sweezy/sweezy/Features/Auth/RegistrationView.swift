@@ -225,6 +225,7 @@ struct RegistrationView: View {
 
         do {
             let response = try await APIClient.register(email: normalizedEmail, password: password)
+            TelemetryService.current?.track(.accountRegistered, source: "auth", meta: ["method": "email"])
             await MainActor.run {
                 isRegistering = false
                 guard response.status == "verification_required" else {

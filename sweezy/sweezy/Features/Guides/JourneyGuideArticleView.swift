@@ -26,10 +26,6 @@ struct JourneyGuideArticleView: View {
             host.hasSuffix(".ge.ch") || host.hasSuffix(".vd.ch")
     }
 
-    private var cantonScope: String {
-        guide.cantonCodes.isEmpty ? "journey.guide.scope.all_cantons".localized : guide.cantonCodes.sorted().joined(separator: ", ")
-    }
-
     private var relatedChecklist: Checklist? {
         if let raw = guide.relatedChecklistId, let id = UUID(uuidString: raw),
            let checklist = appContainer.contentService.getChecklist(by: id) {
@@ -68,13 +64,12 @@ struct JourneyGuideArticleView: View {
 
                         VStack(alignment: .leading, spacing: 22) {
                             officialSourceCard
-                            contentScopeNotice
 
                             if let summary = guide.summary, !summary.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                                 summaryCard(summary)
                             }
 
-                            JourneyArticleMarkdown(markdown: guide.bodyMarkdown)
+                            JourneyArticleMarkdown(markdown: guide.bodyMarkdown, title: guide.title)
 
                             if !guide.links.isEmpty {
                                 usefulLinks
@@ -87,6 +82,8 @@ struct JourneyGuideArticleView: View {
                             if let topic = guide.category.businessTopic {
                                 BusinessHelpersCard(topic: topic)
                             }
+
+                            contentScopeNotice
                         }
                         .frame(width: contentWidth, alignment: .leading)
                         .padding(.horizontal, horizontalInset)
@@ -221,7 +218,7 @@ struct JourneyGuideArticleView: View {
                 }
 
                 Text(guide.title)
-                    .font(.system(size: 34, weight: .bold, design: .default))
+                    .font(.system(size: 28, weight: .bold, design: .default))
                     .foregroundColor(JourneyVisual.primaryText)
                     .lineSpacing(1)
                     .lineLimit(4)
@@ -245,92 +242,73 @@ struct JourneyGuideArticleView: View {
         .clipped()
     }
 
+    /// Source, check date and region in one quiet row; it opens the official page.
     @ViewBuilder
     private var officialSourceCard: some View {
-        if let sourceURL {
-            Link(destination: sourceURL) {
-                HStack(spacing: 12) {
-                    Image(systemName: isOfficialSource ? "checkmark.seal.fill" : "link")
-                        .font(.system(size: 18, weight: .bold))
-                        .foregroundColor(Theme.Colors.textPrimary)
+        let row = HStack(spacing: 12) {
+            Image(systemName: sourceURL == nil ? "exclamationmark.shield.fill" : (isOfficialSource ? "checkmark.seal.fill" : "link"))
+                .font(.system(size: 17, weight: .bold))
+                .foregroundColor(sourceURL == nil ? .orange : JourneyVisual.accentStrong)
 
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text(isOfficialSource ? "journey.guide.source.official".localized : "journey.guide.source.generic".localized)
-                            .font(.system(size: 9, weight: .black))
-                            .foregroundColor(Theme.Colors.textPrimary)
-                        Text(guide.sourceTitle ?? sourceURL.host() ?? "journey.guide.official_portal".localized)
-                            .font(.system(size: 13, weight: .bold))
-                            .foregroundColor(JourneyVisual.primaryText)
-                            .lineLimit(2)
-                        if case .verified(let date) = freshness {
-                            Text("journey.guide.verified".localized(with: date.formatted(Date.FormatStyle(date: .long, time: .omitted, locale: AppLanguage.current.locale))))
-                                .font(.system(size: 10, weight: .medium))
-                                .foregroundColor(JourneyVisual.secondaryText)
-                        }
-                    }
-
-                    Spacer(minLength: 6)
-
-                    Image(systemName: "arrow.up.right")
-                        .font(.system(size: 12, weight: .bold))
-                        .foregroundColor(.black)
-                        .frame(width: 34, height: 34)
-                        .background(JourneyVisual.lime)
-                        .clipShape(Circle())
-                }
-                .padding(14)
-                .background(Theme.Colors.card)
-                .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-                .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(JourneyVisual.softBorder, lineWidth: 1))
+            VStack(alignment: .leading, spacing: 2) {
+                Text(sourceURL == nil ? "journey.guide.source_pending".localized : (guide.sourceTitle ?? sourceURL?.host() ?? "journey.guide.official_portal".localized))
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(JourneyVisual.primaryText)
+                    .lineLimit(1)
+                Text(sourceMetaLine)
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(freshnessIsWarning ? .orange : JourneyVisual.secondaryText)
+                    .lineLimit(2)
             }
-        } else {
-            HStack(spacing: 12) {
-                Image(systemName: "exclamationmark.shield.fill")
-                    .foregroundColor(.orange)
-                Text("journey.guide.source_pending".localized)
-                    .font(.system(size: 12, weight: .semibold))
+
+            Spacer(minLength: 6)
+
+            if sourceURL != nil {
+                Image(systemName: "arrow.up.right")
+                    .font(.system(size: 13, weight: .bold))
                     .foregroundColor(JourneyVisual.secondaryText)
-                Spacer()
             }
-            .padding(14)
-            .background(Theme.Colors.card)
-            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+        .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(JourneyVisual.softBorder, lineWidth: 1))
+
+        if let sourceURL {
+            Link(destination: sourceURL) { row }
+        } else {
+            row
         }
     }
 
+    private var freshnessIsWarning: Bool {
+        if case .verified = freshness { return false }
+        return true
+    }
+
+    /// "Checked 15 July 2026 · all cantons", or the freshness warning.
+    private var sourceMetaLine: String {
+        let status: String
+        switch freshness {
+        case .verified(let date):
+            status = "journey.guide.verified".localized(with: date.formatted(Date.FormatStyle(date: .abbreviated, time: .omitted, locale: AppLanguage.current.locale)))
+        case .expired:
+            status = "journey.guide.scope.expired".localized
+        case .unverified:
+            status = "journey.guide.scope.unverified".localized
+        }
+        let region = guide.cantonCodes.isEmpty ? "journey.guide.scope.all_cantons_short".localized : guide.cantonCodes.sorted().joined(separator: ", ")
+        return [status, region].joined(separator: " · ")
+    }
+
+    /// The legal note sits after the article as a footnote instead of in front of it.
     private var contentScopeNotice: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            scopeRow(cantonScope, systemImage: "map")
-            switch freshness {
-            case .verified:
-                scopeRow("journey.guide.scope.current".localized, systemImage: "checkmark.circle")
-            case .expired:
-                scopeRow("journey.guide.scope.expired".localized, systemImage: "clock.badge.exclamationmark")
-                    .foregroundColor(.orange)
-            case .unverified:
-                scopeRow("journey.guide.scope.unverified".localized, systemImage: "exclamationmark.triangle")
-                    .foregroundColor(.orange)
-            }
-            Text("journey.guide.scope.disclaimer".localized)
-                .foregroundColor(JourneyVisual.secondaryText)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-        .font(.system(size: 11, weight: .semibold))
-        .foregroundColor(JourneyVisual.secondaryText)
-        .padding(14)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Theme.Colors.card)
-        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-    }
-
-    private func scopeRow(_ text: String, systemImage: String) -> some View {
-        HStack(alignment: .top, spacing: 8) {
-            Image(systemName: systemImage)
-                .frame(width: 14)
-            Text(text)
-                .fixedSize(horizontal: false, vertical: true)
-                .frame(maxWidth: .infinity, alignment: .leading)
-        }
+        Text("journey.guide.scope.disclaimer".localized)
+            .font(.system(size: 11, weight: .medium))
+            .foregroundColor(JourneyVisual.secondaryText)
+            .fixedSize(horizontal: false, vertical: true)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.top, 4)
     }
 
     private func summaryCard(_ summary: String) -> some View {
@@ -475,9 +453,19 @@ private struct JourneyGuideHeroImage: View {
 
 private struct JourneyArticleMarkdown: View {
     let markdown: String
+    var title: String = ""
 
+    /// Body lines, without a leading "# Title" that only repeats the guide title above.
     private var lines: [String] {
-        markdown.components(separatedBy: .newlines)
+        var lines = markdown.components(separatedBy: .newlines)
+        if let first = lines.firstIndex(where: { !$0.trimmingCharacters(in: .whitespaces).isEmpty }) {
+            let line = lines[first].trimmingCharacters(in: .whitespaces)
+            let heading = line.drop { $0 == "#" }.trimmingCharacters(in: .whitespaces)
+            if line.hasPrefix("#"), heading.caseInsensitiveCompare(title.trimmingCharacters(in: .whitespaces)) == .orderedSame {
+                lines.remove(at: first)
+            }
+        }
+        return lines
     }
 
     var body: some View {

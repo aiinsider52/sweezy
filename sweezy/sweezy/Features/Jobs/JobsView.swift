@@ -269,7 +269,7 @@ struct JobsView: View {
                 LazyVStack(spacing: 0) {
                     heroSection
 
-                    VStack(spacing: 13) {
+                    VStack(spacing: 16) {
                         careerHubSection
                         smartFiltersSection
 
@@ -280,7 +280,7 @@ struct JobsView: View {
 
                         resultsSection
                     }
-                    .padding(.horizontal, 18)
+                    .padding(.horizontal, 20)
                 }
                 .padding(.bottom, 112)
             }
@@ -298,6 +298,8 @@ struct JobsView: View {
         .sheet(item: $selectedJob) { job in
             JobDetailSheet(
                 job: job,
+                cv: savedCV,
+                onSaveLetter: { letter in await saveCoverLetter(letter, for: job) },
                 matchScore: matchScores[job.id],
                 matchReasons: matchReasons[job.id] ?? [],
                 isApplied: appliedJobIds.contains(job.id),
@@ -317,7 +319,10 @@ struct JobsView: View {
             DraftSheet(text: draftedText, isDrafting: isDrafting)
         }
         .sheet(isPresented: $showApplicationTracker) {
-            JobApplicationTrackerSheet(applications: applications) { jobID, status in
+            JobApplicationTrackerSheet(
+                applications: applications,
+                applicantName: savedCV?.personal.fullName ?? lockManager.userName
+            ) { jobID, status in
                 await updateApplication(jobID: jobID, status: status)
             }
         }
@@ -382,6 +387,11 @@ struct JobsView: View {
                 didLoadScopedState = true
             }
             if isCareerHubUITest {
+                #if DEBUG
+                items = Self.careerHubJobFixtures
+                if ProcessInfo.processInfo.arguments.contains("--open-job-detail") { selectedJob = items.first }
+                if ProcessInfo.processInfo.arguments.contains("--open-job-report") { showApplicationTracker = true }
+                #endif
                 didSearchOnce = true
                 return
             }
@@ -567,197 +577,112 @@ struct JobsView: View {
     }
     
     // MARK: - Hero
+    /// One quiet row: back, title, and the two tools people reach for most.
     private var heroSection: some View {
-        VStack(alignment: .leading, spacing: 0) {
+        HStack(spacing: 10) {
             Button { dismiss() } label: {
                 Image(systemName: "chevron.left")
-                    .font(.system(size: 22, weight: .semibold))
+                    .font(.system(size: 17, weight: .semibold))
                     .foregroundColor(JourneyVisual.primaryText)
-                    .frame(width: 52, height: 52)
-                    .background(.ultraThinMaterial.opacity(0.78))
-                    .background(Theme.Colors.card)
-                    .clipShape(Circle())
+                    .frame(width: 40, height: 40)
+                    .background(Theme.Colors.card, in: Circle())
                     .overlay(Circle().stroke(JourneyVisual.softBorder, lineWidth: 1))
             }
             .buttonStyle(.plain)
             .accessibilityLabel("Назад".localized)
 
-            // Sweezy reviewing a CV next to the laptop: the whole hub in one picture.
-            StoryScene(name: "jobs", height: 190)
-                .padding(.top, 14)
-                .padding(.bottom, 18)
-
-            Text("CAREER HUB · ШВЕЙЦАРІЯ".localized)
-                .font(.system(size: 13, weight: .bold))
-                .tracking(2.2)
-                .foregroundColor(Theme.Colors.textPrimary)
-
-            Text("Від сильного CV\nдо першого оферу".localized)
-                .font(.system(size: 29, weight: .bold, design: .default))
+            Text("jobs.title_short".localized)
+                .font(.system(size: 26, weight: .heavy))
                 .foregroundColor(JourneyVisual.primaryText)
-                .minimumScaleFactor(0.82)
-                .lineSpacing(1)
-                .padding(.top, 13)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+
+            Spacer(minLength: 8)
+
+            headerIcon(alerts.isEmpty ? "bell" : "bell.fill", label: "Сповіщення".localized) { showAlerts = true }
+            headerIcon("tray.full", label: "Трекер".localized, badge: activeApplications.count) { showApplicationTracker = true }
+            Menu {
+                Button { showCVBuilder = true } label: {
+                    Label(careerProfile.hasResume ? "Редагувати CV".localized : "Створити CV".localized, systemImage: "doc.text")
+                }
+                Button { showAIMatchProfile = true } label: { Label("Профіль AI".localized, systemImage: "slider.horizontal.3") }
+                Button { showJobMap = true } label: { Label("jobs.map".localized, systemImage: "map") }
+            } label: {
+                Image(systemName: "ellipsis")
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundColor(JourneyVisual.primaryText)
+                    .frame(width: 40, height: 40)
+                    .background(Theme.Colors.card, in: Circle())
+                    .overlay(Circle().stroke(JourneyVisual.softBorder, lineWidth: 1))
+            }
+            .accessibilityLabel("jobs.more".localized)
         }
-        .frame(maxWidth: .infinity, alignment: .topLeading)
-        .padding(.horizontal, 22)
+        .padding(.horizontal, 20)
         .padding(.top, 10)
-        .padding(.bottom, 16)
+        .padding(.bottom, 18)
+    }
+
+    private func headerIcon(_ icon: String, label: String, badge: Int = 0, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: icon)
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundColor(JourneyVisual.primaryText)
+                .frame(width: 40, height: 40)
+                .background(Theme.Colors.card, in: Circle())
+                .overlay(Circle().stroke(JourneyVisual.softBorder, lineWidth: 1))
+                .overlay(alignment: .topTrailing) {
+                    if badge > 0 {
+                        Text("\(badge)")
+                            .font(.system(size: 10, weight: .heavy))
+                            .foregroundColor(.black)
+                            .frame(minWidth: 17, minHeight: 17)
+                            .background(JourneyVisual.lime, in: Capsule())
+                            .offset(x: 3, y: -3)
+                    }
+                }
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(label)
     }
 
     // MARK: - Career Hub
+    /// Career profile in one line: CV readiness, the next step, and one button to take it.
     private var careerHubSection: some View {
-        VStack(alignment: .leading, spacing: 18) {
-            HStack(alignment: .top, spacing: 14) {
-                CareerReadinessRing(progress: careerProfile.completion)
-
-                VStack(alignment: .leading, spacing: 5) {
-                    Text("КАР’ЄРНИЙ ПРОФІЛЬ".localized)
-                        .font(.system(size: 10, weight: .black, design: .default))
-                        .tracking(1.6)
-                        .foregroundColor(Theme.Colors.textPrimary)
-
-                    Text(careerProfile.desiredPosition.isEmpty ? "Твій наступний крок".localized : careerProfile.desiredPosition)
-                        .font(.system(size: 22, weight: .bold, design: .default))
-                        .foregroundColor(JourneyVisual.primaryText)
-                        .lineLimit(2)
-
-                    Text(careerProfile.hasResume ? "CV автоматично живить пошук і AI Match".localized : "Створи CV — решту Career Hub збере сам".localized)
-                        .font(.system(size: 12, weight: .medium))
-                        .foregroundColor(JourneyVisual.secondaryText)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-
-                Spacer(minLength: 4)
-
-                Button {
-                    showCVBuilder = true
-                } label: {
-                    Image(systemName: careerProfile.hasResume ? "pencil" : "plus")
-                        .font(.system(size: 15, weight: .bold))
-                        .foregroundColor(JourneyVisual.primaryText)
-                        .frame(width: 40, height: 40)
-                        .background(Theme.Colors.card)
-                        .clipShape(Circle())
-                        .overlay(Circle().stroke(JourneyVisual.softBorder, lineWidth: 1))
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel(careerProfile.hasResume ? "Редагувати CV".localized : "Створити CV".localized)
-            }
-
-            careerRoute
-
-            HStack(spacing: 8) {
-                CareerHubMetric(
-                    value: "\(careerProfile.completion)%",
-                    label: "готовність CV".localized,
-                    icon: "doc.text.fill"
-                )
-                CareerHubMetric(
-                    value: "\(careerMatchCount)",
-                    label: "AI збігів".localized,
-                    icon: "sparkles"
-                )
-                CareerHubMetric(
-                    value: "\(activeApplications.count)",
-                    label: "активні заявки".localized,
-                    icon: "paperplane.fill"
-                )
-            }
-
-            HStack(alignment: .top, spacing: 12) {
-                Image(systemName: careerNextIcon)
-                    .font(.system(size: 16, weight: .bold))
-                    .foregroundColor(.black)
-                    .frame(width: 38, height: 38)
-                    .background(JourneyVisual.lime)
-                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-
+        Button { handleCareerPrimaryAction() } label: {
+            HStack(spacing: 14) {
+                JourneyProgressRing(done: careerProfile.completion, total: 100, size: 48, lineWidth: 5, showsPercent: true)
                 VStack(alignment: .leading, spacing: 3) {
-                    Text("НАСТУПНА ДІЯ".localized)
-                        .font(.system(size: 9, weight: .black, design: .default))
-                        .tracking(1.2)
-                        .foregroundColor(Theme.Colors.textPrimary)
-                    Text(careerNextTitle)
-                        .font(.system(size: 15, weight: .bold, design: .default))
+                    Text(careerProfile.desiredPosition.isEmpty ? "Твій наступний крок".localized : careerProfile.desiredPosition)
+                        .font(.system(size: 16, weight: .bold))
                         .foregroundColor(JourneyVisual.primaryText)
-                    Text(careerNextSubtitle)
-                        .font(.system(size: 11, weight: .medium))
+                        .lineLimit(1)
+                    Text(careerNextTitle)
+                        .font(.system(size: 13, weight: .medium))
                         .foregroundColor(JourneyVisual.secondaryText)
-                        .fixedSize(horizontal: false, vertical: true)
+                        .lineLimit(1)
                 }
-                Spacer(minLength: 0)
-            }
-            .padding(13)
-            .background(Theme.Colors.card)
-            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 16).stroke(JourneyVisual.softBorder))
-
-            Button {
-                handleCareerPrimaryAction()
-            } label: {
-                HStack(spacing: 10) {
+                Spacer(minLength: 8)
+                ZStack {
                     if isAIMatching {
                         ProgressView().tint(.black)
                     } else {
-                        Image(systemName: careerPrimaryIcon)
+                        Image(systemName: careerPrimaryIcon).font(.system(size: 15, weight: .bold))
                     }
-                    Text(careerPrimaryTitle)
-                        .font(.system(size: 16, weight: .bold, design: .default))
-                    Spacer()
-                    Image(systemName: "arrow.right")
-                        .font(.system(size: 16, weight: .black))
                 }
                 .foregroundColor(.black)
-                .padding(.horizontal, 18)
-                .frame(maxWidth: .infinity, minHeight: 54)
-                .background(JourneyVisual.lime)
-                .clipShape(RoundedRectangle(cornerRadius: 17, style: .continuous))
+                .frame(width: 42, height: 42)
+                .background(JourneyVisual.lime, in: Circle())
             }
-            .buttonStyle(.plain)
-            .disabled(isAIMatching)
-            .accessibilityIdentifier("careerHub.primaryAction")
-
-            HStack(spacing: 10) {
-                careerUtilityButton(icon: "slider.horizontal.3", title: "Профіль AI".localized) {
-                    showAIMatchProfile = true
-                }
-                careerUtilityButton(icon: alerts.isEmpty ? "bell" : "bell.fill", title: "Сповіщення".localized) {
-                    showAlerts = true
-                }
-                careerUtilityButton(icon: "rectangle.stack", title: "Трекер".localized) {
-                    showApplicationTracker = true
-                }
-            }
+            .padding(.leading, 12)
+            .padding(.trailing, 10)
+            .padding(.vertical, 10)
+            .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(JourneyVisual.lime.opacity(0.55), lineWidth: 1.2))
         }
-        .padding(17)
-        .background(
-            ZStack {
-                RoundedRectangle(cornerRadius: 28, style: .continuous)
-                    .fill(Theme.Colors.card.opacity(0.97))
-                RadialGradient(
-                    colors: [JourneyVisual.lime.opacity(0.14), .clear],
-                    center: .topTrailing,
-                    startRadius: 0,
-                    endRadius: 220
-                )
-                .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
-            }
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 28, style: .continuous)
-                .stroke(
-                    LinearGradient(
-                        colors: [JourneyVisual.lime.opacity(0.72), Color.white.opacity(0.08)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ),
-                    lineWidth: 1.2
-                )
-        )
-        .shadow(color: JourneyVisual.lime.opacity(0.08), radius: 28, y: 12)
-        .accessibilityElement(children: .contain)
-        .accessibilityIdentifier("careerHub.dashboard")
+        .buttonStyle(ScaleButtonStyle(scaleAmount: 0.98, hapticStyle: .light))
+        .disabled(isAIMatching)
+        .accessibilityLabel(careerPrimaryTitle)
+        .accessibilityIdentifier("careerHub.primaryAction")
     }
 
     private var careerRoute: some View {
@@ -1023,12 +948,10 @@ struct JobsView: View {
                     }
                 }
             }
-            .padding(.horizontal, 17)
-            .frame(height: 54)
-            .background(.ultraThinMaterial.opacity(0.7))
-            .background(Theme.Colors.card)
-            .clipShape(RoundedRectangle(cornerRadius: 19, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 19, style: .continuous).stroke(JourneyVisual.softBorder, lineWidth: 1))
+            .padding(.horizontal, 16)
+            .frame(height: 48)
+            .background(Theme.Colors.card, in: Capsule())
+            .overlay(Capsule().stroke(JourneyVisual.softBorder, lineWidth: 1))
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 10) {
@@ -1074,12 +997,11 @@ struct JobsView: View {
                         haptic(.light)
                     } label: {
                         Image(systemName: "slider.horizontal.3")
-                            .font(.system(size: 17, weight: .semibold))
+                            .font(.system(size: 14, weight: .semibold))
                             .foregroundColor(showAdvancedFilters ? .black : JourneyVisual.primaryText)
-                            .frame(width: 44, height: 44)
-                            .background(showAdvancedFilters ? JourneyVisual.lime : Color.white.opacity(0.09))
-                            .clipShape(RoundedRectangle(cornerRadius: 15, style: .continuous))
-                            .overlay(RoundedRectangle(cornerRadius: 15, style: .continuous).stroke(JourneyVisual.softBorder, lineWidth: 1))
+                            .frame(width: 36, height: 36)
+                            .background(showAdvancedFilters ? JourneyVisual.lime : Theme.Colors.card, in: Circle())
+                            .overlay(Circle().stroke(showAdvancedFilters ? .clear : JourneyVisual.softBorder, lineWidth: 1))
                     }
                     .buttonStyle(.plain)
                 }
@@ -1191,7 +1113,7 @@ struct JobsView: View {
     
     // MARK: - Results
     private var resultsSection: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 10) {
             HStack {
                 if showMatchResults {
                     HStack(spacing: 6) {
@@ -1213,8 +1135,8 @@ struct JobsView: View {
                         .foregroundColor(Theme.Colors.textPrimary)
                 }
             }
-            .font(.system(size: 21, weight: .bold, design: .default))
-            .padding(.top, 6)
+            .font(.system(size: 18, weight: .bold, design: .default))
+            .padding(.top, 8)
             
             if isLoading || isAIMatching {
                 // Skeleton loading
@@ -1397,6 +1319,17 @@ struct JobsView: View {
     }
 
     #if DEBUG
+    #if DEBUG
+    /// Offline vacancies for UI checks of the career copilot without signing in.
+    private static var careerHubJobFixtures: [APIClient.JobItem] {
+        let json = """
+        [{"id":"fixture-ux","source":"jooble","title":"UX/UI Designer (m/w/d) 80–100%","company":"Helvetia Digital AG","location":"Zürich","canton":"ZH","country":"CH","url":"https://example.com/job/ux","employment_type":"full_time","workplace_type":"hybrid","workload_min":80,"workload_max":100,"salary":"CHF 95'000–110'000","snippet":"Gestalte digitale Versicherungsprodukte mit unserem Produktteam.","description":"Wir suchen eine/n UX/UI Designer/in mit Erfahrung in Figma, Design Systems und Nutzerforschung. Deutsch B2, Englisch fliessend. Arbeitsbewilligung erforderlich.","languages":["Deutsch B2","Englisch"],"skills":["Figma","Design Systems","User Research"],"is_verified":true,"freshness":"fresh"},
+         {"id":"fixture-care","source":"jooble","title":"Pflegehelfer/in SRK 60%","company":"Alterszentrum Seefeld","location":"Zürich","canton":"ZH","country":"CH","url":"https://example.com/job/care","employment_type":"part_time","workload_min":60,"workload_max":60,"snippet":"Unterstützung in der Pflege und Betreuung unserer Bewohnenden.","languages":["Deutsch B1"],"no_experience_required":true,"freshness":"fresh"}]
+        """
+        return (try? JSONDecoder().decode([APIClient.JobItem].self, from: Data(json.utf8))) ?? []
+    }
+    #endif
+
     private static var careerHubFixture: CVResume {
         var resume = CVResume.empty
         resume.personal = CVPersonal(
@@ -1435,6 +1368,13 @@ struct JobsView: View {
     
     // MARK: - Actions
     private func performSearch() async {
+        #if DEBUG
+        if isCareerHubUITest {
+            items = Self.careerHubJobFixtures
+            didSearchOnce = true
+            return
+        }
+        #endif
         searchGeneration &+= 1
         let generation = searchGeneration
         isLoading = true
@@ -1662,6 +1602,14 @@ struct JobsView: View {
             haptic(.error)
             await MainActor.run { interactionMessage = error.localizedDescription }
         }
+    }
+
+    /// Keeps the kit's motivation letter with the job in the tracker (as "prepared" unless already further).
+    private func saveCoverLetter(_ letter: String, for job: APIClient.JobItem) async {
+        let status = applications.first(where: { $0.job_id == job.id })?.status ?? "prepared"
+        guard let updated = try? await APIClient.updateJobApplication(jobId: job.id, status: status, coverLetter: letter) else { return }
+        applications.removeAll { $0.job_id == job.id }
+        applications.append(updated)
     }
 
     private func updateApplication(jobID: String, status: String) async {
@@ -2362,26 +2310,22 @@ private struct JobsMenuPill: View {
     var showsChevron: Bool = true
 
     var body: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: 6) {
             Image(systemName: icon)
-                .font(.system(size: 14, weight: .semibold))
+                .font(.system(size: 12, weight: .semibold))
             Text(text)
-                .font(.system(size: 14, weight: .semibold))
+                .font(.system(size: 13, weight: .semibold))
                 .lineLimit(1)
             if showsChevron {
                 Image(systemName: "chevron.down")
-                    .font(.system(size: 11, weight: .bold))
+                    .font(.system(size: 9, weight: .bold))
             }
         }
         .foregroundColor(isActive ? .black : JourneyVisual.primaryText)
-        .padding(.horizontal, 15)
-        .frame(height: 44)
-        .background(isActive ? JourneyVisual.lime : Color.white.opacity(0.09))
-        .clipShape(RoundedRectangle(cornerRadius: 15, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: 15, style: .continuous)
-                .stroke(isActive ? JourneyVisual.lime : Color.white.opacity(0.18), lineWidth: 1)
-        )
+        .padding(.horizontal, 13)
+        .frame(height: 36)
+        .background(isActive ? JourneyVisual.lime : Theme.Colors.card, in: Capsule())
+        .overlay(Capsule().stroke(isActive ? .clear : JourneyVisual.softBorder, lineWidth: 1))
     }
 }
 
@@ -2473,6 +2417,17 @@ private struct QuickTagChip: View {
 
 // MARK: - Job Card
 private struct JobCard: View {
+    /// Providers send codes like "full_time" or "Vollzeit"; show them in the app language.
+    static func employmentLabel(_ raw: String) -> String {
+        let value = raw.lowercased()
+        if value.contains("full") || value.contains("vollzeit") { return "jobs.employment.full_time".localized }
+        if value.contains("part") || value.contains("teilzeit") { return "jobs.employment.part_time".localized }
+        if value.contains("contract") || value.contains("temporary") || value.contains("befrist") { return "jobs.employment.contract".localized }
+        if value.contains("intern") || value.contains("prakti") { return "jobs.employment.internship".localized }
+        if value.contains("apprentice") || value.contains("lehr") { return "jobs.employment.apprenticeship".localized }
+        return raw.replacingOccurrences(of: "_", with: " ")
+    }
+
     let job: APIClient.JobItem
     let isSaved: Bool
     let matchScore: Int?
@@ -2496,129 +2451,101 @@ private struct JobCard: View {
         String((job.company ?? "S").prefix(1)).uppercased()
     }
     
+    /// Short facts worth a glance: workload, pay, where you work. Everything else lives on the detail page.
+    private var facts: [String] {
+        var items: [String] = []
+        if let min = job.workload_min, let max = job.workload_max {
+            items.append(min == max ? "\(min)%" : "\(min)–\(max)%")
+        } else if let employment = job.employment_type, !employment.isEmpty {
+            items.append(Self.employmentLabel(employment))
+        }
+        if let workplace = job.workplace_type, workplace == "remote" || workplace == "hybrid" {
+            items.append(workplace == "remote" ? "Віддалено".localized : "Гібридно".localized)
+        } else if isRemote {
+            items.append("Віддалено".localized)
+        }
+        if job.no_experience_required == true { items.append("jobs.no_experience_short".localized) }
+        return items
+    }
+
     var body: some View {
-        HStack(alignment: .top, spacing: 14) {
-            ZStack {
-                RoundedRectangle(cornerRadius: 17, style: .continuous)
-                    .fill(Color.white)
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .top, spacing: 12) {
                 Text(companyInitial)
-                    .font(.system(size: 25, weight: .black, design: .default))
-                    .foregroundStyle(
-                        LinearGradient(
-                            colors: [JourneyVisual.lime, Color(red: 0.15, green: 0.36, blue: 0.25)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
+                    .font(.system(size: 17, weight: .heavy))
+                    .foregroundColor(JourneyVisual.accentText)
+                    .frame(width: 42, height: 42)
+                    .background(JourneyVisual.lime.opacity(0.22), in: RoundedRectangle(cornerRadius: 13, style: .continuous))
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(job.title)
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(JourneyVisual.primaryText)
+                        .lineLimit(2)
+                        .multilineTextAlignment(.leading)
+                    Text([job.company, job.location].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " · "))
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(JourneyVisual.secondaryText)
+                        .lineLimit(1)
+                }
+
+                Spacer(minLength: 4)
+
+                Button(action: onSave) {
+                    Image(systemName: isSaved ? "bookmark.fill" : "bookmark")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(isSaved ? JourneyVisual.accentText : JourneyVisual.secondaryText)
+                        .frame(width: 36, height: 36)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(isSaved ? "Видалити зі збережених".localized : "Зберегти вакансію".localized)
             }
-            .frame(width: 64, height: 64)
 
-            VStack(alignment: .leading, spacing: 7) {
-                HStack(alignment: .top, spacing: 8) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(job.title)
-                            .font(.system(size: 18, weight: .bold, design: .default))
-                            .foregroundColor(JourneyVisual.primaryText)
-                            .lineLimit(2)
-                            .multilineTextAlignment(.leading)
-
-                        HStack(spacing: 5) {
-                            Text(job.company ?? "Компанія".localized)
-                            if isNew {
-                                Image(systemName: "sparkles")
-                                    .font(.system(size: 10, weight: .bold))
-                                    .foregroundColor(Theme.Colors.textPrimary)
-                            }
-                        }
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(JourneyVisual.secondaryText)
-                    }
-
-                    Spacer(minLength: 4)
-
-                    Button(action: onSave) {
-                        Image(systemName: isSaved ? "bookmark.fill" : "bookmark")
-                            .font(.system(size: 17, weight: .semibold))
-                            .foregroundColor(isSaved ? Theme.Colors.textPrimary : JourneyVisual.secondaryText)
-                            .frame(width: 42, height: 42)
-                            .background(Theme.Colors.card)
-                            .clipShape(Circle())
-                            .overlay(Circle().stroke(JourneyVisual.softBorder, lineWidth: 1))
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel(isSaved ? "Видалити зі збережених".localized : "Зберегти вакансію".localized)
-                }
-
-                HStack(spacing: 7) {
-                    Image(systemName: "mappin")
-                    Text(job.location ?? (ResidenceCountry(rawValue: APIClient.countryCode)?.name ?? "Швейцарія".localized))
-                    if let employment = job.employment_type, !employment.isEmpty {
-                        Text("·")
-                        Text(employment)
-                    } else if isRemote {
-                        Text("· Remote")
-                    }
-                }
-                .font(.system(size: 13, weight: .medium))
-                .foregroundColor(JourneyVisual.secondaryText)
-                .lineLimit(1)
-
-                HStack(spacing: 10) {
-                    if let salary = job.salary, !salary.isEmpty {
-                        Text(salary)
-                            .font(.system(size: 16, weight: .bold, design: .default))
-                            .foregroundColor(JourneyVisual.primaryText)
-                            .lineLimit(1)
-                    } else {
-                        Text(job.source.uppercased())
-                            .font(.system(size: 12, weight: .bold))
-                            .foregroundColor(JourneyVisual.secondaryText)
-                    }
-
+            if !facts.isEmpty || job.salary?.isEmpty == false || (matchScore ?? 0) > 0 || isNew {
+                HStack(spacing: 6) {
                     if let score = matchScore, score > 0 {
-                        Text("%@%% збіг".localized(with: "\(score)"))
-                            .font(.system(size: 12, weight: .bold))
-                            .foregroundColor(Theme.Colors.textPrimary)
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 6)
-                            .background(JourneyVisual.lime.opacity(0.11))
-                            .clipShape(Capsule())
-                            .overlay(Capsule().stroke(JourneyVisual.lime.opacity(0.32), lineWidth: 1))
+                        tag("%@%% збіг".localized(with: "\(score)"), strong: true)
+                    } else if isNew {
+                        tag("jobs.new".localized, strong: true)
                     }
-
-                    Spacer()
-
-                    Button(action: onShare) {
-                        Image(systemName: "square.and.arrow.up")
-                            .font(.system(size: 15, weight: .semibold))
-                            .foregroundColor(JourneyVisual.secondaryText)
-                            .frame(width: 34, height: 34)
+                    if let salary = job.salary, !salary.isEmpty {
+                        tag(salary, strong: false, bold: true)
                     }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel("Поділитися вакансією".localized)
-
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 15, weight: .bold))
-                        .foregroundColor(JourneyVisual.secondaryText)
+                    // Salary strings are long; leave room so the row never pushes the card wider.
+                    ForEach(facts.prefix(job.salary?.isEmpty == false ? 1 : 2), id: \.self) { tag($0, strong: false) }
+                    Spacer(minLength: 0)
                 }
+                .padding(.leading, 54)
             }
         }
-        .padding(16)
-        .background(.ultraThinMaterial.opacity(0.72))
-        .background(Theme.Colors.card)
-        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .padding(14)
+        .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .stroke(
-                    matchScore != nil ? JourneyVisual.lime.opacity(0.32) : Color.white.opacity(0.16),
-                    lineWidth: 1
-                )
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .stroke(matchScore != nil ? JourneyVisual.lime.opacity(0.6) : JourneyVisual.softBorder, lineWidth: 1)
         )
-        .contentShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .contentShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
         .onTapGesture(perform: onTap)
+        .contextMenu {
+            Button(action: onShare) { Label("Поділитися вакансією".localized, systemImage: "square.and.arrow.up") }
+            Button(action: onSave) { Label(isSaved ? "Видалити зі збережених".localized : "Зберегти вакансію".localized, systemImage: "bookmark") }
+        }
         .accessibilityElement(children: .contain)
         .accessibilityAddTraits(.isButton)
         .accessibilityAction(named: "Відкрити вакансію".localized, onTap)
+    }
+
+    private func tag(_ text: String, strong: Bool, bold: Bool = false) -> some View {
+        Text(text)
+            .font(.system(size: 12, weight: bold || strong ? .bold : .semibold))
+            .foregroundColor(strong ? .black : JourneyVisual.primaryText)
+            .lineLimit(1)
+            .minimumScaleFactor(0.8)
+            .padding(.horizontal, 9)
+            .frame(height: 24)
+            .background(strong ? JourneyVisual.lime : JourneyVisual.pageBackground, in: Capsule())
+            .overlay(Capsule().stroke(strong ? .clear : JourneyVisual.softBorder, lineWidth: 1))
     }
 }
 
@@ -2787,6 +2714,8 @@ private struct JobsRecoveryState: View {
 // MARK: - Job Detail Sheet
 private struct JobDetailSheet: View {
     let job: APIClient.JobItem
+    let cv: CVResume?
+    let onSaveLetter: (String) async -> Void
     let matchScore: Int?
     let matchReasons: [String]
     let isApplied: Bool
@@ -2798,49 +2727,22 @@ private struct JobDetailSheet: View {
     
     @Environment(\.dismiss) private var dismiss
     @State private var showReportConfirmation = false
+    @State private var showKit = false
+    @State private var showInterview = false
     @State private var translatedDescription: String?
     @State private var isTranslating = false
     @State private var translationError: String?
     
+    @State private var descriptionExpanded = false
+
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    // Header
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text(job.title)
-                            .font(.title2.bold())
-                            .foregroundColor(.primary)
-                        
-                        Text([job.company, job.location, job.canton].compactMap { $0 }.joined(separator: " • "))
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                    }
-                    
-                    Divider()
-
-                    HStack(spacing: 10) {
-                        Label(job.is_verified == true ? "Перевірене джерело".localized : job.source.capitalized, systemImage: job.is_verified == true ? "checkmark.seal.fill" : "link")
-                        if let freshness = job.freshness {
-                            Label(freshness == "fresh" ? "Оновлено нещодавно".localized : "Перевір дату".localized, systemImage: "clock")
-                        }
-                    }
-                    .font(.caption.weight(.semibold))
-                    .foregroundColor(job.freshness == "stale" ? .orange : Theme.Colors.primary)
+                VStack(alignment: .leading, spacing: 18) {
+                    header
 
                     if let matchScore {
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("Підходить на %@%%".localized(with: "\(matchScore)"))
-                                .font(.headline)
-                            ForEach(matchReasons, id: \.self) { reason in
-                                Label(reason, systemImage: "checkmark.circle.fill")
-                                    .font(.subheadline)
-                            }
-                        }
-                        .padding()
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(Theme.Colors.primary.opacity(0.12))
-                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        matchCard(matchScore)
                     }
 
                     jobFacts
@@ -2850,116 +2752,31 @@ private struct JobDetailSheet: View {
                             "Для цієї професії може знадобитися офіційне визнання диплома %@.".localized(with: (ResidenceCountry(rawValue: APIClient.countryCode) ?? .switzerland).inCountryPhrase),
                             systemImage: "checkmark.seal"
                         )
-                        .font(.subheadline.weight(.semibold))
+                        .font(.system(size: 14, weight: .semibold))
                         .foregroundColor(.orange)
-                        .padding(14)
+                        .padding(12)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(Color.orange.opacity(0.12))
-                        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                        .background(Color.orange.opacity(0.1), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                     }
-                    
-                    // Description
-                    if let description = job.description ?? job.snippet, !description.isEmpty {
-                        VStack(alignment: .leading, spacing: 12) {
-                            HStack {
-                                Text(translatedDescription == nil ? "Опис вакансії".localized : "Переклад українською".localized)
-                                    .font(.headline)
-                                Spacer()
-                                Button {
-                                    if translatedDescription != nil {
-                                        translatedDescription = nil
-                                    } else {
-                                        Task { await translateDescription() }
-                                    }
-                                } label: {
-                                    if isTranslating {
-                                        ProgressView()
-                                    } else {
-                                        Label(
-                                            translatedDescription == nil ? "Перекласти".localized : "Оригінал".localized,
-                                            systemImage: "character.book.closed"
-                                        )
-                                    }
-                                }
-                                .font(.caption.weight(.bold))
-                                .disabled(isTranslating)
-                            }
-                            Text(translatedDescription ?? description)
-                                .font(.body)
-                                .foregroundColor(.primary)
-                                .textSelection(.enabled)
-                        }
-                    }
-                    
-                    // Actions
-                    VStack(spacing: 12) {
-                        if job.source != "sweezy" {
-                            Button {
-                                Task { await onOpen() }
-                            } label: {
-                                HStack {
-                                    Image(systemName: "arrow.up.right.square")
-                                    Text("Відкрити вакансію".localized)
-                                }
-                                .frame(maxWidth: .infinity)
-                                .padding()
-                                .background(Theme.Colors.primary)
-                                .foregroundColor(Theme.Colors.textOnPrimary)
-                                .cornerRadius(12)
-                            }
-                        }
 
-                        if !isApplied {
-                            Button {
-                                Task { await onApplied() }
-                            } label: {
-                                Label("Позначити як відправлено".localized, systemImage: "paperplane.fill")
-                                    .frame(maxWidth: .infinity)
-                                    .padding()
-                                    .background(Theme.Colors.card)
-                                    .foregroundColor(.primary)
-                                    .cornerRadius(12)
-                            }
-                        } else {
-                            Label("Відгук додано до трекера".localized, systemImage: "checkmark.circle.fill")
-                                .font(.subheadline.weight(.semibold))
-                                .foregroundColor(JourneyVisual.accentText)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 10)
-                        }
+                    moreActions
 
-                        if job.can_message == true {
-                            Button {
-                                Task { await onChat() }
-                            } label: {
-                                Label("Написати роботодавцю".localized, systemImage: "bubble.left.and.bubble.right.fill")
-                                    .frame(maxWidth: .infinity)
-                                    .padding()
-                                    .background(Theme.Colors.card)
-                                    .foregroundColor(.primary)
-                                    .cornerRadius(12)
-                            }
-                        }
-                        
-                        Button {
-                            Task { await onDraft() }
-                        } label: {
-                            HStack {
-                                Image(systemName: "sparkles")
-                                Text("AI Відповідь".localized)
-                            }
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Theme.Colors.accent)
-                            .foregroundColor(JourneyVisual.primaryText)
-                            .cornerRadius(12)
-                        }
-                    }
+                    descriptionSection
                 }
-                .padding()
+                .padding(.horizontal, 20)
+                .padding(.top, 6)
+                .padding(.bottom, 24)
             }
+            .background(JourneyVisual.pageBackground.ignoresSafeArea())
+            .safeAreaInset(edge: .bottom, spacing: 0) { actionBar }
             .navigationTitle("Деталі".localized)
             .navigationBarTitleDisplayMode(.inline)
+            .fullScreenCover(isPresented: $showKit) {
+                ApplicationKitView(job: job, cv: cv, onUseLetter: onSaveLetter)
+            }
+            .fullScreenCover(isPresented: $showInterview) {
+                InterviewCoachView(job: job, cvSummary: cv?.personal.summary ?? "", preferredLanguage: CareerAPI.defaultLetterLanguage(for: job))
+            }
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Menu {
@@ -3001,39 +2818,315 @@ private struct JobDetailSheet: View {
         }
     }
 
-    private var jobFacts: some View {
+    private var subtitle: String {
+        [job.company, [job.location, job.canton].compactMap { $0 }.joined(separator: ", ")]
+            .compactMap { $0 }
+            .filter { !$0.isEmpty }
+            .joined(separator: " · ")
+    }
+
+    private var header: some View {
         VStack(alignment: .leading, spacing: 12) {
-            if let salary = salaryText {
-                Label(salary, systemImage: "banknote")
-                Text("Вказана зарплата — brutto. Netto залежить від кантону, сімейного стану та відрахувань.".localized)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+            HStack(alignment: .top, spacing: 12) {
+                Text(String((job.company ?? job.title).prefix(1)).uppercased())
+                    .font(.system(size: 20, weight: .heavy))
+                    .foregroundColor(JourneyVisual.primaryText)
+                    .frame(width: 48, height: 48)
+                    .background(JourneyVisual.lime.opacity(0.22), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(job.title)
+                        .font(.system(size: 21, weight: .bold))
+                        .foregroundColor(JourneyVisual.primaryText)
+                        .fixedSize(horizontal: false, vertical: true)
+                    if !subtitle.isEmpty {
+                        Text(subtitle)
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(JourneyVisual.secondaryText)
+                    }
+                }
             }
-            if let workload = workloadText {
-                Label(workload, systemImage: "clock")
-            }
-            if let workplace = job.workplace_type, !workplace.isEmpty {
-                Label(workplaceLabel(workplace), systemImage: "house.and.flag")
-            }
-            if let languages = job.languages, !languages.isEmpty {
-                Label("jobs.languages_list".localized(with: languages.joined(separator: ", ")), systemImage: "character.bubble")
-            }
-            if let permits = job.permit_requirements, !permits.isEmpty {
-                Label("jobs.permits_list".localized(with: permits.joined(separator: ", ")), systemImage: "person.text.rectangle")
-            }
-            if job.no_experience_required == true {
-                Label("Підходить без досвіду".localized, systemImage: "sparkles")
-            }
-            if job.degree_required == false {
-                Label("Диплом не вказаний як обов’язковий".localized, systemImage: "graduationcap")
+            HStack(spacing: 6) {
+                headerTag(
+                    job.is_verified == true ? "Перевірене джерело".localized : job.source.capitalized,
+                    icon: job.is_verified == true ? "checkmark.seal.fill" : "link",
+                    tint: JourneyVisual.accentText
+                )
+                if let freshness = job.freshness {
+                    headerTag(
+                        freshness == "fresh" ? "Оновлено нещодавно".localized : "Перевір дату".localized,
+                        icon: "clock",
+                        tint: freshness == "stale" ? .orange : JourneyVisual.secondaryText
+                    )
+                }
             }
         }
-        .font(.subheadline.weight(.semibold))
-        .foregroundColor(.primary)
-        .padding(16)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Theme.Colors.card)
-        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+    }
+
+    private func headerTag(_ text: String, icon: String, tint: Color) -> some View {
+        Label(text, systemImage: icon)
+            .font(.system(size: 12, weight: .semibold))
+            .foregroundColor(tint)
+            .lineLimit(1)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 6)
+            .background(Theme.Colors.card, in: Capsule())
+            .overlay(Capsule().stroke(JourneyVisual.softBorder, lineWidth: 1))
+    }
+
+    private func matchCard(_ score: Int) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            JourneyProgressRing(done: score, total: 100, size: 46, lineWidth: 5, showsPercent: true)
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Підходить на %@%%".localized(with: "\(score)"))
+                    .font(.system(size: 15, weight: .bold))
+                    .foregroundColor(JourneyVisual.primaryText)
+                ForEach(matchReasons.prefix(3), id: \.self) { reason in
+                    Text(reason)
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(JourneyVisual.secondaryText)
+                }
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(14)
+        .background(JourneyVisual.lime.opacity(0.14), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+    }
+
+    private struct Fact: Identifiable {
+        let icon: String
+        let text: String
+        var note: String?
+        var id: String { icon + text }
+    }
+
+    private var facts: [Fact] {
+        var list: [Fact] = []
+        if let salary = salaryText {
+            list.append(Fact(icon: "banknote", text: salary, note: "Вказана зарплата — brutto. Netto залежить від кантону, сімейного стану та відрахувань.".localized))
+        }
+        if let workload = workloadText {
+            list.append(Fact(icon: "clock", text: JobCard.employmentLabel(workload)))
+        }
+        if let workplace = job.workplace_type, !workplace.isEmpty {
+            list.append(Fact(icon: "house.and.flag", text: workplaceLabel(workplace)))
+        }
+        if let languages = job.languages, !languages.isEmpty {
+            list.append(Fact(icon: "character.bubble", text: "jobs.languages_list".localized(with: languages.joined(separator: ", "))))
+        }
+        if let permits = job.permit_requirements, !permits.isEmpty {
+            list.append(Fact(icon: "person.text.rectangle", text: "jobs.permits_list".localized(with: permits.joined(separator: ", "))))
+        }
+        if job.no_experience_required == true {
+            list.append(Fact(icon: "sparkles", text: "Підходить без досвіду".localized))
+        }
+        if job.degree_required == false {
+            list.append(Fact(icon: "graduationcap", text: "Диплом не вказаний як обов’язковий".localized))
+        }
+        return list
+    }
+
+    @ViewBuilder
+    private var jobFacts: some View {
+        if !facts.isEmpty {
+            VStack(alignment: .leading, spacing: 12) {
+                ForEach(facts) { fact in
+                    HStack(alignment: .top, spacing: 12) {
+                        Image(systemName: fact.icon)
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundColor(JourneyVisual.primaryText)
+                            .frame(width: 30, height: 30)
+                            .background(JourneyVisual.pageBackground, in: Circle())
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(fact.text)
+                                .font(.system(size: 15, weight: .semibold))
+                                .foregroundColor(JourneyVisual.primaryText)
+                                .fixedSize(horizontal: false, vertical: true)
+                            if let note = fact.note {
+                                Text(note)
+                                    .font(.system(size: 12))
+                                    .foregroundColor(JourneyVisual.secondaryText)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+                        }
+                        .padding(.top, 5)
+                        Spacer(minLength: 0)
+                    }
+                }
+            }
+            .padding(14)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(JourneyVisual.softBorder, lineWidth: 1))
+        }
+    }
+
+    /// Interview practice, marking the application sent and chat sit in one quiet list instead of a stack of big buttons.
+    private var moreActions: some View {
+        VStack(spacing: 0) {
+            actionRow(icon: "person.wave.2.fill", title: "career.interview.cta".localized, identifier: "jobs.detail.interview") {
+                showInterview = true
+            }
+            Divider().padding(.leading, 58)
+            if isApplied {
+                HStack(spacing: 12) {
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundColor(.black)
+                        .frame(width: 32, height: 32)
+                        .background(JourneyVisual.lime, in: Circle())
+                    Text("Відгук додано до трекера".localized)
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(JourneyVisual.accentText)
+                    Spacer()
+                }
+                .padding(.horizontal, 14)
+                .frame(minHeight: 54)
+            } else {
+                actionRow(icon: "paperplane.fill", title: "Позначити як відправлено".localized, identifier: "jobs.detail.applied") {
+                    Task { await onApplied() }
+                }
+            }
+            if job.can_message == true {
+                Divider().padding(.leading, 58)
+                actionRow(icon: "bubble.left.and.bubble.right.fill", title: "Написати роботодавцю".localized, identifier: "jobs.detail.chat") {
+                    Task { await onChat() }
+                }
+            }
+        }
+        .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(JourneyVisual.softBorder, lineWidth: 1))
+    }
+
+    private func actionRow(icon: String, title: String, identifier: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: 12) {
+                Image(systemName: icon)
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundColor(.white)
+                    .frame(width: 32, height: 32)
+                    .background(JourneyVisual.black, in: Circle())
+                Text(title)
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundColor(JourneyVisual.primaryText)
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundColor(JourneyVisual.secondaryText.opacity(0.6))
+            }
+            .padding(.horizontal, 14)
+            .frame(minHeight: 54)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier(identifier)
+    }
+
+    @ViewBuilder
+    private var descriptionSection: some View {
+        if let description = job.description ?? job.snippet, !description.isEmpty {
+            let text = translatedDescription ?? description
+            VStack(alignment: .leading, spacing: 10) {
+                HStack {
+                    Text(translatedDescription == nil ? "Опис вакансії".localized : "Переклад українською".localized)
+                        .font(.system(size: 17, weight: .bold))
+                        .foregroundColor(JourneyVisual.primaryText)
+                    Spacer()
+                    Button {
+                        if translatedDescription != nil {
+                            translatedDescription = nil
+                        } else {
+                            Task { await translateDescription() }
+                        }
+                    } label: {
+                        Group {
+                            if isTranslating {
+                                ProgressView().controlSize(.small)
+                            } else {
+                                Label(
+                                    translatedDescription == nil ? "Перекласти".localized : "Оригінал".localized,
+                                    systemImage: "character.book.closed"
+                                )
+                            }
+                        }
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundColor(JourneyVisual.primaryText)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(Theme.Colors.card, in: Capsule())
+                        .overlay(Capsule().stroke(JourneyVisual.softBorder, lineWidth: 1))
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(isTranslating)
+                }
+                Text(text)
+                    .font(.system(size: 15))
+                    .foregroundColor(JourneyVisual.primaryText.opacity(0.86))
+                    .lineSpacing(3)
+                    .lineLimit(descriptionExpanded ? nil : 8)
+                    .textSelection(.enabled)
+                if text.count > 420 {
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.25)) { descriptionExpanded.toggle() }
+                    } label: {
+                        Text(descriptionExpanded ? "jobs.detail.read_less".localized : "jobs.detail.read_more".localized)
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundColor(JourneyVisual.accentText)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
+    }
+
+    /// One sticky primary action, with opening the original posting beside it.
+    private var actionBar: some View {
+        HStack(spacing: 10) {
+            if job.source != "sweezy" {
+                Button {
+                    Task { await onOpen() }
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: "arrow.up.right")
+                        Text("jobs.detail.open_short".localized)
+                    }
+                    .font(.system(size: 15, weight: .bold))
+                    .foregroundColor(JourneyVisual.primaryText)
+                    .padding(.horizontal, 18)
+                    .frame(height: 54)
+                    .background(Theme.Colors.card, in: Capsule())
+                    .overlay(Capsule().stroke(JourneyVisual.softBorder, lineWidth: 1))
+                }
+                .buttonStyle(ScaleButtonStyle(scaleAmount: 0.97, hapticStyle: .light))
+                .accessibilityLabel("Відкрити вакансію".localized)
+                .accessibilityIdentifier("jobs.detail.open")
+            }
+            Button { showKit = true } label: {
+                HStack(spacing: 8) {
+                    Image(systemName: "wand.and.stars")
+                    Text("career.kit.cta".localized)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                }
+                .font(.system(size: 16, weight: .bold))
+                .foregroundColor(.black)
+                .frame(maxWidth: .infinity, minHeight: 54)
+                .background(JourneyVisual.lime, in: Capsule())
+                .shadow(color: JourneyVisual.lime.opacity(0.35), radius: 10, y: 4)
+            }
+            .buttonStyle(ScaleButtonStyle(scaleAmount: 0.98, hapticStyle: .medium))
+            .accessibilityIdentifier("jobs.detail.kit")
+        }
+        .padding(.horizontal, 20)
+        .padding(.top, 14)
+        .padding(.bottom, 8)
+        .background(
+            LinearGradient(
+                colors: [JourneyVisual.pageBackground.opacity(0), JourneyVisual.pageBackground, JourneyVisual.pageBackground],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .ignoresSafeArea(edges: .bottom)
+        )
     }
 
     private func amount<Value: BinaryInteger>(_ value: Value) -> String {
@@ -3108,9 +3201,11 @@ private struct DraftSheet: View {
 
 private struct JobApplicationTrackerSheet: View {
     let applications: [APIClient.JobApplication]
+    let applicantName: String
     let onStatusChange: (String, String) async -> Void
 
     @Environment(\.dismiss) private var dismiss
+    @State private var showReport = false
     private let stages = ["saved", "prepared", "applied", "interview", "offer", "rejected", "withdrawn"]
 
     private func title(_ status: String) -> String {
@@ -3138,6 +3233,30 @@ private struct JobApplicationTrackerSheet: View {
                         .foregroundColor(JourneyVisual.primaryText)
                     Text("Оновлюй статус після кожного кроку. Уся історія синхронізується між пристроями.".localized)
                         .font(.subheadline)
+                    Button { showReport = true } label: {
+                        HStack(spacing: 12) {
+                            Image(systemName: "doc.text.fill")
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundColor(.black)
+                                .frame(width: 40, height: 40)
+                                .background(JourneyVisual.lime, in: Circle())
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("career.report.cta".localized)
+                                    .font(.system(size: 15, weight: .bold))
+                                    .foregroundColor(JourneyVisual.primaryText)
+                                Text("career.report.cta_sub".localized)
+                                    .font(.system(size: 12, weight: .medium))
+                                    .foregroundColor(JourneyVisual.secondaryText)
+                            }
+                            Spacer()
+                            Image(systemName: "chevron.right").foregroundColor(JourneyVisual.secondaryText)
+                        }
+                        .padding(14)
+                        .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                        .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(JourneyVisual.lime.opacity(0.7), lineWidth: 1.5))
+                    }
+                    .buttonStyle(ScaleButtonStyle(scaleAmount: 0.98, hapticStyle: .light))
+                    .accessibilityIdentifier("jobs.tracker.report")
                         .foregroundColor(JourneyVisual.secondaryText)
 
                     if applications.isEmpty {
@@ -3216,6 +3335,14 @@ private struct JobApplicationTrackerSheet: View {
             .navigationTitle("Відгуки".localized)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Готово".localized) { dismiss() } } }
+            .fullScreenCover(isPresented: $showReport) {
+                JobSearchReportView(applications: applications, applicantName: applicantName)
+            }
+            .task {
+                #if DEBUG
+                if ProcessInfo.processInfo.arguments.contains("--open-job-report") { showReport = true }
+                #endif
+            }
         }
     }
 }

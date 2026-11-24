@@ -10,17 +10,6 @@ struct JourneyDirectoryView: View {
     @State private var searchText = ""
     @State private var selectedCategory: GuideCategory?
 
-    private var directoryHeroAsset: String {
-        if selectedWorkspace == .tasks { return "story-documents" }
-        guard selectedWorkspace == .guides else { return CityArtwork.name("directory") }
-        switch selectedCategory {
-        case .housing: return "story-housing"
-        case .documents, .legal: return "story-documents"
-        case .work, .finance, .banking: return "story-jobs"
-        case .education, .integration: return "story-language"
-        default: return CityArtwork.name("directory")
-        }
-    }
     @State private var selectedGuide: Guide?
     @State private var selectedChecklist: Checklist?
     @State private var selectedWorkspace: JourneyDirectoryWorkspace = .guides
@@ -44,7 +33,7 @@ struct JourneyDirectoryView: View {
                         VStack(alignment: .leading, spacing: 18) {
                         VStack(alignment: .leading, spacing: 4) {
                             Text(selectedWorkspace == .guides ? "journey.tab.directory".localized : workspaceTitle)
-                                .font(.system(size: 30, weight: .bold, design: .default))
+                                .font(.system(size: 28, weight: .heavy, design: .default))
                                 .foregroundColor(JourneyVisual.primaryText)
                                 .lineLimit(2)
                                 .minimumScaleFactor(0.76)
@@ -62,22 +51,6 @@ struct JourneyDirectoryView: View {
                             title: \.title,
                             icon: \.icon
                         )
-
-                        // Tools and checklists keep the topic picture; guides open with their own cover.
-                        if selectedWorkspace != .guides {
-                            Color.clear
-                                .frame(height: 150)
-                                .frame(maxWidth: .infinity)
-                                .overlay {
-                                    FocusedSceneImage(name: directoryHeroAsset, focusY: 0.25)
-                                        .id(directoryHeroAsset)
-                                        .transition(.opacity)
-                                }
-                                .animation(.easeInOut(duration: 0.35), value: directoryHeroAsset)
-                                .clipShape(RoundedRectangle(cornerRadius: 22))
-                                .allowsHitTesting(false)
-                                .accessibilityHidden(true)
-                        }
 
                         workspaceContent
                         }
@@ -159,6 +132,12 @@ struct JourneyDirectoryView: View {
             .onChange(of: routeID) { _, _ in
                 applyRequestedSection()
             }
+            .onReceive(NotificationCenter.default.publisher(for: .journeyTabReselected)) { note in
+                guard note.object as? Int == 1 else { return }
+                selectedGuide = nil
+                selectedChecklist = nil
+                selectedTool = nil
+            }
         }
         .accessibilityIdentifier("directory.screen")
     }
@@ -209,19 +188,25 @@ struct JourneyDirectoryView: View {
                             .font(.system(size: 13, weight: .bold))
                             .foregroundColor(JourneyVisual.secondaryText)
                         Spacer()
-                        Label("journey.directory.official_sources".localized, systemImage: "checkmark.seal.fill")
-                            .font(.system(size: 10, weight: .semibold))
-                            .foregroundColor(JourneyVisual.accentText)
                     }
 
-                    LazyVStack(spacing: 10) {
-                        ForEach(rest.prefix(visibleGuideCount)) { guide in
+                    // One quiet list with hairlines instead of a stack of bordered cards.
+                    LazyVStack(spacing: 0) {
+                        let shown = Array(rest.prefix(visibleGuideCount))
+                        ForEach(Array(shown.enumerated()), id: \.element.id) { index, guide in
                             Button { selectedGuide = guide } label: {
                                 JourneyGuideCompactRow(guide: guide, imageName: guide.coverAsset)
                             }
                             .buttonStyle(ScaleButtonStyle(scaleAmount: 0.985, hapticStyle: .light))
+                            if index < shown.count - 1 {
+                                Divider().padding(.leading, 72)
+                            }
                         }
                     }
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 4)
+                    .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(JourneyVisual.softBorder, lineWidth: 1))
 
                     if rest.count > visibleGuideCount {
                         Button {
@@ -254,11 +239,8 @@ struct JourneyDirectoryView: View {
             .sorted { (counts[$0] ?? 0) > (counts[$1] ?? 0) }
 
         return VStack(alignment: .leading, spacing: 10) {
-            Text("journey.directory.topics".localized)
-                .font(.system(size: 19, weight: .bold))
-                .foregroundColor(JourneyVisual.primaryText)
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 10) {
+                HStack(spacing: 8) {
                     JourneyGuideTopicTile(
                         title: "common.all".localized,
                         icon: "square.grid.2x2.fill",
@@ -288,12 +270,8 @@ struct JourneyDirectoryView: View {
     }
 
     private var toolsWorkspace: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            VStack(alignment: .leading, spacing: 11) {
-                Text("journey.directory.toolkit.choose_task".localized)
-                    .font(.system(size: 21, weight: .bold, design: .default))
-                    .foregroundColor(JourneyVisual.primaryText)
-
+        VStack(alignment: .leading, spacing: 22) {
+            VStack(alignment: .leading, spacing: 0) {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 8) {
                         ForEach(JourneyToolkitCategory.availableCases(countryCode: APIClient.countryCode)) { category in
@@ -303,10 +281,10 @@ struct JourneyDirectoryView: View {
                                 }
                             } label: {
                                 Label(category.title, systemImage: category.icon)
-                                    .font(.system(size: 12, weight: .semibold, design: .default))
+                                    .font(.system(size: 13, weight: .semibold, design: .default))
                                     .foregroundColor(selectedToolCategory == category ? .black : JourneyVisual.primaryText)
-                                    .padding(.horizontal, 13)
-                                    .frame(height: 42)
+                                    .padding(.horizontal, 14)
+                                    .frame(height: 38)
                                     .background(selectedToolCategory == category ? JourneyVisual.lime : Theme.Colors.card)
                                     .clipShape(Capsule())
                                     .overlay(
@@ -324,21 +302,25 @@ struct JourneyDirectoryView: View {
             }
 
             if selectedToolCategory == .all {
-                // Two headline tools as illustrated cards, everything else in one even grid.
-                VStack(spacing: 12) {
-                    ForEach(JourneyToolRoute.featured(countryCode: APIClient.countryCode)) { route in
-                        JourneyToolHeroCard(route: route) {
-                            selectedTool = route
+                // Headline tools as a swipeable row of illustrated cards, everything else in one even grid.
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 12) {
+                        ForEach(JourneyToolRoute.featured(countryCode: APIClient.countryCode)) { route in
+                            JourneyToolHeroCard(route: route) {
+                                selectedTool = route
+                            }
                         }
                     }
+                    .scrollTargetLayout()
                 }
+                .scrollTargetBehavior(.viewAligned)
+                .scrollClipDisabled()
 
                 VStack(alignment: .leading, spacing: 12) {
-                    JourneyToolSectionHeader(
-                        eyebrow: "journey.directory.toolkit.current.eyebrow".localized,
-                        title: "journey.directory.toolkit.current.title".localized
-                    )
-                    .id("tools-next-actions")
+                    Text("journey.directory.toolkit.current.title".localized)
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundColor(JourneyVisual.primaryText)
+                        .id("tools-next-actions")
 
                     toolGrid(JourneyToolRoute.everyday)
                 }
@@ -449,6 +431,7 @@ struct JourneyDirectoryView: View {
     private func toolDestination(_ route: JourneyToolRoute) -> some View {
         switch route {
         case .myPlan: MyPlanView()
+        case .letters: LetterExplainerView()
         case .documents: DocumentReadinessView()
         case .ask: AskSweezyView()
         case .deadlines: DeadlineEngineView()
@@ -581,6 +564,7 @@ private enum JourneyToolkitCategory: String, CaseIterable, Identifiable {
 
 private enum JourneyToolRoute: String, Identifiable, CaseIterable {
     case myPlan
+    case letters
     case documents
     case ask
     case deadlines
@@ -600,7 +584,7 @@ private enum JourneyToolRoute: String, Identifiable, CaseIterable {
 
     /// Headline tools shown as illustrated cards on "All".
     static func featured(countryCode: String) -> [JourneyToolRoute] {
-        countryCode == "CH" ? [.careerHub, .discoverSwitzerland] : [.careerHub, .cv]
+        countryCode == "CH" ? [.letters, .careerHub, .discoverSwitzerland] : [.letters, .careerHub, .cv]
     }
 
     /// Everything else, once each. Ask Sweezy and the German word game live elsewhere now.
@@ -608,7 +592,7 @@ private enum JourneyToolRoute: String, Identifiable, CaseIterable {
 
     var swatch: JourneyCategorySwatch {
         switch self {
-        case .myPlan, .roadmap: return JourneyCategoryPalette.lime
+        case .myPlan, .roadmap, .letters: return JourneyCategoryPalette.lime
         case .documents, .cityHub: return JourneyCategoryPalette.sky
         case .deadlines, .moments: return JourneyCategoryPalette.coral
         case .appointments, .experts: return JourneyCategoryPalette.teal
@@ -622,6 +606,7 @@ private enum JourneyToolRoute: String, Identifiable, CaseIterable {
     var heroImage: String {
         switch self {
         case .careerHub, .cv: return "story-jobs"
+        case .letters: return "journey-tool-documents"
         case .discoverSwitzerland: return "swiss-discovery-aletsch"
         default: return imageName
         }
@@ -635,6 +620,7 @@ private enum JourneyToolRoute: String, Identifiable, CaseIterable {
     var title: String {
         switch self {
         case .myPlan: return "journey.tool.my_plan.title".localized
+        case .letters: return "letters.title".localized
         case .documents: return "journey.tool.documents.title".localized
         case .ask: return "journey.tool.ask.title".localized
         case .deadlines: return "journey.tool.deadlines.title".localized
@@ -655,6 +641,7 @@ private enum JourneyToolRoute: String, Identifiable, CaseIterable {
     var subtitle: String {
         switch self {
         case .myPlan: return "journey.tool.my_plan.subtitle".localized
+        case .letters: return "letters.tool_subtitle".localized
         case .documents: return "journey.tool.documents.subtitle".localized
         case .ask: return "journey.tool.ask.subtitle".localized
         case .deadlines: return "journey.tool.deadlines.subtitle".localized
@@ -675,6 +662,7 @@ private enum JourneyToolRoute: String, Identifiable, CaseIterable {
     var icon: String {
         switch self {
         case .myPlan: return "checklist.checked"
+        case .letters: return "envelope.open.badge.clock"
         case .documents: return "doc.text.fill"
         case .ask: return "sparkles"
         case .deadlines: return "calendar.badge.exclamationmark"
@@ -695,6 +683,7 @@ private enum JourneyToolRoute: String, Identifiable, CaseIterable {
     var imageName: String {
         switch self {
         case .myPlan: return "journey-tool-my-plan"
+        case .letters: return "journey-tool-documents"
         case .documents: return "journey-tool-documents"
         case .ask: return "journey-tool-ask"
         case .deadlines: return "journey-tool-deadlines"
@@ -913,31 +902,21 @@ private struct JourneyToolHeroCard: View {
                     endPoint: .bottom
                 )
 
-                HStack(alignment: .bottom, spacing: 12) {
-                    VStack(alignment: .leading, spacing: 5) {
-                        Label(route.title, systemImage: route.icon)
-                            .font(.system(size: 19, weight: .bold))
-                            .foregroundColor(.white)
-                        Text(route.subtitle)
-                            .font(.system(size: 13, weight: .medium))
-                            .foregroundColor(.white.opacity(0.86))
-                            .lineLimit(2)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                    .shadow(color: .black.opacity(0.3), radius: 6, y: 1)
-
-                    Spacer(minLength: 0)
-
-                    Image(systemName: "arrow.up.right")
-                        .font(.system(size: 14, weight: .bold))
-                        .foregroundColor(.black)
-                        .frame(width: 40, height: 40)
-                        .background(JourneyVisual.lime, in: Circle())
+                VStack(alignment: .leading, spacing: 4) {
+                    Label(route.title, systemImage: route.icon)
+                        .font(.system(size: 17, weight: .bold))
+                        .foregroundColor(.white)
+                        .lineLimit(1)
+                    Text(route.subtitle)
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(.white.opacity(0.86))
+                        .lineLimit(2)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
-                .padding(16)
+                .shadow(color: .black.opacity(0.3), radius: 6, y: 1)
+                .padding(14)
             }
-            .frame(height: 176)
-            .frame(maxWidth: .infinity)
+            .frame(width: 250, height: 156)
             .clipShape(shape)
             .overlay(shape.stroke(Color.white.opacity(0.3), lineWidth: 1))
             .contentShape(shape)
@@ -957,55 +936,29 @@ private struct JourneyToolTile: View {
     var body: some View {
         Button(action: action) {
             VStack(alignment: .leading, spacing: 10) {
-                HStack(alignment: .top) {
-                    JourneyCategoryIcon(symbol: route.icon, swatch: route.swatch, size: 40)
-                    Spacer(minLength: 4)
-                    Image(systemName: "arrow.up.right")
-                        .font(.system(size: 11, weight: .bold))
-                        .foregroundColor(JourneyVisual.secondaryText)
-                }
+                JourneyCategoryIcon(symbol: route.icon, swatch: route.swatch, size: 36)
 
-                Spacer(minLength: 0)
-
-                VStack(alignment: .leading, spacing: 3) {
+                VStack(alignment: .leading, spacing: 2) {
                     Text(route.title)
-                        .font(.system(size: 15, weight: .bold))
+                        .font(.system(size: 15, weight: .semibold))
                         .foregroundColor(JourneyVisual.primaryText)
                         .lineLimit(2)
                         .minimumScaleFactor(0.85)
                         .fixedSize(horizontal: false, vertical: true)
                     Text(route.subtitle)
-                        .font(.system(size: 11, weight: .medium))
+                        .font(.system(size: 12, weight: .medium))
                         .foregroundColor(JourneyVisual.secondaryText)
-                        .lineLimit(2)
-                        .fixedSize(horizontal: false, vertical: true)
+                        .lineLimit(1)
                 }
             }
             .padding(14)
-            .frame(maxWidth: .infinity, minHeight: 128, alignment: .topLeading)
+            .frame(maxWidth: .infinity, minHeight: 108, alignment: .topLeading)
             .background(Theme.Colors.card, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
             .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(JourneyVisual.softBorder, lineWidth: 1))
         }
         .buttonStyle(CardPressStyle())
         .accessibilityLabel("\(route.title). \(route.subtitle)")
         .accessibilityIdentifier("journey.tool.\(route.rawValue)")
-    }
-}
-
-private struct JourneyToolSectionHeader: View {
-    let eyebrow: String
-    let title: String
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(eyebrow)
-                .font(.system(size: 9, weight: .black, design: .default))
-                .tracking(1.8)
-                .foregroundColor(Theme.Colors.textPrimary)
-            Text(title)
-                .font(.system(size: 21, weight: .bold, design: .default))
-                .foregroundColor(JourneyVisual.primaryText)
-        }
     }
 }
 

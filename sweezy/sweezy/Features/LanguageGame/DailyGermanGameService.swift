@@ -193,8 +193,10 @@ final class DailyGermanGameService: ObservableObject {
     }
 
     private func evaluate(guess: String) -> [DailyGermanTile] {
-        let guessLetters = Array(guess).map(String.init)
         let targetLetters = Array(puzzle.word).map(String.init)
+        // A guess saved under an older puzzle list can have a different length; compare only the
+        // overlapping letters instead of indexing past the end of the target word.
+        let guessLetters = Array(Array(guess).map(String.init).prefix(targetLetters.count))
         var result = Array(repeating: DailyGermanTileState.absent, count: guessLetters.count)
         var remaining: [String: Int] = [:]
 

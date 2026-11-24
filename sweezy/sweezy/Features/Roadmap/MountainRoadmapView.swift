@@ -97,12 +97,13 @@ struct MountainRoadmapView: View {
                 Image(systemName: "chevron.left")
                     .font(.system(size: 15, weight: .bold))
                     .foregroundColor(JourneyVisual.primaryText)
-                    .frame(width: 40, height: 40)
+                    .frame(width: 44, height: 44)
                     .background(.ultraThinMaterial.opacity(0.8))
                     .background(Theme.Colors.card)
                     .clipShape(Circle())
                     .overlay(Circle().stroke(JourneyVisual.softBorder, lineWidth: 1))
             }
+            .accessibilityLabel("Назад".localized)
             .buttonStyle(.plain)
 
             Spacer()

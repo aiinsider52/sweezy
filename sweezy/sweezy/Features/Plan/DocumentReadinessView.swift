@@ -102,8 +102,7 @@ struct DocumentReadinessView: View {
                 Text("\(readyCount)/\(appContainer.lifeAdmin.documents.count)")
                     .font(.system(size: 12, weight: .bold).monospacedDigit())
                     .foregroundStyle(JourneyVisual.accentText)
-                    .accessibilityLabel("companion.documents.progress".localized)
-                    .accessibilityValue("\(readyCount)/\(appContainer.lifeAdmin.documents.count)")
+                    .accessibilityLabel("\("companion.documents.progress".localized): \(readyCount)/\(appContainer.lifeAdmin.documents.count)")
                     .accessibilityIdentifier("documents.progress")
             }
             Spacer(minLength: 0)

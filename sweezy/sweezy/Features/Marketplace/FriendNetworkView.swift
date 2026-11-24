@@ -861,7 +861,7 @@ struct FriendNetworkView: View {
     }
     .fullScreenCover(isPresented: $editor) { FriendProfileEditor(profile: vm.myProfile, vm: vm) }
     .sheet(isPresented: $filters) { FriendSearchFilters(vm: vm, showPaywall: $paywall) }
-    .fullScreenCover(isPresented: $paywall) { SubscriptionView(source: .profile) }
+    .fullScreenCover(isPresented: $paywall) { SubscriptionView(source: .people) }
     .sheet(item: $eventChat) { SocialEventChatView(event: $0, friends: vm.friends, vm: vm) }
     .sheet(item: $event) { EventDetailView(eventId: $0.id) }
     .sheet(isPresented: $showVisitors) { FriendVisitorsView(visitors: vm.visitors) }

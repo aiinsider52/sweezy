@@ -291,11 +291,13 @@ enum APIClient {
         let url = url("auth/me")
         var req = URLRequest(url: url)
         req.httpMethod = "DELETE"
-        req.timeoutInterval = 15
-        attachAuth(&req)
-        let (_, resp) = try await URLSession.shared.data(for: req)
-        guard let httpResp = resp as? HTTPURLResponse, (200..<300).contains(httpResp.statusCode) else {
-            throw URLError(.badServerResponse)
+        req.timeoutInterval = 20
+        // Through the refreshing path: access tokens expire after a day, and deleting an account
+        // must not fail with a generic error just because the token was stale.
+        let (data, resp) = try await authorizedData(for: req, context: "delete-account")
+        let status = (resp as? HTTPURLResponse)?.statusCode ?? 0
+        guard (200..<300).contains(status) else {
+            throw APIErrorText.error(domain: "API", status: status, data: data)
         }
     }
 
@@ -318,19 +320,27 @@ enum APIClient {
         if let http = result.1 as? HTTPURLResponse, http.statusCode == 401 {
             do {
                 _ = try await TokenRefreshCoordinator.shared.refresh { try await refreshAccessToken() }
-                var retryReq = request
-                attachAuth(&retryReq)
-                let retryResult = try await timedData(for: retryReq, context: "\(context)-retry")
-                if let retryHTTP = retryResult.1 as? HTTPURLResponse, retryHTTP.statusCode == 401 {
-                    invalidateSession()
-                }
-                return retryResult
             } catch {
-                invalidateSession()
+                // Only a rejected refresh token ends the session. Offline, timeouts and server errors
+                // keep the user signed in; the request simply fails and can be retried later.
+                if isSessionRejection(error) { invalidateSession() }
                 throw error
             }
+            var retryReq = request
+            attachAuth(&retryReq)
+            let retryResult = try await timedData(for: retryReq, context: "\(context)-retry")
+            if let retryHTTP = retryResult.1 as? HTTPURLResponse, retryHTTP.statusCode == 401 {
+                invalidateSession()
+            }
+            return retryResult
         }
         return result
+    }
+
+    /// The refresh endpoint said no (or there is no refresh token): the session really is over.
+    static func isSessionRejection(_ error: Error) -> Bool {
+        let nsError = error as NSError
+        return nsError.domain == "API" && [400, 401, 403].contains(nsError.code)
     }
 
     private static func invalidateSession() {
@@ -700,6 +710,8 @@ enum APIClient {
         let guides_full_access: Bool
         let pdf_download: Bool
         let cv_free_uses_remaining: Int
+        /// Free uses left per metered AI feature (newer servers only).
+        let free_uses_remaining: [String: Int]?
     }
 
     struct AppleSubscriptionSync: Decodable {
@@ -1491,6 +1503,8 @@ extension APIClient {
 // MARK: - Analytics
 extension APIClient {
     static func logPaywall(eventType: String, context: String?) {
+        // Paywall analytics follow the same opt-in as the rest of telemetry.
+        guard AnalyticsConsentStore.isGranted else { return }
         Task.detached {
             let url = url("analytics/paywall")
             var req = URLRequest(url: url)

@@ -60,7 +60,7 @@ struct ApplicationKitView: View {
                 }
             }
             .overlay(alignment: .bottom) { CopiedToast(text: copied) }
-            .fullScreenCover(isPresented: $showPaywall) { SubscriptionView(source: .cv) }
+            .fullScreenCover(isPresented: $showPaywall) { SubscriptionView(source: .careerKit) }
             .task {
                 #if DEBUG
                 if ProcessInfo.processInfo.arguments.contains("--preview-career-kit") { kit = .debugSample }
@@ -372,7 +372,7 @@ struct InterviewCoachView: View {
                     }
                 }
             }
-            .fullScreenCover(isPresented: $showPaywall) { SubscriptionView(source: .cv) }
+            .fullScreenCover(isPresented: $showPaywall) { SubscriptionView(source: .interview) }
         }
     }
 

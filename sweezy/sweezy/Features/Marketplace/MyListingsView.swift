@@ -73,7 +73,7 @@ struct MyListingsView: View {
             }
             .fullScreenCover(isPresented: $showProDashboard) { MarketplaceProDashboardView(dashboard: proDashboard, listings: listings) { updated in replaceListing(updated) } }
             .fullScreenCover(item: $selectedWorkspace) { workspace in MarketplaceProDashboardView(dashboard: nil, listings: [], workspace: workspace) { _ in } }
-            .fullScreenCover(isPresented: $showPaywall) { SubscriptionView(source: .profile) }
+            .fullScreenCover(isPresented: $showPaywall) { SubscriptionView(source: .marketplace) }
             .alert("marketplace.delete_title".localized, isPresented: .init(
                 get: { listingToDelete != nil },
                 set: { if !$0 { listingToDelete = nil } }

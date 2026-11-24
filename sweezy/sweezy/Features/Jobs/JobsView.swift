@@ -257,7 +257,7 @@ struct JobsView: View {
                 .environmentObject(sessionManager)
         }
         .fullScreenCover(isPresented: $showSubscription) {
-            SubscriptionView(source: .profile)
+            SubscriptionView(source: .jobs)
         }
     }
 

@@ -55,8 +55,10 @@ struct SweezyApp: App {
                         username: nil
                     )
                     
-                    // Performance monitor + TTI
-                    appContainer.performanceMonitor.start()
+                    // Performance monitor (opt-in analytics only; it runs a display link) + TTI
+                    if AnalyticsConsentStore.isGranted {
+                        appContainer.performanceMonitor.start()
+                    }
                     let tti = (CFAbsoluteTimeGetCurrent() - SweezyApp.appStartTime) * 1000
                     appContainer.telemetry.info("tti", source: "startup", message: nil, meta: ["ms": String(format: "%.0f", tti)])
                 }
@@ -423,6 +425,10 @@ struct MainAppContent: View {
         switch phase {
         case .background:
             lockManager.appDidEnterBackground()
+            // Session lifecycle for opt-in telemetry and Apple Ads attribution retries; the display
+            // link must not keep running in the background.
+            appContainer.telemetry.appDidEnterBackground()
+            appContainer.performanceMonitor.stop()
             Task {
                 await scheduleRetentionLoopsOnBackground()
             }
@@ -433,6 +439,10 @@ struct MainAppContent: View {
             break
         case .active:
             lockManager.appDidBecomeActive()
+            appContainer.telemetry.appDidBecomeActive()
+            if AnalyticsConsentStore.isGranted {
+                appContainer.performanceMonitor.start()
+            }
             Task {
                 await refreshRetentionLoopsOnActive()
                 await startAccountServicesIfNeeded()

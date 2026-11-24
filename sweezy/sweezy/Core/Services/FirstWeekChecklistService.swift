@@ -130,8 +130,9 @@ final class FirstWeekChecklistService: ObservableObject {
             let dayBefore = Calendar.current.date(byAdding: .day, value: -1, to: tasks[idx].dueDate) ?? tasks[idx].dueDate
             let twoHoursBefore = Calendar.current.date(byAdding: .hour, value: -2, to: tasks[idx].dueDate) ?? tasks[idx].dueDate
             
-            let id1 = "fw_\\(tasks[idx].id.uuidString)_d1"
-            let id2 = "fw_\\(tasks[idx].id.uuidString)_h2"
+            // Each task needs its own identifiers; a shared one made every task overwrite the last.
+            let id1 = "fw_\(tasks[idx].id.uuidString)_d1"
+            let id2 = "fw_\(tasks[idx].id.uuidString)_h2"
             let title = "Наближається дедлайн".localized
             let body = tasks[idx].displayTitle
             let scheduledDayBefore = await notificationService.scheduleReminder(id: id1, title: title, body: body, at: dayBefore)

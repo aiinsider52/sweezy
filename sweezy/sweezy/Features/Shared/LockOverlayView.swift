@@ -40,7 +40,7 @@ struct LockScreenOverlay: View {
                     .font(.system(size: 64, weight: .regular))
                     .foregroundStyle(Theme.Colors.gradientPrimaryAdaptive)
                 
-                Text("Unlock with \(lockManager.biometryDisplayName)")
+                Text("lock.unlock_with".localized(with: lockManager.biometryDisplayName))
                     .font(Theme.Typography.headline)
                     .foregroundColor(Theme.Colors.textPrimary)
                 
@@ -52,7 +52,7 @@ struct LockScreenOverlay: View {
                         .padding(.horizontal, Theme.Spacing.md)
                 }
                 
-                PrimaryButton("Unlock") {
+                PrimaryButton("lock.unlock".localized) {
                     Task { _ = await lockManager.authenticate(reason: "lock.unlock_reason".localized) }
                 }
                 .frame(maxWidth: 220)

@@ -70,6 +70,7 @@ struct ChatInboxView: View {
                         .background(JourneyVisual.elevatedSurface)
                         .clipShape(Circle())
                 }
+                .accessibilityLabel("Назад".localized)
                 .buttonStyle(.plain)
                 Spacer()
                 VStack(spacing: 2) {
@@ -87,6 +88,7 @@ struct ChatInboxView: View {
                         .background(JourneyVisual.elevatedSurface)
                         .clipShape(Circle())
                 }
+                .accessibilityLabel("a11y.refresh".localized)
                 .buttonStyle(.plain)
             }
 
@@ -389,10 +391,11 @@ struct ChatConversationView: View {
             Button { dismiss() } label: {
                 Image(systemName: "chevron.left")
                     .font(.system(size: 17, weight: .bold))
-                    .frame(width: 42, height: 42)
+                    .frame(width: 44, height: 44)
                     .background(Theme.Colors.card, in: Circle())
                     .overlay(Circle().stroke(JourneyVisual.softBorder, lineWidth: 1))
             }
+            .accessibilityLabel("Назад".localized)
             .buttonStyle(.plain)
             Button { showProfile = true } label: {
                 HStack(spacing: 10) {
@@ -609,6 +612,7 @@ struct ChatConversationView: View {
                         .frame(width: 46, height: 46)
                         .background(empty ? JourneyVisual.softSurface : JourneyVisual.lime, in: Circle())
                 }
+                .accessibilityLabel("a11y.send".localized)
                 .disabled(draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
             .foregroundColor(JourneyVisual.primaryText)

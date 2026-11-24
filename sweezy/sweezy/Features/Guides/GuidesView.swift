@@ -659,7 +659,7 @@ struct GuideDetailView: View {
         }
         .task { await subscriptionManager.load() }
         .fullScreenCover(isPresented: $showSubscription) {
-            SubscriptionView(source: .profile)
+            SubscriptionView(source: .guides)
         }
     }
 

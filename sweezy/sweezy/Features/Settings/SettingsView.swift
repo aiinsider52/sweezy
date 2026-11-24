@@ -1187,6 +1187,9 @@ private extension SettingsView {
         if let service = appContainer.contentService as? ContentService {
             await service.resetContent()
         }
+        // Personal documents kept on the phone for this account
+        LetterStore.shared.removeAll()
+        JobSearchLogStore.shared.removeAll()
         // Reset local stats and gamification
         appContainer.userStats.reset()
         appContainer.gamification.resetForNewUser()

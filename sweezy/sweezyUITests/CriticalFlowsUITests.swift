@@ -240,11 +240,11 @@ final class CriticalFlowsUITests: XCTestCase {
         app.launchEnvironment["UITESTS"] = "1"
         app.launch()
 
-        XCTAssertTrue(app.descendants(matching: .any)["careerHub.dashboard"].waitForExistence(timeout: 15))
         let primaryAction = app.buttons["careerHub.primaryAction"]
+        XCTAssertTrue(primaryAction.waitForExistence(timeout: 15))
         XCTAssertTrue(scrollToElement(primaryAction, in: app))
-        XCTAssertTrue(app.staticTexts["12"].exists)
-        XCTAssertTrue(app.staticTexts["AI збігів"].exists)
+        // The hub is now one strip (profile ring, desired role, next step); the old metric tiles are gone.
+        XCTAssertTrue(primaryAction.isHittable)
 
         keepScreenshot(app, name: "career-hub-dashboard")
     }
@@ -322,6 +322,7 @@ final class CriticalFlowsUITests: XCTestCase {
 
     @MainActor
     func testFriendsSwipeDeckAdvancesAfterPass() throws {
+        try XCTSkipIf(true, "Swipe cards are switched off since 2.4 (FriendNetworkViewModel.swipeCardsEnabled = false).")
         let app = XCUIApplication()
         app.launchArguments = ["--ui-test-friends"]
         // Earlier flows can persist a pending auth sheet that would cover this screen.

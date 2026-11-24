@@ -165,3 +165,20 @@ def test_data_export_returns_own_rows_without_secrets():
     assert body["account"]["id"] == user_id
     assert "hashed_password" not in body["account"]
     assert body["data"]["job_alerts"][0]["keywords"] == "pflege zürich"
+
+
+def test_rate_limit_key_is_the_forwarded_client_not_the_proxy():
+    from starlette.requests import Request
+
+    from backend.app.core.rate_limit import client_address
+
+    def request(headers: dict[str, str]) -> Request:
+        return Request({
+            "type": "http",
+            "headers": [(k.lower().encode(), v.encode()) for k, v in headers.items()],
+            "client": ("10.0.0.7", 443),
+        })
+
+    assert client_address(request({"X-Forwarded-For": "203.0.113.9, 10.0.0.7"})) == "203.0.113.9"
+    assert client_address(request({"X-Forwarded-For": "198.51.100.4"})) == "198.51.100.4"
+    assert client_address(request({})) == "10.0.0.7"

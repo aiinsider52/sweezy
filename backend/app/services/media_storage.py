@@ -21,6 +21,8 @@ class MediaStorage(Protocol):
 
     def local_path(self, key: str) -> Path | None: ...
 
+    def delete(self, key: str) -> None: ...
+
 
 def _safe_local_path(root: Path, key: str) -> Path:
     root = root.resolve()
@@ -44,6 +46,9 @@ class LocalMediaStorage:
 
     def local_path(self, key: str) -> Path:
         return _safe_local_path(self.root, key)
+
+    def delete(self, key: str) -> None:
+        _safe_local_path(self.root, key).unlink(missing_ok=True)
 
 
 @dataclass(frozen=True)
@@ -94,6 +99,12 @@ class S3MediaStorage:
 
     def local_path(self, key: str) -> None:
         return None
+
+    def delete(self, key: str) -> None:
+        try:
+            self._client().delete_object(Bucket=self.settings.MEDIA_S3_BUCKET, Key=self._object_key(key))
+        except Exception as exc:
+            raise MediaStorageError("Object storage delete failed") from exc
 
 
 def get_media_storage(settings: Settings) -> MediaStorage:

@@ -120,3 +120,32 @@ def test_token_issued_in_the_same_second_as_the_cutoff_stays_valid():
     assert token_is_revoked({"iat": int(cutoff.timestamp()) - 1}, cutoff)
     assert not token_is_revoked({"iat": int(cutoff.timestamp())}, cutoff)
     assert not token_is_revoked({"iat": 1}, None)
+
+
+def test_account_deletion_erases_uploaded_images(tmp_path, monkeypatch):
+    from io import BytesIO
+
+    from backend.app.models.media_upload import MediaUpload
+    from backend.app.services import media_storage
+
+    storage = media_storage.LocalMediaStorage(tmp_path)
+    monkeypatch.setattr(media_storage, "get_media_storage", lambda settings: storage)
+    monkeypatch.setattr("backend.app.routers.media.get_media_storage", lambda settings: storage)
+
+    headers, user_id = _user()
+    uploaded = client.post(
+        "/api/v1/media/upload",
+        headers=headers,
+        files={"file": ("photo.jpg", BytesIO(b"\xff\xd8\xffpayload"), "image/jpeg")},
+    )
+    assert uploaded.status_code == 201, uploaded.text
+    key = uploaded.json()["filename"]
+    assert (tmp_path / key).exists()
+    with SessionLocal() as db:
+        assert db.get(MediaUpload, key).user_id == user_id
+
+    assert client.delete("/api/v1/auth/me", headers=headers).status_code in (200, 204)
+
+    assert not (tmp_path / key).exists()
+    with SessionLocal() as db:
+        assert db.get(MediaUpload, key) is None

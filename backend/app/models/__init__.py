@@ -37,6 +37,7 @@ from .chat import (
 )
 from .discovery_review import DiscoveryReview, DiscoveryReviewReport
 from .place_suggestion import PlaceSuggestion
+from .media_upload import MediaUpload
 from .notification import MarketplaceFollow, MarketplaceWatch, NotificationPreference
 from .incident import Incident
 from .moderation import ModerationAction, ModerationCase, ModerationNotification, UserSanction
@@ -131,4 +132,5 @@ __all__ = [
     "BusinessStatDaily",
     "BusinessPurchase",
     "BusinessClubMember",
+    "MediaUpload",
 ]

@@ -313,6 +313,7 @@ class UserService:
         # rows marked ON DELETE CASCADE are personal data and are deleted, rows marked SET NULL
         # (moderation records, analytics, jobs an employer posted) are unlinked. The user row itself
         # is kept and anonymised, so the database never fires those rules by itself.
+        UserService._erase_uploaded_media(db, user_id)
         UserService._apply_user_foreign_key_rules(db, user_id)
 
         # Anonymize + deactivate
@@ -369,7 +370,29 @@ def _apply_user_foreign_key_rules(db: Session, user_id: str) -> None:
             )
 
 
+def _erase_uploaded_media(db: Session, user_id: str) -> None:
+    """Delete the account's stored images; the rows go with the other CASCADE data."""
+    from ..models.media_upload import MediaUpload
+    from .media_storage import get_media_storage
+
+    keys = [row[0] for row in db.query(MediaUpload.key).filter(MediaUpload.user_id == user_id).all()]
+    if not keys:
+        return
+    try:
+        storage = get_media_storage(get_settings())
+    except Exception:
+        return
+    for key in keys:
+        try:
+            storage.delete(key)
+        except Exception as exc:  # pragma: no cover - logged, deletion continues
+            from ..core.logging import get_logger
+
+            get_logger(component="account_deletion").warning("media_delete_failed", key=key, error=str(exc))
+
+
 UserService._apply_user_foreign_key_rules = staticmethod(_apply_user_foreign_key_rules)
+UserService._erase_uploaded_media = staticmethod(_erase_uploaded_media)
 
 
 def seed_admin_user(db: Session) -> None:

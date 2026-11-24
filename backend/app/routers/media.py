@@ -5,12 +5,13 @@ import re
 from pathlib import Path
 from uuid import uuid4
 
-from fastapi import APIRouter, File, HTTPException, Request, UploadFile, status
+from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile, status
 from fastapi.responses import FileResponse, RedirectResponse
 
 from ..core.config import get_settings
 from ..core.rate_limit import limiter
-from ..dependencies import CurrentUser
+from ..dependencies import CurrentUser, get_db
+from ..models.media_upload import MediaUpload
 from ..services.media_storage import MediaStorageError, get_media_storage
 
 # Kept for legacy importers; it is no longer exposed by a static mount.
@@ -48,8 +49,9 @@ def _validate_upload_name(name: str | None, expected_extension: str) -> None:
 @limiter.limit("10/minute")
 async def upload_media(
     request: Request,
-    _: CurrentUser,
+    user: CurrentUser,
     file: UploadFile = File(...),
+    db=Depends(get_db),
 ) -> dict[str, str]:
     settings = get_settings()
     content_type = (file.content_type or "").lower()
@@ -80,6 +82,9 @@ async def upload_media(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Media storage is unavailable",
         ) from exc
+    # Remember the owner so the file is erased together with the account.
+    db.add(MediaUpload(key=filename, user_id=user.id))
+    db.commit()
     return {"url": f"/media/{filename}", "filename": filename}
 
 

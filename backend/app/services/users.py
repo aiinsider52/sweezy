@@ -391,7 +391,55 @@ def _erase_uploaded_media(db: Session, user_id: str) -> None:
             get_logger(component="account_deletion").warning("media_delete_failed", key=key, error=str(exc))
 
 
+# Columns where the person acted on someone else (moderated, reviewed, resolved a report) or was the
+# subject of other people's reports: exporting those rows would disclose third parties.
+_EXPORT_SKIP_COLUMNS = {
+    "moderated_by", "reviewed_by", "resolved_by", "assigned_to", "created_by", "revoked_by",
+    "moderator_id", "subject_user_id", "profile_user_id", "reviewed_user_id", "blocked_author_id",
+}
+# Secrets and delivery plumbing that are not personal data worth exporting.
+_EXPORT_SKIP_TABLES = {"auth_email_codes", "push_devices", "notification_outbox"}
+_EXPORT_SKIP_FIELDS = {"hashed_password", "code_hash", "token", "device_token"}
+
+
+def _export_value(value):
+    from datetime import date as _date, datetime as _datetime
+    from decimal import Decimal
+
+    if isinstance(value, (_datetime, _date)):
+        return value.isoformat()
+    if isinstance(value, Decimal):
+        return float(value)
+    if isinstance(value, (bytes, bytearray)):
+        return None
+    return value
+
+
+def _export_data(db: Session, *, user: User) -> dict:
+    account = {
+        column.name: _export_value(getattr(user, column.key, None))
+        for column in User.__table__.columns
+        if column.name not in _EXPORT_SKIP_FIELDS
+    }
+    sections: dict[str, list[dict]] = {}
+    for table, column, _rule in _user_foreign_keys():
+        if table.name in _EXPORT_SKIP_TABLES or column.name in _EXPORT_SKIP_COLUMNS:
+            continue
+        rows = db.execute(table.select().where(column == user.id).limit(5000)).mappings().all()
+        if not rows:
+            continue
+        bucket = sections.setdefault(table.name, [])
+        for row in rows:
+            bucket.append({key: _export_value(value) for key, value in row.items() if key not in _EXPORT_SKIP_FIELDS})
+    return {
+        "exported_at": datetime.now(timezone.utc).isoformat(),
+        "account": account,
+        "data": sections,
+    }
+
+
 UserService._apply_user_foreign_key_rules = staticmethod(_apply_user_foreign_key_rules)
+UserService.export_data = staticmethod(_export_data)
 UserService._erase_uploaded_media = staticmethod(_erase_uploaded_media)
 
 

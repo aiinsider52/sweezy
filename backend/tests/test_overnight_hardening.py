@@ -149,3 +149,19 @@ def test_account_deletion_erases_uploaded_images(tmp_path, monkeypatch):
     assert not (tmp_path / key).exists()
     with SessionLocal() as db:
         assert db.get(MediaUpload, key) is None
+
+
+def test_data_export_returns_own_rows_without_secrets():
+    from backend.app.models.job import JobAlert
+
+    headers, user_id = _user()
+    with SessionLocal() as db:
+        db.add(JobAlert(user_id=user_id, name="Pflege", keywords="pflege zürich"))
+        db.commit()
+
+    response = client.get("/api/v1/auth/me/export", headers=headers)
+    assert response.status_code == 200, response.text
+    body = response.json()
+    assert body["account"]["id"] == user_id
+    assert "hashed_password" not in body["account"]
+    assert body["data"]["job_alerts"][0]["keywords"] == "pflege zürich"

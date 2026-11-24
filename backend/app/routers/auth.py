@@ -495,3 +495,14 @@ def delete_my_account(
 @router.get("/me", response_model=UserOut)
 def get_my_account(current_user: User = Depends(get_current_user)) -> User:
     return current_user
+
+
+@router.get("/me/export")
+@limiter.limit("3/hour")
+def export_my_data(
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Everything stored about the signed-in person, as JSON (GDPR / revDSG right of access)."""
+    return UserService.export_data(db, user=current_user)

@@ -3514,3 +3514,8 @@
 "a11y.send" = "Надіслати";
 "lock.unlock_with" = "Розблокувати через %@";
 "lock.unlock" = "Розблокувати";
+"widget.next_step" = "Наступний крок";
+"widget.nearest_deadline" = "Найближчий строк";
+"widget.days_short" = "дн.";
+"widget.today" = "Сьогодні";
+"widget.no_deadlines" = "Строків поки немає";

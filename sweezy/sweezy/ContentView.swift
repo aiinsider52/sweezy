@@ -429,6 +429,7 @@ struct MainAppContent: View {
             // link must not keep running in the background.
             appContainer.telemetry.appDidEnterBackground()
             appContainer.performanceMonitor.stop()
+            WidgetBridge.update(from: appContainer)
             Task {
                 await scheduleRetentionLoopsOnBackground()
             }
@@ -440,6 +441,7 @@ struct MainAppContent: View {
         case .active:
             lockManager.appDidBecomeActive()
             appContainer.telemetry.appDidBecomeActive()
+            WidgetBridge.update(from: appContainer)
             if AnalyticsConsentStore.isGranted {
                 appContainer.performanceMonitor.start()
             }

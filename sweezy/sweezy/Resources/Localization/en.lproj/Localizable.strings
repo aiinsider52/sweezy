@@ -4641,3 +4641,8 @@
 "a11y.send" = "Send";
 "lock.unlock_with" = "Unlock with %@";
 "lock.unlock" = "Unlock";
+"widget.next_step" = "Next step";
+"widget.nearest_deadline" = "Nearest deadline";
+"widget.days_short" = "d";
+"widget.today" = "Today";
+"widget.no_deadlines" = "No deadlines yet";

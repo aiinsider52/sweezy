@@ -4570,3 +4570,8 @@
 "a11y.send" = "Senden";
 "lock.unlock_with" = "Mit %@ entsperren";
 "lock.unlock" = "Entsperren";
+"widget.next_step" = "Nächster Schritt";
+"widget.nearest_deadline" = "Nächste Frist";
+"widget.days_short" = "T.";
+"widget.today" = "Heute";
+"widget.no_deadlines" = "Noch keine Fristen";

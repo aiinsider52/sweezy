@@ -208,6 +208,8 @@ final class SessionManager: ObservableObject {
     /// Centralized sign out (keeps the app usable as a guest afterwards).
     /// Call this instead of manually toggling `isRegistered` + clearing Keychain in multiple places.
     func signOut() {
+        // The home-screen widget must not keep showing the previous person's plan.
+        Task { @MainActor in WidgetBridge.clear() }
         let previousScope = AccountScopedStorage.currentAccountKey()
         let accessToken = KeychainStore.get("access_token")
         let pushToken = PushTokenStore.token
